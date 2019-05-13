@@ -15,11 +15,8 @@ class WebRuntime extends InAppBrowser {
       return;
     }
 
-    await this.openFile("assets/runtime.html", options: {
-      "useShouldOverrideUrlLoading": true,
-      // "useOnLoadResource": true,
-      "hidden": true
-    });
+    await this.openFile("assets/runtime.html",
+        options: {"useShouldOverrideUrlLoading": true, "hidden": true});
     await _init.future;
 
     // listen for post messages coming from the JavaScript side
@@ -29,17 +26,20 @@ class WebRuntime extends InAppBrowser {
 
   @override
   onLoadStop(String url) {
+    // The HTML asset has completed loading
     _init.complete();
   }
 
   @override
   void onLoadError(String url, int code, String message) {
+    // The asset could not load
     _init.completeError("Unable to initialize the Web Runtime");
   }
 
   @override
   void shouldOverrideUrlLoading(String url) {
     // IGNORE ALL NAVIGATION REQUESTS
+    print("Refusing to navigate to $url");
   }
 
   // TRIGGERING CALLS
@@ -54,7 +54,7 @@ class WebRuntime extends InAppBrowser {
       if (requestCompleter.isCompleted)
         return;
       else
-        requestCompleter.completeError("timeout");
+        requestCompleter.completeError("The request timed out");
     });
 
     requests.add(new RequestItem(
@@ -72,8 +72,6 @@ class WebRuntime extends InAppBrowser {
   // GOT A MESSAGE FROM THE BROWSER
 
   onMessageReceived(List<dynamic> arguments) async {
-    print(arguments);
-
     // Expected:
     //  arguments[0] = { id: <int>, error: <bool> }
     //  arguments[1] = <data>

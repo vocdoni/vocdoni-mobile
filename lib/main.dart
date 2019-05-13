@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import './util/web-runtime.dart';
+import './util/singletons.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(VocdoniApp());
+}
 
-class MyApp extends StatelessWidget {
+class VocdoniApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,24 +22,51 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               InkWell(
-                child: Text("Press me"),
-                onTap: () {
-                  runtime
-                      .call("generateMnemonic()")
-                      .then((mnemonic) {
-                        print("MNEMONIC: $mnemonic");
-                        return runtime.call("mnemonicToAddress(\"$mnemonic\")");
-                      })
-                      .then((address) => print("ADDR: $address"))
-                      .catchError((err) => print("ERR: " + err.toString()));
-                },
-              )
+                  child: Text("Web Runtime trigger"),
+                  onTap: () => handleRuntimeCall()),
+              Spacer(),
+              InkWell(child: Text("Set Entity 1"), onTap: () => incIdent()),
+              InkWell(child: Text("Set Org 1"), onTap: () => incOrg()),
+              Spacer(),
+              StreamBuilder(
+                  stream: appStateBloc.stream,
+                  builder: (BuildContext context, AsyncSnapshot<AppState> snapshot) {
+                    final state = snapshot.data;
+                    if (state == null) return Text("");
+                    return Text("Entity Idx: ${state.selectedIdentity}");
+                  }),
+              StreamBuilder(
+                  stream: appStateBloc.stream,
+                  builder: (BuildContext context, AsyncSnapshot<AppState> snapshot) {
+                    final state = snapshot.data;
+                    if (state == null) return Text("");
+                    return Text("Org Idx: ${state.selectedOrganization}");
+                  }),
+              Spacer(),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-WebRuntime runtime = new WebRuntime();
+  handleRuntimeCall() {
+    webRuntime
+        .call("generateMnemonic()")
+        .then((mnemonic) {
+          print("MNEMONIC: $mnemonic");
+          return webRuntime.call("mnemonicToAddress(\"$mnemonic\")");
+        })
+        .then((address) => print("ADDR: $address"))
+        .catchError((err) => print("ERR: " + err.toString()));
+  }
+
+  incIdent() {
+    appStateBloc.selectIdentity(appStateBloc.current.selectedIdentity + 1);
+  }
+
+  incOrg() {
+    appStateBloc
+        .selectOrganization(appStateBloc.current.selectedOrganization + 1);
+  }
+}
