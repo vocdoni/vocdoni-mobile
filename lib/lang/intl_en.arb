@@ -1,0 +1,13 @@
+{
+  "@@last_modified": "2019-05-14T01:22:06.189167",
+  "Vocdoni": "Vocdoni",
+  "@Vocdoni": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Welcome": "Welcome",
+  "@Welcome": {
+    "type": "text",
+    "placeholders": {}
+  }
+}

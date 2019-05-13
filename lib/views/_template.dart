@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import '../lang/index.dart';
 import '../util/singletons.dart';
 
 class WelcomeScreen extends StatelessWidget {

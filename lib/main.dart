@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import './util/singletons.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'util/singletons.dart';
+import 'lang/index.dart';
 
 import "views/welcome.dart";
 import "views/welcome-identity.dart";
@@ -24,6 +27,13 @@ void main() async {
   // RUN THE APP
   runApp(MaterialApp(
     title: 'Vocdoni',
+    localizationsDelegates: [
+      LangDelegate(),
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate
+    ],
+    supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
+    onGenerateTitle: (BuildContext context) => Lang.of(context).title,
     home: home,
     routes: {
       // NO IDENTITIES YET
@@ -31,7 +41,7 @@ void main() async {
       "/welcome/identity": (context) => WelcomeIdentityScreen(),
       "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
       "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
-      
+
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen()
     },
