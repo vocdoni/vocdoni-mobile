@@ -12,6 +12,10 @@ class IdentitiesBloc {
     // TODO: FETCH STORED DATA
   }
 
+  Future restore() async {
+    // TODO: Fetch the last selected identity
+  }
+
   // Operations
   create() {
     // TODO: CREATE

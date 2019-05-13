@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeIdentityRecoverScreen extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
@@ -12,13 +12,9 @@ class WelcomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Spacer(),
-            Text("ONBOARDING PAGE"),
-            Spacer(),
-            InkWell(child: Text("CONTINUE (push)"), onTap: () => go(context)),
-            Spacer(),
             InkWell(
-                child: Text("SKIP TO HOME (replace)"),
-                onTap: () => replace(context)),
+                child: Text("RECOVER IDENTITY"),
+                onTap: () => recoverIdentity(context)),
             Spacer(),
           ],
         ),
@@ -26,11 +22,7 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  go(BuildContext context) {
-    Navigator.pushNamed(context, "/welcome/identity");
-  }
-
-  replace(BuildContext context) {
+  recoverIdentity(BuildContext context) {
     Navigator.pushReplacementNamed(context, "/home");
   }
 }

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-class OnboardingScreen extends StatelessWidget {
+class WelcomeIdentityCreateScreen extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
@@ -12,11 +12,17 @@ class OnboardingScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Spacer(),
-            Text("Onboarding"),
+            InkWell(
+                child: Text("CREATE IDENTITY"),
+                onTap: () => createIdentity(context)),
             Spacer(),
           ],
         ),
       ),
     );
+  }
+
+  createIdentity(BuildContext context) {
+    Navigator.pushReplacementNamed(context, "/home");
   }
 }
