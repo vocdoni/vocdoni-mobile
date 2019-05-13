@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './util/web-runtime.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,7 +19,19 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Vocdoni"),
+              InkWell(
+                child: Text("Press me"),
+                onTap: () {
+                  runtime
+                      .call("generateMnemonic()")
+                      .then((mnemonic) {
+                        print("MNEMONIC: $mnemonic");
+                        return runtime.call("mnemonicToAddress(\"$mnemonic\")");
+                      })
+                      .then((address) => print("ADDR: $address"))
+                      .catchError((err) => print("ERR: " + err.toString()));
+                },
+              )
             ],
           ),
         ),
@@ -26,3 +39,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+WebRuntime runtime = new WebRuntime();
