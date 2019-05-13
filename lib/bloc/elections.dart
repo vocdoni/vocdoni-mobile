@@ -12,6 +12,10 @@ class ElectionsBloc {
     // TODO: FETCH CACHED DATA
   }
 
+  Future restore() async {
+    // TODO: Fetch the last selected identity
+  }
+
   // Operations
   update(List<Election> entities) {
     _state.add(entities);

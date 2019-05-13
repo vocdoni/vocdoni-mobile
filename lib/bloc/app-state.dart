@@ -12,6 +12,10 @@ class AppStateBloc {
     _state.add(AppState());
   }
 
+  Future restore() async {
+    // TODO: Fetch the last selected identity
+  }
+
   // Operations
 
   selectIdentity(int identityIdx) {
