@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import '../lang/index.dart';
 
 class WelcomeIdentityRecoverScreen extends StatelessWidget {
   @override

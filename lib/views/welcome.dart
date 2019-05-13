@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import '../lang/index.dart';
 
 class WelcomeScreen extends StatelessWidget {
   @override
@@ -11,6 +12,8 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Spacer(),
+            Text(Lang.of(context).welcome),
             Spacer(),
             Text("ONBOARDING PAGE"),
             Spacer(),
