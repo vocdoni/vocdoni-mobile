@@ -1,12 +1,12 @@
 import './web-runtime.dart';
-import "../bloc/app-state.dart";
-import "../bloc/identities.dart";
-import "../bloc/elections.dart";
+import "../data/app-state.dart";
+import "../data/identities.dart";
+import "../data/elections.dart";
 
 // export './web-runtime.dart';
-export "../bloc/app-state.dart";
-export "../bloc/identities.dart";
-export "../bloc/elections.dart";
+export "../data/app-state.dart";
+export "../data/identities.dart";
+export "../data/elections.dart";
 
 // EXPORTED SINGLETON INSTANCES
 
