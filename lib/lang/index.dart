@@ -45,13 +45,16 @@ class Lang {
   /////////////////////////////////////////////////////////////////////////////
 
   _definitions() {
+    // GLOBAL
     Intl.message('Vocdoni');
     Intl.message('Welcome');
+
+    // IDENTITY - ON BOARDING
     Intl.message('Create an identity');
     Intl.message('Import an identity');
     Intl.message('Create identity');
     Intl.message('Tap to create your self-sovereign identity');
-
+    Intl.message('Your identity has been successfully created');
 
     // ERRORS
     Intl.message('An error occurred while generating the identity');

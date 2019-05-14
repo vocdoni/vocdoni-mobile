@@ -6,6 +6,6 @@ final Color alt2BackgroundColor = Color(0xFFFF682D);
 
 final Color mainTextColor = Color(0xFFFFFFFF); // white
 
-final successColor = Color(0xFF53E44D);
+final successColor = Color(0xFF25bd5b);
 final dangerColor = altBackgroundColor;
  
