@@ -9,7 +9,10 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Vocdoni"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"> <!-- Backup flags added by https://pub.dev/packages/flutter_secure_storage -->
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

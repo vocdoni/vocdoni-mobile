@@ -2,20 +2,32 @@ PODS:
   - Flutter (1.0.0)
   - flutter_inappbrowser (0.0.1):
     - Flutter
+  - flutter_secure_storage (3.2.0):
+    - Flutter
+  - shared_preferences (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_inappbrowser (from `.symlinks/plugins/flutter_inappbrowser/ios`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: ".symlinks/flutter/ios"
   flutter_inappbrowser:
     :path: ".symlinks/plugins/flutter_inappbrowser/ios"
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
   flutter_inappbrowser: adfb663330ce08dc7cac71034f76926088e0e301
+  flutter_secure_storage: dbcc8ff35d99569c3a4d3b483afa3339416c1a78
+  shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
 
 PODFILE CHECKSUM: ebd43b443038e611b86ede96e613bd6033c49497
 
