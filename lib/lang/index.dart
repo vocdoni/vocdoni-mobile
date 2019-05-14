@@ -54,6 +54,7 @@ class Lang {
     Intl.message('Import an identity');
     Intl.message('Create identity');
     Intl.message('Tap to create your self-sovereign identity');
+    Intl.message('Continue');
     Intl.message('Generating...');
     Intl.message('Your identity is ready!');
 
