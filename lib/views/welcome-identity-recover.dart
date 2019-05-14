@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import '../lang/index.dart';
 
 class WelcomeIdentityRecoverScreen extends StatelessWidget {
@@ -7,6 +8,7 @@ class WelcomeIdentityRecoverScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Vocdoni"),
+        backgroundColor: mainBackgroundColor,
       ),
       body: Center(
         child: Column(

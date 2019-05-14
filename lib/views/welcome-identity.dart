@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import '../lang/index.dart';
 
 class WelcomeIdentityScreen extends StatelessWidget {
@@ -7,21 +8,48 @@ class WelcomeIdentityScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Vocdoni"),
+        backgroundColor: mainBackgroundColor,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Spacer(),
-            Text(Lang.of(context).welcome),
+            Text(Lang.of(context).get("Welcome")),
             Spacer(),
-            InkWell(
-                child: Text("CREATE AN IDENTITY"),
-                onTap: () => createIdentity(context)),
-            Spacer(),
-            InkWell(
-                child: Text("RECOVER AN IDENTITY"),
-                onTap: () => recoverIdentity(context)),
+            SizedBox(
+              width: double.infinity,
+              height: 80,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: FlatButton(
+                  color: mainBackgroundColor,
+                  textColor: mainTextColor,
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 64),
+                  onPressed: () {
+                    createIdentity(context);
+                  },
+                  child: Text(Lang.of(context).get("Create an identity")),
+                ),
+              ),
+            ),
+            SizedBox(height: 5),
+            SizedBox(
+              width: double.infinity,
+              height: 80,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: FlatButton(
+                  color: mainBackgroundColor,
+                  textColor: mainTextColor,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  onPressed: () {
+                    recoverIdentity(context);
+                  },
+                  child: Text(Lang.of(context).get("Import an identity")),
+                ),
+              ),
+            ),
             Spacer(),
           ],
         ),
