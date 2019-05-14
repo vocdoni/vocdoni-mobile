@@ -24,11 +24,11 @@ info:
 ###############################################################################
 
 lang-extract:
-	@flutter pub run intl_translation:extract_to_arb --output-dir=lib/lang lib/lang/index.dart
+	@flutter pub pub run intl_translation:extract_to_arb --output-dir=lib/lang lib/lang/index.dart
 	@echo "Upload ./lib/lang/intl_messages.arb to https://translate.google.com/toolkit/ and translate the files"
 
 lang-compile:
-	@flutter pub run intl_translation:generate_from_arb --output-dir=lib/lang \
+	@flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/lang \
 		--no-use-deferred-loading lib/lang/index.dart lib/lang/intl_*.arb
 
 run: 

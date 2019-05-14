@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import '../lang/index.dart';
 import '../util/singletons.dart';
 
@@ -8,6 +9,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Vocdoni"),
+        backgroundColor: mainBackgroundColor,
       ),
       body: Center(
         child: Column(

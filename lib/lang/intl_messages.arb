@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2019-05-14T01:26:31.217151",
+  "@@last_modified": "2019-05-14T12:55:16.745148",
   "Vocdoni": "Vocdoni",
   "@Vocdoni": {
     "type": "text",
@@ -7,6 +7,16 @@
   },
   "Welcome": "Welcome",
   "@Welcome": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Create an identity": "Create an identity",
+  "@Create an identity": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Import an identity": "Import an identity",
+  "@Import an identity": {
     "type": "text",
     "placeholders": {}
   }

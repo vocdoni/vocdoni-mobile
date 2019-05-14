@@ -33,7 +33,7 @@ void main() async {
       GlobalWidgetsLocalizations.delegate
     ],
     supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
-    onGenerateTitle: (BuildContext context) => Lang.of(context).title,
+    onGenerateTitle: (BuildContext context) => Lang.of(context).get("Vocdoni"),
     home: home,
     routes: {
       // NO IDENTITIES YET

@@ -26,15 +26,36 @@ class Lang {
     return Localizations.of<Lang>(context, Lang);
   }
 
+  // ///////////////////////////////////////////////////////////////////////////
+  /// Helper method to allow Lang.of(context).get("My string goes here")
+  /// as long as it is declared on _definitions()
+  // ///////////////////////////////////////////////////////////////////////////
+
+  String get(String key) {
+    var _ = Intl.message; // avoid warnings of non-literals by aliasing
+    return _(key);
+  }
+
   /////////////////////////////////////////////////////////////////////////////
-  // AVAILABLE TRANSLATION KEYS GO HERE
+  // IMPORTANT:
+  // DECLARE ANY STRINGS YOU USE IN THE METHOD BELOW
+  // 
+  // The code of this method is used so that Flutter can extract the string literals
+  // No runtime functionality
   /////////////////////////////////////////////////////////////////////////////
 
-  String get title => Intl.message('Vocdoni');
-  String get welcome => Intl.message('Welcome');
+  _definitions() {
+    Intl.message('Vocdoni');
+    Intl.message('Welcome');
+    Intl.message('Create an identity');
+    Intl.message('Import an identity');
+  }
 
   /////////////////////////////////////////////////////////////////////////////
+  // DYNAMIC CONTENT CAN BE FETCHED HERE
   /////////////////////////////////////////////////////////////////////////////
+
+  // String greetTo(String name) => Intl.message("Hello $name").replace(...);
 }
 
 class LangDelegate extends LocalizationsDelegate<Lang> {
