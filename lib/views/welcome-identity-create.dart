@@ -2,7 +2,8 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import '../util/singletons.dart';
 import '../lang/index.dart';
-import "../widgets/snackbars.dart";
+import "../widgets/toast.dart";
+// import "../widgets/alerts.dart";
 
 class WelcomeIdentityCreateScreen extends StatefulWidget {
   @override
@@ -71,6 +72,9 @@ class _WelcomeIdentityCreateScreenState
 
       // TODO: STORE
 
+      showSuccessMessage(
+          Lang.of(context).get("Your identity has been successfully created"),
+          context);
     } catch (err) {
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
