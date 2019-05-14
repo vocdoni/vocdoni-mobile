@@ -58,6 +58,9 @@ class Lang {
     Intl.message('Generating...');
     Intl.message('Your identity is ready!');
 
+    // HOME
+    Intl.message('Select your identity');
+
     // ERRORS
     Intl.message('An error occurred while generating the identity');
   }

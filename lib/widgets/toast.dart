@@ -17,7 +17,9 @@ void showMessage(String text, BuildContext context, {Function onPressed}) {
   );
 
   // Find the Scaffold in the Widget tree and use it to show a SnackBar!
-  Scaffold.of(context).showSnackBar(snackBar);
+  Scaffold.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(snackBar);
 }
 
 void showSuccessMessage(String text, BuildContext context,
@@ -37,7 +39,9 @@ void showSuccessMessage(String text, BuildContext context,
   );
 
   // Find the Scaffold in the Widget tree and use it to show a SnackBar!
-  Scaffold.of(context).showSnackBar(snackBar);
+  Scaffold.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(snackBar);
 }
 
 void showErrorMessage(String text, BuildContext context, {Function onPressed}) {
@@ -56,10 +60,12 @@ void showErrorMessage(String text, BuildContext context, {Function onPressed}) {
   );
 
   // Find the Scaffold in the Widget tree and use it to show a SnackBar!
-  Scaffold.of(context).showSnackBar(snackBar);
+  Scaffold.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(snackBar);
 }
 
-SnackBar showLoading(String text, BuildContext context) {
+showLoading(String text, BuildContext context) {
   if (text == null)
     throw ("No text");
   else if (context == null) throw ("No context");
@@ -73,8 +79,9 @@ SnackBar showLoading(String text, BuildContext context) {
       ],
     ),
   );
-  Scaffold.of(context).showSnackBar(loadingSnackBar);
-  return loadingSnackBar;
+  Scaffold.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(loadingSnackBar);
 }
 
 void hideLoading(BuildContext context) {
