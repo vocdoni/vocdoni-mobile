@@ -49,9 +49,11 @@ class IdentitiesBloc {
 
       // Intentionally skip the mnemonic
       return Identity(
-          publicKey: decoded["publicKey"],
-          alias: decoded["alias"],
-          mnemonic: null);
+        publicKey: decoded["publicKey"],
+        alias: decoded["alias"],
+        mnemonic: null,
+        address: addr,
+      );
     }));
 
     // TODO: No organizations fetched yet
@@ -113,8 +115,9 @@ class Identity {
   final String alias;
   final String mnemonic;
   final String publicKey;
+  final String address;
 
-  Identity({this.alias, this.publicKey, this.mnemonic});
+  Identity({this.alias, this.publicKey, this.mnemonic, this.address});
 }
 
 class Organization {
