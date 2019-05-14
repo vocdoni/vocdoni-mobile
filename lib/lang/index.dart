@@ -49,6 +49,12 @@ class Lang {
     Intl.message('Welcome');
     Intl.message('Create an identity');
     Intl.message('Import an identity');
+    Intl.message('Create identity');
+    Intl.message('Tap to create your self-sovereign identity');
+
+
+    // ERRORS
+    Intl.message('An error occurred while generating the identity');
   }
 
   /////////////////////////////////////////////////////////////////////////////

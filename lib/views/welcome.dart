@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 // import 'package:vocdoni/constants/colors.dart';
 import 'dart:async';
 
-import 'package:vocdoni/widgets/animation-gesture/page-dragger.dart';
-import 'package:vocdoni/widgets/animation-gesture/page-reveal.dart';
-import 'package:vocdoni/widgets/pager-ui/pager-indicator.dart';
-import 'package:vocdoni/widgets/pager-ui/pages.dart';
+import 'package:vocdoni/widgets/pager/page-dragger.dart';
+import 'package:vocdoni/widgets/pager/page-reveal.dart';
+import 'package:vocdoni/widgets/pager/pager-indicator.dart';
+import 'package:vocdoni/widgets/pager/pages.dart';
 
 class WelcomeScreen extends StatefulWidget {
   @override
