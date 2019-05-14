@@ -14,6 +14,7 @@ class AppStateBloc {
 
   Future restore() async {
     // TODO: Fetch the last selected identity
+    // TODO: Exampe: https://github.com/AppleEducate/flutter_login/blob/master/lib/data/models/auth.dart
   }
 
   // Operations

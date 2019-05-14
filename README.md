@@ -1,2 +1,5 @@
-# mobileClient
-Mobile app implementation
+# Vocdoni Mobile Client
+Official implementation of the Vocdoni core features.
+
+## Development
+

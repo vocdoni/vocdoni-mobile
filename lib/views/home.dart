@@ -35,20 +35,24 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             ListTile(
+              leading: Icon(Icons.person),
               title: Text('Switch Identity'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
+              leading: Icon(Icons.home),
               title: Text('Organization 1'),
               onTap: () => {},
             ),
             ListTile(
+              leading: Icon(Icons.home),
               title: Text('Organization 2'),
               onTap: () => {},
             ),
             ListTile(
+              leading: Icon(Icons.exit_to_app),
               title: Text('Logout'),
               onTap: () {
                 Navigator.pop(context);
