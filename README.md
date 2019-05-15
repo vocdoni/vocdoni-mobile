@@ -97,6 +97,8 @@ Now you can run `sendHostRequest(<data>)` from anywhere in your code and get a p
 
 #### Public Key Request
 
+Ask the host to provide the public key of the current account.
+
 ```javascript
 sendHostRequest({ type: "getPublicKey" })
 	.then(response => {
@@ -109,6 +111,8 @@ sendHostRequest({ type: "getPublicKey" })
 
 #### Closing the window
 
+Ask the host to close the browser window.
+
 ```javascript
 sendHostRequest({ type: "closeWindow" })
 	.then(response => console.log("Good Bye"))
@@ -116,6 +120,25 @@ sendHostRequest({ type: "closeWindow" })
 		console.error(err);
 	});
 ```
+
+### Deep linking
+
+The app accepts incoming requests using the `vocdoni` schema. 
+
+On developoment, you can launch deep links by running `make launch-ios-link` or `make launch-android-link`
+
+#### Subscribe to an entity
+
+To trigger a prompt to subscribe to an entity, use:
+
+```
+vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__
+```
+
+- `resolverAddress`: The address of the entity resolver contract instance
+- `entityId`: The Id of the entity
+- `networkId`: The of the network (currently supported 0 => mainnet)
+- `entryPoint`: Array of entry point URL's to use
 
 ## Development
 
@@ -133,22 +156,3 @@ An headless web browser running a bundled application. The bundled page exposes 
 
 - See [DVote JS Runtime for Flutter](https://github.com/vocdoni/dvote-js-runtime-flutter)
 - See `lib/util/web-runtime.dart`
-
-### Deep linking
-
-The app accepts incoming requests using the `vocdoni` schema. 
-
-On developoment, you can launch deep links by running `make launch-ios-link` or `make launch-android-link`
-
-#### Subscribe to an entity
-
-Example URL:
-
-```
-vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__
-```
-
-- `resolverAddress`: The address of the entity resolver contract instance
-- `entityId`: The Id of the entity
-- `networkId`: The of the network (currently supported 0 => mainnet)
-- `entryPoint`: Array of entry point URL's to use
