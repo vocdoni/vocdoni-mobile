@@ -107,8 +107,11 @@ class IdentitiesBloc {
     fetchState();
   }
 
-  subscribe(Organization org) {
+  subscribe(String resolverAddress, String entityId, String networkId,
+      List<String> entryPoints) async {
     // TODO: PERSIST CHANGES
+    print(
+        "TODO: REGISTER ORGANIZATION: $resolverAddress, $entityId, $networkId, $entryPoints");
   }
 
   unsubscribe(Organization org) {

@@ -66,6 +66,7 @@ class Lang {
 
     // ERRORS
     Intl.message('An error occurred while generating the identity');
+    Intl.message('The link you followed appears to be invalid');
   }
 
   /////////////////////////////////////////////////////////////////////////////

@@ -52,6 +52,7 @@ void showErrorMessage(String text, BuildContext context, {Function onPressed}) {
   final snackBar = SnackBar(
     content: Text(text),
     backgroundColor: dangerColor,
+    duration: Duration(seconds: 10),
     action: SnackBarAction(
       label: 'OK',
       textColor: Colors.white,

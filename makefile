@@ -37,10 +37,10 @@ lang-compile:
 
 launch-ios-link:
 	@#/usr/bin/xcrun simctl openurl booted "https://vocdoni.app/path/portion/?uid=123&token=abc"
-	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"
+	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__&entryPoints[]=__URI2__"
 
 launch-android-link:
-	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"'
+	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__&entryPoints[]=__URI2__"'
 
 run: 
 	flutter run
