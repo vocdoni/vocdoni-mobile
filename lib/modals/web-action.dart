@@ -159,8 +159,6 @@ class _WebActionState extends State<WebAction> {
   }
 
   onMessageReceived(JavascriptMessage message) async {
-    print("GOT JS MESSAGE:\n> ${message.message}");
-
     if (webViewCtrl == null)
       return print("WebView not loaded");
     else if (!(message.message is String)) return print("Empty message");

@@ -13,12 +13,22 @@ Official implementation of the Vocdoni core features.
 
 ### WebRuntime
 
+An headless web browser running a bundled application. The bundled page exposes access to a predefined set of cryptographic / Ethereum operations, currently missing on the Dart ecosystem.
+
 - See [https://github.com/vocdoni/dvote-js-runtime-flutter](DVote JS Runtime for Flutter)
 - See `lib/util/web-runtime.dart`
 
 ### Deep linking
 
-- Simulate deep links by running `make launch-ios-link` or `make launch-android-link`
+The app accepts incoming requests using the `vocdoni` schema. 
+
+- Subscribe to an entity: `vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__`
+  - `resolverAddress`: The address of the entity resolver contract instance
+	- `entityId`: The Id of the entity
+	- `networkId`: The of the network (currently supported 0 => mainnet)
+	- `entryPoint`: Array of entry point URL's to use
+
+On developoment, you can launch deep links by running `make launch-ios-link` or `make launch-android-link`
 
 ### Organization Actions
 
