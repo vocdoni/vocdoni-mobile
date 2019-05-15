@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/modals/select-identity.dart';
+import 'package:vocdoni/modals/web-action.dart';
 
 // import 'dart:convert';
 import '../lang/index.dart';
@@ -105,7 +106,17 @@ class HomeScreen extends StatelessWidget {
         (appState?.selectedIdentity is int)
             ? Text(identities[appState.selectedIdentity].alias)
             : Text(""),
-        Text("\nCURRENT ORG: ${appState?.selectedOrganization}")
+        Text("\nCURRENT ORG: ${appState?.selectedOrganization}"),
+        FlatButton(
+          color: mainBackgroundColor,
+          textColor: mainTextColor,
+          padding: EdgeInsets.all(16),
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => WebAction()));
+          },
+          child: Text(Lang.of(context).get("Org action")),
+        )
       ],
     ));
   }
