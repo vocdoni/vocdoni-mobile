@@ -36,8 +36,8 @@ lang-compile:
 		--no-use-deferred-loading lib/lang/index.dart lib/lang/intl_*.arb
 
 launch-ios-link:
-	/usr/bin/xcrun simctl openurl booted "https://vocdoni.app/path/portion/?uid=123&token=abc"
-	@#/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"
+	@#/usr/bin/xcrun simctl openurl booted "https://vocdoni.app/path/portion/?uid=123&token=abc"
+	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"
 
 launch-android-link:
 	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"'
