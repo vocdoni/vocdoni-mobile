@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/alerts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 const String kRuntimeContent = '''
@@ -92,22 +95,40 @@ const String kRuntimeContent = '''
 
     setTimeout(() => {
       sendHostRequest({ type: "getPublicKey" })
-        .then(res => console.log("RESULT", res))
-        .catch(err => console.error("ERROR", err));
+        .then(res => showResponse("Public Key: " + res))
+        .catch(showError);
     }, 5000)
+
+    setTimeout(() => {
+      sendHostRequest({ type: "getPublicKey" })
+        .then(res => showResponse("Public Key: " + res))
+        .catch(showError);
+    }, 10000)
 
 
     setTimeout(() => {
       sendHostRequest({ type: "does-not-exist" })
-        .then(res => console.log("RESULT", res))
-        .catch(err => console.error("ERROR", err));
-    }, 10000)
+        .then(res => showResponse(res))
+        .catch(showError);
+    }, 12000)
 
     setTimeout(() => {
       sendHostRequest({ type: "closeWindow" })
-        .then(res => console.log("RESULT", res))
-        .catch(err => console.error("ERROR", err));
+        .then(res => showResponse(res))
+        .catch(showError);
     }, 15000)
+
+    // UTIL
+
+    function showResponse(res) {
+      const node = document.querySelector("body").appendChild(document.createElement("p"));
+      node.innerText = res;
+    }
+
+    function showError(err) {
+      const node = document.querySelector("body").appendChild(document.createElement("p"));
+      node.innerText = "Error: " + err.message;
+    }
   </script>
 </head>
 <body>
@@ -133,6 +154,7 @@ class WebAction extends StatefulWidget {
 
 class _WebActionState extends State<WebAction> {
   WebViewController webViewCtrl;
+  bool hasPublicReadPermission = false;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +168,10 @@ class _WebActionState extends State<WebAction> {
         title: Text("Vocdoni"),
       ),
       body: WebView(
+        navigationDelegate: (NavigationRequest req) {
+          hasPublicReadPermission = false;
+          return NavigationDecision.navigate;
+        },
         initialUrl: uriFromContent(kRuntimeContent),
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
@@ -163,12 +189,9 @@ class _WebActionState extends State<WebAction> {
       return print("WebView not loaded");
     else if (!(message.message is String)) return print("Empty message");
 
-    String responseCode = "";
-    Map<String, dynamic> decodedMsg;
-
     try {
-      decodedMsg = jsonDecode(message.message);
-      responseCode = await handleIncomingMessage(decodedMsg);
+      Map<String, dynamic> decodedMsg = jsonDecode(message.message);
+      String responseCode = await digestIncomingMessage(decodedMsg);
       if (responseCode != null) {
         webViewCtrl.evaluateJavascript(responseCode);
       }
@@ -178,28 +201,48 @@ class _WebActionState extends State<WebAction> {
     }
   }
 
-  Future<String> handleIncomingMessage(Map<String, dynamic> message) async {
+  Future<String> digestIncomingMessage(Map<String, dynamic> message) async {
     final id = message["id"];
     if (!(id is int)) return null;
 
     final payload = message["payload"];
     if (!(payload is Map)) return null;
 
-    String responseCode = "";
     switch (payload["type"]) {
       case "getPublicKey":
-        // TODO: INJECT THE PUBLIC KEY
-        responseCode =
-            "handleHostResponse(JSON.stringify({id: $id, data: 'SOME PUBLIC KEY' }));";
+        // ASK FOR PERMISSION
+        // hasPublicReadPermission may be null
+        if (hasPublicReadPermission != true) {
+          hasPublicReadPermission = await showPrompt(
+              title: Lang.of(context).get("Permission"),
+              text: Lang.of(context).get(
+                  "The current service is requesting access to your public information.\nDo you want to continue?"),
+              context: context);
+        }
+
+        if (hasPublicReadPermission != true) // may be null as well
+          return respondError(id, "Permission declined");
+
+        // GET THE PUBLIC KEY
+        final publicKey = identitiesBloc
+            .current[appStateBloc.current.selectedIdentity].publicKey;
+
+        return respond(id, '''
+            handleHostResponse(JSON.stringify({id: $id, data: "$publicKey" }));
+        ''');
         break;
+
       case "closeWindow":
         Navigator.pop(context);
-        break;
-      default:
-        responseCode =
-            "handleHostResponse(JSON.stringify({id: $id, error: 'Unsupported action type sent to the host: ${payload["type"]}' }));";
-    }
+        return null;
 
+      default:
+        return respondError(id,
+            "Unsupported action type sent to the host: '${payload["type"]}'");
+    }
+  }
+
+  String respond(int id, String responseCode) {
     return '''
       try {
         $responseCode
@@ -210,8 +253,20 @@ class _WebActionState extends State<WebAction> {
     ''';
   }
 
+  String respondError(int id, String message) {
+    return '''
+      try {
+        handleHostResponse(JSON.stringify({id: $id, error: "$message" }));
+      }
+      catch(err) {
+        console.error(err);
+      }
+    ''';
+  }
+
   @override
   Future dispose() async {
+    // unload the web
     webViewCtrl.loadUrl(uriFromContent("<html></html>"));
     super.dispose();
     webViewCtrl = null;

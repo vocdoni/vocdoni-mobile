@@ -48,6 +48,8 @@ class Lang {
     // GLOBAL
     Intl.message('Vocdoni');
     Intl.message('Welcome');
+    Intl.message('OK');
+    Intl.message('Cancel');
 
     // IDENTITY - ON BOARDING
     Intl.message('Create an identity');
@@ -60,6 +62,7 @@ class Lang {
 
     // HOME
     Intl.message('Select your identity');
+    Intl.message('Permission');
 
     // ERRORS
     Intl.message('An error occurred while generating the identity');
