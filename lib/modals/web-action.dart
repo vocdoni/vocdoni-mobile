@@ -12,7 +12,7 @@ const String kRuntimeContent = '''
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <script>
     setInterval(() => {
-      HostApp.postMessage("I AM A MESSAGE: " + Date.now());
+      HostApp.postMessage("I AM A JS MESSAGE: " + Date.now());
     }, 3000);
 
     function handleResponse(type, data){
@@ -50,16 +50,13 @@ class WebAction extends StatefulWidget {
 
 class _WebActionState extends State<WebAction> {
   WebViewController webViewCtrl;
-  final Set<JavascriptChannel> javascriptChannels = Set.from([
-    JavascriptChannel(
-        name: 'HostApp',
-        onMessageReceived: (JavascriptMessage message) {
-          print("GOT JS MESSAGE:\n> ${message.message}");
-        })
-  ]);
 
   @override
   Widget build(BuildContext context) {
+    final Set<JavascriptChannel> javascriptChannels = Set.from([
+      JavascriptChannel(name: 'HostApp', onMessageReceived: onMessageReceived)
+    ]);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: mainBackgroundColor,
@@ -76,5 +73,15 @@ class _WebActionState extends State<WebAction> {
         javascriptChannels: javascriptChannels,
       ),
     );
+  }
+
+  onMessageReceived(JavascriptMessage message) {
+    print("GOT JS MESSAGE:\n> ${message.message}");
+
+    if (webViewCtrl == null) return;
+    final String code = '''
+      handleResponse("publicKey", "0x1234");
+    ''';
+    webViewCtrl.evaluateJavascript(code);
   }
 }
