@@ -8,4 +8,3 @@ final Color mainTextColor = Color(0xFFFFFFFF); // white
 
 final successColor = Color(0xFF25bd5b);
 final dangerColor = altBackgroundColor;
- 
