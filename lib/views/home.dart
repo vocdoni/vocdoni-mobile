@@ -1,13 +1,68 @@
+import 'dart:async';
 import "package:flutter/material.dart";
+import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/modals/select-identity.dart';
 import 'package:vocdoni/modals/web-action.dart';
-
-// import 'dart:convert';
+import 'package:vocdoni/util/incoming-links.dart';
+import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  /////////////////////////////////////////////////////////////////////////////
+  // DEEP LINKS / UNIVERSAL LINKS
+  /////////////////////////////////////////////////////////////////////////////
+
+  StreamSubscription<Uri> linkChangeStream;
+
+  @override
+  void initState() {
+    try {
+      // Handle the initial link
+      getInitialUri()
+          .then((initialLink) => handleIncomingLink(initialLink, context))
+          .catchError((err) => handleIncomingLinkError(err));
+
+      // Listen to link changes
+      linkChangeStream = getUriLinksStream().listen(
+          (uri) => handleIncomingLink(uri, context).catchError(handleIncomingLinkError),
+          onError: handleIncomingLinkError);
+    } catch (err) {
+      showAlert(
+          title: Lang.of(context).get("Error"),
+          text: Lang.of(context)
+              .get("The link you followed appears to be invalid"),
+          context: context);
+    }
+
+    super.initState();
+  }
+
+  handleIncomingLinkError(err) {
+    showAlert(
+        title: Lang.of(context).get("Error"),
+        text:
+            Lang.of(context).get("The link you followed appears to be invalid"),
+        context: context);
+  }
+
+  @override
+  void dispose() {
+    if (linkChangeStream != null) linkChangeStream.cancel();
+    super.dispose();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // MAIN
+  /////////////////////////////////////////////////////////////////////////////
+
   @override
   Widget build(context) {
     return StreamBuilder(
@@ -21,14 +76,14 @@ class HomeScreen extends StatelessWidget {
                     title: Text("Vocdoni"),
                     backgroundColor: mainBackgroundColor,
                   ),
-                  drawer: HomeDrawer(ctx, appState.data, identities.data),
-                  body: HomeBody(ctx, appState.data, identities.data),
+                  drawer: homeDrawer(ctx, appState.data, identities.data),
+                  body: homeBody(ctx, appState.data, identities.data),
                 );
               });
         });
   }
 
-  HomeDrawer(
+  homeDrawer(
       BuildContext context, AppState appState, List<Identity> identities) {
     final String identAlias = (appState?.selectedIdentity is int)
         ? identities[appState.selectedIdentity].alias
@@ -92,7 +147,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  HomeBody(BuildContext context, AppState appState, List<Identity> identities) {
+  homeBody(BuildContext context, AppState appState, List<Identity> identities) {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +176,6 @@ class HomeScreen extends StatelessWidget {
     ));
   }
 
-  // EVENTS
   selectIdentity(BuildContext ctx) async {
     Navigator.pop(ctx);
     final result = await Navigator.push(
