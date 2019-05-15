@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
               color: mainBackgroundColor,
             ),
           ),
-          (identities != null && identities.length > 0)
+          (identities != null && identities.length > 1)
               ? ListTile(
                   leading: Icon(Icons.person),
                   title: Text('Switch Identity'),

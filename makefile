@@ -11,12 +11,16 @@ SHELL := /bin/bash
 info:
 	@echo "Available actions:"
 	@echo
-	@echo "  $$ run         Runs 'run info' by default"
-	@echo "  $$ run info    Shows this text"
+	@echo "  $$ make         Runs 'make info' by default"
+	@echo "  $$ make info    Shows this text"
 	@echo
-	@echo "  $$ run lang-extract"
-	@echo "  $$ run lang-compile"
-	@echo "  $$ run run"
+	@echo "  $$ make lang-extract"
+	@echo "  $$ make lang-compile"
+	@echo
+	@echo "  $$ make launch-ios-link"
+	@echo "  $$ make launch-android-link"
+	@echo
+	@echo "  $$ make run"
 	@echo
 
 ###############################################################################
@@ -30,6 +34,13 @@ lang-extract:
 lang-compile:
 	@flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/lang \
 		--no-use-deferred-loading lib/lang/index.dart lib/lang/intl_*.arb
+
+launch-ios-link:
+	/usr/bin/xcrun simctl openurl booted "https://vocdoni.app/path/portion/?uid=123&token=abc"
+	@#/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"
+
+launch-android-link:
+	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/path/portion/?uid=123&token=abc"'
 
 run: 
 	flutter run

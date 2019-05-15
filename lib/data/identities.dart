@@ -39,6 +39,10 @@ class IdentitiesBloc {
 
     identities = await Future.wait(accounts.map((addr) async {
       String str = await secStore.read(key: addr);
+      if (str == null) {
+        print("WARNING: Data for $addr is empty");
+        return null;
+      }
       final decoded = jsonDecode(str);
       if (!(decoded is Map)) {
         return null;
@@ -55,6 +59,7 @@ class IdentitiesBloc {
         address: addr,
       );
     }));
+    identities = identities.where((item) => item != null).toList();
 
     // TODO: No organizations fetched yet
 
