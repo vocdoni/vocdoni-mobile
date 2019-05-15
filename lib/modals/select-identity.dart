@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import '../util/singletons.dart';
+import '../constants/colors.dart';
 import '../lang/index.dart';
 
 class SelectIdentityModal extends StatelessWidget {
@@ -18,17 +19,19 @@ class SelectIdentityModal extends StatelessWidget {
 
   Widget ListContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
+    final identityRows = ((identities ?? []).asMap().keys.map((idx) => ListTile(
+              leading: Icon(Icons.person),
+              title: Text(identities[idx].alias),
+              onTap: () => selected(ctx, idx),
+            )))
+        .toList();
+
     return Scaffold(
         appBar: AppBar(
-          title: Text(Lang.of(ctx).get("Select your identity")),
+          title: Text("Vocdoni"),
+          backgroundColor: mainBackgroundColor,
         ),
-        body: ListView(padding: EdgeInsets.zero, children: <Widget>[
-          ...((identities ?? []).asMap().keys.map((idx) => ListTile(
-                leading: Icon(Icons.person),
-                title: Text(identities[idx].alias),
-                onTap: () => selected(ctx, idx),
-              )))
-        ]));
+        body: ListView(padding: EdgeInsets.zero, children: identityRows));
   }
 
   selected(BuildContext ctx, int idx) {
