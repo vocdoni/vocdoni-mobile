@@ -36,13 +36,13 @@ Future<String> handleEntitySubscription(
     List<String> entryPoints,
     BuildContext context}) async {
   if (!(resolverAddress is String) ||
-      RegExp(r"^0x[a-zA-Z0-9]{40}$").hasMatch(resolverAddress)) {
+      !RegExp(r"^0x[a-zA-Z0-9]{40}$").hasMatch(resolverAddress)) {
     throw ("Invalid resolverAddress");
   } else if (!(entityId is String) ||
-      RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
+      !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw ("Invalid entityId");
   } else if (!(networkId is String) ||
-      RegExp(r"^[0-9]+$").hasMatch(networkId)) {
+      !RegExp(r"^[0-9]+$").hasMatch(networkId)) {
     throw ("Invalid networkId");
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
     throw ("Invalid entryPoints");
