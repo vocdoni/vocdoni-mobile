@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/modals/confirm-entity-subscription.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 
@@ -6,16 +8,12 @@ import 'package:vocdoni/util/api.dart';
 // MAIN
 ///////////////////////////////////////////////////////////////////////////////
 
-Uri lastHandledLink;
-
-Future handleIncomingLink(Uri newLink, BuildContext context) async {
-  if (!(newLink is Uri))
-    return;
-  else if (newLink.toString() == lastHandledLink?.toString()) return;
+Future<String> handleIncomingLink(Uri newLink, BuildContext context) async {
+  if (!(newLink is Uri)) return null;
 
   switch (newLink.path) {
     case "/subscribe":
-      await handleEntitySubscription(
+      return handleEntitySubscription(
           resolverAddress: newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
           networkId: newLink.queryParameters["networkId"],
@@ -25,15 +23,13 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
     default:
       throw ("Invalid path");
   }
-
-  lastHandledLink = newLink;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // HANDLERS
 ///////////////////////////////////////////////////////////////////////////////
 
-Future handleEntitySubscription(
+Future<String> handleEntitySubscription(
     {String resolverAddress,
     String entityId,
     String networkId,
@@ -64,11 +60,20 @@ Future handleEntitySubscription(
       .toList();
 
   // Fetch organization data
-  Organization org = await fetchOrganizationInfo(resolverAddress, entityId, networkId, decodedEntryPoints);
+  Organization org = await fetchOrganizationInfo(
+      resolverAddress, entityId, networkId, decodedEntryPoints);
 
-  // TODO: SHOW MODAL APPROVAL SCREEN
+  // Show approval screen
+  final accept = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ConfirmEntitySubscriptionModal(org)));
 
-  // TODO: SEND DIGESTED DATA TO STORE
+  if (accept != true) {
+    return null;
+  }
 
-  return identitiesBloc.subscribe(org);
+  await identitiesBloc.subscribe(org);
+
+  return Lang.of(context).get("The subscription has been registered");
 }

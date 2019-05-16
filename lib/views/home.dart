@@ -7,6 +7,7 @@ import 'package:vocdoni/modals/select-identity.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/toast.dart';
 // import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
@@ -16,6 +17,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Global scaffold key for snackbars
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
   /////////////////////////////////////////////////////////////////////////////
@@ -27,13 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // Handle the initial link
       getInitialUri()
-          .then((initialLink) => handleIncomingLink(initialLink, context))
+          .then((initialUri) => handleLink(initialUri))
           .catchError((err) => handleIncomingLinkError(err));
 
       // Listen to link changes
-      linkChangeStream = getUriLinksStream().listen(
-          (uri) => handleIncomingLink(uri, context).catchError(handleIncomingLinkError),
-          onError: handleIncomingLinkError);
+      linkChangeStream = getUriLinksStream()
+          .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
     } catch (err) {
       showAlert(
           title: Lang.of(context).get("Error"),
@@ -45,12 +48,28 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  handleLink(Uri givenUri) {
+    handleIncomingLink(givenUri, _scaffoldKey.currentContext)
+        .then((String result) => handleLinkSuccess(result))
+        .catchError(handleIncomingLinkError);
+  }
+
+  handleLinkSuccess(String text) {
+    if (text == null || !(text is String)) return;
+
+    // Try to merge with showSuccessMessage()
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      backgroundColor: successColor,
+      content: Text(text),
+    ));
+  }
+
   handleIncomingLinkError(err) {
     showAlert(
-        title: Lang.of(context).get("Error"),
-        text:
-            Lang.of(context).get("The link you followed appears to be invalid"),
-        context: context);
+        title: Lang.of(_scaffoldKey.currentContext).get("Error"),
+        text: Lang.of(_scaffoldKey.currentContext)
+            .get("There was a problem handling the link provided"),
+        context: _scaffoldKey.currentContext);
   }
 
   @override
@@ -72,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 return Scaffold(
+                  key: _scaffoldKey,
                   appBar: AppBar(
                     title: Text("Vocdoni"),
                     backgroundColor: mainBackgroundColor,
@@ -148,32 +168,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   homeBody(BuildContext context, AppState appState, List<Identity> identities) {
-    return Center(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text("HOME SCREEN"),
-        Text("Available Identities:"),
-        (identities == null)
-            ? Text("(empty?)")
-            : Text(identities.map((idt) => idt.alias).join(", ")),
-        Text("CURRENT ID: ${appState?.selectedIdentity}"),
-        (appState?.selectedIdentity is int)
-            ? Text(identities[appState.selectedIdentity].alias)
-            : Text(""),
-        Text("\nCURRENT ORG: ${appState?.selectedOrganization}"),
-        FlatButton(
-          color: mainBackgroundColor,
-          textColor: mainTextColor,
-          padding: EdgeInsets.all(16),
-          onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => WebAction()));
-          },
-          child: Text(Lang.of(context).get("Org action")),
-        )
-      ],
-    ));
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Row(children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(children: [
+                  Text("HOME SCREEN"),
+                  SizedBox(height: 20),
+                  Text("Available Identities:"),
+                  (identities == null)
+                      ? Text("(empty?)")
+                      : Text(identities.map((idt) => idt.alias).join(", ")),
+                  SizedBox(height: 20),
+                  Text("CURRENT IDENTITY:"),
+                  (appState?.selectedIdentity is int)
+                      ? Text(identities[appState.selectedIdentity].alias)
+                      : Text(""),
+                  SizedBox(height: 20),
+                  Text("CURRENT ORG: ${appState?.selectedOrganization}"),
+                ]),
+              ),
+            ),
+          ]),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: FlatButton(
+                  color: Colors.blue[100],
+                  child: Padding(
+                      child: Text("LAUNCH ORG ACTION"),
+                      padding: EdgeInsets.all(24)),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => WebAction()));
+                  },
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    );
   }
 
   selectIdentity(BuildContext ctx) async {

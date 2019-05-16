@@ -16,5 +16,5 @@ Future<Organization> fetchOrganizationInfo(String resolverAddress,
 
   // TODO: fetch
 
-  return Organization(name: "TEMP");
+  return Organization(name: "TEMP", resolverAddress: "0x1234", entityId: "0x2345", networkId: "1234", entryPoints: ["http://gw.io"]);
 }

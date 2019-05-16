@@ -38,7 +38,7 @@ void showSuccessMessage(String text, BuildContext context,
     ),
   );
 
-  // Find the Scaffold in the Widget tree and use it to show a SnackBar!
+  // Find the Scaffold in the Widget tree and use it to show a SnackBar
   Scaffold.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(snackBar);

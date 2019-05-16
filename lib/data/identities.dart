@@ -111,6 +111,8 @@ class IdentitiesBloc {
   subscribe(Organization newOrganization) async {
     // TODO: PERSIST CHANGES
     print("TODO: REGISTER ORGANIZATION: $newOrganization");
+
+    // TODO: appStateBloc.selectOrganization(n);
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
@@ -130,12 +132,21 @@ class Identity {
 
 class Organization {
   final String name;
+  final String resolverAddress;
+  final String entityId;
+  final String networkId;
+  final List<String> entryPoints;
 
-  Organization({this.name});
+  Organization(
+      {this.name,
+      this.resolverAddress,
+      this.entityId,
+      this.networkId,
+      this.entryPoints});
 
-  Organization.fromJson(Map<String, dynamic> json) : name = json['name'];
+  // Organization.fromJson(Map<String, dynamic> json) : name = json['name'];
 
-  Map<String, dynamic> toJson() => {
-        'name': name,
-      };
+  // Map<String, dynamic> toJson() => {
+  //       'name': name,
+  //     };
 }

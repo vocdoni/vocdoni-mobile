@@ -39,7 +39,7 @@ class Lang {
   /////////////////////////////////////////////////////////////////////////////
   // IMPORTANT:
   // DECLARE ANY STRINGS YOU USE IN THE METHOD BELOW
-  // 
+  //
   // The code of this method is used so that Flutter can extract the string literals
   // No runtime functionality
   /////////////////////////////////////////////////////////////////////////////
@@ -50,6 +50,7 @@ class Lang {
     Intl.message('Welcome');
     Intl.message('OK');
     Intl.message('Cancel');
+    Intl.message('Organization');
 
     // IDENTITY - ON BOARDING
     Intl.message('Create an identity');
@@ -64,9 +65,14 @@ class Lang {
     Intl.message('Select your identity');
     Intl.message('Permission');
 
+    // SUBSCRIPTION
+    Intl.message('Do you want to subscribe to the organization?');
+    Intl.message('Subscribe', desc: "Yes, subscribe me");
+
     // ERRORS
     Intl.message('An error occurred while generating the identity');
     Intl.message('The link you followed appears to be invalid');
+    Intl.message('There was a problem handling the link provided');
   }
 
   /////////////////////////////////////////////////////////////////////////////
