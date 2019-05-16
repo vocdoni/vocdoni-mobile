@@ -20,8 +20,22 @@ class SelectIdentityModal extends StatelessWidget {
   Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
     final identityRows = ((identities ?? []).asMap().keys.map((idx) => ListTile(
-              leading: Icon(Icons.person),
-              title: Text(identities[idx].alias),
+              leading: Icon(
+                Icons.person,
+                size: 40,
+              ),
+              title: Text(
+                identities[idx].alias,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black26),
+              ),
+              subtitle: Text(
+                identities[idx].address,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               onTap: () => selected(ctx, idx),
             )))
         .toList();
