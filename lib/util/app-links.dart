@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/util/api.dart';
 
 ///////////////////////////////////////////////////////////////////////////////
 // MAIN
@@ -62,12 +63,12 @@ Future handleEntitySubscription(
       .where((uri) => uri != null)
       .toList();
 
-  // TODO: FETCH ORGANIZATION DATA
+  // Fetch organization data
+  Organization org = await fetchOrganizationInfo(resolverAddress, entityId, networkId, decodedEntryPoints);
 
   // TODO: SHOW MODAL APPROVAL SCREEN
 
   // TODO: SEND DIGESTED DATA TO STORE
 
-  return identitiesBloc.subscribe(
-      resolverAddress, entityId, networkId, decodedEntryPoints);
+  return identitiesBloc.subscribe(org);
 }
