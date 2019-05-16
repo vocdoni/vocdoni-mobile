@@ -149,15 +149,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               : Container(),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Organization 1 (TODO)'),
-            onTap: () => {appStateBloc.selectOrganization(0)},
-          ),
+              leading: Icon(Icons.home),
+              title: Text('Organization 1 (TODO)'),
+              onTap: () => {appStateBloc.selectOrganization(0)},
+              trailing: InkWell(
+                child: Icon(Icons.remove_circle_outline),
+                onTap: () => print("CLICK"),
+              )),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Organization 2 (TODO)'),
-            onTap: () => {appStateBloc.selectOrganization(1)},
-          ),
+              leading: Icon(Icons.home),
+              title: Text('Organization 2 (TODO)'),
+              onTap: () => {appStateBloc.selectOrganization(1)},
+              trailing: InkWell(
+                child: Icon(Icons.remove_circle_outline),
+                onTap: () => print("CLICK"),
+              )),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),

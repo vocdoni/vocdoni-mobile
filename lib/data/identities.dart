@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import "dart:convert";
 
+import 'package:vocdoni/util/singletons.dart';
+
 ///
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
@@ -104,15 +106,31 @@ class IdentitiesBloc {
     // ADD AN EMPTY LIST OF ORGANIZATIONS
     await prefs.setStringList("$address-organizations", []);
 
+    // TODO: SET THE NEW IDENTITY AS THE ACTIVE
+
     fetchState();
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
   subscribe(Organization newOrganization) async {
-    // TODO: PERSIST CHANGES
-    print("TODO: REGISTER ORGANIZATION: $newOrganization");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // TODO: appStateBloc.selectOrganization(n);
+    if (_state.value.length <= appStateBloc.current?.selectedIdentity)
+      throw ("Invalid selectedIdentity: out of bounds");
+
+    final address =
+        prefs.getStringList("accounts")[appStateBloc.current.selectedIdentity];
+    if (!(address is String)) throw ("Invalid account address");
+
+    List<String> accountOrganizations = [];
+    if (prefs.containsKey("$address-organizations")) {
+      accountOrganizations = prefs.getStringList("$address-organizations");
+    }
+
+    accountOrganizations.add(newOrganization.toJson().toString());
+    await prefs.setStringList("$address-organizations", accountOrganizations);
+
+    appStateBloc.selectOrganization(accountOrganizations.length - 1);
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
@@ -144,9 +162,20 @@ class Organization {
       this.networkId,
       this.entryPoints});
 
-  // Organization.fromJson(Map<String, dynamic> json) : name = json['name'];
+  Organization.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        resolverAddress = json['resolverAddress'],
+        entityId = json['entityId'],
+        networkId = json['networkId'],
+        entryPoints = json['entryPoints'];
 
-  // Map<String, dynamic> toJson() => {
-  //       'name': name,
-  //     };
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'resolverAddress': resolverAddress,
+      'entityId': entityId,
+      'networkId': networkId,
+      'entryPoints': entryPoints,
+    };
+  }
 }

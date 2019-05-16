@@ -47,6 +47,16 @@ class ConfirmEntitySubscriptionModal extends StatelessWidget {
                     Text(
                       organization.entryPoints.join(", "),
                       textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 40),
+                    Text(
+                      Lang.of(context).get("Using the identity:"),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      identitiesBloc
+                          .current[appStateBloc.current.selectedIdentity].alias,
+                      textAlign: TextAlign.center,
                     )
                   ]),
                 ),
@@ -72,7 +82,7 @@ class ConfirmEntitySubscriptionModal extends StatelessWidget {
 
   promptAction(BuildContext ctx) async {
     final accepts = await showPrompt(
-      context: ctx,
+        context: ctx,
         title: Lang.of(ctx).get("Organization"),
         text: Lang.of(ctx).get("Do you want to subscribe to the organization?"),
         okButton: Lang.of(ctx).get("Subscribe"));
