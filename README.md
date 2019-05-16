@@ -132,13 +132,13 @@ On developoment, you can launch deep links by running `make launch-ios-link` or 
 To trigger a prompt to subscribe to an entity, use:
 
 ```
-vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI__
+vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
 ```
 
 - `resolverAddress`: The address of the entity resolver contract instance
-- `entityId`: The Id of the entity
+- `entityId`: See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
 - `networkId`: The of the network (currently supported 0 => mainnet)
-- `entryPoint`: Array of entry point URL's to use
+- `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
 
 ## Development
 
