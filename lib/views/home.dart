@@ -127,10 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 22,
                       letterSpacing: 1,
                     )),
-                Text(identAddress,
-                    style: TextStyle(
-                      color: Colors.white,
-                    )),
+                Text(
+                  identAddress,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
             decoration: BoxDecoration(
