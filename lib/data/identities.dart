@@ -48,17 +48,24 @@ class IdentitiesBloc {
         return null;
       }
 
+      List<String> orgs = [];
+      if (prefs.containsKey("$addr-organizations")) {
+        orgs = prefs.getStringList("$addr-organizations");
+      }
+
       // Intentionally skip the mnemonic
       return Identity(
         publicKey: decoded["publicKey"],
         alias: decoded["alias"],
         mnemonic: null,
         address: addr,
+        organizations: orgs
+            .where((String org) => org != null)
+            .map((String org) => Organization.fromJson(jsonDecode(org)))
+            .toList(),
       );
     }));
     identities = identities.where((item) => item != null).toList();
-
-    // TODO: No organizations fetched yet
 
     _state.add(identities);
   }
@@ -108,6 +115,7 @@ class IdentitiesBloc {
 
     // TODO: SET THE NEW IDENTITY AS THE ACTIVE
 
+    // Refresh state
     fetchState();
   }
 
@@ -127,10 +135,16 @@ class IdentitiesBloc {
       accountOrganizations = prefs.getStringList("$address-organizations");
     }
 
-    accountOrganizations.add(newOrganization.toJson().toString());
+    // TODO: CHECK NOT ALREADY SUBSCRIBED
+
+    accountOrganizations.add(json.encode(newOrganization.toJson()));
     await prefs.setStringList("$address-organizations", accountOrganizations);
+    // await prefs.setStringList("$address-organizations", []);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
+    
+    // Refresh state
+    fetchState();
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
@@ -144,8 +158,14 @@ class Identity {
   final String mnemonic;
   final String publicKey;
   final String address;
+  final List<Organization> organizations;
 
-  Identity({this.alias, this.publicKey, this.mnemonic, this.address});
+  Identity(
+      {this.alias,
+      this.publicKey,
+      this.mnemonic,
+      this.address,
+      this.organizations});
 }
 
 class Organization {
@@ -167,7 +187,7 @@ class Organization {
         resolverAddress = json['resolverAddress'],
         entityId = json['entityId'],
         networkId = json['networkId'],
-        entryPoints = json['entryPoints'];
+        entryPoints = json['entryPoints'].cast<String>().toList();
 
   Map<String, dynamic> toJson() {
     return {

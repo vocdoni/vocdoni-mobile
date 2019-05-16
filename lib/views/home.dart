@@ -105,12 +105,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   homeDrawer(
       BuildContext context, AppState appState, List<Identity> identities) {
-    final String identAlias = (appState?.selectedIdentity is int)
-        ? identities[appState.selectedIdentity].alias
-        : "";
-    final String identAddress = (appState?.selectedIdentity is int)
-        ? identities[appState.selectedIdentity].address
-        : "";
+    String identAlias = "";
+    String identAddress = "";
+    List<ListTile> organizationTiles = [];
+    if (appState?.selectedIdentity is int) {
+      identAlias = identities[appState.selectedIdentity].alias;
+      identAddress = identities[appState.selectedIdentity].address;
+
+      if (identities[appState.selectedIdentity].organizations?.length > 0) {
+        final orgs = identities[appState.selectedIdentity].organizations;
+        organizationTiles = orgs.asMap().keys.map((idx) {
+          return ListTile(
+              leading: Icon(Icons.home),
+              title: Text(orgs[idx].name ?? ""),
+              onTap: () => selectOrganization(idx),
+              trailing: InkWell(
+                child: Icon(Icons.remove_circle_outline),
+                onTap: () => promptRemoveOrganization(idx),
+              ));
+        }).toList();
+      }
+    }
 
     return Drawer(
       child: ListView(
@@ -148,22 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => selectIdentity(context),
                 )
               : Container(),
-          ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Organization 1 (TODO)'),
-              onTap: () => {appStateBloc.selectOrganization(0)},
-              trailing: InkWell(
-                child: Icon(Icons.remove_circle_outline),
-                onTap: () => print("CLICK"),
-              )),
-          ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Organization 2 (TODO)'),
-              onTap: () => {appStateBloc.selectOrganization(1)},
-              trailing: InkWell(
-                child: Icon(Icons.remove_circle_outline),
-                onTap: () => print("CLICK"),
-              )),
+          ...organizationTiles,
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
@@ -239,5 +239,16 @@ class _HomeScreenState extends State<HomeScreen> {
       //   ..removeCurrentSnackBar()
       //   ..showSnackBar(SnackBar(content: Text("$result")));
     }
+  }
+
+  selectOrganization(int idx) async {
+    if (idx is int) {
+      appStateBloc.selectOrganization(idx);
+      Navigator.of(context).pop();
+    }
+  }
+
+  promptRemoveOrganization(int idx) async {
+    // TODO:
   }
 }
