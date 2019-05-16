@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import '../util/api.dart';
 import '../util/singletons.dart';
 import '../lang/index.dart';
 import "../widgets/toast.dart";
@@ -27,10 +28,17 @@ class _WelcomeIdentityCreateScreenState
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Spacer(),
-            Text(generatedMnemonic != null
-                ? generatedMnemonic
-                : Lang.of(context)
-                    .get("Tap to create your self-sovereign identity")),
+            Padding(
+              padding: EdgeInsets.all(30),
+              child: Text(
+                generatedMnemonic != null
+                    ? generatedMnemonic
+                    : Lang.of(context)
+                        .get("Tap to create your self-sovereign identity"),
+                style: TextStyle(fontSize: 22),
+                textAlign: TextAlign.center,
+              ),
+            ),
             Spacer(),
             SizedBox(
               width: double.infinity,
@@ -65,8 +73,8 @@ class _WelcomeIdentityCreateScreenState
     try {
       showLoading(Lang.of(context).get("Generating..."), context);
 
-      final mnemonic = await webRuntime.call("generateMnemonic()");
-      final address = await webRuntime.call("mnemonicToAddress('$mnemonic')");
+      final mnemonic = await generateMnemonic();
+      final address = await mnemonicToAddress(mnemonic);
       hideLoading(context);
 
       setState(() {
@@ -80,6 +88,8 @@ class _WelcomeIdentityCreateScreenState
       showSuccessMessage(
           Lang.of(context).get("Your identity is ready!"), context);
     } catch (err) {
+      hideLoading(context);
+
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
 

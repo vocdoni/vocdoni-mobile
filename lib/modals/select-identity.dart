@@ -12,12 +12,12 @@ class SelectIdentityModal extends StatelessWidget {
           return StreamBuilder(
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return ListContent(context, appState.data, identities.data);
+                return listContent(context, appState.data, identities.data);
               });
         });
   }
 
-  Widget ListContent(
+  Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
     final identityRows = ((identities ?? []).asMap().keys.map((idx) => ListTile(
               leading: Icon(Icons.person),

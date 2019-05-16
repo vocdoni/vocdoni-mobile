@@ -5,9 +5,9 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/modals/select-identity.dart';
 import 'package:vocdoni/modals/web-action.dart';
-import 'package:vocdoni/util/incoming-links.dart';
+import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
-import 'package:vocdoni/widgets/toast.dart';
+// import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
 class HomeScreen extends StatefulWidget {

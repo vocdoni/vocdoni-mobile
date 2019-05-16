@@ -18,11 +18,6 @@ class IdentitiesBloc {
   Observable<List<Identity>> get stream => _state.stream;
   List<Identity> get current => _state.value;
 
-  // Constructor
-  IdentitiesBloc() {
-    // TODO: FETCH STORED DATA
-  }
-
   Future restore() async {
     return fetchState();
   }
@@ -67,6 +62,8 @@ class IdentitiesBloc {
   }
 
   // Operations
+
+  /// Registers a new identity with an empty list of organizations
   create(
       {String mnemonic, String publicKey, String address, String alias}) async {
     if (!(mnemonic is String))
@@ -98,22 +95,25 @@ class IdentitiesBloc {
     }
 
     // ADD A SERIALIZED WALLET FOR THE ADDRESS
-    secStore.write(
+    await secStore.write(
       key: address,
       value: json.encode(
           {"mnemonic": mnemonic, "publicKey": publicKey, "alias": alias}),
     );
 
+    // ADD AN EMPTY LIST OF ORGANIZATIONS
+    await prefs.setStringList("$address-organizations", []);
+
     fetchState();
   }
 
-  subscribe(String resolverAddress, String entityId, String networkId,
-      List<String> entryPoints) async {
+  /// Register the given organization as a subscribtion of the currently selected identity
+  subscribe(Organization newOrganization) async {
     // TODO: PERSIST CHANGES
-    print(
-        "TODO: REGISTER ORGANIZATION: $resolverAddress, $entityId, $networkId, $entryPoints");
+    print("TODO: REGISTER ORGANIZATION: $newOrganization");
   }
 
+  /// Remove the given organization from the currently selected identity's subscriptions
   unsubscribe(Organization org) {
     // TODO: PERSIST CHANGES
   }
