@@ -81,6 +81,7 @@ Future<String> handleEntitySubscription(
     await identitiesBloc.subscribe(org);
   } catch (err) {
     hideLoading(global: true);
+
     throw err;
   }
 

@@ -75,6 +75,7 @@ class _WelcomeIdentityCreateScreenState
 
       final mnemonic = await generateMnemonic();
       final address = await mnemonicToAddress(mnemonic);
+      final publicKey = await mnemonicToPublicKey(mnemonic);
       hideLoading(context: context);
 
       setState(() {
@@ -83,7 +84,10 @@ class _WelcomeIdentityCreateScreenState
 
       final String alias = "Ident ${identitiesBloc.current.length + 1}";
       identitiesBloc.create(
-          mnemonic: mnemonic, publicKey: "", address: address, alias: alias);
+          mnemonic: mnemonic,
+          publicKey: publicKey,
+          address: address,
+          alias: alias);
 
       showSuccessMessage(Lang.of(context).get("Your identity is ready!"),
           context: context);

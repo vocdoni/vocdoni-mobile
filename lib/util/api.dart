@@ -10,6 +10,11 @@ Future<String> mnemonicToAddress(String mnemonic) async {
   return address;
 }
 
+Future<String> mnemonicToPublicKey(String mnemonic) async {
+  String address = await webRuntime.call("mnemonicToPublicKey('$mnemonic')");
+  return address;
+}
+
 Future<Organization> fetchOrganizationInfo(String resolverAddress,
     String entityId, String networkId, List<String> entryPoints) async {
   // TODO: TEMP: USE A REAL $providerUrl

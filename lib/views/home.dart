@@ -57,6 +57,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleIncomingLinkError(err) {
+    if (err == "Already subscribed") {
+      return showMessage(
+          Lang.of(context)
+              .get("You are already subscribed to this organization"),
+          global: true);
+    }
     print(err);
     showAlert(
         title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
