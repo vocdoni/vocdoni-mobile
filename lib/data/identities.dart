@@ -9,7 +9,7 @@ import 'package:vocdoni/util/singletons.dart';
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
 /// - SecureStorage > {account-address} > { mnemonic, publicKey, alias }
-/// - SharedPreferences > "{account-address}-organizations" > String List > { name, ... }
+/// - SharedPreferences > "{account-address}/organizations" > String List > { name, ... }
 
 final secStore = new FlutterSecureStorage();
 
@@ -49,8 +49,8 @@ class IdentitiesBloc {
       }
 
       List<String> orgs = [];
-      if (prefs.containsKey("$addr-organizations")) {
-        orgs = prefs.getStringList("$addr-organizations");
+      if (prefs.containsKey("$addr/organizations")) {
+        orgs = prefs.getStringList("$addr/organizations");
       }
 
       // Intentionally skip the mnemonic
@@ -86,8 +86,9 @@ class IdentitiesBloc {
     // ADD THE ADDRESS IN THE ACCOUNT INDEX
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    List<String> currentAddrs;
     if (prefs.containsKey("accounts")) {
-      final currentAddrs = prefs.getStringList("accounts");
+      currentAddrs = prefs.getStringList("accounts");
       if (currentAddrs.length > 0) {
         if (currentAddrs.indexWhere((addr) => addr == address) >= 0 ||
             (await secStore.read(key: address)) != null) {
@@ -97,10 +98,12 @@ class IdentitiesBloc {
           prefs.setStringList("accounts", currentAddrs);
         }
       } else {
-        prefs.setStringList("accounts", [address]);
+        currentAddrs = [address];
+        prefs.setStringList("accounts", currentAddrs);
       }
     } else {
-      prefs.setStringList("accounts", [address]);
+      currentAddrs = [address];
+      prefs.setStringList("accounts", currentAddrs);
     }
 
     // ADD A SERIALIZED WALLET FOR THE ADDRESS
@@ -111,12 +114,13 @@ class IdentitiesBloc {
     );
 
     // ADD AN EMPTY LIST OF ORGANIZATIONS
-    await prefs.setStringList("$address-organizations", []);
-
-    // TODO: SET THE NEW IDENTITY AS THE ACTIVE
+    await prefs.setStringList("$address/organizations", []);
 
     // Refresh state
-    fetchState();
+    await fetchState();
+
+    // Set the new identity as active
+    appStateBloc.selectIdentity(currentAddrs.length - 1);
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
@@ -131,20 +135,24 @@ class IdentitiesBloc {
     if (!(address is String)) throw ("Invalid account address");
 
     List<String> accountOrganizations = [];
-    if (prefs.containsKey("$address-organizations")) {
-      accountOrganizations = prefs.getStringList("$address-organizations");
+    if (prefs.containsKey("$address/organizations")) {
+      accountOrganizations = prefs.getStringList("$address/organizations");
     }
 
-    // TODO: CHECK NOT ALREADY SUBSCRIBED
+    final already = accountOrganizations.any((strOrganization) {
+      final org = Organization.fromJson(jsonDecode(strOrganization));
+      if (!(org is Organization)) return false;
+      return org.entityId == newOrganization.entityId;
+    });
+    if (already) throw ("Already subscribed");
 
     accountOrganizations.add(json.encode(newOrganization.toJson()));
-    await prefs.setStringList("$address-organizations", accountOrganizations);
-    // await prefs.setStringList("$address-organizations", []);
+    await prefs.setStringList("$address/organizations", accountOrganizations);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
 
     // Refresh state
-    fetchState();
+    await fetchState();
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
