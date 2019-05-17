@@ -142,7 +142,7 @@ class IdentitiesBloc {
     // await prefs.setStringList("$address-organizations", []);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
-    
+
     // Refresh state
     fetchState();
   }
@@ -169,33 +169,89 @@ class Identity {
 }
 
 class Organization {
+  // Generic
+  String resolverAddress;
+  String entityId;
+  String networkId;
+  List<String> entryPoints; // TODO: REMOVE?
+
+  // Metadata
+  final List<String> languages;
   final String name;
-  final String resolverAddress;
-  final String entityId;
-  final String networkId;
-  final List<String> entryPoints;
+  final Map<String, String> description; // language dependent
+  final String metadataOrigin;
+  final String votingProcessContractAddress;
+  final List<String> activeProcessIds;
+  final List<String> endedProcessIds;
+  final Map<String, dynamic> newsFeed; // language dependent
+  final String avatar;
+  Map<String, dynamic> gatewayUpdate = {}; // unused
+  List<String> gatewayBootNodes = []; // unused by now
+  List<String> relays = []; // unused by now
+  List actions = []; // unused by now
 
   Organization(
-      {this.name,
-      this.resolverAddress,
+      {this.resolverAddress,
       this.entityId,
       this.networkId,
-      this.entryPoints});
+      this.entryPoints,
+      this.languages,
+      this.name,
+      this.description,
+      this.metadataOrigin,
+      this.votingProcessContractAddress,
+      this.activeProcessIds,
+      this.endedProcessIds,
+      this.newsFeed,
+      this.avatar});
 
   Organization.fromJson(Map<String, dynamic> json)
-      : name = json['name'],
-        resolverAddress = json['resolverAddress'],
-        entityId = json['entityId'],
-        networkId = json['networkId'],
-        entryPoints = json['entryPoints'].cast<String>().toList();
+      : // global
+        resolverAddress = json['resolverAddress'] ?? "",
+        entityId = json['entityId'] ?? "",
+        networkId = json['networkId'] ?? "",
+        entryPoints = (json['entryPoints'] ?? []).cast<String>().toList(),
+        // meta
+        languages = (json['languages'] ?? []).cast<String>().toList(),
+        name = json['entity-name'] ?? "",
+        description =
+            Map<String, String>.from(json['entity-description'] ?? {}),
+        metadataOrigin = json['meta'] ?? "",
+        votingProcessContractAddress = json['voting-contract'],
+        gatewayUpdate = json['gateway-update'] ?? {},
+        newsFeed = json['news-feed'] ?? {},
+        activeProcessIds = ((json['process-ids'] ?? {})['active'] ?? [])
+            .cast<String>()
+            .toList(),
+        endedProcessIds = ((json['process-ids'] ?? {})['ended'] ?? [])
+            .cast<String>()
+            .toList(),
+        avatar = json['avatar'],
+        gatewayBootNodes =
+            (json['gateway-boot-nodes'] ?? []).cast<String>().toList(),
+        relays = (json['relays'] ?? []).cast<String>().toList(),
+        actions = json['actions'] ?? [];
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      // global
       'resolverAddress': resolverAddress,
       'entityId': entityId,
       'networkId': networkId,
       'entryPoints': entryPoints,
+      // meta
+      'languages': languages,
+      'entity-name': name,
+      'entity-description': description,
+      'meta': metadataOrigin,
+      'voting-contract': votingProcessContractAddress,
+      'gateway-update': gatewayUpdate,
+      'news-feed': newsFeed,
+      'process-ids': {'active': activeProcessIds, 'ended': endedProcessIds},
+      'avatar': avatar,
+      'gateway-boot-nodes': gatewayBootNodes,
+      'relays': relays,
+      'actions': actions
     };
   }
 }

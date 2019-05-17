@@ -3,6 +3,7 @@ import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/confirm-entity-subscription.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/widgets/toast.dart';
 
 ///////////////////////////////////////////////////////////////////////////////
 // MAIN
@@ -59,21 +60,29 @@ Future<String> handleEntitySubscription(
       .where((uri) => uri != null)
       .toList();
 
-  // Fetch organization data
-  Organization org = await fetchOrganizationInfo(
-      resolverAddress, entityId, networkId, decodedEntryPoints);
+  showLoading(Lang.of(context).get("Connecting..."), global: true);
 
-  // Show approval screen
-  final accept = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => ConfirmEntitySubscriptionModal(org)));
+  try {
+    // Fetch organization data
+    Organization org = await fetchOrganizationInfo(
+        resolverAddress, entityId, networkId, decodedEntryPoints);
 
-  if (accept != true) {
-    return null;
+    hideLoading(global: true);
+
+    // Show approval screen
+    final accept = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ConfirmEntitySubscriptionModal(org)));
+
+    if (accept != true) {
+      return null;
+    }
+    await identitiesBloc.subscribe(org);
+  } catch (err) {
+    hideLoading(global: true);
+    throw err;
   }
-
-  await identitiesBloc.subscribe(org);
 
   return Lang.of(context).get("The subscription has been registered");
 }

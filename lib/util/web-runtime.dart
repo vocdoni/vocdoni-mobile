@@ -60,11 +60,16 @@ class WebRuntime extends InAppBrowser {
     requests.add(new RequestItem(
         id: id, completer: requestCompleter, timeout: timeoutTimer));
 
-    await this.webViewController.injectScriptCode('''
-      call(() => $jsExpression)
-        .then(result => replyMessage($id, result))
-        .catch(error => replyError($id, error))
-    ''');
+    final code = '''
+      call(() => { return $jsExpression })
+        .then(result => {
+          return replyMessage($id, result)
+        })
+        .catch(error => {
+          return replyError($id, error)
+        })
+    ''';
+    await this.webViewController.injectScriptCode(code);
 
     return requestCompleter.future;
   }
@@ -94,7 +99,8 @@ class WebRuntime extends InAppBrowser {
     final item = requests.firstWhere((req) => req.id == meta["id"]);
     if (item == null) {
       return print("ERROR: Got a non-existing request ID from the Web Runtime");
-    } else if (meta["error"] is String) {
+    } else if (meta["error"] == true ||
+        (!(meta["error"] is bool) && meta["error"] != null)) {
       item.completer.completeError(data);
     } else {
       item.completer.complete(data);
