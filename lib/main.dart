@@ -9,6 +9,7 @@ import "views/welcome-identity.dart";
 import "views/welcome-identity-create.dart";
 import "views/welcome-identity-recover.dart";
 import "views/home.dart";
+import "views/identity-welcome.dart";
 
 void main() async {
   // RESTORE DATA
@@ -21,7 +22,7 @@ void main() async {
   if (identitiesBloc?.current?.length > 0) {
     home = HomeScreen();
   } else {
-    home = WelcomeScreen();
+    home = IdentityWelcome();
   }
 
   // RUN THE APP
@@ -37,6 +38,7 @@ void main() async {
     home: home,
     routes: {
       // NO IDENTITIES YET
+      "/identityWelcome":(context) => IdentityWelcome(),
       "/welcome": (context) => WelcomeScreen(),
       "/welcome/identity": (context) => WelcomeIdentityScreen(),
       "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
