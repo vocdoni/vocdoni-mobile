@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListTile(
               leading: Icon(Icons.home),
               title: Text(orgs[idx].name ?? ""),
-              onTap: () => selectOrganization(idx),
+              onTap: () => selectOrganization(idx, context),
               trailing: InkWell(
                 child: Icon(Icons.remove_circle_outline),
                 onTap: () => promptRemoveOrganization(idx),
@@ -239,9 +239,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  selectOrganization(int idx) async {
+  selectOrganization(int idx, BuildContext ctx) async {
     if (idx is int) {
       appStateBloc.selectOrganization(idx);
+
+      showMessage(
+          Lang.of(ctx).get("Using: ") +
+              identitiesBloc.current[0].organizations[idx].name,
+          global: true);
       Navigator.of(context).pop();
     }
   }
