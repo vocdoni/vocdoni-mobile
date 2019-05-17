@@ -1,8 +1,19 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
+import 'identity-details.dart';
 
-class IdentityWelcome extends StatelessWidget {
+class IdentityWelcome extends StatefulWidget {
+  @override
+  _IdentityWelcome createState() => _IdentityWelcome();
+}
+
+class _IdentityWelcome extends State {
+  bool generating = false;
+
   @override
   Widget build(context) {
     return Scaffold(
@@ -12,7 +23,16 @@ class IdentityWelcome extends StatelessWidget {
         child: Container(
           constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
           color: Color(0x00ff0000),
-          child: Column(
+          child:generating
+            ? Text("Generating sovereign identity...", style: TextStyle(fontSize: 18))
+            : buildWelcome(context),
+        ),
+      ),
+    ));
+  }
+
+  buildWelcome(BuildContext context){
+    return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Center(
@@ -24,18 +44,39 @@ class IdentityWelcome extends StatelessWidget {
                 child: TextField(
                   style: TextStyle(fontSize: 20),
                   decoration: InputDecoration(hintText: "What's your name?"),
-                  onSubmitted: onSubmitted,
+                  onSubmitted: (alias) => {createIdentity(context, alias)},
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    ));
+          );
   }
 
-  onSubmitted(String name) {
-    debugPrint(name);
-    //Navigator.pushReplacementNamed(context, "/home");
+  createIdentity(BuildContext context, String alias) async {
+    try {
+      
+      setState(() {
+        generating = true;
+      });
+
+      final mnemonic = await generateMnemonic();
+      final address = await mnemonicToAddress(mnemonic);
+
+      identitiesBloc.create(
+          mnemonic: mnemonic, publicKey: "", address: address, alias: alias);
+
+      done(context);
+
+    } catch (err) {
+      String text = Lang.of(context)
+          .get("An error occurred while generating the identity");
+
+      showErrorMessage(text, context);
+    }
+  }
+
+  done(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return IdentityDetails();
+    }));
   }
 }
