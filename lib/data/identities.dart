@@ -9,7 +9,7 @@ import 'package:vocdoni/util/singletons.dart';
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
 /// - SecureStorage > {account-address} > { mnemonic, publicKey, alias }
-/// - SharedPreferences > "{account-address}-organizations" > String List > { name, ... }
+/// - SharedPreferences > "{account-address}/organizations" > String List > { name, ... }
 
 final secStore = new FlutterSecureStorage();
 
@@ -49,8 +49,8 @@ class IdentitiesBloc {
       }
 
       List<String> orgs = [];
-      if (prefs.containsKey("$addr-organizations")) {
-        orgs = prefs.getStringList("$addr-organizations");
+      if (prefs.containsKey("$addr/organizations")) {
+        orgs = prefs.getStringList("$addr/organizations");
       }
 
       // Intentionally skip the mnemonic
@@ -86,8 +86,9 @@ class IdentitiesBloc {
     // ADD THE ADDRESS IN THE ACCOUNT INDEX
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    List<String> currentAddrs;
     if (prefs.containsKey("accounts")) {
-      final currentAddrs = prefs.getStringList("accounts");
+      currentAddrs = prefs.getStringList("accounts");
       if (currentAddrs.length > 0) {
         if (currentAddrs.indexWhere((addr) => addr == address) >= 0 ||
             (await secStore.read(key: address)) != null) {
@@ -97,10 +98,12 @@ class IdentitiesBloc {
           prefs.setStringList("accounts", currentAddrs);
         }
       } else {
-        prefs.setStringList("accounts", [address]);
+        currentAddrs = [address];
+        prefs.setStringList("accounts", currentAddrs);
       }
     } else {
-      prefs.setStringList("accounts", [address]);
+      currentAddrs = [address];
+      prefs.setStringList("accounts", currentAddrs);
     }
 
     // ADD A SERIALIZED WALLET FOR THE ADDRESS
@@ -111,12 +114,13 @@ class IdentitiesBloc {
     );
 
     // ADD AN EMPTY LIST OF ORGANIZATIONS
-    await prefs.setStringList("$address-organizations", []);
-
-    // TODO: SET THE NEW IDENTITY AS THE ACTIVE
+    await prefs.setStringList("$address/organizations", []);
 
     // Refresh state
-    fetchState();
+    await fetchState();
+
+    // Set the new identity as active
+    appStateBloc.selectIdentity(currentAddrs.length - 1);
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
@@ -131,20 +135,24 @@ class IdentitiesBloc {
     if (!(address is String)) throw ("Invalid account address");
 
     List<String> accountOrganizations = [];
-    if (prefs.containsKey("$address-organizations")) {
-      accountOrganizations = prefs.getStringList("$address-organizations");
+    if (prefs.containsKey("$address/organizations")) {
+      accountOrganizations = prefs.getStringList("$address/organizations");
     }
 
-    // TODO: CHECK NOT ALREADY SUBSCRIBED
+    final already = accountOrganizations.any((strOrganization) {
+      final org = Organization.fromJson(jsonDecode(strOrganization));
+      if (!(org is Organization)) return false;
+      return org.entityId == newOrganization.entityId;
+    });
+    if (already) throw ("Already subscribed");
 
     accountOrganizations.add(json.encode(newOrganization.toJson()));
-    await prefs.setStringList("$address-organizations", accountOrganizations);
-    // await prefs.setStringList("$address-organizations", []);
+    await prefs.setStringList("$address/organizations", accountOrganizations);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
-    
+
     // Refresh state
-    fetchState();
+    await fetchState();
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
@@ -169,33 +177,89 @@ class Identity {
 }
 
 class Organization {
+  // Generic
+  String resolverAddress;
+  String entityId;
+  String networkId;
+  List<String> entryPoints; // TODO: REMOVE?
+
+  // Metadata
+  final List<String> languages;
   final String name;
-  final String resolverAddress;
-  final String entityId;
-  final String networkId;
-  final List<String> entryPoints;
+  final Map<String, String> description; // language dependent
+  final String metadataOrigin;
+  final String votingProcessContractAddress;
+  final List<String> activeProcessIds;
+  final List<String> endedProcessIds;
+  final Map<String, dynamic> newsFeed; // language dependent
+  final String avatar;
+  Map<String, dynamic> gatewayUpdate = {}; // unused
+  List<String> gatewayBootNodes = []; // unused by now
+  List<String> relays = []; // unused by now
+  List actions = []; // unused by now
 
   Organization(
-      {this.name,
-      this.resolverAddress,
+      {this.resolverAddress,
       this.entityId,
       this.networkId,
-      this.entryPoints});
+      this.entryPoints,
+      this.languages,
+      this.name,
+      this.description,
+      this.metadataOrigin,
+      this.votingProcessContractAddress,
+      this.activeProcessIds,
+      this.endedProcessIds,
+      this.newsFeed,
+      this.avatar});
 
   Organization.fromJson(Map<String, dynamic> json)
-      : name = json['name'],
-        resolverAddress = json['resolverAddress'],
-        entityId = json['entityId'],
-        networkId = json['networkId'],
-        entryPoints = json['entryPoints'].cast<String>().toList();
+      : // global
+        resolverAddress = json['resolverAddress'] ?? "",
+        entityId = json['entityId'] ?? "",
+        networkId = json['networkId'] ?? "",
+        entryPoints = (json['entryPoints'] ?? []).cast<String>().toList(),
+        // meta
+        languages = (json['languages'] ?? []).cast<String>().toList(),
+        name = json['entity-name'] ?? "",
+        description =
+            Map<String, String>.from(json['entity-description'] ?? {}),
+        metadataOrigin = json['meta'] ?? "",
+        votingProcessContractAddress = json['voting-contract'],
+        gatewayUpdate = json['gateway-update'] ?? {},
+        newsFeed = json['news-feed'] ?? {},
+        activeProcessIds = ((json['process-ids'] ?? {})['active'] ?? [])
+            .cast<String>()
+            .toList(),
+        endedProcessIds = ((json['process-ids'] ?? {})['ended'] ?? [])
+            .cast<String>()
+            .toList(),
+        avatar = json['avatar'],
+        gatewayBootNodes =
+            (json['gateway-boot-nodes'] ?? []).cast<String>().toList(),
+        relays = (json['relays'] ?? []).cast<String>().toList(),
+        actions = json['actions'] ?? [];
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      // global
       'resolverAddress': resolverAddress,
       'entityId': entityId,
       'networkId': networkId,
       'entryPoints': entryPoints,
+      // meta
+      'languages': languages,
+      'entity-name': name,
+      'entity-description': description,
+      'meta': metadataOrigin,
+      'voting-contract': votingProcessContractAddress,
+      'gateway-update': gatewayUpdate,
+      'news-feed': newsFeed,
+      'process-ids': {'active': activeProcessIds, 'ended': endedProcessIds},
+      'avatar': avatar,
+      'gateway-boot-nodes': gatewayBootNodes,
+      'relays': relays,
+      'actions': actions
     };
   }
 }

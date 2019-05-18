@@ -51,6 +51,7 @@ class Lang {
     Intl.message('OK');
     Intl.message('Cancel');
     Intl.message('Organization');
+    Intl.message('Connecting...');
 
     // IDENTITY - ON BOARDING
     Intl.message('Create an identity');
