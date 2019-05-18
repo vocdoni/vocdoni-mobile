@@ -71,11 +71,12 @@ class _WelcomeIdentityCreateScreenState
 
   createIdentity(BuildContext context) async {
     try {
-      showLoading(Lang.of(context).get("Generating..."), context);
+      showLoading(Lang.of(context).get("Generating..."), context: context);
 
       final mnemonic = await generateMnemonic();
       final address = await mnemonicToAddress(mnemonic);
-      hideLoading(context);
+      final publicKey = await mnemonicToPublicKey(mnemonic);
+      hideLoading(context: context);
 
       setState(() {
         generatedMnemonic = mnemonic;
@@ -83,17 +84,20 @@ class _WelcomeIdentityCreateScreenState
 
       final String alias = "Ident ${identitiesBloc.current.length + 1}";
       identitiesBloc.create(
-          mnemonic: mnemonic, publicKey: "", address: address, alias: alias);
+          mnemonic: mnemonic,
+          publicKey: publicKey,
+          address: address,
+          alias: alias);
 
-      showSuccessMessage(
-          Lang.of(context).get("Your identity is ready!"), context);
+      showSuccessMessage(Lang.of(context).get("Your identity is ready!"),
+          context: context);
     } catch (err) {
-      hideLoading(context);
+      hideLoading(context: context);
 
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
 
-      showErrorMessage(text, context);
+      showErrorMessage(text, context: context);
     }
   }
 

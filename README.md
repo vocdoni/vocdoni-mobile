@@ -156,3 +156,9 @@ An headless web browser running a bundled application. The bundled page exposes 
 
 - See [DVote JS Runtime for Flutter](https://github.com/vocdoni/dvote-js-runtime-flutter)
 - See `lib/util/web-runtime.dart`
+
+**Considerations**:
+- On iOS the key `NSAppTransportSecurity` > `NSAllowsArbitraryLoads` is set to true
+  - This is due to the fact that the runtime will need to connect to Vocdoni Gateways
+  - As Gateways need to be accessed by their IP address, TLS can't be enabled on them
+  - Rather, the protocol will use its own integrity + encryption system

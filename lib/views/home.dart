@@ -8,7 +8,6 @@ import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/toast.dart';
-// import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,9 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Global scaffold key for snackbars
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
   /////////////////////////////////////////////////////////////////////////////
@@ -49,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleLink(Uri givenUri) {
-    handleIncomingLink(givenUri, _scaffoldKey.currentContext)
+    handleIncomingLink(givenUri, homePageScaffoldKey.currentContext)
         .then((String result) => handleLinkSuccess(result))
         .catchError(handleIncomingLinkError);
   }
@@ -57,19 +53,22 @@ class _HomeScreenState extends State<HomeScreen> {
   handleLinkSuccess(String text) {
     if (text == null || !(text is String)) return;
 
-    // Try to merge with showSuccessMessage()
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      backgroundColor: successColor,
-      content: Text(text),
-    ));
+    showSuccessMessage(text, global: true);
   }
 
   handleIncomingLinkError(err) {
+    if (err == "Already subscribed") {
+      return showMessage(
+          Lang.of(context)
+              .get("You are already subscribed to this organization"),
+          global: true);
+    }
+    print(err);
     showAlert(
-        title: Lang.of(_scaffoldKey.currentContext).get("Error"),
-        text: Lang.of(_scaffoldKey.currentContext)
+        title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
+        text: Lang.of(homePageScaffoldKey.currentContext)
             .get("There was a problem handling the link provided"),
-        context: _scaffoldKey.currentContext);
+        context: homePageScaffoldKey.currentContext);
   }
 
   @override
@@ -91,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 return Scaffold(
-                  key: _scaffoldKey,
+                  key: homePageScaffoldKey,
                   appBar: AppBar(
                     title: Text("Vocdoni"),
                     backgroundColor: mainBackgroundColor,
@@ -118,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListTile(
               leading: Icon(Icons.home),
               title: Text(orgs[idx].name ?? ""),
-              onTap: () => selectOrganization(idx),
+              onTap: () => selectOrganization(idx, context),
               trailing: InkWell(
                 child: Icon(Icons.remove_circle_outline),
                 onTap: () => promptRemoveOrganization(idx),
@@ -234,16 +233,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result is int) {
       appStateBloc.selectIdentity(result);
 
-      // TODO: Needs rearranging the Scaffold hierarchy
-      // Scaffold.of(ctx)
-      //   ..removeCurrentSnackBar()
-      //   ..showSnackBar(SnackBar(content: Text("$result")));
+      showMessage(
+          Lang.of(ctx).get("Using: ") + identitiesBloc.current[result].alias,
+          global: true);
     }
   }
 
-  selectOrganization(int idx) async {
+  selectOrganization(int idx, BuildContext ctx) async {
     if (idx is int) {
       appStateBloc.selectOrganization(idx);
+
+      showMessage(
+          Lang.of(ctx).get("Using: ") +
+              identitiesBloc.current[0].organizations[idx].name,
+          global: true);
       Navigator.of(context).pop();
     }
   }
