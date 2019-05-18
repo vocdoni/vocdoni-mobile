@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'dart:async';
 import 'util/singletons.dart';
 import 'lang/index.dart';
 
@@ -16,6 +17,11 @@ void main() async {
   await appStateBloc.restore();
   await identitiesBloc.restore();
   await electionsBloc.restore();
+
+  // POST RENDER TRIGGERS
+  Timer(Duration(seconds: 5), () async {
+    await appStateBloc.loadBootNodes();
+  });
 
   // DETERMINE THE FIRST SCREEN
   Widget home;
@@ -38,7 +44,7 @@ void main() async {
     home: home,
     routes: {
       // NO IDENTITIES YET
-      "/identityWelcome":(context) => IdentityWelcome(),
+      "/identityWelcome": (context) => IdentityWelcome(),
       "/welcome": (context) => WelcomeScreen(),
       "/welcome/identity": (context) => WelcomeIdentityScreen(),
       "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
@@ -51,7 +57,4 @@ void main() async {
       primarySwatch: Colors.blue,
     ),
   ));
-
-  // POST RENDER TRIGGERS
-  await appStateBloc.loadBootNodes();
 }
