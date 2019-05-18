@@ -49,4 +49,7 @@ void main() async {
       primarySwatch: Colors.blue,
     ),
   ));
+
+  // POST RENDER TRIGGERS
+  await appStateBloc.loadBootNodes();
 }

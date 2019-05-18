@@ -1,4 +1,10 @@
-import '../util/singletons.dart';
+import 'package:http/http.dart' as http;
+import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/constants/urls.dart' show bootnodesUrl;
+
+Future<String> getBootNodes() {
+  return http.read(bootnodesUrl);
+}
 
 Future<String> generateMnemonic() async {
   String mnemonic = await webRuntime.call("generateMnemonic()");
