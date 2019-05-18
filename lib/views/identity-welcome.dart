@@ -59,10 +59,11 @@ class _IdentityWelcome extends State {
       });
 
       final mnemonic = await generateMnemonic();
+      final publicKey = await mnemonicToPublicKey(mnemonic);
       final address = await mnemonicToAddress(mnemonic);
 
       identitiesBloc.create(
-          mnemonic: mnemonic, publicKey: "", address: address, alias: alias);
+          mnemonic: mnemonic, publicKey: publicKey, address: address, alias: alias);
 
       int currentIndex = identitiesBloc.current.length;
       appStateBloc.selectIdentity(currentIndex);
@@ -73,7 +74,7 @@ class _IdentityWelcome extends State {
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
 
-      showErrorMessage(text, context);
+      showErrorMessage(text, context: context);
     }
   }
 
