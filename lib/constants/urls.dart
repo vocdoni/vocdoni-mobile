@@ -1,1 +1,1 @@
-final String bootnodeServer = "https://bootnodes.github.io/gateways.json";
+final String bootnodesUrl = "https://bootnodes.github.io/gateways.json";
