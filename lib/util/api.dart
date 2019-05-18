@@ -23,19 +23,26 @@ Future<String> mnemonicToPublicKey(String mnemonic) async {
 
 Future<Organization> fetchOrganizationInfo(String resolverAddress,
     String entityId, String networkId, List<String> entryPoints) async {
-  // TODO: TEMP: USE A REAL $providerUrl
-  final providerUrl = "http://node.testnet.vocdoni.io:8545";
+  for (BootNode node in appStateBloc.current.bootnodes) {
+    final providerUri = node.ethereumUri;
+    // Attempt for every node
+    try {
+      final Map<String, dynamic> result = await webRuntime.call('''
+        fetchEntity("$resolverAddress", "$entityId", "$providerUri")
+      ''');
 
-  final Map<String, dynamic> result = await webRuntime.call('''
-    fetchEntity("$resolverAddress", "$entityId", "$providerUrl")
-  ''');
+      final org = Organization.fromJson(result);
 
-  final org = Organization.fromJson(result);
+      org.resolverAddress = resolverAddress;
+      org.entityId = entityId;
+      org.networkId = networkId;
+      org.entryPoints = entryPoints;
 
-  org.resolverAddress = resolverAddress;
-  org.entityId = entityId;
-  org.networkId = networkId;
-  org.entryPoints = entryPoints;
-
-  return org;
+      return org;
+    } catch (err) {
+      print(err);
+      continue;
+    }
+  }
+  return null;
 }
