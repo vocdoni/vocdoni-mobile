@@ -1,14 +1,19 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
-import '../lang/index.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 class IdentityDetails extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
-        bottomNavigationBar: BottomNavigation()
+      bottomNavigationBar: BottomNavigation(),
+      body: ListView(
+        children: <Widget>[
+          ListItem(text:"Back up identity", onTap: (){debugPrint("BACK");},),
+          ListItem(text:"Log out"),
+          ListItem(text:"Test"),
+        ],
+      ),
     );
   }
 
