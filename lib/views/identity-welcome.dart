@@ -64,6 +64,9 @@ class _IdentityWelcome extends State {
       identitiesBloc.create(
           mnemonic: mnemonic, publicKey: "", address: address, alias: alias);
 
+      int currentIndex = identitiesBloc.current.length;
+      appStateBloc.selectIdentity(currentIndex);
+
       done(context);
 
     } catch (err) {
