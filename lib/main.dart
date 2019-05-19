@@ -57,7 +57,7 @@ void main() async {
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen(),
       "/organizations": (context) => Organizations(),
-      "/identityDetails": (context) => IdentityDetails(),
+      "/identity/details": (context) => IdentityDetails(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,

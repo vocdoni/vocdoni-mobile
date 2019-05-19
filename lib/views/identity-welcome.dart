@@ -23,37 +23,36 @@ class _IdentityWelcome extends State {
         child: Container(
           constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
           color: Color(0x00ff0000),
-          child:generating
-            ? Text("Generating sovereign identity...", style: TextStyle(fontSize: 18))
-            : buildWelcome(context),
+          child: generating
+              ? Text("Generating sovereign identity...",
+                  style: TextStyle(fontSize: 18))
+              : buildWelcome(context),
         ),
       ),
     ));
   }
 
-  buildWelcome(BuildContext context){
+  buildWelcome(BuildContext context) {
     return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                  child: Text("Welcome!",
-                      style: new TextStyle(
-                          fontSize: 30, color: Color(0xff888888)))),
-              SizedBox(height: 100),
-              Center(
-                child: TextField(
-                  style: TextStyle(fontSize: 20),
-                  decoration: InputDecoration(hintText: "What's your name?"),
-                  onSubmitted: (alias) => {createIdentity(context, alias)},
-                ),
-              ),
-            ],
-          );
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Center(
+            child: Text("Welcome!",
+                style: new TextStyle(fontSize: 30, color: Color(0xff888888)))),
+        SizedBox(height: 100),
+        Center(
+          child: TextField(
+            style: TextStyle(fontSize: 20),
+            decoration: InputDecoration(hintText: "What's your name?"),
+            onSubmitted: (alias) => createIdentity(context, alias),
+          ),
+        ),
+      ],
+    );
   }
 
   createIdentity(BuildContext context, String alias) async {
     try {
-      
       setState(() {
         generating = true;
       });
@@ -63,13 +62,15 @@ class _IdentityWelcome extends State {
       final address = await mnemonicToAddress(mnemonic);
 
       identitiesBloc.create(
-          mnemonic: mnemonic, publicKey: publicKey, address: address, alias: alias);
+          mnemonic: mnemonic,
+          publicKey: publicKey,
+          address: address,
+          alias: alias);
 
       int currentIndex = identitiesBloc.current.length;
       appStateBloc.selectIdentity(currentIndex);
 
       done(context);
-
     } catch (err) {
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
@@ -79,7 +80,7 @@ class _IdentityWelcome extends State {
   }
 
   done(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return IdentityDetails();
     }));
   }
