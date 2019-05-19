@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/widgets/listItem.dart';
 import '../util/singletons.dart';
 import '../constants/colors.dart';
 import '../lang/index.dart';
@@ -19,33 +20,18 @@ class SelectIdentityModal extends StatelessWidget {
 
   Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
-    final identityRows = ((identities ?? []).asMap().keys.map((idx) => ListTile(
-              leading: Icon(
-                Icons.person,
-                size: 40,
-              ),
-              title: Text(
-                identities[idx].alias,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.black26),
-              ),
-              subtitle: Text(
-                identities[idx].address,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              onTap: () => selected(ctx, idx),
-            )))
-        .toList();
-
     return Scaffold(
         appBar: AppBar(
-          title: Text("Vocdoni"),
           backgroundColor: mainBackgroundColor,
         ),
-        body: ListView(padding: EdgeInsets.zero, children: identityRows));
+        body: ListView.builder(
+            itemCount: identities.length,
+            itemBuilder: (BuildContext ctxt, int idx) {
+              return ListItem(
+                text: identities[idx].alias,
+                onTap: () => selected(ctx, idx),
+              );
+            }));
   }
 
   selected(BuildContext ctx, int idx) {
