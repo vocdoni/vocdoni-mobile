@@ -210,11 +210,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   currentOrg != null
                       ? Column(children: [
                           Text(currentOrg.name),
-                          Text(
-                              currentOrg.description[currentOrg.languages[0]] ??
-                                  "-"),
-                          Text(currentOrg.languages.join(", ")),
-                          Text(currentOrg.avatar),
+                          //Text(currentOrg.description[currentOrg.languages[0]] ??"-"),
+                          //Text(currentOrg.languages.join(", ")),
+                          //Text(currentOrg.avatar),
                         ])
                       : Text("NO ORGS YET")
                 ]),
