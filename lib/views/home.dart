@@ -4,7 +4,7 @@ import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
-import 'package:vocdoni/views/news-feed-tab.dart';
+import 'package:vocdoni/views/votes-feed-tab.dart';
 import 'package:vocdoni/views/organizations-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 
@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     try {
-      // Handle the initial link
+      // Handle the app launch link
       getInitialUri()
           .then((initialUri) => handleLink(initialUri))
           .catchError((err) => handleIncomingLinkError(err));
@@ -44,6 +44,20 @@ class _HomeScreenState extends State<HomeScreen> {
           text: Lang.of(context)
               .get("The link you followed appears to be invalid"),
           context: context);
+    }
+
+    // Check if there are no organizations => show identity
+    if (identitiesBloc.current == null || identitiesBloc.current == null) {
+      selectedTab = 2;
+    } else if (appStateBloc != null &&
+        appStateBloc.current != null &&
+        identitiesBloc
+                .current[appStateBloc.current.selectedIdentity].organizations !=
+            null &&
+        identitiesBloc.current[appStateBloc.current.selectedIdentity]
+                .organizations.length ==
+            0) {
+      selectedTab = 2;
     }
 
     super.initState();
@@ -108,40 +122,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
   buildBody(BuildContext ctx, AppState appState, List<Identity> identities) {
     Widget body;
-    Identity currentIdentity;
-    Organization currentOrganization;
-    if (appState != null && appState.selectedIdentity >= 0) {
-      currentIdentity = identities[appState.selectedIdentity];
-      if (currentIdentity != null &&
-          appState.selectedOrganization >= 0 &&
-          currentIdentity.organizations.length > 0) {
-        currentOrganization =
-            currentIdentity.organizations[appState.selectedOrganization];
-      }
-    }
+    // Identity currentIdentity;
+    // Organization currentOrganization;
+    // if (appState != null && appState.selectedIdentity >= 0) {
+    //   currentIdentity = identities[appState.selectedIdentity];
+    //   if (currentIdentity != null &&
+    //       appState.selectedOrganization >= 0 &&
+    //       currentIdentity.organizations.length > 0) {
+    //     currentOrganization =
+    //         currentIdentity.organizations[appState.selectedOrganization];
+    //   }
+    // }
 
     // RENDER THE CURRENT TAB BODY
     switch (selectedTab) {
+      // VOTES FEED
       case 0:
-        body = StreamBuilder(
-            stream: newsFeedsBloc.stream,
-            builder: (BuildContext ctx,
-                AsyncSnapshot<Map<String, Map<String, NewsFeed>>> newsFeed) {
-              NewsFeed feed;
-              if (currentOrganization != null && newsFeed.data != null)
-                feed = newsFeed.data[currentOrganization.entityId]["en"];
-              return NewsFeedTab(
-                newsFeed: feed,
-                organization: currentOrganization,
-              );
-            });
+        body = VotesFeedTab(votes: []);
         break;
+      // SUBSCRIBED ORGANIZATIONS
       case 1:
         body = OrganizationsTab(
           appState: appState,
           identities: identities,
         );
         break;
+      // IDENTITY INFO
       case 2:
         body = IdentityTab(appState: appState, identities: identities);
         break;

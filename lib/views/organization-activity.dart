@@ -3,6 +3,7 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/views/feed-page.dart';
 import 'package:vocdoni/widgets/feed-item-card.dart';
+import 'package:vocdoni/widgets/toast.dart';
 
 class OrganizationActivity extends StatelessWidget {
   final Organization organization;
@@ -26,18 +27,20 @@ class OrganizationActivity extends StatelessWidget {
     final Organization organization = ModalRoute.of(context).settings.arguments;
     if (organization == null) return buildEmptyOrganization(context);
 
-    return ListView.builder(
-      itemCount: 3, //organization.newsFeed.length,
-      itemBuilder: (BuildContext context, int index) {
-        // TODO: USE FETCHED DATA
-        
-        FeedItem feedItem = makeFakeFeed();
-        return FeedItemCard(
-          organization: organization,
-          feedItem: feedItem,
-          onTap: () => Navigator.of(context).pop(),
-        );
-      },
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: 3, //organization.newsFeed.length,
+        itemBuilder: (BuildContext context, int index) {
+          // TODO: USE FETCHED DATA
+
+          FeedItem feedItem = makeFakeFeed();
+          return FeedItemCard(
+            organization: organization,
+            feedItem: feedItem,
+            onTap: () => onTapItem(context, feedItem),
+          );
+        },
+      ),
     );
   }
 
@@ -46,5 +49,10 @@ class OrganizationActivity extends StatelessWidget {
     return Center(
       child: Text("(No organization)"),
     );
+  }
+
+  onTapItem(BuildContext ctx, FeedItem item) {
+    // Navigator.of(context).pop()
+    showMessage("Coming soon...", context: ctx);
   }
 }

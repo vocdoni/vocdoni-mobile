@@ -3,6 +3,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
+import 'package:vocdoni/widgets/toast.dart';
 
 class IdentityTab extends StatelessWidget {
   final AppState appState;
@@ -28,9 +29,7 @@ class IdentityTab extends StatelessWidget {
         Section(text: "Your identity"),
         ListItem(
           text: "Back up identity",
-          onTap: () {
-            debugPrint("BACK");
-          },
+          onTap: () => showMessage("Coming soon...", global: true),
         ),
         ListItem(
             text: "Log out",

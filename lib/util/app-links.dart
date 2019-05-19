@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/modals/confirm-entity-subscription.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -71,10 +70,8 @@ Future<String> handleEntitySubscription(
     hideLoading(global: true);
 
     // Show approval screen
-    final accept = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ConfirmEntitySubscriptionModal(org)));
+    final accept = await Navigator.pushNamed(context, "/organizations/info",
+        arguments: org);
 
     if (accept != true) {
       return null;

@@ -5,10 +5,6 @@ import '../constants/colors.dart';
 import '../lang/index.dart';
 
 class ConfirmEntitySubscriptionModal extends StatelessWidget {
-  @required
-  final Organization organization;
-  ConfirmEntitySubscriptionModal(this.organization);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,7 +65,7 @@ class ConfirmEntitySubscriptionModal extends StatelessWidget {
                     color: Colors.blue[100],
                     child: Padding(
                         child: Text("Subscribe"), padding: EdgeInsets.all(24)),
-                    onPressed: () => promptAction(context),
+                    onPressed: () => confirmSubscribe(context),
                   ),
                 )
               ],
@@ -80,7 +76,7 @@ class ConfirmEntitySubscriptionModal extends StatelessWidget {
     );
   }
 
-  promptAction(BuildContext ctx) async {
+  confirmSubscribe(BuildContext ctx) async {
     final accepts = await showPrompt(
         context: ctx,
         title: Lang.of(ctx).get("Organization"),
