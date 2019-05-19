@@ -66,6 +66,7 @@ Future<String> handleEntitySubscription(
     // Fetch organization data
     Organization org = await fetchOrganizationInfo(
         resolverAddress, entityId, networkId, decodedEntryPoints);
+    if (org == null) throw ("Could not fetch the details");
 
     hideLoading(global: true);
 
