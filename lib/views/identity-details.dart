@@ -19,8 +19,17 @@ class IdentityDetails extends StatelessWidget {
                   body: ListView(
                     children: <Widget>[
                       PageTitle(
-                        title:  identities.data[appState.data.selectedIdentity].alias,
-                        subtitle: identities.data[appState.data.selectedIdentity].address,
+                        title:
+                            appState.data != null && identities.data.length > 0
+                                ? identities
+                                    .data[appState.data.selectedIdentity].alias
+                                : "",
+                        subtitle:
+                            appState.data != null && identities.data.length > 0
+                                ? identities
+                                    .data[appState.data.selectedIdentity]
+                                    .address
+                                : "",
                       ),
                       Section(text: "Your identity"),
                       ListItem(

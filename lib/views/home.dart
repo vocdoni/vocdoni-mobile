@@ -177,6 +177,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   homeBody(BuildContext context, AppState appState, List<Identity> identities) {
+    Organization currentOrg;
+    if (identities != null &&
+        identities.length > 0 &&
+        identities[appState.selectedIdentity].organizations?.length > 0) {
+      currentOrg = identities[appState.selectedIdentity]
+          .organizations[appState.selectedOrganization];
+    }
     return Container(
       child: Column(
         children: <Widget>[
@@ -197,7 +204,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? Text(identities[appState.selectedIdentity].alias)
                       : Text(""),
                   SizedBox(height: 20),
-                  Text("CURRENT ORG: ${appState?.selectedOrganization}"),
+                  Text("CURRENT ORG:"),
+                  currentOrg != null
+                      ? Column(children: [
+                          Text(currentOrg.name),
+                          Text(
+                              currentOrg.description[currentOrg.languages[0]] ??
+                                  "-"),
+                          Text(currentOrg.languages.join(", ")),
+                          Text(currentOrg.avatar),
+                        ])
+                      : Text("NO ORGS YET")
                 ]),
               ),
             ),
@@ -208,11 +225,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FlatButton(
                   color: Colors.blue[100],
                   child: Padding(
-                      child: Text("LAUNCH ORG ACTION"),
+                      child:
+                          currentOrg != null && currentOrg.actions?.length > 0
+                              ? Text(currentOrg.actions[0]["name"]
+                                  [currentOrg.languages[0]])
+                              : Text("(NO ACTIONS)"),
                       padding: EdgeInsets.all(24)),
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => WebAction()));
+                    if (currentOrg == null ||
+                        currentOrg.actions?.length < 1 &&
+                            currentOrg.actions[0]["url"] == null) return;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebAction(
+                                  url: currentOrg.actions[0]["url"],
+                                )));
                   },
                 ),
               )
