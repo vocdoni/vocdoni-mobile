@@ -15,3 +15,4 @@ final Color lightGuideColor = Color(0x66888888);
 final Color titleColor = Color(0xFF000000);
 
 final double pagePadding = 24;
+final double cardSpacing = 16;
