@@ -3,10 +3,11 @@ import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/modals/select-identity.dart';
+import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
@@ -97,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   drawer: homeDrawer(ctx, appState.data, identities.data),
                   body: homeBody(ctx, appState.data, identities.data),
+                  bottomNavigationBar: BottomNavigation(),
                 );
               });
         });
@@ -208,11 +210,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   currentOrg != null
                       ? Column(children: [
                           Text(currentOrg.name),
-                          Text(
-                              currentOrg.description[currentOrg.languages[0]] ??
-                                  "-"),
-                          Text(currentOrg.languages.join(", ")),
-                          Text(currentOrg.avatar),
+                          //Text(currentOrg.description[currentOrg.languages[0]] ??"-"),
+                          //Text(currentOrg.languages.join(", ")),
+                          //Text(currentOrg.avatar),
                         ])
                       : Text("NO ORGS YET")
                 ]),
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pop(ctx);
     final result = await Navigator.push(
       ctx,
-      MaterialPageRoute(builder: (ctx) => SelectIdentityModal()),
+      MaterialPageRoute(builder: (ctx) => IdentitySelect()),
     );
 
     if (result is int) {

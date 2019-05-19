@@ -28,8 +28,10 @@ class BottomNavigation extends StatelessWidget {
   }
 
   onNavigationTap(BuildContext context, int index) {
-    if (index == 0) Navigator.popAndPushNamed(context, "/home");
-    if (index == 1) Navigator.popAndPushNamed(context, "/organizations");
-    if (index == 2) Navigator.popAndPushNamed(context, "/identityDetails");
+    Navigator.pop(context);
+
+    if (index == 0) Navigator.pushReplacementNamed(context, "/home");
+    if (index == 1) Navigator.pushReplacementNamed(context, "/organizations");
+    if (index == 2) Navigator.pushReplacementNamed(context, "/identityDetails");
   }
 }
