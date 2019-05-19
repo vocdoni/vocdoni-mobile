@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/views/organizations.dart';
 
 import 'dart:async';
 import 'util/singletons.dart';
@@ -51,7 +52,8 @@ void main() async {
       "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
 
       // IDENTITY/IES AVAILABLE
-      "/home": (context) => HomeScreen()
+      "/home": (context) => HomeScreen(),
+      "/organizations": (context) => Organizations(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
