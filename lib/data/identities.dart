@@ -2,8 +2,10 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import "dart:convert";
+import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/util/api.dart';
 
 ///
 /// STORAGE STRUCTURE
@@ -195,7 +197,7 @@ class Organization {
   final String votingProcessContractAddress;
   final List<String> activeProcessIds;
   final List<String> endedProcessIds;
-  final Map<String, dynamic> newsFeed; // language dependent
+  final Map<String, String> newsFeed; // language dependent
   final String avatar;
   Map<String, dynamic> gatewayUpdate = {}; // unused
   List gatewayBootNodes = []; // unused by now
@@ -231,7 +233,7 @@ class Organization {
         metadataOrigin = json['meta'] ?? "",
         votingProcessContractAddress = json['voting-contract'],
         gatewayUpdate = json['gateway-update'] ?? {},
-        newsFeed = json['news-feed'] ?? {},
+        newsFeed = Map<String, String>.from(json['news-feed'] ?? {}),
         activeProcessIds = ((json['process-ids'] ?? {})['active'] ?? [])
             .cast<String>()
             .toList(),
