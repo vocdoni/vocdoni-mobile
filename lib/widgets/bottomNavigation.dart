@@ -32,6 +32,6 @@ class BottomNavigation extends StatelessWidget {
 
     if (index == 0) Navigator.pushReplacementNamed(context, "/home");
     if (index == 1) Navigator.pushReplacementNamed(context, "/organizations");
-    if (index == 2) Navigator.pushReplacementNamed(context, "/identityDetails");
+    if (index == 2) Navigator.pushReplacementNamed(context, "/identity/details");
   }
 }

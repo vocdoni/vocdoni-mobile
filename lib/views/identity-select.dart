@@ -47,7 +47,7 @@ class IdentitySelect extends StatelessWidget {
   selected(BuildContext ctx, int idx) {
     appStateBloc.selectIdentity(idx);
     Navigator.pop(ctx);
-    Navigator.pushReplacementNamed(ctx, "/identityDetails");
+    Navigator.pushReplacementNamed(ctx, "/identity/details");
   }
 
   createNew(BuildContext ctx) {
