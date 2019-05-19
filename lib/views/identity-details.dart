@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
@@ -38,8 +39,11 @@ class IdentityDetails extends StatelessWidget {
                           debugPrint("BACK");
                         },
                       ),
-                      ListItem(text: "Log out"),
-                      ListItem(text: "Test"),
+                      ListItem(
+                          text: "Log out",
+                          onTap: () {
+                            selectIdentity(ctx);
+                          }),
                     ],
                   ),
                 );
@@ -47,9 +51,8 @@ class IdentityDetails extends StatelessWidget {
         });
   }
 
-  onNavigationTap(BuildContext context, int index) {
-    if (index == 0) Navigator.popAndPushNamed(context, "/home");
-    if (index == 1) Navigator.popAndPushNamed(context, "/organizations");
-    if (index == 2) Navigator.popAndPushNamed(context, "/identityDetails");
+  selectIdentity(BuildContext ctx) async {
+    Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => IdentitySelect()),
+    );
   }
 }

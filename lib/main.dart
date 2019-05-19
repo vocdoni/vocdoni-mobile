@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/views/identity-details.dart';
+import 'package:vocdoni/views/identity-select.dart';
+import 'package:vocdoni/views/organizations.dart';
 
 import 'dart:async';
 import 'util/singletons.dart';
@@ -26,7 +29,7 @@ void main() async {
   // DETERMINE THE FIRST SCREEN
   Widget home;
   if (identitiesBloc?.current?.length > 0) {
-    home = HomeScreen();
+    home = IdentitySelect();
   } else {
     home = IdentityWelcome();
   }
@@ -51,7 +54,9 @@ void main() async {
       "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
 
       // IDENTITY/IES AVAILABLE
-      "/home": (context) => HomeScreen()
+      "/home": (context) => HomeScreen(),
+      "/organizations": (context) => Organizations(),
+      "/identityDetails": (context) => IdentityDetails(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
