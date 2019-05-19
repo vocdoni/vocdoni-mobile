@@ -1,10 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/bottomNavigation.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
-import 'package:vocdoni/widgets/section.dart';
 
 class OrganizationActivity extends StatelessWidget {
   final Organization organization;
@@ -16,7 +12,7 @@ class OrganizationActivity extends StatelessWidget {
   makeFakeFeed() {
     return FeedItem(
         author: "John Stark",
-        title: "The Bells",
+        title: "The BellsThe BellsThe BellsThe Bells",
         id: "one",
         image:
             "https://vignette.wikia.nocookie.net/gameofthrones/images/5/5e/S8_E6_Daenerys.jpg/revision/latest?cb=20190515191839",

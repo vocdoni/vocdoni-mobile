@@ -5,12 +5,12 @@ class CardTitle extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  CardTitle({String this.title, String this.subtitle});
+  CardTitle({this.title, this.subtitle});
 
   @override
   Widget build(context) {
     return Container(
-        padding: EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
