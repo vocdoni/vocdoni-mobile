@@ -23,31 +23,28 @@ class OrganizationActivity extends StatelessWidget {
 
   @override
   Widget build(context) {
-    Map<String, dynamic> args = ModalRoute.of(context).settings.arguments;
+    final Organization organization = ModalRoute.of(context).settings.arguments;
+    if (organization == null) return buildEmptyOrganization(context);
 
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: 3, //organization.newsFeed.length,
-        itemBuilder: (BuildContext context, int index) {
-          FeedItem feedItem = makeFakeFeed();
-          return FeedItemCard(
-            organization: organization,
-            feedItem: feedItem,
-            // onTap: () => gotoFeedPage(context, organization, feedItem),
-            onTap: () => Navigator.of(context).pop(),
-          );
-        },
-      ),
+    return ListView.builder(
+      itemCount: 3, //organization.newsFeed.length,
+      itemBuilder: (BuildContext context, int index) {
+        // TODO: USE FETCHED DATA
+        
+        FeedItem feedItem = makeFakeFeed();
+        return FeedItemCard(
+          organization: organization,
+          feedItem: feedItem,
+          onTap: () => Navigator.of(context).pop(),
+        );
+      },
     );
   }
 
-  // gotoFeedPage(BuildContext ctx, Organization organization, FeedItem feedItem) {
-  //   Navigator.push(
-  //       ctx,
-  //       MaterialPageRoute(
-  //           builder: (BuildContext context) => FeedPage(
-  //                 organization: organization,
-  //                 feedItem: feedItem,
-  //               )));
-  // }
+  Widget buildEmptyOrganization(BuildContext ctx) {
+    // TODO: UI
+    return Center(
+      child: Text("(No organization)"),
+    );
+  }
 }

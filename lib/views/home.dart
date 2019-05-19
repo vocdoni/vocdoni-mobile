@@ -5,7 +5,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
 import 'package:vocdoni/views/news-feed-tab.dart';
-import 'package:vocdoni/views/organization-tab.dart';
+import 'package:vocdoni/views/organizations-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 
 import 'package:vocdoni/widgets/alerts.dart';
@@ -137,8 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
             });
         break;
       case 1:
-        body = OrganizationTab(
-          organization: currentOrganization,
+        body = OrganizationsTab(
+          appState: appState,
+          identities: identities,
         );
         break;
       case 2:

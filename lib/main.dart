@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/views/organization-activity.dart';
+import 'package:vocdoni/views/organization-info.dart';
 // import 'package:vocdoni/views/identity-details.dart';
 // import 'package:vocdoni/views/organizations.dart';
 
@@ -58,6 +59,7 @@ void main() async {
 
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen(),
+      "/organizations/info": (context) => OrganizationInfo(),
       "/organizations/activity": (context) => OrganizationActivity()
       // "/organizations": (context) => Organizations(),
       // "/identity/details": (context) => IdentityDetails(),
