@@ -28,8 +28,10 @@ class Organizations extends StatelessWidget {
           return StreamBuilder(
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
+                int selectedIdentity = appState.data.selectedIdentity;
+
                 List<Organization> orgs = identities
-                    .data[appState.data.selectedIdentity].organizations;
+                    .data[selectedIdentity].organizations;
                 return Scaffold(
                     bottomNavigationBar: BottomNavigation(),
                     body: new ListView.builder(
