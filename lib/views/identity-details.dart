@@ -39,7 +39,6 @@ class IdentityDetails extends StatelessWidget {
                         },
                       ),
                       ListItem(text: "Log out"),
-                      ListItem(text: "Test"),
                     ],
                   ),
                 );
