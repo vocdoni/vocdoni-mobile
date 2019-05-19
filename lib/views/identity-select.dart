@@ -4,7 +4,7 @@ import '../util/singletons.dart';
 import '../constants/colors.dart';
 import '../lang/index.dart';
 
-class SelectIdentityModal extends StatelessWidget {
+class IdentitySelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -21,9 +21,7 @@ class SelectIdentityModal extends StatelessWidget {
   Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: mainBackgroundColor,
-        ),
+        
         body: ListView.builder(
             itemCount: identities.length,
             itemBuilder: (BuildContext ctxt, int idx) {
@@ -35,6 +33,8 @@ class SelectIdentityModal extends StatelessWidget {
   }
 
   selected(BuildContext ctx, int idx) {
-    Navigator.pop(ctx, idx);
+    appStateBloc.selectIdentity(idx);
+    Navigator.pop(ctx);
+    Navigator.pushReplacementNamed(ctx, "/identityDetails");
   }
 }

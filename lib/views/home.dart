@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/modals/select-identity.dart';
+import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pop(ctx);
     final result = await Navigator.push(
       ctx,
-      MaterialPageRoute(builder: (ctx) => SelectIdentityModal()),
+      MaterialPageRoute(builder: (ctx) => IdentitySelect()),
     );
 
     if (result is int) {
