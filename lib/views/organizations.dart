@@ -30,14 +30,14 @@ class Organizations extends StatelessWidget {
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 int selectedIdentity = appState.data.selectedIdentity;
 
-                List<Organization> orgs = identities
-                    .data[selectedIdentity].organizations;
+                List<Organization> orgs =
+                    identities.data[selectedIdentity].organizations;
                 return Scaffold(
                     bottomNavigationBar: BottomNavigation(),
                     body: new ListView.builder(
                         itemCount: orgs.length,
                         itemBuilder: (BuildContext ctxt, int index) {
-                          Organization org  = orgs[index];
+                          Organization org = orgs[index];
                           return ListItem(
                               text: org.name,
                               onTap: () {
@@ -45,16 +45,12 @@ class Organizations extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                         builder: (BuildContext context) =>
-                                            OrganiztionDetails(organization: org,)));
+                                            OrganiztionDetails(
+                                              organization: org,
+                                            )));
                               });
                         }));
               });
         });
-  }
-
-  onNavigationTap(BuildContext context, int index) {
-    if (index == 0) Navigator.popAndPushNamed(context, "/home");
-    if (index == 1) Navigator.popAndPushNamed(context, "/organizations");
-    if (index == 2) Navigator.popAndPushNamed(context, "/identityDetails");
   }
 }
