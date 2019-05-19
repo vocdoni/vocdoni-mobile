@@ -20,7 +20,7 @@ class FeedItemCard extends StatelessWidget {
                 pagePadding, cardSpacing, pagePadding, cardSpacing),
             child: Card(
                 child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                   Container(
                     height: 200,
