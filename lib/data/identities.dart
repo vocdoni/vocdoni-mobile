@@ -70,6 +70,10 @@ class IdentitiesBloc {
     _state.add(identities);
   }
 
+  Future refreshSubscriptions() {
+    // TODO: refresh for the selected identity
+  }
+
   // Operations
 
   /// Registers a new identity with an empty list of organizations
@@ -194,8 +198,8 @@ class Organization {
   final Map<String, dynamic> newsFeed; // language dependent
   final String avatar;
   Map<String, dynamic> gatewayUpdate = {}; // unused
-  List<String> gatewayBootNodes = []; // unused by now
-  List<String> relays = []; // unused by now
+  List gatewayBootNodes = []; // unused by now
+  List relays = []; // unused by now
   List actions = []; // unused by now
 
   Organization(
@@ -235,9 +239,8 @@ class Organization {
             .cast<String>()
             .toList(),
         avatar = json['avatar'],
-        gatewayBootNodes =
-            (json['gateway-boot-nodes'] ?? []).cast<String>().toList(),
-        relays = (json['relays'] ?? []).cast<String>().toList(),
+        gatewayBootNodes = json['gateway-boot-nodes'] ?? [],
+        relays = json['relays'] ?? [],
         actions = json['actions'] ?? [];
 
   Map<String, dynamic> toJson() {
