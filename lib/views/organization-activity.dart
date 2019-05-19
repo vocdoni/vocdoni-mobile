@@ -1,14 +1,15 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/feed-page.dart';
-import 'package:vocdoni/widgets/feedItemCard.dart';
+// import 'package:vocdoni/views/feed-page.dart';
+import 'package:vocdoni/widgets/feed-item-card.dart';
 
 class OrganizationActivity extends StatelessWidget {
   final Organization organization;
 
   OrganizationActivity({this.organization});
 
+  // TODO:  Fetch the news feed on demand
   makeFakeFeed() {
     return FeedItem(
         author: "John Stark",
@@ -22,27 +23,31 @@ class OrganizationActivity extends StatelessWidget {
 
   @override
   Widget build(context) {
+    Map<String, dynamic> args = ModalRoute.of(context).settings.arguments;
+
     return Scaffold(
-        body: ListView.builder(
-      itemCount: 3, //organization.newsFeed.length,
-      itemBuilder: (BuildContext context, int index) {
-        FeedItem feedItem = makeFakeFeed();
-        return FeedItemCard(
-          organization: organization,
-          feedItem: feedItem,
-          onTap: () => gotoFeedPage(context, organization, feedItem),
-        );
-      },
-    ));
+      body: ListView.builder(
+        itemCount: 3, //organization.newsFeed.length,
+        itemBuilder: (BuildContext context, int index) {
+          FeedItem feedItem = makeFakeFeed();
+          return FeedItemCard(
+            organization: organization,
+            feedItem: feedItem,
+            // onTap: () => gotoFeedPage(context, organization, feedItem),
+            onTap: () => Navigator.of(context).pop(),
+          );
+        },
+      ),
+    );
   }
 
-  gotoFeedPage(BuildContext ctx, Organization organization, FeedItem feedItem) {
-    Navigator.push(
-        ctx,
-        MaterialPageRoute(
-            builder: (BuildContext context) => FeedPage(
-                  organization: organization,
-                  feedItem: feedItem,
-                )));
-  }
+  // gotoFeedPage(BuildContext ctx, Organization organization, FeedItem feedItem) {
+  //   Navigator.push(
+  //       ctx,
+  //       MaterialPageRoute(
+  //           builder: (BuildContext context) => FeedPage(
+  //                 organization: organization,
+  //                 feedItem: feedItem,
+  //               )));
+  // }
 }

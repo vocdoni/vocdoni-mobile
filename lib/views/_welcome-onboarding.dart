@@ -7,12 +7,12 @@ import 'package:vocdoni/widgets/pager/page-reveal.dart';
 import 'package:vocdoni/widgets/pager/pager-indicator.dart';
 import 'package:vocdoni/widgets/pager/pages.dart';
 
-class WelcomeScreen extends StatefulWidget {
+class WelcomeOnboardingScreen extends StatefulWidget {
   @override
-  _WelcomeScreenState createState() => new _WelcomeScreenState();
+  _WelcomeOnboardingScreenState createState() => new _WelcomeOnboardingScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen>
+class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen>
     with TickerProviderStateMixin {
   StreamController<SlideUpdate> slideUpdateStream;
   AnimatedPageDragger animatedPageDragger;
@@ -22,7 +22,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   int nextPageIndex = 0;
   double slidePercent = 0.0;
 
-  _WelcomeScreenState() {
+  _WelcomeOnboardingScreenState() {
     slideUpdateStream = new StreamController<SlideUpdate>();
 
     slideUpdateStream.stream.listen((SlideUpdate event) {

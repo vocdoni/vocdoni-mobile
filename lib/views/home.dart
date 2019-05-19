@@ -1,15 +1,17 @@
 import 'dart:async';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/identity-select.dart';
-import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
+
+import 'package:vocdoni/views/news-feed-tab.dart';
+import 'package:vocdoni/views/organization-tab.dart';
+import 'package:vocdoni/views/identity-tab.dart';
+
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import '../lang/index.dart';
+import 'package:vocdoni/lang/index.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -17,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int selectedTab = 0;
+
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
   /////////////////////////////////////////////////////////////////////////////
@@ -92,194 +96,67 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 return Scaffold(
                   key: homePageScaffoldKey,
-                  appBar: AppBar(
-                    title: Text("Vocdoni"),
-                    backgroundColor: mainBackgroundColor,
+                  body: buildBody(ctx, appState.data, identities.data),
+                  bottomNavigationBar: BottomNavigation(
+                    onTabSelect: (index) => onTabSelect(index),
+                    selectedTab: selectedTab,
                   ),
-                  drawer: homeDrawer(ctx, appState.data, identities.data),
-                  body: homeBody(ctx, appState.data, identities.data),
-                  bottomNavigationBar: BottomNavigation(),
                 );
               });
         });
   }
 
-  homeDrawer(
-      BuildContext context, AppState appState, List<Identity> identities) {
-    String identAlias = "";
-    String identAddress = "";
-    List<ListTile> organizationTiles = [];
-    if (appState?.selectedIdentity is int) {
-      identAlias = identities[appState.selectedIdentity].alias;
-      identAddress = identities[appState.selectedIdentity].address;
-
-      if (identities[appState.selectedIdentity].organizations?.length > 0) {
-        final orgs = identities[appState.selectedIdentity].organizations;
-        organizationTiles = orgs.asMap().keys.map((idx) {
-          return ListTile(
-              leading: Icon(Icons.home),
-              title: Text(orgs[idx].name ?? ""),
-              onTap: () => selectOrganization(idx, context),
-              trailing: InkWell(
-                child: Icon(Icons.remove_circle_outline),
-                onTap: () => promptRemoveOrganization(idx),
-              ));
-        }).toList();
+  buildBody(BuildContext ctx, AppState appState, List<Identity> identities) {
+    Widget body;
+    Identity currentIdentity;
+    Organization currentOrganization;
+    if (appState != null && appState.selectedIdentity >= 0) {
+      currentIdentity = identities[appState.selectedIdentity];
+      if (currentIdentity != null &&
+          appState.selectedOrganization >= 0 &&
+          currentIdentity.organizations.length > 0) {
+        currentOrganization =
+            currentIdentity.organizations[appState.selectedOrganization];
       }
     }
 
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(identAlias,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      letterSpacing: 1,
-                    )),
-                Text(
-                  identAddress,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            decoration: BoxDecoration(
-              color: mainBackgroundColor,
-            ),
+    // RENDER THE CURRENT TAB BODY
+    switch (selectedTab) {
+      case 0:
+        body = StreamBuilder(
+            stream: newsFeedsBloc.stream,
+            builder: (BuildContext ctx,
+                AsyncSnapshot<Map<String, Map<String, NewsFeed>>> newsFeed) {
+              NewsFeed feed;
+              if (currentOrganization != null && newsFeed.data != null)
+                feed = newsFeed.data[currentOrganization.entityId]["en"];
+              return NewsFeedTab(
+                newsFeed: feed,
+                organization: currentOrganization,
+              );
+            });
+        break;
+      case 1:
+        body = OrganizationTab(
+          organization: currentOrganization,
+        );
+        break;
+      case 2:
+        body = IdentityTab(appState: appState, identities: identities);
+        break;
+      default:
+        body = Container(
+          child: Center(
+            child: Text("Vocdoni"),
           ),
-          (identities != null && identities.length > 1)
-              ? ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text('Switch Identity'),
-                  onTap: () => selectIdentity(context),
-                )
-              : Container(),
-          ...organizationTiles,
-          ListTile(
-            leading: Icon(Icons.exit_to_app),
-            title: Text('Logout'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, "/welcome");
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  homeBody(BuildContext context, AppState appState, List<Identity> identities) {
-    Organization currentOrg;
-    if (identities != null &&
-        identities.length > 0 &&
-        identities[appState.selectedIdentity].organizations?.length > 0) {
-      currentOrg = identities[appState.selectedIdentity]
-          .organizations[appState.selectedOrganization];
+        );
     }
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Row(children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(children: [
-                  Text("HOME SCREEN"),
-                  SizedBox(height: 20),
-                  Text("Available Identities:"),
-                  (identities == null)
-                      ? Text("(empty?)")
-                      : Text(identities.map((idt) => idt.alias).join(", ")),
-                  SizedBox(height: 20),
-                  Text("CURRENT IDENTITY:"),
-                  (appState?.selectedIdentity is int)
-                      ? Text(identities[appState.selectedIdentity].alias)
-                      : Text(""),
-                  SizedBox(height: 20),
-                  Text("CURRENT ORG:"),
-                  currentOrg != null
-                      ? Column(children: [
-                          Text(currentOrg.name),
-                          //Text(currentOrg.description[currentOrg.languages[0]] ??"-"),
-                          //Text(currentOrg.languages.join(", ")),
-                          //Text(currentOrg.avatar),
-                        ])
-                      : Text("NO ORGS YET")
-                ]),
-              ),
-            ),
-          ]),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: FlatButton(
-                  color: Colors.blue[100],
-                  child: Padding(
-                      child:
-                          currentOrg != null && currentOrg.actions?.length > 0
-                              ? Text(currentOrg.actions[0]["name"]
-                                  [currentOrg.languages[0]])
-                              : Text("(NO ACTIONS)"),
-                      padding: EdgeInsets.all(24)),
-                  onPressed: () {
-                    if (currentOrg == null ||
-                        currentOrg.actions?.length < 1 &&
-                            currentOrg.actions[0]["url"] == null) return;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebAction(
-                                  url: currentOrg.actions[0]["url"],
-                                )));
-                  },
-                ),
-              )
-            ],
-          )
-        ],
-      ),
-    );
+    return body;
   }
 
-  selectIdentity(BuildContext ctx) async {
-    Navigator.pop(ctx);
-    final result = await Navigator.push(
-      ctx,
-      MaterialPageRoute(builder: (ctx) => IdentitySelect()),
-    );
-
-    if (result is int) {
-      appStateBloc.selectIdentity(result);
-
-      showMessage(
-          Lang.of(ctx).get("Using: ") + identitiesBloc.current[result].alias,
-          global: true);
-    }
-  }
-
-  selectOrganization(int idx, BuildContext ctx) async {
-    if (idx is int) {
-      appStateBloc.selectOrganization(idx);
-
-      showMessage(
-          Lang.of(ctx).get("Using: ") +
-              identitiesBloc.current[0].organizations[idx].name,
-          global: true);
-      Navigator.of(context).pop();
-    }
-  }
-
-  promptRemoveOrganization(int idx) async {
-    // TODO:
+  onTabSelect(int idx) {
+    setState(() {
+      selectedTab = idx;
+    });
   }
 }

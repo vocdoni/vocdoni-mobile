@@ -1,10 +1,9 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/views/identity-welcome.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import '../util/singletons.dart';
 
-class IdentitySelect extends StatelessWidget {
+class IdentitySelectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -38,22 +37,19 @@ class IdentitySelect extends StatelessWidget {
     for (var i = 0; i < identities.length; i++) {
       list.add(ListItem(
         text: identities[i].alias,
-        onTap: () => selected(ctx, i),
+        onTap: () => onIdentitySelected(ctx, i),
       ));
     }
     return Column(children: list);
   }
 
-  selected(BuildContext ctx, int idx) {
+  onIdentitySelected(BuildContext ctx, int idx) {
     appStateBloc.selectIdentity(idx);
-    Navigator.pop(ctx);
-    Navigator.pushReplacementNamed(ctx, "/identity/details");
+    // Replace all routes with /home on top
+    Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
   }
 
   createNew(BuildContext ctx) {
-    Navigator.push(
-        ctx,
-        MaterialPageRoute(
-            builder: (BuildContext context) => IdentityWelcome()));
+    Navigator.pushNamed(ctx, "/identity/create");
   }
 }

@@ -83,7 +83,7 @@ class _WelcomeIdentityCreateScreenState
       });
 
       final String alias = "Ident ${identitiesBloc.current.length + 1}";
-      identitiesBloc.create(
+      await identitiesBloc.create(
           mnemonic: mnemonic,
           publicKey: publicKey,
           address: address,

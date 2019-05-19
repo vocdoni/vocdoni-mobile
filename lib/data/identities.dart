@@ -77,7 +77,7 @@ class IdentitiesBloc {
   // Operations
 
   /// Registers a new identity with an empty list of organizations
-  create(
+  Future create(
       {String mnemonic, String publicKey, String address, String alias}) async {
     if (!(mnemonic is String))
       throw ("Invalid mnemonic");
@@ -270,30 +270,4 @@ class Organization {
       'actions': actions
     };
   }
-}
-
-class FeedItem {
-  final String id;
-  final String title;
-  final String contentHtml;
-  final String summary;
-  final String image;
-  final String bannerImage;
-  final String datePublished;
-  final String dateModified;
-  final String author;
-  final List<String> tags;
-  
-  FeedItem({
-    this.id,
-    this.title,
-    this.contentHtml,
-    this.summary,
-    this.image,
-    this.bannerImage,
-    this.datePublished,
-    this.dateModified,
-    this.author,
-    this.tags,
-  });
 }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:vocdoni/views/identity-details.dart';
 import 'package:vocdoni/views/identity-select.dart';
-import 'package:vocdoni/views/organizations.dart';
+import 'package:vocdoni/views/organization-activity.dart';
+// import 'package:vocdoni/views/identity-details.dart';
+// import 'package:vocdoni/views/organizations.dart';
 
 import 'dart:async';
 import 'util/singletons.dart';
 import 'lang/index.dart';
 
-import "views/welcome.dart";
-import "views/welcome-identity.dart";
-import "views/welcome-identity-create.dart";
-import "views/welcome-identity-recover.dart";
+// import "views/welcome-onboarding.dart";
+// import "views/welcome-identity.dart";
+// import "views/welcome-identity-create.dart";
+// import "views/welcome-identity-recover.dart";
 import "views/home.dart";
-import "views/identity-welcome.dart";
+import "views/identity-create.dart";
 
 void main() async {
   // RESTORE DATA
@@ -30,9 +31,9 @@ void main() async {
   // DETERMINE THE FIRST SCREEN
   Widget home;
   if (identitiesBloc?.current?.length > 0) {
-    home = IdentitySelect();
+    home = IdentitySelectScreen();
   } else {
-    home = IdentityWelcome();
+    home = IdentityCreateScreen();
   }
 
   // RUN THE APP
@@ -48,16 +49,18 @@ void main() async {
     home: home,
     routes: {
       // NO IDENTITIES YET
-      "/identityWelcome": (context) => IdentityWelcome(),
-      "/welcome": (context) => WelcomeScreen(),
-      "/welcome/identity": (context) => WelcomeIdentityScreen(),
-      "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
-      "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
+      "/identity/create": (context) => IdentityCreateScreen(),
+      "/identity/select": (context) => IdentitySelectScreen(),
+      // "/welcome": (context) => WelcomeOnboardingScreen(),  // ?
+      // "/welcome/identity": (context) => WelcomeIdentityScreen(),
+      // "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
+      // "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
 
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen(),
-      "/organizations": (context) => Organizations(),
-      "/identity/details": (context) => IdentityDetails(),
+      "/organizations/activity": (context) => OrganizationActivity()
+      // "/organizations": (context) => Organizations(),
+      // "/identity/details": (context) => IdentityDetails(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
