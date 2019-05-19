@@ -49,6 +49,6 @@ class OrganizationsTab extends StatelessWidget {
   }
 
   onTapOrganization(BuildContext ctx, Organization org) {
-    Navigator.pushNamed(ctx, "/organizations/info", arguments: org);
+    Navigator.pushNamed(ctx, "/organizations/activity", arguments: org);
   }
 }
