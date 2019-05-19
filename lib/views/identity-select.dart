@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/views/identity-welcome.dart';
 import 'package:vocdoni/widgets/listItem.dart';
+import 'package:vocdoni/widgets/section.dart';
 import '../util/singletons.dart';
-import '../constants/colors.dart';
-import '../lang/index.dart';
 
 class IdentitySelect extends StatelessWidget {
   @override
@@ -21,20 +21,37 @@ class IdentitySelect extends StatelessWidget {
   Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
     return Scaffold(
-        
-        body: ListView.builder(
-            itemCount: identities.length,
-            itemBuilder: (BuildContext ctxt, int idx) {
-              return ListItem(
-                text: identities[idx].alias,
-                onTap: () => selected(ctx, idx),
-              );
-            }));
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Section(text: "Select an identity"),
+            buildIdentities(ctx, identities),
+            ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
+          ],
+        ));
+  }
+
+  buildIdentities(BuildContext ctx, identities) {
+    List<Widget> list = new List<Widget>();
+    for (var i = 0; i < identities.length; i++) {
+      list.add(ListItem(
+        text: identities[i].alias,
+        onTap: () => selected(ctx, i),
+      ));
+    }
+    return Column(children: list);
   }
 
   selected(BuildContext ctx, int idx) {
     appStateBloc.selectIdentity(idx);
     Navigator.pop(ctx);
     Navigator.pushReplacementNamed(ctx, "/identityDetails");
+  }
+
+  createNew(BuildContext ctx) {
+    Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            builder: (BuildContext context) => IdentityWelcome()));
   }
 }

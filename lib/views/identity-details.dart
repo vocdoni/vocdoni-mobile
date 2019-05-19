@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/select-identity.dart';
+import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
