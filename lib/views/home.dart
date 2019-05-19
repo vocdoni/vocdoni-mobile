@@ -7,6 +7,7 @@ import 'package:vocdoni/modals/select-identity.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
@@ -97,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   drawer: homeDrawer(ctx, appState.data, identities.data),
                   body: homeBody(ctx, appState.data, identities.data),
+                  bottomNavigationBar: BottomNavigation(),
                 );
               });
         });
