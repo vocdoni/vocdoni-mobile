@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/urls.dart' show bootnodesUrl;
+// import 'package:vocdoni/constants/vocdoni.dart';
 
 Future<String> getBootNodes() {
   return http.read(bootnodesUrl);
@@ -38,6 +39,35 @@ Future<Organization> fetchOrganizationInfo(String resolverAddress,
       org.entryPoints = entryPoints;
 
       return org;
+    } catch (err) {
+      print(err);
+      continue;
+    }
+  }
+  return null;
+}
+
+Future<String> fetchOrganizationNewsFeed(Organization org, String lang) async {
+  // Create a random cloned list
+  final List<BootNode> bootnodes = List<BootNode>();
+  bootnodes.addAll(appStateBloc.current.bootnodes);
+  bootnodes.shuffle();
+
+  if (!(org is Organization))
+    return null;
+  else if (!(org.newsFeed is Map<String, String>))
+    return null;
+  else if (!(org.newsFeed[lang] is String)) return null;
+
+  final String contentUri = org.newsFeed[lang];
+
+  // Attempt for every node available
+  for (BootNode node in bootnodes) {
+    try {
+      final result = await webRuntime.call('''
+        fetchTextFile("$contentUri", "${node.dvoteUri}")
+      ''');
+      return result;
     } catch (err) {
       print(err);
       continue;
