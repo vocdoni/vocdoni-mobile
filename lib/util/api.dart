@@ -27,8 +27,10 @@ Future<Organization> fetchOrganizationInfo(String resolverAddress,
   // Attempt for every node available
   for (BootNode node in appStateBloc.current.bootnodes) {
     try {
+      final ethereumUri = node.ethereumUri;
+      final dvoteUri = node.dvoteUri;
       final Map<String, dynamic> result = await webRuntime.call('''
-        fetchEntityMetadata("$resolverAddress", "$entityId", "${node.dvoteUri}", "${node.ethereumUri}")
+        fetchEntityMetadata("$resolverAddress", "$entityId", "$dvoteUri", "$ethereumUri")
       ''');
 
       final org = Organization.fromJson(result);
@@ -73,5 +75,5 @@ Future<String> fetchOrganizationNewsFeed(Organization org, String lang) async {
       continue;
     }
   }
-  return null;
+  throw ("Could not connect to the network");
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/lang/index.dart';
@@ -141,8 +142,18 @@ class _WebActionState extends State<WebAction> {
   @override
   Future dispose() async {
     // unload the web
-    webViewCtrl.loadUrl(uriFromContent("<html></html>"));
-    super.dispose();
+    try {
+      if (Platform.isIOS) {
+        await webViewCtrl.loadUrl(uriFromContent("<html></html>"));
+      }
+    } catch (err) {
+      try {
+        await webViewCtrl
+            .evaluateJavascript('window.location.href = "about:blank"');
+      } catch (err) {}
+    }
+
     webViewCtrl = null;
+    super.dispose();
   }
 }

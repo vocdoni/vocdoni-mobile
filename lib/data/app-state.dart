@@ -23,7 +23,7 @@ class AppStateBloc {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final dat = prefs.getStringList("bootnodes");
       if (!(dat is List)) {
-        prefs.setStringList("bootnodes", []);
+        await prefs.setStringList("bootnodes", []);
         return;
       }
       final List<BootNode> deserializedBootNodes =
@@ -97,7 +97,7 @@ class AppStateBloc {
     if (!(bootnodes is List<BootNode>)) throw ("Invalid bootnode list");
     final List<String> serializedData =
         bootnodes.map((node) => jsonEncode(node.toJson())).toList();
-    prefs.setStringList("bootnodes", serializedData);
+    await prefs.setStringList("bootnodes", serializedData);
 
     AppState newState = AppState()
       ..selectedIdentity = _state.value.selectedIdentity
