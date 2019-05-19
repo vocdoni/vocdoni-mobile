@@ -68,6 +68,8 @@ class NewsFeedsBloc {
   /// on the shared storage
   Future<Map<String, NewsFeed>> fetchOrganizationFeeds(Organization org) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (org.languages == null || org.languages.length < 1)
+      return Map<String, NewsFeed>();
 
     final Map<String, String> strFeeds = {};
     final Map<String, NewsFeed> orgFeeds = {};

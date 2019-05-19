@@ -9,16 +9,16 @@ import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 
 class Organizations extends StatelessWidget {
-  Organizations() {
-    makeFakeOrg();
-  }
+  // Organizations() {
+  //   makeFakeOrg();
+  // }
 
-  makeFakeOrg() {
-    var r = new Random();
-    var i = r.nextInt(999);
-    identitiesBloc.subscribe(
-        Organization(entityId: '0xfff$i', name: 'Vocdoni fundation $i'));
-  }
+  // makeFakeOrg() {
+  //   var r = new Random();
+  //   var i = r.nextInt(999);
+  //   identitiesBloc.subscribe(
+  //       Organization(entityId: '0xfff$i', name: 'Vocdoni fundation $i'));
+  // }
 
   @override
   Widget build(context) {
@@ -28,10 +28,12 @@ class Organizations extends StatelessWidget {
           return StreamBuilder(
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                int selectedIdentity = appState.data.selectedIdentity;
+                List<Organization> orgs = [];
 
-                List<Organization> orgs =
-                    identities.data[selectedIdentity].organizations;
+                if (appState.data != null) {
+                  int selectedIdentity = appState.data.selectedIdentity;
+                  orgs = identities.data[selectedIdentity].organizations ?? [];
+                }
                 return Scaffold(
                     bottomNavigationBar: BottomNavigation(),
                     body: new ListView.builder(
