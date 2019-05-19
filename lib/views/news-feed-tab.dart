@@ -3,7 +3,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart'; // TODO: REMOVE
 
 class NewsFeedTab extends StatelessWidget {
   final Organization organization;

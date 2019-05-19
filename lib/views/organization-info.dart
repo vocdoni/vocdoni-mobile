@@ -1,17 +1,14 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/organization-activity.dart';
+// import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 
-class OrganizationTab extends StatelessWidget {
-  final Organization organization;
-
-  OrganizationTab({this.organization});
-
+class OrganizationInfo extends StatelessWidget {
   @override
   Widget build(context) {
+    final Organization organization = ModalRoute.of(context).settings.arguments;
     if (organization == null) return buildEmptyOrganization(context);
 
     return ListView(
@@ -32,7 +29,7 @@ class OrganizationTab extends StatelessWidget {
           text: "Activity",
           onTap: () {
             Navigator.pushNamed(context, "/organizations/activity",
-                arguments: {"organization": organization});
+                arguments: organization);
           },
         ),
       ],
@@ -42,7 +39,7 @@ class OrganizationTab extends StatelessWidget {
   Widget buildEmptyOrganization(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text("(No organizations)"),
+      child: Text("(No organization)"),
     );
   }
 }
