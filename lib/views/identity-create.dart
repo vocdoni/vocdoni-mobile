@@ -1,17 +1,16 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
-import 'identity-details.dart';
 
-class IdentityWelcome extends StatefulWidget {
+class IdentityCreateScreen extends StatefulWidget {
   @override
-  _IdentityWelcome createState() => _IdentityWelcome();
+  _IdentityCreateScreen createState() => _IdentityCreateScreen();
 }
 
-class _IdentityWelcome extends State {
+class _IdentityCreateScreen extends State {
   bool generating = false;
 
   @override
@@ -44,14 +43,14 @@ class _IdentityWelcome extends State {
           child: TextField(
             style: TextStyle(fontSize: 20),
             decoration: InputDecoration(hintText: "What's your name?"),
-            onSubmitted: (alias) => createIdentity(context, alias),
+            onSubmitted: (alias) => onCreateIdentity(context, alias),
           ),
         ),
       ],
     );
   }
 
-  createIdentity(BuildContext context, String alias) async {
+  onCreateIdentity(BuildContext context, String alias) async {
     try {
       setState(() {
         generating = true;
@@ -61,16 +60,16 @@ class _IdentityWelcome extends State {
       final publicKey = await mnemonicToPublicKey(mnemonic);
       final address = await mnemonicToAddress(mnemonic);
 
-      identitiesBloc.create(
+      await identitiesBloc.create(
           mnemonic: mnemonic,
           publicKey: publicKey,
           address: address,
           alias: alias);
 
-      int currentIndex = identitiesBloc.current.length;
+      int currentIndex = identitiesBloc.current.length - 1;
       appStateBloc.selectIdentity(currentIndex);
 
-      done(context);
+      showHomePage(context);
     } catch (err) {
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
@@ -79,9 +78,8 @@ class _IdentityWelcome extends State {
     }
   }
 
-  done(BuildContext context) {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return IdentityDetails();
-    }));
+  showHomePage(BuildContext ctx) {
+    // Replace all routes with /home on top
+    Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
   }
 }
