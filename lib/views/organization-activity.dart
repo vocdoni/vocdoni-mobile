@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
+import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/feed-page.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
 
 class OrganizationActivity extends StatelessWidget {
   final Organization organization;
 
   OrganizationActivity({this.organization});
-
-
 
   makeFakeFeed() {
     return FeedItem(
@@ -24,13 +24,25 @@ class OrganizationActivity extends StatelessWidget {
   Widget build(context) {
     return Scaffold(
         body: ListView.builder(
-      itemCount: 3,//organization.newsFeed.length,
+      itemCount: 3, //organization.newsFeed.length,
       itemBuilder: (BuildContext context, int index) {
+        FeedItem feedItem = makeFakeFeed();
         return FeedItemCard(
           organization: organization,
-          feedItem: makeFakeFeed(),
+          feedItem: feedItem,
+          onTap: () => gotoFeedPage(context, organization, feedItem),
         );
       },
     ));
+  }
+
+  gotoFeedPage(BuildContext ctx, Organization organization, FeedItem feedItem) {
+    Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            builder: (BuildContext context) => FeedPage(
+                  organization: organization,
+                  feedItem: feedItem,
+                )));
   }
 }
