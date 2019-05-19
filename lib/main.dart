@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/views/identity-details.dart';
 import 'package:vocdoni/views/organizations.dart';
 
 import 'dart:async';
@@ -54,6 +55,7 @@ void main() async {
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen(),
       "/organizations": (context) => Organizations(),
+      "/identityDetails": (context) => IdentityDetails(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
