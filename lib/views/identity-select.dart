@@ -22,17 +22,19 @@ class IdentitySelect extends StatelessWidget {
       BuildContext ctx, AppState appState, List<Identity> identities) {
     return Scaffold(
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Section(text: "Select an identity"),
-            buildIdentities(ctx, identities),
-            ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
-          ],
-        ));
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Section(text: "Select an identity"),
+        buildIdentities(ctx, identities),
+        ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
+      ],
+    ));
   }
 
   buildIdentities(BuildContext ctx, identities) {
     List<Widget> list = new List<Widget>();
+    if (identities == null) return Column(children: list);
+
     for (var i = 0; i < identities.length; i++) {
       list.add(ListItem(
         text: identities[i].alias,

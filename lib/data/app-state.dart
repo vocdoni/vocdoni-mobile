@@ -116,7 +116,7 @@ class AppState {
   AppState(
       {this.selectedIdentity = 0,
       this.selectedOrganization = 0,
-      this.bootnodes});
+      this.bootnodes = const []});
 }
 
 class BootNode {
