@@ -5,9 +5,8 @@ import "dart:convert";
 import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/util/api.dart';
+// import 'package:vocdoni/util/api.dart';
 
-///
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
 /// - SecureStorage > {account-address} > { mnemonic, publicKey, alias }
@@ -23,12 +22,11 @@ class IdentitiesBloc {
   List<Identity> get current => _state.value;
 
   Future restore() async {
-    return fetchState();
+    return readState();
   }
 
-  Future fetchState() async {
-    // Read and construct the data structures (without the private data/mnemonic)
-
+  /// Read and construct the data structures (without the private data/mnemonic)
+  Future readState() async {
     List<Identity> identities = List<Identity>();
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -101,15 +99,15 @@ class IdentitiesBloc {
           throw ("The account already exists");
         } else {
           currentAddrs.add(address);
-          prefs.setStringList("accounts", currentAddrs);
+          await prefs.setStringList("accounts", currentAddrs);
         }
       } else {
         currentAddrs = [address];
-        prefs.setStringList("accounts", currentAddrs);
+        await prefs.setStringList("accounts", currentAddrs);
       }
     } else {
       currentAddrs = [address];
-      prefs.setStringList("accounts", currentAddrs);
+      await prefs.setStringList("accounts", currentAddrs);
     }
 
     // ADD A SERIALIZED WALLET FOR THE ADDRESS
@@ -123,7 +121,7 @@ class IdentitiesBloc {
     await prefs.setStringList("$address/organizations", []);
 
     // Refresh state
-    await fetchState();
+    await readState();
 
     // Set the new identity as active
     appStateBloc.selectIdentity(currentAddrs.length - 1);
@@ -157,8 +155,13 @@ class IdentitiesBloc {
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
 
+    // Deferred news feed fetch
+    Timer(Duration(milliseconds: 200), () {
+      newsFeedsBloc.fetchOrganizationFeeds(newOrganization);
+    });
+
     // Refresh state
-    await fetchState();
+    await readState();
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions

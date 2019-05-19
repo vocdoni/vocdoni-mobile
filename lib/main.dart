@@ -17,6 +17,7 @@ void main() async {
   await appStateBloc.restore();
   await identitiesBloc.restore();
   await electionsBloc.restore();
+  await newsFeedsBloc.restore();
 
   // POST RENDER TRIGGERS
   Timer(Duration(seconds: 5), () async {
