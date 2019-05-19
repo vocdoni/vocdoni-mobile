@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
@@ -22,15 +23,30 @@ class OrganiztionDetails extends StatelessWidget {
                   bottomNavigationBar: BottomNavigation(),
                   body: ListView(
                     children: <Widget>[
+                      
                       PageTitle(
                         title: organization.name,
                         subtitle: organization.entityId,
                       ),
+                       Section(text: "Description"),
                       Section(text: "Actions"),
+                      
                       ListItem(
                         text: "Subscribe",
                         onTap: () {
                           debugPrint("Subscriing?");
+                        },
+                      ),
+                      ListItem(
+                        text: "Activity",
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      OrganizationActivity(
+                                        organization: organization,
+                                      )));
                         },
                       ),
                     ],
@@ -39,5 +55,4 @@ class OrganiztionDetails extends StatelessWidget {
               });
         });
   }
-
 }
