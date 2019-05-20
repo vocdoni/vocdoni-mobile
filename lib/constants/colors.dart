@@ -17,3 +17,7 @@ final Color titleColor = Color(0xFF000000);
 
 final double pagePadding = 24;
 final double cardSpacing = 16;
+
+final FontWeight lightFontWeight = FontWeight.w300;
+final FontWeight normalFontWeight = FontWeight.w600;
+final FontWeight boldFontWeight = FontWeight.w900;
