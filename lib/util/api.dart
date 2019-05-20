@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/urls.dart' show bootnodesUrl;
+import 'package:vocdoni/util/random.dart';
 // import 'package:vocdoni/constants/vocdoni.dart';
 
 Future<String> getBootNodes() {
@@ -24,13 +25,23 @@ Future<String> mnemonicToPublicKey(String mnemonic) async {
 
 Future<Organization> fetchOrganizationInfo(String resolverAddress,
     String entityId, String networkId, List<String> entryPoints) async {
+  Uri parsedUri, ethereumUri;
+  final String randomSuffix = randomString();
+
   // Attempt for every node available
   for (BootNode node in appStateBloc.current.bootnodes) {
     try {
-      final ethereumUri = node.ethereumUri;
+      // randomize the path to prevent caching
+      parsedUri = Uri.parse(node.ethereumUri);
+      ethereumUri = Uri(
+          scheme: parsedUri.scheme,
+          host: parsedUri.host,
+          port: parsedUri.port,
+          path: "${parsedUri?.path ?? '/web3'}/$randomSuffix",
+          query: parsedUri.query);
       final dvoteUri = node.dvoteUri;
       final Map<String, dynamic> result = await webRuntime.call('''
-        fetchEntityMetadata("$resolverAddress", "$entityId", "$dvoteUri", "$ethereumUri")
+        fetchEntityMetadata("$resolverAddress", "$entityId", "$dvoteUri", "${ethereumUri.toString()}")
       ''');
 
       final org = Organization.fromJson(result);
