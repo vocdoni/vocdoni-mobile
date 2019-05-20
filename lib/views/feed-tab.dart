@@ -6,15 +6,15 @@ import 'package:vocdoni/widgets/feed-item-card.dart';
 class FeedTab extends StatelessWidget {
   final AppState appState;
   final List<Identity> identities;
+  final Map<String, Map<String, NewsFeed>> newsFeeds;
 
-  FeedTab({this.appState, this.identities});
+  FeedTab({this.appState, this.identities, this.newsFeeds});
 
   @override
   Widget build(ctx) {
-    if (newsFeedsBloc.current == null) return buildNoVotes(ctx);
+    if (newsFeeds == null) return buildNoVotes(ctx);
 
     List<NewsPost> newsPosts = List<NewsPost>();
-    final Map<String, Map<String, NewsFeed>> newsFeeds = newsFeedsBloc.current;
     final Identity currentIdentity =
         identities?.elementAt(appState?.selectedIdentity ?? 0);
     if (currentIdentity == null) return buildNoVotes(ctx);
