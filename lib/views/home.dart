@@ -4,7 +4,7 @@ import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
-import 'package:vocdoni/views/votes-feed-tab.dart';
+import 'package:vocdoni/views/feed-tab.dart';
 import 'package:vocdoni/views/organizations-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (selectedTab) {
       // VOTES FEED
       case 0:
-        body = VotesFeedTab(votes: []);
+        body = FeedTab(appState: appState, identities: identities);
         break;
       // SUBSCRIBED ORGANIZATIONS
       case 1:

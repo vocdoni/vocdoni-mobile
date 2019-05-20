@@ -33,7 +33,6 @@ class OrganizationActivity extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           final NewsPost post = feed.items[index];
           return FeedItemCard(
-            organization: organization,
             post: post,
             onTap: () => onTapItem(context, post),
           );
