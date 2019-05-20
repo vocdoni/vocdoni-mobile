@@ -3,7 +3,7 @@ import 'package:vocdoni/constants/colors.dart';
 import '../lang/index.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
-class TopNavigation extends StatelessWidget with PreferredSizeWidget{
+class TopNavigation extends StatelessWidget with PreferredSizeWidget {
   final String title;
 
   TopNavigation({this.title});
@@ -13,12 +13,16 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget{
     return AppBar(
       backgroundColor: baseBackgroundColor,
       elevation: 0,
-      title: Text(title,style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),),
-    
+      title: Text(
+        title,
+        style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),
+      ),
       centerTitle: true,
-      leading:  Navigator.canPop(context) ? InkWell(
-          onTap: () => Navigator.pop(context),
-          child: Icon(FeatherIcons.arrowLeft)):null,
+      leading: Navigator.canPop(context)
+          ? InkWell(
+              onTap: () => Navigator.pop(context),
+              child: Icon(FeatherIcons.arrowLeft))
+          : null,
     );
   }
 

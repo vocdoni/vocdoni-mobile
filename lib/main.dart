@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/views/identity-select.dart';
@@ -70,7 +71,7 @@ void main() async {
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
-      fontFamily: "Open Sans"
+      fontFamily: "Open Sans",
     ),
   ));
 }
