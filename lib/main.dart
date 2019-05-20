@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/modals/web-action.dart';
+import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/views/organization-info.dart';
@@ -60,9 +62,11 @@ void main() async {
       // IDENTITY/IES AVAILABLE
       "/home": (context) => HomeScreen(),
       "/organizations/info": (context) => OrganizationInfo(),
-      "/organizations/activity": (context) => OrganizationActivity()
-      // "/organizations": (context) => Organizations(),
-      // "/identity/details": (context) => IdentityDetails(),
+      "/organizations/activity": (context) => OrganizationActivity(),
+
+      // GLOBAL
+      "/web/actions": (context) => WebAction(),
+      "/web/viewer": (context) => WebViewer(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,

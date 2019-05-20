@@ -32,7 +32,7 @@ class IdentityTab extends StatelessWidget {
           onTap: () => showMessage("Coming soon...", global: true),
         ),
         ListItem(
-            text: "Log out",
+            text: "Identities",
             onTap: () {
               onLogOut(ctx);
             }),

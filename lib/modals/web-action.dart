@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -38,7 +37,6 @@ class _WebActionState extends State<WebAction> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: mainBackgroundColor,
         title: Text("Vocdoni"),
       ),
       body: WebView(

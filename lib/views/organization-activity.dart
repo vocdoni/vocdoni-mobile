@@ -59,7 +59,7 @@ class OrganizationActivity extends StatelessWidget {
   }
 
   onTapItem(BuildContext ctx, NewsPost item) {
-    // Navigator.of(context).pop()
-    showMessage("Coming soon...", context: ctx);
+    Navigator.of(ctx).pushNamed("/web/viewer",
+        arguments: item.contentHtml ?? "<p>${item.contentText}</p>");
   }
 }
