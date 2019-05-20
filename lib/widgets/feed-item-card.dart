@@ -7,10 +7,10 @@ import 'package:vocdoni/widgets/cardTitle.dart';
 
 class FeedItemCard extends StatelessWidget {
   final NewsPost post;
-  final Organization organization;
+  // final Organization organization;
   final void Function() onTap;
 
-  FeedItemCard({this.post, this.organization, this.onTap});
+  FeedItemCard({this.post, this.onTap});
 
   @override
   Widget build(context) {
