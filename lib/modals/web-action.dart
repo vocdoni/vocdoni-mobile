@@ -141,6 +141,8 @@ class _WebActionState extends State<WebAction> {
 
   @override
   Future dispose() async {
+    super.dispose();
+
     // unload the web
     try {
       if (Platform.isIOS) {
@@ -154,6 +156,5 @@ class _WebActionState extends State<WebAction> {
     }
 
     webViewCtrl = null;
-    super.dispose();
   }
 }

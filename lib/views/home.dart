@@ -122,17 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   buildBody(BuildContext ctx, AppState appState, List<Identity> identities) {
     Widget body;
-    // Identity currentIdentity;
-    // Organization currentOrganization;
-    // if (appState != null && appState.selectedIdentity >= 0) {
-    //   currentIdentity = identities[appState.selectedIdentity];
-    //   if (currentIdentity != null &&
-    //       appState.selectedOrganization >= 0 &&
-    //       currentIdentity.organizations.length > 0) {
-    //     currentOrganization =
-    //         currentIdentity.organizations[appState.selectedOrganization];
-    //   }
-    // }
 
     // RENDER THE CURRENT TAB BODY
     switch (selectedTab) {

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -13,6 +14,19 @@ class OrganizationInfo extends StatelessWidget {
     final Organization organization = ModalRoute.of(context).settings.arguments;
     if (organization == null) return buildEmptyOrganization(context);
 
+    bool alreadySubscribed = false;
+    if (appStateBloc.current != null &&
+        appStateBloc.current.selectedIdentity >= 0) {
+      final Identity currentIdentity =
+          identitiesBloc.current[appStateBloc.current.selectedIdentity];
+      if (currentIdentity != null &&
+          appStateBloc.current.selectedOrganization >= 0 &&
+          currentIdentity.organizations.length > 0) {
+        alreadySubscribed = currentIdentity.organizations
+            .any((o) => o.entityId == organization.entityId);
+      }
+    }
+
     return Scaffold(
       body: ListView(
         children: <Widget>[
@@ -22,14 +36,11 @@ class OrganizationInfo extends StatelessWidget {
           ),
           Section(text: "Description"),
           Text(
-            organization.description["en"],
+            organization.description[
+                organization.languages[0]], // TODO: DETECT LANGUAGE
             textAlign: TextAlign.center,
-          ), // TODO: LANGUAGE
-          Section(text: "Actions"),
-          ListItem(
-            text: "Subscribe",
-            onTap: () => confirmSubscribe(context),
           ),
+          Section(text: "Actions"),
           ListItem(
             text: "Activity",
             onTap: () {
@@ -37,24 +48,9 @@ class OrganizationInfo extends StatelessWidget {
                   arguments: organization);
             },
           ),
-          SizedBox(height: 40),
-          Text(
-            Lang.of(context).get("You are about to subscribe to:"),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            organization.name,
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          Text(
-            Lang.of(context).get("Using the identity:"),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
-            textAlign: TextAlign.center,
-          )
+          alreadySubscribed
+              ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
+              : buildSubscriptionTiles(context, organization) // SUBSCRIBE
         ],
       ),
     );
@@ -62,9 +58,71 @@ class OrganizationInfo extends StatelessWidget {
 
   Widget buildEmptyOrganization(BuildContext ctx) {
     // TODO: UI
-    return Center(
+    return Scaffold(
+        body: Center(
       child: Text("(No organization)"),
-    );
+    ));
+  }
+
+  Widget buildAlreadySubscribed(BuildContext ctx, Organization organization) {
+    // TODO: Handle all actions
+    final List<Widget> actions = organization.actions
+        .map((action) {
+          if (!(action is Map) ||
+              !(action["name"] is Map) ||
+              !(action["name"][organization.languages[0]] is String))
+            return null;
+          return ListItem(
+            text: action["name"][organization.languages[0]],
+            onTap: () {
+              Navigator.push(
+                  ctx,
+                  MaterialPageRoute(
+                      builder: (context) => WebAction(
+                            url: action["url"],
+                          )));
+            },
+          );
+        })
+        .toList()
+        .where((w) => w != null)
+        .toList();
+
+    return Column(children: <Widget>[
+      ...actions,
+      SizedBox(height: 40),
+      Text(
+        Lang.of(ctx).get("You are already subscribed"),
+        textAlign: TextAlign.center,
+      )
+    ]);
+  }
+
+  Widget buildSubscriptionTiles(BuildContext ctx, Organization organization) {
+    return Column(children: <Widget>[
+      ListItem(
+        text: "Subscribe",
+        onTap: () => confirmSubscribe(ctx),
+      ),
+      SizedBox(height: 40),
+      Text(
+        Lang.of(ctx).get("You are about to subscribe to:"),
+        textAlign: TextAlign.center,
+      ),
+      Text(
+        organization.name,
+        textAlign: TextAlign.center,
+      ),
+      SizedBox(height: 20),
+      Text(
+        Lang.of(ctx).get("Using the identity:"),
+        textAlign: TextAlign.center,
+      ),
+      Text(
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
+        textAlign: TextAlign.center,
+      )
+    ]);
   }
 
   confirmSubscribe(BuildContext ctx) async {
