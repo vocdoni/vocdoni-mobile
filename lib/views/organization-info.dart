@@ -56,6 +56,8 @@ class OrganizationInfo extends StatelessWidget {
     );
   }
 
+  /// NO ORGANIZATION
+
   Widget buildEmptyOrganization(BuildContext ctx) {
     // TODO: UI
     return Scaffold(
@@ -63,6 +65,8 @@ class OrganizationInfo extends StatelessWidget {
       child: Text("(No organization)"),
     ));
   }
+
+  /// ALREADY REGISTERED CONTENT
 
   Widget buildAlreadySubscribed(BuildContext ctx, Organization organization) {
     // TODO: Handle all actions
@@ -97,6 +101,8 @@ class OrganizationInfo extends StatelessWidget {
       )
     ]);
   }
+
+  /// PROMPT TO SUBSCRIBE
 
   Widget buildSubscriptionTiles(BuildContext ctx, Organization organization) {
     return Column(children: <Widget>[
