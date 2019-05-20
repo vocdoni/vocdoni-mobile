@@ -103,7 +103,12 @@ class _WebActionState extends State<WebAction> {
         return respond(id, '''
             handleHostResponse(JSON.stringify({id: $id, data: "$publicKey" }));
         ''');
-        break;
+
+      case "getLanguage":
+        String lang = Localizations.localeOf(context).languageCode;
+        return respond(id, '''
+            handleHostResponse(JSON.stringify({id: $id, data: "$lang" }));
+        ''');
 
       case "closeWindow":
         Navigator.pop(context);
@@ -111,7 +116,7 @@ class _WebActionState extends State<WebAction> {
 
       default:
         return respondError(id,
-            "Unsupported action type sent to the host: '${payload["type"]}'");
+            "Unsupported action type: '${payload["type"]}'");
     }
   }
 

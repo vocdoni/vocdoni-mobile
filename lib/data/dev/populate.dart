@@ -10,6 +10,9 @@ Future populateSampleData() async {
   final List<Organization> orgs = await _populateOrganizations();
 
   await _populateNewsFeeds(orgs);
+
+  await identitiesBloc.readState();
+  await newsFeedsBloc.readState();
 }
 
 Future<List<Organization>> _populateOrganizations() async {
@@ -29,7 +32,8 @@ Future<List<Organization>> _populateOrganizations() async {
       "${currentIdent.address}/organizations", strOrganizations);
 
   return strOrganizations
-      .map((strOrg) => Organization.fromJson(jsonDecode(strOrg))).toList();
+      .map((strOrg) => Organization.fromJson(jsonDecode(strOrg)))
+      .toList();
 }
 
 Future _populateNewsFeeds(List<Organization> orgs) async {
@@ -38,9 +42,10 @@ Future _populateNewsFeeds(List<Organization> orgs) async {
 
   // Indeed, all 3 organizations have the same entity ID...
   await Future.wait(orgs.map((org) async {
-      final strFeed = _makeFeed(org);
-      await prefs.setString(
-          NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/${org.languages[0] ?? "en"}", strFeed);
+    final strFeed = _makeFeed(org);
+    await prefs.setString(
+        NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/${org.languages[0] ?? "en"}",
+        strFeed);
   }));
 }
 
@@ -93,11 +98,15 @@ String _makeOrganization(String name) {
             "url": "https://cloudflare-ipfs.com/ipfs/QmZ56Z2kpG5QjJcWfhxFD4ac3DhfX21hrQ2gCTrWxzTAse",
             "visible": true
         }
-    ]
+    ],
+    "resolverAddress": "0x0dCA233CE5152d58c74E74693A3C496D01542244",
+    "entityId": "0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85",
+    "networkId": "testnet",
+    "entryPoints": ["__URI1__"]
 }''';
 }
 
-String _makeFeed(Organization org){
+String _makeFeed(Organization org) {
   return '''{
   "version": "https://jsonfeed.org/version/1",
   "title": "${org.name}",

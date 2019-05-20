@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 return Scaffold(
                   key: homePageScaffoldKey,
-                  body: buildBody(ctx, appState.data, identities.data),
+                  body: buildBody(ctx, appState?.data, identities?.data),
                   bottomNavigationBar: BottomNavigation(
                     onTabSelect: (index) => onTabSelect(index),
                     selectedTab: selectedTab,
@@ -127,14 +127,19 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (selectedTab) {
       // VOTES FEED
       case 0:
-        body = FeedTab(appState: appState, identities: identities);
+        body = StreamBuilder(
+            stream: newsFeedsBloc.stream,
+            builder: (BuildContext ctx,
+                AsyncSnapshot<Map<String, Map<String, NewsFeed>>> newsFeeds) {
+              return FeedTab(
+                  appState: appState,
+                  identities: identities,
+                  newsFeeds: newsFeeds?.data);
+            });
         break;
       // SUBSCRIBED ORGANIZATIONS
       case 1:
-        body = OrganizationsTab(
-          appState: appState,
-          identities: identities,
-        );
+        body = OrganizationsTab(appState: appState, identities: identities);
         break;
       // IDENTITY INFO
       case 2:

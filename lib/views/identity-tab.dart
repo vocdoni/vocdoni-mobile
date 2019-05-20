@@ -49,8 +49,8 @@ class IdentityTab extends StatelessWidget {
                   try {
                     await populateSampleData();
                     showMessage("Completed", context: ctx);
-                    await newsFeedsBloc.readState();
                     await identitiesBloc.readState();
+                    await newsFeedsBloc.readState();
                   } catch (err) {
                     showErrorMessage(err?.message ?? err, context: ctx);
                   }

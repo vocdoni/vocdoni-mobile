@@ -137,12 +137,16 @@ String wrapHtmlBody(String content) {
 				<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
 
 				<style>
+            body {
+							background-color: #f7f7f7;
+            }
 						.container {
 							font-family: 'Helvetica Neue', Helvetica, Sans-serif, Arial;
 							margin: 0;
 							padding: 7px;
 
 							user-select: none;
+              -webkit-user-select: none;
 						}
 						.box {
 							background-color: white;
