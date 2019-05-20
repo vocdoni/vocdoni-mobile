@@ -13,7 +13,7 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget{
     return AppBar(
       backgroundColor: baseBackgroundColor,
       elevation: 0,
-      title: Text(title,style: TextStyle(color: guideColor),),
+      title: Text(title,style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),),
     
       centerTitle: true,
       leading:  Navigator.canPop(context) ? InkWell(
