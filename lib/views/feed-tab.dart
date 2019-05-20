@@ -15,7 +15,8 @@ class FeedTab extends StatelessWidget {
 
     List<NewsPost> newsPosts = List<NewsPost>();
     final Map<String, Map<String, NewsFeed>> newsFeeds = newsFeedsBloc.current;
-    final Identity currentIdentity = identities[appState.selectedIdentity];
+    final Identity currentIdentity =
+        identities?.elementAt(appState?.selectedIdentity ?? 0);
     if (currentIdentity == null) return buildNoVotes(ctx);
     currentIdentity.organizations.forEach((org) {
       // TODO: DETECT LANGUAGE
@@ -29,6 +30,14 @@ class FeedTab extends StatelessWidget {
     });
 
     if (newsPosts.length == 0) return buildNoVotes(ctx);
+    newsPosts.sort((a, b) {
+      if (!(a?.published is DateTime) && !(b?.published is DateTime))
+        return 0;
+      else if (!(a?.published is DateTime))
+        return -1;
+      else if (!(b?.published is DateTime)) return 1;
+      return b.published.compareTo(a.published);
+    });
 
     // TODO: UI
 

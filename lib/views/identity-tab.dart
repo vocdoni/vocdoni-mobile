@@ -4,6 +4,10 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
+import 'package:flutter/foundation.dart'; // for kReleaseMode
+
+// TODO: REMOVE
+import 'package:vocdoni/data/dev/populate.dart';
 
 class IdentityTab extends StatelessWidget {
   final AppState appState;
@@ -36,6 +40,21 @@ class IdentityTab extends StatelessWidget {
             onTap: () {
               onLogOut(ctx);
             }),
+        kReleaseMode // TODO: DEV BUTTON OUT
+            ? Container()
+            : ListItem(
+                text: "[DEV] Add fake organizations",
+                onTap: () async {
+                  // TODO: REMOVE
+                  try {
+                    await populateSampleData();
+                    showMessage("Completed", context: ctx);
+                    await newsFeedsBloc.readState();
+                    await identitiesBloc.readState();
+                  } catch (err) {
+                    showErrorMessage(err?.message ?? err, context: ctx);
+                  }
+                }),
       ],
     );
   }
