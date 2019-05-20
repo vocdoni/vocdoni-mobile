@@ -9,6 +9,7 @@ final Color mainTextColor = Color(0xFFFFFFFF); // white
 final successColor = Color(0xFF25bd5b);
 final dangerColor = altBackgroundColor;
 
+final Color baseBackgroundColor = Color(0xFFF3F0ED);
 final Color descriptionColor = Color(0xFF444444);
 final Color guideColor = Color(0xFF888888);
 final Color lightGuideColor = Color(0x66888888);
