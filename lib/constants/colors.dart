@@ -15,8 +15,11 @@ final Color guideColor = Color(0xFF888888);
 final Color lightGuideColor = Color(0x66888888);
 final Color titleColor = Color(0xFF000000);
 
+final Color chipColor = Color(0xFFFFEEBF);
+
 final double pagePadding = 24;
 final double cardSpacing = 16;
+final double chipPadding = 4;
 
 final FontWeight lightFontWeight = FontWeight.w300;
 final FontWeight normalFontWeight = FontWeight.w600;
