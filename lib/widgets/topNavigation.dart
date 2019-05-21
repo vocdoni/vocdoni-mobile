@@ -21,7 +21,7 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget {
       leading: Navigator.canPop(context)
           ? InkWell(
               onTap: () => Navigator.pop(context),
-              child: Icon(FeatherIcons.arrowLeft))
+              child: Icon(FeatherIcons.arrowLeft, color: descriptionColor,))
           : null,
     );
   }

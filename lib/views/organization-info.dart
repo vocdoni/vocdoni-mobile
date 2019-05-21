@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/views/organization-activity.dart';
@@ -6,6 +7,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
 class OrganizationInfo extends StatelessWidget {
@@ -28,6 +30,10 @@ class OrganizationInfo extends StatelessWidget {
     }
 
     return Scaffold(
+      appBar: TopNavigation(
+        title: "",
+      ),
+      backgroundColor: baseBackgroundColor,
       body: ListView(
         children: <Widget>[
           PageTitle(
@@ -61,9 +67,13 @@ class OrganizationInfo extends StatelessWidget {
   Widget buildEmptyOrganization(BuildContext ctx) {
     // TODO: UI
     return Scaffold(
+        appBar: TopNavigation(
+          title: "",
+        ),
+        backgroundColor: baseBackgroundColor,
         body: Center(
-      child: Text("(No organization)"),
-    ));
+          child: Text("(No organization)"),
+        ));
   }
 
   /// ALREADY REGISTERED CONTENT
