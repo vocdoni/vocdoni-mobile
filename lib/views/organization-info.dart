@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
-// import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
 class OrganizationInfo extends StatelessWidget {
@@ -26,6 +27,10 @@ class OrganizationInfo extends StatelessWidget {
     }
 
     return Scaffold(
+      appBar: TopNavigation(
+        title: "",
+      ),
+      backgroundColor: baseBackgroundColor,
       body: ListView(
         children: <Widget>[
           PageTitle(
@@ -33,11 +38,7 @@ class OrganizationInfo extends StatelessWidget {
             subtitle: organization.entityId,
           ),
           Section(text: "Description"),
-          Text(
-            organization.description[
-                organization.languages[0]], // TODO: DETECT LANGUAGE
-            textAlign: TextAlign.center,
-          ),
+          Summary(text: organization.description[organization.languages[0]], maxLines: 5,),
           Section(text: "Actions"),
           ListItem(
             text: "Activity",
@@ -59,9 +60,13 @@ class OrganizationInfo extends StatelessWidget {
   Widget buildEmptyOrganization(BuildContext ctx) {
     // TODO: UI
     return Scaffold(
+        appBar: TopNavigation(
+          title: "",
+        ),
+        backgroundColor: baseBackgroundColor,
         body: Center(
-      child: Text("(No organization)"),
-    ));
+          child: Text("(No organization)"),
+        ));
   }
 
   /// ALREADY REGISTERED CONTENT
@@ -143,5 +148,28 @@ class OrganizationInfo extends StatelessWidget {
 
   goBack(BuildContext ctx) {
     Navigator.pop(ctx, false);
+  }
+}
+
+class Summary extends StatelessWidget {
+  final String text;
+  final int maxLines;
+
+  Summary({this.text, this.maxLines});
+
+  @override
+  Widget build(context) {
+    return Container(
+        padding: new EdgeInsets.all(pagePadding),
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.left,
+          maxLines: maxLines,
+          style: TextStyle(
+              fontSize: 16,
+              color: descriptionColor,
+              fontWeight: lightFontWeight),
+        ));
   }
 }

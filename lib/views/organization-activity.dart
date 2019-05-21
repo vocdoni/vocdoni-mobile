@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/views/feed-page.dart';
 import 'package:vocdoni/widgets/feed-item-card.dart';
 import 'package:vocdoni/widgets/toast.dart';
+import 'package:vocdoni/widgets/topNavigation.dart';
 
 class OrganizationActivity extends StatelessWidget {
   final Organization organization;
@@ -28,6 +30,10 @@ class OrganizationActivity extends StatelessWidget {
     final NewsFeed feed = newsFeeds[organization.entityId][defaultLang];
 
     return Scaffold(
+      appBar: TopNavigation(
+        title: organization.name,
+      ),
+      backgroundColor: baseBackgroundColor,
       body: ListView.builder(
         itemCount: newsFeeds[organization.entityId][defaultLang].items.length,
         itemBuilder: (BuildContext context, int index) {
