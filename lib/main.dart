@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/modals/web-viewer.dart';
+import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/views/organization-info.dart';
@@ -51,6 +53,7 @@ void main() async {
       // NO IDENTITIES YET
       "/identity/create": (context) => IdentityCreateScreen(),
       "/identity/select": (context) => IdentitySelectScreen(),
+
       // "/welcome": (context) => WelcomeOnboardingScreen(),  // ?
       // "/welcome/identity": (context) => WelcomeIdentityScreen(),
       // "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
@@ -60,6 +63,7 @@ void main() async {
       "/home": (context) => HomeScreen(),
       "/organizations/info": (context) => OrganizationInfo(),
       "/organizations/activity": (context) => OrganizationActivity(),
+      "/identity/backup": (context) => IdentityBackupScreen(),
 
       // GLOBAL
       "/web/actions": (context) => WebAction(),
@@ -67,6 +71,7 @@ void main() async {
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
+      fontFamily: "Open Sans",
     ),
   ));
 }

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
@@ -32,9 +33,9 @@ class IdentityTab extends StatelessWidget {
         ),
         Section(text: "Your identity"),
         ListItem(
-          text: "Back up identity",
-          onTap: () => showMessage("Coming soon...", global: true),
-        ),
+            text: "Back up identity",
+            onTap: () => Navigator.pushNamed(ctx, "/identity/backup",
+                arguments: IdentityBackupArguments(appState, identities))),
         ListItem(
             text: "Identities",
             onTap: () {
