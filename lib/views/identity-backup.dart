@@ -1,0 +1,86 @@
+import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
+// import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/toast.dart';
+import '../lang/index.dart';
+
+class IdentityBackupArguments {
+  final AppState appState;
+  final List<Identity> identities;
+
+  IdentityBackupArguments(this.appState, this.identities);
+}
+
+class MnemonicWord extends StatelessWidget {
+  final int idx;
+  final String word;
+
+  MnemonicWord({this.idx, this.word});
+
+  @override
+  Widget build(context) {
+    return Row(children: <Widget>[
+      Text(idx.toString()),
+      SizedBox(
+        width: 10,
+      ),
+      Container(
+        alignment: Alignment(0, 0),
+        padding: EdgeInsets.all(chipPadding),
+        constraints: BoxConstraints(maxWidth: 150, maxHeight: 40),
+        decoration: new BoxDecoration(
+            color: chipColor,
+            borderRadius: new BorderRadius.all(const Radius.circular(5.0))),
+        child: Text(word, style: TextStyle(fontSize: 14)),
+      )
+    ]);
+  }
+}
+
+class IdentityBackupScreen extends StatelessWidget {
+  @override
+  Widget build(context) {
+    final IdentityBackupArguments args =
+        ModalRoute.of(context).settings.arguments;
+    List<String> mnemonic =
+        args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
+    int half = (mnemonic.length / 2).ceil();
+    List<String> l1 = mnemonic.sublist(0, half);
+    List<String> l2 = mnemonic.sublist(half, mnemonic.length);
+    int i = 1;
+
+    return Scaffold(
+        body: Center(
+      child: Align(
+          alignment: Alignment(0, 0),
+          child: Container(
+              constraints: BoxConstraints(maxHeight: 600, maxWidth: 400),
+              color: Color(0x00ff0000),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    
+                    children: l1
+                        .map((word) => MnemonicWord(
+                              idx: i++,
+                              word: word,
+                            ))
+                        .toList()),
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    
+                    children: l2
+                        .map((word) => MnemonicWord(
+                              idx: i++,
+                              word: word,
+                            ))
+                        .toList())
+              ]))
+          ),
+    ));
+  }
+}
