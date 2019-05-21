@@ -6,6 +6,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
@@ -151,25 +152,4 @@ class OrganizationInfo extends StatelessWidget {
   }
 }
 
-class Summary extends StatelessWidget {
-  final String text;
-  final int maxLines;
 
-  Summary({this.text, this.maxLines});
-
-  @override
-  Widget build(context) {
-    return Container(
-        padding: new EdgeInsets.all(pagePadding),
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.left,
-          maxLines: maxLines,
-          style: TextStyle(
-              fontSize: 16,
-              color: descriptionColor,
-              fontWeight: lightFontWeight),
-        ));
-  }
-}
