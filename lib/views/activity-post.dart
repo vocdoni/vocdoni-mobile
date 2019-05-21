@@ -97,6 +97,10 @@ class ActivityPostScreen extends StatelessWidget {
   }
 
   String styleHtml(String content) {
+
+    String hex = linkColor.value.toRadixString(16);
+    String htmlLinkColor = hex.replaceRange(0, 2, '#');
+
     return '''<!DOCTYPE html>
 <html>
 		<head>
@@ -112,6 +116,10 @@ class ActivityPostScreen extends StatelessWidget {
               margin: 0px;
               line-height: 1.6;
               font-size: 16px;
+            }
+
+            a {
+              color: ${htmlLinkColor};
             }
 
 						img {
