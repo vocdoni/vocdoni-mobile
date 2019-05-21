@@ -5,6 +5,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 
@@ -45,26 +46,15 @@ class ActivityPostScreen extends StatelessWidget {
               title: post.title,
               subtitle: post.author,
             ),
-            buildHtml(post.contentHtml),
-            Html(
-              data: post.contentHtml,
-              padding: EdgeInsets.fromLTRB(
-                  pagePadding, 0, pagePadding, cardSpacing),
-              defaultTextStyle: TextStyle(fontSize: 16),
-              onLinkTap: (url) => launchUrl(url),
-              /*customRender: (node, children) {
-                      if (node is dom.Element) {
-                        switch (node.localName) {
-                          case "custom_tag": // using this, you can handle custom tags in your HTML
-                            return Column(children: children);
-                        }
-                    },*/
-            ),
+            //Section(text: "HTML render 1"),
+            //html1(post.contentHtml),
+            //Section(text: "HTML render 2"),
+            html2(post.contentHtml),
           ],
         ));
   }
 
-  buildHtml(String htmlBody) {
+  html1(String htmlBody) {
     final String html = styleHtml(htmlBody);
     final uri = uriFromContent(html);
     return Container(
@@ -73,11 +63,27 @@ class ActivityPostScreen extends StatelessWidget {
         height: 500,
         child: WebView(
             navigationDelegate: (NavigationRequest request) {
-                launchUrl(request.url);
-                return NavigationDecision.prevent;
+              launchUrl(request.url);
+              return NavigationDecision.prevent;
             },
             initialUrl: uri,
             javascriptMode: JavascriptMode.disabled));
+  }
+
+  html2(String htmlBody) {
+    return Html(
+      data: htmlBody,
+      padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, cardSpacing),
+      defaultTextStyle: TextStyle(fontSize: 16),
+      onLinkTap: (url) => launchUrl(url),
+      /*customRender: (node, children) {
+                      if (node is dom.Element) {
+                        switch (node.localName) {
+                          case "custom_tag": // using this, you can handle custom tags in your HTML
+                            return Column(children: children);
+                        }
+                    },*/
+    );
   }
 
   launchUrl(String url) async {
@@ -97,7 +103,6 @@ class ActivityPostScreen extends StatelessWidget {
   }
 
   String styleHtml(String content) {
-
     String hex = linkColor.value.toRadixString(16);
     String htmlLinkColor = hex.replaceRange(0, 2, '#');
 
