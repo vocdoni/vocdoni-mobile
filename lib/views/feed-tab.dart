@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/feed-item-card.dart';
+import 'package:vocdoni/views/activity-post.dart';
+import 'package:vocdoni/widgets/feedItemCard.dart';
 
 class FeedTab extends StatelessWidget {
   final AppState appState;
@@ -59,8 +59,8 @@ class FeedTab extends StatelessWidget {
     );
   }
 
-  onTapItem(BuildContext ctx, NewsPost item) {
-    Navigator.of(ctx).pushNamed("/web/viewer",
-        arguments: item.contentHtml ?? "<p>${item.contentText}</p>");
+  onTapItem(BuildContext ctx, NewsPost post) {
+    Navigator.of(ctx).pushNamed("/organizations/activity/post",
+        arguments: ActivityPostArguments( post));
   }
 }

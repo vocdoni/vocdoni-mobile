@@ -21,8 +21,10 @@ final Color blueColor=Color(0xFF84CBFF);
 final Color redColor =Color(0xFFFF7C7C);
 final Color greenColor =Color(0xFF77DD77);
 
+final Color linkColor = blueColor;
+
 final double pagePadding = 24;
-final double cardSpacing = 16;
+final double elementSpacing = 12;
 final double chipPadding = 4;
 final double buttonPadding = 8;
 

@@ -119,12 +119,12 @@ String _makeFeed(Organization org) {
   "items": [
     {
       "id": "900e5aa6896c53a40745acac8ca00c3c0ae4f7c3",
-      "title": "SmallHD FOCUS OLED 5.5-inch Monitor Review",
-      "summary": "A 5-inch OLED display for your camera is what SmallHD offers with the FOCUS OLED and I've put it through its paces!",
-      "content_text": "Many cameras nowadays come with a nice screen, often high resolution with a high brightness, but not always swivelling and always too small to fully rely on. I cannot tell how many times a bad picture on the small camera display was actually pretty decent once I opened it on the computer. And when you’re doing video, you really need to get that focus right, at all times. This is hard, but I have a solution that will help you out tremendously!",
-      "content_html": "<p>Many cameras nowadays come with a nice screen, often high resolution with a high brightness, but not always swivelling and always too small to fully rely on. I cannot tell how many times a bad picture on the small camera display was actually pretty decent once I opened it on the computer. And when you’re doing video, you really need to get that focus right, at all times. This is hard, but I have a solution that will help you out tremendously!</p>",
+      "title": "China's latest weapon in the trade war: Karaoke",
+      "summary": "A Chinese propaganda song about the ongoing Sino-US trade war is getting a lot of interest - and raising a few eyebrows - on Chinese social media.",
+      "content_text": "AAAMany cameras nowadays come with a nice screen, often high resolution with a high brightness, but not always swivelling and always too small to fully rely on. I cannot tell how many times a bad picture on the small camera display was actually pretty decent once I opened it on the computer. And when you’re doing video, you really need to get that focus right, at all times. This is hard, but I have a solution that will help you out tremendously!",
+      "content_html": "<h1>I'm an H1</h1> <h2>I'm an H2</h2> <h3>I'm an H3</h3> <img src=\\"https://i.udemycdn.com/course/750x422/59535_1f48_6.jpg\\" alt=\\"Girl in a jacket\\">",
       "url": "https://hipsterpixel.co/2019/05/10/smallhd-5-5-focus-oled-monitor-review/",
-      "image": "https://ad3d98360fa0de008220-e893b890b8e259a099f8456bf1578245.ssl.cf5.rackcdn.com/smallhd-focus-oled-monitor-review-819-c-m3w0c-q6801.jpg",
+      "image": "https://ichef.bbci.co.uk/news/768/cpsprodpb/E24F/production/_107053975_tradewar.png",
       "tags": [
         "smallhd",
         "oled",

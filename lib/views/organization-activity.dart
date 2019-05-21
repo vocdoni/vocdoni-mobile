@@ -6,9 +6,11 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/widgets/feed-item-card.dart';
+import 'package:vocdoni/widgets/feedItemCard.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+
+import 'activity-post.dart';
 
 class OrganizationActivity extends StatefulWidget {
   @override
@@ -75,9 +77,9 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     ));
   }
 
-  onTapItem(BuildContext ctx, NewsPost item) {
-    Navigator.of(ctx).pushNamed("/web/viewer",
-        arguments: item.contentHtml ?? "<p>${item.contentText}</p>");
+  onTapItem(BuildContext ctx, NewsPost post) {
+     Navigator.of(ctx).pushNamed("/organizations/activity/post",
+        arguments: ActivityPostArguments( post));
   }
 
   NewsFeed digestGivenOrganizationFeed(
