@@ -10,21 +10,21 @@ class PageTitle extends StatelessWidget {
   @override
   Widget build(context) {
     return Container(
-        padding: EdgeInsets.all(24.0),
+        padding: EdgeInsets.fromLTRB(pagePadding, elementSpacing, pagePadding, elementSpacing),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-          Text(title,
-              style: new TextStyle(
-                  fontSize: 24,
-                  color: titleColor,
-                  fontWeight: FontWeight.w700)),
-          SizedBox(height: 10),
-          Text(subtitle,
-              style: new TextStyle(
-                  fontSize: 16,
-                  color: guideColor,
-                  fontWeight: FontWeight.w400)),
-        ]));
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(title,
+                  style: new TextStyle(
+                      fontSize: 22,
+                      color: titleColor,
+                      fontWeight: FontWeight.w700)),
+              SizedBox(height: 10),
+              Text(subtitle,
+                  style: new TextStyle(
+                      fontSize: 16,
+                      color: guideColor,
+                      fontWeight: FontWeight.w400)),
+            ]));
   }
 }
