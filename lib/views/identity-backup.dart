@@ -80,6 +80,7 @@ class IdentityBackupScreen extends StatelessWidget {
         args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
 
     return Scaffold(
+      backgroundColor: baseBackgroundColor,
         body: Center(
       child: Align(
           alignment: Alignment(0, 0),
@@ -99,7 +100,7 @@ class IdentityBackupScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
               child: Text(
-                "I wrote them!",
+                "I wrote them down",
                 style: TextStyle(fontSize: 20.0),
               ),
             )
