@@ -81,6 +81,8 @@ class NewsFeedsBloc {
           NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang", strFeed);
     }));
 
+    await readState();
+
     return orgFeeds;
   }
 }
@@ -163,35 +165,4 @@ class NewsPost {
         tags = (json['tags'] ?? []).cast<String>().toList(),
         title = json['title'] ?? "",
         url = json['url'] ?? "";
-}
-
-
-
-
-// TODO: REMOVE
-
-class FeedItem {
-  final String id;
-  final String title;
-  final String contentHtml;
-  final String summary;
-  final String image;
-  final String bannerImage;
-  final String datePublished;
-  final String dateModified;
-  final String author;
-  final List<String> tags;
-  
-  FeedItem({
-    this.id,
-    this.title,
-    this.contentHtml,
-    this.summary,
-    this.image,
-    this.bannerImage,
-    this.datePublished,
-    this.dateModified,
-    this.author,
-    this.tags,
-  });
 }

@@ -57,7 +57,9 @@ class IdentitiesBloc {
       return Identity(
         publicKey: decoded["publicKey"],
         alias: decoded["alias"],
-        mnemonic: "This Mnemonic Is Fake Because Is Not Encrypted This Mnemonic Is Fake Because Is Not Encrypted One Two",
+        // TODO: REMOVE
+        mnemonic:
+            "This Mnemonic Is Fake Because Is Not Encrypted This Mnemonic Is Fake Because Is Not Encrypted One Two",
         address: addr,
         organizations: orgs
             .where((String org) => org != null)
@@ -155,13 +157,11 @@ class IdentitiesBloc {
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
 
-    // Deferred news feed fetch
-    Timer(Duration(milliseconds: 200), () {
-      newsFeedsBloc.fetchOrganizationFeeds(newOrganization);
-    });
-
     // Refresh state
     await readState();
+
+    // Fetch after the organization is registered
+    newsFeedsBloc.fetchOrganizationFeeds(newOrganization);
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
