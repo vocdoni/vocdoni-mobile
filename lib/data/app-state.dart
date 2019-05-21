@@ -31,7 +31,6 @@ class AppStateBloc {
 
       AppState newState = AppState()
         ..selectedIdentity = _state.value.selectedIdentity
-        ..selectedOrganization = _state.value.selectedOrganization
         ..bootnodes = deserializedBootNodes;
 
       _state.add(newState);
@@ -77,7 +76,6 @@ class AppStateBloc {
   selectIdentity(int identityIdx) {
     AppState newState = AppState()
       ..selectedIdentity = identityIdx
-      ..selectedOrganization = 0
       ..bootnodes = _state.value.bootnodes;
 
     _state.add(newState);
@@ -88,7 +86,6 @@ class AppStateBloc {
   selectOrganization(int organizationIdx) {
     AppState newState = AppState()
       ..selectedIdentity = _state.value.selectedIdentity
-      ..selectedOrganization = organizationIdx
       ..bootnodes = _state.value.bootnodes;
 
     _state.add(newState);
@@ -103,7 +100,6 @@ class AppStateBloc {
 
     AppState newState = AppState()
       ..selectedIdentity = _state.value.selectedIdentity
-      ..selectedOrganization = _state.value.selectedOrganization
       ..bootnodes = bootnodes;
 
     _state.add(newState);
@@ -112,13 +108,9 @@ class AppStateBloc {
 
 class AppState {
   int selectedIdentity = 0;
-  int selectedOrganization = 0;
   List<BootNode> bootnodes = [];
 
-  AppState(
-      {this.selectedIdentity = 0,
-      this.selectedOrganization = 0,
-      this.bootnodes = const []});
+  AppState({this.selectedIdentity = 0, this.bootnodes = const []});
 }
 
 class BootNode {
