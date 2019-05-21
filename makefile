@@ -21,6 +21,8 @@ info:
 	@echo "  $$ make launch-android-link"
 	@echo
 	@echo "  $$ make run"
+	@echo "  $$ make apk"
+	@echo "  $$ make ios"
 	@echo
 
 ###############################################################################
@@ -44,3 +46,10 @@ launch-android-link:
 
 run: 
 	flutter run
+
+apk:
+	flutter build apk
+	if [ -x $(which open) ] ; then open build/app/outputs/apk/release ; fi
+
+ios:
+	flutter build ios
