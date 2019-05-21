@@ -1,10 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-// import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/toast.dart';
-import '../lang/index.dart';
 
 class IdentityBackupArguments {
   final AppState appState;
@@ -39,6 +35,42 @@ class MnemonicWord extends StatelessWidget {
   }
 }
 
+class Mnemonic2Columns extends StatelessWidget {
+  final List<String> mnemonic;
+
+  Mnemonic2Columns({this.mnemonic});
+
+  @override
+  Widget build(context) {
+    int half = (mnemonic.length / 2).ceil();
+    List<String> l1 = mnemonic.sublist(0, half);
+    List<String> l2 = mnemonic.sublist(half, mnemonic.length);
+    int i = 1;
+
+    return Container(
+        constraints: BoxConstraints(maxHeight: 500, maxWidth: 400),
+        color: Color(0x00ff0000),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: l1
+                  .map((word) => MnemonicWord(
+                        idx: i++,
+                        word: word,
+                      ))
+                  .toList()),
+          Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: l2
+                  .map((word) => MnemonicWord(
+                        idx: i++,
+                        word: word,
+                      ))
+                  .toList())
+        ]));
+  }
+}
+
 class IdentityBackupScreen extends StatelessWidget {
   @override
   Widget build(context) {
@@ -46,41 +78,32 @@ class IdentityBackupScreen extends StatelessWidget {
         ModalRoute.of(context).settings.arguments;
     List<String> mnemonic =
         args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
-    int half = (mnemonic.length / 2).ceil();
-    List<String> l1 = mnemonic.sublist(0, half);
-    List<String> l2 = mnemonic.sublist(half, mnemonic.length);
-    int i = 1;
 
     return Scaffold(
         body: Center(
       child: Align(
           alignment: Alignment(0, 0),
-          child: Container(
-              constraints: BoxConstraints(maxHeight: 600, maxWidth: 400),
-              color: Color(0x00ff0000),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    
-                    children: l1
-                        .map((word) => MnemonicWord(
-                              idx: i++,
-                              word: word,
-                            ))
-                        .toList()),
-                Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    
-                    children: l2
-                        .map((word) => MnemonicWord(
-                              idx: i++,
-                              word: word,
-                            ))
-                        .toList())
-              ]))
-          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+            Mnemonic2Columns(mnemonic: mnemonic),
+            FlatButton(
+              
+              color: blueColor,
+              textColor: Colors.white,
+              disabledColor: Colors.grey,
+              disabledTextColor: Colors.black,
+              padding: EdgeInsets.all(buttonPadding),
+              splashColor: Colors.blueAccent,
+              onPressed: () { 
+                Navigator.pop(context);
+              },
+              child: Text(
+                "I wrote them!",
+                style: TextStyle(fontSize: 20.0),
+              ),
+            )
+          ])),
     ));
   }
 }
