@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/feed-item-card.dart';
+import 'package:vocdoni/widgets/feedItemCard.dart';
 
 class FeedTab extends StatelessWidget {
   final AppState appState;

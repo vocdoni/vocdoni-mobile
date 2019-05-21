@@ -6,7 +6,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/widgets/feed-item-card.dart';
+import 'package:vocdoni/widgets/feedItemCard.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
