@@ -46,7 +46,7 @@ class ActivityPostScreen extends StatelessWidget {
               subtitle: post.author,
             ),
             buildHtml(post.contentHtml),
-            /*Html(
+            Html(
               data: post.contentHtml,
               padding: EdgeInsets.fromLTRB(
                   pagePadding, 0, pagePadding, cardSpacing),
@@ -59,7 +59,7 @@ class ActivityPostScreen extends StatelessWidget {
                             return Column(children: children);
                         }
                     },*/
-            ),*/
+            ),
           ],
         ));
   }
@@ -71,12 +71,16 @@ class ActivityPostScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, cardSpacing),
         width: double.infinity,
         height: 500,
-        child:
-            WebView(initialUrl: uri, javascriptMode: JavascriptMode.disabled));
+        child: WebView(
+            navigationDelegate: (NavigationRequest request) {
+                launchUrl(request.url);
+                return NavigationDecision.prevent;
+            },
+            initialUrl: uri,
+            javascriptMode: JavascriptMode.disabled));
   }
 
-  launchUrl(url) async {
-    // TODO: Uninstall url_launcher and use inapp_webview instead
+  launchUrl(String url) async {
     print(url);
     if (await canLaunch(url)) {
       await launch(url);
