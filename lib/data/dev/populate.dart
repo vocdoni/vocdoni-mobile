@@ -53,7 +53,7 @@ String _makeOrganization(String name) {
     ],
     "entity-name": "$name",
     "entity-description": {
-        "en": "The description of $name goes here",
+        "en": "The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. ",
         "fr": "La description officielle de $name est ici"
     },
     "voting-contract": "0x0",
