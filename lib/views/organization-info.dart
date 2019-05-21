@@ -19,9 +19,7 @@ class OrganizationInfo extends StatelessWidget {
         appStateBloc.current.selectedIdentity >= 0) {
       final Identity currentIdentity =
           identitiesBloc.current[appStateBloc.current.selectedIdentity];
-      if (currentIdentity != null &&
-          appStateBloc.current.selectedOrganization >= 0 &&
-          currentIdentity.organizations.length > 0) {
+      if (currentIdentity != null && currentIdentity.organizations.length > 0) {
         alreadySubscribed = currentIdentity.organizations
             .any((o) => o.entityId == organization.entityId);
       }

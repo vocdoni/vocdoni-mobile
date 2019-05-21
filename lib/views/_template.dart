@@ -19,8 +19,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Text("Web Runtime trigger"),
                 onTap: () => handleRuntimeCall()),
             Spacer(),
-            InkWell(child: Text("Set Entity 1"), onTap: () => incIdent()),
-            InkWell(child: Text("Set Org 1"), onTap: () => incOrg()),
+            InkWell(child: Text("Set Entity ++"), onTap: () => incIdent()),
             Spacer(),
             StreamBuilder(
                 stream: appStateBloc.stream,
@@ -28,13 +27,6 @@ class WelcomeScreen extends StatelessWidget {
                     (BuildContext context, AsyncSnapshot<AppState> snapshot) {
                   final state = snapshot?.data;
                   return Text("Entity Idx: ${state?.selectedIdentity ?? 0}");
-                }),
-            StreamBuilder(
-                stream: appStateBloc.stream,
-                builder:
-                    (BuildContext context, AsyncSnapshot<AppState> snapshot) {
-                  final state = snapshot?.data;
-                  return Text("Org Idx: ${state?.selectedOrganization ?? 0}");
                 }),
             Spacer(),
           ],
@@ -56,10 +48,5 @@ class WelcomeScreen extends StatelessWidget {
 
   incIdent() {
     appStateBloc.selectIdentity(appStateBloc.current.selectedIdentity + 1);
-  }
-
-  incOrg() {
-    appStateBloc
-        .selectOrganization(appStateBloc.current.selectedOrganization + 1);
   }
 }

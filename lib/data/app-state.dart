@@ -81,6 +81,8 @@ class AppStateBloc {
       ..bootnodes = _state.value.bootnodes;
 
     _state.add(newState);
+
+    // TODO: TRIGGER UPDATE
   }
 
   selectOrganization(int organizationIdx) {

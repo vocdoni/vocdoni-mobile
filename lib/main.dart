@@ -13,9 +13,6 @@ import 'util/singletons.dart';
 import 'lang/index.dart';
 
 // import "views/welcome-onboarding.dart";
-// import "views/welcome-identity.dart";
-// import "views/welcome-identity-create.dart";
-// import "views/welcome-identity-recover.dart";
 import "views/home.dart";
 import "views/identity-create.dart";
 
