@@ -1,6 +1,7 @@
 import 'dart:async';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
@@ -12,6 +13,8 @@ import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/widgets/topNavigation.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -109,6 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
                 return Scaffold(
+                  appBar: TopNavigation(
+                    title: getTabName(selectedTab),
+                  ),
+                  backgroundColor: baseBackgroundColor,
                   key: homePageScaffoldKey,
                   body: buildBody(ctx, appState?.data, identities?.data),
                   bottomNavigationBar: BottomNavigation(
@@ -159,5 +166,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       selectedTab = idx;
     });
+  }
+
+  getTabName(int idx) {
+    if (idx == 0) return "Home";
+    if (idx == 1) return "Your organizations";
+    if (idx == 2) return "Your identity";
   }
 }

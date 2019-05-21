@@ -57,7 +57,7 @@ class IdentitiesBloc {
       return Identity(
         publicKey: decoded["publicKey"],
         alias: decoded["alias"],
-        mnemonic: null,
+        mnemonic: "This Mnemonic Is Fake Because Is Not Encrypted This Mnemonic Is Fake Because Is Not Encrypted One Two",
         address: addr,
         organizations: orgs
             .where((String org) => org != null)
