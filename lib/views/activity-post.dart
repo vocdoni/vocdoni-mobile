@@ -58,7 +58,7 @@ class ActivityPostScreen extends StatelessWidget {
     final String html = styleHtml(htmlBody);
     final uri = uriFromContent(html);
     return Container(
-        padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, cardSpacing),
+        padding: EdgeInsets.fromLTRB(pagePadding, elementSpacing, pagePadding, elementSpacing),
         width: double.infinity,
         height: 500,
         child: WebView(
@@ -73,7 +73,7 @@ class ActivityPostScreen extends StatelessWidget {
   html2(String htmlBody) {
     return Html(
       data: htmlBody,
-      padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, cardSpacing),
+      padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, elementSpacing),
       defaultTextStyle: TextStyle(fontSize: 16),
       onLinkTap: (url) => launchUrl(url),
       /*customRender: (node, children) {
