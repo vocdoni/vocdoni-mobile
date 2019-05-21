@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vocdoni/widgets/topNavigation.dart'; // TODO: REMOVE
+import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 
 class ActivityPostArguments {
   final NewsPost post;
@@ -28,14 +30,26 @@ class ActivityPostScreen extends StatelessWidget {
         backgroundColor: baseBackgroundColor,
         body: ListView(
           children: <Widget>[
+            Container(
+              height: 300,
+              width: double.infinity,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                    color: Color(0xff7c94b6),
+                    image: new DecorationImage(
+                        image: new NetworkImage(post.image),
+                        fit: BoxFit.cover)),
+              ),
+            ),
             PageTitle(
               title: post.title,
               subtitle: post.author,
             ),
-            Html(
+            buildHtml(post.contentHtml),
+            /*Html(
               data: post.contentHtml,
               padding: EdgeInsets.fromLTRB(
-                  pagePadding, cardSpacing, pagePadding, cardSpacing),
+                  pagePadding, 0, pagePadding, cardSpacing),
               defaultTextStyle: TextStyle(fontSize: 16),
               onLinkTap: (url) => launchUrl(url),
               /*customRender: (node, children) {
@@ -45,9 +59,20 @@ class ActivityPostScreen extends StatelessWidget {
                             return Column(children: children);
                         }
                     },*/
-            ),
+            ),*/
           ],
         ));
+  }
+
+  buildHtml(String htmlBody) {
+    final String html = styleHtml(htmlBody);
+    final uri = uriFromContent(html);
+    return Container(
+        padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, cardSpacing),
+        width: double.infinity,
+        height: 500,
+        child:
+            WebView(initialUrl: uri, javascriptMode: JavascriptMode.disabled));
   }
 
   launchUrl(url) async {
@@ -60,17 +85,41 @@ class ActivityPostScreen extends StatelessWidget {
     }
   }
 
-  Widget buildNoOrganization(BuildContext ctx) {
-    // TODO: UI
-    return Center(
-      child: Text("(No organizations)"),
-    );
-  }
-
   Widget buildNoPosts(BuildContext ctx) {
     // TODO: UI
     return Center(
       child: Text("(No posts)"),
     );
+  }
+
+  String styleHtml(String content) {
+    return '''<!DOCTYPE html>
+<html>
+		<head>
+				<meta charset="utf-8">
+				<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
+
+				<style>
+            body {
+							
+              font-family: 'Open Sans' Helvetica Neue', Helvetica, Sans-serif, Arial;
+              	user-select: none;
+              -webkit-user-select: none;
+              margin: 0px;
+              line-height: 1.6;
+              font-size: 16px;
+            }
+
+						img {
+								margin: 15px 0 8px;
+								/*display: none;*/
+								max-width: 100% !important;
+						}
+				</style>
+		</head>
+		<body>
+			$content
+		</body>
+''';
   }
 }
