@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/views/activity-post.dart';
@@ -30,6 +30,15 @@ void main() async {
   Timer(Duration(seconds: 5), () async {
     await appStateBloc.loadBootNodes();
   });
+
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.black, //top bar color
+    statusBarIconBrightness: Brightness.light, //top bar icons
+    systemNavigationBarColor: Colors.black, //bottom bar color
+    systemNavigationBarIconBrightness: Brightness.light, //bottom bar icons
+  ));
+  await SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   // DETERMINE THE FIRST SCREEN
   Widget home;

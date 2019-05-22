@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
+import 'package:native_widgets/native_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 // FETCH RUNTIME DATA
@@ -18,16 +19,21 @@ String uriFromContent(String content) {
 
 class WebAction extends StatefulWidget {
   final String url;
+  final String title;
 
-  WebAction({this.url});
+  WebAction({this.url, this.title});
 
   @override
   _WebActionState createState() => _WebActionState();
 }
 
 class _WebActionState extends State<WebAction> {
-  WebViewController webViewCtrl;
   bool hasPublicReadPermission = false;
+
+  WebViewController webViewCtrl;
+  bool canGoBack = false;
+  bool canGoForward = false;
+  bool loading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -37,23 +43,81 @@ class _WebActionState extends State<WebAction> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Vocdoni"),
+        title: Text(widget.title ?? "Vocdoni"),
       ),
       body: WebView(
-        navigationDelegate: (NavigationRequest req) {
+        navigationDelegate: (NavigationRequest request) {
           // Forget any premissions that the user may have granted before
           hasPublicReadPermission = false;
+          setState(() {
+            loading = true;
+          });
           return NavigationDecision.navigate;
         },
         initialUrl: widget.url,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
-          webViewCtrl = webViewController;
+          setState(() {
+            webViewCtrl = webViewController;
+          });
+        },
+        onPageFinished: (String url) async {
+          if (webViewCtrl == null) return;
+          bool back = await webViewCtrl.canGoBack();
+          bool fwd = await webViewCtrl.canGoForward();
+          setState(() {
+            canGoBack = back;
+            canGoForward = fwd;
+            loading = false;
+          });
         },
         // TODO(iskakaushik): Remove this when collection literals makes it to stable.
         // ignore: prefer_collection_literals
         javascriptChannels: javascriptChannels,
       ),
+      bottomNavigationBar: buildBottomBar(context),
+    );
+  }
+
+  Widget buildBottomBar(BuildContext context) {
+    return BottomAppBar(
+      child: Container(
+          height: 50.0,
+          child: webViewCtrl == null
+              ? Container()
+              : Row(
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      color: canGoBack ? Colors.black54 : Colors.black26,
+                      onPressed: () async {
+                        if (!canGoBack) return;
+                        webViewCtrl.goBack();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      color: canGoForward ? Colors.black54 : Colors.black26,
+                      onPressed: () async {
+                        if (!canGoForward) return;
+                        webViewCtrl.goForward();
+                      },
+                    ),
+                    Spacer(),
+                    loading
+                        ? Padding(
+                            child: NativeLoadingIndicator(),
+                            padding: EdgeInsets.only(right: 12),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.replay),
+                            color: Colors.black54,
+                            onPressed: () {
+                              webViewCtrl.reload();
+                            },
+                          ),
+                  ],
+                )),
     );
   }
 
@@ -115,8 +179,8 @@ class _WebActionState extends State<WebAction> {
         return null;
 
       default:
-        return respondError(id,
-            "Unsupported action type: '${payload["type"]}'");
+        return respondError(
+            id, "Unsupported action type: '${payload["type"]}'");
     }
   }
 
