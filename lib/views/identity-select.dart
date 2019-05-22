@@ -3,7 +3,12 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import '../util/singletons.dart';
 
-class IdentitySelectScreen extends StatelessWidget {
+class IdentitySelectScreen extends StatefulWidget {
+  @override
+  _IdentitySelectScreenState createState() => _IdentitySelectScreenState();
+}
+
+class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -19,15 +24,18 @@ class IdentitySelectScreen extends StatelessWidget {
 
   Widget listContent(
       BuildContext ctx, AppState appState, List<Identity> identities) {
-    return Scaffold(
-        body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Section(text: "Select an identity"),
-        buildIdentities(ctx, identities),
-        ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
-      ],
-    ));
+    return WillPopScope(
+        onWillPop: handleWillPop,
+        child: Scaffold(
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Section(text: "Select an identity"),
+              buildIdentities(ctx, identities),
+              ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
+            ],
+          ),
+        ));
   }
 
   buildIdentities(BuildContext ctx, identities) {
@@ -42,6 +50,26 @@ class IdentitySelectScreen extends StatelessWidget {
     }
     return Column(children: list);
   }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // GLOBAL EVENTS
+  /////////////////////////////////////////////////////////////////////////////
+
+  Future<bool> handleWillPop() async {
+    if (!Navigator.canPop(context)) {
+      // dispose the Web Runtime
+      try {
+        await webRuntime.close();
+      } catch (err) {
+        print(err);
+      }
+    }
+    return true;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // LOCAL EVENTS
+  /////////////////////////////////////////////////////////////////////////////
 
   onIdentitySelected(BuildContext ctx, int idx) {
     appStateBloc.selectIdentity(idx);

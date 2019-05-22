@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:vocdoni/util/net.dart';
 
 // MAIN CLASS
 
@@ -109,6 +110,16 @@ class WebRuntime extends InAppBrowser {
 
     await Future.delayed(Duration(milliseconds: 100));
     requests.removeWhere((req) => req.id == item.id);
+  }
+
+  @override
+  Future<void> close() async {
+    if (this.isOpened()) {
+      if(this.webViewController != null) {
+        await this.webViewController.loadUrl(uriFromContent("<html></html>"));
+      }
+      return super.close();
+    }
   }
 }
 
