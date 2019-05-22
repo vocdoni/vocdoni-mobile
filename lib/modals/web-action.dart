@@ -6,14 +6,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-// FETCH RUNTIME DATA
-
-String uriFromContent(String content) {
-  return new Uri.dataFromString(content,
-          mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-      .toString();
-}
+import 'package:vocdoni/util/net.dart';
 
 /// ACTUAL STATE
 

@@ -15,20 +15,23 @@ class _IdentityCreateScreen extends State {
 
   @override
   Widget build(context) {
-    return Scaffold(
-        body: Center(
-      child: Align(
-        alignment: Alignment(0, -0.3),
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-          color: Color(0x00ff0000),
-          child: generating
-              ? Text("Generating sovereign identity...",
-                  style: TextStyle(fontSize: 18))
-              : buildWelcome(context),
-        ),
-      ),
-    ));
+    return WillPopScope(
+        onWillPop: handleWillPop,
+        child: Scaffold(
+          body: Center(
+            child: Align(
+              alignment: Alignment(0, -0.3),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+                color: Color(0x00ff0000),
+                child: generating
+                    ? Text("Generating sovereign identity...",
+                        style: TextStyle(fontSize: 18))
+                    : buildWelcome(context),
+              ),
+            ),
+          ),
+        ));
   }
 
   buildWelcome(BuildContext context) {
@@ -77,6 +80,26 @@ class _IdentityCreateScreen extends State {
       showErrorMessage(text, context: context);
     }
   }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // GLOBAL EVENTS
+  /////////////////////////////////////////////////////////////////////////////
+
+  Future<bool> handleWillPop() async {
+    if (!Navigator.canPop(context)) {
+      // dispose the Web Runtime
+      try {
+        await webRuntime.close();
+      } catch (err) {
+        print(err);
+      }
+    }
+    return true;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // LOCAL EVENTS
+  /////////////////////////////////////////////////////////////////////////////
 
   showHomePage(BuildContext ctx) {
     // Replace all routes with /home on top
