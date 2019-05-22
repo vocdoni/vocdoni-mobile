@@ -3,32 +3,50 @@ import 'package:vocdoni/constants/colors.dart';
 
 class BaseButton extends StatelessWidget {
   final String text;
+  final void Function() onTap;
   final Icon icon;
   final Color color;
+  final bool secondary;
 
-  const BaseButton({this.text, this.icon, this.color});
-
+  const BaseButton(
+      {this.text, this.onTap, this.icon, this.color, this.secondary = false});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.red,
-      borderOnForeground: true,
-      //borderRadius: BorderRadius.circular(8.0),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(width: 2.0, color: Colors.lightBlue.shade900)),
-      elevation: 5,
-      child: InkWell(
-        onTap: () => print("Tap!"),
-        child: SizedBox(
-          width: 50.0,
-          height: 48.0,
-          child: Center(
-            child: Text("Tap me!"),
-          ),
-        ),
-      ),
-    );
+    Color c1 = color == null ? blueColor : color;
+    Color c2 = Colors.transparent;
+    Color ct = Colors.white;
+
+    if (secondary) {
+      c2 = c1;
+      c1 = Colors.transparent;
+      ct = c2;
+    }
+
+    return Align(
+        alignment: Alignment.center,
+        child: Container(
+            constraints: BoxConstraints( maxWidth: 150, minHeight: 32),
+            child: Material(
+              color: c1,
+              borderOnForeground: true,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  side: BorderSide(width: 2.0, color: c2)),
+              child: InkWell(
+                onTap: () => onTap,
+                child: SizedBox(
+                  child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(elementSpacing,0,elementSpacing,0),
+                    child: Text(text,
+                        style: TextStyle(
+                            color: ct,
+                            fontWeight: semiBoldFontWeight,
+                            fontSize: 16)),
+                  )),
+                ),
+              ),
+            )));
   }
 }
