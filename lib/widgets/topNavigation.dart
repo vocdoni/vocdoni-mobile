@@ -17,11 +17,15 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget {
         title,
         style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),
       ),
+      brightness: Brightness.light, // or use Brightness.dark
       centerTitle: true,
       leading: Navigator.canPop(context)
           ? InkWell(
               onTap: () => Navigator.pop(context),
-              child: Icon(FeatherIcons.arrowLeft, color: descriptionColor,))
+              child: Icon(
+                FeatherIcons.arrowLeft,
+                color: descriptionColor,
+              ))
           : null,
     );
   }

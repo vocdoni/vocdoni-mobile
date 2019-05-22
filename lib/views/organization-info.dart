@@ -39,7 +39,10 @@ class OrganizationInfo extends StatelessWidget {
             subtitle: organization.entityId,
           ),
           Section(text: "Description"),
-          Summary(text: organization.description[organization.languages[0]], maxLines: 5,),
+          Summary(
+            text: organization.description[organization.languages[0]],
+            maxLines: 5,
+          ),
           Section(text: "Actions"),
           ListItem(
             text: "Activity",
@@ -88,6 +91,7 @@ class OrganizationInfo extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (context) => WebAction(
                             url: action["url"],
+                            title: action["name"][organization.languages[0]] ?? organization.name,
                           )));
             },
           );
@@ -151,5 +155,3 @@ class OrganizationInfo extends StatelessWidget {
     Navigator.pop(ctx, false);
   }
 }
-
-
