@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 // import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
@@ -74,10 +75,17 @@ class _IdentityCreateScreen extends State {
 
       showHomePage(context);
     } catch (err) {
+      setState(() {
+        generating = false;
+      });
       String text = Lang.of(context)
           .get("An error occurred while generating the identity");
 
-      showErrorMessage(text, context: context);
+      if (err == "The account already exists") {
+        text = Lang.of(context).get("The account already exists");
+      }
+      showAlert(
+          title: Lang.of(context).get("Error"), text: text, context: context);
     }
   }
 
