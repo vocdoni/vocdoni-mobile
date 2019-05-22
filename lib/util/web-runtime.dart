@@ -5,20 +5,20 @@ import 'package:vocdoni/util/net.dart';
 // MAIN CLASS
 
 class WebRuntime extends InAppBrowser {
-  Completer _init;
+  Completer _initializer;
   List<RequestItem> requests = new List<RequestItem>();
   int requestCounter = 0;
 
   Future init() async {
-    if (_init == null) {
-      _init = new Completer();
-    } else if (_init.isCompleted) {
+    if (_initializer == null) {
+      _initializer = new Completer();
+    } else if (_initializer.isCompleted) {
       return;
     }
 
     await this.openFile("assets/runtime.html",
         options: {"useShouldOverrideUrlLoading": true, "hidden": true});
-    await _init.future;
+    await _initializer.future;
 
     // listen for post messages coming from the JavaScript side
     this.webViewController.addJavaScriptHandler("JS_REQUEST_RESPONSE_CHANNEL",
@@ -28,13 +28,13 @@ class WebRuntime extends InAppBrowser {
   @override
   onLoadStop(String url) {
     // The HTML asset has completed loading
-    _init.complete();
+    _initializer.complete();
   }
 
   @override
   void onLoadError(String url, int code, String message) {
     // The asset could not load
-    _init.completeError("Unable to initialize the Web Runtime");
+    _initializer.completeError("Unable to initialize the Web Runtime");
   }
 
   @override
@@ -106,16 +106,24 @@ class WebRuntime extends InAppBrowser {
     } else {
       item.completer.complete(data);
     }
+
     item.timeout.cancel();
 
     await Future.delayed(Duration(milliseconds: 100));
+
     requests.removeWhere((req) => req.id == item.id);
+
+    // dispose if unused
+    if (requests.length == 0) {
+      await this.close();
+      _initializer = null;
+    }
   }
 
   @override
   Future<void> close() async {
     if (this.isOpened()) {
-      if(this.webViewController != null) {
+      if (this.webViewController != null) {
         await this.webViewController.loadUrl(uriFromContent("<html></html>"));
       }
       return super.close();
