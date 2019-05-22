@@ -17,9 +17,9 @@ final Color titleColor = Color(0xFF000000);
 
 final Color chipColor = Color(0xFFFFEEBF);
 
-final Color blueColor=Color(0xFF66BBEF);
-final Color redColor =Color(0xFFFF7C7C);
-final Color greenColor =Color(0xFF77DD77);
+final Color blueColor = Color(0xFF66BBEF);
+final Color redColor = Color(0xFFFF7C7C);
+final Color greenColor = Color(0xFF77DD77);
 
 final Color linkColor = blueColor;
 
@@ -32,3 +32,7 @@ final FontWeight lightFontWeight = FontWeight.w300;
 final FontWeight regularFontWeight = FontWeight.w400;
 final FontWeight semiBoldFontWeight = FontWeight.w600;
 final FontWeight boldFontWeight = FontWeight.w700;
+
+addOpacityToColor(Color color, double opacity) {
+  return Color.fromRGBO(color.red, color.green, color.blue, opacity);
+}
