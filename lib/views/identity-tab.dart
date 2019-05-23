@@ -44,7 +44,7 @@ class IdentityTab extends StatelessWidget {
         kReleaseMode // TODO: DEV BUTTON OUT
             ? Container()
             : ListItem(
-                text: "[DEV] Add fake organizations",
+                text: "[DEV] Add test organizations",
                 onTap: () async {
                   // TODO: REMOVE
                   try {

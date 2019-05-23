@@ -14,6 +14,9 @@ class WebRuntime extends InAppBrowser {
       _initializer = new Completer();
     } else if (_initializer.isCompleted) {
       return;
+    } else if (this.isOpened()) {
+      _initializer.complete();
+      return;
     }
 
     await this.openFile("assets/runtime.html",

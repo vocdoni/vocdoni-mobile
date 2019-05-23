@@ -8,6 +8,8 @@ PODS:
     - Flutter
   - uni_links (0.0.1):
     - Flutter
+  - url_launcher (0.0.1):
+    - Flutter
   - webview_flutter (0.0.1):
     - Flutter
 
@@ -17,6 +19,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
 
 EXTERNAL SOURCES:
@@ -30,6 +33,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   uni_links:
     :path: ".symlinks/plugins/uni_links/ios"
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
   webview_flutter:
     :path: ".symlinks/plugins/webview_flutter/ios"
 
@@ -39,6 +44,7 @@ SPEC CHECKSUMS:
   flutter_secure_storage: dbcc8ff35d99569c3a4d3b483afa3339416c1a78
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
   uni_links: 5ee5240df5cbffc52d9e7f8017a576b6a6bc5141
+  url_launcher: 92b89c1029a0373879933c21642958c874539095
   webview_flutter: 9bd234c07e99632356cba112df56fd1d47d6b6e3
 
 PODFILE CHECKSUM: ebd43b443038e611b86ede96e613bd6033c49497
