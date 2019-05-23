@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
@@ -26,7 +27,6 @@ class OrganizationInfo extends StatelessWidget {
             .any((o) => o.entityId == organization.entityId);
       }
     }
-
    
     double totalHeaderHeight = 350;
     double titleHeight = 50;
@@ -45,6 +45,9 @@ class OrganizationInfo extends StatelessWidget {
               //title: Text('SliverAppBar'),
               backgroundColor: baseBackgroundColor,
               expandedHeight: totalHeaderHeight,
+              leading: InkWell(
+              onTap: () => Navigator.pop(context),
+              child: Icon(FeatherIcons.arrowLeft, color: descriptionColor,)),
               flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                 pos = constraints.biggest.height;
