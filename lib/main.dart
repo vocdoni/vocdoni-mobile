@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/views/activity-post.dart';
@@ -8,8 +8,6 @@ import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/views/organization-activity.dart';
 import 'package:vocdoni/views/organization-info.dart';
-// import 'package:vocdoni/views/identity-details.dart';
-// import 'package:vocdoni/views/organizations.dart';
 
 import 'dart:async';
 import 'util/singletons.dart';
@@ -26,10 +24,13 @@ void main() async {
   await electionsBloc.restore();
   await newsFeedsBloc.restore();
 
-  // POST RENDER TRIGGERS
+  // POST-BOOTSTRAP ACTIONS
   Timer(Duration(seconds: 5), () async {
     await appStateBloc.loadBootNodes();
   });
+
+  await SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   // DETERMINE THE FIRST SCREEN
   Widget home;

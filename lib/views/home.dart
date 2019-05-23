@@ -1,3 +1,4 @@
+// import 'dart:io';
 import 'dart:async';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
@@ -13,7 +14,7 @@ import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+// import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int selectedTab = 0;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -33,12 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     try {
-      // Handle the app launch link
+      // HANDLE APP LAUNCH LINK
       getInitialUri()
           .then((initialUri) => handleLink(initialUri))
           .catchError((err) => handleIncomingLinkError(err));
 
-      // Listen to link changes
+      // HANDLE RUNTIME LINKS
       linkChangeStream = getUriLinksStream()
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
     } catch (err) {
@@ -49,7 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
           context: context);
     }
 
-    // Check if there are no organizations => show identity
+    // APP EVENT LISTENER
+    WidgetsBinding.instance.addObserver(this);
+
+    // DETERMINE INITIAL TAB
+    // No organizations => identity
     if (identitiesBloc.current == null || identitiesBloc.current == null) {
       selectedTab = 2;
     } else if (appStateBloc != null &&
@@ -93,9 +98,53 @@ class _HomeScreenState extends State<HomeScreen> {
         context: homePageScaffoldKey.currentContext);
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+  // GLOBAL EVENTS
+  /////////////////////////////////////////////////////////////////////////////
+
+  Future<bool> handleWillPop() async {
+    if (!Navigator.canPop(context)) {
+      // dispose the Web Runtime
+      try {
+        await webRuntime.close();
+      } catch (err) {
+        print(err);
+      }
+    }
+    return true;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.inactive:
+        print("Inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("Paused");
+        break;
+      case AppLifecycleState.resumed:
+        print("Resumed");
+        break;
+      case AppLifecycleState.suspending:
+        print("Suspending");
+        break;
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // CLEANUP
+  /////////////////////////////////////////////////////////////////////////////
+
   @override
   void dispose() {
+    // RUNTIME LINK HANDLING
     if (linkChangeStream != null) linkChangeStream.cancel();
+
+    // APP EVENT LISTENER
+    WidgetsBinding.instance.removeObserver(this);
+
     super.dispose();
   }
 
@@ -111,19 +160,20 @@ class _HomeScreenState extends State<HomeScreen> {
           return StreamBuilder(
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return Scaffold(
-                  appBar: TopNavigation(
-                    title: getTabName(selectedTab),
-                    showBackButton: false,
-                  ),
-                  backgroundColor: baseBackgroundColor,
-                  key: homePageScaffoldKey,
-                  body: buildBody(ctx, appState?.data, identities?.data),
-                  bottomNavigationBar: BottomNavigation(
-                    onTabSelect: (index) => onTabSelect(index),
-                    selectedTab: selectedTab,
-                  ),
-                );
+                return WillPopScope(
+                    onWillPop: handleWillPop,
+                    child: Scaffold(
+                      appBar: TopNavigation(
+                        title: getTabName(selectedTab),
+                      ),
+                      backgroundColor: baseBackgroundColor,
+                      key: homePageScaffoldKey,
+                      body: buildBody(ctx, appState?.data, identities?.data),
+                      bottomNavigationBar: BottomNavigation(
+                        onTabSelect: (index) => onTabSelect(index),
+                        selectedTab: selectedTab,
+                      ),
+                    ));
               });
         });
   }

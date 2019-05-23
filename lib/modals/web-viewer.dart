@@ -1,16 +1,8 @@
-import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-// FETCH RUNTIME DATA
-
-String uriFromContent(String content) {
-  return new Uri.dataFromString(content,
-          mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-      .toString();
-}
+import 'package:vocdoni/util/net.dart';
 
 class WebViewer extends StatefulWidget {
   @override
@@ -32,72 +24,76 @@ class _WebViewerState extends State<WebViewer> {
     final uri = uriFromContent(html);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Vocdoni"),
-      ),
-      body: WebView(
-        initialUrl: uri,
-        javascriptMode: JavascriptMode.disabled,
-        onWebViewCreated: (WebViewController webViewController) {
-          setState(() {
-            webViewCtrl = webViewController;
-          });
-        },
-        navigationDelegate: (NavigationRequest request) {
-          setState(() {
-            loading = true;
-          });
-          return NavigationDecision.navigate;
-        },
-        onPageFinished: (String url) async {
-          bool back = await webViewCtrl.canGoBack();
-          bool fwd = await webViewCtrl.canGoForward();
-          setState(() {
-            canGoBack = back;
-            canGoForward = fwd;
-            loading = false;
-          });
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-            height: 50.0,
-            child: webViewCtrl == null
-                ? Container()
-                : Row(
-                    children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        color: canGoBack ? Colors.black54 : Colors.black26,
-                        onPressed: () async {
-                          if (!canGoBack) return;
-                          webViewCtrl.goBack();
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        color: canGoForward ? Colors.black54 : Colors.black26,
-                        onPressed: () async {
-                          if (!canGoForward) return;
-                          webViewCtrl.goForward();
-                        },
-                      ),
-                      Spacer(),
-                      loading
-                          ? Padding(
-                              child: NativeLoadingIndicator(),
-                              padding: EdgeInsets.only(right: 12),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.replay),
-                              color: Colors.black54,
-                              onPressed: () {
-                                webViewCtrl.reload();
-                              },
-                            ),
-                    ],
-                  )),
-      ),
+        appBar: AppBar(
+          title: Text("Vocdoni"),
+        ),
+        body: WebView(
+          initialUrl: uri,
+          javascriptMode: JavascriptMode.disabled,
+          onWebViewCreated: (WebViewController webViewController) {
+            setState(() {
+              webViewCtrl = webViewController;
+            });
+          },
+          navigationDelegate: (NavigationRequest request) {
+            setState(() {
+              loading = true;
+            });
+            return NavigationDecision.navigate;
+          },
+          onPageFinished: (String url) async {
+            if (webViewCtrl == null) return;
+            bool back = await webViewCtrl.canGoBack();
+            bool fwd = await webViewCtrl.canGoForward();
+            setState(() {
+              canGoBack = back;
+              canGoForward = fwd;
+              loading = false;
+            });
+          },
+        ),
+        bottomNavigationBar: buildBottomBar(context));
+  }
+
+  Widget buildBottomBar(BuildContext context) {
+    return BottomAppBar(
+      child: Container(
+          height: 50.0,
+          child: webViewCtrl == null
+              ? Container()
+              : Row(
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      color: canGoBack ? Colors.black54 : Colors.black26,
+                      onPressed: () async {
+                        if (!canGoBack) return;
+                        webViewCtrl.goBack();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      color: canGoForward ? Colors.black54 : Colors.black26,
+                      onPressed: () async {
+                        if (!canGoForward) return;
+                        webViewCtrl.goForward();
+                      },
+                    ),
+                    Spacer(),
+                    loading
+                        ? Padding(
+                            child: NativeLoadingIndicator(),
+                            padding: EdgeInsets.only(right: 12),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.replay),
+                            color: Colors.black54,
+                            onPressed: () {
+                              webViewCtrl.reload();
+                            },
+                          ),
+                  ],
+                )),
     );
   }
 
