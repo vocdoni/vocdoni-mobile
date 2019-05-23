@@ -1,10 +1,9 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
@@ -34,107 +33,36 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
       }
     }
 
-    double totalHeaderHeight = 350;
-    double titleHeight = 50;
-    double headerImageHeight = totalHeaderHeight - titleHeight;
-    double pos = 0;
-    double opacity = 0;
-
-    return Scaffold(
-      backgroundColor: baseBackgroundColor,
-      body: CustomScrollView(
-        controller: ScrollController(),
-        slivers: [
-          SliverAppBar(
-              floating: false,
-              snap: false,
-              pinned: true,
-              elevation: 0,
-              //title: Text('SliverAppBar'),
-              backgroundColor: baseBackgroundColor,
-              expandedHeight: totalHeaderHeight,
-              leading: InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(
-                    FeatherIcons.arrowLeft,
-                    color: collapsed ? descriptionColor : Colors.white,
-                  )),
-              flexibleSpace: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                pos = constraints.biggest.height;
-                // print('constraints=' + constraints.toString());
-                double minAppBarHeight = 48;
-
-                double o = ((pos - minAppBarHeight) / (titleHeight));
-                opacity = o < 1 ? o : 1;
-                debugPrint(opacity.toString());
-
-                double collapseTrigger = 0.5;
-                if (o < collapseTrigger && collapsed == false) {
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    setState(() {
-                      collapsed = true;
-                    });
-                  });
-                } else if (o >= collapseTrigger && collapsed == true) {
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    setState(() {
-                      collapsed = false;
-                    });
-                  });
-                }
-
-                return FlexibleSpaceBar(
-                    collapseMode: CollapseMode.pin,
-                    centerTitle: true,
-                    title: Text(
-                      organization.name,
-                      style: TextStyle(
-                          color: descriptionColor.withOpacity(1 - opacity),
-                          fontWeight: lightFontWeight),
-                    ),
-                    background: Column(children: [
-                      Expanded(
-                        child: Image.network(
-                            "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
-                            fit: BoxFit.cover,
-                            height: headerImageHeight,
-                            width: double.infinity),
-                      ),
-                      PageTitle(
-                        title: organization.name,
-                        subtitle: organization.entityId,
-                        titleColor: titleColor.withOpacity(opacity),
-                      ),
-                      //ListItem( text: opacity.toString(),)
-                    ]));
-              })),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              Section(text: "Description"),
-              Summary(
-                text: organization.description[organization.languages[0]],
-                maxLines: 5,
-              ),
-              Section(text: "Actions"),
-              ListItem(
-                text: "Activity",
-                onTap: () {
-                  Navigator.pushNamed(context, "/organizations/activity",
-                      arguments: organization);
-                },
-              ),
-              (alreadySubscribed
-                  ? buildAlreadySubscribed(
-                      context, organization) // CUSTOM ACTIONS
-                  : buildSubscriptionTiles(context, organization) // SUBSCRIBE
-
-              ),
-            ]),
+    return ScaffoldWithImage(
+        headerImageUrl:
+            "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
+        title: organization.name,
+        collapsedTitle: organization.name,
+        subtitle: organization.name,
+        children: [
+          Section(text: "Description"),
+          Summary(
+            text: organization.description[organization.languages[0]],
+            maxLines: 5,
           ),
-        ],
-      ),
-    );
+           Summary(
+            text: organization.description[organization.languages[0]],
+            maxLines: 50,
+          ),
+          Section(text: "Actions"),
+          ListItem(
+            text: "Activity",
+            onTap: () {
+              Navigator.pushNamed(context, "/organizations/activity",
+                  arguments: organization);
+            },
+          ),
+          (alreadySubscribed
+              ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
+              : buildSubscriptionTiles(context, organization) // SUBSCRIBE
+
+          ),
+        ]);
   }
 
   /// NO ORGANIZATION
