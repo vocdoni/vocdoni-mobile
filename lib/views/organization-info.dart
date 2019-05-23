@@ -2,15 +2,21 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
-class OrganizationInfo extends StatelessWidget {
+class OrganizationInfo extends StatefulWidget {
+  @override
+  _OrganizationInfoState createState() => _OrganizationInfoState();
+}
+
+class _OrganizationInfoState extends State<OrganizationInfo> {
+  bool collapsed = false;
   @override
   Widget build(context) {
     final Organization organization = ModalRoute.of(context).settings.arguments;
@@ -27,21 +33,21 @@ class OrganizationInfo extends StatelessWidget {
       }
     }
 
-    return Scaffold(
-      appBar: TopNavigation(
-        title: "",
-      ),
-      backgroundColor: baseBackgroundColor,
-      body: ListView(
-        children: <Widget>[
-          PageTitle(
-            title: organization.name,
-            subtitle: organization.entityId,
-          ),
+    return ScaffoldWithImage(
+        headerImageUrl:
+            "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
+        title: organization.name,
+        collapsedTitle: organization.name,
+        subtitle: organization.name,
+        children: [
           Section(text: "Description"),
           Summary(
             text: organization.description[organization.languages[0]],
             maxLines: 5,
+          ),
+           Summary(
+            text: organization.description[organization.languages[0]],
+            maxLines: 50,
           ),
           Section(text: "Actions"),
           ListItem(
@@ -51,12 +57,12 @@ class OrganizationInfo extends StatelessWidget {
                   arguments: organization);
             },
           ),
-          alreadySubscribed
+          (alreadySubscribed
               ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
               : buildSubscriptionTiles(context, organization) // SUBSCRIBE
-        ],
-      ),
-    );
+
+          ),
+        ]);
   }
 
   /// NO ORGANIZATION
@@ -91,7 +97,8 @@ class OrganizationInfo extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (context) => WebAction(
                             url: action["url"],
-                            title: action["name"][organization.languages[0]] ?? organization.name,
+                            title: action["name"][organization.languages[0]] ??
+                                organization.name,
                           )));
             },
           );
