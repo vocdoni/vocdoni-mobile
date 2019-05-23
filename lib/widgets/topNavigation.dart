@@ -5,8 +5,9 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 class TopNavigation extends StatelessWidget with PreferredSizeWidget {
   final String title;
+  final bool showBackButton; 
 
-  TopNavigation({this.title});
+  TopNavigation({this.title, this.showBackButton = true});
 
   @override
   Widget build(context) {
@@ -18,7 +19,7 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget {
         style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),
       ),
       centerTitle: true,
-      leading: Navigator.canPop(context)
+      leading: showBackButton
           ? InkWell(
               onTap: () => Navigator.pop(context),
               child: Icon(FeatherIcons.arrowLeft, color: descriptionColor,))

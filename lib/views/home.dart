@@ -114,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Scaffold(
                   appBar: TopNavigation(
                     title: getTabName(selectedTab),
+                    showBackButton: false,
                   ),
                   backgroundColor: baseBackgroundColor,
                   key: homePageScaffoldKey,
