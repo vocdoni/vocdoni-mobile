@@ -41,8 +41,10 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     double opacity = 0;
 
     return Scaffold(
-        backgroundColor: baseBackgroundColor,
-        body: CustomScrollView(controller: ScrollController(), slivers: [
+      backgroundColor: baseBackgroundColor,
+      body: CustomScrollView(
+        controller: ScrollController(),
+        slivers: [
           SliverAppBar(
               floating: false,
               snap: false,
@@ -114,10 +116,6 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
                 text: organization.description[organization.languages[0]],
                 maxLines: 5,
               ),
-              Summary(
-                text: organization.description[organization.languages[0]],
-                maxLines: 10,
-              ),
               Section(text: "Actions"),
               ListItem(
                 text: "Activity",
@@ -134,19 +132,6 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
               ),
             ]),
           ),
-          Section(text: "Description"),
-          Summary(text: organization.description[organization.languages[0]], maxLines: 5,),
-          Section(text: "Actions"),
-          ListItem(
-            text: "Activity",
-            onTap: () {
-              Navigator.pushNamed(context, "/organizations/activity",
-                  arguments: organization);
-            },
-          ),
-          alreadySubscribed
-              ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
-              : buildSubscriptionTiles(context, organization) // SUBSCRIBE
         ],
       ),
     );
@@ -184,7 +169,8 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
                   MaterialPageRoute(
                       builder: (context) => WebAction(
                             url: action["url"],
-                            title: action["name"][organization.languages[0]] ?? organization.name,
+                            title: action["name"][organization.languages[0]] ??
+                                organization.name,
                           )));
             },
           );
