@@ -1,6 +1,8 @@
+import 'dart:io';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/modals/web-action.dart';
+import 'package:vocdoni/modals/web-action-ios.dart';
+import 'package:vocdoni/modals/web-action-android.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
@@ -86,13 +88,23 @@ class OrganizationInfo extends StatelessWidget {
           return ListItem(
             text: action["name"][organization.languages[0]],
             onTap: () {
-              Navigator.push(
-                  ctx,
-                  MaterialPageRoute(
-                      builder: (context) => WebAction(
-                            url: action["url"],
-                            title: action["name"][organization.languages[0]] ?? organization.name,
-                          )));
+              final String url = action["url"];
+              final String title = action["name"][organization.languages[0]] ??
+                  organization.name;
+
+              if (Platform.isAndroid) {
+                WebActionAndroid inAppBrowser = new WebActionAndroid();
+                inAppBrowser.open(
+                    url: url,
+                    options: {"clearSessionCache": true, "hideUrlBar": true});
+              } else {
+                final route = MaterialPageRoute(
+                    builder: (context) => WebActionIos(
+                          url: url,
+                          title: title,
+                        ));
+                Navigator.push(ctx, route);
+              }
             },
           );
         })
