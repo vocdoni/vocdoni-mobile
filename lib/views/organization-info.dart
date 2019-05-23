@@ -11,7 +11,13 @@ import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
-class OrganizationInfo extends StatelessWidget {
+class OrganizationInfo extends StatefulWidget {
+  @override
+  _OrganizationInfoState createState() => _OrganizationInfoState();
+}
+
+class _OrganizationInfoState extends State<OrganizationInfo> {
+  bool collapsed = false;
   @override
   Widget build(context) {
     final Organization organization = ModalRoute.of(context).settings.arguments;
@@ -27,7 +33,7 @@ class OrganizationInfo extends StatelessWidget {
             .any((o) => o.entityId == organization.entityId);
       }
     }
-   
+
     double totalHeaderHeight = 350;
     double titleHeight = 50;
     double headerImageHeight = totalHeaderHeight - titleHeight;
@@ -46,8 +52,11 @@ class OrganizationInfo extends StatelessWidget {
               backgroundColor: baseBackgroundColor,
               expandedHeight: totalHeaderHeight,
               leading: InkWell(
-              onTap: () => Navigator.pop(context),
-              child: Icon(FeatherIcons.arrowLeft, color: descriptionColor,)),
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    FeatherIcons.arrowLeft,
+                    color: collapsed ? descriptionColor : Colors.white,
+                  )),
               flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                 pos = constraints.biggest.height;
@@ -56,6 +65,22 @@ class OrganizationInfo extends StatelessWidget {
 
                 double o = ((pos - minAppBarHeight) / (titleHeight));
                 opacity = o < 1 ? o : 1;
+                debugPrint(opacity.toString());
+
+                double collapseTrigger = 0.5;
+                if (o < collapseTrigger && collapsed == false) {
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    setState(() {
+                      collapsed = true;
+                    });
+                  });
+                } else if (o >= collapseTrigger && collapsed == true) {
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    setState(() {
+                      collapsed = false;
+                    });
+                  });
+                }
 
                 return FlexibleSpaceBar(
                     collapseMode: CollapseMode.pin,
@@ -88,6 +113,10 @@ class OrganizationInfo extends StatelessWidget {
               Summary(
                 text: organization.description[organization.languages[0]],
                 maxLines: 5,
+              ),
+              Summary(
+                text: organization.description[organization.languages[0]],
+                maxLines: 10,
               ),
               Section(text: "Actions"),
               ListItem(
