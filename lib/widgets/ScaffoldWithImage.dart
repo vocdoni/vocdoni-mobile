@@ -26,10 +26,11 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   @override
   Widget build(context) {
     double totalHeaderHeight = 350;
-    double titleHeight = 50;
-    double headerImageHeight = totalHeaderHeight - titleHeight;
+    double interpolationHeight = 40;
+    double headerImageHeight = totalHeaderHeight - interpolationHeight;
     double pos = 0;
-    double opacity = 0;
+    double interpolation = 0;
+    double collapseTrigger =0.9;
 
     return Scaffold(
       backgroundColor: baseBackgroundColor,
@@ -54,11 +55,10 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                 pos = constraints.biggest.height;
 
                 double minAppBarHeight = 48;
-                double o = ((pos - minAppBarHeight) / (titleHeight));
-                opacity = o < 1 ? o : 1;
-                debugPrint(opacity.toString());
+                double o = ((pos - minAppBarHeight) / (interpolationHeight));
+                interpolation = o < 1 ? o : 1;
+                debugPrint(interpolation.toString());
 
-                double collapseTrigger = 0.5;
                 if (o < collapseTrigger && collapsed == false) {
                   Future.delayed(const Duration(milliseconds: 100), () {
                     setState(() {
@@ -79,7 +79,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                     title: Text(
                       widget.collapsedTitle,
                       style: TextStyle(
-                          color: descriptionColor.withOpacity(1 - opacity),
+                          color:
+                              descriptionColor.withOpacity(1 - interpolation),
                           fontWeight: lightFontWeight),
                     ),
                     background: Column(children: [
@@ -91,12 +92,13 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       ),
                       Container(
                         width: double.infinity,
-                        child:PageTitle(
-                        title: widget.title,
-                        subtitle: widget.subtitle,
-                        titleColor: titleColor.withOpacity(opacity),
-                      ),
-                )]));
+                        child: PageTitle(
+                          title: widget.title,
+                          subtitle: widget.subtitle,
+                          titleColor: titleColor.withOpacity(interpolation),
+                        ),
+                      )
+                    ]));
               })),
           SliverList(
             delegate: SliverChildListDelegate(widget.children),
