@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
-import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/modals/web-viewer.dart';
 import 'package:vocdoni/views/activity-post.dart';
 import 'package:vocdoni/views/identity-backup.dart';
@@ -70,7 +69,6 @@ void main() async {
       "/identity/backup": (context) => IdentityBackupScreen(),
 
       // GLOBAL
-      "/web/actions": (context) => WebAction(),
       "/web/viewer": (context) => WebViewer(),
       "/signature": (context) => SignModal(),
     },
