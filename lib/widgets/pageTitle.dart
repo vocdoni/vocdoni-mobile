@@ -4,20 +4,23 @@ import 'package:vocdoni/constants/colors.dart';
 class PageTitle extends StatelessWidget {
   final String title;
   final String subtitle;
+  final Color titleColor;
 
-  PageTitle({String this.title, String this.subtitle});
+  PageTitle({this.title, this.subtitle, this.titleColor});
 
   @override
   Widget build(context) {
+    Color c = titleColor == null? titleColor: titleColor;
     return Container(
-        padding: EdgeInsets.fromLTRB(pagePadding, elementSpacing, pagePadding, elementSpacing),
+        padding: EdgeInsets.fromLTRB(
+            pagePadding, elementSpacing, pagePadding, elementSpacing),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(title,
                   style: new TextStyle(
                       fontSize: 22,
-                      color: titleColor,
+                      color: c,
                       fontWeight: FontWeight.w700)),
               SizedBox(height: 10),
               Text(subtitle,
