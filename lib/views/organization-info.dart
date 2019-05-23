@@ -1,9 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/constants/colors.dart' as prefix0;
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
@@ -29,8 +27,10 @@ class OrganizationInfo extends StatelessWidget {
       }
     }
 
-    double height = 200;
-    double zoneHeight = 100;
+   
+    double totalHeaderHeight = 350;
+    double titleHeight = 50;
+    double headerImageHeight = totalHeaderHeight - titleHeight;
     double pos = 0;
     double opacity = 0;
 
@@ -38,43 +38,49 @@ class OrganizationInfo extends StatelessWidget {
         backgroundColor: baseBackgroundColor,
         body: CustomScrollView(controller: ScrollController(), slivers: [
           SliverAppBar(
-              floating: true,
-              snap: true,
+              floating: false,
+              snap: false,
               pinned: true,
               elevation: 0,
               //title: Text('SliverAppBar'),
               backgroundColor: baseBackgroundColor,
-              expandedHeight: height,
+              expandedHeight: totalHeaderHeight,
               flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                 pos = constraints.biggest.height;
                 // print('constraints=' + constraints.toString());
+                double minAppBarHeight = 48;
 
-                opacity = (pos / zoneHeight) < 1 ? pos / height : 1;
+                double o = ((pos - minAppBarHeight) / (titleHeight));
+                opacity = o < 1 ? o : 1;
 
                 return FlexibleSpaceBar(
+                    collapseMode: CollapseMode.pin,
                     centerTitle: true,
                     title: Text(
                       organization.name,
-                      style: TextStyle(color: titleColor.withOpacity(opacity)),
+                      style: TextStyle(
+                          color: descriptionColor.withOpacity(1 - opacity),
+                          fontWeight: lightFontWeight),
                     ),
-                    background: Image.network(
-                      "https://images.unsplash.com/photo-1542601098-3adb3baeb1ec?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=5bb9a9747954cdd6eabe54e3688a407e&auto=format&fit=crop&w=500&q=60",
-                      fit: BoxFit.cover,
-                    ));
-              })
-              //flexibleSpace: FlexibleSpaceBar(
-              //  background:Image.network(organization.avatar)
-              //),
-              ),
-          SliverFixedExtentList(
-            itemExtent: 150.0,
+                    background: Column(children: [
+                      Expanded(
+                        child: Image.network(
+                            "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
+                            fit: BoxFit.cover,
+                            height: headerImageHeight,
+                            width: double.infinity),
+                      ),
+                      PageTitle(
+                        title: organization.name,
+                        subtitle: organization.entityId,
+                        titleColor: titleColor.withOpacity(opacity),
+                      ),
+                      //ListItem( text: opacity.toString(),)
+                    ]));
+              })),
+          SliverList(
             delegate: SliverChildListDelegate([
-              PageTitle(
-                title: organization.name,
-                subtitle: organization.entityId,
-                titleColor: titleColor.withOpacity(1.0 - opacity),
-              ),
               Section(text: "Description"),
               Summary(
                 text: organization.description[organization.languages[0]],
@@ -88,10 +94,12 @@ class OrganizationInfo extends StatelessWidget {
                       arguments: organization);
                 },
               ),
-              alreadySubscribed
+              (alreadySubscribed
                   ? buildAlreadySubscribed(
                       context, organization) // CUSTOM ACTIONS
                   : buildSubscriptionTiles(context, organization) // SUBSCRIBE
+
+              ),
             ]),
           ),
         ]));
