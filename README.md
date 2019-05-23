@@ -162,3 +162,11 @@ An headless web browser running a bundled application. The bundled page exposes 
   - This is due to the fact that the runtime will need to connect to Vocdoni Gateways
   - As Gateways need to be accessed by their IP address, TLS can't be enabled on them
   - Rather, the protocol will use its own integrity + encryption system
+
+**Runtime Cleanup**:
+On Android, the webview will be loaded as a background view which may cause issues when the user exits the app by pressing the back button. To prevent an empty webview to appear when the user returns:
+
+- The WebRuntime will unload itself after all pending requests are done
+- `Home`, `IdentityCreate` and `IdentitySelect` use `WillPopScope` to detect `onWillPop`
+- When the user has no route to go back to, the root views are expected to tell the webview to close if it didn't already
+  - If the webview can't close itself on time, the route will not pop cleanly and the `IdentitySelect` screen may be shown again instead of the app just quitting

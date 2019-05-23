@@ -134,7 +134,22 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
               ),
             ]),
           ),
-        ]));
+          Section(text: "Description"),
+          Summary(text: organization.description[organization.languages[0]], maxLines: 5,),
+          Section(text: "Actions"),
+          ListItem(
+            text: "Activity",
+            onTap: () {
+              Navigator.pushNamed(context, "/organizations/activity",
+                  arguments: organization);
+            },
+          ),
+          alreadySubscribed
+              ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
+              : buildSubscriptionTiles(context, organization) // SUBSCRIBE
+        ],
+      ),
+    );
   }
 
   /// NO ORGANIZATION
@@ -169,6 +184,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
                   MaterialPageRoute(
                       builder: (context) => WebAction(
                             url: action["url"],
+                            title: action["name"][organization.languages[0]] ?? organization.name,
                           )));
             },
           );

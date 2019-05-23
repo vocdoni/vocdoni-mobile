@@ -96,13 +96,21 @@ class IdentitiesBloc {
     if (prefs.containsKey("accounts")) {
       currentAddrs = prefs.getStringList("accounts");
       if (currentAddrs.length > 0) {
-        if (currentAddrs.indexWhere((addr) => addr == address) >= 0 ||
-            (await secStore.read(key: address)) != null) {
-          throw ("The account already exists");
-        } else {
-          currentAddrs.add(address);
-          await prefs.setStringList("accounts", currentAddrs);
-        }
+        // Check unique addr, alias
+        await Future.wait(currentAddrs.map((addr) async {
+          if (addr == address) throw ("The account already exists");
+
+          final strIdent = await secStore.read(key: addr);
+          final decoded = jsonDecode(strIdent);
+          if (decoded is Map &&
+              decoded["alias"] is String &&
+              (decoded["alias"] as String).trim() == alias.trim()) {
+            throw ("The account already exists");
+          }
+        }));
+
+        currentAddrs.add(address);
+        await prefs.setStringList("accounts", currentAddrs);
       } else {
         currentAddrs = [address];
         await prefs.setStringList("accounts", currentAddrs);
@@ -115,8 +123,11 @@ class IdentitiesBloc {
     // ADD A SERIALIZED WALLET FOR THE ADDRESS
     await secStore.write(
       key: address,
-      value: json.encode(
-          {"mnemonic": mnemonic, "publicKey": publicKey, "alias": alias}),
+      value: json.encode({
+        "mnemonic": mnemonic,
+        "publicKey": publicKey,
+        "alias": alias.trim()
+      }),
     );
 
     // ADD AN EMPTY LIST OF ORGANIZATIONS
