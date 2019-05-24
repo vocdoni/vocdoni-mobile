@@ -34,8 +34,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     }
 
     return ScaffoldWithImage(
-        headerImageUrl:
-            "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
+        headerImageUrl:organization.imageHeader??"https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
         title: organization.name,
         collapsedTitle: organization.name,
         subtitle: organization.name,
@@ -44,10 +43,6 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
           Summary(
             text: organization.description[organization.languages[0]],
             maxLines: 5,
-          ),
-           Summary(
-            text: organization.description[organization.languages[0]],
-            maxLines: 50,
           ),
           Section(text: "Actions"),
           ListItem(
