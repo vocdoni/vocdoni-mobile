@@ -1,6 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
@@ -8,6 +9,7 @@ class ScaffoldWithImage extends StatefulWidget {
   final String subtitle;
   final String collapsedTitle;
   final String headerImageUrl;
+  final String avatarUrl;
   final List<Widget> children;
 
   const ScaffoldWithImage(
@@ -15,7 +17,8 @@ class ScaffoldWithImage extends StatefulWidget {
       this.collapsedTitle,
       this.headerImageUrl,
       this.children,
-      this.subtitle});
+      this.subtitle,
+      this.avatarUrl});
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
@@ -30,7 +33,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
     double headerImageHeight = totalHeaderHeight - interpolationHeight;
     double pos = 0;
     double interpolation = 0;
-    double collapseTrigger =0.9;
+    double collapseTrigger = 0.9;
 
     return Scaffold(
       backgroundColor: baseBackgroundColor,
@@ -83,21 +86,24 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                               descriptionColor.withOpacity(1 - interpolation),
                           fontWeight: lightFontWeight),
                     ),
-                    background: Column(children: [
-                      Expanded(
-                        child: Image.network(widget.headerImageUrl,
-                            fit: BoxFit.cover,
-                            height: headerImageHeight,
-                            width: double.infinity),
-                      ),
-                      Container(
-                        width: double.infinity,
-                        child: PageTitle(
-                          title: widget.title,
-                          subtitle: widget.subtitle,
-                          titleColor: titleColor.withOpacity(interpolation),
+                    background: Stack(children: [
+                      Column(children: [
+                        Expanded(
+                          child: Image.network(widget.headerImageUrl,
+                              fit: BoxFit.cover,
+                              height: headerImageHeight,
+                              width: double.infinity),
                         ),
-                      )
+                        Container(
+                          width: double.infinity,
+                          child: PageTitle(
+                            title: widget.title,
+                            subtitle: widget.subtitle,
+                            titleColor: titleColor.withOpacity(interpolation),
+                          ),
+                        )
+                      ]),
+                      widget.avatarUrl == null? Container() : Avatar(avatarUrl: widget.avatarUrl,)
                     ]));
               })),
           SliverList(
