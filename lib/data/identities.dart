@@ -213,6 +213,7 @@ class Organization {
   final List<String> endedProcessIds;
   final Map<String, String> newsFeed; // language dependent
   final String avatar;
+  final String imageHeader;
   Map<String, dynamic> gatewayUpdate = {}; // unused
   List gatewayBootNodes = []; // unused by now
   List relays = []; // unused by now
@@ -231,7 +232,8 @@ class Organization {
       this.activeProcessIds,
       this.endedProcessIds,
       this.newsFeed,
-      this.avatar});
+      this.avatar,
+      this.imageHeader});
 
   Organization.fromJson(Map<String, dynamic> json)
       : // global
@@ -255,6 +257,7 @@ class Organization {
             .cast<String>()
             .toList(),
         avatar = json['avatar'],
+        imageHeader = "http://4.bp.blogspot.com/-aJDSY_Ph4Go/VZ2-iOy8eHI/AAAAAAABvn4/__J0db_cync/s1600/Screen%2BShot%2B2015-07-08%2Bat%2B5.21.15%2BPM.png",//['imageHeader'],
         gatewayBootNodes = json['gateway-boot-nodes'] ?? [],
         relays = json['relays'] ?? [],
         actions = json['actions'] ?? [];
@@ -276,6 +279,7 @@ class Organization {
       'news-feed': newsFeed,
       'process-ids': {'active': activeProcessIds, 'ended': endedProcessIds},
       'avatar': avatar,
+      'imageHeader':imageHeader,
       'gateway-boot-nodes': gatewayBootNodes,
       'relays': relays,
       'actions': actions
