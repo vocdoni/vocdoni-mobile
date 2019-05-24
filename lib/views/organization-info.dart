@@ -3,6 +3,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
+import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -34,20 +35,17 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     }
 
     return ScaffoldWithImage(
-        headerImageUrl:
+        headerImageUrl: organization.imageHeader ??
             "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
         title: organization.name,
         collapsedTitle: organization.name,
         subtitle: organization.name,
+        avatarUrl: organization.avatar,
         children: [
           Section(text: "Description"),
           Summary(
             text: organization.description[organization.languages[0]],
             maxLines: 5,
-          ),
-           Summary(
-            text: organization.description[organization.languages[0]],
-            maxLines: 50,
           ),
           Section(text: "Actions"),
           ListItem(
