@@ -257,7 +257,7 @@ class Organization {
             .cast<String>()
             .toList(),
         avatar = json['avatar'],
-        imageHeader = "http://4.bp.blogspot.com/-aJDSY_Ph4Go/VZ2-iOy8eHI/AAAAAAABvn4/__J0db_cync/s1600/Screen%2BShot%2B2015-07-08%2Bat%2B5.21.15%2BPM.png",//['imageHeader'],
+        imageHeader = json['imageHeader'],
         gatewayBootNodes = json['gateway-boot-nodes'] ?? [],
         relays = json['relays'] ?? [],
         actions = json['actions'] ?? [];
