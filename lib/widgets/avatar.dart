@@ -3,29 +3,26 @@ import 'package:vocdoni/constants/colors.dart';
 
 class Avatar extends StatelessWidget {
   final String avatarUrl;
+  final double size;
 
-  Avatar({this.avatarUrl});
+  Avatar({this.avatarUrl, this.size});
 
   @override
   Widget build(context) {
-    return Padding(
-      padding: EdgeInsets.all(elementSpacing),
-      child: Center(
-        child: new Container(
-            width: 96,
-            height: 96,
-            decoration: new BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 15,
-                    offset: new Offset(0, 2),
-                  )
-                ],
-                shape: BoxShape.circle,
-                image: new DecorationImage(
-                    fit: BoxFit.fill, image: new NetworkImage(avatarUrl)))),
-      ),
-    );
+    return Container(
+        width: size,
+        height: size,
+        decoration: new BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 15,
+                offset: new Offset(0, 2),
+              )
+            ],
+            color: guideColor,
+            shape: BoxShape.circle,
+            image: new DecorationImage(
+                fit: BoxFit.fill, image: new NetworkImage(avatarUrl))));
   }
 }
