@@ -28,9 +28,15 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   bool collapsed = false;
   @override
   Widget build(context) {
-    double totalHeaderHeight = 350;
+    double headerImageHeight = 400;
+    double titleHeight = 86;
+    double avatarHeight = widget.avatarUrl == null ? 0 : 96;
+    double avatarY = headerImageHeight - avatarHeight * 0.5;
+    double titleY = widget.avatarUrl == null
+        ? headerImageHeight + elementSpacing
+        : headerImageHeight + elementSpacing + avatarHeight * 0.5;
+    double totalHeaderHeight = titleY + titleHeight;
     double interpolationHeight = 40;
-    double headerImageHeight = totalHeaderHeight - interpolationHeight;
     double pos = 0;
     double interpolation = 0;
     double collapseTrigger = 0.9;
@@ -88,22 +94,32 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                     ),
                     background: Stack(children: [
                       Column(children: [
-                        Expanded(
+                        Container(
                           child: Image.network(widget.headerImageUrl,
                               fit: BoxFit.cover,
                               height: headerImageHeight,
                               width: double.infinity),
                         ),
-                        Container(
-                          width: double.infinity,
-                          child: PageTitle(
-                            title: widget.title,
-                            subtitle: widget.subtitle,
-                            titleColor: titleColor.withOpacity(interpolation),
-                          ),
-                        )
                       ]),
-                      widget.avatarUrl == null? Container() : Avatar(avatarUrl: widget.avatarUrl,)
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            pagePadding, avatarY, pagePadding, 0),
+                        child: widget.avatarUrl == null
+                            ? Container()
+                            : Avatar(
+                                avatarUrl: widget.avatarUrl,
+                                size: avatarHeight,
+                              ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(0, titleY, 0, 0),
+                        width: double.infinity,
+                        child: PageTitle(
+                          title: widget.title,
+                          subtitle: widget.subtitle,
+                          titleColor: titleColor.withOpacity(interpolation),
+                        ),
+                      )
                     ]));
               })),
           SliverList(
