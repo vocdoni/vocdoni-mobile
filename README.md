@@ -125,9 +125,10 @@ sendHostRequest({ type: "closeWindow" })
 
 The app accepts incoming requests using the `vocdoni:` schema. 
 
-On developoment, you can launch deep links by running `make launch-ios-link` or `make launch-android-link`
 
-#### Subscribe to an entity
+#### Show an organization
+
+On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
 
 To point the user to an organization, use:
 
@@ -136,9 +137,22 @@ vocdoni://vocdoni.app/organization?resolverAddress=__ADDR__&entityId=__ID__&netw
 ```
 
 - `resolverAddress`: The address of the entity resolver contract instance
-- `entityId`: See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
+- `entityId`: The ID of the organization. See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
 - `networkId`: The of the network (currently supported 0 => mainnet)
 - `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
+
+#### Prompt to sign a payload
+
+On developoment, you can test it by running `make launch-ios-sign` or `make launch-android-sign`
+
+To let the user sign a given payload, use:
+
+```
+vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
+```
+
+- `payload`: A URI-encoded version of the text to sign
+- `returnURI`: A URI-encoded string containing the URI that will be launched after a successful signature. The URI will be appended the query string parameter `?signature=...`
 
 ## Development
 
