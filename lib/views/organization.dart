@@ -8,6 +8,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
@@ -51,7 +52,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
           ListItem(
             text: "Activity",
             onTap: () {
-              Navigator.pushNamed(context, "/organizations/activity",
+              Navigator.pushNamed(context, "/organization/activity",
                   arguments: organization);
             },
           ),
@@ -121,7 +122,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     return Column(children: <Widget>[
       ListItem(
         text: "Subscribe",
-        onTap: () => confirmSubscribe(ctx),
+        onTap: () => subscribeToOrganization(ctx, organization),
       ),
       SizedBox(height: 40),
       Text(
@@ -144,15 +145,32 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     ]);
   }
 
-  confirmSubscribe(BuildContext ctx) async {
-    final accepts = await showPrompt(
+  subscribeToOrganization(BuildContext ctx, Organization organization) async {
+    final accepted = await showPrompt(
         context: ctx,
         title: Lang.of(ctx).get("Organization"),
         text: Lang.of(ctx).get("Do you want to subscribe to the organization?"),
         okButton: Lang.of(ctx).get("Subscribe"));
 
-    if (accepts == true) {
-      Navigator.pop(ctx, true);
+    if (accepted == false) return;
+
+    try {
+      await identitiesBloc.subscribe(organization);
+
+      showMessage(Lang.of(context).get("The subscription has been registered"),
+          context: context);
+    } catch (err) {
+      if (err == "Already subscribed") {
+        showMessage(
+            Lang.of(context)
+                .get("You are already subscribed to this organization"),
+            context: context);
+      } else {
+        showMessage(
+            Lang.of(context)
+                .get("The subscription could not be registered"),
+            context: context);
+      }
     }
   }
 

@@ -123,16 +123,16 @@ sendHostRequest({ type: "closeWindow" })
 
 ### Deep linking
 
-The app accepts incoming requests using the `vocdoni` schema. 
+The app accepts incoming requests using the `vocdoni:` schema. 
 
 On developoment, you can launch deep links by running `make launch-ios-link` or `make launch-android-link`
 
 #### Subscribe to an entity
 
-To trigger a prompt to subscribe to an entity, use:
+To point the user to an organization, use:
 
 ```
-vocdoni://vocdoni.app/subscribe?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
+vocdoni://vocdoni.app/organization?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
 ```
 
 - `resolverAddress`: The address of the entity resolver contract instance

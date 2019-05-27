@@ -7,7 +7,7 @@ import 'package:vocdoni/views/activity-post.dart';
 import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import 'package:vocdoni/views/organization-activity.dart';
-import 'package:vocdoni/views/organization-info.dart';
+import 'package:vocdoni/views/organization.dart';
 
 import 'dart:async';
 import 'util/singletons.dart';
@@ -61,11 +61,11 @@ void main() async {
       // "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
       // "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
 
-      // IDENTITY/IES AVAILABLE
+      // WHEN THERE IS AN IDENTITY
       "/home": (context) => HomeScreen(),
-      "/organizations/info": (context) => OrganizationInfo(),
-      "/organizations/activity": (context) => OrganizationActivity(),
-      "/organizations/activity/post": (context) => ActivityPostScreen(),
+      "/organization": (context) => OrganizationInfo(),
+      "/organization/activity": (context) => OrganizationActivity(),
+      "/organization/activity/post": (context) => ActivityPostScreen(),
       "/identity/backup": (context) => IdentityBackupScreen(),
 
       // GLOBAL

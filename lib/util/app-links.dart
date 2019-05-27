@@ -3,17 +3,18 @@ import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/widgets/toast.dart';
+import 'package:flutter/foundation.dart'; // for kReleaseMode
 
 ///////////////////////////////////////////////////////////////////////////////
 // MAIN
 ///////////////////////////////////////////////////////////////////////////////
 
-Future<String> handleIncomingLink(Uri newLink, BuildContext context) async {
+Future handleIncomingLink(Uri newLink, BuildContext context) async {
   if (!(newLink is Uri)) return null;
 
   switch (newLink.path) {
-    case "/subscribe":
-      return handleEntitySubscription(
+    case "/organization":
+      return fetchAndShowOrganization(
           resolverAddress: newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
           networkId: newLink.queryParameters["networkId"],
@@ -21,7 +22,8 @@ Future<String> handleIncomingLink(Uri newLink, BuildContext context) async {
           context: context);
       break;
     default:
-      throw ("Invalid path");
+      if (!kReleaseMode)
+        throw ("Invalid path"); // Throw on debug, ignore on release
   }
 }
 
@@ -29,7 +31,7 @@ Future<String> handleIncomingLink(Uri newLink, BuildContext context) async {
 // HANDLERS
 ///////////////////////////////////////////////////////////////////////////////
 
-Future<String> handleEntitySubscription(
+Future fetchAndShowOrganization(
     {String resolverAddress,
     String entityId,
     String networkId,
@@ -69,19 +71,11 @@ Future<String> handleEntitySubscription(
 
     hideLoading(global: true);
 
-    // Show approval screen
-    final accept = await Navigator.pushNamed(context, "/organizations/info",
-        arguments: org);
-
-    if (accept != true) {
-      return null;
-    }
-    await identitiesBloc.subscribe(org);
+    // Show screen
+    Navigator.pushNamed(context, "/organization", arguments: org);
   } catch (err) {
     hideLoading(global: true);
 
     throw err;
   }
-
-  return Lang.of(context).get("The subscription has been registered");
 }
