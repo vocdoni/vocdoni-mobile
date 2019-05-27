@@ -73,28 +73,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   handleLink(Uri givenUri) {
     handleIncomingLink(givenUri, homePageScaffoldKey.currentContext)
-        .then((String result) => handleLinkSuccess(result))
         .catchError(handleIncomingLinkError);
   }
 
-  handleLinkSuccess(String text) {
-    if (text == null || !(text is String)) return;
-
-    showSuccessMessage(text, global: true);
-  }
-
   handleIncomingLinkError(err) {
-    if (err == "Already subscribed") {
-      return showMessage(
-          Lang.of(context)
-              .get("You are already subscribed to this organization"),
-          global: true);
-    }
     print(err);
     showAlert(
         title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
         text: Lang.of(homePageScaffoldKey.currentContext)
-            .get("There was a problem handling the link provided"),
+            .get("There was a problem handling the link"),
         context: homePageScaffoldKey.currentContext);
   }
 

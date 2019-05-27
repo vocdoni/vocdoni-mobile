@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-// import 'package:vocdoni/views/organization-info.dart';
+// import 'package:vocdoni/views/organization.dart';
 // import 'package:vocdoni/widgets/pageTitle.dart';
 // import 'package:vocdoni/widgets/section.dart';
 
@@ -49,6 +49,6 @@ class OrganizationsTab extends StatelessWidget {
   }
 
   onTapOrganization(BuildContext ctx, Organization org) {
-    Navigator.pushNamed(ctx, "/organizations/info", arguments: org);
+    Navigator.pushNamed(ctx, "/organization", arguments: org);
   }
 }

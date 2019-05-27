@@ -78,7 +78,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
   }
 
   onTapItem(BuildContext ctx, NewsPost post) {
-     Navigator.of(ctx).pushNamed("/organizations/activity/post",
+     Navigator.of(ctx).pushNamed("/organization/activity/post",
         arguments: ActivityPostArguments( post));
   }
 

@@ -73,7 +73,8 @@ class Lang {
     // ERRORS
     Intl.message('An error occurred while generating the identity');
     Intl.message('The link you followed appears to be invalid');
-    Intl.message('There was a problem handling the link provided');
+    Intl.message('There was a problem handling the link');
+    Intl.message('The subscription could not be registered');
   }
 
   /////////////////////////////////////////////////////////////////////////////
