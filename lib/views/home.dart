@@ -152,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Scaffold(
                       appBar: TopNavigation(
                         title: getTabName(selectedTab),
+                        showBackButton: false,
                       ),
                       backgroundColor: baseBackgroundColor,
                       key: homePageScaffoldKey,

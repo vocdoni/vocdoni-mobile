@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/modals/sign-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -21,6 +22,11 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
           entryPoints: newLink.queryParametersAll["entryPoints[]"],
           context: context);
       break;
+    case "/signature":
+      return showSignatureScreen(
+          payload: newLink.queryParameters["payload"],
+          returnUri: newLink.queryParameters["returnUri"],
+          context: context);
     default:
       if (!kReleaseMode)
         throw ("Invalid path"); // Throw on debug, ignore on release
@@ -78,4 +84,23 @@ Future fetchAndShowOrganization(
 
     throw err;
   }
+}
+
+showSignatureScreen(
+    {@required BuildContext context,
+    @required String payload,
+    @required String returnUri}) {
+  if (!(payload is String) || payload.length == 0) {
+    throw ("Invalid payload");
+  } else if (!(returnUri is String) || returnUri.length == 0) {
+    throw ("Invalid returnUri");
+  }
+
+  payload = Uri.decodeFull(payload);
+  final rtnUri = Uri.parse(returnUri);
+  if (rtnUri == null) throw ("Invalid return URI");
+
+  final SignModalArguments args = SignModalArguments(payload: payload, returnUri: rtnUri);
+
+  Navigator.pushNamed(context, "/signature", arguments: args);
 }
