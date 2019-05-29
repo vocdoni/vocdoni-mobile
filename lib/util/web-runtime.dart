@@ -19,8 +19,12 @@ class WebRuntime extends InAppBrowser {
       return;
     }
 
-    await this.openFile("assets/runtime.html",
-        options: {"useShouldOverrideUrlLoading": true, "hidden": true});
+    if (this.isOpened()) {
+      await this.webViewController.loadFile("assets/runtime.html");
+    } else {
+      await this.openFile("assets/runtime.html",
+          options: {"useShouldOverrideUrlLoading": true, "hidden": true});
+    }
     await _initializer.future;
 
     // listen for post messages coming from the JavaScript side
@@ -31,13 +35,14 @@ class WebRuntime extends InAppBrowser {
   @override
   onLoadStop(String url) {
     // The HTML asset has completed loading
-    _initializer.complete();
+    if (_initializer != null) _initializer.complete();
   }
 
   @override
   void onLoadError(String url, int code, String message) {
     // The asset could not load
-    _initializer.completeError("Unable to initialize the Web Runtime");
+    if (_initializer != null)
+      _initializer.completeError("Unable to initialize the Web Runtime");
   }
 
   @override
@@ -54,11 +59,12 @@ class WebRuntime extends InAppBrowser {
     requestCounter++;
     final id = requestCounter;
     final requestCompleter = new Completer();
-    final timeoutTimer = Timer(Duration(seconds: timeout), () {
-      if (requestCompleter.isCompleted)
-        return;
-      else
-        requestCompleter.completeError("The request timed out");
+    final timeoutTimer = Timer(Duration(seconds: timeout), () async {
+      if (requestCompleter.isCompleted) return;
+
+      requestCompleter.completeError("The request timed out");
+      requests.removeWhere((entry) => entry.id == id);
+      await closeIfIdle();
     });
 
     requests.add(new RequestItem(
@@ -115,11 +121,13 @@ class WebRuntime extends InAppBrowser {
     await Future.delayed(Duration(milliseconds: 100));
 
     requests.removeWhere((req) => req.id == item.id);
+    await closeIfIdle();
+  }
 
+  Future closeIfIdle() async {
     // dispose if unused
     if (requests.length == 0) {
       await this.close();
-      _initializer = null;
     }
   }
 
@@ -129,6 +137,7 @@ class WebRuntime extends InAppBrowser {
       if (this.webViewController != null) {
         await this.webViewController.loadUrl(uriFromContent("<html></html>"));
       }
+      _initializer = null;
       return super.close();
     }
   }
