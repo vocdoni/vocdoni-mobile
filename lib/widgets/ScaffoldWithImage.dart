@@ -11,6 +11,7 @@ class ScaffoldWithImage extends StatefulWidget {
   final String headerImageUrl;
   final String avatarUrl;
   final List<Widget> children;
+  final Builder builder;
 
   const ScaffoldWithImage(
       {this.title,
@@ -18,7 +19,9 @@ class ScaffoldWithImage extends StatefulWidget {
       this.headerImageUrl,
       this.children,
       this.subtitle,
-      this.avatarUrl});
+      this.avatarUrl,
+      this.builder,
+      });
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
@@ -122,9 +125,10 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       )
                     ]));
               })),
-          SliverList(
+              widget.builder
+          /* SliverList(
             delegate: SliverChildListDelegate(widget.children),
-          ),
+          ), */
         ],
       ),
     );
