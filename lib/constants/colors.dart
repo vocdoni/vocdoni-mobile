@@ -32,7 +32,3 @@ final FontWeight lightFontWeight = FontWeight.w300;
 final FontWeight regularFontWeight = FontWeight.w400;
 final FontWeight semiBoldFontWeight = FontWeight.w600;
 final FontWeight boldFontWeight = FontWeight.w700;
-
-addOpacityToColor(Color color, double opacity) {
-  return Color.fromRGBO(color.red, color.green, color.blue, opacity);
-}

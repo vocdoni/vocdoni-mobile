@@ -14,7 +14,7 @@ class ListItem extends StatelessWidget {
     return InkWell(
         onTap: onTap,
         child: Container(
-            padding: EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(pagePadding),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
