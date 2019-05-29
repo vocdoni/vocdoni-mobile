@@ -1,6 +1,8 @@
+import 'dart:io';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/modals/web-action.dart';
+import 'package:vocdoni/modals/web-action-ios.dart';
+import 'package:vocdoni/modals/web-action-android.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/avatar.dart';
@@ -107,14 +109,23 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
           return ListItem(
             text: action["name"][organization.languages[0]],
             onTap: () {
-              Navigator.push(
-                  ctx,
-                  MaterialPageRoute(
-                      builder: (context) => WebAction(
-                            url: action["url"],
-                            title: action["name"][organization.languages[0]] ??
-                                organization.name,
-                          )));
+              final String url = action["url"];
+              final String title = action["name"][organization.languages[0]] ??
+                  organization.name;
+
+              if (Platform.isAndroid) {
+                WebActionAndroid inAppBrowser = new WebActionAndroid();
+                inAppBrowser.open(
+                    url: url,
+                    options: {"clearSessionCache": true, "hideUrlBar": true});
+              } else {
+                final route = MaterialPageRoute(
+                    builder: (context) => WebActionIos(
+                          url: url,
+                          title: title,
+                        ));
+                Navigator.push(ctx, route);
+              }
             },
           );
         })
@@ -173,18 +184,17 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     try {
       await identitiesBloc.subscribe(organization);
 
-      showMessage(Lang.of(context).get("The subscription has been registered"),
-          context: context);
+      showMessage(Lang.of(ctx).get("The subscription has been registered"),
+          context: ctx);
     } catch (err) {
       if (err == "Already subscribed") {
         showMessage(
-            Lang.of(context)
-                .get("You are already subscribed to this organization"),
-            context: context);
+            Lang.of(ctx).get("You are already subscribed to this organization"),
+            context: ctx);
       } else {
         showMessage(
-            Lang.of(context).get("The subscription could not be registered"),
-            context: context);
+            Lang.of(ctx).get("The subscription could not be registered"),
+            context: ctx);
       }
     }
   }

@@ -95,7 +95,7 @@ String _makeOrganization(String name) {
                 "en": "Sign up to $name",
                 "fr": "S'inscrire à $name"
             },
-            "url": "https://cloudflare-ipfs.com/ipfs/QmZ56Z2kpG5QjJcWfhxFD4ac3DhfX21hrQ2gCTrWxzTAse",
+            "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
             "visible": true
         }
     ],
