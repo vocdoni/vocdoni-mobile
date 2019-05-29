@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/modals/unlock.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -56,6 +57,10 @@ class IdentityTab extends StatelessWidget {
                     showErrorMessage(err?.message ?? err, context: ctx);
                   }
                 }),
+        /* ListItem(
+            text: "Unlock test",
+            onTap: () => Navigator.push(
+                ctx, MaterialPageRoute(builder: (context) => Unlock()))) */
       ],
     );
   }
