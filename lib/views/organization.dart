@@ -168,18 +168,17 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     try {
       await identitiesBloc.subscribe(organization);
 
-      showMessage(Lang.of(context).get("The subscription has been registered"),
-          context: context);
+      showMessage(Lang.of(ctx).get("The subscription has been registered"),
+          context: ctx);
     } catch (err) {
       if (err == "Already subscribed") {
         showMessage(
-            Lang.of(context)
-                .get("You are already subscribed to this organization"),
-            context: context);
+            Lang.of(ctx).get("You are already subscribed to this organization"),
+            context: ctx);
       } else {
         showMessage(
-            Lang.of(context).get("The subscription could not be registered"),
-            context: context);
+            Lang.of(ctx).get("The subscription could not be registered"),
+            context: ctx);
       }
     }
   }
