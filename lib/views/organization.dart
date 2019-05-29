@@ -42,26 +42,42 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         collapsedTitle: organization.name,
         subtitle: organization.name,
         avatarUrl: organization.avatar,
-        children: [
-          Section(text: "Description"),
-          Summary(
-            text: organization.description[organization.languages[0]],
-            maxLines: 5,
-          ),
-          Section(text: "Actions"),
-          ListItem(
-            text: "Activity",
-            onTap: () {
-              Navigator.pushNamed(context, "/organization/activity",
-                  arguments: organization);
-            },
-          ),
-          (alreadySubscribed
-              ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
-              : buildSubscriptionTiles(context, organization) // SUBSCRIBE
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+              delegate: SliverChildListDelegate(
+                  getScaffoldChildren(ctx, organization, alreadySubscribed)),
+            );
+          },
+        ));
+  }
 
-          ),
-        ]);
+  getScaffoldChildren(
+      BuildContext context, Organization organization, bool alreadySubscribed) {
+    return [
+      Section(text: "Description"),
+      Summary(
+        text: organization.description[organization.languages[0]],
+        maxLines: 5,
+      ),
+      Section(text: "Actions"),
+     /*  ListItem(
+        text: "Subscribe",
+        onTap: () => subscribeToOrganization(context, organization),
+      ), */
+      ListItem(
+        text: "Activity",
+        onTap: () {
+          Navigator.pushNamed(context, "/organization/activity",
+              arguments: organization);
+        },
+      ),
+      (alreadySubscribed
+          ? buildAlreadySubscribed(context, organization) // CUSTOM ACTIONS
+          : buildSubscriptionTiles(context, organization) // SUBSCRIBE
+
+      ),
+    ];
   }
 
   /// NO ORGANIZATION
@@ -167,8 +183,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
             context: context);
       } else {
         showMessage(
-            Lang.of(context)
-                .get("The subscription could not be registered"),
+            Lang.of(context).get("The subscription could not be registered"),
             context: context);
       }
     }
