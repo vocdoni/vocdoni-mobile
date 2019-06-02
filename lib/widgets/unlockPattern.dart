@@ -17,8 +17,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
   List<Offset> points = <Offset>[];
   List<Offset> dots = [];
 
-  initState(){
-    
+  initState() {
     dots = getDosOffsets();
   }
 
@@ -29,13 +28,12 @@ class _UnlockPatternState extends State<UnlockPattern> {
       alignment: Alignment.topLeft,
       color: Colors.blueGrey[50],
       child: CustomPaint(
-        painter: Sketcher(
-            points: points,
-            gridSize: widget.gridSize,
-            widthSize: widget.widthSize,
-            dotRadius: widget.dotRadius,
-            dots:dots)
-      ),
+          painter: Sketcher(
+              points: points,
+              gridSize: widget.gridSize,
+              widthSize: widget.widthSize,
+              dotRadius: widget.dotRadius,
+              dots: dots)),
     );
 
     return Container(
@@ -47,10 +45,20 @@ class _UnlockPatternState extends State<UnlockPattern> {
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
 
-           // if (isPointInCircle(point, widget.dotRadius * 4, widget.dotRadius))
-              //point = point.translate(0.0, -(AppBar().preferredSize.height))
+            // if (isPointInCircle(point, widget.dotRadius * 4, widget.dotRadius))
+            //point = point.translate(0.0, -(AppBar().preferredSize.height))
 
-              points = List.from(points)..add(point);
+            for (int i = 0; i < dots.length; i++) {
+              if(isPointInCircle(point, dots[i], widget.dotRadius)){
+                debugPrint(i.toString()+" IN");
+              }
+              else
+              {
+               //debugPrint(i.toString()+" OUT");
+              }
+            }
+
+            points = List.from(points)..add(point);
           });
         },
         onPanEnd: (DragEndDetails details) {
@@ -68,26 +76,24 @@ class _UnlockPatternState extends State<UnlockPattern> {
     );
   }
 
-  List<Offset> getDosOffsets (){
+  List<Offset> getDosOffsets() {
     double margin = widget.dotRadius;
-    double spaceBetweenDots = (widget.widthSize - widget.dotRadius * 2) / (widget.gridSize - 1);
+    double spaceBetweenDots =
+        (widget.widthSize - widget.dotRadius * 4) / (widget.gridSize - 1);
 
     List<Offset> dots = [];
-    for (int i = 0; i < widget.gridSize; i++) {
-      for (int j = 0; j < widget.gridSize; j++) {
-            dots.add( Offset( margin + spaceBetweenDots * i, margin + spaceBetweenDots * j));
-            //debugPrint(dots[dots.length-1].dx.toString()+','+dots[dots.length-1].dy.toString());
+    for (int j = 0; j < widget.gridSize; j++) {
+      for (int i = 0; i < widget.gridSize; i++) {
+        dots.add(Offset(
+            margin + spaceBetweenDots * i, margin + spaceBetweenDots * j));
+        //debugPrint(dots[dots.length-1].dx.toString()+','+dots[dots.length-1].dy.toString());
       }
     }
     return dots;
   }
 
-  checkIfPanningDot() {
-    
-  }
-
   isPointInCircle(Offset point, Offset circleOffset, double circleRadius) {
-    return pow(point.dy - circleOffset.dx, 2) +
+    return pow(point.dx - circleOffset.dx, 2) +
             pow(point.dy - circleOffset.dy, 2) <
         pow(circleRadius, 2);
   }
@@ -100,7 +106,8 @@ class Sketcher extends CustomPainter {
   final double dotRadius;
   final List<Offset> dots;
 
-  Sketcher({this.points, this.gridSize, this.widthSize, this.dotRadius, this.dots});
+  Sketcher(
+      {this.points, this.gridSize, this.widthSize, this.dotRadius, this.dots});
 
   @override
   bool shouldRepaint(Sketcher oldDelegate) {
@@ -108,7 +115,6 @@ class Sketcher extends CustomPainter {
   }
 
   void paint(Canvas canvas, Size size) {
-    
     Paint paint = Paint()
       ..color = Colors.black
       ..strokeCap = StrokeCap.round
