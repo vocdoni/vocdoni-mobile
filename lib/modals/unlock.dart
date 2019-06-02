@@ -16,7 +16,9 @@ class _UnlockState extends State<Unlock> {
         appBar: AppBar(
           title: Text("Vocdoni"),
         ),
-        body:UnlockPattern(gridSize: 3,),
+        body:Center(
+          child: UnlockPattern(gridSize: 4, widthSize: 250, dotRadius: 10,),
+        ),
     );
   }
 }
