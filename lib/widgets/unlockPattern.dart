@@ -14,8 +14,9 @@ class UnlockPattern extends StatefulWidget {
 }
 
 class _UnlockPatternState extends State<UnlockPattern> {
-  List<Offset> points = <Offset>[];
+  List<int> pattern = <int>[];
   List<Offset> dots = [];
+  Offset fingerPos;
 
   initState() {
     dots = getDosOffsets();
@@ -29,11 +30,10 @@ class _UnlockPatternState extends State<UnlockPattern> {
       color: Colors.blueGrey[50],
       child: CustomPaint(
           painter: Sketcher(
-              points: points,
-              gridSize: widget.gridSize,
-              widthSize: widget.widthSize,
+              pattern: pattern,
               dotRadius: widget.dotRadius,
-              dots: dots)),
+              dots: dots,
+              fingerPos: fingerPos)),
     );
 
     return Container(
@@ -45,48 +45,40 @@ class _UnlockPatternState extends State<UnlockPattern> {
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
 
-            // if (isPointInCircle(point, widget.dotRadius * 4, widget.dotRadius))
-            //point = point.translate(0.0, -(AppBar().preferredSize.height))
-
+            fingerPos = point;
             for (int i = 0; i < dots.length; i++) {
-              if(isPointInCircle(point, dots[i], widget.dotRadius)){
-                debugPrint(i.toString()+" IN");
-              }
-              else
-              {
-               //debugPrint(i.toString()+" OUT");
+              if (isPointInCircle(point, dots[i], widget.dotRadius)) {
+                if (pattern.length == 0) pattern.add(i);
+
+                if (pattern.last != i) pattern.add(i);
               }
             }
 
-            points = List.from(points)..add(point);
+            //pattern = List.from(pattern)..add(point);
           });
         },
         onPanEnd: (DragEndDetails details) {
-          points.add(null);
+          setState(() {
+            fingerPos = null;
+          });
+
+          // pattern.add(null);
         },
         child: sketchArea,
       ),
-      /* floatingActionButton: FloatingActionButton(
-        tooltip: 'clear Screen',
-        backgroundColor: Colors.red,
-        child: Icon(Icons.refresh),
-        onPressed: () {
-          setState(() => points.clear());
-        }, */
     );
   }
 
   List<Offset> getDosOffsets() {
     double margin = widget.dotRadius;
     double spaceBetweenDots =
-        (widget.widthSize - widget.dotRadius * 4) / (widget.gridSize - 1);
+        (widget.widthSize - widget.dotRadius * 2) / (widget.gridSize - 1);
 
     List<Offset> dots = [];
     for (int j = 0; j < widget.gridSize; j++) {
       for (int i = 0; i < widget.gridSize; i++) {
         dots.add(Offset(
             margin + spaceBetweenDots * i, margin + spaceBetweenDots * j));
-        //debugPrint(dots[dots.length-1].dx.toString()+','+dots[dots.length-1].dy.toString());
       }
     }
     return dots;
@@ -100,18 +92,16 @@ class _UnlockPatternState extends State<UnlockPattern> {
 }
 
 class Sketcher extends CustomPainter {
-  final List<Offset> points;
-  final int gridSize;
-  final double widthSize;
+  final List<int> pattern;
   final double dotRadius;
   final List<Offset> dots;
+  final Offset fingerPos;
 
-  Sketcher(
-      {this.points, this.gridSize, this.widthSize, this.dotRadius, this.dots});
+  Sketcher({this.pattern, this.dotRadius, this.dots, this.fingerPos});
 
   @override
   bool shouldRepaint(Sketcher oldDelegate) {
-    return oldDelegate.points != points;
+    return oldDelegate.pattern != pattern || oldDelegate.fingerPos != fingerPos;
   }
 
   void paint(Canvas canvas, Size size) {
@@ -124,10 +114,12 @@ class Sketcher extends CustomPainter {
       canvas.drawCircle(dots[i], dotRadius, paint);
     }
 
-    for (int i = 0; i < points.length - 1; i++) {
-      if (points[i] != null && points[i + 1] != null) {
-        canvas.drawLine(points[i], points[i + 1], paint);
+    for (int i = 0; i < pattern.length - 1; i++) {
+      if (pattern[i] != null && pattern[i + 1] != null) {
+        canvas.drawLine(dots[pattern[i]], dots[pattern[i + 1]], paint);
       }
     }
+    if (fingerPos != null) if (dots[pattern.length - 1] != null)
+      canvas.drawLine(dots[pattern.last], fingerPos, paint);
   }
 }
