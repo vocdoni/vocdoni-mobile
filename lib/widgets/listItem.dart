@@ -6,13 +6,15 @@ class ListItem extends StatelessWidget {
   final String text;
   final Icon icon;
   final void Function() onTap;
+  final void Function() onLongPress;
 
-  ListItem({String this.text, Icon this.icon, void Function() this.onTap});
+  ListItem({this.text, this.icon, this.onTap, this.onLongPress});
 
   @override
   Widget build(context) {
     return InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Container(
             padding: EdgeInsets.all(pagePadding),
             child: Row(

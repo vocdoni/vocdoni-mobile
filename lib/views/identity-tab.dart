@@ -36,7 +36,9 @@ class IdentityTab extends StatelessWidget {
         ListItem(
             text: "Back up identity",
             onTap: () => Navigator.pushNamed(ctx, "/identity/backup",
-                arguments: IdentityBackupArguments(appState, identities))),
+                arguments: IdentityBackupArguments(appState, identities)),
+            onLongPress: () => Navigator.push(
+                ctx, MaterialPageRoute(builder: (context) => Unlock()))),
         ListItem(
             text: "Identities",
             onTap: () {
@@ -57,10 +59,6 @@ class IdentityTab extends StatelessWidget {
                     showErrorMessage(err?.message ?? err, context: ctx);
                   }
                 }),
-        /* ListItem(
-            text: "Unlock test",
-            onTap: () => Navigator.push(
-                ctx, MaterialPageRoute(builder: (context) => Unlock()))) */
       ],
     );
   }
