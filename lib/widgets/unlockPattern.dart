@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class UnlockPattern extends StatefulWidget {
+  final LocalKey key;
   final int gridSize;
   final double widthSize;
   final double dotRadius;
@@ -13,7 +14,8 @@ class UnlockPattern extends StatefulWidget {
   final void Function(List<int> pattern) onPatternStopped;
 
   UnlockPattern(
-      {this.gridSize,
+      {this.key,
+      this.gridSize,
       this.widthSize,
       this.dotRadius,
       this.canRepeatDot,
@@ -38,19 +40,17 @@ class _UnlockPatternState extends State<UnlockPattern> {
   @override
   Widget build(BuildContext context) {
     final Container sketchArea = Container(
-      // margin: EdgeInsets.all(20.0),
-      alignment: Alignment.topLeft,
-      color: Colors.blueGrey[50],
-      child: CustomPaint(
-          painter: Sketcher(
-              pattern: pattern,
-              dotRadius: widget.dotRadius,
-              dots: dots,
-              fingerPos: fingerPos,
-              dotsColor:widget.dotsColor,
-              patternColor:widget.patternColor
-          ))
-    );
+        // margin: EdgeInsets.all(20.0),
+        alignment: Alignment.topLeft,
+        color: Colors.blueGrey[50],
+        child: CustomPaint(
+            painter: Sketcher(
+                pattern: pattern,
+                dotRadius: widget.dotRadius,
+                dots: dots,
+                fingerPos: fingerPos,
+                dotsColor: widget.dotsColor,
+                patternColor: widget.patternColor)));
 
     return Container(
       height: widget.widthSize,
@@ -58,9 +58,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
       child: GestureDetector(
         onPanUpdate: (DragUpdateDetails details) {
           setState(() {
-
-            if(!widget.canDraw)
-              return;
+            if (!widget.canDraw) return;
 
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
@@ -91,7 +89,6 @@ class _UnlockPatternState extends State<UnlockPattern> {
           });
 
           widget.onPatternStopped(pattern);
-
         },
         child: sketchArea,
       ),
@@ -118,6 +115,12 @@ class _UnlockPatternState extends State<UnlockPattern> {
             pow(point.dy - circleOffset.dy, 2) <
         pow(circleRadius, 2);
   }
+
+  clearPattern() {
+    setState(() {
+      pattern = [];
+    });
+  }
 }
 
 class Sketcher extends CustomPainter {
@@ -128,7 +131,14 @@ class Sketcher extends CustomPainter {
   final Color dotsColor;
   final Color patternColor;
 
-  Sketcher({this.pattern, this.dotRadius, this.dots, this.fingerPos, this.dotsColor, this.patternColor,});
+  Sketcher({
+    this.pattern,
+    this.dotRadius,
+    this.dots,
+    this.fingerPos,
+    this.dotsColor,
+    this.patternColor,
+  });
 
   @override
   bool shouldRepaint(Sketcher oldDelegate) {
@@ -161,12 +171,14 @@ class Sketcher extends CustomPainter {
     //Draw pattern dots
     for (int i = 0; i <= pattern.length - 1; i++) {
       if (pattern[i] != null) {
-       canvas.drawCircle(dots[pattern[i]], dotRadius, patternPaint);
+        canvas.drawCircle(dots[pattern[i]], dotRadius, patternPaint);
       }
     }
 
     //Draw from last point to finger
-    if (fingerPos != null) if (dots[pattern.length - 1] != null)
-      canvas.drawLine(dots[pattern.last], fingerPos, patternPaint);
+    if (fingerPos != null) {
+      if (pattern.length > 0)
+        canvas.drawLine(dots[pattern.last], fingerPos, patternPaint);
+    }
   }
 }
