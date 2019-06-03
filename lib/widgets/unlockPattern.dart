@@ -7,9 +7,20 @@ class UnlockPattern extends StatefulWidget {
   final double widthSize;
   final double dotRadius;
   final bool canRepeatDot;
+  final bool canDraw;
+  final Color patternColor;
+  final Color dotsColor;
+  final void Function(List<int> pattern) onPatternStopped;
 
   UnlockPattern(
-      {this.gridSize, this.widthSize, this.dotRadius, this.canRepeatDot});
+      {this.gridSize,
+      this.widthSize,
+      this.dotRadius,
+      this.canRepeatDot,
+      this.onPatternStopped,
+      this.canDraw,
+      this.patternColor,
+      this.dotsColor});
 
   @override
   _UnlockPatternState createState() => _UnlockPatternState();
@@ -35,7 +46,10 @@ class _UnlockPatternState extends State<UnlockPattern> {
               pattern: pattern,
               dotRadius: widget.dotRadius,
               dots: dots,
-              fingerPos: fingerPos)),
+              fingerPos: fingerPos,
+              dotsColor:widget.dotsColor,
+              patternColor:widget.patternColor
+          ))
     );
 
     return Container(
@@ -44,6 +58,10 @@ class _UnlockPatternState extends State<UnlockPattern> {
       child: GestureDetector(
         onPanUpdate: (DragUpdateDetails details) {
           setState(() {
+
+            if(!widget.canDraw)
+              return;
+
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
 
@@ -72,7 +90,8 @@ class _UnlockPatternState extends State<UnlockPattern> {
             fingerPos = null;
           });
 
-          // pattern.add(null);
+          widget.onPatternStopped(pattern);
+
         },
         child: sketchArea,
       ),
@@ -106,8 +125,10 @@ class Sketcher extends CustomPainter {
   final double dotRadius;
   final List<Offset> dots;
   final Offset fingerPos;
+  final Color dotsColor;
+  final Color patternColor;
 
-  Sketcher({this.pattern, this.dotRadius, this.dots, this.fingerPos});
+  Sketcher({this.pattern, this.dotRadius, this.dots, this.fingerPos, this.dotsColor, this.patternColor,});
 
   @override
   bool shouldRepaint(Sketcher oldDelegate) {
@@ -115,21 +136,37 @@ class Sketcher extends CustomPainter {
   }
 
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = Colors.black
+    Paint dotsPaint = Paint()
+      ..color = dotsColor
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 4.0;
 
+    Paint patternPaint = Paint()
+      ..color = patternColor
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 4.0;
+
+    //Draw static dots
     for (int i = 0; i < dots.length; i++) {
-      canvas.drawCircle(dots[i], dotRadius, paint);
+      canvas.drawCircle(dots[i], dotRadius, dotsPaint);
     }
 
+    //Draw pattern lines
     for (int i = 0; i < pattern.length - 1; i++) {
       if (pattern[i] != null && pattern[i + 1] != null) {
-        canvas.drawLine(dots[pattern[i]], dots[pattern[i + 1]], paint);
+        canvas.drawLine(dots[pattern[i]], dots[pattern[i + 1]], patternPaint);
       }
     }
+
+    //Draw pattern dots
+    for (int i = 0; i <= pattern.length - 1; i++) {
+      if (pattern[i] != null) {
+       canvas.drawCircle(dots[pattern[i]], dotRadius, patternPaint);
+      }
+    }
+
+    //Draw from last point to finger
     if (fingerPos != null) if (dots[pattern.length - 1] != null)
-      canvas.drawLine(dots[pattern.last], fingerPos, paint);
+      canvas.drawLine(dots[pattern.last], fingerPos, patternPaint);
   }
 }
