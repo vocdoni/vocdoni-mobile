@@ -6,8 +6,10 @@ class UnlockPattern extends StatefulWidget {
   final int gridSize;
   final double widthSize;
   final double dotRadius;
+  final bool canRepeatDot;
 
-  UnlockPattern({this.gridSize, this.widthSize, this.dotRadius});
+  UnlockPattern(
+      {this.gridSize, this.widthSize, this.dotRadius, this.canRepeatDot});
 
   @override
   _UnlockPatternState createState() => _UnlockPatternState();
@@ -50,7 +52,15 @@ class _UnlockPatternState extends State<UnlockPattern> {
               if (isPointInCircle(point, dots[i], widget.dotRadius)) {
                 if (pattern.length == 0) pattern.add(i);
 
-                if (pattern.last != i) pattern.add(i);
+                if (pattern.last != i) {
+                  if (widget.canRepeatDot) {
+                    pattern.add(i);
+                  } else {
+                    if (!pattern.contains(i)) {
+                      pattern.add(i);
+                    }
+                  }
+                }
               }
             }
 

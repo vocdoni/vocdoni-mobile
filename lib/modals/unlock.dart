@@ -17,7 +17,7 @@ class _UnlockState extends State<Unlock> {
           title: Text("Vocdoni"),
         ),
         body:Center(
-          child: UnlockPattern(gridSize: 4, widthSize: 250, dotRadius: 10,),
+          child: UnlockPattern(gridSize: 4, widthSize: 250, dotRadius: 10, canRepeatDot: false)
         ),
     );
   }
