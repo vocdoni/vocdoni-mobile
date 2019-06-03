@@ -23,7 +23,7 @@ class BaseButton extends StatelessWidget {
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
-    if(isDisabled){ 
+    if (isDisabled) {
       c1 = c1.withOpacity(0.4);
     }
 
@@ -45,7 +45,7 @@ class BaseButton extends StatelessWidget {
                   side: BorderSide(width: 2.0, color: c2)),
               child: InkWell(
                 splashColor: isDisabled ? Colors.transparent : null,
-                onTap: () => isDisabled ? onTap : null,
+                onTap: () => isDisabled ? null : onTap(),
                 child: SizedBox(
                   child: Center(
                       child: Padding(
