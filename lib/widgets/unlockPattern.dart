@@ -32,6 +32,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
   List<int> pattern = <int>[];
   List<Offset> dots = [];
   Offset fingerPos;
+  bool hasStopped = false;
 
   initState() {
     dots = getDosOffsets();
@@ -63,6 +64,11 @@ class _UnlockPatternState extends State<UnlockPattern> {
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
 
+            if(hasStopped){
+              pattern = [];
+              hasStopped = false;
+            }
+
             fingerPos = point;
             for (int i = 0; i < dots.length; i++) {
               if (isPointInCircle(point, dots[i], widget.dotRadius)) {
@@ -86,6 +92,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
         onPanEnd: (DragEndDetails details) {
           setState(() {
             fingerPos = null;
+            hasStopped = true;
           });
 
           widget.onPatternStopped(pattern);

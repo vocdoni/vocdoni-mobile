@@ -80,7 +80,7 @@ class _UnlockState extends State<Unlock> {
     debugPrint(pattern.toString());
 
     setState(() {
-      canDraw = false;
+      canDraw = true;
       patternColor = greenColor;
       setPattern = pattern;
       patternState = SetPatternState.waitingConfirmation;
