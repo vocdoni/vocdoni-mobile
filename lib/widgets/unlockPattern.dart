@@ -12,6 +12,7 @@ class UnlockPattern extends StatefulWidget {
   final Color patternColor;
   final Color dotsColor;
   final void Function(List<int> pattern) onPatternStopped;
+  final void Function() onPatternStarted;
 
   UnlockPattern(
       {this.key,
@@ -20,6 +21,7 @@ class UnlockPattern extends StatefulWidget {
       this.dotRadius,
       this.canRepeatDot,
       this.onPatternStopped,
+      this.onPatternStarted,
       this.canDraw,
       this.patternColor,
       this.dotsColor});
@@ -32,7 +34,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
   List<int> pattern = <int>[];
   List<Offset> dots = [];
   Offset fingerPos;
-  bool hasStopped = false;
+  bool isStopped = true;
 
   initState() {
     dots = getDosOffsets();
@@ -64,9 +66,10 @@ class _UnlockPatternState extends State<UnlockPattern> {
             RenderBox box = context.findRenderObject();
             Offset point = box.globalToLocal(details.globalPosition);
 
-            if(hasStopped){
+            if (isStopped) {
               pattern = [];
-              hasStopped = false;
+              isStopped = false;
+              widget.onPatternStarted();
             }
 
             fingerPos = point;
@@ -92,7 +95,7 @@ class _UnlockPatternState extends State<UnlockPattern> {
         onPanEnd: (DragEndDetails details) {
           setState(() {
             fingerPos = null;
-            hasStopped = true;
+            isStopped = true;
           });
 
           widget.onPatternStopped(pattern);

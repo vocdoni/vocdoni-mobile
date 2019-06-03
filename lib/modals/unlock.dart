@@ -34,7 +34,10 @@ class _UnlockState extends State<Unlock> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Section(
-                text: patternState==SetPatternState.setting? "Set a a new pattern":"Confirm your pattern",
+                text: patternState == SetPatternState.setting ||
+                        patternState == SetPatternState.waitingConfirmation
+                    ? "Set a a new pattern"
+                    : "Confirm your pattern",
               ),
               Center(
                 child: patternState == SetPatternState.setting ||
@@ -67,10 +70,19 @@ class _UnlockState extends State<Unlock> {
         widthSize: widthSize,
         dotRadius: dotRadius,
         canRepeatDot: false,
-        patternColor: patternColor,
+        patternColor: patternState == SetPatternState.waitingConfirmation
+            ? greenColor
+            : blueColor,
         dotsColor: descriptionColor,
         canDraw: canDraw,
+        onPatternStarted: onSettingPatternStarted,
         onPatternStopped: onSettingPatternStopped);
+  }
+
+  void onSettingPatternStarted() {
+    setState(() {
+      patternState = SetPatternState.setting;
+    });
   }
 
   void onSettingPatternStopped(List<int> pattern) {
@@ -89,15 +101,23 @@ class _UnlockState extends State<Unlock> {
 
   UnlockPattern buildConfirming() {
     return UnlockPattern(
-        key: Key("ConfirmPattern"),
-        gridSize: gridSize,
-        widthSize: widthSize,
-        dotRadius: dotRadius,
-        canRepeatDot: false,
-        patternColor: patternColor,
-        dotsColor: descriptionColor,
-        canDraw: true,
-        onPatternStopped: onConfirmingPatternStopped);
+      key: Key("ConfirmPattern"),
+      gridSize: gridSize,
+      widthSize: widthSize,
+      dotRadius: dotRadius,
+      canRepeatDot: false,
+      patternColor: blueColor,
+      dotsColor: descriptionColor,
+      canDraw: true,
+      onPatternStarted: onConfirmingPatternStarted,
+      onPatternStopped: onConfirmingPatternStopped,
+    );
+  }
+
+  void onConfirmingPatternStarted() {
+    setState(() {
+      //patternState = SetPatternState.setting;
+    });
   }
 
   void onConfirmingPatternStopped(List<int> pattern) {
