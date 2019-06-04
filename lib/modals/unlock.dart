@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/unlockPattern.dart';
+import 'package:collection/collection.dart';
 
 enum SetPatternState { setting, waitingConfirmation, confirming }
 
@@ -47,11 +49,13 @@ class _UnlockState extends State<Unlock> {
               ),
               Padding(
                 padding: EdgeInsets.all(elementSpacing * 4),
-                child: BaseButton(
-                    text: "Looks good",
-                    //isDisabled:patternState != SetPatternState.waitingConfirmation,
-                    secondary: false,
-                    onTap: () => onApprovePattern()),
+                child: patternState != SetPatternState.waitingConfirmation
+                    ? null
+                    : BaseButton(
+                        text: "Looks good",
+                        //isDisabled:patternState != SetPatternState.waitingConfirmation,
+                        secondary: false,
+                        onTap: () => onApprovePattern()),
               )
             ]));
   }
@@ -70,9 +74,7 @@ class _UnlockState extends State<Unlock> {
         widthSize: widthSize,
         dotRadius: dotRadius,
         canRepeatDot: false,
-        patternColor: patternState == SetPatternState.waitingConfirmation
-            ? greenColor
-            : blueColor,
+        patternColor: patternColor,
         dotsColor: descriptionColor,
         canDraw: canDraw,
         onPatternStarted: onSettingPatternStarted,
@@ -82,12 +84,25 @@ class _UnlockState extends State<Unlock> {
   void onSettingPatternStarted() {
     setState(() {
       patternState = SetPatternState.setting;
+      patternColor = blueColor;
     });
   }
 
   void onSettingPatternStopped(List<int> pattern) {
+    debugPrint(pattern.length.toString());
     if (pattern.length < minLength) {
       //show "to short"
+      setState(() {
+        canDraw = true;
+        patternColor = redColor;
+        //setPattern = [];
+        //patternState = SetPatternState.waitingConfirmation;
+      });
+      return;
+    }
+
+    if (pattern.length > maxLength) {
+      //show "to long"
     }
     debugPrint(pattern.toString());
 
@@ -106,7 +121,7 @@ class _UnlockState extends State<Unlock> {
       widthSize: widthSize,
       dotRadius: dotRadius,
       canRepeatDot: false,
-      patternColor: blueColor,
+      patternColor: patternColor,
       dotsColor: descriptionColor,
       canDraw: true,
       onPatternStarted: onConfirmingPatternStarted,
@@ -116,18 +131,22 @@ class _UnlockState extends State<Unlock> {
 
   void onConfirmingPatternStarted() {
     setState(() {
-      //patternState = SetPatternState.setting;
+      patternColor = blueColor;
     });
   }
 
   void onConfirmingPatternStopped(List<int> pattern) {
-    if (pattern.length < minLength) {
-      //show "to short"
-    }
+    debugPrint(pattern.toString() + "==" + setPattern.toString());
 
-    setState(() {
-      canDraw = false;
-      patternColor = greenColor;
-    });
+    if (!listEquals(setPattern, pattern)) {
+      setState(() {
+        canDraw = false;
+        patternColor = redColor;
+      });
+      return;
+    }
+    onNewPattern(pattern);
   }
+
+  onNewPattern(List<int> pattern) {}
 }
