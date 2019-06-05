@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class UnlockPattern extends StatefulWidget {
+class DrawPattern extends StatefulWidget {
   final LocalKey key;
   final int gridSize;
   final double widthSize;
@@ -14,7 +14,7 @@ class UnlockPattern extends StatefulWidget {
   final void Function(List<int> pattern) onPatternStopped;
   final void Function() onPatternStarted;
 
-  UnlockPattern(
+  DrawPattern(
       {this.key,
       this.gridSize,
       this.widthSize,
@@ -27,10 +27,10 @@ class UnlockPattern extends StatefulWidget {
       this.dotsColor});
 
   @override
-  _UnlockPatternState createState() => _UnlockPatternState();
+  _DrawPatternState createState() => _DrawPatternState();
 }
 
-class _UnlockPatternState extends State<UnlockPattern> {
+class _DrawPatternState extends State<DrawPattern> {
   List<int> pattern = <int>[];
   List<Offset> dots = [];
   Offset fingerPos;

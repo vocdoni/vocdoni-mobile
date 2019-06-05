@@ -4,17 +4,16 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/unlockPattern.dart';
-import 'package:collection/collection.dart';
+import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
 
-enum SetPatternState { setting, waitingConfirmation, confirming }
+enum PatternStep { setting, waitingApproval, confirming }
 
-class Unlock extends StatefulWidget {
+class CreatePatternModal extends StatefulWidget {
   @override
-  _UnlockState createState() => _UnlockState();
+  _CreatePatternModalState createState() => _CreatePatternModalState();
 }
 
-class _UnlockState extends State<Unlock> {
+class _CreatePatternModalState extends State<CreatePatternModal> {
   int minLength = 5;
   int maxLength = 10;
   double widthSize = 250;
@@ -22,7 +21,7 @@ class _UnlockState extends State<Unlock> {
   double dotRadius = 10;
   bool canDraw = true;
   Color patternColor = blueColor;
-  SetPatternState patternState = SetPatternState.setting;
+  PatternStep patternState = PatternStep.setting;
   List<int> setPattern = [];
 
   @override
@@ -36,20 +35,20 @@ class _UnlockState extends State<Unlock> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Section(
-                text: patternState == SetPatternState.setting ||
-                        patternState == SetPatternState.waitingConfirmation
+                text: patternState == PatternStep.setting ||
+                        patternState == PatternStep.waitingApproval
                     ? "Set a a new pattern"
                     : "Confirm your pattern",
               ),
               Center(
-                child: patternState == SetPatternState.setting ||
-                        patternState == SetPatternState.waitingConfirmation
+                child: patternState == PatternStep.setting ||
+                        patternState == PatternStep.waitingApproval
                     ? buildSetting()
                     : buildConfirming(),
               ),
               Padding(
                 padding: EdgeInsets.all(elementSpacing * 4),
-                child: patternState != SetPatternState.waitingConfirmation
+                child: patternState != PatternStep.waitingApproval
                     ? null
                     : BaseButton(
                         text: "Looks good",
@@ -62,13 +61,13 @@ class _UnlockState extends State<Unlock> {
 
   onApprovePattern() {
     setState(() {
-      patternState = SetPatternState.confirming;
+      patternState = PatternStep.confirming;
       debugPrint("confirmed");
     });
   }
 
-  UnlockPattern buildSetting() {
-    return UnlockPattern(
+  DrawPattern buildSetting() {
+    return DrawPattern(
         key: Key("SetPattern"),
         gridSize: gridSize,
         widthSize: widthSize,
@@ -83,7 +82,7 @@ class _UnlockState extends State<Unlock> {
 
   void onSettingPatternStarted() {
     setState(() {
-      patternState = SetPatternState.setting;
+      patternState = PatternStep.setting;
       patternColor = blueColor;
     });
   }
@@ -110,12 +109,12 @@ class _UnlockState extends State<Unlock> {
       canDraw = true;
       patternColor = greenColor;
       setPattern = pattern;
-      patternState = SetPatternState.waitingConfirmation;
+      patternState = PatternStep.waitingApproval;
     });
   }
 
-  UnlockPattern buildConfirming() {
-    return UnlockPattern(
+  DrawPattern buildConfirming() {
+    return DrawPattern(
       key: Key("ConfirmPattern"),
       gridSize: gridSize,
       widthSize: widthSize,

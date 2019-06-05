@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/unlock.dart';
+import 'package:vocdoni/modals/create-pattern-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -38,7 +38,7 @@ class IdentityTab extends StatelessWidget {
             onTap: () => Navigator.pushNamed(ctx, "/identity/backup",
                 arguments: IdentityBackupArguments(appState, identities)),
             onLongPress: () => Navigator.push(
-                ctx, MaterialPageRoute(builder: (context) => Unlock()))),
+                ctx, MaterialPageRoute(builder: (context) => CreatePatternModal()))),
         ListItem(
             text: "Identities",
             onTap: () {
