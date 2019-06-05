@@ -80,14 +80,14 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
         onPatternStopped: onSettingPatternStopped);
   }
 
-  void onSettingPatternStarted() {
+  void onSettingPatternStarted(BuildContext context) {
     setState(() {
       patternState = PatternStep.setting;
       patternColor = blueColor;
     });
   }
 
-  void onSettingPatternStopped(List<int> pattern) {
+  void onSettingPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.length.toString());
     if (pattern.length < minLength) {
       //show "to short"
@@ -128,24 +128,25 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     );
   }
 
-  void onConfirmingPatternStarted() {
+  void onConfirmingPatternStarted(BuildContext context) {
     setState(() {
       patternColor = blueColor;
     });
   }
 
-  void onConfirmingPatternStopped(List<int> pattern) {
+  void onConfirmingPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.toString() + "==" + setPattern.toString());
 
-    if (!listEquals(setPattern, pattern)) {
-      setState(() {
-        canDraw = false;
-        patternColor = redColor;
-      });
+    if (listEquals(setPattern, pattern)) {
+      Navigator.pop(context, pattern);
       return;
     }
-    onNewPattern(pattern);
+
+    setState(() {
+      canDraw = false;
+      patternColor = redColor;
+    });
+    return;
   }
 
-  onNewPattern(List<int> pattern) {}
 }

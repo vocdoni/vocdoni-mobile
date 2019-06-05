@@ -11,8 +11,8 @@ class DrawPattern extends StatefulWidget {
   final bool canDraw;
   final Color patternColor;
   final Color dotsColor;
-  final void Function(List<int> pattern) onPatternStopped;
-  final void Function() onPatternStarted;
+  final void Function(BuildContext context, List<int> pattern) onPatternStopped;
+  final void Function(BuildContext context) onPatternStarted;
 
   DrawPattern(
       {this.key,
@@ -69,7 +69,7 @@ class _DrawPatternState extends State<DrawPattern> {
             if (isStopped) {
               pattern = [];
               isStopped = false;
-              widget.onPatternStarted();
+              widget.onPatternStarted(context);
             }
 
             fingerPos = point;
@@ -98,7 +98,7 @@ class _DrawPatternState extends State<DrawPattern> {
             isStopped = true;
           });
 
-          widget.onPatternStopped(pattern);
+          widget.onPatternStopped(context, pattern);
         },
         child: sketchArea,
       ),
