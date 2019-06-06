@@ -19,7 +19,7 @@ class BaseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = color == null ? blueColor : color;
+    Color c1 = color == null ? descriptionColor : color;
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
@@ -36,6 +36,7 @@ class BaseButton extends StatelessWidget {
     return Align(
         alignment: Alignment.center,
         child: Container(
+          height: 48,
             constraints: BoxConstraints(maxWidth: 150, minHeight: 32),
             child: Material(
               color: c1,
