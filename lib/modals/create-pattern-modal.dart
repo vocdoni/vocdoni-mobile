@@ -23,8 +23,9 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   int maxLength = 10;
   double widthSize = 250;
   int gridSize = 4;
-  double dotRadius = 10;
-  bool canDraw = true;
+  double dotRadius = 5;
+  double hitRadius = 20;
+  Color hitColor = Colors.transparent;
   Color patternColor = blueColor;
   PatternStep patternStep = PatternStep.setting;
   List<int> setPattern = [];
@@ -34,7 +35,8 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     return Scaffold(
         appBar: TopNavigation(
           title: " ",
-          showBackButton: widget.canGoBack || patternStep == PatternStep.confirming,
+          showBackButton:
+              widget.canGoBack || patternStep == PatternStep.confirming,
           onBackButton: onCancel,
         ),
         body: Column(
@@ -97,10 +99,12 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
         gridSize: gridSize,
         widthSize: widthSize,
         dotRadius: dotRadius,
+        hitRadius: hitRadius,
+        hitColor: hitColor,
         canRepeatDot: false,
         patternColor: patternColor,
-        dotsColor: descriptionColor,
-        canDraw: canDraw,
+        dotColor: descriptionColor,
+        canDraw: true,
         onPatternStarted: onSettingPatternStarted,
         onPatternStopped: onSettingPatternStopped);
   }
@@ -140,9 +144,11 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
       gridSize: gridSize,
       widthSize: widthSize,
       dotRadius: dotRadius,
+      hitRadius: hitRadius,
+      hitColor: hitColor,
       canRepeatDot: false,
       patternColor: patternColor,
-      dotsColor: descriptionColor,
+      dotColor: descriptionColor,
       canDraw: true,
       onPatternStarted: onConfirmingPatternStarted,
       onPatternStopped: onConfirmingPatternStopped,

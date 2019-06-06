@@ -7,10 +7,12 @@ class DrawPattern extends StatefulWidget {
   final int gridSize;
   final double widthSize;
   final double dotRadius;
+  final double hitRadius;
   final bool canRepeatDot;
   final bool canDraw;
   final Color patternColor;
-  final Color dotsColor;
+  final Color dotColor;
+  final Color hitColor;
   final void Function(BuildContext context, List<int> pattern) onPatternStopped;
   final void Function(BuildContext context) onPatternStarted;
 
@@ -19,12 +21,14 @@ class DrawPattern extends StatefulWidget {
       this.gridSize,
       this.widthSize,
       this.dotRadius,
+      this.hitRadius,
       this.canRepeatDot,
       this.onPatternStopped,
       this.onPatternStarted,
       this.canDraw,
       this.patternColor,
-      this.dotsColor});
+      this.hitColor,
+      this.dotColor});
 
   @override
   _DrawPatternState createState() => _DrawPatternState();
@@ -43,22 +47,23 @@ class _DrawPatternState extends State<DrawPattern> {
   @override
   Widget build(BuildContext context) {
     final Container sketchArea = Container(
-        // margin: EdgeInsets.all(20.0),
         alignment: Alignment.topLeft,
-        color: Colors.blueGrey[50],
         child: CustomPaint(
             painter: Sketcher(
                 pattern: pattern,
                 dotRadius: widget.dotRadius,
+                hitRadius: widget.hitRadius,
+                hitColor: widget.hitColor,
                 dots: dots,
                 fingerPos: fingerPos,
-                dotsColor: widget.dotsColor,
+                dotColor: widget.dotColor,
                 patternColor: widget.patternColor)));
 
     return Container(
       height: widget.widthSize,
       width: widget.widthSize,
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onPanUpdate: (DragUpdateDetails details) {
           setState(() {
             if (!widget.canDraw) return;
@@ -74,7 +79,7 @@ class _DrawPatternState extends State<DrawPattern> {
 
             fingerPos = point;
             for (int i = 0; i < dots.length; i++) {
-              if (isPointInCircle(point, dots[i], widget.dotRadius)) {
+              if (isPointInCircle(point, dots[i], widget.hitRadius)) {
                 if (pattern.length == 0) pattern.add(i);
 
                 if (pattern.last != i) {
@@ -88,8 +93,6 @@ class _DrawPatternState extends State<DrawPattern> {
                 }
               }
             }
-
-            //pattern = List.from(pattern)..add(point);
           });
         },
         onPanEnd: (DragEndDetails details) {
@@ -106,9 +109,9 @@ class _DrawPatternState extends State<DrawPattern> {
   }
 
   List<Offset> getDosOffsets() {
-    double margin = widget.dotRadius;
+    double margin =widget.hitRadius;
     double spaceBetweenDots =
-        (widget.widthSize - widget.dotRadius * 2) / (widget.gridSize - 1);
+        (widget.widthSize - widget.hitRadius * 2) / (widget.gridSize - 1);
 
     List<Offset> dots = [];
     for (int j = 0; j < widget.gridSize; j++) {
@@ -136,17 +139,21 @@ class _DrawPatternState extends State<DrawPattern> {
 class Sketcher extends CustomPainter {
   final List<int> pattern;
   final double dotRadius;
+  final double hitRadius;
   final List<Offset> dots;
   final Offset fingerPos;
-  final Color dotsColor;
+  final Color dotColor;
+  final Color hitColor;
   final Color patternColor;
 
   Sketcher({
     this.pattern,
     this.dotRadius,
+    this.hitRadius,
     this.dots,
     this.fingerPos,
-    this.dotsColor,
+    this.dotColor,
+    this.hitColor,
     this.patternColor,
   });
 
@@ -156,18 +163,22 @@ class Sketcher extends CustomPainter {
   }
 
   void paint(Canvas canvas, Size size) {
+
+    Paint hitPaint = Paint()
+      ..color = hitColor;
+      
     Paint dotsPaint = Paint()
-      ..color = dotsColor
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4.0;
+      ..color = dotColor;
 
     Paint patternPaint = Paint()
       ..color = patternColor
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4.0;
+      ..strokeWidth = 3.0;
 
+    
     //Draw static dots
     for (int i = 0; i < dots.length; i++) {
+      canvas.drawCircle(dots[i], hitRadius, hitPaint);
       canvas.drawCircle(dots[i], dotRadius, dotsPaint);
     }
 
