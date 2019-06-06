@@ -45,7 +45,6 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
     double collapseTrigger = 0.9;
 
     return Scaffold(
-      backgroundColor: baseBackgroundColor,
       body: CustomScrollView(
         controller: ScrollController(),
         slivers: [

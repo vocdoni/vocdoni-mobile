@@ -154,7 +154,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         title: getTabName(selectedTab),
                         showBackButton: false,
                       ),
-                      backgroundColor: baseBackgroundColor,
                       key: homePageScaffoldKey,
                       body: buildBody(ctx, appState?.data, identities?.data),
                       bottomNavigationBar: BottomNavigation(

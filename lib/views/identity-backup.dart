@@ -80,7 +80,6 @@ class IdentityBackupScreen extends StatelessWidget {
         args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
 
     return Scaffold(
-      backgroundColor: baseBackgroundColor,
         body: Center(
       child: Align(
           alignment: Alignment(0, 0),

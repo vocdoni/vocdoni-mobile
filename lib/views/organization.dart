@@ -90,7 +90,6 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         appBar: TopNavigation(
           title: "",
         ),
-        backgroundColor: baseBackgroundColor,
         body: Center(
           child: Text("(No organization)"),
         ));

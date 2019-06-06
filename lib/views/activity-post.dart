@@ -29,7 +29,6 @@ class ActivityPostScreen extends StatelessWidget {
         appBar: TopNavigation(
           title: "Post",
         ),
-        backgroundColor: baseBackgroundColor,
         body: ListView(
           children: <Widget>[
             Container(
