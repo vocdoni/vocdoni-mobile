@@ -43,6 +43,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Spacer(flex:3),
               Section(
                 withDectoration: false,
                 text: patternStep == PatternStep.setting ||
@@ -50,22 +51,27 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
                     ? "Set a a new pattern"
                     : "Confirm your pattern",
               ),
+              Spacer(),
               Center(
                 child: patternStep == PatternStep.setting ||
                         patternStep == PatternStep.waitingApproval
                     ? buildSetting()
                     : buildConfirming(),
               ),
-              Padding(
-                padding: EdgeInsets.all(elementSpacing * 4),
-                child: patternStep != PatternStep.waitingApproval
-                    ? null
-                    : BaseButton(
-                        text: "Looks good",
-                        //isDisabled:patternState != SetPatternState.waitingConfirmation,
-                        secondary: false,
-                        onTap: () => onApprovePattern()),
-              )
+              Spacer(),
+              SizedBox(
+                  height: 100,
+                  child: Center(
+                      child: Container(
+                    child: patternStep != PatternStep.waitingApproval
+                        ? null
+                        : BaseButton(
+                            text: "Continue",
+                            //isDisabled:patternState != SetPatternState.waitingConfirmation,
+                            secondary: false,
+                            onTap: () => onApprovePattern()),
+                  ))),
+                  Spacer(),
             ]));
   }
 
