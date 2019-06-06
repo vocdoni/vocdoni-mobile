@@ -42,6 +42,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Section(
+                withDectoration: false,
                 text: patternStep == PatternStep.setting ||
                         patternStep == PatternStep.waitingApproval
                     ? "Set a a new pattern"
