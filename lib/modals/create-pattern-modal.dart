@@ -4,11 +4,16 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
+import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
 
 enum PatternStep { setting, waitingApproval, confirming }
 
 class CreatePatternModal extends StatefulWidget {
+  bool canGoBack;
+
+  CreatePatternModal({this.canGoBack = true});
+
   @override
   _CreatePatternModalState createState() => _CreatePatternModalState();
 }
@@ -21,34 +26,36 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   double dotRadius = 10;
   bool canDraw = true;
   Color patternColor = blueColor;
-  PatternStep patternState = PatternStep.setting;
+  PatternStep patternStep = PatternStep.setting;
   List<int> setPattern = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Vocdoni"),
+        appBar: TopNavigation(
+          title: " ",
+          showBackButton: widget.canGoBack || patternStep == PatternStep.confirming,
+          onBackButton: onCancel,
         ),
         body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Section(
-                text: patternState == PatternStep.setting ||
-                        patternState == PatternStep.waitingApproval
+                text: patternStep == PatternStep.setting ||
+                        patternStep == PatternStep.waitingApproval
                     ? "Set a a new pattern"
                     : "Confirm your pattern",
               ),
               Center(
-                child: patternState == PatternStep.setting ||
-                        patternState == PatternStep.waitingApproval
+                child: patternStep == PatternStep.setting ||
+                        patternStep == PatternStep.waitingApproval
                     ? buildSetting()
                     : buildConfirming(),
               ),
               Padding(
                 padding: EdgeInsets.all(elementSpacing * 4),
-                child: patternState != PatternStep.waitingApproval
+                child: patternStep != PatternStep.waitingApproval
                     ? null
                     : BaseButton(
                         text: "Looks good",
@@ -59,10 +66,27 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
             ]));
   }
 
+  onCancel() {
+    if (patternStep == PatternStep.confirming) {
+      resetToSetting();
+      return;
+    } else {
+      Navigator.pop(context, []);
+      return;
+    }
+  }
+
   onApprovePattern() {
     setState(() {
-      patternState = PatternStep.confirming;
+      patternStep = PatternStep.confirming;
       debugPrint("confirmed");
+    });
+  }
+
+  resetToSetting() {
+    setState(() {
+      patternStep = PatternStep.setting;
+      patternColor = blueColor;
     });
   }
 
@@ -82,7 +106,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
 
   void onSettingPatternStarted(BuildContext context) {
     setState(() {
-      patternState = PatternStep.setting;
+      patternStep = PatternStep.setting;
       patternColor = blueColor;
     });
   }
@@ -92,10 +116,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     if (pattern.length < minLength) {
       //show "to short"
       setState(() {
-        canDraw = true;
         patternColor = redColor;
-        //setPattern = [];
-        //patternState = SetPatternState.waitingConfirmation;
       });
       return;
     }
@@ -106,10 +127,9 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     debugPrint(pattern.toString());
 
     setState(() {
-      canDraw = true;
       patternColor = greenColor;
       setPattern = pattern;
-      patternState = PatternStep.waitingApproval;
+      patternStep = PatternStep.waitingApproval;
     });
   }
 
@@ -143,10 +163,8 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     }
 
     setState(() {
-      canDraw = false;
       patternColor = redColor;
     });
     return;
   }
-
 }
