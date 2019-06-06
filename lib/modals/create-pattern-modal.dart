@@ -4,6 +4,7 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
 
@@ -25,6 +26,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   int gridSize = 4;
   double dotRadius = 5;
   double hitRadius = 20;
+  int toasterDuration = 3;
   Color hitColor = Colors.transparent;
   Color patternColor = blueColor;
   PatternStep patternStep = PatternStep.setting;
@@ -125,15 +127,15 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   void onSettingPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.length.toString());
     if (pattern.length < minLength) {
-      //show "to short"
+      showErrorMessage("Pattern must have at least $minLength points", context: context, duration: toasterDuration, buttonText: "");  
       setState(() {
         patternColor = redColor;
       });
       return;
     }
 
-    if (pattern.length > maxLength) {
-      //show "to long"
+    if (pattern.length >= maxLength) {
+      showErrorMessage("Pattern should not exceed $maxLength points", context: context, duration: toasterDuration);
     }
     debugPrint(pattern.toString());
 
@@ -178,6 +180,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     setState(() {
       patternColor = redColor;
     });
+    showErrorMessage("Patterns don't match", context: context, duration: toasterDuration);
     return;
   }
 }
