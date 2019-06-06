@@ -39,7 +39,6 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
       appBar: TopNavigation(
         title: organization.name,
       ),
-      backgroundColor: baseBackgroundColor,
       body: ListView.builder(
         itemCount: feed.items.length,
         itemBuilder: (BuildContext context, int index) {
