@@ -48,7 +48,7 @@ class IdentityTab extends StatelessWidget {
               if (pattern == null) {
                 showMessage("Pattern was cancelled", context: ctx);
               } else {
-                showSuccessMessage("Pattern has been set to $pattern",
+                showSuccessMessage("Pattern has been set!",
                     context: ctx);
               }
             }),
