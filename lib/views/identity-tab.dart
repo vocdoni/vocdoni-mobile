@@ -37,8 +37,21 @@ class IdentityTab extends StatelessWidget {
             text: "Back up identity",
             onTap: () => Navigator.pushNamed(ctx, "/identity/backup",
                 arguments: IdentityBackupArguments(appState, identities)),
-            onLongPress: () => Navigator.push(
-                ctx, MaterialPageRoute(builder: (context) => CreatePatternModal()))),
+            onLongPress: () async {
+              String pattern = await Navigator.push(
+                  ctx,
+                  MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => CreatePatternModal(
+                            canGoBack: true,
+                          )));
+              if (pattern == null) {
+                showMessage("Pattern was cancelled", context: ctx);
+              } else {
+                showSuccessMessage("Pattern has been set to $pattern",
+                    context: ctx);
+              }
+            }),
         ListItem(
             text: "Identities",
             onTap: () {

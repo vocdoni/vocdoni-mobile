@@ -21,9 +21,9 @@ class CreatePatternModal extends StatefulWidget {
 
 class _CreatePatternModalState extends State<CreatePatternModal> {
   int minLength = 5;
-  int maxLength = 10;
+  int maxLength = 100;
   double widthSize = 250;
-  int gridSize = 4;
+  int gridSize = 6;
   double dotRadius = 5;
   double hitRadius = 20;
   int toasterDuration = 3;
@@ -45,7 +45,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Spacer(flex:3),
+              Spacer(flex: 3),
               Section(
                 withDectoration: false,
                 text: patternStep == PatternStep.setting ||
@@ -73,7 +73,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
                             secondary: false,
                             onTap: () => onApprovePattern()),
                   ))),
-                  Spacer(),
+              Spacer(),
             ]));
   }
 
@@ -82,7 +82,7 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
       resetToSetting();
       return;
     } else {
-      Navigator.pop(context, []);
+      Navigator.pop(context, null);
       return;
     }
   }
@@ -127,7 +127,8 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   void onSettingPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.length.toString());
     if (pattern.length < minLength) {
-      showErrorMessage("Pattern must have at least $minLength points", context: context, duration: toasterDuration, buttonText: "");  
+      showErrorMessage("Pattern must have at least $minLength points",
+          context: context, duration: toasterDuration, buttonText: "");
       setState(() {
         patternColor = redColor;
       });
@@ -135,7 +136,9 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
     }
 
     if (pattern.length >= maxLength) {
-      showErrorMessage("Pattern should not exceed $maxLength points", context: context, duration: toasterDuration);
+      showErrorMessage("Pattern should not exceed $maxLength points",
+          context: context, duration: toasterDuration);
+      return;
     }
     debugPrint(pattern.toString());
 
@@ -172,15 +175,21 @@ class _CreatePatternModalState extends State<CreatePatternModal> {
   void onConfirmingPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.toString() + "==" + setPattern.toString());
 
+    String stringPattern = '';
     if (listEquals(setPattern, pattern)) {
-      Navigator.pop(context, pattern);
+      for (int i = 0; i < pattern.length - 1; i++) {
+        stringPattern += (pattern[i].toRadixString(gridSize * gridSize));
+      }
+      Navigator.pop(context, stringPattern);
       return;
     }
 
     setState(() {
       patternColor = redColor;
     });
-    showErrorMessage("Patterns don't match", context: context, duration: toasterDuration);
+
+    showErrorMessage("Patterns don't match",
+        context: context, duration: toasterDuration);
     return;
   }
 }
