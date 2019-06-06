@@ -3,6 +3,9 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:native_widgets/native_widgets.dart';
 
+final toasterTextStyle =
+    TextStyle(fontSize:14, fontWeight: semiBoldFontWeight);
+
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
     {bool global,
@@ -13,7 +16,11 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
   if (text == null) throw ("No text");
 
   final snackBar = SnackBar(
-    content: Text(text),
+    content: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Text(text, style: toasterTextStyle),
+    ),
+    backgroundColor: descriptionColor,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,
@@ -35,8 +42,11 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
   if (text == null) throw ("No text");
 
   final snackBar = SnackBar(
-    content: Text(text),
-    backgroundColor: successColor,
+    content: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Text(text, style: toasterTextStyle),
+    ),
+    backgroundColor: greenColor,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,
@@ -58,8 +68,11 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
   if (text == null) throw ("No text");
 
   final snackBar = SnackBar(
-    content: Text(text),
-    backgroundColor: dangerColor,
+    content: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Text(text, style: toasterTextStyle),
+    ),
+    backgroundColor: redColor,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,
