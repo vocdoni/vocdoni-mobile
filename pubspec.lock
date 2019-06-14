@@ -78,6 +78,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.7"
+  dvote:
+    dependency: "direct main"
+    description:
+      name: dvote
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
   feather_icons_flutter:
     dependency: "direct main"
     description:

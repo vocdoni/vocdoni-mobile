@@ -16,7 +16,7 @@ class WelcomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             InkWell(
-                child: Text("Web Runtime trigger"),
+                child: Text("Action trigger"),
                 onTap: () => handleRuntimeCall()),
             Spacer(),
             InkWell(child: Text("Set Entity ++"), onTap: () => incIdent()),
@@ -36,14 +36,7 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   handleRuntimeCall() {
-    webRuntime
-        .call("generateMnemonic()")
-        .then((mnemonic) {
-          print("MNEMONIC: $mnemonic");
-          return webRuntime.call("mnemonicToAddress(\"$mnemonic\")");
-        })
-        .then((address) => print("ADDR: $address"))
-        .catchError((err) => print("ERR: " + err.toString()));
+    print("Tap");
   }
 
   incIdent() {

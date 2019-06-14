@@ -95,12 +95,7 @@ class _IdentityCreateScreen extends State {
 
   Future<bool> handleWillPop() async {
     if (!Navigator.canPop(context)) {
-      // dispose the Web Runtime
-      try {
-        await webRuntime.close();
-      } catch (err) {
-        print(err);
-      }
+      // dispose any resource in use
     }
     return true;
   }

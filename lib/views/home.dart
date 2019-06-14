@@ -91,12 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<bool> handleWillPop() async {
     if (!Navigator.canPop(context)) {
-      // dispose the Web Runtime
-      try {
-        await webRuntime.close();
-      } catch (err) {
-        print(err);
-      }
+      // dispose any resource in use
     }
     return true;
   }
