@@ -70,18 +70,18 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
       patternColor: patternColor,
       dotColor: descriptionColor,
       canDraw: true,
-      onPatternStarted: onConfirmingPatternStarted,
-      onPatternStopped: onConfirmingPatternStopped,
+      onPatternStarted: onPatternStarted,
+      onPatternStopped: onPatternStopped,
     );
   }
 
-  void onConfirmingPatternStarted(BuildContext context) {
+  void onPatternStarted(BuildContext context) {
     setState(() {
       patternColor = blueColor;
     });
   }
 
-  void onConfirmingPatternStopped(BuildContext context, List<int> pattern) {
+  void onPatternStopped(BuildContext context, List<int> pattern) {
     debugPrint(pattern.toString() + "==" + setPattern.toString());
 
     String stringPattern = '';
