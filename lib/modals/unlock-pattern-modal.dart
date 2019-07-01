@@ -2,16 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
 
+enum SignatureType { decipherOnly, ecsda, lrs }
+
 class UnlockPatternModal extends StatefulWidget {
-
-
-  UnlockPatternModal();
+  SignatureType signatureType = SignatureType.decipherOnly;
+  String payloadToDecrypt;
+  String payloadToSign;
+  UnlockPatternModal(
+      {this.payloadToDecrypt, this.signatureType = SignatureType.decipherOnly});
 
   @override
   _UnlockPatternModalState createState() => _UnlockPatternModalState();
@@ -27,14 +30,13 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
   int toasterDuration = 3;
   Color hitColor = Colors.transparent;
   Color patternColor = blueColor;
-  List<int> setPattern = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: TopNavigation(
           title: " ",
-          showBackButton:true,
+          showBackButton: true,
           onBackButton: onCancel,
         ),
         body: Column(
@@ -54,8 +56,8 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
             ]));
   }
 
-  onCancel() { 
-      Navigator.pop(context, null);
+  onCancel() {
+    Navigator.pop(context, null);
   }
 
   DrawPattern buildConfirming() {
@@ -82,14 +84,12 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
   }
 
   void onPatternStopped(BuildContext context, List<int> pattern) {
-    debugPrint(pattern.toString() + "==" + setPattern.toString());
+    String key = patternToString(pattern);
+    String decryptedPayload  = decrypt(key, widget.payloadToDecrypt);
 
-    String stringPattern = '';
-    if (listEquals(setPattern, pattern)) {
-      for (int i = 0; i < pattern.length - 1; i++) {
-        stringPattern += (pattern[i].toRadixString(gridSize * gridSize));
-      }
-      Navigator.pop(context, stringPattern);
+    if (decryptedPayload != null)
+    {
+      Navigator.pop(context, decryptedPayload);
       return;
     }
 
@@ -97,8 +97,20 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
       patternColor = redColor;
     });
 
-    showErrorMessage("Patterns don't match",
+    showErrorMessage("Wrong pattern",
         context: context, duration: toasterDuration);
     return;
+  }
+
+  String patternToString(List<int> pattern) {
+    String stringPattern = "";
+    for (int i = 0; i < pattern.length - 1; i++) {
+      stringPattern += (pattern[i].toRadixString(gridSize * gridSize));
+    }
+    return stringPattern;
+  }
+
+  String decrypt(String key, String payload) {
+    return null;
   }
 }
