@@ -67,11 +67,16 @@ class _IdentityCreateScreen extends State {
       showMessage("Pattern was cancelled", context: context);
     } else {
       showSuccessMessage("Pattern has been set!", context: context);
-      onCreateIdentity(context, alias);
+      onCreateIdentity(context, alias, pattern);
     }
   }
 
-  onCreateIdentity(BuildContext context, String alias) async {
+  encrypt(String key, String payload) async {
+    //TODO: encrypt 
+    return payload;
+  }
+
+  onCreateIdentity(BuildContext context, String alias, String encryptionKey) async {
     try {
       setState(() {
         generating = true;
@@ -80,6 +85,9 @@ class _IdentityCreateScreen extends State {
       final mnemonic = await generateMnemonic();
       final publicKey = await mnemonicToPublicKey(mnemonic);
       final address = await mnemonicToAddress(mnemonic);
+      final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
+
+     // debugPrint("encryptedMenmonic" + ' ' + encryptedMenmonic);
 
       await identitiesBloc.create(
           mnemonic: mnemonic,
