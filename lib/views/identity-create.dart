@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/modals/create-pattern-modal.dart';
 // import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -18,8 +19,8 @@ class _IdentityCreateScreen extends State {
   Widget build(context) {
     return WillPopScope(
         onWillPop: handleWillPop,
-        child: Scaffold(
-          body: Center(
+        child: Scaffold(body: Builder(builder: (BuildContext context) {
+          return Center(
             child: Align(
               alignment: Alignment(0, -0.3),
               child: Container(
@@ -31,8 +32,8 @@ class _IdentityCreateScreen extends State {
                     : buildWelcome(context),
               ),
             ),
-          ),
-        ));
+          );
+        })));
   }
 
   buildWelcome(BuildContext context) {
@@ -45,16 +46,37 @@ class _IdentityCreateScreen extends State {
         SizedBox(height: 100),
         Center(
           child: TextField(
-            style: TextStyle(fontSize: 20),
-            decoration: InputDecoration(hintText: "What's your name?"),
-            onSubmitted: (alias) => onCreateIdentity(context, alias),
-          ),
+              style: TextStyle(fontSize: 20),
+              decoration: InputDecoration(hintText: "What's your name?"),
+              onSubmitted: (alias) => setPattern(context, alias)),
         ),
       ],
     );
   }
 
-  onCreateIdentity(BuildContext context, String alias) async {
+  setPattern(BuildContext context, String alias) async {
+    String pattern = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => CreatePatternModal(
+                  canGoBack: true,
+                )));
+
+    if (pattern == null) {
+      showMessage("Pattern was cancelled", context: context);
+    } else {
+      showSuccessMessage("Pattern has been set!", context: context);
+      onCreateIdentity(context, alias, pattern);
+    }
+  }
+
+  encrypt(String key, String payload) async {
+    //TODO: encrypt 
+    return payload;
+  }
+
+  onCreateIdentity(BuildContext context, String alias, String encryptionKey) async {
     try {
       setState(() {
         generating = true;
@@ -63,6 +85,9 @@ class _IdentityCreateScreen extends State {
       final mnemonic = await generateMnemonic();
       final publicKey = await mnemonicToPublicKey(mnemonic);
       final address = await mnemonicToAddress(mnemonic);
+      final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
+
+     // debugPrint("encryptedMenmonic" + ' ' + encryptedMenmonic);
 
       await identitiesBloc.create(
           mnemonic: mnemonic,
