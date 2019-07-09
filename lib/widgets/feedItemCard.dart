@@ -1,13 +1,14 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data/identities.dart';
+// import 'package:vocdoni/data/identities.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/cardTitle.dart';
 // import 'package:vocdoni/widgets/pageTitle.dart';
+// import 'package:vocdoni/util/api.dart' show Entity;
 
 class FeedItemCard extends StatelessWidget {
   final NewsPost post;
-  // final Organization organization;
+  // final Entity organization;
   final void Function() onTap;
 
   FeedItemCard({this.post, this.onTap});

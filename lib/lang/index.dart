@@ -50,7 +50,7 @@ class Lang {
     Intl.message('Welcome');
     Intl.message('OK');
     Intl.message('Cancel');
-    Intl.message('Organization');
+    Intl.message('Entity');
     Intl.message('Connecting...');
 
     // IDENTITY - ON BOARDING
@@ -67,7 +67,7 @@ class Lang {
     Intl.message('Permission');
 
     // SUBSCRIPTION
-    Intl.message('Do you want to subscribe to the organization?');
+    Intl.message('Do you want to subscribe to the entity?');
     Intl.message('Subscribe', desc: "Yes, subscribe me");
 
     // ERRORS

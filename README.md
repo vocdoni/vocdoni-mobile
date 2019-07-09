@@ -3,7 +3,7 @@ Official implementation of the Vocdoni core features.
 
 ## Integration
 
-### Organization Actions
+### Entity Actions
 
 Web sites loaded by the Vocdoni host app need can communicate to it by using a simple interface.
 

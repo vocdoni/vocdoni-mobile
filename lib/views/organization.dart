@@ -1,11 +1,11 @@
 import 'dart:io';
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action-ios.dart';
 import 'package:vocdoni/modals/web-action-android.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
-import 'package:vocdoni/widgets/avatar.dart';
+// import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -13,6 +13,9 @@ import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import '../lang/index.dart';
+
+import 'package:dvote/dvote.dart'
+    show Entity, EntityActionBrowser, EntityActionImage;
 
 class OrganizationInfo extends StatefulWidget {
   @override
@@ -23,7 +26,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
   bool collapsed = false;
   @override
   Widget build(context) {
-    final Organization organization = ModalRoute.of(context).settings.arguments;
+    final Entity organization = ModalRoute.of(context).settings.arguments;
     if (organization == null) return buildEmptyOrganization(context);
 
     bool alreadySubscribed = false;
@@ -38,11 +41,13 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     }
 
     return ScaffoldWithImage(
-        headerImageUrl: organization.imageHeader ??
+        // headerImageUrl: organization.imageHeader ?? // TODO: Use dynamic image header
+        headerImageUrl:
             "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
-        title: organization.name,
-        collapsedTitle: organization.name,
-        subtitle: organization.name,
+        title: organization.name[organization.languages[0]] ?? "(entity)",
+        collapsedTitle:
+            organization.name[organization.languages[0]] ?? "(entity)",
+        subtitle: organization.name[organization.languages[0]] ?? "(entity)",
         avatarUrl: organization.avatar,
         builder: Builder(
           builder: (ctx) {
@@ -55,7 +60,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
   }
 
   getScaffoldChildren(
-      BuildContext context, Organization organization, bool alreadySubscribed) {
+      BuildContext context, Entity organization, bool alreadySubscribed) {
     return [
       Section(text: "Description"),
       Summary(
@@ -63,7 +68,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         maxLines: 5,
       ),
       Section(text: "Actions"),
-     /*  ListItem(
+      /*  ListItem(
         text: "Subscribe",
         onTap: () => subscribeToOrganization(context, organization),
       ), */
@@ -91,42 +96,47 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
           title: "",
         ),
         body: Center(
-          child: Text("(No organization)"),
+          child: Text("(No entity)"),
         ));
   }
 
   /// ALREADY REGISTERED CONTENT
 
-  Widget buildAlreadySubscribed(BuildContext ctx, Organization organization) {
+  Widget buildAlreadySubscribed(BuildContext ctx, Entity organization) {
     // TODO: Handle all actions
     final List<Widget> actions = organization.actions
         .map((action) {
-          if (!(action is Map) ||
-              !(action["name"] is Map) ||
-              !(action["name"][organization.languages[0]] is String))
-            return null;
-          return ListItem(
-            text: action["name"][organization.languages[0]],
-            onTap: () {
-              final String url = action["url"];
-              final String title = action["name"][organization.languages[0]] ??
-                  organization.name;
+          if (action is EntityActionBrowser) {
+            if (!(action.name is Map) ||
+                !(action.name[organization.languages[0]] is String))
+              return null;
+            return ListItem(
+              text: action.name[organization.languages[0]],
+              onTap: () {
+                final String url = action.url;
+                final String title =
+                    action.name[organization.languages[0]] ?? organization.name;
 
-              if (Platform.isAndroid) {
-                WebActionAndroid inAppBrowser = new WebActionAndroid();
-                inAppBrowser.open(
-                    url: url,
-                    options: {"clearSessionCache": true, "hideUrlBar": true});
-              } else {
-                final route = MaterialPageRoute(
-                    builder: (context) => WebActionIos(
-                          url: url,
-                          title: title,
-                        ));
-                Navigator.push(ctx, route);
-              }
-            },
-          );
+                if (Platform.isAndroid) {
+                  WebActionAndroid inAppBrowser = new WebActionAndroid();
+                  inAppBrowser.open(
+                      url: url,
+                      options: {"clearSessionCache": true, "hideUrlBar": true});
+                } else {
+                  final route = MaterialPageRoute(
+                      builder: (context) => WebActionIos(
+                            url: url,
+                            title: title,
+                          ));
+                  Navigator.push(ctx, route);
+                }
+              },
+            );
+          } else if (action is EntityActionImage) {
+            return ListItem(text: "TO DO: EntityActionImage");
+          } else {
+            return null;
+          }
         })
         .toList()
         .where((w) => w != null)
@@ -144,7 +154,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
 
   /// PROMPT TO SUBSCRIBE
 
-  Widget buildSubscriptionTiles(BuildContext ctx, Organization organization) {
+  Widget buildSubscriptionTiles(BuildContext ctx, Entity organization) {
     return Column(children: <Widget>[
       ListItem(
         text: "Subscribe",
@@ -156,7 +166,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         textAlign: TextAlign.center,
       ),
       Text(
-        organization.name,
+        organization.name[organization.languages[0]] ?? "(entity)",
         textAlign: TextAlign.center,
       ),
       SizedBox(height: 20),
@@ -171,11 +181,11 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     ]);
   }
 
-  subscribeToOrganization(BuildContext ctx, Organization organization) async {
+  subscribeToOrganization(BuildContext ctx, Entity organization) async {
     final accepted = await showPrompt(
         context: ctx,
-        title: Lang.of(ctx).get("Organization"),
-        text: Lang.of(ctx).get("Do you want to subscribe to the organization?"),
+        title: Lang.of(ctx).get("Entity"),
+        text: Lang.of(ctx).get("Do you want to subscribe to the entity?"),
         okButton: Lang.of(ctx).get("Subscribe"));
 
     if (accepted == false) return;
@@ -188,7 +198,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     } catch (err) {
       if (err == "Already subscribed") {
         showMessage(
-            Lang.of(ctx).get("You are already subscribed to this organization"),
+            Lang.of(ctx).get("You are already subscribed to this entity"),
             context: ctx);
       } else {
         showMessage(

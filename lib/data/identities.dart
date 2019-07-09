@@ -6,6 +6,7 @@ import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/util/api.dart';
+import 'package:dvote/dvote.dart' show Entity;
 
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
@@ -63,7 +64,7 @@ class IdentitiesBloc {
         address: addr,
         organizations: orgs
             .where((String org) => org != null)
-            .map((String org) => Organization.fromJson(jsonDecode(org)))
+            .map((String org) => Entity.fromJson(jsonDecode(org)))
             .toList(),
       );
     }));
@@ -141,7 +142,7 @@ class IdentitiesBloc {
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribe(Organization newOrganization) async {
+  subscribe(Entity newOrganization) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (_state.value.length <= appStateBloc.current?.selectedIdentity)
@@ -156,9 +157,9 @@ class IdentitiesBloc {
       accountOrganizations = prefs.getStringList("$address/organizations");
     }
 
-    final already = accountOrganizations.any((strOrganization) {
-      final org = Organization.fromJson(jsonDecode(strOrganization));
-      if (!(org is Organization)) return false;
+    final already = accountOrganizations.any((strEntity) {
+      final org = Entity.fromJson(jsonDecode(strEntity));
+      if (!(org is Entity)) return false;
       return org.entityId == newOrganization.entityId;
     });
     if (already) throw ("Already subscribed");
@@ -172,11 +173,11 @@ class IdentitiesBloc {
     await readState();
 
     // Fetch after the organization is registered
-    newsFeedsBloc.fetchOrganizationFeeds(newOrganization);
+    newsFeedsBloc.fetchEntityFeeds(newOrganization);
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions
-  unsubscribe(Organization org) {
+  unsubscribe(Entity org) {
     // TODO: PERSIST CHANGES
   }
 }
@@ -186,7 +187,7 @@ class Identity {
   final String mnemonic;
   final String publicKey;
   final String address;
-  final List<Organization> organizations;
+  final List<Entity> organizations;
 
   Identity(
       {this.alias,
@@ -194,95 +195,4 @@ class Identity {
       this.mnemonic,
       this.address,
       this.organizations});
-}
-
-class Organization {
-  // Generic
-  String resolverAddress;
-  String entityId;
-  String networkId;
-  List<String> entryPoints; // TODO: REMOVE?
-
-  // Metadata
-  final List<String> languages;
-  final String name;
-  final Map<String, String> description; // language dependent
-  final String metadataOrigin;
-  final String votingProcessContractAddress;
-  final List<String> activeProcessIds;
-  final List<String> endedProcessIds;
-  final Map<String, String> newsFeed; // language dependent
-  final String avatar;
-  final String imageHeader;
-  Map<String, dynamic> gatewayUpdate = {}; // unused
-  List gatewayBootNodes = []; // unused by now
-  List relays = []; // unused by now
-  List actions = []; // unused by now
-
-  Organization(
-      {this.resolverAddress,
-      this.entityId,
-      this.networkId,
-      this.entryPoints,
-      this.languages,
-      this.name,
-      this.description,
-      this.metadataOrigin,
-      this.votingProcessContractAddress,
-      this.activeProcessIds,
-      this.endedProcessIds,
-      this.newsFeed,
-      this.avatar,
-      this.imageHeader});
-
-  Organization.fromJson(Map<String, dynamic> json)
-      : // global
-        resolverAddress = json['resolverAddress'] ?? "",
-        entityId = json['entityId'] ?? "",
-        networkId = json['networkId'] ?? "",
-        entryPoints = (json['entryPoints'] ?? []).cast<String>().toList(),
-        // meta
-        languages = (json['languages'] ?? []).cast<String>().toList(),
-        name = json['entity-name'] ?? "",
-        description =
-            Map<String, String>.from(json['entity-description'] ?? {}),
-        metadataOrigin = json['meta'] ?? "",
-        votingProcessContractAddress = json['voting-contract'],
-        gatewayUpdate = json['gateway-update'] ?? {},
-        newsFeed = Map<String, String>.from(json['news-feed'] ?? {}),
-        activeProcessIds = ((json['process-ids'] ?? {})['active'] ?? [])
-            .cast<String>()
-            .toList(),
-        endedProcessIds = ((json['process-ids'] ?? {})['ended'] ?? [])
-            .cast<String>()
-            .toList(),
-        avatar = json['avatar'],
-        imageHeader = json['imageHeader'],
-        gatewayBootNodes = json['gateway-boot-nodes'] ?? [],
-        relays = json['relays'] ?? [],
-        actions = json['actions'] ?? [];
-
-  Map<String, dynamic> toJson() {
-    return {
-      // global
-      'resolverAddress': resolverAddress,
-      'entityId': entityId,
-      'networkId': networkId,
-      'entryPoints': entryPoints,
-      // meta
-      'languages': languages,
-      'entity-name': name,
-      'entity-description': description,
-      'meta': metadataOrigin,
-      'voting-contract': votingProcessContractAddress,
-      'gateway-update': gatewayUpdate,
-      'news-feed': newsFeed,
-      'process-ids': {'active': activeProcessIds, 'ended': endedProcessIds},
-      'avatar': avatar,
-      'imageHeader':imageHeader,
-      'gateway-boot-nodes': gatewayBootNodes,
-      'relays': relays,
-      'actions': actions
-    };
-  }
 }

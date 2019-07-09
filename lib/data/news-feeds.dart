@@ -5,6 +5,7 @@ import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
+import 'package:dvote/dvote.dart' show Entity;
 
 const NEWS_FEEDS_KEY_PREFIX = "news-feeds/"; // + organization.entityId
 
@@ -34,7 +35,7 @@ class NewsFeedsBloc {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<Organization> allOrgs = List<Organization>();
+    List<Entity> allOrgs = List<Entity>();
     Map<String, Map<String, NewsFeed>> allFeeds =
         Map<String, Map<String, NewsFeed>>();
     if (identitiesBloc.current == null) return;
@@ -66,7 +67,7 @@ class NewsFeedsBloc {
 
   /// Fetch the news feeds of the given organization and update their entries
   /// on the shared storage
-  Future<Map<String, NewsFeed>> fetchOrganizationFeeds(Organization org) async {
+  Future<Map<String, NewsFeed>> fetchEntityFeeds(Entity org) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (org.languages == null || org.languages.length < 1)
       return Map<String, NewsFeed>();
@@ -74,7 +75,7 @@ class NewsFeedsBloc {
     final Map<String, String> strFeeds = {};
     final Map<String, NewsFeed> orgFeeds = {};
     await Future.wait(org.languages.map((lang) async {
-      final strFeed = await fetchOrganizationNewsFeed(org, lang);
+      final strFeed = await fetchEntityNewsFeed(org, lang);
       strFeeds[lang] = strFeed;
       orgFeeds[lang] = NewsFeed.fromJson(jsonDecode(strFeed));
       await prefs.setString(
@@ -87,6 +88,7 @@ class NewsFeedsBloc {
   }
 }
 
+// TODO: Move to Dvote Flutter library
 class NewsFeed {
   final String version;
   final String title;
