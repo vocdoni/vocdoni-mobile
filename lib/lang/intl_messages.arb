@@ -20,8 +20,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "Organization": "Organization",
-  "@Organization": {
+  "Entity": "Entity",
+  "@Entity": {
     "type": "text",
     "placeholders": {}
   },

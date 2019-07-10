@@ -1,57 +1,46 @@
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/constants/urls.dart' show bootnodesUrl;
-import 'package:vocdoni/util/random.dart';
+import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
+import 'package:dvote/dvote.dart';
+// import 'package:vocdoni/util/random.dart';
 // import 'package:vocdoni/constants/vocdoni.dart';
+export 'package:dvote/dvote.dart' show Entity, ContentURI;
 
 Future<String> getBootNodes() {
   return http.read(bootnodesUrl);
 }
 
-Future<String> generateMnemonic() async {
-  String mnemonic = await webRuntime.call("generateMnemonic()");
-  return mnemonic;
+Future<String> generateMnemonic() {
+  return Dvote.generateMnemonic(size: 192);
 }
 
-Future<String> mnemonicToAddress(String mnemonic) async {
-  String address = await webRuntime.call("mnemonicToAddress('$mnemonic')");
-  return address;
+Future<String> mnemonicToPrivateKey(String mnemonic) {
+  return Dvote.mnemonicToPrivateKey(mnemonic);
 }
 
-Future<String> mnemonicToPublicKey(String mnemonic) async {
-  String address = await webRuntime.call("mnemonicToPublicKey('$mnemonic')");
-  return address;
+Future<String> mnemonicToPublicKey(String mnemonic) {
+  return Dvote.mnemonicToPublicKey(mnemonic);
 }
 
-Future<Organization> fetchOrganizationInfo(String resolverAddress,
-    String entityId, String networkId, List<String> entryPoints) async {
-  Uri parsedUri, ethereumUri;
-  final String randomSuffix = randomString();
+Future<String> mnemonicToAddress(String mnemonic) {
+  return Dvote.mnemonicToAddress(mnemonic);
+}
+
+Future<Entity> fetchEntityData(String resolverAddress, String entityId,
+    String networkId, List<String> entryPoints) async {
+  // Create a random cloned list
+  final List<BootNode> bootnodes = List<BootNode>();
+  bootnodes.addAll(appStateBloc.current.bootnodes);
+  bootnodes.shuffle();
 
   // Attempt for every node available
-  for (BootNode node in appStateBloc.current.bootnodes) {
+  for (BootNode node in bootnodes) {
     try {
-      // randomize the path to prevent caching
-      parsedUri = Uri.parse(node.ethereumUri);
-      ethereumUri = Uri(
-          scheme: parsedUri.scheme,
-          host: parsedUri.host,
-          port: parsedUri.port,
-          path: "${parsedUri?.path ?? '/web3'}/$randomSuffix",
-          query: parsedUri.query);
-      final dvoteUri = node.dvoteUri;
-      final Map<String, dynamic> result = await webRuntime.call('''
-        fetchEntityMetadata("$resolverAddress", "$entityId", "$dvoteUri", "${ethereumUri.toString()}")
-      ''');
+      final Entity entity = await fetchEntity(
+          entityId, resolverAddress, node.dvoteUri, node.ethereumUri,
+          networkId: "1234", entryPoints: entryPoints);
 
-      final org = Organization.fromJson(result);
-
-      org.resolverAddress = resolverAddress;
-      org.entityId = entityId;
-      org.networkId = networkId;
-      org.entryPoints = entryPoints;
-
-      return org;
+      return entity;
     } catch (err) {
       print(err);
       continue;
@@ -60,13 +49,13 @@ Future<Organization> fetchOrganizationInfo(String resolverAddress,
   return null;
 }
 
-Future<String> fetchOrganizationNewsFeed(Organization org, String lang) async {
+Future<String> fetchEntityNewsFeed(Entity org, String lang) async {
   // Create a random cloned list
   final List<BootNode> bootnodes = List<BootNode>();
   bootnodes.addAll(appStateBloc.current.bootnodes);
   bootnodes.shuffle();
 
-  if (!(org is Organization))
+  if (!(org is Entity))
     return null;
   else if (!(org.newsFeed is Map<String, String>))
     return null;
@@ -77,9 +66,8 @@ Future<String> fetchOrganizationNewsFeed(Organization org, String lang) async {
   // Attempt for every node available
   for (BootNode node in bootnodes) {
     try {
-      final result = await webRuntime.call('''
-        fetchTextFile("$contentUri", "${node.dvoteUri}")
-      ''');
+      ContentURI cUri = ContentURI(contentUri);
+      final result = await fetchFileString(cUri, node.dvoteUri);
       return result;
     } catch (err) {
       print(err);

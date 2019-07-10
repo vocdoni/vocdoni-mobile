@@ -2,7 +2,7 @@ import "dart:convert";
 import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/constants/colors.dart';
+// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
@@ -24,7 +24,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
 
   @override
   Widget build(context) {
-    final Organization organization = ModalRoute.of(context).settings.arguments;
+    final Entity organization = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
     else if (organization == null) return buildEmptyOrganization(context);
@@ -37,7 +37,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
 
     return Scaffold(
       appBar: TopNavigation(
-        title: organization.name,
+        title: organization.name[organization.languages[0]],
       ),
       body: ListView.builder(
         itemCount: feed.items.length,
@@ -77,12 +77,12 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
   }
 
   onTapItem(BuildContext ctx, NewsPost post) {
-     Navigator.of(ctx).pushNamed("/organization/activity/post",
-        arguments: ActivityPostArguments( post));
+    Navigator.of(ctx).pushNamed("/organization/activity/post",
+        arguments: ActivityPostArguments(post));
   }
 
   NewsFeed digestGivenOrganizationFeed(
-      BuildContext context, Organization organization) {
+      BuildContext context, Entity organization) {
     // Already fetched?
     if (remoteNewsFeed != null)
       return remoteNewsFeed;
@@ -102,7 +102,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     return feed;
   }
 
-  Future loadRemoteFeed(BuildContext ctx, Organization organization) async {
+  Future loadRemoteFeed(BuildContext ctx, Entity organization) async {
     if (remoteFetched) return;
     remoteFetched = true;
     Timer(Duration(milliseconds: 10), () {
@@ -112,8 +112,8 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     });
 
     try {
-      final result = await fetchOrganizationNewsFeed(
-          organization, organization.languages[0]);
+      final result =
+          await fetchEntityNewsFeed(organization, organization.languages[0]);
       final decoded = NewsFeed.fromJson(jsonDecode(result));
 
       setState(() {

@@ -3,7 +3,7 @@ Official implementation of the Vocdoni core features.
 
 ## Integration
 
-### Organization Actions
+### Entity Actions
 
 Web sites loaded by the Vocdoni host app need can communicate to it by using a simple interface.
 
@@ -164,23 +164,6 @@ vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
 - Generate the string template with `make lang-extract`
 - Import the translated bundles with `make lang-compile`
 
-### WebRuntime
+### Dependencies
 
-An headless web browser running a bundled application. The bundled page exposes access to a predefined set of cryptographic / Ethereum operations, currently missing on the Dart ecosystem.
-
-- See [DVote JS Runtime for Flutter](https://github.com/vocdoni/dvote-js-runtime-flutter)
-- See `lib/util/web-runtime.dart`
-
-**Considerations**:
-- On iOS the key `NSAppTransportSecurity` > `NSAllowsArbitraryLoads` is set to true
-  - This is due to the fact that the runtime will need to connect to Vocdoni Gateways
-  - As Gateways need to be accessed by their IP address, TLS can't be enabled on them
-  - Rather, the protocol will use its own integrity + encryption system
-
-**Runtime Cleanup**:
-On Android, the webview will be loaded as a background view which may cause issues when the user exits the app by pressing the back button. To prevent an empty webview to appear when the user returns:
-
-- The WebRuntime will unload itself after all pending requests are done
-- `Home`, `IdentityCreate` and `IdentitySelect` use `WillPopScope` to detect `onWillPop`
-- When the user has no route to go back to, the root views are expected to tell the webview to close if it didn't already
-  - If the webview can't close itself on time, the route will not pop cleanly and the `IdentitySelect` screen may be shown again instead of the app just quitting
+The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 

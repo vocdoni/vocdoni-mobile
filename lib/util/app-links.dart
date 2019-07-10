@@ -71,7 +71,7 @@ Future fetchAndShowOrganization(
 
   try {
     // Fetch organization data
-    Organization org = await fetchOrganizationInfo(
+    final org = await fetchEntityData(
         resolverAddress, entityId, networkId, decodedEntryPoints);
     if (org == null) throw ("Could not fetch the details");
 

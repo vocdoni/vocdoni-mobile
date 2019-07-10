@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import "package:vocdoni/util/singletons.dart";
+import "package:dvote/dvote.dart" show Entity;
 
 // TODO: REMOVE THIS FILE
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
-  final List<Organization> orgs = await _populateOrganizations();
+  final List<Entity> orgs = await _populateEntities();
 
   await _populateNewsFeeds(orgs);
 
@@ -15,7 +16,7 @@ Future populateSampleData() async {
   await newsFeedsBloc.readState();
 }
 
-Future<List<Organization>> _populateOrganizations() async {
+Future<List<Entity>> _populateEntities() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   Identity currentIdent = identitiesBloc.current
@@ -24,7 +25,7 @@ Future<List<Organization>> _populateOrganizations() async {
 
   final ids = ["1", "2", "3"];
   List<String> strOrganizations = ids.map((id) {
-    String newOrganization = _makeOrganization("Organization #$id");
+    String newOrganization = _makeEntity("Entity #$id");
     return newOrganization;
   }).toList();
 
@@ -32,11 +33,11 @@ Future<List<Organization>> _populateOrganizations() async {
       "${currentIdent.address}/organizations", strOrganizations);
 
   return strOrganizations
-      .map((strOrg) => Organization.fromJson(jsonDecode(strOrg)))
+      .map((strOrg) => Entity.fromJson(jsonDecode(strOrg)))
       .toList();
 }
 
-Future _populateNewsFeeds(List<Organization> orgs) async {
+Future _populateNewsFeeds(List<Entity> orgs) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (orgs?.length == 0 ?? false) throw ("No orgs");
 
@@ -49,69 +50,71 @@ Future _populateNewsFeeds(List<Organization> orgs) async {
   }));
 }
 
-String _makeOrganization(String name) {
+String _makeEntity(String name) {
   return '''{
     "version": "1.0",
     "languages": [
-        "en",
-        "fr"
+        "default"
     ],
-    "entity-name": "$name",
-    "entity-description": {
-        "en": "The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. ",
+    "name": {
+        "default": "$name",
+        "fr": "Mon organisation officielle"
+    },
+    "description": {
+        "default": "The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. ",
         "fr": "La description officielle de $name est ici"
     },
-    "voting-contract": "0x0",
-    "gateway-update": {
-        "timeout": 60000,
-        "topic": "vocdoni-gateway-update",
-        "difficulty": 1000
-    },
-    "process-ids": {
+    "votingContract": "0x0123456789012345678901234567890123456789",
+    "votingProcesses": {
         "active": [],
         "ended": []
     },
-    "news-feed": {
-        "en": "https://hipsterpixel.co/feed.json",
+    "newsFeed": {
+        "default": "https://hipsterpixel.co/feed.json",
         "fr": "https://feed2json.org/convert?url=http://www.intertwingly.net/blog/index.atom"
     },
     "avatar": "https://hipsterpixel.co/assets/favicons/apple-touch-icon.png",
-    "gateway-boot-nodes": [
-        {
-            "update": "pss://publicKey@0x0",
-            "fetch": "https://hostname:port/route"
-        }
-    ],
-    "relays": [
-        {
-            "publicKey": "0x23456...",
-            "messagingUri": "<messaging-uri>"
-        }
-    ],
     "actions": [
         {
             "type": "browser",
             "name": {
-                "en": "Sign up to $name",
+                "default": "Sign up to $name",
                 "fr": "S'inscrire à $name"
             },
-            "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": true
+            "url": "https://cloudflare-ipfs.com/ipfs/QmZ56Z2kpG5QjJcWfhxFD4ac3DhfX21hrQ2gCTrWxzTAse",
+            "visible": "always"
         }
     ],
-    "resolverAddress": "0x0dCA233CE5152d58c74E74693A3C496D01542244",
-    "entityId": "0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85",
-    "networkId": "testnet",
-    "entryPoints": ["__URI1__"]
+    "gatewayBootNodes": [
+        {
+            "heartbeatMessagingUri": "pss://publicKey@0x0",
+            "fetchUri": "https://bootnode:port/gateways.json"
+        }
+    ],
+    "gatewayUpdate": {
+        "timeout": 60000,
+        "topic": "vocdoni-gateway-update",
+        "difficulty": 1000
+    },
+    "relays": [
+        {
+            "publicKey": "04875204f7b0bd9dfcf9af89b4fa0c44016f4b0372646c2142f55136973bd0d660565755341e4c583d49f9d607d08d40e3558de7e6f14f34aa83b7436ac70dc958",
+            "messagingUri": "<messaging-uri>"
+        }
+    ],
+    "bootEntities": [],
+    "fallbackBootNodeEntities": [],
+    "trustedEntities": [],
+    "censusServiceManagedEntities": []
 }''';
 }
 
-String _makeFeed(Organization org) {
+String _makeFeed(Entity org) {
   return '''{
   "version": "https://jsonfeed.org/version/1",
-  "title": "${org.name}",
+  "title": "${org.name["default"] ?? "Entity"}",
   "home_page_url": "https://hipsterpixel.co/",
-  "description": "${org.description}",
+  "description": "${org.description["default"] ?? "The description of an entity"}",
   "feed_url": "https://hipsterpixel.co/feed.json",
   "icon": "https://hipsterpixel.co/assets/favicons/apple-touch-icon.png",
   "favicon": "https://hipsterpixel.co/assets/favicons/favicon.ico",
@@ -121,7 +124,7 @@ String _makeFeed(Organization org) {
       "id": "900e5aa6896c53a40745acac8ca00c3c0ae4f7c3",
       "title": "China's latest weapon in the trade war: Karaoke",
       "summary": "A Chinese propaganda song about the ongoing Sino-US trade war is getting a lot of interest - and raising a few eyebrows - on Chinese social media.",
-      "content_text": "AAAMany cameras nowadays come with a nice screen, often high resolution with a high brightness, but not always swivelling and always too small to fully rely on. I cannot tell how many times a bad picture on the small camera display was actually pretty decent once I opened it on the computer. And when you’re doing video, you really need to get that focus right, at all times. This is hard, but I have a solution that will help you out tremendously!",
+      "content_text": "Many cameras nowadays come with a nice screen, often high resolution with a high brightness, but not always swivelling and always too small to fully rely on. I cannot tell how many times a bad picture on the small camera display was actually pretty decent once I opened it on the computer. And when you’re doing video, you really need to get that focus right, at all times. This is hard, but I have a solution that will help you out tremendously!",
       "content_html": "<h1>I'm an H1</h1> <h2>I'm an H2</h2> <h3>I'm an H3</h3> <img src=\\"https://i.udemycdn.com/course/750x422/59535_1f48_6.jpg\\" alt=\\"Girl in a jacket\\">",
       "url": "https://hipsterpixel.co/2019/05/10/smallhd-5-5-focus-oled-monitor-review/",
       "image": "https://ichef.bbci.co.uk/news/768/cpsprodpb/E24F/production/_107053975_tradewar.png",
