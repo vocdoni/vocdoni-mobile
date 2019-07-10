@@ -88,7 +88,7 @@ class IdentitiesBloc {
       throw ("Invalid publicKey");
     else if (!(address is String))
       throw ("Invalid address");
-    else if (!(alias is String)) throw ("Invalid alias");
+    else if (!(alias is String) || alias.length < 2) throw ("Invalid alias");
 
     // ADD THE ADDRESS IN THE ACCOUNT INDEX
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -173,7 +173,7 @@ class IdentitiesBloc {
     await readState();
 
     // Fetch after the organization is registered
-    newsFeedsBloc.fetchEntityFeeds(newOrganization);
+    await newsFeedsBloc.fetchEntityFeeds(newOrganization);
   }
 
   /// Remove the given organization from the currently selected identity's subscriptions

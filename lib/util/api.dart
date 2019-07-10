@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/constants/urls.dart' show bootnodesUrl;
+import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
 import 'package:dvote/dvote.dart';
 // import 'package:vocdoni/util/random.dart';
 // import 'package:vocdoni/constants/vocdoni.dart';
@@ -37,13 +37,8 @@ Future<Entity> fetchEntityData(String resolverAddress, String entityId,
   for (BootNode node in bootnodes) {
     try {
       final Entity entity = await fetchEntity(
-        entityId,
-        resolverAddress,
-        node.dvoteUri,
-        node.ethereumUri,
-        networkId: "1234",
-        entryPoints: entryPoints
-      );
+          entityId, resolverAddress, node.dvoteUri, node.ethereumUri,
+          networkId: "1234", entryPoints: entryPoints);
 
       return entity;
     } catch (err) {
@@ -72,7 +67,7 @@ Future<String> fetchEntityNewsFeed(Entity org, String lang) async {
   for (BootNode node in bootnodes) {
     try {
       ContentURI cUri = ContentURI(contentUri);
-      final result = fetchFileString(cUri, node.dvoteUri);
+      final result = await fetchFileString(cUri, node.dvoteUri);
       return result;
     } catch (err) {
       print(err);
