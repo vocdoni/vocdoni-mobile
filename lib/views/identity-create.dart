@@ -72,7 +72,7 @@ class _IdentityCreateScreen extends State {
   }
 
   encrypt(String key, String payload) async {
-    //TODO: encrypt 
+    // TODO: encrypt 
     return payload;
   }
 
@@ -86,8 +86,7 @@ class _IdentityCreateScreen extends State {
       final publicKey = await mnemonicToPublicKey(mnemonic);
       final address = await mnemonicToAddress(mnemonic);
       final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
-
-     // debugPrint("encryptedMenmonic" + ' ' + encryptedMenmonic);
+      // TODO: Use encrypted mnemonic
 
       await identitiesBloc.create(
           mnemonic: mnemonic,
