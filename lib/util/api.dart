@@ -38,7 +38,7 @@ Future<Entity> fetchEntityData(String resolverAddress, String entityId,
     try {
       final Entity entity = await fetchEntity(
           entityId, resolverAddress, node.dvoteUri, node.ethereumUri,
-          networkId: "1234", entryPoints: entryPoints);
+          networkId: networkId, entryPoints: entryPoints);
 
       return entity;
     } catch (err) {
