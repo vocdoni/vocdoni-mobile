@@ -164,7 +164,7 @@ class IdentitiesBloc {
     });
     if (already) throw ("Already subscribed");
 
-    accountOrganizations.add(json.encode(newOrganization.toJson()));
+    accountOrganizations.add(json.encode(newOrganization.toJsonAll()));
     await prefs.setStringList("$address/organizations", accountOrganizations);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);

@@ -50,7 +50,7 @@ Future fetchAndShowOrganization(
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw ("Invalid entityId");
   } else if (!(networkId is String) ||
-      !RegExp(r"^[0-9]+$").hasMatch(networkId)) {
+      !RegExp(r"^[0-9a-zA-Z]+$").hasMatch(networkId)) {
     throw ("Invalid networkId");
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
     throw ("Invalid entryPoints");

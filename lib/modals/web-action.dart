@@ -10,17 +10,17 @@ import 'package:vocdoni/util/net.dart';
 
 /// ACTUAL STATE
 
-class WebActionIos extends StatefulWidget {
+class WebAction extends StatefulWidget {
   final String url;
   final String title;
 
-  WebActionIos({this.url, this.title});
+  WebAction({this.url, this.title});
 
   @override
-  _WebActionIosState createState() => _WebActionIosState();
+  _WebActionState createState() => _WebActionState();
 }
 
-class _WebActionIosState extends State<WebActionIos> {
+class _WebActionState extends State<WebAction> {
   bool hasPublicReadPermission = false;
 
   WebViewController webViewCtrl;

@@ -30,7 +30,8 @@ Future<Entity> fetchEntityData(String resolverAddress, String entityId,
     String networkId, List<String> entryPoints) async {
   // Create a random cloned list
   final List<BootNode> bootnodes = List<BootNode>();
-  bootnodes.addAll(appStateBloc.current.bootnodes);
+  bootnodes.addAll(
+      appStateBloc.current.bootnodes.where((bn) => bn.networkId == networkId));
   bootnodes.shuffle();
 
   // Attempt for every node available
@@ -53,7 +54,11 @@ Future<String> fetchEntityNewsFeed(Entity org, String lang) async {
   // Create a random cloned list
   final List<BootNode> bootnodes = List<BootNode>();
   bootnodes.addAll(appStateBloc.current.bootnodes);
+  // TODO: USE Network id
+  // bootnodes.addAll(
+  //     appStateBloc.current.bootnodes.where((bn) => bn.networkId == networkId));
   bootnodes.shuffle();
+
 
   if (!(org is Entity))
     return null;
