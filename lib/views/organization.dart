@@ -1,8 +1,7 @@
-import 'dart:io';
+// import 'dart:io';
 import "package:flutter/material.dart";
 // import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/modals/web-action-ios.dart';
-import 'package:vocdoni/modals/web-action-android.dart';
+import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 // import 'package:vocdoni/widgets/avatar.dart';
@@ -115,21 +114,14 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
               onTap: () {
                 final String url = action.url;
                 final String title =
-                    action.name[organization.languages[0]] ?? organization.name;
+                    action.name[organization.languages[0]] ?? organization.name[organization.languages[0]];
 
-                if (Platform.isAndroid) {
-                  WebActionAndroid inAppBrowser = new WebActionAndroid();
-                  inAppBrowser.open(
-                      url: url,
-                      options: {"clearSessionCache": true, "hideUrlBar": true});
-                } else {
                   final route = MaterialPageRoute(
-                      builder: (context) => WebActionIos(
+                      builder: (context) => WebAction(
                             url: url,
                             title: title,
                           ));
                   Navigator.push(ctx, route);
-                }
               },
             );
           } else if (action is EntityActionImage) {

@@ -59,12 +59,12 @@ class AppStateBloc {
       (jsonBootnodes[networkId] as List).forEach((bootnode) {
         if (!(bootnode is Map)) return;
 
-        String dvoteUri;
-        String ethereumUri;
-        if (bootnode["dvote"] is String) dvoteUri = bootnode["dvote"];
-        if (bootnode["web3"] is String) ethereumUri = bootnode["web3"];
-        BootNode bn =
-            BootNode(networkId, dvoteUri: dvoteUri, ethereumUri: ethereumUri);
+        BootNode bn = BootNode(
+          networkId,
+          dvoteUri: bootnode["dvote"] is String ? bootnode["dvote"] : null,
+          ethereumUri: bootnode["web3"] is String ? bootnode["web3"] : null,
+          publicKey: bootnode["pubKey"] is String ? bootnode["pubKey"] : null,
+        );
         bootnodes.add(bn);
       });
     }
@@ -117,19 +117,22 @@ class BootNode {
   final String networkId;
   final String dvoteUri;
   final String ethereumUri;
+  final String publicKey;
 
-  BootNode(this.networkId, {this.dvoteUri, this.ethereumUri});
+  BootNode(this.networkId, {this.dvoteUri, this.ethereumUri, this.publicKey});
 
   BootNode.fromJson(Map<String, dynamic> json)
       : networkId = json['networkId'] ?? "",
         dvoteUri = json['dvoteUri'] ?? "",
-        ethereumUri = json['ethereumUri'] ?? "";
+        ethereumUri = json['ethereumUri'] ?? "",
+        publicKey = json['pubKey'] ?? "";
 
   Map<String, dynamic> toJson() {
     return {
       'networkId': networkId,
       'dvoteUri': dvoteUri,
-      'ethereumUri': ethereumUri
+      'ethereumUri': ethereumUri,
+      'pubKey': publicKey
     };
   }
 }

@@ -76,8 +76,12 @@ class NewsFeedsBloc {
     final Map<String, NewsFeed> orgFeeds = {};
     await Future.wait(org.languages.map((lang) async {
       final strFeed = await fetchEntityNewsFeed(org, lang);
-      strFeeds[lang] = strFeed;
-      orgFeeds[lang] = NewsFeed.fromJson(jsonDecode(strFeed));
+      if (strFeed != null) {
+        strFeeds[lang] = strFeed;
+        orgFeeds[lang] = NewsFeed.fromJson(jsonDecode(strFeed));
+      } else {
+        orgFeeds[lang] = NewsFeed.fromJson({});
+      }
       await prefs.setString(
           NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang", strFeed);
     }));
