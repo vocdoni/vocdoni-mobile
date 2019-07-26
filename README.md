@@ -1,6 +1,8 @@
 # Vocdoni Mobile Client
 Official implementation of the Vocdoni core features.
 
+The repository depends on a Git submodule mounted on `lib/models` => `git@gitlab.com:vocdoni/dvote-protobuf.git`
+
 ## Integration
 
 ### Entity Actions

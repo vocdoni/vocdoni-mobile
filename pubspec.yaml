@@ -22,6 +22,7 @@ dependencies:
   dvote: ^0.4.1
   webview_flutter: ^0.3.10+3
   rxdart: ^0.22.0
+  protobuf: ^0.13.15
   flutter_localizations:
     sdk: flutter
   shared_preferences: ^0.5.2
