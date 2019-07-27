@@ -16,6 +16,7 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lang/index.dart';
 // import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote/dvote.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -60,10 +61,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else if (appStateBloc != null &&
         appStateBloc.current != null &&
         identitiesBloc
-                .current[appStateBloc.current.selectedIdentity].organizations !=
+                .current[appStateBloc.current.selectedIdentity].subscribedEntities !=
             null &&
         identitiesBloc.current[appStateBloc.current.selectedIdentity]
-                .organizations.length ==
+                .subscribedEntities.length ==
             0) {
       selectedTab = 2;
     }
@@ -170,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         body = StreamBuilder(
             stream: newsFeedsBloc.stream,
             builder: (BuildContext ctx,
-                AsyncSnapshot<Map<String, Map<String, NewsFeed>>> newsFeeds) {
+                AsyncSnapshot<Map<String, Map<String, Feed>>> newsFeeds) {
               return FeedTab(
                   appState: appState,
                   identities: identities,

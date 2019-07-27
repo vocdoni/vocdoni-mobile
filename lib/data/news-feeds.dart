@@ -5,7 +5,7 @@ import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
-import 'package:dvote/dvote.dart' show Entity;
+import 'package:dvote/dvote.dart';
 
 const NEWS_FEEDS_KEY_PREFIX = "news-feeds/"; // + organization.entityId
 
@@ -13,17 +13,17 @@ const NEWS_FEEDS_KEY_PREFIX = "news-feeds/"; // + organization.entityId
 /// - SharedPreferences > "news-feeds/{organization-id}/{lang}" => "{...JSON-Feed...}"
 
 /// STREAM DATA STRUCTURE
-/// - Data > Map[organization-id] > Map[lang] > NewsFeed
+/// - Data > Map[organization-id] > Map[lang] > Feed
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
 /// of the subscribed organizations
 class NewsFeedsBloc {
-  BehaviorSubject<Map<String, Map<String, NewsFeed>>> _state =
-      BehaviorSubject<Map<String, Map<String, NewsFeed>>>.seeded(
-          Map<String, Map<String, NewsFeed>>());
+  BehaviorSubject<Map<String, Map<String, Feed>>> _state =
+      BehaviorSubject<Map<String, Map<String, Feed>>>.seeded(
+          Map<String, Map<String, Feed>>());
 
-  Observable<Map<String, Map<String, NewsFeed>>> get stream => _state.stream;
-  Map<String, Map<String, NewsFeed>> get current => _state.value;
+  Observable<Map<String, Map<String, Feed>>> get stream => _state.stream;
+  Map<String, Map<String, Feed>> get current => _state.value;
 
   Future restore() {
     return readState();
@@ -35,9 +35,9 @@ class NewsFeedsBloc {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<Entity> allOrgs = List<Entity>();
-    Map<String, Map<String, NewsFeed>> allFeeds =
-        Map<String, Map<String, NewsFeed>>();
+    List<EntitySummary> allOrgs = List<EntitySummary>();
+    Map<String, Map<String, Feed>> allFeeds =
+        Map<String, Map<String, Feed>>();
     if (identitiesBloc.current == null) return;
 
     // Unique list
@@ -47,17 +47,17 @@ class NewsFeedsBloc {
           allOrgs.add(org);
         }
       });
-      allOrgs.addAll(ident.organizations);
+      allOrgs.addAll(ident.subscribedEntities);
     });
 
     // Arrange info
     allOrgs.forEach((org) {
-      allFeeds[org.entityId] = Map<String, NewsFeed>();
+      allFeeds[org.entityId] = Map<String, Feed>();
       org.languages.forEach((lang) {
         final str =
             prefs.getString(NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang");
         if (str == null) return;
-        final feed = NewsFeed.fromJson(jsonDecode(str));
+        final feed = Feed.fromJson(jsonDecode(str));
         allFeeds[org.entityId][lang] = feed;
       });
     });
@@ -67,20 +67,20 @@ class NewsFeedsBloc {
 
   /// Fetch the news feeds of the given organization and update their entries
   /// on the shared storage
-  Future<Map<String, NewsFeed>> fetchEntityFeeds(Entity org) async {
+  Future<Map<String, Feed>> fetchEntityFeeds(Entity org) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (org.languages == null || org.languages.length < 1)
-      return Map<String, NewsFeed>();
+      return Map<String, Feed>();
 
     final Map<String, String> strFeeds = {};
-    final Map<String, NewsFeed> orgFeeds = {};
+    final Map<String, Feed> orgFeeds = {};
     await Future.wait(org.languages.map((lang) async {
       final strFeed = await fetchEntityNewsFeed(org, lang);
       if (strFeed != null) {
         strFeeds[lang] = strFeed;
-        orgFeeds[lang] = NewsFeed.fromJson(jsonDecode(strFeed));
+        orgFeeds[lang] = Feed.fromJson(jsonDecode(strFeed));
       } else {
-        orgFeeds[lang] = NewsFeed.fromJson({});
+        orgFeeds[lang] = Feed.fromJson("{}");
       }
       await prefs.setString(
           NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang", strFeed);
@@ -90,85 +90,4 @@ class NewsFeedsBloc {
 
     return orgFeeds;
   }
-}
-
-// TODO: Move to Dvote Flutter library
-class NewsFeed {
-  final String version;
-  final String title;
-  final String description;
-  final String favicon;
-  final String feedUrl;
-  final String homePageUrl;
-  final String icon;
-  final List<NewsPost> items;
-  final bool expired;
-
-  NewsFeed(
-      {this.version,
-      this.title,
-      this.description,
-      this.favicon,
-      this.feedUrl,
-      this.homePageUrl,
-      this.icon,
-      this.items,
-      this.expired});
-
-  NewsFeed.fromJson(Map<String, dynamic> json)
-      : version = json['version'] ?? "",
-        title = json['title'] ?? "",
-        description = json['description'] ?? "",
-        favicon = json['favicon'] ?? "",
-        feedUrl = json['feedUrl'] ?? "",
-        homePageUrl = json['homePageUrl'] ?? "",
-        icon = json['icon'] ?? "",
-        items = ((json['items'] ?? []) as List)
-            .map((i) => NewsPost.fromJson(i))
-            .toList(),
-        expired = json['expired'] ?? false;
-}
-
-class NewsPost {
-  final String id;
-  final String author;
-  final String url;
-  final String title;
-  final String summary;
-  final String contentHtml;
-  final String contentText;
-  final DateTime published;
-  final DateTime modified;
-  final String image;
-  final List<String> tags;
-
-  NewsPost(
-      {this.id,
-      this.author,
-      this.url,
-      this.title,
-      this.summary,
-      this.contentHtml,
-      this.contentText,
-      this.published,
-      this.modified,
-      this.image,
-      this.tags});
-
-  NewsPost.fromJson(Map json)
-      : id = json['id'] ?? json["guid"] ?? "",
-        author = json['author'] is Map ? json["author"]["name"] ?? "" : "",
-        summary = json['summary'] ?? "",
-        contentHtml = json['content_html'] ?? "",
-        contentText = json['content_text'] ?? "",
-        published = json['date_published'] != null
-            ? DateTime.parse(json['date_published'])
-            : null,
-        modified = json['date_modified'] != null
-            ? DateTime.parse(json['date_modified'])
-            : null,
-        image = json['image'] ?? "",
-        tags = (json['tags'] ?? []).cast<String>().toList(),
-        title = json['title'] ?? "",
-        url = json['url'] ?? "";
 }

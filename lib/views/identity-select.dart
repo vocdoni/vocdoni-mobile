@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import '../util/singletons.dart';
+import 'package:dvote/dvote.dart';
 
 class IdentitySelectScreen extends StatefulWidget {
   @override

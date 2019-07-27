@@ -1,3 +1,4 @@
+import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 // import 'package:vocdoni/modals/web-viewer.dart';
@@ -11,7 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
 class ActivityPostArguments {
-  final NewsPost post;
+  final FeedPost post;
 
   ActivityPostArguments(this.post);
 }
@@ -21,7 +22,7 @@ class ActivityPostScreen extends StatelessWidget {
   Widget build(ctx) {
     final ActivityPostArguments args = ModalRoute.of(ctx).settings.arguments;
 
-    NewsPost post = args.post;
+    FeedPost post = args.post;
 
     if (post == null) return buildNoPosts(ctx);
 
@@ -44,7 +45,7 @@ class ActivityPostScreen extends StatelessWidget {
             ),
             PageTitle(
               title: post.title,
-              subtitle: post.author,
+              subtitle: post.author.name,
             ),
             //Section(text: "HTML render 1"),
             //html1(post.contentHtml),

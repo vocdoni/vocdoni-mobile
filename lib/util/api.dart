@@ -4,26 +4,25 @@ import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
 import 'package:dvote/dvote.dart';
 // import 'package:vocdoni/util/random.dart';
 // import 'package:vocdoni/constants/vocdoni.dart';
-export 'package:dvote/dvote.dart' show Entity, ContentURI;
 
 Future<String> getBootNodes() {
   return http.read(bootnodesUrl);
 }
 
-Future<String> generateMnemonic() {
-  return Dvote.generateMnemonic(size: 192);
+Future<String> makeMnemonic() {
+  return generateMnemonic(size: 192);
 }
 
-Future<String> mnemonicToPrivateKey(String mnemonic) {
-  return Dvote.mnemonicToPrivateKey(mnemonic);
+Future<String> privateKeyFromMnemonic(String mnemonic) {
+  return mnemonicToPrivateKey(mnemonic);
 }
 
-Future<String> mnemonicToPublicKey(String mnemonic) {
-  return Dvote.mnemonicToPublicKey(mnemonic);
+Future<String> publicKeyFromMnemonic(String mnemonic) {
+  return mnemonicToPublicKey(mnemonic);
 }
 
-Future<String> mnemonicToAddress(String mnemonic) {
-  return Dvote.mnemonicToAddress(mnemonic);
+Future<String> addressFromMnemonic(String mnemonic) {
+  return mnemonicToAddress(mnemonic);
 }
 
 Future<Entity> fetchEntityData(String resolverAddress, String entityId,

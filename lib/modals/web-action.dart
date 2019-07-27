@@ -154,8 +154,9 @@ class _WebActionState extends State<WebAction> {
           return respondError(id, "Permission declined");
 
         // GET THE PUBLIC KEY
+        // TODO: USE A REAL PUBLIC KEY
         final publicKey = identitiesBloc
-            .current[appStateBloc.current.selectedIdentity].publicKey;
+            .current[appStateBloc.current.selectedIdentity].identityId;
 
         return respond(id, '''
             handleHostResponse(JSON.stringify({id: $id, data: "$publicKey" }));

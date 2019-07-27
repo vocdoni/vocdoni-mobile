@@ -82,9 +82,9 @@ class _IdentityCreateScreen extends State {
         generating = true;
       });
 
-      final mnemonic = await generateMnemonic();
-      final publicKey = await mnemonicToPublicKey(mnemonic);
-      final address = await mnemonicToAddress(mnemonic);
+      final mnemonic = await makeMnemonic();
+      final publicKey = await publicKeyFromMnemonic(mnemonic);
+      final address = await addressFromMnemonic(mnemonic);
       final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
       // TODO: Use encrypted mnemonic
 

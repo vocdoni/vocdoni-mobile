@@ -8,9 +8,10 @@ import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
+import 'package:dvote/dvote.dart';
 
 // TODO: REMOVE
-import 'package:vocdoni/data/dev/populate.dart';
+import 'package:vocdoni/util/dev/populate.dart';
 
 class IdentityTab extends StatelessWidget {
   final AppState appState;
@@ -27,10 +28,10 @@ class IdentityTab extends StatelessWidget {
       children: <Widget>[
         PageTitle(
           title: appState != null && identities.length > 0
-              ? identities[appState.selectedIdentity].alias
+              ? identities[appState.selectedIdentity].name
               : "",
           subtitle: appState != null && identities.length > 0
-              ? identities[appState.selectedIdentity].address
+              ? identities[appState.selectedIdentity].identityId
               : "",
         ),
         Section(text: "Your identity"),

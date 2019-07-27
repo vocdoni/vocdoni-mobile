@@ -1,3 +1,4 @@
+import "package:dvote/dvote.dart";
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 // import 'package:vocdoni/data/identities.dart';
@@ -7,7 +8,7 @@ import 'package:vocdoni/widgets/cardTitle.dart';
 // import 'package:vocdoni/util/api.dart' show Entity;
 
 class FeedItemCard extends StatelessWidget {
-  final NewsPost post;
+  final FeedPost post;
   // final Entity organization;
   final void Function() onTap;
 
@@ -37,7 +38,7 @@ class FeedItemCard extends StatelessWidget {
                 ),
                 CardTitle(
                   title: post.title,
-                  subtitle: post.author,
+                  subtitle: post.author.name,
                 )
               ]),
         ),

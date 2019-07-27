@@ -1,53 +1,43 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import "package:vocdoni/util/singletons.dart";
-import "package:dvote/dvote.dart" show Entity;
-
-// TODO: REMOVE THIS FILE
+import "package:dvote/dvote.dart";
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
-  final List<Entity> orgs = await _populateEntities();
+  final List<Entity> entities = _makeEntities();
+  final List<Feed> feeds = await _makeNewsFeeds(entities);
 
-  await _populateNewsFeeds(orgs);
+  // TODO:
 
   await identitiesBloc.readState();
   await newsFeedsBloc.readState();
 }
 
-Future<List<Entity>> _populateEntities() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-
+List<Entity> _makeEntities() {
   Identity currentIdent = identitiesBloc.current
       ?.elementAt(appStateBloc.current?.selectedIdentity ?? 0);
-  if (currentIdent == null) throw ("No current identity");
+  if (currentIdent == null) throw "No current identity";
 
-  final ids = ["1", "2", "3"];
-  List<String> strOrganizations = ids.map((id) {
+  final ids = ["0x1", "0x2", "0x3"];
+  return ids.map((id) {
     String newOrganization = _makeEntity("Entity #$id");
-    return newOrganization;
+    return Entity.fromJson(newOrganization);
   }).toList();
-
-  await prefs.setStringList(
-      "${currentIdent.address}/organizations", strOrganizations);
-
-  return strOrganizations
-      .map((strOrg) => Entity.fromJson(jsonDecode(strOrg)))
-      .toList();
 }
 
-Future _populateNewsFeeds(List<Entity> orgs) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (orgs?.length == 0 ?? false) throw ("No orgs");
+List<Feed> _makeNewsFeeds(List<Entity> entities) {
+  if (entities?.length == 0 ?? false) throw "No entities";
 
-  // Indeed, all 3 organizations have the same entity ID...
-  await Future.wait(orgs.map((org) async {
-    final strFeed = _makeFeed(org);
-    await prefs.setString(
-        NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/${org.languages[0] ?? "en"}",
-        strFeed);
-  }));
+  List<Feed> result = [];
+  entities.forEach((entity) {
+    entity.languages.forEach((lang) {
+      Feed f = Feed.fromJson(_makeFeed(entity));
+      // external metadata
+      f.meta.addAll({"entityId": entity.entityId, "language": lang});
+      return f;
+    });
+  });
+
+  return result;
 }
 
 String _makeEntity(String name) {
@@ -64,7 +54,11 @@ String _makeEntity(String name) {
         "default": "The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. The description of $name goes here. ",
         "fr": "La description officielle de $name est ici"
     },
-    "votingContract": "0x0123456789012345678901234567890123456789",
+    "contracts": {
+        "resolverAddress": "0x21f7DcCd9D1ce4C3685A5c50096265A8db4103b4",
+        "votingAddress": "0x1234567890123456789012345678901234567890",
+        "networkId": "goerli"
+    },
     "votingProcesses": {
         "active": [],
         "ended": []
@@ -73,7 +67,10 @@ String _makeEntity(String name) {
         "default": "https://hipsterpixel.co/feed.json",
         "fr": "https://feed2json.org/convert?url=http://www.intertwingly.net/blog/index.atom"
     },
-    "avatar": "https://hipsterpixel.co/assets/favicons/apple-touch-icon.png",
+    "media": {
+        "avatar": "https://hipsterpixel.co/assets/favicons/apple-touch-icon.png",
+        "header": "https://images.unsplash.com/photo-1557518016-299b3b3c2e7f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80"
+    },
     "actions": [
         {
             "type": "browser",
@@ -87,8 +84,8 @@ String _makeEntity(String name) {
     ],
     "gatewayBootNodes": [
         {
-            "heartbeatMessagingUri": "pss://publicKey@0x0",
-            "fetchUri": "https://bootnode:port/gateways.json"
+            "fetchUri": "https://bootnode:port/gateways.json",
+            "heartbeatMessagingUri": "pss://publicKey@0x0"
         }
     ],
     "gatewayUpdate": {

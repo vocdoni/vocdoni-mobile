@@ -11,10 +11,10 @@ import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
 
-import 'package:dvote/dvote.dart'
-    show Entity, EntityActionBrowser, EntityActionImage;
+import 'package:dvote/dvote.dart' show Entity;
 
 class OrganizationInfo extends StatefulWidget {
   @override
@@ -33,8 +33,8 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         appStateBloc.current.selectedIdentity >= 0) {
       final Identity currentIdentity =
           identitiesBloc.current[appStateBloc.current.selectedIdentity];
-      if (currentIdentity != null && currentIdentity.organizations.length > 0) {
-        alreadySubscribed = currentIdentity.organizations
+      if (currentIdentity != null && currentIdentity.subscribedEntities.length > 0) {
+        alreadySubscribed = currentIdentity.subscribedEntities
             .any((o) => o.entityId == organization.entityId);
       }
     }
@@ -47,7 +47,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         collapsedTitle:
             organization.name[organization.languages[0]] ?? "(entity)",
         subtitle: organization.name[organization.languages[0]] ?? "(entity)",
-        avatarUrl: organization.avatar,
+        avatarUrl: organization.media.avatar,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -105,7 +105,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
     // TODO: Handle all actions
     final List<Widget> actions = organization.actions
         .map((action) {
-          if (action is EntityActionBrowser) {
+          if (action.type == "browser") {
             if (!(action.name is Map) ||
                 !(action.name[organization.languages[0]] is String))
               return null;
@@ -113,18 +113,18 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
               text: action.name[organization.languages[0]],
               onTap: () {
                 final String url = action.url;
-                final String title =
-                    action.name[organization.languages[0]] ?? organization.name[organization.languages[0]];
+                final String title = action.name[organization.languages[0]] ??
+                    organization.name[organization.languages[0]];
 
-                  final route = MaterialPageRoute(
-                      builder: (context) => WebAction(
-                            url: url,
-                            title: title,
-                          ));
-                  Navigator.push(ctx, route);
+                final route = MaterialPageRoute(
+                    builder: (context) => WebAction(
+                          url: url,
+                          title: title,
+                        ));
+                Navigator.push(ctx, route);
               },
             );
-          } else if (action is EntityActionImage) {
+          } else if (action.type == "image") {
             return ListItem(text: "TO DO: EntityActionImage");
           } else {
             return null;
@@ -167,7 +167,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         textAlign: TextAlign.center,
       ),
       Text(
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].name,
         textAlign: TextAlign.center,
       )
     ]);

@@ -9,6 +9,7 @@ import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote/dvote.dart';
 
 import 'activity-post.dart';
 
@@ -18,7 +19,7 @@ class OrganizationActivity extends StatefulWidget {
 }
 
 class _OrganizationActivityState extends State<OrganizationActivity> {
-  NewsFeed remoteNewsFeed;
+  Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
 
@@ -42,7 +43,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
       body: ListView.builder(
         itemCount: feed.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final NewsPost post = feed.items[index];
+          final FeedPost post = feed.items[index];
           return FeedItemCard(
             post: post,
             onTap: () => onTapItem(context, post),
@@ -76,12 +77,12 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     ));
   }
 
-  onTapItem(BuildContext ctx, NewsPost post) {
+  onTapItem(BuildContext ctx, FeedPost post) {
     Navigator.of(ctx).pushNamed("/organization/activity/post",
         arguments: ActivityPostArguments(post));
   }
 
-  NewsFeed digestGivenOrganizationFeed(
+  Feed digestGivenOrganizationFeed(
       BuildContext context, Entity organization) {
     // Already fetched?
     if (remoteNewsFeed != null)
@@ -114,7 +115,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     try {
       final result =
           await fetchEntityNewsFeed(organization, organization.languages[0]);
-      final decoded = NewsFeed.fromJson(jsonDecode(result));
+      final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {
         remoteNewsFeed = decoded;

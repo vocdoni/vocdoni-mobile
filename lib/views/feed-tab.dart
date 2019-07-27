@@ -2,12 +2,12 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/activity-post.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
-import 'package:dvote/dvote.dart' show Entity;
+import 'package:dvote/dvote.dart';
 
 class FeedTab extends StatelessWidget {
   final AppState appState;
   final List<Identity> identities;
-  final Map<String, Map<String, NewsFeed>> newsFeeds;
+  final Map<String, Map<String, Feed>> newsFeeds;
 
   FeedTab({this.appState, this.identities, this.newsFeeds});
 
@@ -15,16 +15,16 @@ class FeedTab extends StatelessWidget {
   Widget build(ctx) {
     if (newsFeeds == null) return buildNoVotes(ctx);
 
-    List<NewsPost> newsPosts = List<NewsPost>();
+    List<FeedPost> newsPosts = List<FeedPost>();
     final Identity currentIdentity =
         identities?.elementAt(appState?.selectedIdentity ?? 0);
     if (currentIdentity == null) return buildNoVotes(ctx);
-    currentIdentity.organizations.forEach((entity) {
+    currentIdentity.subscribedEntities.forEach((entity) {
       // TODO: DETECT LANGUAGE
       final lang =
           (entity is Entity && entity.languages is List) ? entity.languages[0] : "en";
       if (!(newsFeeds[entity.entityId] is Map) ||
-          !(newsFeeds[entity.entityId][lang] is NewsFeed)) return;
+          !(newsFeeds[entity.entityId][lang] is Feed)) return;
       final newsFeed = newsFeeds[entity.entityId][lang];
       newsPosts.addAll(newsFeed.items);
     });
@@ -59,7 +59,7 @@ class FeedTab extends StatelessWidget {
     );
   }
 
-  onTapItem(BuildContext ctx, NewsPost post) {
+  onTapItem(BuildContext ctx, FeedPost post) {
     Navigator.of(ctx).pushNamed("/organization/activity/post",
         arguments: ActivityPostArguments(post));
   }

@@ -6,7 +6,7 @@ import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
 // import 'package:vocdoni/util/api.dart';
-import 'package:dvote/dvote.dart' show Entity;
+import 'package:dvote/dvote.dart';
 
 /// STORAGE STRUCTURE
 /// - SharedPreferences > "accounts" > String List > address (String)
@@ -164,7 +164,7 @@ class IdentitiesBloc {
     });
     if (already) throw ("Already subscribed");
 
-    accountOrganizations.add(json.encode(newOrganization.toJsonAll()));
+    accountOrganizations.add(json.encode(newOrganization.writeToJson()));
     await prefs.setStringList("$address/organizations", accountOrganizations);
 
     appStateBloc.selectOrganization(accountOrganizations.length - 1);
@@ -180,19 +180,4 @@ class IdentitiesBloc {
   unsubscribe(Entity org) {
     // TODO: PERSIST CHANGES
   }
-}
-
-class Identity {
-  final String alias;
-  final String mnemonic;
-  final String publicKey;
-  final String address;
-  final List<Entity> organizations;
-
-  Identity(
-      {this.alias,
-      this.publicKey,
-      this.mnemonic,
-      this.address,
-      this.organizations});
 }
