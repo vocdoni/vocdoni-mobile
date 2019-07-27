@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
@@ -5,8 +6,24 @@ import 'package:dvote/dvote.dart';
 // import 'package:vocdoni/util/random.dart';
 // import 'package:vocdoni/constants/vocdoni.dart';
 
-Future<String> getBootNodes() {
-  return http.read(bootnodesUrl);
+Future<List<Gateway>> getBootNodes() async {
+  try {
+    List<Gateway> result = List<Gateway>();
+    final strBootnodes = await http.read(bootnodesUrl);
+    Map<String, List<Map>> networkItems = jsonDecode(strBootnodes);
+    networkItems.forEach((networkId, network) {
+      network.forEach((item) {
+        Gateway gw = Gateway();
+        gw.dvote = item["dvote"];
+        gw.web3 = item["web3"];
+        gw.publicKey = item["publicKey"];
+        result.add(gw);
+      });
+    });
+    return result;
+  } catch (err) {
+    throw "The boot nodes cannot be loaded";
+  }
 }
 
 Future<String> makeMnemonic() {
@@ -57,7 +74,6 @@ Future<String> fetchEntityNewsFeed(Entity org, String lang) async {
   // bootnodes.addAll(
   //     appStateBloc.current.bootnodes.where((bn) => bn.networkId == networkId));
   bootnodes.shuffle();
-
 
   if (!(org is Entity))
     return null;

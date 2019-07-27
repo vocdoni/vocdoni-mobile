@@ -31,12 +31,12 @@ class FeedTab extends StatelessWidget {
 
     if (newsPosts.length == 0) return buildNoVotes(ctx);
     newsPosts.sort((a, b) {
-      if (!(a?.published is DateTime) && !(b?.published is DateTime))
+      if (!(a?.datePublished is DateTime) && !(b?.datePublished is DateTime))
         return 0;
-      else if (!(a?.published is DateTime))
+      else if (!(a?.datePublished is DateTime))
         return -1;
-      else if (!(b?.published is DateTime)) return 1;
-      return b.published.compareTo(a.published);
+      else if (!(b?.datePublished is DateTime)) return 1;
+      return b.datePublished.compareTo(a.datePublished);
     });
 
     // TODO: UI

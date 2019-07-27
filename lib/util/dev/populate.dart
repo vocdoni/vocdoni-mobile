@@ -7,7 +7,6 @@ Future populateSampleData() async {
   final List<Feed> feeds = await _makeNewsFeeds(entities);
 
   // TODO:
-
   await identitiesBloc.readState();
   await newsFeedsBloc.readState();
 }

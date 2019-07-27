@@ -1,138 +1,120 @@
+import 'dart:io';
 import 'dart:convert';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vocdoni/util/api.dart';
+// import 'package:dvote/models/dart/gateway.pb.dart';
+import 'package:vocdoni/data/generic.dart';
+import 'package:dvote/dvote.dart';
 
-class AppStateBloc {
-  BehaviorSubject<AppState> _state =
-      BehaviorSubject<AppState>.seeded(AppState());
-
-  Observable<AppState> get stream => _state.stream;
-  AppState get current => _state.value;
-
-  // Constructor
+class AppStateBloc extends BlocComponent<AppState> {
   AppStateBloc() {
-    _state.add(AppState());
+    state.add(AppState());
   }
 
-  Future restore() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!prefs.containsKey("bootnodes")) return; // nothing to restore
-
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final dat = prefs.getStringList("bootnodes");
-      if (!(dat is List)) {
-        await prefs.setStringList("bootnodes", []);
-        return;
-      }
-      final List<BootNode> deserializedBootNodes =
-          dat.map((strNode) => BootNode.fromJson(jsonDecode(strNode))).toList();
-
-      AppState newState = AppState()
-        ..selectedIdentity = _state.value.selectedIdentity
-        ..bootnodes = deserializedBootNodes;
-
-      _state.add(newState);
-    } catch (err) {
-      print(err);
-    }
+  @override
+  Future<void> restore() {
+    // return readState();
   }
 
-  Future loadBootNodes() async {
-    try {
-      final List<BootNode> bnList = await fetchBootNodes();
-      await setBootNodes(bnList);
-    } catch (err) {
-      print("ERR: $err");
-    }
+  @override
+  Future<void> persist() {
+    // TODO:
   }
 
-  Future<List<BootNode>> fetchBootNodes() async {
-    final String strJsonBootnodes = await getBootNodes();
-    final Map jsonBootnodes = jsonDecode(strJsonBootnodes);
-    if (!(jsonBootnodes is Map)) throw ("Invalid bootnodes response");
+  // Future restore() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   if (!prefs.containsKey("bootnodes")) return; // nothing to restore
 
-    List<BootNode> bootnodes = List<BootNode>();
-    for (String networkId in jsonBootnodes.keys) {
-      if (!(jsonBootnodes[networkId] is List)) continue;
-      (jsonBootnodes[networkId] as List).forEach((bootnode) {
-        if (!(bootnode is Map)) return;
+  //   try {
+  //     final dat = prefs.getStringList("bootnodes");
+  //     if (!(dat is List)) {
+  //       await prefs.setStringList("bootnodes", []);
+  //       return;
+  //     }
+  //     final List<BootNode> deserializedBootNodes =
+  //         dat.map((strNode) => BootNode.fromJson(jsonDecode(strNode))).toList();
 
-        BootNode bn = BootNode(
-          networkId,
-          dvoteUri: bootnode["dvote"] is String ? bootnode["dvote"] : null,
-          ethereumUri: bootnode["web3"] is String ? bootnode["web3"] : null,
-          publicKey: bootnode["pubKey"] is String ? bootnode["pubKey"] : null,
-        );
-        bootnodes.add(bn);
-      });
-    }
-    return bootnodes;
-  }
+  //     AppState newState = AppState()
+  //       ..selectedIdentity = state.value.selectedIdentity
+  //       ..bootnodes = deserializedBootNodes;
 
-  // Operations
+  //     state.add(newState);
+  //   } catch (err) {
+  //     print(err);
+  //   }
+  // }
 
-  selectIdentity(int identityIdx) {
-    AppState newState = AppState()
-      ..selectedIdentity = identityIdx
-      ..bootnodes = _state.value.bootnodes;
+  // Future loadBootNodes() async {
+  //   try {
+  //     final List<BootNode> bnList = await fetchBootNodes();
+  //     await setBootNodes(bnList);
+  //   } catch (err) {
+  //     print("ERR: $err");
+  //   }
+  // }
 
-    _state.add(newState);
+  // Future<List<BootNode>> fetchBootNodes() async {
+  //   final String strJsonBootnodes = await getBootNodes();
+  //   final Map jsonBootnodes = jsonDecode(strJsonBootnodes);
+  //   if (!(jsonBootnodes is Map)) throw ("Invalid bootnodes response");
 
-    // TODO: TRIGGER UPDATE
-  }
+  //   List<BootNode> bootnodes = List<BootNode>();
+  //   for (String networkId in jsonBootnodes.keys) {
+  //     if (!(jsonBootnodes[networkId] is List)) continue;
+  //     (jsonBootnodes[networkId] as List).forEach((bootnode) {
+  //       if (!(bootnode is Map)) return;
 
-  selectOrganization(int organizationIdx) {
-    AppState newState = AppState()
-      ..selectedIdentity = _state.value.selectedIdentity
-      ..bootnodes = _state.value.bootnodes;
+  //       BootNode bn = BootNode(
+  //         networkId,
+  //         dvoteUri: bootnode["dvote"] is String ? bootnode["dvote"] : null,
+  //         ethereumUri: bootnode["web3"] is String ? bootnode["web3"] : null,
+  //         publicKey: bootnode["pubKey"] is String ? bootnode["pubKey"] : null,
+  //       );
+  //       bootnodes.add(bn);
+  //     });
+  //   }
+  //   return bootnodes;
+  // }
 
-    _state.add(newState);
-  }
+  // // Operations
 
-  setBootNodes(List<BootNode> bootnodes) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!(bootnodes is List<BootNode>)) throw ("Invalid bootnode list");
-    final List<String> serializedData =
-        bootnodes.map((node) => jsonEncode(node.toJson())).toList();
-    await prefs.setStringList("bootnodes", serializedData);
+  // selectIdentity(int identityIdx) {
+  //   AppState newState = AppState()
+  //     ..selectedIdentity = identityIdx
+  //     ..bootnodes = state.value.bootnodes;
 
-    AppState newState = AppState()
-      ..selectedIdentity = _state.value.selectedIdentity
-      ..bootnodes = bootnodes;
+  //   state.add(newState);
 
-    _state.add(newState);
-  }
+  //   // TODO: TRIGGER UPDATE
+  // }
+
+  // selectOrganization(int organizationIdx) {
+  //   AppState newState = AppState()
+  //     ..selectedIdentity = state.value.selectedIdentity
+  //     ..bootnodes = state.value.bootnodes;
+
+  //   state.add(newState);
+  // }
+
+  // setBootNodes(List<BootNode> bootnodes) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   if (!(bootnodes is List<BootNode>)) throw ("Invalid bootnode list");
+  //   final List<String> serializedData =
+  //       bootnodes.map((node) => jsonEncode(node.toJson())).toList();
+  //   await prefs.setStringList("bootnodes", serializedData);
+
+  //   AppState newState = AppState()
+  //     ..selectedIdentity = state.value.selectedIdentity
+  //     ..bootnodes = bootnodes;
+
+  //   state.add(newState);
+  // }
 }
 
 class AppState {
   int selectedIdentity = 0;
-  List<BootNode> bootnodes = [];
+  /// All Gateways known to us, regardless of the entity
+  List<Gateway> bootnodes = [];
 
   AppState({this.selectedIdentity = 0, this.bootnodes = const []});
-}
-
-class BootNode {
-  final String networkId;
-  final String dvoteUri;
-  final String ethereumUri;
-  final String publicKey;
-
-  BootNode(this.networkId, {this.dvoteUri, this.ethereumUri, this.publicKey});
-
-  BootNode.fromJson(Map<String, dynamic> json)
-      : networkId = json['networkId'] ?? "",
-        dvoteUri = json['dvoteUri'] ?? "",
-        ethereumUri = json['ethereumUri'] ?? "",
-        publicKey = json['pubKey'] ?? "";
-
-  Map<String, dynamic> toJson() {
-    return {
-      'networkId': networkId,
-      'dvoteUri': dvoteUri,
-      'ethereumUri': ethereumUri,
-      'pubKey': publicKey
-    };
-  }
 }
