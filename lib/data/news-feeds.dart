@@ -1,5 +1,5 @@
 import 'package:rxdart/rxdart.dart';
-import "dart:convert";
+import "dart:io";
 import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
@@ -10,19 +10,65 @@ import 'package:vocdoni/data/generic.dart';
 /// Provides a Business Logic Component to store and consume data related to the news feeds
 /// of the subscribed organizations
 class NewsFeedsBloc extends BlocComponent<List<Feed>> {
+  final String _storageFile = NEWSFEED_STORE_FILE;
+
   NewsFeedsBloc() {
     state.add([]);
   }
 
+  // GENERIC OVERRIDES
+
+  /// Read and construct the data structures
   @override
-  Future<void> restore() {
-    // return readState();
+  Future<void> restore() async {
+    File fd;
+    FeedStore store;
+
+    try {
+      fd = File("${storageDir.path}/$_storageFile");
+      if (!(await fd.exists())) {
+        set([]);
+        return;
+      }
+    } catch (err) {
+      print(err);
+      set([]);
+      throw "There was an error while accessing the local data";
+    }
+
+    try {
+      final bytes = await fd.readAsBytes();
+      store = FeedStore.fromBuffer(bytes);
+      set(store.feeds);
+    } catch (err) {
+      print(err);
+      set([]);
+      throw "There was an error processing the local data";
+    }
   }
 
   @override
-  Future<void> persist() {
-    // TODO:
+  Future<void> persist() async {
+    // Gateway boot nodes
+    try {
+      File fd = File("${storageDir.path}/$_storageFile");
+      FeedStore store = FeedStore();
+      store.feeds.addAll(state.value);
+      await fd.writeAsBytes(store.writeToBuffer());
+    } catch (err) {
+      print(err);
+      throw "There was an error while storing the changes";
+    }
   }
+
+  /// Sets the given value as the current one and persists the new data
+  @override
+  void set(List<Feed> data) async {
+    super.set(data);
+    await persist();
+  }
+
+  // CUSTOM OPERATIONS
 
   // /// Read the state stored as JSON text and emit the decoded class instances
   // Future readState() async {

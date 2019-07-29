@@ -17,6 +17,7 @@ Future<List<Gateway>> getBootNodes() async {
         gw.dvote = item["dvote"];
         gw.web3 = item["web3"];
         gw.publicKey = item["publicKey"];
+        gw.meta.addAll({"networkId": networkId ?? ""});
         result.add(gw);
       });
     });
@@ -45,16 +46,16 @@ Future<String> addressFromMnemonic(String mnemonic) {
 Future<Entity> fetchEntityData(String resolverAddress, String entityId,
     String networkId, List<String> entryPoints) async {
   // Create a random cloned list
-  final List<BootNode> bootnodes = List<BootNode>();
-  bootnodes.addAll(
-      appStateBloc.current.bootnodes.where((bn) => bn.networkId == networkId));
+  var bootnodes = appStateBloc.current.bootnodes
+      .where((gw) => gw.meta["networkId"] == networkId)
+      .toList();
   bootnodes.shuffle();
 
   // Attempt for every node available
-  for (BootNode node in bootnodes) {
+  for (Gateway node in bootnodes) {
     try {
       final Entity entity = await fetchEntity(
-          entityId, resolverAddress, node.dvoteUri, node.ethereumUri,
+          entityId, resolverAddress, node.dvote, node.web3,
           networkId: networkId, entryPoints: entryPoints);
 
       return entity;
@@ -63,36 +64,33 @@ Future<Entity> fetchEntityData(String resolverAddress, String entityId,
       continue;
     }
   }
-  return null;
+  throw "The entity's data cannot be fetched";
 }
 
-Future<String> fetchEntityNewsFeed(Entity org, String lang) async {
+Future<String> fetchEntityNewsFeed(Entity entity, String lang) async {
+  // Attempt for every node available
+  if (!(entity is Entity))
+    return null;
+  else if (!(entity.newsFeed is Map<String, String>))
+    return null;
+  else if (!(entity.newsFeed[lang] is String)) return null;
+
   // Create a random cloned list
-  final List<BootNode> bootnodes = List<BootNode>();
-  bootnodes.addAll(appStateBloc.current.bootnodes);
-  // TODO: USE Network id
-  // bootnodes.addAll(
-  //     appStateBloc.current.bootnodes.where((bn) => bn.networkId == networkId));
+  var bootnodes = appStateBloc.current.bootnodes.skip(0).toList();
   bootnodes.shuffle();
 
-  if (!(org is Entity))
-    return null;
-  else if (!(org.newsFeed is Map<String, String>))
-    return null;
-  else if (!(org.newsFeed[lang] is String)) return null;
-
-  final String contentUri = org.newsFeed[lang];
+  final String contentUri = entity.newsFeed[lang];
 
   // Attempt for every node available
-  for (BootNode node in bootnodes) {
+  for (Gateway node in bootnodes) {
     try {
       ContentURI cUri = ContentURI(contentUri);
-      final result = await fetchFileString(cUri, node.dvoteUri);
+      final result = await fetchFileString(cUri, node.dvote);
       return result;
     } catch (err) {
       print(err);
       continue;
     }
   }
-  throw ("Could not connect to the network");
+  throw "The news feed cannot be fetched";
 }

@@ -9,54 +9,65 @@ import 'package:dvote/dvote.dart';
 final secStore = new FlutterSecureStorage();
 
 class IdentitiesBloc extends BlocComponent<List<Identity>> {
+  final String _storageFile = IDENTITIES_STORE_FILE;
+
   IdentitiesBloc() {
     state.add([]);
   }
 
-  @override
-  Future<void> restore() {
-    return readState();
-  }
-
-  @override
-  Future<void> persist() {
-    // TODO:
-  }
-
-  @override
-  void set(List<Identity> data) {
-    // TODO:
-  }
+  // GENERIC OVERRIDES
 
   /// Read and construct the data structures
-  Future readState() async {
+  @override
+  Future<void> restore() async {
     File fd;
     IdentitiesStore store;
 
     try {
-      fd = File(IDENTITIES_STORE_PATH);
+      fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        super.state.add([]);
+        set([]);
         return;
       }
     } catch (err) {
       print(err);
-      super.state.add([]);
+      set([]);
       throw "There was an error while accessing the local data";
     }
 
     try {
       final bytes = await fd.readAsBytes();
       store = IdentitiesStore.fromBuffer(bytes);
-      super.state.add(store.identities);
+      set(store.identities);
     } catch (err) {
       print(err);
-      super.state.add([]);
+      set([]);
       throw "There was an error processing the local data";
     }
   }
 
-  // // Operations
+  @override
+  Future<void> persist() async {
+    // Gateway boot nodes
+    try {
+      File fd = File("${storageDir.path}/$_storageFile");
+      IdentitiesStore store = IdentitiesStore();
+      store.identities.addAll(state.value);
+      await fd.writeAsBytes(store.writeToBuffer());
+    } catch (err) {
+      print(err);
+      throw "There was an error while storing the changes";
+    }
+  }
+
+  /// Sets the given value as the current one and persists the new data
+  @override
+  void set(List<Identity> data) async {
+    super.set(data);
+    await persist();
+  }
+
+  // CUSTOM OPERATIONS
 
   // /// Registers a new identity with an empty list of organizations
   // Future create(

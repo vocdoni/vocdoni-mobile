@@ -2,20 +2,35 @@ import 'dart:io';
 import 'package:vocdoni/data/generic.dart';
 import 'package:dvote/dvote.dart';
 
-class ElectionsBloc extends BlocComponent<List<Election>> {
-  ElectionsBloc() {
+class VotesBloc extends BlocComponent<List<Election>> {
+  VotesBloc() {
     state.add([]);
   }
 
+  // GENERIC OVERRIDES
+
+  /// Read and construct the data structures
   @override
   Future<void> restore() {
+    // TODO: Unimplemented
+    print("Unimplemented: processes > restore()");
     return readState();
   }
 
   @override
   Future<void> persist() {
+    print("Unimplemented: processes > persist()");
     // TODO:
   }
+
+  /// Sets the given value as the current one and persists the new data
+  @override
+  void set(List<Election> data) async {
+    super.set(data);
+    await persist();
+  }
+
+  // CUSTOM OPERATIONS
 
   /// Read and construct the data structures
   Future readState() async {

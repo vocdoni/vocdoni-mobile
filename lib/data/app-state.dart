@@ -1,119 +1,123 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:rxdart/rxdart.dart';
+import 'dart:async';
 import 'package:vocdoni/util/api.dart';
+// import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
 import 'package:vocdoni/data/generic.dart';
 import 'package:dvote/dvote.dart';
 
 class AppStateBloc extends BlocComponent<AppState> {
+  final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
+
   AppStateBloc() {
     state.add(AppState());
   }
 
+  // GENERIC OVERRIDES
+
   @override
-  Future<void> restore() {
-    // return readState();
+  Future<void> init() async {
+    await super.init();
+
+    // POST-BOOTSTRAP ACTIONS
+    Timer(Duration(seconds: 2), () {
+      loadBootNodes().catchError((_) {
+        print("Error: Unable to load the boot nodes");
+      });
+    });
+  }
+
+  /// Read and construct the data structures
+  @override
+  Future<void> restore() async {
+    File fd;
+    GatewaysStore gwStore;
+
+    // Gateway boot nodes
+    try {
+      fd = File("${storageDir.path}/$_storageFileBootNodes");
+      if (await fd.exists()) {
+        final bytes = await fd.readAsBytes();
+        gwStore = GatewaysStore.fromBuffer(bytes);
+      } else {
+        gwStore = GatewaysStore();
+      }
+    } catch (err) {
+      print(err);
+      throw "There was an error while accessing the local data";
+    }
+
+    // Assemble state object
+    AppState newState = AppState()
+      ..selectedIdentity = state.value.selectedIdentity
+      ..bootnodes = gwStore.bootnodes;
+
+    set(newState);
   }
 
   @override
-  Future<void> persist() {
-    // TODO:
+  Future<void> persist() async {
+    // Gateway boot nodes
+    try {
+      File fd = File("${storageDir.path}/$_storageFileBootNodes");
+      GatewaysStore store = GatewaysStore();
+      store.bootnodes.addAll(state.value.bootnodes);
+      await fd.writeAsBytes(store.writeToBuffer());
+    } catch (err) {
+      print(err);
+      throw "There was an error while storing the changes";
+    }
   }
 
-  // Future restore() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   if (!prefs.containsKey("bootnodes")) return; // nothing to restore
+  /// Sets the given value as the current one and persists the new data
+  @override
+  void set(AppState data) async {
+    super.set(data);
+    await persist();
+  }
 
-  //   try {
-  //     final dat = prefs.getStringList("bootnodes");
-  //     if (!(dat is List)) {
-  //       await prefs.setStringList("bootnodes", []);
-  //       return;
-  //     }
-  //     final List<BootNode> deserializedBootNodes =
-  //         dat.map((strNode) => BootNode.fromJson(jsonDecode(strNode))).toList();
+  // CUSTOM OPERATIONS
 
-  //     AppState newState = AppState()
-  //       ..selectedIdentity = state.value.selectedIdentity
-  //       ..bootnodes = deserializedBootNodes;
+  Future loadBootNodes() async {
+    try {
+      final bnList = await getBootNodes();
+      await setBootNodes(bnList);
+    } catch (err) {
+      print("ERR: $err");
+    }
+  }
 
-  //     state.add(newState);
-  //   } catch (err) {
-  //     print(err);
-  //   }
-  // }
+  // Operations
 
-  // Future loadBootNodes() async {
-  //   try {
-  //     final List<BootNode> bnList = await fetchBootNodes();
-  //     await setBootNodes(bnList);
-  //   } catch (err) {
-  //     print("ERR: $err");
-  //   }
-  // }
+  selectIdentity(int identityIdx) {
+    AppState newState = AppState()
+      ..selectedIdentity = identityIdx
+      ..bootnodes = state.value.bootnodes;
 
-  // Future<List<BootNode>> fetchBootNodes() async {
-  //   final String strJsonBootnodes = await getBootNodes();
-  //   final Map jsonBootnodes = jsonDecode(strJsonBootnodes);
-  //   if (!(jsonBootnodes is Map)) throw ("Invalid bootnodes response");
+    // do not use set(), because we don't need to persist anyting new
+    state.add(newState);
 
-  //   List<BootNode> bootnodes = List<BootNode>();
-  //   for (String networkId in jsonBootnodes.keys) {
-  //     if (!(jsonBootnodes[networkId] is List)) continue;
-  //     (jsonBootnodes[networkId] as List).forEach((bootnode) {
-  //       if (!(bootnode is Map)) return;
+    // TODO: TRIGGER UPDATE ELSEWHERE
+  }
 
-  //       BootNode bn = BootNode(
-  //         networkId,
-  //         dvoteUri: bootnode["dvote"] is String ? bootnode["dvote"] : null,
-  //         ethereumUri: bootnode["web3"] is String ? bootnode["web3"] : null,
-  //         publicKey: bootnode["pubKey"] is String ? bootnode["pubKey"] : null,
-  //       );
-  //       bootnodes.add(bn);
-  //     });
-  //   }
-  //   return bootnodes;
-  // }
+  setBootNodes(List<Gateway> bootnodes) async {
+    if (!(bootnodes is List<Gateway>)) throw "Invalid bootnode list";
 
-  // // Operations
+    AppState newState = AppState()
+      ..selectedIdentity = state.value.selectedIdentity
+      ..bootnodes = bootnodes;
 
-  // selectIdentity(int identityIdx) {
-  //   AppState newState = AppState()
-  //     ..selectedIdentity = identityIdx
-  //     ..bootnodes = state.value.bootnodes;
-
-  //   state.add(newState);
-
-  //   // TODO: TRIGGER UPDATE
-  // }
-
-  // selectOrganization(int organizationIdx) {
-  //   AppState newState = AppState()
-  //     ..selectedIdentity = state.value.selectedIdentity
-  //     ..bootnodes = state.value.bootnodes;
-
-  //   state.add(newState);
-  // }
-
-  // setBootNodes(List<BootNode> bootnodes) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   if (!(bootnodes is List<BootNode>)) throw ("Invalid bootnode list");
-  //   final List<String> serializedData =
-  //       bootnodes.map((node) => jsonEncode(node.toJson())).toList();
-  //   await prefs.setStringList("bootnodes", serializedData);
-
-  //   AppState newState = AppState()
-  //     ..selectedIdentity = state.value.selectedIdentity
-  //     ..bootnodes = bootnodes;
-
-  //   state.add(newState);
-  // }
+    set(newState);
+  }
 }
 
 class AppState {
+  /// Index of the currently active identity
   int selectedIdentity = 0;
-  /// All Gateways known to us, regardless of the entity
+
+  /// All Gateways known to us, regardless of the entity.
+  /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
+  /// it can be filtered.
   List<Gateway> bootnodes = [];
 
   AppState({this.selectedIdentity = 0, this.bootnodes = const []});
