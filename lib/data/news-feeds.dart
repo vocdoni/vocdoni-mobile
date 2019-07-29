@@ -22,7 +22,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
   @override
   Future<void> restore() async {
     File fd;
-    FeedStore store;
+    FeedsStore store;
 
     try {
       fd = File("${storageDir.path}/$_storageFile");
@@ -38,8 +38,8 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
 
     try {
       final bytes = await fd.readAsBytes();
-      store = FeedStore.fromBuffer(bytes);
-      set(store.feeds);
+      store = FeedsStore.fromBuffer(bytes);
+      set(store.items);
     } catch (err) {
       print(err);
       set([]);
@@ -52,8 +52,8 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
     // Gateway boot nodes
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      FeedStore store = FeedStore();
-      store.feeds.addAll(state.value);
+      FeedsStore store = FeedsStore();
+      store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);

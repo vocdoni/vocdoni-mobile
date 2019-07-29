@@ -50,7 +50,7 @@ class AppStateBloc extends BlocComponent<AppState> {
     // Assemble state object
     AppState newState = AppState()
       ..selectedIdentity = state.value.selectedIdentity
-      ..bootnodes = gwStore.bootnodes;
+      ..bootnodes = gwStore.items;
 
     set(newState);
   }
@@ -61,7 +61,7 @@ class AppStateBloc extends BlocComponent<AppState> {
     try {
       File fd = File("${storageDir.path}/$_storageFileBootNodes");
       GatewaysStore store = GatewaysStore();
-      store.bootnodes.addAll(state.value.bootnodes);
+      store.items.addAll(state.value.bootnodes);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);

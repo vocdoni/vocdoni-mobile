@@ -35,7 +35,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
     try {
       final bytes = await fd.readAsBytes();
       store = EntitiesStore.fromBuffer(bytes);
-      state.add(store.entities);
+      state.add(store.items);
     } catch (err) {
       print(err);
       throw "There was an error processing the local data";
@@ -48,7 +48,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
     try {
       File fd = File("${storageDir.path}/$_storageFile");
       EntitiesStore store = EntitiesStore();
-      store.entities.addAll(state.value);
+      store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);

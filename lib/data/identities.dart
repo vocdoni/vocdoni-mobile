@@ -38,7 +38,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     try {
       final bytes = await fd.readAsBytes();
       store = IdentitiesStore.fromBuffer(bytes);
-      set(store.identities);
+      set(store.items);
     } catch (err) {
       print(err);
       set([]);
@@ -52,7 +52,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     try {
       File fd = File("${storageDir.path}/$_storageFile");
       IdentitiesStore store = IdentitiesStore();
-      store.identities.addAll(state.value);
+      store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);
