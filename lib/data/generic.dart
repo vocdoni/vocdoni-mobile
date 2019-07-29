@@ -39,7 +39,7 @@ abstract class BlocComponent<T> {
   Future<void> persist();
 
   /// Send the given value to the stream
-  void set(T data) {
+  set(T data) {
     state.add(data);
   }
 }

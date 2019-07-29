@@ -6,7 +6,7 @@ import "dart:async";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
-final secStore = new FlutterSecureStorage();
+final _secStore = new FlutterSecureStorage();
 
 class IdentitiesBloc extends BlocComponent<List<Identity>> {
   final String _storageFile = IDENTITIES_STORE_FILE;
@@ -62,7 +62,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  void set(List<Identity> data) async {
+  Future<void> set(List<Identity> data) async {
     super.set(data);
     await persist();
   }
@@ -91,7 +91,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   //       await Future.wait(currentAddrs.map((addr) async {
   //         if (addr == address) throw ("The account already exists");
 
-  //         final strIdent = await secStore.read(key: addr);
+  //         final strIdent = await _secStore.read(key: addr);
   //         final decoded = jsonDecode(strIdent);
   //         if (decoded is Map &&
   //             decoded["alias"] is String &&
@@ -112,7 +112,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   //   }
 
   //   // ADD A SERIALIZED WALLET FOR THE ADDRESS
-  //   await secStore.write(
+  //   await _secStore.write(
   //     key: address,
   //     value: json.encode({
   //       "mnemonic": mnemonic,

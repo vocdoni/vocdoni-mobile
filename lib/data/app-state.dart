@@ -71,7 +71,7 @@ class AppStateBloc extends BlocComponent<AppState> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  void set(AppState data) async {
+  Future<void> set(AppState data) async {
     super.set(data);
     await persist();
   }

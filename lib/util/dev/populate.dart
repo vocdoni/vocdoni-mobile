@@ -4,11 +4,10 @@ import "package:dvote/dvote.dart";
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
   final List<Entity> entities = _makeEntities();
-  final List<Feed> feeds = await _makeNewsFeeds(entities);
+  await entitiesBloc.set(entities);
 
-  // TODO:
-  await identitiesBloc.readState();
-  await newsFeedsBloc.readState();
+  final List<Feed> feeds = _makeNewsFeeds(entities);
+  await newsFeedsBloc.set(feeds);
 }
 
 List<Entity> _makeEntities() {

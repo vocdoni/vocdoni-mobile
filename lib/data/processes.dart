@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:vocdoni/data/generic.dart';
 import 'package:dvote/dvote.dart';
 
-class VotesBloc extends BlocComponent<List<Election>> {
-  VotesBloc() {
+class ProcessesBloc extends BlocComponent<List<Process>> {
+  ProcessesBloc() {
     state.add([]);
   }
 
@@ -25,7 +25,7 @@ class VotesBloc extends BlocComponent<List<Election>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  void set(List<Election> data) async {
+  Future<void> set(List<Process> data) async {
     super.set(data);
     await persist();
   }
@@ -61,4 +61,5 @@ class VotesBloc extends BlocComponent<List<Election>> {
   }
 }
 
-class Election {}
+// TODO: Use a protobuf model
+class Process {}

@@ -63,7 +63,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  void set(List<Feed> data) async {
+  Future<void> set(List<Feed> data) async {
     super.set(data);
     await persist();
   }
