@@ -64,4 +64,9 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   }
 
   // CUSTOM OPERATIONS
+
+  Future<void> refreshFrom(List<EntitySummary> entities) {
+    // TODO:
+    print("Unimplemented: entities > refreshFrom");
+  }
 }

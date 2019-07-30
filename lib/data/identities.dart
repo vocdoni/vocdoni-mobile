@@ -26,22 +26,19 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     try {
       fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        set([]);
         return;
       }
     } catch (err) {
       print(err);
-      set([]);
       throw "There was an error while accessing the local data";
     }
 
     try {
       final bytes = await fd.readAsBytes();
       store = IdentitiesStore.fromBuffer(bytes);
-      set(store.items);
+      state.add(store.items);
     } catch (err) {
       print(err);
-      set([]);
       throw "There was an error processing the local data";
     }
   }
@@ -69,67 +66,67 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
 
   // CUSTOM OPERATIONS
 
-  // /// Registers a new identity with an empty list of organizations
-  // Future create(
-  //     {String mnemonic, String publicKey, String address, String alias}) async {
-  //   if (!(mnemonic is String))
-  //     throw ("Invalid mnemonic");
-  //   else if (!(publicKey is String))
-  //     throw ("Invalid publicKey");
-  //   else if (!(address is String))
-  //     throw ("Invalid address");
-  //   else if (!(alias is String) || alias.length < 2) throw ("Invalid alias");
+  /// Registers a new identity with an empty list of organizations
+  Future create(
+      {String mnemonic, String publicKey, String address, String alias}) async {
+    //   if (!(mnemonic is String))
+    //     throw ("Invalid mnemonic");
+    //   else if (!(publicKey is String))
+    //     throw ("Invalid publicKey");
+    //   else if (!(address is String))
+    //     throw ("Invalid address");
+    //   else if (!(alias is String) || alias.length < 2) throw ("Invalid alias");
 
-  //   // ADD THE ADDRESS IN THE ACCOUNT INDEX
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   // ADD THE ADDRESS IN THE ACCOUNT INDEX
+    //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  //   List<String> currentAddrs;
-  //   if (prefs.containsKey("accounts")) {
-  //     currentAddrs = prefs.getStringList("accounts");
-  //     if (currentAddrs.length > 0) {
-  //       // Check unique addr, alias
-  //       await Future.wait(currentAddrs.map((addr) async {
-  //         if (addr == address) throw ("The account already exists");
+    //   List<String> currentAddrs;
+    //   if (prefs.containsKey("accounts")) {
+    //     currentAddrs = prefs.getStringList("accounts");
+    //     if (currentAddrs.length > 0) {
+    //       // Check unique addr, alias
+    //       await Future.wait(currentAddrs.map((addr) async {
+    //         if (addr == address) throw ("The account already exists");
 
-  //         final strIdent = await _secStore.read(key: addr);
-  //         final decoded = jsonDecode(strIdent);
-  //         if (decoded is Map &&
-  //             decoded["alias"] is String &&
-  //             (decoded["alias"] as String).trim() == alias.trim()) {
-  //           throw ("The account already exists");
-  //         }
-  //       }));
+    //         final strIdent = await _secStore.read(key: addr);
+    //         final decoded = jsonDecode(strIdent);
+    //         if (decoded is Map &&
+    //             decoded["alias"] is String &&
+    //             (decoded["alias"] as String).trim() == alias.trim()) {
+    //           throw ("The account already exists");
+    //         }
+    //       }));
 
-  //       currentAddrs.add(address);
-  //       await prefs.setStringList("accounts", currentAddrs);
-  //     } else {
-  //       currentAddrs = [address];
-  //       await prefs.setStringList("accounts", currentAddrs);
-  //     }
-  //   } else {
-  //     currentAddrs = [address];
-  //     await prefs.setStringList("accounts", currentAddrs);
-  //   }
+    //       currentAddrs.add(address);
+    //       await prefs.setStringList("accounts", currentAddrs);
+    //     } else {
+    //       currentAddrs = [address];
+    //       await prefs.setStringList("accounts", currentAddrs);
+    //     }
+    //   } else {
+    //     currentAddrs = [address];
+    //     await prefs.setStringList("accounts", currentAddrs);
+    //   }
 
-  //   // ADD A SERIALIZED WALLET FOR THE ADDRESS
-  //   await _secStore.write(
-  //     key: address,
-  //     value: json.encode({
-  //       "mnemonic": mnemonic,
-  //       "publicKey": publicKey,
-  //       "alias": alias.trim()
-  //     }),
-  //   );
+    //   // ADD A SERIALIZED WALLET FOR THE ADDRESS
+    //   await _secStore.write(
+    //     key: address,
+    //     value: json.encode({
+    //       "mnemonic": mnemonic,
+    //       "publicKey": publicKey,
+    //       "alias": alias.trim()
+    //     }),
+    //   );
 
-  //   // ADD AN EMPTY LIST OF ORGANIZATIONS
-  //   await prefs.setStringList("$address/organizations", []);
+    //   // ADD AN EMPTY LIST OF ORGANIZATIONS
+    //   await prefs.setStringList("$address/organizations", []);
 
-  //   // Refresh state
-  //   await readState();
+    //   // Refresh state
+    //   await readState();
 
-  //   // Set the new identity as active
-  //   appStateBloc.selectIdentity(currentAddrs.length - 1);
-  // }
+    //   // Set the new identity as active
+    //   appStateBloc.selectIdentity(currentAddrs.length - 1);
+  }
 
   // /// Register the given organization as a subscribtion of the currently selected identity
   // subscribe(Entity newOrganization) async {

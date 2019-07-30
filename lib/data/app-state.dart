@@ -5,6 +5,7 @@ import 'package:vocdoni/util/api.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
 import 'package:vocdoni/data/generic.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 class AppStateBloc extends BlocComponent<AppState> {
   final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
@@ -52,7 +53,7 @@ class AppStateBloc extends BlocComponent<AppState> {
       ..selectedIdentity = state.value.selectedIdentity
       ..bootnodes = gwStore.items;
 
-    set(newState);
+    state.add(newState);
   }
 
   @override
@@ -87,8 +88,6 @@ class AppStateBloc extends BlocComponent<AppState> {
     }
   }
 
-  // Operations
-
   selectIdentity(int identityIdx) {
     AppState newState = AppState()
       ..selectedIdentity = identityIdx
@@ -97,7 +96,13 @@ class AppStateBloc extends BlocComponent<AppState> {
     // do not use set(), because we don't need to persist anyting new
     state.add(newState);
 
-    // TODO: TRIGGER UPDATE ELSEWHERE
+    // Trigger updates elsewhere
+    entitiesBloc
+        .refreshFrom(identitiesBloc.current[identityIdx].subscribedEntities)
+        .catchError((_) {
+      print(
+          "Error: Unable to refresh the entities from the newly selected identity");
+    });
   }
 
   setBootNodes(List<Gateway> bootnodes) async {

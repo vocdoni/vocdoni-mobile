@@ -20,9 +20,10 @@ import "package:vocdoni/views/identity-create.dart";
 void main() async {
   // RESTORE DATA
   await appStateBloc.init();
+  await entitiesBloc.init();
   await identitiesBloc.init();
-  await votesBloc.init();
   await newsFeedsBloc.init();
+  await processesBloc.init();
 
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);

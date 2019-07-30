@@ -10,13 +10,15 @@ Future<List<Gateway>> getBootNodes() async {
   try {
     List<Gateway> result = List<Gateway>();
     final strBootnodes = await http.read(bootnodesUrl);
-    Map<String, List<Map>> networkItems = jsonDecode(strBootnodes);
+    Map<String, dynamic> networkItems = jsonDecode(strBootnodes);
     networkItems.forEach((networkId, network) {
+      if (!(network is List)) return;
       network.forEach((item) {
+        if (!(item is Map)) return;
         Gateway gw = Gateway();
-        gw.dvote = item["dvote"];
-        gw.web3 = item["web3"];
-        gw.publicKey = item["publicKey"];
+        gw.dvote = item["dvote"] ?? "";
+        gw.web3 = item["web3"] ?? "";
+        gw.publicKey = item["pubKey"] ?? "";
         gw.meta.addAll({"networkId": networkId ?? ""});
         result.add(gw);
       });

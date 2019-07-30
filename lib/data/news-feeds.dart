@@ -27,22 +27,19 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
     try {
       fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        set([]);
         return;
       }
     } catch (err) {
       print(err);
-      set([]);
       throw "There was an error while accessing the local data";
     }
 
     try {
       final bytes = await fd.readAsBytes();
       store = FeedsStore.fromBuffer(bytes);
-      set(store.items);
+      state.add(store.items);
     } catch (err) {
       print(err);
-      set([]);
       throw "There was an error processing the local data";
     }
   }
