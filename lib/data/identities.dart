@@ -71,6 +71,11 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     else if (!(encryptionKey is String) || encryptionKey.length < 2)
       throw ("Invalid encryptionKey");
 
+    alias = alias.trim();
+    if (super.current.where((item) => item.alias == alias).length > 0) {
+      throw "The account already exists";
+    }
+
     final mnemonic = await makeMnemonic();
     final privateKey = await privateKeyFromMnemonic(mnemonic);
     final publicKey = await publicKeyFromMnemonic(mnemonic);
@@ -79,7 +84,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     final encryptedPrivateKey = await encryptString(privateKey, encryptionKey);
 
     Identity newIdentity = Identity();
-    newIdentity.alias = alias.trim();
+    newIdentity.alias = alias;
     newIdentity.identityId = publicKey;
     newIdentity.type = Identity_Type.ECDSA_SECP256k1;
 

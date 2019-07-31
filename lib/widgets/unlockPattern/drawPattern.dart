@@ -40,24 +40,28 @@ class _DrawPatternState extends State<DrawPattern> {
   Offset fingerPos;
   bool isStopped = true;
 
+  @override
   initState() {
-    dots = getDosOffsets();
+    super.initState();
+    dots = getDotOffsets();
   }
 
   @override
   Widget build(BuildContext context) {
     final Container sketchArea = Container(
-        alignment: Alignment.topLeft,
-        child: CustomPaint(
-            painter: Sketcher(
-                pattern: pattern,
-                dotRadius: widget.dotRadius,
-                hitRadius: widget.hitRadius,
-                hitColor: widget.hitColor,
-                dots: dots,
-                fingerPos: fingerPos,
-                dotColor: widget.dotColor,
-                patternColor: widget.patternColor)));
+      alignment: Alignment.topLeft,
+      child: CustomPaint(
+        painter: Sketcher(
+            pattern: pattern,
+            dotRadius: widget.dotRadius,
+            hitRadius: widget.hitRadius,
+            hitColor: widget.hitColor,
+            dots: dots,
+            fingerPos: fingerPos,
+            dotColor: widget.dotColor,
+            patternColor: widget.patternColor),
+      ),
+    );
 
     return Container(
       height: widget.widthSize,
@@ -108,8 +112,8 @@ class _DrawPatternState extends State<DrawPattern> {
     );
   }
 
-  List<Offset> getDosOffsets() {
-    double margin =widget.hitRadius;
+  List<Offset> getDotOffsets() {
+    double margin = widget.hitRadius;
     double spaceBetweenDots =
         (widget.widthSize - widget.hitRadius * 2) / (widget.gridSize - 1);
 
@@ -163,40 +167,35 @@ class Sketcher extends CustomPainter {
   }
 
   void paint(Canvas canvas, Size size) {
-
-    Paint hitPaint = Paint()
-      ..color = hitColor;
-      
-    Paint dotsPaint = Paint()
-      ..color = dotColor;
+    Paint hitPaint = Paint()..color = hitColor;
+    Paint dotsPaint = Paint()..color = dotColor;
 
     Paint patternPaint = Paint()
       ..color = patternColor
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 3.0;
 
-    
-    //Draw static dots
+    // Draw static dots
     for (int i = 0; i < dots.length; i++) {
       canvas.drawCircle(dots[i], hitRadius, hitPaint);
       canvas.drawCircle(dots[i], dotRadius, dotsPaint);
     }
 
-    //Draw pattern lines
+    // Draw pattern lines
     for (int i = 0; i < pattern.length - 1; i++) {
       if (pattern[i] != null && pattern[i + 1] != null) {
         canvas.drawLine(dots[pattern[i]], dots[pattern[i + 1]], patternPaint);
       }
     }
 
-    //Draw pattern dots
+    // Draw pattern dots
     for (int i = 0; i <= pattern.length - 1; i++) {
       if (pattern[i] != null) {
         canvas.drawCircle(dots[pattern[i]], dotRadius, patternPaint);
       }
     }
 
-    //Draw from last point to finger
+    // Draw from last point to finger
     if (fingerPos != null) {
       if (pattern.length > 0)
         canvas.drawLine(dots[pattern.last], fingerPos, patternPaint);
