@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/modals/create-pattern-modal.dart';
 // import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -71,28 +70,15 @@ class _IdentityCreateScreen extends State {
     }
   }
 
-  encrypt(String key, String payload) async {
-    // TODO: encrypt 
-    return payload;
-  }
-
-  onCreateIdentity(BuildContext context, String alias, String encryptionKey) async {
+  onCreateIdentity(
+      BuildContext context, String alias, String encryptionKey) async {
     try {
       setState(() {
         generating = true;
       });
 
-      final mnemonic = await makeMnemonic();
-      final publicKey = await publicKeyFromMnemonic(mnemonic);
-      final address = await addressFromMnemonic(mnemonic);
-      final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
-      // TODO: Use encrypted mnemonic
-
-      await identitiesBloc.create(
-          mnemonic: mnemonic,
-          publicKey: publicKey,
-          address: address,
-          alias: alias);
+      // TODO: use the given passphrase
+      await identitiesBloc.create(alias, "key-123");
 
       int currentIndex = identitiesBloc.current.length - 1;
       appStateBloc.selectIdentity(currentIndex);

@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/util/api.dart';
 import "dart:async";
 
-import 'package:vocdoni/util/singletons.dart';
+// import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
-
-final _secStore = new FlutterSecureStorage();
 
 class IdentitiesBloc extends BlocComponent<List<Identity>> {
   final String _storageFile = IDENTITIES_STORE_FILE;
@@ -67,65 +65,36 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   // CUSTOM OPERATIONS
 
   /// Registers a new identity with an empty list of organizations
-  Future create(
-      {String mnemonic, String publicKey, String address, String alias}) async {
-    //   if (!(mnemonic is String))
-    //     throw ("Invalid mnemonic");
-    //   else if (!(publicKey is String))
-    //     throw ("Invalid publicKey");
-    //   else if (!(address is String))
-    //     throw ("Invalid address");
-    //   else if (!(alias is String) || alias.length < 2) throw ("Invalid alias");
+  Future create(String alias, String encryptionKey) async {
+    if (!(alias is String) || alias.length < 2)
+      throw ("Invalid alias");
+    else if (!(encryptionKey is String) || encryptionKey.length < 2)
+      throw ("Invalid encryptionKey");
 
-    //   // ADD THE ADDRESS IN THE ACCOUNT INDEX
-    //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    final mnemonic = await makeMnemonic();
+    final privateKey = await privateKeyFromMnemonic(mnemonic);
+    final publicKey = await publicKeyFromMnemonic(mnemonic);
+    final address = await addressFromMnemonic(mnemonic);
+    final encryptedMenmonic = await encryptString(mnemonic, encryptionKey);
+    final encryptedPrivateKey = await encryptString(privateKey, encryptionKey);
 
-    //   List<String> currentAddrs;
-    //   if (prefs.containsKey("accounts")) {
-    //     currentAddrs = prefs.getStringList("accounts");
-    //     if (currentAddrs.length > 0) {
-    //       // Check unique addr, alias
-    //       await Future.wait(currentAddrs.map((addr) async {
-    //         if (addr == address) throw ("The account already exists");
+    Identity newIdentity = Identity();
+    newIdentity.alias = alias.trim();
+    newIdentity.identityId = publicKey;
+    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
 
-    //         final strIdent = await _secStore.read(key: addr);
-    //         final decoded = jsonDecode(strIdent);
-    //         if (decoded is Map &&
-    //             decoded["alias"] is String &&
-    //             (decoded["alias"] as String).trim() == alias.trim()) {
-    //           throw ("The account already exists");
-    //         }
-    //       }));
+    Key k = Key();
+    k.type = Key_Type.SECP256K1;
+    k.encryptedMnemonic = encryptedMenmonic;
+    k.encryptedPrivateKey = encryptedPrivateKey;
+    k.publicKey = publicKey;
+    k.address = address;
 
-    //       currentAddrs.add(address);
-    //       await prefs.setStringList("accounts", currentAddrs);
-    //     } else {
-    //       currentAddrs = [address];
-    //       await prefs.setStringList("accounts", currentAddrs);
-    //     }
-    //   } else {
-    //     currentAddrs = [address];
-    //     await prefs.setStringList("accounts", currentAddrs);
-    //   }
+    newIdentity.keys.add(k);
 
-    //   // ADD A SERIALIZED WALLET FOR THE ADDRESS
-    //   await _secStore.write(
-    //     key: address,
-    //     value: json.encode({
-    //       "mnemonic": mnemonic,
-    //       "publicKey": publicKey,
-    //       "alias": alias.trim()
-    //     }),
-    //   );
-
-    //   // ADD AN EMPTY LIST OF ORGANIZATIONS
-    //   await prefs.setStringList("$address/organizations", []);
-
-    //   // Refresh state
-    //   await readState();
-
-    //   // Set the new identity as active
-    //   appStateBloc.selectIdentity(currentAddrs.length - 1);
+    // Add to existing, notify and store
+    super.current.add(newIdentity);
+    set(super.current);
   }
 
   // /// Register the given organization as a subscribtion of the currently selected identity

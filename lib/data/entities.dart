@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vocdoni/data/generic.dart';
 import "dart:async";
 
@@ -28,7 +27,6 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       }
     } catch (err) {
       print(err);
-      state.add([]);
       throw "There was an error while accessing the local data";
     }
 
