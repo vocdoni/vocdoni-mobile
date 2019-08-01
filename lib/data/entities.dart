@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:vocdoni/data/generic.dart';
 import "dart:async";
 
@@ -61,6 +62,26 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   }
 
   // CUSTOM OPERATIONS
+
+  Future<void> add(Entity newEntity) async {
+    if (!(newEntity is Entity))
+      throw FlutterError("The entity parameter is invalid");
+
+    final currentIndex =
+        current.indexWhere((e) => e.entityId == newEntity.entityId);
+    // Already exists
+    if (currentIndex >= 0) {
+      final currentEntities = current;
+      currentEntities[currentIndex] = newEntity;
+      await set(currentEntities);
+    } else {
+      // Add it
+      await set(current.followedBy([newEntity]));
+
+      // Fetch the news feeds if needed
+      await newsFeedsBloc.addFromEntity(newEntity);
+    }
+  }
 
   Future<void> refreshFrom(List<EntitySummary> entities) async {
     // TODO:

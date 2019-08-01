@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:dvote/dvote.dart';
+import 'package:dvote/dvote.dart' as dvote;
+import 'package:flutter/material.dart';
 import 'package:vocdoni/data/generic.dart';
 import 'package:vocdoni/util/api.dart';
 import "dart:async";
 
-// import 'package:vocdoni/util/singletons.dart';
-import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 class IdentitiesBloc extends BlocComponent<List<Identity>> {
   final String _storageFile = IDENTITIES_STORE_FILE;
@@ -88,7 +90,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     newIdentity.identityId = publicKey;
     newIdentity.type = Identity_Type.ECDSA_SECP256k1;
 
-    Key k = Key();
+    dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;
     k.encryptedMnemonic = encryptedMenmonic;
     k.encryptedPrivateKey = encryptedPrivateKey;
@@ -103,42 +105,45 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribe(Entity newOrganization) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  subscribe(Entity newEntity) async {
+    if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
+      throw FlutterError("Invalid selectedIdentity: out of bounds");
 
-  //   if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
-  //     throw ("Invalid selectedIdentity: out of bounds");
+    // Add the entity to the global registry if it does not exist
+    await entitiesBloc.add(newEntity);
 
-  //   final address =
-  //       prefs.getStringList("accounts")[appStateBloc.current.selectedIdentity];
-  //   if (!(address is String)) throw ("Invalid account address");
+    // Add the summary of the entity to the current identity
+    final currentIdentities = identitiesBloc.current;
 
-  //   List<String> accountOrganizations = [];
-  //   if (prefs.containsKey("$address/organizations")) {
-  //     accountOrganizations = prefs.getStringList("$address/organizations");
-  //   }
+    final currentIdentity =
+        currentIdentities[appStateBloc.current.selectedIdentity];
+    if (!(currentIdentity is List<Identity>))
+      throw FlutterError("The current account is invalid");
 
-  //   final already = accountOrganizations.any((strEntity) {
-  //     final org = Entity.fromJson(jsonDecode(strEntity));
-  //     if (!(org is Entity)) return false;
-  //     return org.entityId == newOrganization.entityId;
-  //   });
-  //   if (already) throw ("Already subscribed");
+    final already = currentIdentity.peers.entities.any((entity) {
+      return entity.entityId == newEntity.entityId;
+    });
+    if (already)
+      throw FlutterError("You are already subscribed to this entity");
 
-  //   accountOrganizations.add(json.encode(newOrganization.writeToJson()));
-  //   await prefs.setStringList("$address/organizations", accountOrganizations);
+    EntitySummary es = EntitySummary();
+    es.entityId = newEntity.entityId;
+    es.resolverAddress = newEntity.contracts.resolverAddress;
+    es.networkId = newEntity.contracts.networkId;
+    es.entryPoints.addAll(newEntity.meta["entryPoints"] ?? []);
 
-  //   appStateBloc.selectOrganization(accountOrganizations.length - 1);
+    // Update existing identities
+    Identity_Peers newPeers = Identity_Peers();
+    newPeers.entities.addAll(currentIdentity.peers.entities.followedBy([es]));
+    newPeers.identities.addAll(currentIdentity.peers.identities);
+    currentIdentity.peers = newPeers;
 
-  //   // Refresh state
-  //   await readState();
-
-  //   // Fetch after the organization is registered
-  //   await newsFeedsBloc.fetchEntityFeeds(newOrganization);
+    currentIdentities[appStateBloc.current.selectedIdentity] = currentIdentity;
+    await set(currentIdentities);
   }
 
-  // /// Remove the given organization from the currently selected identity's subscriptions
-  // unsubscribe(Entity org) {
-  //   // TODO: PERSIST CHANGES
-  // }
+  /// Remove the given organization from the currently selected identity's subscriptions
+  unsubscribe(Entity org) async {
+    // TODO: PERSIST CHANGES
+  }
 }

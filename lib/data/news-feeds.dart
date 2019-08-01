@@ -1,14 +1,15 @@
-import 'package:rxdart/rxdart.dart';
 import "dart:io";
 import "dart:async";
 
-import 'package:vocdoni/util/singletons.dart';
+// import 'package:vocdoni/util/singletons.dart';
+import 'package:flutter/material.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:dvote/dvote.dart';
+import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/generic.dart';
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
-/// of the subscribed organizations
+/// of the subscribed entities
 class NewsFeedsBloc extends BlocComponent<List<Feed>> {
   final String _storageFile = NEWSFEED_STORE_FILE;
 
@@ -54,7 +55,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);
-      throw "There was an error while storing the changes";
+      throw FlutterError("There was an error while storing the changes");
     }
   }
 
@@ -102,29 +103,30 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
   //   _state.add(allFeeds);
   // }
 
-  // /// Fetch the news feeds of the given organization and update their entries
-  // /// on the shared storage
-  // Future<Map<String, Feed>> fetchEntityFeeds(Entity org) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   if (org.languages == null || org.languages.length < 1)
-  //     return Map<String, Feed>();
+  /// Fetch the feeds of the given entity and update their entries
+  /// on the local storage
+  Future<void> addFromEntity(Entity entity) async {
+    if (entity.languages == null || entity.languages.length < 1) return;
+    final feeds = current;
 
-  //   final Map<String, String> strFeeds = {};
-  //   final Map<String, Feed> orgFeeds = {};
-  //   await Future.wait(org.languages.map((lang) async {
-  //     final strFeed = await fetchEntityNewsFeed(org, lang);
-  //     if (strFeed != null) {
-  //       strFeeds[lang] = strFeed;
-  //       orgFeeds[lang] = Feed.fromJson(jsonDecode(strFeed));
-  //     } else {
-  //       orgFeeds[lang] = Feed.fromJson("{}");
-  //     }
-  //     await prefs.setString(
-  //         NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang", strFeed);
-  //   }));
+    await Future.wait(entity.languages.map((lang) async {
+      final strFeed = await fetchEntityNewsFeed(entity, lang);
+      final newFeed = parseFeed(strFeed);
+      newFeed.meta["entityId"] = entity.entityId;
+      newFeed.meta["language"] = lang;
 
-  //   await readState();
+      final alreadyIdx = feeds.indexWhere((feed) =>
+          feed.meta["entityId"] == entity.entityId &&
+          feed.meta["language"] == lang);
+      if (alreadyIdx >= 0) {
+        // Update existing
+        feeds[alreadyIdx] = newFeed;
+      } else {
+        // Add
+        feeds.add(newFeed);
+      }
+    }));
 
-  //   return orgFeeds;
-  // }
+    await set(feeds);
+  }
 }
