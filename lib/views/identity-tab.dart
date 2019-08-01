@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/create-pattern-modal.dart';
-import 'package:vocdoni/modals/unlock-pattern-modal.dart';
+// import 'package:vocdoni/modals/pattern-create-modal.dart';
+import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -28,7 +28,7 @@ class IdentityTab extends StatelessWidget {
       children: <Widget>[
         PageTitle(
           title: appState != null && identities.length > 0
-              ? identities[appState.selectedIdentity].name
+              ? identities[appState.selectedIdentity].alias
               : "",
           subtitle: appState != null && identities.length > 0
               ? identities[appState.selectedIdentity].identityId
@@ -65,8 +65,6 @@ class IdentityTab extends StatelessWidget {
                   try {
                     await populateSampleData();
                     showMessage("Completed", context: ctx);
-                    await identitiesBloc.readState();
-                    await newsFeedsBloc.readState();
                   } catch (err) {
                     showErrorMessage(err?.message ?? err, context: ctx);
                   }

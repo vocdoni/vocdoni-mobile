@@ -102,8 +102,8 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     set(super.current);
   }
 
-  // /// Register the given organization as a subscribtion of the currently selected identity
-  // subscribe(Entity newOrganization) async {
+  /// Register the given organization as a subscribtion of the currently selected identity
+  subscribe(Entity newOrganization) async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   //   if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
@@ -135,7 +135,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
 
   //   // Fetch after the organization is registered
   //   await newsFeedsBloc.fetchEntityFeeds(newOrganization);
-  // }
+  }
 
   // /// Remove the given organization from the currently selected identity's subscriptions
   // unsubscribe(Entity org) {

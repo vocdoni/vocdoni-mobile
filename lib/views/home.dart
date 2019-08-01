@@ -7,7 +7,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
 import 'package:vocdoni/views/feed-tab.dart';
-import 'package:vocdoni/views/organizations-tab.dart';
+import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 
 import 'package:vocdoni/widgets/alerts.dart';
@@ -170,17 +170,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case 0:
         body = StreamBuilder(
             stream: newsFeedsBloc.stream,
-            builder: (BuildContext ctx,
-                AsyncSnapshot<Map<String, Map<String, Feed>>> newsFeeds) {
+            builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
               return FeedTab(
                   appState: appState,
                   identities: identities,
-                  newsFeeds: newsFeeds?.data);
+                  newsFeeds: newsFeeds.data ?? <Feed>[]);
             });
         break;
-      // SUBSCRIBED ORGANIZATIONS
+      // SUBSCRIBED ENTITIES
       case 1:
-        body = OrganizationsTab(appState: appState, identities: identities);
+        body = EntitiesTab(appState: appState, identities: identities);
         break;
       // IDENTITY INFO
       case 2:
@@ -204,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   getTabName(int idx) {
     if (idx == 0) return "Home";
-    if (idx == 1) return "Your organizations";
+    if (idx == 1) return "Your entities";
     if (idx == 2) return "Your identity";
   }
 }

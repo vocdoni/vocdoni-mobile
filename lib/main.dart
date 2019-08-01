@@ -9,13 +9,13 @@ import 'package:vocdoni/views/identity-select.dart';
 import "package:vocdoni/views/identity-create.dart";
 // import 'package:vocdoni/views/activity-post.dart';
 // import 'package:vocdoni/views/identity-backup.dart';
-// import 'package:vocdoni/views/organization-activity.dart';
-// import 'package:vocdoni/views/organization.dart';
+// import 'package:vocdoni/views/entity-activity.dart';
+// import 'package:vocdoni/views/entity.dart';
 // import 'package:vocdoni/modals/sign-modal.dart';
 // import 'package:vocdoni/modals/web-viewer.dart';
 
 // import "views/welcome-onboarding.dart";
-// import "views/home.dart";
+import "views/home.dart";
 
 void main() async {
   // RESTORE DATA
@@ -57,11 +57,11 @@ void main() async {
       // // "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
       // // "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
 
-      // // WHEN THERE IS AN IDENTITY
-      // "/home": (context) => HomeScreen(),
-      // "/organization": (context) => OrganizationInfo(),
-      // "/organization/activity": (context) => OrganizationActivity(),
-      // "/organization/activity/post": (context) => ActivityPostScreen(),
+      // WHEN THERE IS AN IDENTITY
+      "/home": (context) => HomeScreen(),
+      // "/entity": (context) => EntityInfo(),
+      // "/entity/activity": (context) => EntityActivity(),
+      // "/entity/activity/post": (context) => ActivityPostScreen(),
       // "/identity/backup": (context) => IdentityBackupScreen(),
 
       // // GLOBAL

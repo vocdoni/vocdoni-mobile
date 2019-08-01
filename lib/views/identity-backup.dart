@@ -77,34 +77,34 @@ class IdentityBackupScreen extends StatelessWidget {
   Widget build(context) {
     final IdentityBackupArguments args =
         ModalRoute.of(context).settings.arguments;
-    List<String> mnemonic =
-        args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
+    List<String> mnemonic = args
+        .identities[args.appState.selectedIdentity].keys[0].encryptedMnemonic
+        .split(" ");
 
     return Scaffold(
         body: Center(
       child: Align(
           alignment: Alignment(0, 0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-            Mnemonic2Columns(mnemonic: mnemonic),
-            FlatButton(
-              
-              color: blueColor,
-              textColor: Colors.white,
-              disabledColor: Colors.grey,
-              disabledTextColor: Colors.black,
-              padding: EdgeInsets.all(buttonPadding),
-              splashColor: Colors.blueAccent,
-              onPressed: () { 
-                Navigator.pop(context);
-              },
-              child: Text(
-                "I wrote them down",
-                style: TextStyle(fontSize: 20.0),
-              ),
-            )
-          ])),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Mnemonic2Columns(mnemonic: mnemonic),
+                FlatButton(
+                  color: blueColor,
+                  textColor: Colors.white,
+                  disabledColor: Colors.grey,
+                  disabledTextColor: Colors.black,
+                  padding: EdgeInsets.all(buttonPadding),
+                  splashColor: Colors.blueAccent,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "I wrote them down",
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                )
+              ])),
     ));
   }
 }

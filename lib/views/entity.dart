@@ -16,12 +16,12 @@ import '../lang/index.dart';
 
 import 'package:dvote/dvote.dart' show Entity;
 
-class OrganizationInfo extends StatefulWidget {
+class EntityInfo extends StatefulWidget {
   @override
-  _OrganizationInfoState createState() => _OrganizationInfoState();
+  _EntityInfoState createState() => _EntityInfoState();
 }
 
-class _OrganizationInfoState extends State<OrganizationInfo> {
+class _EntityInfoState extends State<EntityInfo> {
   bool collapsed = false;
   @override
   Widget build(context) {
@@ -33,8 +33,9 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         appStateBloc.current.selectedIdentity >= 0) {
       final Identity currentIdentity =
           identitiesBloc.current[appStateBloc.current.selectedIdentity];
-      if (currentIdentity != null && currentIdentity.subscribedEntities.length > 0) {
-        alreadySubscribed = currentIdentity.subscribedEntities
+      if (currentIdentity != null &&
+          currentIdentity.peers.entities.length > 0) {
+        alreadySubscribed = currentIdentity.peers.entities
             .any((o) => o.entityId == organization.entityId);
       }
     }
@@ -167,7 +168,7 @@ class _OrganizationInfoState extends State<OrganizationInfo> {
         textAlign: TextAlign.center,
       ),
       Text(
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].name,
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
         textAlign: TextAlign.center,
       )
     ]);

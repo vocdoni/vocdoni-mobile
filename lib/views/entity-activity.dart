@@ -13,12 +13,12 @@ import 'package:dvote/dvote.dart';
 
 import 'activity-post.dart';
 
-class OrganizationActivity extends StatefulWidget {
+class EntityActivity extends StatefulWidget {
   @override
-  _OrganizationActivityState createState() => _OrganizationActivityState();
+  _EntityActivityState createState() => _EntityActivityState();
 }
 
-class _OrganizationActivityState extends State<OrganizationActivity> {
+class _EntityActivityState extends State<EntityActivity> {
   Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
@@ -30,7 +30,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
       return buildLoading(context);
     else if (organization == null) return buildEmptyOrganization(context);
 
-    final feed = digestGivenOrganizationFeed(context, organization);
+    final feed = digestEntityFeed(context, organization);
     if (feed == null) {
       loadRemoteFeed(context, organization);
       return buildEmptyPosts(context);
@@ -82,28 +82,24 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
         arguments: ActivityPostArguments(post));
   }
 
-  Feed digestGivenOrganizationFeed(
-      BuildContext context, Entity organization) {
+  Feed digestEntityFeed(BuildContext context, Entity entity) {
     // Already fetched?
     if (remoteNewsFeed != null)
       return remoteNewsFeed;
     else if (newsFeedsBloc.current == null) return null;
 
-    // TODO: DETECT LANGUAGE
-    final defaultLang = organization?.languages?.elementAt(0) ?? "en";
-    final newsFeeds = newsFeedsBloc.current;
-    if ((newsFeeds[organization?.entityId] ?? const {})[defaultLang] == null)
-      return null;
+    // TODO: DETECT THE CURRENT LANGUAGE
+    final feeds = newsFeedsBloc.current.where((feed) {
+      if (feed.meta["entityId"] != entity.entityId)
+        return false;
+      else if (feed.meta["language"] != entity.languages[0]) return false;
+      return true;
+    }).toList();
 
-    final feed = (newsFeeds[organization?.entityId] ?? const {})[defaultLang];
-    if (feed.items?.length == 0 ?? true) {
-      return null;
-    }
-
-    return feed;
+    return feeds[0] ?? null;
   }
 
-  Future loadRemoteFeed(BuildContext ctx, Entity organization) async {
+  Future loadRemoteFeed(BuildContext ctx, Entity entity) async {
     if (remoteFetched) return;
     remoteFetched = true;
     Timer(Duration(milliseconds: 10), () {
@@ -113,8 +109,7 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     });
 
     try {
-      final result =
-          await fetchEntityNewsFeed(organization, organization.languages[0]);
+      final result = await fetchEntityNewsFeed(entity, entity.languages[0]);
       final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {
