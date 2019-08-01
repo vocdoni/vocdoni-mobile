@@ -8,7 +8,7 @@ import 'util/singletons.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import "package:vocdoni/views/identity-create.dart";
 // import 'package:vocdoni/views/activity-post.dart';
-// import 'package:vocdoni/views/identity-backup.dart';
+import 'package:vocdoni/views/identity-backup.dart';
 // import 'package:vocdoni/views/entity-activity.dart';
 // import 'package:vocdoni/views/entity.dart';
 // import 'package:vocdoni/modals/sign-modal.dart';
@@ -62,7 +62,7 @@ void main() async {
       // "/entity": (context) => EntityInfo(),
       // "/entity/activity": (context) => EntityActivity(),
       // "/entity/activity/post": (context) => ActivityPostScreen(),
-      // "/identity/backup": (context) => IdentityBackupScreen(),
+      "/identity/backup": (context) => IdentityBackupScreen(),
 
       // // GLOBAL
       // "/web/viewer": (context) => WebViewer(),

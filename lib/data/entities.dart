@@ -42,7 +42,6 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
 
   @override
   Future<void> persist() async {
-    // Gateway boot nodes
     try {
       File fd = File("${storageDir.path}/$_storageFile");
       EntitiesStore store = EntitiesStore();

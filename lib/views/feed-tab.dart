@@ -70,7 +70,7 @@ class FeedTab extends StatelessWidget {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/organization/activity/post",
+    Navigator.of(ctx).pushNamed("/entity/activity/post",
         arguments: ActivityPostArguments(post));
   }
 }

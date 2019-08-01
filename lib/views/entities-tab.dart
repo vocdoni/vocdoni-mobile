@@ -26,7 +26,7 @@ class EntitiesTab extends StatelessWidget {
     entities = identities[selectedIdentity].peers.entities.map((e) {
       return entitiesBloc.current
           .firstWhere((entity) => entity.entityId == e.entityId);
-    });
+    }).toList();
     if (entities.length == 0) return buildNoEntities(ctx);
 
     return ListView.builder(

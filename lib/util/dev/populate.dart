@@ -1,13 +1,37 @@
+import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
+import 'package:dvote/util/parsers.dart';
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
   final List<Entity> entities = _makeEntities();
-  await entitiesBloc.set(entities);
+  final currentEntities = entitiesBloc.current;
+  currentEntities.addAll(entities);
+  await entitiesBloc.set(currentEntities);
+  final currentIdentities = identitiesBloc.current;
+
+  final newEnts = entities.map((e) {
+    EntitySummary entity = EntitySummary();
+    entity.entityId = e.entityId;
+    entity.resolverAddress = e.contracts.resolverAddress;
+    entity.networkId = e.contracts.networkId;
+    // entity.entryPoints.addAll(...);
+    return entity;
+  }).toList();
+
+  Identity_Peers newPeers = Identity_Peers();
+  newPeers.entities.addAll(newEnts);
+  newPeers.identities.addAll(
+      currentIdentities[appStateBloc.current.selectedIdentity]
+          .peers
+          .identities);
+  currentIdentities[appStateBloc.current.selectedIdentity].peers = newPeers;
+  await identitiesBloc.set(currentIdentities);
 
   final List<Feed> feeds = _makeNewsFeeds(entities);
-  await newsFeedsBloc.set(feeds);
+  final newFeeds = newsFeedsBloc.current.followedBy(feeds).toList();
+  await newsFeedsBloc.set(newFeeds);
 }
 
 List<Entity> _makeEntities() {
@@ -17,8 +41,9 @@ List<Entity> _makeEntities() {
 
   final ids = ["0x1", "0x2", "0x3"];
   return ids.map((id) {
-    String newOrganization = _makeEntity("Entity #$id");
-    return Entity.fromJson(newOrganization);
+    String strEntity = _makeEntity("Entity #$id");
+    final entity = parseEntity(strEntity);
+    return entity;
   }).toList();
 }
 
@@ -27,20 +52,24 @@ List<Feed> _makeNewsFeeds(List<Entity> entities) {
 
   List<Feed> result = [];
   entities.forEach((entity) {
-    entity.languages.forEach((lang) {
-      Feed f = Feed.fromJson(_makeFeed(entity));
+    List<Feed> feeds = entity.languages.map((lang) {
+      Feed f = parseFeed(_makeFeed(entity));
       // external metadata
       f.meta.addAll({"entityId": entity.entityId, "language": lang});
       return f;
-    });
+    }).toList();
+    result.addAll(feeds);
   });
 
   return result;
 }
 
 String _makeEntity(String name) {
+  String entityId =
+      "0x" + randomString() + randomString() + randomString() + randomString();
   return '''{
     "version": "1.0",
+    "entityId":"$entityId",
     "languages": [
         "default"
     ],
