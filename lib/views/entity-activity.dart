@@ -25,20 +25,20 @@ class _EntityActivityState extends State<EntityActivity> {
 
   @override
   Widget build(context) {
-    final Entity organization = ModalRoute.of(context).settings.arguments;
+    final Entity entity = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
-    else if (organization == null) return buildEmptyOrganization(context);
+    else if (entity == null) return buildEmptyEntity(context);
 
-    final feed = digestEntityFeed(context, organization);
+    final feed = digestEntityFeed(context, entity);
     if (feed == null) {
-      loadRemoteFeed(context, organization);
+      loadRemoteFeed(context, entity);
       return buildEmptyPosts(context);
     }
 
     return Scaffold(
       appBar: TopNavigation(
-        title: organization.name[organization.languages[0]],
+        title: entity.name[entity.languages[0]],
       ),
       body: ListView.builder(
         itemCount: feed.items.length,
@@ -53,11 +53,11 @@ class _EntityActivityState extends State<EntityActivity> {
     );
   }
 
-  Widget buildEmptyOrganization(BuildContext ctx) {
+  Widget buildEmptyEntity(BuildContext ctx) {
     // TODO: UI
     return Scaffold(
         body: Center(
-      child: Text("(No organization)"),
+      child: Text("(No entity)"),
     ));
   }
 
@@ -78,7 +78,7 @@ class _EntityActivityState extends State<EntityActivity> {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/organization/activity/post",
+    Navigator.of(ctx).pushNamed("/entity/activity/post",
         arguments: ActivityPostArguments(post));
   }
 

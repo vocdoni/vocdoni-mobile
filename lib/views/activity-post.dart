@@ -59,7 +59,8 @@ class ActivityPostScreen extends StatelessWidget {
     final String html = styleHtml(htmlBody);
     final uri = uriFromContent(html);
     return Container(
-        padding: EdgeInsets.fromLTRB(pagePadding, elementSpacing, pagePadding, elementSpacing),
+        padding: EdgeInsets.fromLTRB(
+            pagePadding, elementSpacing, pagePadding, elementSpacing),
         width: double.infinity,
         height: 500,
         child: WebView(
