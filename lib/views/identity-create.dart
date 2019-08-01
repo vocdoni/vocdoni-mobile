@@ -54,6 +54,15 @@ class _IdentityCreateScreen extends State {
   }
 
   createIdentity(BuildContext context, String alias) async {
+    if (!(alias is String) || alias == "")
+      return;
+    else if (alias.length < 2) {
+      showAlert(
+          title: Lang.of(context).get("Error"),
+          text: Lang.of(context).get("The identity name is too short"),
+          context: context);
+      return;
+    }
     String newPattern = await Navigator.push(
       context,
       MaterialPageRoute(

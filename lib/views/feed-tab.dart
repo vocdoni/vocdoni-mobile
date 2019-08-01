@@ -19,10 +19,11 @@ class FeedTab extends StatelessWidget {
     final Identity currentIdentity =
         identities?.elementAt(appState?.selectedIdentity ?? 0);
     if (currentIdentity == null) return buildNoVotes(ctx);
-    currentIdentity.subscribedEntities.forEach((entity) {
+    currentIdentity.peers.entities.forEach((entity) {
       // TODO: DETECT LANGUAGE
-      final lang =
-          (entity is Entity && entity.languages is List) ? entity.languages[0] : "en";
+      final lang = (entity is Entity && entity.languages is List)
+          ? entity.languages[0]
+          : "en";
       if (!(newsFeeds[entity.entityId] is Map) ||
           !(newsFeeds[entity.entityId][lang] is Feed)) return;
       final newsFeed = newsFeeds[entity.entityId][lang];

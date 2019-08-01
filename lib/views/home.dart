@@ -60,11 +60,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       selectedTab = 2;
     } else if (appStateBloc != null &&
         appStateBloc.current != null &&
-        identitiesBloc
-                .current[appStateBloc.current.selectedIdentity].subscribedEntities !=
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+                .entities !=
             null &&
-        identitiesBloc.current[appStateBloc.current.selectedIdentity]
-                .subscribedEntities.length ==
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+                .entities.length ==
             0) {
       selectedTab = 2;
     }

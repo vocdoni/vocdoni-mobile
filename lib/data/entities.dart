@@ -63,7 +63,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
 
   // CUSTOM OPERATIONS
 
-  Future<void> refreshFrom(List<EntitySummary> entities) {
+  Future<void> refreshFrom(List<EntitySummary> entities) async {
     // TODO:
     print("Unimplemented: entities > refreshFrom");
   }

@@ -2,8 +2,6 @@ PODS:
   - dvote (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_secure_storage (3.2.0):
-    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - uni_links (0.0.1):
@@ -16,7 +14,6 @@ PODS:
 DEPENDENCIES:
   - dvote (from `.symlinks/plugins/dvote/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
-  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
@@ -27,8 +24,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/dvote/ios"
   Flutter:
     :path: ".symlinks/flutter/ios"
-  flutter_secure_storage:
-    :path: ".symlinks/plugins/flutter_secure_storage/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   uni_links:
@@ -41,7 +36,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   dvote: f47c89f5debc2c03848a4ff33793ac83bd8ac7bf
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
-  flutter_secure_storage: 0c5779648ff644110e507909b77a57e620cbbf8b
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: 0067ddb8f10d36786672aa0722a21717dba3a298

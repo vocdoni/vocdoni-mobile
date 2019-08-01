@@ -98,7 +98,7 @@ class AppStateBloc extends BlocComponent<AppState> {
 
     // Trigger updates elsewhere
     entitiesBloc
-        .refreshFrom(identitiesBloc.current[identityIdx].subscribedEntities)
+        .refreshFrom(identitiesBloc.current[identityIdx].peers.entities)
         .catchError((_) {
       print(
           "Error: Unable to refresh the entities from the newly selected identity");
