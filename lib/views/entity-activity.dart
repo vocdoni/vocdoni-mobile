@@ -9,40 +9,41 @@ import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote/dvote.dart';
 
 import 'activity-post.dart';
 
-class OrganizationActivity extends StatefulWidget {
+class EntityActivity extends StatefulWidget {
   @override
-  _OrganizationActivityState createState() => _OrganizationActivityState();
+  _EntityActivityState createState() => _EntityActivityState();
 }
 
-class _OrganizationActivityState extends State<OrganizationActivity> {
-  NewsFeed remoteNewsFeed;
+class _EntityActivityState extends State<EntityActivity> {
+  Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
 
   @override
   Widget build(context) {
-    final Entity organization = ModalRoute.of(context).settings.arguments;
+    final Entity entity = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
-    else if (organization == null) return buildEmptyOrganization(context);
+    else if (entity == null) return buildEmptyEntity(context);
 
-    final feed = digestGivenOrganizationFeed(context, organization);
+    final feed = digestEntityFeed(context, entity);
     if (feed == null) {
-      loadRemoteFeed(context, organization);
+      loadRemoteFeed(context, entity);
       return buildEmptyPosts(context);
     }
 
     return Scaffold(
       appBar: TopNavigation(
-        title: organization.name[organization.languages[0]],
+        title: entity.name[entity.languages[0]],
       ),
       body: ListView.builder(
         itemCount: feed.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final NewsPost post = feed.items[index];
+          final FeedPost post = feed.items[index];
           return FeedItemCard(
             post: post,
             onTap: () => onTapItem(context, post),
@@ -52,11 +53,11 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     );
   }
 
-  Widget buildEmptyOrganization(BuildContext ctx) {
+  Widget buildEmptyEntity(BuildContext ctx) {
     // TODO: UI
     return Scaffold(
         body: Center(
-      child: Text("(No organization)"),
+      child: Text("(No entity)"),
     ));
   }
 
@@ -76,33 +77,29 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     ));
   }
 
-  onTapItem(BuildContext ctx, NewsPost post) {
-    Navigator.of(ctx).pushNamed("/organization/activity/post",
+  onTapItem(BuildContext ctx, FeedPost post) {
+    Navigator.of(ctx).pushNamed("/entity/activity/post",
         arguments: ActivityPostArguments(post));
   }
 
-  NewsFeed digestGivenOrganizationFeed(
-      BuildContext context, Entity organization) {
+  Feed digestEntityFeed(BuildContext context, Entity entity) {
     // Already fetched?
     if (remoteNewsFeed != null)
       return remoteNewsFeed;
     else if (newsFeedsBloc.current == null) return null;
 
-    // TODO: DETECT LANGUAGE
-    final defaultLang = organization?.languages?.elementAt(0) ?? "en";
-    final newsFeeds = newsFeedsBloc.current;
-    if ((newsFeeds[organization?.entityId] ?? const {})[defaultLang] == null)
-      return null;
+    // TODO: DETECT THE CURRENT LANGUAGE
+    final feeds = newsFeedsBloc.current.where((feed) {
+      if (feed.meta["entityId"] != entity.entityId)
+        return false;
+      else if (feed.meta["language"] != entity.languages[0]) return false;
+      return true;
+    }).toList();
 
-    final feed = (newsFeeds[organization?.entityId] ?? const {})[defaultLang];
-    if (feed.items?.length == 0 ?? true) {
-      return null;
-    }
-
-    return feed;
+    return feeds[0] ?? null;
   }
 
-  Future loadRemoteFeed(BuildContext ctx, Entity organization) async {
+  Future loadRemoteFeed(BuildContext ctx, Entity entity) async {
     if (remoteFetched) return;
     remoteFetched = true;
     Timer(Duration(milliseconds: 10), () {
@@ -112,9 +109,8 @@ class _OrganizationActivityState extends State<OrganizationActivity> {
     });
 
     try {
-      final result =
-          await fetchEntityNewsFeed(organization, organization.languages[0]);
-      final decoded = NewsFeed.fromJson(jsonDecode(result));
+      final result = await fetchEntityNewsFeed(entity, entity.languages[0]);
+      final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {
         remoteNewsFeed = decoded;

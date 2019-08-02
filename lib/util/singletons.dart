@@ -1,12 +1,15 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/data/news-feeds.dart';
+import '../data/news-feeds.dart';
 import "../data/app-state.dart";
 import "../data/identities.dart";
-import "../data/elections.dart";
+import "../data/entities.dart";
+import "../data/processes.dart";
 
+// Export classes
 export "../data/app-state.dart";
 export "../data/identities.dart";
-export "../data/elections.dart";
+export "../data/entities.dart";
+export "../data/processes.dart";
 export "../data/news-feeds.dart";
 
 // EXPORTED SINGLETON INSTANCES
@@ -14,7 +17,8 @@ export "../data/news-feeds.dart";
 // Bloc entities
 AppStateBloc appStateBloc = AppStateBloc();
 IdentitiesBloc identitiesBloc = IdentitiesBloc();
-ElectionsBloc electionsBloc = ElectionsBloc();
+EntitiesBloc entitiesBloc = EntitiesBloc();
+ProcessesBloc processesBloc = ProcessesBloc();
 NewsFeedsBloc newsFeedsBloc = NewsFeedsBloc();
 
 // Global scaffold key for snackbars

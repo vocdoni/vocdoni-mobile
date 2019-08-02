@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/create-pattern-modal.dart';
+import 'package:vocdoni/modals/pattern-create-modal.dart';
 // import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -48,66 +47,59 @@ class _IdentityCreateScreen extends State {
           child: TextField(
               style: TextStyle(fontSize: 20),
               decoration: InputDecoration(hintText: "What's your name?"),
-              onSubmitted: (alias) => setPattern(context, alias)),
+              onSubmitted: (alias) => createIdentity(context, alias)),
         ),
       ],
     );
   }
 
-  setPattern(BuildContext context, String alias) async {
-    String pattern = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (context) => CreatePatternModal(
-                  canGoBack: true,
-                )));
-
-    if (pattern == null) {
-      showMessage("Pattern was cancelled", context: context);
-    } else {
-      showSuccessMessage("Pattern has been set!", context: context);
-      onCreateIdentity(context, alias, pattern);
+  createIdentity(BuildContext context, String alias) async {
+    if (!(alias is String) || alias == "")
+      return;
+    else if (alias.length < 2) {
+      showAlert(
+          title: Lang.of(context).get("Error"),
+          text: Lang.of(context).get("The identity name is too short"),
+          context: context);
+      return;
     }
-  }
+    String newPattern = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => PatternCreateModal(canGoBack: true)),
+    );
 
-  encrypt(String key, String payload) async {
-    // TODO: encrypt 
-    return payload;
-  }
+    if (newPattern == null) {
+      return; // showMessage("Pattern was cancelled", context: context);
+    }
+    // showSuccessMessage("Pattern has been set!", context: context);
 
-  onCreateIdentity(BuildContext context, String alias, String encryptionKey) async {
     try {
       setState(() {
         generating = true;
       });
 
-      final mnemonic = await generateMnemonic();
-      final publicKey = await mnemonicToPublicKey(mnemonic);
-      final address = await mnemonicToAddress(mnemonic);
-      final encryptedMenmonic = await encrypt(encryptionKey, mnemonic);
-      // TODO: Use encrypted mnemonic
-
-      await identitiesBloc.create(
-          mnemonic: mnemonic,
-          publicKey: publicKey,
-          address: address,
-          alias: alias);
+      await identitiesBloc.create(alias, newPattern);
 
       int currentIndex = identitiesBloc.current.length - 1;
       appStateBloc.selectIdentity(currentIndex);
 
       showHomePage(context);
     } catch (err) {
+      String text;
       setState(() {
         generating = false;
       });
-      String text = Lang.of(context)
-          .get("An error occurred while generating the identity");
 
       if (err == "The account already exists") {
-        text = Lang.of(context).get("The account already exists");
+        text = Lang.of(context)
+            .get("An account with the same name already exists");
+      } else {
+        text = Lang.of(context)
+            .get("An error occurred while generating the identity");
       }
+
       showAlert(
           title: Lang.of(context).get("Error"), text: text, context: context);
     }

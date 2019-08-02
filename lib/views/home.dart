@@ -7,7 +7,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 
 import 'package:vocdoni/views/feed-tab.dart';
-import 'package:vocdoni/views/organizations-tab.dart';
+import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 
 import 'package:vocdoni/widgets/alerts.dart';
@@ -16,6 +16,7 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lang/index.dart';
 // import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote/dvote.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -59,11 +60,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       selectedTab = 2;
     } else if (appStateBloc != null &&
         appStateBloc.current != null &&
-        identitiesBloc
-                .current[appStateBloc.current.selectedIdentity].organizations !=
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+                .entities !=
             null &&
-        identitiesBloc.current[appStateBloc.current.selectedIdentity]
-                .organizations.length ==
+        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+                .entities.length ==
             0) {
       selectedTab = 2;
     }
@@ -169,17 +170,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case 0:
         body = StreamBuilder(
             stream: newsFeedsBloc.stream,
-            builder: (BuildContext ctx,
-                AsyncSnapshot<Map<String, Map<String, NewsFeed>>> newsFeeds) {
+            builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
               return FeedTab(
                   appState: appState,
                   identities: identities,
-                  newsFeeds: newsFeeds?.data);
+                  newsFeeds: newsFeeds.data ?? <Feed>[]);
             });
         break;
-      // SUBSCRIBED ORGANIZATIONS
+      // SUBSCRIBED ENTITIES
       case 1:
-        body = OrganizationsTab(appState: appState, identities: identities);
+        body = EntitiesTab(appState: appState, identities: identities);
         break;
       // IDENTITY INFO
       case 2:
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   getTabName(int idx) {
     if (idx == 0) return "Home";
-    if (idx == 1) return "Your organizations";
+    if (idx == 1) return "Your entities";
     if (idx == 2) return "Your identity";
   }
 }

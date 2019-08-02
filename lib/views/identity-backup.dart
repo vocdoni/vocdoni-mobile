@@ -1,12 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/singletons.dart';
 
 class IdentityBackupArguments {
-  final AppState appState;
-  final List<Identity> identities;
+  final String alias;
+  final String mnemonic;
 
-  IdentityBackupArguments(this.appState, this.identities);
+  IdentityBackupArguments(this.alias, this.mnemonic);
 }
 
 class MnemonicWord extends StatelessWidget {
@@ -76,34 +75,32 @@ class IdentityBackupScreen extends StatelessWidget {
   Widget build(context) {
     final IdentityBackupArguments args =
         ModalRoute.of(context).settings.arguments;
-    List<String> mnemonic =
-        args.identities[args.appState.selectedIdentity].mnemonic.split(" ");
+    List<String> words = args.mnemonic.split(" ");
 
     return Scaffold(
         body: Center(
       child: Align(
           alignment: Alignment(0, 0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-            Mnemonic2Columns(mnemonic: mnemonic),
-            FlatButton(
-              
-              color: blueColor,
-              textColor: Colors.white,
-              disabledColor: Colors.grey,
-              disabledTextColor: Colors.black,
-              padding: EdgeInsets.all(buttonPadding),
-              splashColor: Colors.blueAccent,
-              onPressed: () { 
-                Navigator.pop(context);
-              },
-              child: Text(
-                "I wrote them down",
-                style: TextStyle(fontSize: 20.0),
-              ),
-            )
-          ])),
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Mnemonic2Columns(mnemonic: words),
+                FlatButton(
+                  color: blueColor,
+                  textColor: Colors.white,
+                  disabledColor: Colors.grey,
+                  disabledTextColor: Colors.black,
+                  padding: EdgeInsets.all(buttonPadding),
+                  splashColor: Colors.blueAccent,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "I wrote them down",
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                )
+              ])),
     ));
   }
 }

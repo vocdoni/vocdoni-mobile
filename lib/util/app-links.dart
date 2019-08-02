@@ -29,7 +29,7 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
           context: context);
     default:
       if (!kReleaseMode)
-        throw ("Invalid path"); // Throw on debug, ignore on release
+        throw FlutterError("Invalid path"); // Throw on debug, ignore on release
   }
 }
 
@@ -45,15 +45,15 @@ Future fetchAndShowOrganization(
     BuildContext context}) async {
   if (!(resolverAddress is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{40}$").hasMatch(resolverAddress)) {
-    throw ("Invalid resolverAddress");
+    throw FlutterError("Invalid resolverAddress");
   } else if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
-    throw ("Invalid entityId");
+    throw FlutterError("Invalid entityId");
   } else if (!(networkId is String) ||
       !RegExp(r"^[0-9a-zA-Z]+$").hasMatch(networkId)) {
-    throw ("Invalid networkId");
+    throw FlutterError("Invalid networkId");
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
-    throw ("Invalid entryPoints");
+    throw FlutterError("Invalid entryPoints");
   }
 
   List<String> decodedEntryPoints = entryPoints
@@ -61,7 +61,7 @@ Future fetchAndShowOrganization(
         try {
           return Uri.decodeFull(uri);
         } catch (err) {
-          throw ("Invalid entry point URI");
+          throw FlutterError("Invalid entry point URI");
         }
       })
       .where((uri) => uri != null)
@@ -73,7 +73,7 @@ Future fetchAndShowOrganization(
     // Fetch organization data
     final org = await fetchEntityData(
         resolverAddress, entityId, networkId, decodedEntryPoints);
-    if (org == null) throw ("Could not fetch the details");
+    if (org == null) throw FlutterError("Could not fetch the details");
 
     hideLoading(global: true);
 
@@ -91,14 +91,14 @@ showSignatureScreen(
     @required String payload,
     @required String returnUri}) {
   if (!(payload is String) || payload.length == 0) {
-    throw ("Invalid payload");
+    throw FlutterError("Invalid payload");
   } else if (!(returnUri is String) || returnUri.length == 0) {
-    throw ("Invalid returnUri");
+    throw FlutterError("Invalid returnUri");
   }
 
   payload = Uri.decodeFull(payload);
   final rtnUri = Uri.parse(returnUri);
-  if (rtnUri == null) throw ("Invalid return URI");
+  if (rtnUri == null) throw FlutterError("Invalid return URI");
 
   final SignModalArguments args = SignModalArguments(payload: payload, returnUri: rtnUri);
 

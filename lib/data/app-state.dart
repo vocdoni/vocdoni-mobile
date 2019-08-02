@@ -1,138 +1,154 @@
-import 'dart:convert';
-import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'dart:async';
+import 'dart:math';
 import 'package:vocdoni/util/api.dart';
+// import 'package:rxdart/rxdart.dart';
+// import 'package:dvote/models/dart/gateway.pb.dart';
+import 'package:vocdoni/data/generic.dart';
+import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/singletons.dart';
 
-class AppStateBloc {
-  BehaviorSubject<AppState> _state =
-      BehaviorSubject<AppState>.seeded(AppState());
+class AppStateBloc extends BlocComponent<AppState> {
+  final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
 
-  Observable<AppState> get stream => _state.stream;
-  AppState get current => _state.value;
-
-  // Constructor
   AppStateBloc() {
-    _state.add(AppState());
+    state.add(AppState());
   }
 
-  Future restore() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!prefs.containsKey("bootnodes")) return; // nothing to restore
+  // GENERIC OVERRIDES
 
+  @override
+  Future<void> init() async {
+    await super.init();
+
+    // POST-BOOTSTRAP ACTIONS
+    Timer(Duration(seconds: 2), () {
+      loadBootNodes().catchError((_) {
+        print("Error: Unable to load the boot nodes");
+      });
+    });
+  }
+
+  /// Read and construct the data structures
+  @override
+  Future<void> restore() async {
+    File fd;
+    GatewaysStore gwStore;
+
+    // Gateway boot nodes
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final dat = prefs.getStringList("bootnodes");
-      if (!(dat is List)) {
-        await prefs.setStringList("bootnodes", []);
-        return;
+      fd = File("${storageDir.path}/$_storageFileBootNodes");
+      if (await fd.exists()) {
+        final bytes = await fd.readAsBytes();
+        gwStore = GatewaysStore.fromBuffer(bytes);
+      } else {
+        gwStore = GatewaysStore();
       }
-      final List<BootNode> deserializedBootNodes =
-          dat.map((strNode) => BootNode.fromJson(jsonDecode(strNode))).toList();
-
-      AppState newState = AppState()
-        ..selectedIdentity = _state.value.selectedIdentity
-        ..bootnodes = deserializedBootNodes;
-
-      _state.add(newState);
     } catch (err) {
       print(err);
+      throw "There was an error while accessing the local data";
+    }
+
+    // Assemble state object
+    AppState newState = AppState()
+      ..selectedIdentity = state.value.selectedIdentity
+      ..bootnodes = gwStore.items;
+
+    state.add(newState);
+  }
+
+  @override
+  Future<void> persist() async {
+    try {
+      // Gateway boot nodes
+      File fd = File("${storageDir.path}/$_storageFileBootNodes");
+      GatewaysStore store = GatewaysStore();
+      store.items.addAll(state.value.bootnodes);
+      await fd.writeAsBytes(store.writeToBuffer());
+
+      // TODO: Store authFailures and authThresholdDate
+      print("TO DO: Store authFailures and authThresholdDate");
+    } catch (err) {
+      print(err);
+      throw "There was an error while storing the changes";
     }
   }
 
+  /// Sets the given value as the current one and persists the new data
+  @override
+  Future<void> set(AppState data) async {
+    super.set(data);
+    await persist();
+  }
+
+  // CUSTOM OPERATIONS
+
   Future loadBootNodes() async {
     try {
-      final List<BootNode> bnList = await fetchBootNodes();
+      final bnList = await getBootNodes();
       await setBootNodes(bnList);
     } catch (err) {
       print("ERR: $err");
     }
   }
 
-  Future<List<BootNode>> fetchBootNodes() async {
-    final String strJsonBootnodes = await getBootNodes();
-    final Map jsonBootnodes = jsonDecode(strJsonBootnodes);
-    if (!(jsonBootnodes is Map)) throw ("Invalid bootnodes response");
-
-    List<BootNode> bootnodes = List<BootNode>();
-    for (String networkId in jsonBootnodes.keys) {
-      if (!(jsonBootnodes[networkId] is List)) continue;
-      (jsonBootnodes[networkId] as List).forEach((bootnode) {
-        if (!(bootnode is Map)) return;
-
-        BootNode bn = BootNode(
-          networkId,
-          dvoteUri: bootnode["dvote"] is String ? bootnode["dvote"] : null,
-          ethereumUri: bootnode["web3"] is String ? bootnode["web3"] : null,
-          publicKey: bootnode["pubKey"] is String ? bootnode["pubKey"] : null,
-        );
-        bootnodes.add(bn);
-      });
-    }
-    return bootnodes;
-  }
-
-  // Operations
-
   selectIdentity(int identityIdx) {
     AppState newState = AppState()
       ..selectedIdentity = identityIdx
-      ..bootnodes = _state.value.bootnodes;
+      ..bootnodes = state.value.bootnodes;
 
-    _state.add(newState);
+    // do not use set(), because we don't need to persist anyting new
+    state.add(newState);
 
-    // TODO: TRIGGER UPDATE
+    // Trigger updates elsewhere
+    entitiesBloc
+        .refreshFrom(identitiesBloc.current[identityIdx].peers.entities)
+        .catchError((_) {
+      print(
+          "Error: Unable to refresh the entities from the newly selected identity");
+    });
   }
 
-  selectOrganization(int organizationIdx) {
-    AppState newState = AppState()
-      ..selectedIdentity = _state.value.selectedIdentity
-      ..bootnodes = _state.value.bootnodes;
-
-    _state.add(newState);
-  }
-
-  setBootNodes(List<BootNode> bootnodes) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!(bootnodes is List<BootNode>)) throw ("Invalid bootnode list");
-    final List<String> serializedData =
-        bootnodes.map((node) => jsonEncode(node.toJson())).toList();
-    await prefs.setStringList("bootnodes", serializedData);
+  setBootNodes(List<Gateway> bootnodes) async {
+    if (!(bootnodes is List<Gateway>)) throw "Invalid bootnode list";
 
     AppState newState = AppState()
-      ..selectedIdentity = _state.value.selectedIdentity
+      ..selectedIdentity = state.value.selectedIdentity
       ..bootnodes = bootnodes;
 
-    _state.add(newState);
+    set(newState);
+  }
+
+  Future trackAuthAttemp(bool successful) async {
+    final newState = current;
+    var now = DateTime.now();
+    if (successful) {
+      newState.authFailures = 0;
+    } else {
+      newState.authFailures++;
+      final seconds = pow(2, newState.authFailures);
+      now.add(Duration(seconds: seconds));
+    }
+    newState.authThresholdDate = now;
+    await set(newState);
   }
 }
 
 class AppState {
+  /// Index of the currently active identity
   int selectedIdentity = 0;
-  List<BootNode> bootnodes = [];
+
+  /// All Gateways known to us, regardless of the entity.
+  /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
+  /// it can be filtered.
+  List<Gateway> bootnodes = [];
+
+  /// How many failed auth attempts happened since the last
+  /// successful one.
+  int authFailures = 0;
+
+  /// Date after which a new auth attempt can be made
+  DateTime authThresholdDate = DateTime.now();
 
   AppState({this.selectedIdentity = 0, this.bootnodes = const []});
-}
-
-class BootNode {
-  final String networkId;
-  final String dvoteUri;
-  final String ethereumUri;
-  final String publicKey;
-
-  BootNode(this.networkId, {this.dvoteUri, this.ethereumUri, this.publicKey});
-
-  BootNode.fromJson(Map<String, dynamic> json)
-      : networkId = json['networkId'] ?? "",
-        dvoteUri = json['dvoteUri'] ?? "",
-        ethereumUri = json['ethereumUri'] ?? "",
-        publicKey = json['pubKey'] ?? "";
-
-  Map<String, dynamic> toJson() {
-    return {
-      'networkId': networkId,
-      'dvoteUri': dvoteUri,
-      'ethereumUri': ethereumUri,
-      'pubKey': publicKey
-    };
-  }
 }

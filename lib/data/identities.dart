@@ -1,198 +1,152 @@
-import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import "dart:convert";
+import 'dart:io';
+import 'package:dvote/dvote.dart';
+import 'package:dvote/dvote.dart' as dvote;
+import 'package:flutter/material.dart';
+import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/util/api.dart';
 import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
-// import 'package:vocdoni/util/api.dart';
-import 'package:dvote/dvote.dart' show Entity;
 
-/// STORAGE STRUCTURE
-/// - SharedPreferences > "accounts" > String List > address (String)
-/// - SecureStorage > {account-address} > { mnemonic, publicKey, alias }
-/// - SharedPreferences > "{account-address}/organizations" > String List > { name, ... }
+class IdentitiesBloc extends BlocComponent<List<Identity>> {
+  final String _storageFile = IDENTITIES_STORE_FILE;
 
-final secStore = new FlutterSecureStorage();
-
-class IdentitiesBloc {
-  BehaviorSubject<List<Identity>> _state =
-      BehaviorSubject<List<Identity>>.seeded(List<Identity>());
-
-  Observable<List<Identity>> get stream => _state.stream;
-  List<Identity> get current => _state.value;
-
-  Future restore() async {
-    return readState();
+  IdentitiesBloc() {
+    state.add([]);
   }
 
-  /// Read and construct the data structures (without the private data/mnemonic)
-  Future readState() async {
-    List<Identity> identities = List<Identity>();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  // GENERIC OVERRIDES
 
-    if (!prefs.containsKey("accounts")) return; // nothing to fetch
+  /// Read and construct the data structures
+  @override
+  Future<void> restore() async {
+    File fd;
+    IdentitiesStore store;
 
-    List<String> accounts = prefs.getStringList("accounts");
-
-    identities = await Future.wait(accounts.map((addr) async {
-      String str = await secStore.read(key: addr);
-      if (str == null) {
-        print("WARNING: Data for $addr is empty");
-        return null;
+    try {
+      fd = File("${storageDir.path}/$_storageFile");
+      if (!(await fd.exists())) {
+        return;
       }
-      final decoded = jsonDecode(str);
-      if (!(decoded is Map)) {
-        return null;
-      } else if (!(decoded["publicKey"] is String) ||
-          !(decoded["alias"] is String)) {
-        return null;
-      }
-
-      List<String> orgs = [];
-      if (prefs.containsKey("$addr/organizations")) {
-        orgs = prefs.getStringList("$addr/organizations");
-      }
-
-      // Intentionally skip the mnemonic
-      return Identity(
-        publicKey: decoded["publicKey"],
-        alias: decoded["alias"],
-        // TODO: REMOVE
-        mnemonic:
-            "This Mnemonic Is Fake Because Is Not Encrypted This Mnemonic Is Fake Because Is Not Encrypted One Two",
-        address: addr,
-        organizations: orgs
-            .where((String org) => org != null)
-            .map((String org) => Entity.fromJson(jsonDecode(org)))
-            .toList(),
-      );
-    }));
-    identities = identities.where((item) => item != null).toList();
-
-    _state.add(identities);
-  }
-
-  Future refreshSubscriptions() {
-    // TODO: refresh for the selected identity
-  }
-
-  // Operations
-
-  /// Registers a new identity with an empty list of organizations
-  Future create(
-      {String mnemonic, String publicKey, String address, String alias}) async {
-    if (!(mnemonic is String))
-      throw ("Invalid mnemonic");
-    else if (!(publicKey is String))
-      throw ("Invalid publicKey");
-    else if (!(address is String))
-      throw ("Invalid address");
-    else if (!(alias is String) || alias.length < 2) throw ("Invalid alias");
-
-    // ADD THE ADDRESS IN THE ACCOUNT INDEX
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    List<String> currentAddrs;
-    if (prefs.containsKey("accounts")) {
-      currentAddrs = prefs.getStringList("accounts");
-      if (currentAddrs.length > 0) {
-        // Check unique addr, alias
-        await Future.wait(currentAddrs.map((addr) async {
-          if (addr == address) throw ("The account already exists");
-
-          final strIdent = await secStore.read(key: addr);
-          final decoded = jsonDecode(strIdent);
-          if (decoded is Map &&
-              decoded["alias"] is String &&
-              (decoded["alias"] as String).trim() == alias.trim()) {
-            throw ("The account already exists");
-          }
-        }));
-
-        currentAddrs.add(address);
-        await prefs.setStringList("accounts", currentAddrs);
-      } else {
-        currentAddrs = [address];
-        await prefs.setStringList("accounts", currentAddrs);
-      }
-    } else {
-      currentAddrs = [address];
-      await prefs.setStringList("accounts", currentAddrs);
+    } catch (err) {
+      print(err);
+      throw "There was an error while accessing the local data";
     }
 
-    // ADD A SERIALIZED WALLET FOR THE ADDRESS
-    await secStore.write(
-      key: address,
-      value: json.encode({
-        "mnemonic": mnemonic,
-        "publicKey": publicKey,
-        "alias": alias.trim()
-      }),
-    );
+    try {
+      final bytes = await fd.readAsBytes();
+      store = IdentitiesStore.fromBuffer(bytes);
+      state.add(store.items);
+    } catch (err) {
+      print(err);
+      throw "There was an error processing the local data";
+    }
+  }
 
-    // ADD AN EMPTY LIST OF ORGANIZATIONS
-    await prefs.setStringList("$address/organizations", []);
+  @override
+  Future<void> persist() async {
+    // Gateway boot nodes
+    try {
+      File fd = File("${storageDir.path}/$_storageFile");
+      IdentitiesStore store = IdentitiesStore();
+      store.items.addAll(state.value);
+      await fd.writeAsBytes(store.writeToBuffer());
+    } catch (err) {
+      print(err);
+      throw "There was an error while storing the changes";
+    }
+  }
 
-    // Refresh state
-    await readState();
+  /// Sets the given value as the current one and persists the new data
+  @override
+  Future<void> set(List<Identity> data) async {
+    super.set(data);
+    await persist();
+  }
 
-    // Set the new identity as active
-    appStateBloc.selectIdentity(currentAddrs.length - 1);
+  // CUSTOM OPERATIONS
+
+  /// Registers a new identity with an empty list of organizations
+  Future create(String alias, String encryptionKey) async {
+    if (!(alias is String) || alias.length < 2)
+      throw FlutterError("Invalid alias");
+    else if (!(encryptionKey is String) || encryptionKey.length < 2)
+      throw FlutterError("Invalid encryptionKey");
+
+    alias = alias.trim();
+    if (super.current.where((item) => item.alias == alias).length > 0) {
+      throw "The account already exists";
+    }
+
+    final mnemonic = await makeMnemonic();
+    final privateKey = await privateKeyFromMnemonic(mnemonic);
+    final publicKey = await publicKeyFromMnemonic(mnemonic);
+    final address = await addressFromMnemonic(mnemonic);
+    final encryptedMenmonic = await encryptString(mnemonic, encryptionKey);
+    final encryptedPrivateKey = await encryptString(privateKey, encryptionKey);
+
+    Identity newIdentity = Identity();
+    newIdentity.alias = alias;
+    newIdentity.identityId = publicKey;
+    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
+
+    dvote.Key k = dvote.Key();
+    k.type = Key_Type.SECP256K1;
+    k.encryptedMnemonic = encryptedMenmonic;
+    k.encryptedPrivateKey = encryptedPrivateKey;
+    k.publicKey = publicKey;
+    k.address = address;
+
+    newIdentity.keys.add(k);
+
+    // Add to existing, notify and store
+    super.current.add(newIdentity);
+    set(super.current);
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribe(Entity newOrganization) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  subscribe(Entity newEntity) async {
+    if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
+      throw FlutterError("Invalid selectedIdentity: out of bounds");
 
-    if (_state.value.length <= appStateBloc.current?.selectedIdentity)
-      throw ("Invalid selectedIdentity: out of bounds");
+    // Add the entity to the global registry if it does not exist
+    await entitiesBloc.add(newEntity);
 
-    final address =
-        prefs.getStringList("accounts")[appStateBloc.current.selectedIdentity];
-    if (!(address is String)) throw ("Invalid account address");
+    // Add the summary of the entity to the current identity
+    final currentIdentities = identitiesBloc.current;
 
-    List<String> accountOrganizations = [];
-    if (prefs.containsKey("$address/organizations")) {
-      accountOrganizations = prefs.getStringList("$address/organizations");
-    }
+    final currentIdentity =
+        currentIdentities[appStateBloc.current.selectedIdentity];
+    if (!(currentIdentity is List<Identity>))
+      throw FlutterError("The current account is invalid");
 
-    final already = accountOrganizations.any((strEntity) {
-      final org = Entity.fromJson(jsonDecode(strEntity));
-      if (!(org is Entity)) return false;
-      return org.entityId == newOrganization.entityId;
+    final already = currentIdentity.peers.entities.any((entity) {
+      return entity.entityId == newEntity.entityId;
     });
-    if (already) throw ("Already subscribed");
+    if (already)
+      throw FlutterError("You are already subscribed to this entity");
 
-    accountOrganizations.add(json.encode(newOrganization.toJsonAll()));
-    await prefs.setStringList("$address/organizations", accountOrganizations);
+    EntitySummary es = EntitySummary();
+    es.entityId = newEntity.entityId;
+    es.resolverAddress = newEntity.contracts.resolverAddress;
+    es.networkId = newEntity.contracts.networkId;
+    es.entryPoints.addAll(newEntity.meta["entryPoints"] ?? []);
 
-    appStateBloc.selectOrganization(accountOrganizations.length - 1);
+    // Update existing identities
+    Identity_Peers newPeers = Identity_Peers();
+    newPeers.entities.addAll(currentIdentity.peers.entities.followedBy([es]));
+    newPeers.identities.addAll(currentIdentity.peers.identities);
+    currentIdentity.peers = newPeers;
 
-    // Refresh state
-    await readState();
-
-    // Fetch after the organization is registered
-    await newsFeedsBloc.fetchEntityFeeds(newOrganization);
+    currentIdentities[appStateBloc.current.selectedIdentity] = currentIdentity;
+    await set(currentIdentities);
   }
 
-  /// Remove the given organization from the currently selected identity's subscriptions
-  unsubscribe(Entity org) {
-    // TODO: PERSIST CHANGES
+  /// Remove the given entity from the currently selected identity's subscriptions
+  unsubscribe(Entity entity) async {
+    // TODO: Remove the entity summary from the identity
+    // TODO: Check if other identities are also subscribed
+    // TODO: Remove the full entity if not used elsewhere
+    // TODO: Remove the entity feeds if not used elsewhere
   }
-}
-
-class Identity {
-  final String alias;
-  final String mnemonic;
-  final String publicKey;
-  final String address;
-  final List<Entity> organizations;
-
-  Identity(
-      {this.alias,
-      this.publicKey,
-      this.mnemonic,
-      this.address,
-      this.organizations});
 }

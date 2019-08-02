@@ -1,7 +1,6 @@
 .DEFAULT_GOAL := info
-.PHONY: info build
+.PHONY: info apk ios
 
-PATH  := node_modules/.bin:$(PATH)
 SHELL := /bin/bash
 
 ###############################################################################

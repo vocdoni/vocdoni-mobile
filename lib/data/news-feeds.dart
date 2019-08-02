@@ -1,174 +1,97 @@
-import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import "dart:convert";
+import "dart:io";
 import "dart:async";
 
-import 'package:vocdoni/util/singletons.dart';
+// import 'package:vocdoni/util/singletons.dart';
+import 'package:flutter/material.dart';
 import 'package:vocdoni/util/api.dart';
-import 'package:dvote/dvote.dart' show Entity;
-
-const NEWS_FEEDS_KEY_PREFIX = "news-feeds/"; // + organization.entityId
-
-/// STORAGE STRUCTURE
-/// - SharedPreferences > "news-feeds/{organization-id}/{lang}" => "{...JSON-Feed...}"
-
-/// STREAM DATA STRUCTURE
-/// - Data > Map[organization-id] > Map[lang] > NewsFeed
+import 'package:dvote/dvote.dart';
+import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/data/generic.dart';
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
-/// of the subscribed organizations
-class NewsFeedsBloc {
-  BehaviorSubject<Map<String, Map<String, NewsFeed>>> _state =
-      BehaviorSubject<Map<String, Map<String, NewsFeed>>>.seeded(
-          Map<String, Map<String, NewsFeed>>());
+/// of the subscribed entities
+class NewsFeedsBloc extends BlocComponent<List<Feed>> {
+  final String _storageFile = NEWSFEED_STORE_FILE;
 
-  Observable<Map<String, Map<String, NewsFeed>>> get stream => _state.stream;
-  Map<String, Map<String, NewsFeed>> get current => _state.value;
-
-  Future restore() {
-    return readState();
+  NewsFeedsBloc() {
+    state.add([]);
   }
 
-  /// Read the state stored as JSON text and emit the decoded class instances
-  Future readState() async {
-    // Read and construct the data structures
+  // GENERIC OVERRIDES
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  /// Read and construct the data structures
+  @override
+  Future<void> restore() async {
+    File fd;
+    FeedsStore store;
 
-    List<Entity> allOrgs = List<Entity>();
-    Map<String, Map<String, NewsFeed>> allFeeds =
-        Map<String, Map<String, NewsFeed>>();
-    if (identitiesBloc.current == null) return;
-
-    // Unique list
-    identitiesBloc.current.forEach((ident) {
-      allOrgs.forEach((org) {
-        if (allOrgs.indexWhere((o) => o.entityId == org.entityId) < 0) {
-          allOrgs.add(org);
-        }
-      });
-      allOrgs.addAll(ident.organizations);
-    });
-
-    // Arrange info
-    allOrgs.forEach((org) {
-      allFeeds[org.entityId] = Map<String, NewsFeed>();
-      org.languages.forEach((lang) {
-        final str =
-            prefs.getString(NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang");
-        if (str == null) return;
-        final feed = NewsFeed.fromJson(jsonDecode(str));
-        allFeeds[org.entityId][lang] = feed;
-      });
-    });
-
-    _state.add(allFeeds);
-  }
-
-  /// Fetch the news feeds of the given organization and update their entries
-  /// on the shared storage
-  Future<Map<String, NewsFeed>> fetchEntityFeeds(Entity org) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (org.languages == null || org.languages.length < 1)
-      return Map<String, NewsFeed>();
-
-    final Map<String, String> strFeeds = {};
-    final Map<String, NewsFeed> orgFeeds = {};
-    await Future.wait(org.languages.map((lang) async {
-      final strFeed = await fetchEntityNewsFeed(org, lang);
-      if (strFeed != null) {
-        strFeeds[lang] = strFeed;
-        orgFeeds[lang] = NewsFeed.fromJson(jsonDecode(strFeed));
-      } else {
-        orgFeeds[lang] = NewsFeed.fromJson({});
+    try {
+      fd = File("${storageDir.path}/$_storageFile");
+      if (!(await fd.exists())) {
+        return;
       }
-      await prefs.setString(
-          NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang", strFeed);
+    } catch (err) {
+      print(err);
+      throw "There was an error while accessing the local data";
+    }
+
+    try {
+      final bytes = await fd.readAsBytes();
+      store = FeedsStore.fromBuffer(bytes);
+      state.add(store.items);
+    } catch (err) {
+      print(err);
+      throw "There was an error processing the local data";
+    }
+  }
+
+  @override
+  Future<void> persist() async {
+    // Gateway boot nodes
+    try {
+      File fd = File("${storageDir.path}/$_storageFile");
+      FeedsStore store = FeedsStore();
+      store.items.addAll(state.value);
+      await fd.writeAsBytes(store.writeToBuffer());
+    } catch (err) {
+      print(err);
+      throw FlutterError("There was an error while storing the changes");
+    }
+  }
+
+  /// Sets the given value as the current one and persists the new data
+  @override
+  Future<void> set(List<Feed> data) async {
+    super.set(data);
+    await persist();
+  }
+
+  // CUSTOM OPERATIONS
+
+  /// Fetch the feeds of the given entity and update their entries
+  /// on the local storage
+  Future<void> fetchFromEntity(Entity entity) async {
+    if (entity.languages == null || entity.languages.length < 1) return;
+    final feeds = current;
+
+    await Future.wait(entity.languages.map((lang) async {
+      final strFeed = await fetchEntityNewsFeed(entity, lang);
+      final newFeed = parseFeed(strFeed);
+      newFeed.meta["entityId"] = entity.entityId; // metadata
+      newFeed.meta["language"] = lang;
+
+      final alreadyIdx = feeds.indexWhere((feed) =>
+          feed.meta["entityId"] == entity.entityId && // metadata
+          feed.meta["language"] == lang);
+      if (alreadyIdx >= 0) {
+        // Update existing
+        feeds[alreadyIdx] = newFeed;
+      } else {
+        // Add
+        feeds.add(newFeed);
+      }
     }));
 
-    await readState();
-
-    return orgFeeds;
+    await set(feeds);
   }
-}
-
-// TODO: Move to Dvote Flutter library
-class NewsFeed {
-  final String version;
-  final String title;
-  final String description;
-  final String favicon;
-  final String feedUrl;
-  final String homePageUrl;
-  final String icon;
-  final List<NewsPost> items;
-  final bool expired;
-
-  NewsFeed(
-      {this.version,
-      this.title,
-      this.description,
-      this.favicon,
-      this.feedUrl,
-      this.homePageUrl,
-      this.icon,
-      this.items,
-      this.expired});
-
-  NewsFeed.fromJson(Map<String, dynamic> json)
-      : version = json['version'] ?? "",
-        title = json['title'] ?? "",
-        description = json['description'] ?? "",
-        favicon = json['favicon'] ?? "",
-        feedUrl = json['feedUrl'] ?? "",
-        homePageUrl = json['homePageUrl'] ?? "",
-        icon = json['icon'] ?? "",
-        items = ((json['items'] ?? []) as List)
-            .map((i) => NewsPost.fromJson(i))
-            .toList(),
-        expired = json['expired'] ?? false;
-}
-
-class NewsPost {
-  final String id;
-  final String author;
-  final String url;
-  final String title;
-  final String summary;
-  final String contentHtml;
-  final String contentText;
-  final DateTime published;
-  final DateTime modified;
-  final String image;
-  final List<String> tags;
-
-  NewsPost(
-      {this.id,
-      this.author,
-      this.url,
-      this.title,
-      this.summary,
-      this.contentHtml,
-      this.contentText,
-      this.published,
-      this.modified,
-      this.image,
-      this.tags});
-
-  NewsPost.fromJson(Map json)
-      : id = json['id'] ?? json["guid"] ?? "",
-        author = json['author'] is Map ? json["author"]["name"] ?? "" : "",
-        summary = json['summary'] ?? "",
-        contentHtml = json['content_html'] ?? "",
-        contentText = json['content_text'] ?? "",
-        published = json['date_published'] != null
-            ? DateTime.parse(json['date_published'])
-            : null,
-        modified = json['date_modified'] != null
-            ? DateTime.parse(json['date_modified'])
-            : null,
-        image = json['image'] ?? "",
-        tags = (json['tags'] ?? []).cast<String>().toList(),
-        title = json['title'] ?? "",
-        url = json['url'] ?? "";
 }

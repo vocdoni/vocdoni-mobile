@@ -2,41 +2,51 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/activity-post.dart';
 import 'package:vocdoni/widgets/feedItemCard.dart';
-import 'package:dvote/dvote.dart' show Entity;
+import 'package:dvote/dvote.dart';
 
 class FeedTab extends StatelessWidget {
   final AppState appState;
   final List<Identity> identities;
-  final Map<String, Map<String, NewsFeed>> newsFeeds;
+  final List<Feed> newsFeeds;
 
   FeedTab({this.appState, this.identities, this.newsFeeds});
 
   @override
   Widget build(ctx) {
-    if (newsFeeds == null) return buildNoVotes(ctx);
+    if (newsFeeds == null) return buildNoEntries(ctx);
 
-    List<NewsPost> newsPosts = List<NewsPost>();
+    List<FeedPost> newsPosts = List<FeedPost>();
     final Identity currentIdentity =
         identities?.elementAt(appState?.selectedIdentity ?? 0);
-    if (currentIdentity == null) return buildNoVotes(ctx);
-    currentIdentity.organizations.forEach((entity) {
-      // TODO: DETECT LANGUAGE
-      final lang =
-          (entity is Entity && entity.languages is List) ? entity.languages[0] : "en";
-      if (!(newsFeeds[entity.entityId] is Map) ||
-          !(newsFeeds[entity.entityId][lang] is NewsFeed)) return;
-      final newsFeed = newsFeeds[entity.entityId][lang];
-      newsPosts.addAll(newsFeed.items);
+    if (currentIdentity == null) return buildNoEntries(ctx);
+
+    final entities = entitiesBloc.current.where((entity) {
+      return currentIdentity.peers.entities
+              .indexWhere((e) => e.entityId == entity.entityId) >=
+          0;
+    }).toList();
+
+    newsFeedsBloc.current.forEach((feed) {
+      final matched = 0 <=
+          entities.indexWhere((entity) {
+            if (feed.meta["entityId"] != entity.entityId)
+              return false;
+            // TODO: DETECT THE CURRENT LANGUAGE
+            else if (feed.meta["language"] != entity.languages[0]) return false;
+            return true;
+          });
+      if (!matched) return;
+      newsPosts.addAll(feed.items);
     });
 
-    if (newsPosts.length == 0) return buildNoVotes(ctx);
+    if (newsPosts.length == 0) return buildNoEntries(ctx);
     newsPosts.sort((a, b) {
-      if (!(a?.published is DateTime) && !(b?.published is DateTime))
+      if (!(a?.datePublished is DateTime) && !(b?.datePublished is DateTime))
         return 0;
-      else if (!(a?.published is DateTime))
+      else if (!(a?.datePublished is DateTime))
         return -1;
-      else if (!(b?.published is DateTime)) return 1;
-      return b.published.compareTo(a.published);
+      else if (!(b?.datePublished is DateTime)) return 1;
+      return b.datePublished.compareTo(a.datePublished);
     });
 
     // TODO: UI
@@ -52,15 +62,15 @@ class FeedTab extends StatelessWidget {
         });
   }
 
-  Widget buildNoVotes(BuildContext ctx) {
+  Widget buildNoEntries(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text("(No votes available)"),
+      child: Text("No votes available"),
     );
   }
 
-  onTapItem(BuildContext ctx, NewsPost post) {
-    Navigator.of(ctx).pushNamed("/organization/activity/post",
+  onTapItem(BuildContext ctx, FeedPost post) {
+    Navigator.of(ctx).pushNamed("/entity/activity/post",
         arguments: ActivityPostArguments(post));
   }
 }
