@@ -1,13 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/singletons.dart';
-import 'package:dvote/dvote.dart';
 
 class IdentityBackupArguments {
-  final AppState appState;
-  final List<Identity> identities;
+  final String alias;
+  final String mnemonic;
 
-  IdentityBackupArguments(this.appState, this.identities);
+  IdentityBackupArguments(this.alias, this.mnemonic);
 }
 
 class MnemonicWord extends StatelessWidget {
@@ -77,9 +75,7 @@ class IdentityBackupScreen extends StatelessWidget {
   Widget build(context) {
     final IdentityBackupArguments args =
         ModalRoute.of(context).settings.arguments;
-    List<String> mnemonic = args
-        .identities[args.appState.selectedIdentity].keys[0].encryptedMnemonic
-        .split(" ");
+    List<String> words = args.mnemonic.split(" ");
 
     return Scaffold(
         body: Center(
@@ -88,7 +84,7 @@ class IdentityBackupScreen extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Mnemonic2Columns(mnemonic: mnemonic),
+                Mnemonic2Columns(mnemonic: words),
                 FlatButton(
                   color: blueColor,
                   textColor: Colors.white,

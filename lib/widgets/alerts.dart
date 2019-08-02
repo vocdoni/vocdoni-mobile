@@ -4,8 +4,8 @@ import 'package:vocdoni/lang/index.dart';
 Future showAlert(
     {String title, String text, String okButton, BuildContext context}) {
   if (text == null)
-    throw ("No text");
-  else if (context == null) throw ("No context");
+    throw FlutterError("No text");
+  else if (context == null) throw FlutterError("No context");
 
   return showDialog(
     context: context,
@@ -31,8 +31,8 @@ Future showPrompt(
     String cancelButton,
     BuildContext context}) {
   if (text == null)
-    throw ("No text");
-  else if (context == null) throw ("No context");
+    throw FlutterError("No text");
+  else if (context == null) throw FlutterError("No context");
 
   return showDialog(
     context: context,

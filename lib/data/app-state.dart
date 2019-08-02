@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:math';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
@@ -58,12 +59,15 @@ class AppStateBloc extends BlocComponent<AppState> {
 
   @override
   Future<void> persist() async {
-    // Gateway boot nodes
     try {
+      // Gateway boot nodes
       File fd = File("${storageDir.path}/$_storageFileBootNodes");
       GatewaysStore store = GatewaysStore();
       store.items.addAll(state.value.bootnodes);
       await fd.writeAsBytes(store.writeToBuffer());
+
+      // TODO: Store authFailures and authThresholdDate
+      print("TO DO: Store authFailures and authThresholdDate");
     } catch (err) {
       print(err);
       throw "There was an error while storing the changes";
@@ -114,6 +118,20 @@ class AppStateBloc extends BlocComponent<AppState> {
 
     set(newState);
   }
+
+  Future trackAuthAttemp(bool successful) async {
+    final newState = current;
+    var now = DateTime.now();
+    if (successful) {
+      newState.authFailures = 0;
+    } else {
+      newState.authFailures++;
+      final seconds = pow(2, newState.authFailures);
+      now.add(Duration(seconds: seconds));
+    }
+    newState.authThresholdDate = now;
+    await set(newState);
+  }
 }
 
 class AppState {
@@ -124,6 +142,13 @@ class AppState {
   /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
   /// it can be filtered.
   List<Gateway> bootnodes = [];
+
+  /// How many failed auth attempts happened since the last
+  /// successful one.
+  int authFailures = 0;
+
+  /// Date after which a new auth attempt can be made
+  DateTime authThresholdDate = DateTime.now();
 
   AppState({this.selectedIdentity = 0, this.bootnodes = const []});
 }

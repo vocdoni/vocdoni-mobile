@@ -1,30 +1,31 @@
+import 'package:dvote/dvote.dart' as dvote;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
+import 'package:vocdoni/util/pattern.dart';
+import 'package:vocdoni/constants/settings.dart';
 
-enum SignatureType { decipherOnly, ecsda, lrs }
+/// This component prompts for a visual lock patten, which is transformed into a passphrase.
+/// The component will attempt to decrypt `encryptedText`. If it succeeds, the
+/// passphrase will be returned via the router as a string.
+class PaternPromptModal extends StatefulWidget {
+  final String encryptedText;
 
-class UnlockPatternModal extends StatefulWidget {
-  SignatureType signatureType = SignatureType.decipherOnly;
-  String payloadToDecrypt;
-  String payloadToSign;
-  UnlockPatternModal(
-      {this.payloadToDecrypt, this.signatureType = SignatureType.decipherOnly});
+  PaternPromptModal(this.encryptedText);
 
   @override
-  _UnlockPatternModalState createState() => _UnlockPatternModalState();
+  _PaternPromptModalState createState() => _PaternPromptModalState();
 }
 
-class _UnlockPatternModalState extends State<UnlockPatternModal> {
+class _PaternPromptModalState extends State<PaternPromptModal> {
   int minLength = 5;
   int maxLength = 100;
   double widthSize = 300;
-  int gridSize = 3;
   double dotRadius = 5;
   double hitRadius = 20;
   int toasterDuration = 3;
@@ -61,9 +62,11 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
   }
 
   DrawPattern buildConfirming() {
+    // TODO: Implement exponential back-off
+
     return DrawPattern(
       key: Key("ConfirmPattern"),
-      gridSize: gridSize,
+      gridSize: patternGridSize,
       widthSize: widthSize,
       dotRadius: dotRadius,
       hitRadius: hitRadius,
@@ -72,45 +75,45 @@ class _UnlockPatternModalState extends State<UnlockPatternModal> {
       patternColor: patternColor,
       dotColor: descriptionColor,
       canDraw: true,
-      onPatternStarted: onPatternStarted,
-      onPatternStopped: onPatternStopped,
+      onPatternStarted: onPatternStart,
+      onPatternStopped: onPatternStop,
     );
   }
 
-  void onPatternStarted(BuildContext context) {
+  void onPatternStart(BuildContext context) {
     setState(() {
       patternColor = blueColor;
     });
   }
 
-  void onPatternStopped(BuildContext context, List<int> pattern) {
-    String key = patternToString(pattern);
-    String decryptedPayload  = decrypt(key, widget.payloadToDecrypt);
+  onPatternStop(BuildContext context, List<int> pattern) async {
+    try {
+      String passphrase = patternToString(pattern, gridSize: patternGridSize);
+      String decryptedPayload =
+          await dvote.decryptString(widget.encryptedText, passphrase);
+      if (decryptedPayload == null)
+        throw InvalidPatternError("The decryption key is invalid");
 
-    if (decryptedPayload != null)
-    {
-      Navigator.pop(context, decryptedPayload);
-      return;
+      // OK
+      await appStateBloc.trackAuthAttemp(true);
+      Navigator.pop(context, passphrase);
+    } catch (err) {
+      await appStateBloc.trackAuthAttemp(false);
+
+      setState(() {
+        patternColor = redColor;
+      });
+
+      // TODO: Do not use this instance of context, because it does not
+      // come from a Scaffold right now
+      Navigator.pop(
+          context, InvalidPatternError("The pattern you entered is not valid"));
     }
-
-    setState(() {
-      patternColor = redColor;
-    });
-
-    showErrorMessage("Wrong pattern",
-        context: context, duration: toasterDuration);
-    return;
   }
+}
 
-  String patternToString(List<int> pattern) {
-    String stringPattern = "";
-    for (int i = 0; i < pattern.length - 1; i++) {
-      stringPattern += (pattern[i].toRadixString(gridSize * gridSize));
-    }
-    return stringPattern;
-  }
-
-  String decrypt(String key, String payload) {
-    return null;
-  }
+class InvalidPatternError implements Exception {
+  final String msg;
+  const InvalidPatternError(this.msg);
+  String toString() => 'InvalidPatternError: $msg';
 }

@@ -36,21 +36,9 @@ class IdentityTab extends StatelessWidget {
         ),
         Section(text: "Your identity"),
         ListItem(
-            text: "Back up identity",
-            onTap: () => Navigator.pushNamed(ctx, "/identity/backup",
-                arguments: IdentityBackupArguments(appState, identities)),
-            onLongPress: () async {
-              String pattern = await Navigator.push(
-                  ctx,
-                  MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => UnlockPatternModal()));
-              if (pattern == null) {
-                showMessage("Pattern was cancelled", context: ctx);
-              } else {
-                showSuccessMessage("Pattern has been set!", context: ctx);
-              }
-            }),
+          text: "Back up my identity",
+          onTap: () => showIdentityBackup(ctx),
+        ),
         ListItem(
             text: "Identities",
             onTap: () {
@@ -77,6 +65,28 @@ class IdentityTab extends StatelessWidget {
     return Center(
       child: Text("(No identity)"),
     );
+  }
+
+  showIdentityBackup(BuildContext ctx) async {
+    final identity =
+        identitiesBloc.current[appStateBloc.current.selectedIdentity];
+
+    var result = await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) =>
+                PaternPromptModal(identity.keys[0].encryptedMnemonic)));
+
+    if (result == null || result is InvalidPatternError) {
+      showErrorMessage("The pattern you entered is not valid", context: ctx);
+      return;
+    }
+    final mnemonic =
+        await decryptString(identity.keys[0].encryptedMnemonic, result);
+
+    Navigator.pushNamed(ctx, "/identity/backup",
+        arguments: IdentityBackupArguments(identity.alias, mnemonic));
   }
 
   onLogOut(BuildContext ctx) async {

@@ -79,7 +79,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       await set(current.followedBy([newEntity]));
 
       // Fetch the news feeds if needed
-      await newsFeedsBloc.addFromEntity(newEntity);
+      await newsFeedsBloc.fetchFromEntity(newEntity);
     }
   }
 

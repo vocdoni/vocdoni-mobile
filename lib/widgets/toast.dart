@@ -4,7 +4,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:native_widgets/native_widgets.dart';
 
 final toasterTextStyle =
-    TextStyle(fontSize:14, fontWeight: semiBoldFontWeight);
+    TextStyle(fontSize: 14, fontWeight: semiBoldFontWeight);
 
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
@@ -13,7 +13,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String buttonText = "OK",
     int duration = 6,
     Function onPressed}) {
-  if (text == null) throw ("No text");
+  if (text == null) throw FlutterError("No text");
 
   final snackBar = SnackBar(
     content: Padding(
@@ -39,7 +39,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
     String buttonText = "OK",
     int duration = 6,
     Function onPressed}) {
-  if (text == null) throw ("No text");
+  if (text == null) throw FlutterError("No text");
 
   final snackBar = SnackBar(
     content: Padding(
@@ -65,7 +65,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
     String buttonText = "OK",
     int duration = 10,
     Function onPressed}) {
-  if (text == null) throw ("No text");
+  if (text == null) throw FlutterError("No text");
 
   final snackBar = SnackBar(
     content: Padding(
@@ -88,7 +88,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
     String text,
     {BuildContext context,
     bool global}) {
-  if (text == null) throw ("No text");
+  if (text == null) throw FlutterError("No text");
 
   final loadingSnackBar = SnackBar(
     duration: Duration(seconds: 30),
@@ -109,7 +109,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _displaySnackBar(
     BuildContext context}) {
   if (global == true) {
     if (homePageScaffoldKey.currentState == null)
-      throw ("The global snack bar can't be shown");
+      throw FlutterError("The global snack bar can't be shown");
 
     homePageScaffoldKey.currentState.hideCurrentSnackBar();
     return homePageScaffoldKey.currentState.showSnackBar(snackBar);
@@ -117,18 +117,18 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _displaySnackBar(
     Scaffold.of(context).hideCurrentSnackBar();
     return Scaffold.of(context).showSnackBar(snackBar);
   }
-  throw ("Either context or global = true are expected");
+  throw FlutterError("Either context or global = true are expected");
 }
 
 void hideLoading({BuildContext context, bool global}) {
   if (global == true) {
     if (homePageScaffoldKey.currentState == null)
-      throw ("The global snack bar can't be shown");
+      throw FlutterError("The global snack bar can't be shown");
     else
       return homePageScaffoldKey.currentState.hideCurrentSnackBar();
   } else if (context is BuildContext) {
     // Find the Scaffold in the Widget tree and use it to show a SnackBar!
     return Scaffold.of(context).hideCurrentSnackBar();
   }
-  throw ("Either a context or global = true must be provided");
+  throw FlutterError("Either a context or global = true must be provided");
 }

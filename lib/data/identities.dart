@@ -69,9 +69,9 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   /// Registers a new identity with an empty list of organizations
   Future create(String alias, String encryptionKey) async {
     if (!(alias is String) || alias.length < 2)
-      throw ("Invalid alias");
+      throw FlutterError("Invalid alias");
     else if (!(encryptionKey is String) || encryptionKey.length < 2)
-      throw ("Invalid encryptionKey");
+      throw FlutterError("Invalid encryptionKey");
 
     alias = alias.trim();
     if (super.current.where((item) => item.alias == alias).length > 0) {
@@ -142,8 +142,11 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     await set(currentIdentities);
   }
 
-  /// Remove the given organization from the currently selected identity's subscriptions
-  unsubscribe(Entity org) async {
-    // TODO: PERSIST CHANGES
+  /// Remove the given entity from the currently selected identity's subscriptions
+  unsubscribe(Entity entity) async {
+    // TODO: Remove the entity summary from the identity
+    // TODO: Check if other identities are also subscribed
+    // TODO: Remove the full entity if not used elsewhere
+    // TODO: Remove the entity feeds if not used elsewhere
   }
 }

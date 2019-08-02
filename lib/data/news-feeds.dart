@@ -68,55 +68,20 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
 
   // CUSTOM OPERATIONS
 
-  // /// Read the state stored as JSON text and emit the decoded class instances
-  // Future readState() async {
-  //   // Read and construct the data structures
-
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   List<EntitySummary> allOrgs = List<EntitySummary>();
-  //   Map<String, Map<String, Feed>> allFeeds = Map<String, Map<String, Feed>>();
-  //   if (identitiesBloc.current == null) return;
-
-  //   // Unique list
-  //   identitiesBloc.current.forEach((ident) {
-  //     allOrgs.forEach((org) {
-  //       if (allOrgs.indexWhere((o) => o.entityId == org.entityId) < 0) {
-  //         allOrgs.add(org);
-  //       }
-  //     });
-  //     allOrgs.addAll(ident.subscribedEntities);
-  //   });
-
-  //   // Arrange info
-  //   allOrgs.forEach((org) {
-  //     allFeeds[org.entityId] = Map<String, Feed>();
-  //     org.languages.forEach((lang) {
-  //       final str =
-  //           prefs.getString(NEWS_FEEDS_KEY_PREFIX + "${org.entityId}/$lang");
-  //       if (str == null) return;
-  //       final feed = Feed.fromJson(jsonDecode(str));
-  //       allFeeds[org.entityId][lang] = feed;
-  //     });
-  //   });
-
-  //   _state.add(allFeeds);
-  // }
-
   /// Fetch the feeds of the given entity and update their entries
   /// on the local storage
-  Future<void> addFromEntity(Entity entity) async {
+  Future<void> fetchFromEntity(Entity entity) async {
     if (entity.languages == null || entity.languages.length < 1) return;
     final feeds = current;
 
     await Future.wait(entity.languages.map((lang) async {
       final strFeed = await fetchEntityNewsFeed(entity, lang);
       final newFeed = parseFeed(strFeed);
-      newFeed.meta["entityId"] = entity.entityId;
+      newFeed.meta["entityId"] = entity.entityId; // metadata
       newFeed.meta["language"] = lang;
 
       final alreadyIdx = feeds.indexWhere((feed) =>
-          feed.meta["entityId"] == entity.entityId &&
+          feed.meta["entityId"] == entity.entityId && // metadata
           feed.meta["language"] == lang);
       if (alreadyIdx >= 0) {
         // Update existing

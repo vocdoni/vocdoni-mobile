@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
+import 'package:vocdoni/modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import '../util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
@@ -18,7 +20,7 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
           return StreamBuilder(
               stream: appStateBloc.stream,
               builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return listContent(context, appState.data, identities.data);
+                return listContent(ctx, appState.data, identities.data);
               });
         });
   }
@@ -32,14 +34,14 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Section(text: "Select an identity"),
-              buildIdentities(ctx, identities),
+              buildExistingIdentities(ctx, identities),
               ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
             ],
           ),
         ));
   }
 
-  buildIdentities(BuildContext ctx, identities) {
+  buildExistingIdentities(BuildContext ctx, identities) {
     List<Widget> list = new List<Widget>();
     if (identities == null) return Column(children: list);
 
@@ -67,7 +69,19 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
   // LOCAL EVENTS
   /////////////////////////////////////////////////////////////////////////////
 
-  onIdentitySelected(BuildContext ctx, int idx) {
+  onIdentitySelected(BuildContext ctx, int idx) async {
+    final identity = identitiesBloc.current[idx];
+
+    var result = await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) =>
+                PaternPromptModal(identity.keys[0].encryptedPrivateKey)));
+    if (result == null || result is InvalidPatternError) {
+      showErrorMessage("The pattern you entered is not valid", context: ctx);
+      return;
+    }
     appStateBloc.selectIdentity(idx);
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
