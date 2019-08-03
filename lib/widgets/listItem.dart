@@ -7,6 +7,7 @@ enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String mainText;
+  final bool iconIsSecondary;
   final String secondaryText;
   final bool mainTextMultiline;
   final bool secondaryTextMultiline;
@@ -21,6 +22,7 @@ class ListItem extends StatelessWidget {
 
   ListItem(
       {this.mainText,
+      this.iconIsSecondary = false,
       this.secondaryText,
       this.mainTextMultiline = true,
       this.secondaryTextMultiline = false,
@@ -41,46 +43,72 @@ class ListItem extends StatelessWidget {
         child: Container(
             color: getBackroundColor(style, disabled),
             padding: EdgeInsets.all(paddingPage),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  buildIcon(icon: icon, isBig: secondaryText != null),
-                  buildTexts(mainText, secondaryText, mainTextMultiline,
-                      secondaryTextMultiline, disabled),
-                  buildRightItem(
-                      itemStyle: style,
-                      icon: rightIcon,
-                      text: rightText,
-                      rightItemStyle: rightTextStyle)
-                ])));
+            child: iconIsSecondary
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                        buildMainText(),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              0, spaceMainAndSecondary, 0, 0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                buildIcon(icon: icon, isBig: false),
+                                Expanded(child: buildSecondaryText()),
+                                buildRightItem(
+                                    itemStyle: style,
+                                    icon: rightIcon,
+                                    text: rightText,
+                                    rightItemStyle: rightTextStyle)
+                              ]),
+                        )
+                      ])
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                        buildIcon(icon: icon, isBig: secondaryText != null),
+                        buildTextsColumn(),
+                        buildRightItem(
+                            itemStyle: style,
+                            icon: rightIcon,
+                            text: rightText,
+                            rightItemStyle: rightTextStyle)
+                      ])));
   }
 
-  buildTexts(String mainText, String secondaryText, bool mainTextMultiline,
-      bool secondaryTextMultiline, bool disabled) {
+  buildTextsColumn() {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(mainText,
-              maxLines: mainTextMultiline ? 3 : 1,
-              overflow: TextOverflow.ellipsis,
-              style: new TextStyle(
-                  fontSize: fontSizeBase,
-                  color: getMainColor(style, disabled),
-                  fontWeight: FontWeight.w400)),
-          secondaryText == null
-              ? Container()
-              : Text(secondaryText,
-                  maxLines: secondaryTextMultiline ? 3 : 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: new TextStyle(
-                      fontSize: fontSizeSecondary,
-                      color: getSecondaryElementColor(style, disabled),
-                      fontWeight: FontWeight.w400)),
+          buildMainText(),
+          secondaryText == null ? Container() : buildSecondaryText(),
         ],
       ),
     );
+  }
+
+  buildMainText() {
+    return Text(mainText,
+        maxLines: mainTextMultiline ? 3 : 1,
+        overflow: TextOverflow.ellipsis,
+        style: new TextStyle(
+            fontSize: fontSizeBase,
+            color: getMainColor(style, disabled),
+            fontWeight: FontWeight.w400));
+  }
+
+  buildSecondaryText() {
+    return Text(secondaryText,
+        maxLines: secondaryTextMultiline ? 3 : 1,
+        overflow: TextOverflow.ellipsis,
+        style: new TextStyle(
+            fontSize: fontSizeSecondary,
+            color: getSecondaryElementColor(style, disabled),
+            fontWeight: FontWeight.w400));
   }
 
   buildIcon({IconData icon = null, bool isBig}) {
@@ -91,7 +119,7 @@ class ListItem extends StatelessWidget {
       child: Icon(
         icon,
         color: getMainColor(style, disabled),
-        size: isBig ? iconSizeMedium : iconSizeMedium,
+        size: isBig ? iconSizeMedium : iconSizeSmall,
       ),
     );
   }

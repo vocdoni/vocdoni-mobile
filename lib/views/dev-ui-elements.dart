@@ -145,6 +145,33 @@ class DevUiElements extends StatelessWidget {
                 mainText: "With icon",
                 secondaryText: "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 icon: FeatherIcons.anchor),
+                
+
+            //ICON IS SECONDARY
+            ListItem(
+                mainText: "With secondary icon",
+                secondaryText: "With secondary text",
+                secondaryTextMultiline: true,
+                iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
+            ListItem(
+                mainText: "With secondary icon",
+                secondaryText: "With very very very very long secondary text",
+                secondaryTextMultiline: true,
+                iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
+            ListItem(
+                mainText: "With secondary icon",
+                secondaryText: "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryTextMultiline: true,
+                iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
+
+             ListItem(
+                mainText: "With iconWith secondary icon",
+                secondaryText: "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
           ],
         ));
   }
