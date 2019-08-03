@@ -48,4 +48,4 @@ final double fontSizeSecondary = 14;
 final FontWeight fontWeightLight = FontWeight.w300;
 final FontWeight fontWeightRegular = FontWeight.w400;
 final FontWeight fontWeightSemiBold = FontWeight.w600;
-final FontWeight fontWeihtBold = FontWeight.w700;
+final FontWeight fontWeightBold = FontWeight.w700;
