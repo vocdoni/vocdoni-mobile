@@ -19,7 +19,7 @@ class BaseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = color == null ? descriptionColor : color;
+    Color c1 = color == null ? colorDescription : color;
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
@@ -55,7 +55,7 @@ class BaseButton extends StatelessWidget {
                     child: Text(text,
                         style: TextStyle(
                             color: ct,
-                            fontWeight: semiBoldFontWeight,
+                            fontWeight: fontWeightBold,
                             fontSize: 16)),
                   )),
                 ),

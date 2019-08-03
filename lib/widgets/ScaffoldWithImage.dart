@@ -53,13 +53,13 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
               snap: false,
               pinned: true,
               elevation: 0,
-              backgroundColor: baseBackgroundColor,
+              backgroundColor: colorBaseBackground,
               expandedHeight: totalHeaderHeight,
               leading: InkWell(
                   onTap: () => Navigator.pop(context),
                   child: Icon(
                     FeatherIcons.arrowLeft,
-                    color: collapsed ? descriptionColor : Colors.white,
+                    color: collapsed ? colorDescription : Colors.white,
                   )),
               flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
@@ -91,8 +91,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       widget.collapsedTitle,
                       style: TextStyle(
                           color:
-                              descriptionColor.withOpacity(1 - interpolation),
-                          fontWeight: lightFontWeight),
+                              colorDescription.withOpacity(1 - interpolation),
+                          fontWeight: fontWeightLight),
                     ),
                     background: Stack(children: [
                       Column(children: [
@@ -119,7 +119,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                         child: PageTitle(
                           title: widget.title,
                           subtitle: widget.subtitle,
-                          titleColor: titleColor.withOpacity(interpolation),
+                          titleColor: colorTitle.withOpacity(interpolation),
                         ),
                       )
                     ]));

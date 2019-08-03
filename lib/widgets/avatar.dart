@@ -20,7 +20,7 @@ class Avatar extends StatelessWidget {
                 offset: new Offset(0, 2),
               )
             ],
-            color: guideColor,
+            color: colorGuide,
             shape: BoxShape.circle,
             image: new DecorationImage(
                 fit: BoxFit.fill, image: new NetworkImage(avatarUrl))));

@@ -34,8 +34,8 @@ class _SummaryState extends State<Summary> with TickerProviderStateMixin {
                   maxLines: collapsed ? widget.maxLines : 100,
                   style: TextStyle(
                       fontSize: 16,
-                      color: descriptionColor,
-                      fontWeight: lightFontWeight),
+                      color: colorDescription,
+                      fontWeight: fontWeightLight),
                 ))));
   }
 }

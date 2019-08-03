@@ -26,7 +26,7 @@ class PageTitle extends StatelessWidget {
               Text(subtitle,
                   style: new TextStyle(
                       fontSize: 16,
-                      color: guideColor,
+                      color: colorGuide,
                       fontWeight: FontWeight.w400)),
             ]));
   }

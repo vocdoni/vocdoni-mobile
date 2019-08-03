@@ -13,11 +13,11 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(context) {
     return AppBar(
-      backgroundColor: baseBackgroundColor,
+      backgroundColor: colorBaseBackground,
       elevation: 0,
       title: Text(
         title,
-        style: TextStyle(color: descriptionColor, fontWeight: lightFontWeight),
+        style: TextStyle(color: colorDescription, fontWeight: fontWeightLight),
       ),
       brightness: Brightness.light, // or use Brightness.dark
       centerTitle: true,
@@ -29,7 +29,7 @@ class TopNavigation extends StatelessWidget with PreferredSizeWidget {
               },
               child: Icon(
                 FeatherIcons.arrowLeft,
-                color: descriptionColor,
+                color: colorDescription,
               ))
           : null,
     );

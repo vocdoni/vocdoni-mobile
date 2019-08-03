@@ -5,19 +5,19 @@ import 'package:vocdoni/constants/colors.dart';
 
 final pages = [
   new PageViewModel(
-      mainBackgroundColor,
+      colorMainBackground,
       'assets/media/mountain.png',
       'Self sovereign identity',
       'An identity that you create and you own',
       'assets/media/plane.png'),
   new PageViewModel(
-      altBackgroundColor,
+      colorAltBackground,
       'assets/media/world.png',
       'Anonymous voting',
       'Speak your voice with the confidence that your opinion is safe',
       'assets/media/calendar.png'),
   new PageViewModel(
-      alt2BackgroundColor,
+      colorAlt2Background,
       'assets/media/home.png',
       'End to end verifiable',
       'Participate on elections that you and anyone can verify',

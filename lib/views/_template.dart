@@ -9,7 +9,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Vocdoni"),
-        backgroundColor: mainBackgroundColor,
+        backgroundColor: colorMainBackground,
       ),
       body: Center(
         child: Column(

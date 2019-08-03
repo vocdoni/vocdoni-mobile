@@ -35,7 +35,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   double hitRadius = 20;
   int toasterDuration = 3;
   Color hitColor = Colors.transparent;
-  Color patternColor = blueColor;
+  Color patternColor = colorBlue;
   PatternStep patternStep = PatternStep.PATTERN_SETTING;
   List<int> setPattern = [];
 
@@ -106,7 +106,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   resetToSetting() {
     setState(() {
       patternStep = PatternStep.PATTERN_SETTING;
-      patternColor = blueColor;
+      patternColor = colorBlue;
     });
   }
 
@@ -121,7 +121,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         hitColor: hitColor,
         canRepeatDot: false,
         patternColor: patternColor,
-        dotColor: descriptionColor,
+        dotColor: colorDescription,
         canDraw: true,
         onPatternStarted: onSettingPatternStart,
         onPatternStopped: onSettingPatternStop);
@@ -130,7 +130,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   void onSettingPatternStart(BuildContext context) {
     setState(() {
       patternStep = PatternStep.PATTERN_SETTING;
-      patternColor = blueColor;
+      patternColor = colorBlue;
     });
   }
 
@@ -140,7 +140,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       showErrorMessage("The pattern must have at least $minPatternDots points",
           context: context, duration: toasterDuration, buttonText: "");
       setState(() {
-        patternColor = redColor;
+        patternColor = colorRed;
       });
       return;
     }
@@ -153,7 +153,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
     debugPrint(pattern.toString());
 
     setState(() {
-      patternColor = greenColor;
+      patternColor = colorGreen;
       setPattern = pattern;
       patternStep = PatternStep.PATTERN_WAITING_CONFIRM;
     });
@@ -170,7 +170,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       hitColor: hitColor,
       canRepeatDot: false,
       patternColor: patternColor,
-      dotColor: descriptionColor,
+      dotColor: colorDescription,
       canDraw: true,
       onPatternStarted: onConfirmingPatternStart,
       onPatternStopped: onConfirmingPatternStop,
@@ -179,7 +179,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
   void onConfirmingPatternStart(BuildContext context) {
     setState(() {
-      patternColor = blueColor;
+      patternColor = colorBlue;
     });
   }
 
@@ -188,7 +188,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
     if (!listEquals(setPattern, pattern)) {
       setState(() {
-        patternColor = redColor;
+        patternColor = colorRed;
       });
 
       showErrorMessage("The patterns you entered don't match",

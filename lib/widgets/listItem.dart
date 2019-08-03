@@ -58,17 +58,17 @@ class ListItem extends StatelessWidget {
   }
 
   Color getMainColor(ItemStyle style) {
-    if (style == ItemStyle.DANGER) return redColor;
+    if (style == ItemStyle.DANGER) return colorRed;
     if (style == ItemStyle.WARNING) return colorOrange;
-    if (style == ItemStyle.GOOD) return greenColor;
-    if (style == ItemStyle.HIGHLIGHT) return blueColor;
-    return descriptionColor;
+    if (style == ItemStyle.GOOD) return colorGreen;
+    if (style == ItemStyle.HIGHLIGHT) return colorBlue;
+    return colorDescription;
   }
 
   Color getBackroundColor(ItemStyle style) {
     if (style == ItemStyle.DEFAULT)
       return null;
-    return getMainColor(style).withOpacity(backgroundColorOpacity);
+    return getMainColor(style).withOpacity(opacityBackgroundColor);
   }
 
   buildIcon({IconData icon = null}) {
@@ -130,13 +130,13 @@ class ListItem extends StatelessWidget {
   Color getRightElementColor(
       ItemStyle itemStyle, RightItemStyle rightItemStyle) {
     if (rightItemStyle == RightItemStyle.DEFAULT)
-      return getMainColor(itemStyle).withOpacity(secondaryElementOpacity);
+      return getMainColor(itemStyle).withOpacity(opacitySecondaryElement);
     return Colors.white;
   }
 
   Color getRightElementBackgroundColor(RightItemStyle style) {
-    if (style == RightItemStyle.BADGE_DANGER) return redColor;
-    if (style == RightItemStyle.BADGE) return guideColor;
+    if (style == RightItemStyle.BADGE_DANGER) return colorRed;
+    if (style == RightItemStyle.BADGE) return colorGuide;
     return Colors.transparent;
   }
 }

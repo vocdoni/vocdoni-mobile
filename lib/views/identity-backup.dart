@@ -26,7 +26,7 @@ class MnemonicWord extends StatelessWidget {
         padding: EdgeInsets.all(paddingChip),
         constraints: BoxConstraints(maxWidth: 150, maxHeight: 40),
         decoration: new BoxDecoration(
-            color: chipColor,
+            color: colorChip,
             borderRadius: new BorderRadius.all(const Radius.circular(5.0))),
         child: Text(word, style: TextStyle(fontSize: 14)),
       )
@@ -86,7 +86,7 @@ class IdentityBackupScreen extends StatelessWidget {
               children: [
                 Mnemonic2Columns(mnemonic: words),
                 FlatButton(
-                  color: blueColor,
+                  color: colorBlue,
                   textColor: Colors.white,
                   disabledColor: Colors.grey,
                   disabledTextColor: Colors.black,

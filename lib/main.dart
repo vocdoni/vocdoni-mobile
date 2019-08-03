@@ -76,7 +76,7 @@ void main() async {
     theme: ThemeData(
       primarySwatch: Colors.blue,
       fontFamily: "Open Sans",
-      scaffoldBackgroundColor: baseBackgroundColor,
+      scaffoldBackgroundColor: colorBaseBackground,
     ),
   ));
 }
