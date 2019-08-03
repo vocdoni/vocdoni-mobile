@@ -12,7 +12,7 @@ class Section extends StatelessWidget {
     Color decorationColor = withDectoration? lightGuideColor:Colors.transparent;
      
     return Container(
-        padding: EdgeInsets.fromLTRB(pagePadding, 24, pagePadding, 16),
+        padding: EdgeInsets.fromLTRB(paddingPage, 24, paddingPage, 16),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[

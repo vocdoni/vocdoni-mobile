@@ -36,8 +36,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
     double avatarHeight = widget.avatarUrl == null ? 0 : 96;
     double avatarY = headerImageHeight - avatarHeight * 0.5;
     double titleY = widget.avatarUrl == null
-        ? headerImageHeight + elementSpacing
-        : headerImageHeight + elementSpacing + avatarHeight * 0.5;
+        ? headerImageHeight + spaceElement
+        : headerImageHeight + spaceElement + avatarHeight * 0.5;
     double totalHeaderHeight = titleY + titleHeight;
     double interpolationHeight = 40;
     double pos = 0;
@@ -105,7 +105,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       ]),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                            pagePadding, avatarY, pagePadding, 0),
+                            paddingPage, avatarY, paddingPage, 0),
                         child: widget.avatarUrl == null
                             ? Container()
                             : Avatar(

@@ -51,7 +51,7 @@ class BaseButton extends StatelessWidget {
                   child: Center(
                       child: Padding(
                     padding: EdgeInsets.fromLTRB(
-                        elementSpacing, 0, elementSpacing, 0),
+                        spaceElement, 0, spaceElement, 0),
                     child: Text(text,
                         style: TextStyle(
                             color: ct,

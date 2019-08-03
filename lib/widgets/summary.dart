@@ -26,7 +26,7 @@ class _SummaryState extends State<Summary> with TickerProviderStateMixin {
                   collapsed = !collapsed;
                 }),
             child: Container(
-                padding: new EdgeInsets.all(pagePadding),
+                padding: new EdgeInsets.all(paddingPage),
                 child: Text(
                   widget.text,
                   overflow: TextOverflow.ellipsis,

@@ -23,16 +23,19 @@ final Color greenColor = Color(0xFF77DD77);
 
 final Color linkColor = blueColor;
 
-final double pagePadding = 24;
-final double elementSpacing = 12;
-final double chipPadding = 4;
-final double buttonPadding = 8;
+final double paddingPage = 24;
+final double paddingChip = 4;
+final double paddingButton = 8;
+final double paddingBade = 8;
+final double spaceElement = 12;
 
+final double iconSizeTinny = 16;
 final double iconSizeSmall = 24;
 final double iconSizeMedium = 32;
 final double iconSizeLarge = 48;
 
 final double fontSizeBase = 18;
+final double fontSizeSecondary = 14;
 
 final FontWeight lightFontWeight = FontWeight.w300;
 final FontWeight regularFontWeight = FontWeight.w400;

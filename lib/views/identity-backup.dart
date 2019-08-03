@@ -23,7 +23,7 @@ class MnemonicWord extends StatelessWidget {
       ),
       Container(
         alignment: Alignment(0, 0),
-        padding: EdgeInsets.all(chipPadding),
+        padding: EdgeInsets.all(paddingChip),
         constraints: BoxConstraints(maxWidth: 150, maxHeight: 40),
         decoration: new BoxDecoration(
             color: chipColor,
@@ -90,7 +90,7 @@ class IdentityBackupScreen extends StatelessWidget {
                   textColor: Colors.white,
                   disabledColor: Colors.grey,
                   disabledTextColor: Colors.black,
-                  padding: EdgeInsets.all(buttonPadding),
+                  padding: EdgeInsets.all(paddingButton),
                   splashColor: Colors.blueAccent,
                   onPressed: () {
                     Navigator.pop(context);
