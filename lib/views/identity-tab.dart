@@ -10,8 +10,7 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 
-// TODO: REMOVE
-import 'package:vocdoni/util/dev/populate.dart';
+
 
 class IdentityTab extends StatelessWidget {
   final AppState appState;
@@ -47,16 +46,10 @@ class IdentityTab extends StatelessWidget {
         kReleaseMode // TODO: DEV BUTTON OUT
             ? Container()
             : ListItem(
-                text: "[DEV] Add test organizations",
-                onTap: () async {
-                  // TODO: REMOVE
-                  try {
-                    await populateSampleData();
-                    showMessage("Completed", context: ctx);
-                  } catch (err) {
-                    showErrorMessage(err?.message ?? err, context: ctx);
-                  }
-                }),
+            text: "Development testing",
+            onTap: () {
+              onDevelopmentTesting(ctx);
+            })
       ],
     );
   }
@@ -92,5 +85,9 @@ class IdentityTab extends StatelessWidget {
   onLogOut(BuildContext ctx) async {
     Navigator.pushNamedAndRemoveUntil(
         ctx, "/identity/select", (Route _) => false);
+  }
+
+  onDevelopmentTesting(BuildContext ctx) async {
+    Navigator.pushNamed(ctx, "/dev");
   }
 }

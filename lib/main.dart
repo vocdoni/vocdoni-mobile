@@ -11,6 +11,7 @@ import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/views/entity.dart';
 import 'package:vocdoni/views/entity-activity.dart';
 import 'package:vocdoni/views/activity-post.dart';
+import 'package:vocdoni/views/dev-testing.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 // import 'package:vocdoni/modals/web-viewer.dart';
 
@@ -67,6 +68,8 @@ void main() async {
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
       "/signature": (context) => SignModal(),
+      //DEV
+      "/dev":(context) => DevTesting(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
