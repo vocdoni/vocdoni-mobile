@@ -63,24 +63,43 @@ class DevUiElements extends StatelessWidget {
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.DANGER,
+              onTap: () {},
             ),
             ListItem(
               text: "Item with WARNING style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.WARNING,
+              onTap: () {},
             ),
             ListItem(
               text: "Item with GOOD style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.GOOD,
+              onTap: () {},
             ),
             ListItem(
               text: "Item with HIGHLIGHT style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.HIGHLIGHT,
+              onTap: () {},
+            ),
+            ListItem(
+              text: "Item disabled ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              onTap: () {},
+              disabled: true,
+            ),
+            ListItem(
+              text: "Item disabled with style ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              style: ItemStyle.HIGHLIGHT,
+              onTap: () {},
+              disabled: true,
             )
           ],
         ));

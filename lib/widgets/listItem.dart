@@ -15,6 +15,7 @@ class ListItem extends StatelessWidget {
   final void Function() onTap;
   final void Function() onLongPress;
   final ItemStyle style;
+  final bool disabled;
 
   ListItem(
       {this.text,
@@ -25,15 +26,16 @@ class ListItem extends StatelessWidget {
       this.rightTextStyle = RightItemStyle.DEFAULT,
       this.onTap,
       this.onLongPress,
-      this.style = ItemStyle.DEFAULT});
+      this.style = ItemStyle.DEFAULT,
+      this.disabled = false});
 
   @override
   Widget build(context) {
     return InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: disabled ? null : onTap,
+        onLongPress: disabled ? null : onLongPress,
         child: Container(
-            color: getBackroundColor(style),
+            color: getBackroundColor(style, disabled),
             padding: EdgeInsets.all(paddingPage),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,7 +48,7 @@ class ListItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: new TextStyle(
                             fontSize: fontSizeBase,
-                            color: getMainColor(style),
+                            color: getMainColor(style, disabled),
                             fontWeight: FontWeight.w400)),
                   ),
                   buildRightItem(
@@ -57,18 +59,19 @@ class ListItem extends StatelessWidget {
                 ])));
   }
 
-  Color getMainColor(ItemStyle style) {
-    if (style == ItemStyle.DANGER) return colorRed;
-    if (style == ItemStyle.WARNING) return colorOrange;
-    if (style == ItemStyle.GOOD) return colorGreen;
-    if (style == ItemStyle.HIGHLIGHT) return colorBlue;
-    return colorDescription;
+  Color getMainColor(ItemStyle style, bool disabled) {
+    Color color = colorDescription;
+    if (style == ItemStyle.DANGER) color = colorRed;
+    if (style == ItemStyle.WARNING) color = colorOrange;
+    if (style == ItemStyle.GOOD) color = colorGreen;
+    if (style == ItemStyle.HIGHLIGHT) color = colorBlue;
+    if (disabled) color = color.withOpacity(opacityDisabled);
+    return color;
   }
 
-  Color getBackroundColor(ItemStyle style) {
-    if (style == ItemStyle.DEFAULT)
-      return null;
-    return getMainColor(style).withOpacity(opacityBackgroundColor);
+  Color getBackroundColor(ItemStyle style, bool disabled) {
+    if (style == ItemStyle.DEFAULT) return null;
+    return getMainColor(style, disabled).withOpacity(opacityBackgroundColor);
   }
 
   buildIcon({IconData icon = null}) {
@@ -78,7 +81,7 @@ class ListItem extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
       child: Icon(
         icon,
-        color: getMainColor(style),
+        color: getMainColor(style, disabled),
         size: iconSizeSmall,
       ),
     );
@@ -99,7 +102,7 @@ class ListItem extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
       child: Icon(
         icon,
-        color: getRightElementColor(itemStyle, rightItemStyle),
+        color: getRightElementColor(itemStyle, rightItemStyle, disabled),
         size: iconSizeSmall,
       ),
     );
@@ -122,15 +125,16 @@ class ListItem extends StatelessWidget {
       child: Text(text,
           style: TextStyle(
               fontSize: fontSizeSecondary,
-              color: getRightElementColor(itemStyle, rightItemStyle),
+              color: getRightElementColor(itemStyle, rightItemStyle, disabled),
               fontWeight: FontWeight.w400)),
     );
   }
 
   Color getRightElementColor(
-      ItemStyle itemStyle, RightItemStyle rightItemStyle) {
+      ItemStyle itemStyle, RightItemStyle rightItemStyle, bool disabled) {
     if (rightItemStyle == RightItemStyle.DEFAULT)
-      return getMainColor(itemStyle).withOpacity(opacitySecondaryElement);
+      return getMainColor(itemStyle, disabled)
+          .withOpacity(opacitySecondaryElement);
     return Colors.white;
   }
 
