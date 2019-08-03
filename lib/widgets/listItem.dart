@@ -3,6 +3,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 enum RightItemStyle { DEFAULT, BADGE, BADGE_DANGER }
+enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String text;
@@ -13,6 +14,7 @@ class ListItem extends StatelessWidget {
   final RightItemStyle rightTextStyle;
   final void Function() onTap;
   final void Function() onLongPress;
+  final ItemStyle style;
 
   ListItem(
       {this.text,
@@ -22,16 +24,16 @@ class ListItem extends StatelessWidget {
       this.rightText,
       this.rightTextStyle = RightItemStyle.DEFAULT,
       this.onTap,
-      this.onLongPress});
+      this.onLongPress,
+      this.style = ItemStyle.DEFAULT});
 
   @override
   Widget build(context) {
-    double iconSize = iconSizeSmall;
-
     return InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
         child: Container(
+            color: getBackroundColor(style),
             padding: EdgeInsets.all(paddingPage),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -44,12 +46,29 @@ class ListItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: new TextStyle(
                             fontSize: fontSizeBase,
-                            color: descriptionColor,
+                            color: getMainColor(style),
                             fontWeight: FontWeight.w400)),
                   ),
                   buildRightItem(
-                      icon: rightIcon, text: rightText, style: rightTextStyle)
+                      itemStyle: style,
+                      icon: rightIcon,
+                      text: rightText,
+                      rightItemStyle: rightTextStyle)
                 ])));
+  }
+
+  Color getMainColor(ItemStyle style) {
+    if (style == ItemStyle.DANGER) return redColor;
+    if (style == ItemStyle.WARNING) return colorOrange;
+    if (style == ItemStyle.GOOD) return greenColor;
+    if (style == ItemStyle.HIGHLIGHT) return blueColor;
+    return descriptionColor;
+  }
+
+  Color getBackroundColor(ItemStyle style) {
+    if (style == ItemStyle.DEFAULT)
+      return null;
+    return getMainColor(style).withOpacity(backgroundColorOpacity);
   }
 
   buildIcon({IconData icon = null}) {
@@ -59,15 +78,19 @@ class ListItem extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
       child: Icon(
         icon,
-        color: descriptionColor,
+        color: getMainColor(style),
         size: iconSizeSmall,
       ),
     );
   }
 
-  buildRightItem({IconData icon, String text, RightItemStyle style}) {
+  buildRightItem(
+      {ItemStyle itemStyle,
+      IconData icon,
+      String text,
+      RightItemStyle rightItemStyle}) {
     if (text != null) {
-      return buildRightText(text, style);
+      return buildRightText(itemStyle, text, rightItemStyle);
     }
 
     if (icon == null) return Container();
@@ -76,32 +99,38 @@ class ListItem extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
       child: Icon(
         icon,
-        color: guideColor,
+        color: getRightElementColor(itemStyle, rightItemStyle),
         size: iconSizeSmall,
       ),
     );
   }
 
-  Widget buildRightText(String text, RightItemStyle style) {
+  Widget buildRightText(
+    ItemStyle itemStyle,
+    String text,
+    RightItemStyle rightItemStyle,
+  ) {
     return Container(
       alignment: Alignment(0, 0),
       padding: EdgeInsets.fromLTRB(paddingBadge, 0, paddingBadge, 0),
       constraints: BoxConstraints(
           minWidth: fontSizeSecondary * 2, minHeight: fontSizeSecondary * 2),
       decoration: new BoxDecoration(
-          color: getRightElementBackgroundColor(style),
+          color: getRightElementBackgroundColor(rightItemStyle),
           borderRadius:
               new BorderRadius.all(Radius.circular(fontSizeSecondary))),
       child: Text(text,
           style: TextStyle(
               fontSize: fontSizeSecondary,
-              color: getRightElementColor(style),
+              color: getRightElementColor(itemStyle, rightItemStyle),
               fontWeight: FontWeight.w400)),
     );
   }
 
-  Color getRightElementColor(RightItemStyle style) {
-    if (style == RightItemStyle.DEFAULT) return guideColor;
+  Color getRightElementColor(
+      ItemStyle itemStyle, RightItemStyle rightItemStyle) {
+    if (rightItemStyle == RightItemStyle.DEFAULT)
+      return getMainColor(itemStyle).withOpacity(secondaryElementOpacity);
     return Colors.white;
   }
 

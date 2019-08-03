@@ -13,8 +13,10 @@ class DevUiElements extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(text: "Simple item"),
-
-            ListItem(text: "Item with no chevron", rightIcon: null,),
+            ListItem(
+              text: "Item with no chevron",
+              rightIcon: null,
+            ),
             ListItem(
                 text: "Item with default badge",
                 rightText: "3",
@@ -46,15 +48,40 @@ class DevUiElements extends StatelessWidget {
                 rightIcon: FeatherIcons.info,
                 icon: FeatherIcons.anchor),
             ListItem(
-                text: "Item with an event longer very very very very long text that doesn't fit even int two lines ",
-                rightIcon: null,
-                ),
-
+              text:
+                  "Item with an event longer very very very very long text that doesn't fit even int two lines ",
+              rightIcon: null,
+            ),
             ListItem(
-                text: "Lon text with multiline disabled. Bla bla bla bla bla bla bla bla bla bla",
-                rightIcon: null,
-                mainTextMultiline: false,
-                ),
+              text:
+                  "Lon text with multiline disabled. Bla bla bla bla bla bla bla bla bla bla",
+              rightIcon: null,
+              mainTextMultiline: false,
+            ),
+            ListItem(
+              text: "Item with DANGER style ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              style: ItemStyle.DANGER,
+            ),
+            ListItem(
+              text: "Item with WARNING style ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              style: ItemStyle.WARNING,
+            ),
+            ListItem(
+              text: "Item with GOOD style ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              style: ItemStyle.GOOD,
+            ),
+            ListItem(
+              text: "Item with HIGHLIGHT style ",
+              rightText: "Sat, Aug 3",
+              icon: FeatherIcons.anchor,
+              style: ItemStyle.HIGHLIGHT,
+            )
           ],
         ));
   }
