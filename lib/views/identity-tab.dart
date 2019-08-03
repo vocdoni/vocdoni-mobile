@@ -33,18 +33,18 @@ class IdentityTab extends StatelessWidget {
         ),
         Section(text: "Your identity"),
         ListItem(
-          text: "Back up my identity",
+          mainText: "Back up my identity",
           onTap: () => showIdentityBackup(ctx),
         ),
         ListItem(
-            text: "Identities",
+            mainText: "Identities",
             onTap: () {
               onLogOut(ctx);
             }),
         kReleaseMode // TODO: DEV BUTTON OUT
             ? Container()
             : ListItem(
-            text: "Development testing",
+            mainText: "Development testing",
             onTap: () {
               onDevelopmentTesting(ctx);
             })

@@ -6,7 +6,7 @@ enum RightItemStyle { DEFAULT, BADGE, BADGE_DANGER }
 enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
-  final String text;
+  final String mainText;
   final bool mainTextMultiline;
   final IconData icon;
   final IconData rightIcon;
@@ -18,7 +18,7 @@ class ListItem extends StatelessWidget {
   final bool disabled;
 
   ListItem(
-      {this.text,
+      {this.mainText,
       this.mainTextMultiline = true,
       this.icon,
       this.rightIcon = FeatherIcons.chevronRight,
@@ -43,7 +43,7 @@ class ListItem extends StatelessWidget {
                 children: <Widget>[
                   buildIcon(icon: icon),
                   Expanded(
-                    child: Text(text,
+                    child: Text(mainText,
                         maxLines: mainTextMultiline ? 3 : 1,
                         overflow: TextOverflow.ellipsis,
                         style: new TextStyle(

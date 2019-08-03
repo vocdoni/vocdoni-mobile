@@ -15,7 +15,7 @@ class DevMenu extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(
-                text: "Add fake organizations",
+                mainText: "Add fake organizations",
                 onTap: () async {
                   // TODO: REMOVE
                   try {
@@ -26,7 +26,7 @@ class DevMenu extends StatelessWidget {
                   }
                 }),
             ListItem(
-              text: "See UI elements",
+              mainText: "See UI elements",
               onTap: () {
                 Navigator.pushNamed(ctx, "/dev/ui-elements");
               },

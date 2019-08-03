@@ -34,7 +34,7 @@ class EntitiesTab extends StatelessWidget {
         itemBuilder: (BuildContext ctxt, int index) {
           final entity = entities[index];
           return ListItem(
-              text: entity.name[entity.languages[0]],
+              mainText: entity.name[entity.languages[0]],
               onTap: () => onTapEntity(ctx, entity));
         });
   }

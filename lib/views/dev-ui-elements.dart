@@ -12,89 +12,89 @@ class DevUiElements extends StatelessWidget {
         ),
         body: ListView(
           children: <Widget>[
-            ListItem(text: "Simple item"),
+            ListItem(mainText: "Simple item"),
             ListItem(
-              text: "Item with no chevron",
+              mainText: "Item with no chevron",
               rightIcon: null,
             ),
             ListItem(
-                text: "Item with default badge",
+                mainText: "Item with default badge",
                 rightText: "3",
                 rightTextStyle: RightItemStyle.BADGE),
             ListItem(
-                text: "Item with long badge",
+                mainText: "Item with long badge",
                 rightText: "9323",
                 rightTextStyle: RightItemStyle.BADGE),
             ListItem(
-              text: "Item with danger badge",
+              mainText: "Item with danger badge",
               rightText: "!",
               rightTextStyle: RightItemStyle.BADGE_DANGER,
             ),
             ListItem(
-              text: "Item with secondary text",
+              mainText: "Item with secondary text",
               rightText: "Sat, Aug 3",
             ),
-            ListItem(text: "With icon", icon: FeatherIcons.anchor),
+            ListItem(mainText: "With icon", icon: FeatherIcons.anchor),
             ListItem(
-                text: "Item with icon and badge ",
+                mainText: "Item with icon and badge ",
                 rightText: "Sat, Aug 3",
                 icon: FeatherIcons.anchor),
             ListItem(
-                text: "Item with right icon ",
+                mainText: "Item with right icon ",
                 rightIcon: FeatherIcons.info,
                 icon: FeatherIcons.anchor),
             ListItem(
-                text: "Item with a very very long text that doesn't fit ",
+                mainText: "Item with a very very long text that doesn't fit ",
                 rightIcon: FeatherIcons.info,
                 icon: FeatherIcons.anchor),
             ListItem(
-              text:
+              mainText:
                   "Item with an event longer very very very very long text that doesn't fit even int two lines ",
               rightIcon: null,
             ),
             ListItem(
-              text:
+              mainText:
                   "Lon text with multiline disabled. Bla bla bla bla bla bla bla bla bla bla",
               rightIcon: null,
               mainTextMultiline: false,
             ),
             ListItem(
-              text: "Item with DANGER style ",
+              mainText: "Item with DANGER style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.DANGER,
               onTap: () {},
             ),
             ListItem(
-              text: "Item with WARNING style ",
+              mainText: "Item with WARNING style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.WARNING,
               onTap: () {},
             ),
             ListItem(
-              text: "Item with GOOD style ",
+              mainText: "Item with GOOD style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.GOOD,
               onTap: () {},
             ),
             ListItem(
-              text: "Item with HIGHLIGHT style ",
+              mainText: "Item with HIGHLIGHT style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.HIGHLIGHT,
               onTap: () {},
             ),
             ListItem(
-              text: "Item disabled ",
+              mainText: "Item disabled ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               onTap: () {},
               disabled: true,
             ),
             ListItem(
-              text: "Item disabled with style ",
+              mainText: "Item disabled with style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
               style: ItemStyle.HIGHLIGHT,

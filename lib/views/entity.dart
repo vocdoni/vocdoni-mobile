@@ -70,7 +70,7 @@ class _EntityInfoState extends State<EntityInfo> {
         onTap: () => subscribeToEntity(context, entity),
       ), */
       ListItem(
-        text: "Activity",
+        mainText: "Activity",
         onTap: () {
           Navigator.pushNamed(context, "/entity/activity", arguments: entity);
         },
@@ -106,7 +106,7 @@ class _EntityInfoState extends State<EntityInfo> {
             if (!(action.name is Map) ||
                 !(action.name[entity.languages[0]] is String)) return null;
             return ListItem(
-              text: action.name[entity.languages[0]],
+              mainText: action.name[entity.languages[0]],
               onTap: () {
                 final String url = action.url;
                 final String title = action.name[entity.languages[0]] ??
@@ -121,7 +121,7 @@ class _EntityInfoState extends State<EntityInfo> {
               },
             );
           } else if (action.type == "image") {
-            return ListItem(text: "TO DO: EntityActionImage");
+            return ListItem(mainText: "TO DO: EntityActionImage");
           } else {
             return null;
           }
@@ -145,7 +145,7 @@ class _EntityInfoState extends State<EntityInfo> {
   Widget buildSubscriptionTiles(BuildContext ctx, Entity entity) {
     return Column(children: <Widget>[
       ListItem(
-        text: "Subscribe",
+        mainText: "Subscribe",
         onTap: () => subscribeToEntity(ctx, entity),
       ),
       SizedBox(height: 40),
