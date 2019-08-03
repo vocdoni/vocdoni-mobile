@@ -8,11 +8,13 @@ class DevUiElements extends StatelessWidget {
   Widget build(ctx) {
     return Scaffold(
         appBar: TopNavigation(
-          title: "Post",
+          title: "List item variants",
         ),
         body: ListView(
           children: <Widget>[
             ListItem(text: "Simple item"),
+
+            ListItem(text: "Item with no chevron", rightIcon: null,),
             ListItem(
                 text: "Item with default badge",
                 rightText: "3",
@@ -39,11 +41,20 @@ class DevUiElements extends StatelessWidget {
                 text: "Item with right icon ",
                 rightIcon: FeatherIcons.info,
                 icon: FeatherIcons.anchor),
-
             ListItem(
                 text: "Item with a very very long text that doesn't fit ",
                 rightIcon: FeatherIcons.info,
                 icon: FeatherIcons.anchor),
+            ListItem(
+                text: "Item with an event longer very very very very long text that doesn't fit even int two lines ",
+                rightIcon: null,
+                ),
+
+            ListItem(
+                text: "Lon text with multiline disabled. Bla bla bla bla bla bla bla bla bla bla",
+                rightIcon: null,
+                mainTextMultiline: false,
+                ),
           ],
         ));
   }

@@ -6,6 +6,7 @@ enum RightItemStyle { DEFAULT, BADGE, BADGE_DANGER }
 
 class ListItem extends StatelessWidget {
   final String text;
+  final bool mainTextMultiline;
   final IconData icon;
   final IconData rightIcon;
   final String rightText;
@@ -15,6 +16,7 @@ class ListItem extends StatelessWidget {
 
   ListItem(
       {this.text,
+      this.mainTextMultiline = true,
       this.icon,
       this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
@@ -36,12 +38,15 @@ class ListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   buildIcon(icon: icon),
-                  Text(text,
-                      style: new TextStyle(
-                          fontSize: fontSizeBase,
-                          color: descriptionColor,
-                          fontWeight: FontWeight.w400)),
-                  Spacer(flex: 1),
+                  Expanded(
+                    child: Text(text,
+                        maxLines: mainTextMultiline ? 3 : 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: new TextStyle(
+                            fontSize: fontSizeBase,
+                            color: descriptionColor,
+                            fontWeight: FontWeight.w400)),
+                  ),
                   buildRightItem(
                       icon: rightIcon, text: rightText, style: rightTextStyle)
                 ])));
@@ -64,7 +69,8 @@ class ListItem extends StatelessWidget {
     if (text != null) {
       return buildRightText(text, style);
     }
-    //if (icon == null) return Container();
+
+    if (icon == null) return Container();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
