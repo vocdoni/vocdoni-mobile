@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 final double opacitySecondaryElement = 0.5;
 final double opacityDecorationLines = 0.1;
 final double opacityBackgroundColor = 0.1;
-final double opacityDisabled = 0.3;
+final double opacityDisabled = 0.4;
 
 final Color colorRed = Color(0xFFFF7C7C);
 final Color colorOrange = Color(0xFFFFA800);

@@ -124,7 +124,7 @@ class ListItem extends StatelessWidget {
     if (icon == null) return Container();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
+      padding: EdgeInsets.fromLTRB(paddingIcon, 0, 0, 0),
       child: Icon(
         icon,
         color: getRightElementColor(),
