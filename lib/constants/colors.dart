@@ -26,7 +26,7 @@ final Color linkColor = blueColor;
 final double paddingPage = 24;
 final double paddingChip = 4;
 final double paddingButton = 8;
-final double paddingBade = 8;
+final double paddingBadge = 10;
 final double spaceElement = 12;
 
 final double iconSizeTinny = 16;

@@ -30,7 +30,7 @@ class ListItem extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         child: Container(
-            padding: EdgeInsets.all(pagePadding),
+            padding: EdgeInsets.all(paddingPage),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -50,7 +50,7 @@ class ListItem extends StatelessWidget {
     if (icon == null) return Container();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, elementSpacing, 0),
+      padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
       child: Icon(
         icon,
         color: descriptionColor,
@@ -71,7 +71,7 @@ class ListItem extends StatelessWidget {
     if (icon == null) return Container();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(elementSpacing, 0, 0, 0),
+      padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
       child: Icon(
         icon,
         color: descriptionColor,
@@ -82,12 +82,14 @@ class ListItem extends StatelessWidget {
 
   Widget buildRightText(String text, RightItemStyle style) {
     return Container(
-      alignment: Alignment(1, 0),
-      padding: EdgeInsets.fromLTRB(elementSpacing, 0, 0, 0),
-     // constraints: BoxConstraints(maxWidth: 150, maxHeight: 40),
+      alignment: Alignment(0, 0),
+      padding: EdgeInsets.fromLTRB(paddingBadge, 0, paddingBadge, 0),
+      constraints: BoxConstraints(
+          minWidth: fontSizeSecondary * 2, minHeight: fontSizeSecondary * 2),
       decoration: new BoxDecoration(
           color: getRightElementBackgroundColor(style),
-          borderRadius: new BorderRadius.all(const Radius.circular(5.0))),
+          borderRadius:
+              new BorderRadius.all(Radius.circular(fontSizeSecondary))),
       child: Text(text,
           style: TextStyle(
               fontSize: fontSizeSecondary,
@@ -96,20 +98,14 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  Color getRightElementColor(RightItemStyle style){
-    if(style == RightItemStyle.DEFAULT)
-      return guideColor;
-    return Colors.white;  
+  Color getRightElementColor(RightItemStyle style) {
+    if (style == RightItemStyle.DEFAULT) return guideColor;
+    return Colors.white;
   }
-  Color getRightElementBackgroundColor(RightItemStyle style){
-    
-    if(style == RightItemStyle.BADGE_DANGER)
-      return redColor;
 
-    if(style == RightItemStyle.BADGE)
-      return guideColor;
-
+  Color getRightElementBackgroundColor(RightItemStyle style) {
+    if (style == RightItemStyle.BADGE_DANGER) return redColor;
+    if (style == RightItemStyle.BADGE) return guideColor;
     return Colors.transparent;
-     
   }
 }
