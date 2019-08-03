@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 
 class DevUiElements extends StatelessWidget {
@@ -12,8 +13,8 @@ class DevUiElements extends StatelessWidget {
         ),
         body: ListView(
           children: <Widget>[
-            ListItem(text: "SimpleItem"),
-            ListItem(text: "Item with icon")
+            ListItem(text: "Simple item"),
+            ListItem(text: "Item with icon", icon:FeatherIcons.anchor )
           ],
         ));
   }

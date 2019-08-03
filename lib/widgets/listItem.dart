@@ -4,7 +4,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 class ListItem extends StatelessWidget {
   final String text;
-  final Icon icon;
+  final IconData icon;
   final void Function() onTap;
   final void Function() onLongPress;
 
@@ -12,6 +12,8 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(context) {
+    double iconSize = iconSizeSmall;
+
     return InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -20,9 +22,10 @@ class ListItem extends StatelessWidget {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
+                  getIcon(icon: icon),
                   Text(text,
                       style: new TextStyle(
-                          fontSize: 18,
+                          fontSize: fontSizeBase,
                           color: descriptionColor,
                           fontWeight: FontWeight.w400)),
                   Spacer(flex: 1),
@@ -32,5 +35,18 @@ class ListItem extends StatelessWidget {
                     size: 18.0,
                   )
                 ])));
+  }
+
+  getIcon({IconData icon = null}) {
+    if (icon == null) return Container();
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 0, elementSpacing, 0),
+      child: Icon(
+        icon,
+        color: descriptionColor,
+        size: iconSizeSmall,
+      ),
+    );
   }
 }

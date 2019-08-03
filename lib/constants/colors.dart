@@ -28,6 +28,12 @@ final double elementSpacing = 12;
 final double chipPadding = 4;
 final double buttonPadding = 8;
 
+final double iconSizeSmall = 24;
+final double iconSizeMedium = 32;
+final double iconSizeLarge = 48;
+
+final double fontSizeBase = 18;
+
 final FontWeight lightFontWeight = FontWeight.w300;
 final FontWeight regularFontWeight = FontWeight.w400;
 final FontWeight semiBoldFontWeight = FontWeight.w600;
