@@ -13,7 +13,6 @@ class DevUiElements extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(text: "Simple item"),
-            ListItem(text: "With icon", icon: FeatherIcons.anchor),
             ListItem(
                 text: "Item with default badge",
                 rightText: "3",
@@ -28,9 +27,23 @@ class DevUiElements extends StatelessWidget {
               rightTextStyle: RightItemStyle.BADGE_DANGER,
             ),
             ListItem(
-              text: "Item text",
+              text: "Item with secondary text",
               rightText: "Sat, Aug 3",
-            )
+            ),
+            ListItem(text: "With icon", icon: FeatherIcons.anchor),
+            ListItem(
+                text: "Item with icon and badge ",
+                rightText: "Sat, Aug 3",
+                icon: FeatherIcons.anchor),
+            ListItem(
+                text: "Item with right icon ",
+                rightIcon: FeatherIcons.info,
+                icon: FeatherIcons.anchor),
+
+            ListItem(
+                text: "Item with a very very long text that doesn't fit ",
+                rightIcon: FeatherIcons.info,
+                icon: FeatherIcons.anchor),
           ],
         ));
   }

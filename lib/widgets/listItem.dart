@@ -16,7 +16,7 @@ class ListItem extends StatelessWidget {
   ListItem(
       {this.text,
       this.icon,
-      this.rightIcon,
+      this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
       this.rightTextStyle = RightItemStyle.DEFAULT,
       this.onTap,
@@ -33,6 +33,7 @@ class ListItem extends StatelessWidget {
             padding: EdgeInsets.all(paddingPage),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   buildIcon(icon: icon),
                   Text(text,
@@ -59,23 +60,18 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  buildRightItem(
-      {IconData icon = FeatherIcons.chevronRight,
-      String text,
-      RightItemStyle style}) {
-    Widget item;
-
+  buildRightItem({IconData icon, String text, RightItemStyle style}) {
     if (text != null) {
       return buildRightText(text, style);
     }
-    if (icon == null) return Container();
+    //if (icon == null) return Container();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
+      padding: EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
       child: Icon(
         icon,
-        color: descriptionColor,
-        size: iconSizeTinny,
+        color: guideColor,
+        size: iconSizeSmall,
       ),
     );
   }
