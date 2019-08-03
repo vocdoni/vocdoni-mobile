@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 
-final double opacitySecondaryElement = 0.7;
+final double opacitySecondaryElement = 0.5;
 final double opacityDecorationLines = 0.1;
 final double opacityBackgroundColor = 0.1;
-final double opacityDisabled = 0.4;
+final double opacityDisabled = 0.3;
 
 final Color colorRed = Color(0xFFFF7C7C);
 final Color colorOrange = Color(0xFFFFA800);
@@ -24,6 +24,7 @@ final double paddingPage = 24;
 final double paddingChip = 4;
 final double paddingButton = 8;
 final double paddingBadge = 10;
+final double paddingIcon = 24;
 final double spaceElement = 12;
 
 final double iconSizeTinny = 16;
@@ -32,7 +33,7 @@ final double iconSizeMedium = 32;
 final double iconSizeLarge = 48;
 
 final double fontSizeBase = 18;
-final double fontSizeSecondary = 14;
+final double fontSizeSecondary = 16;
 
 final FontWeight fontWeightLight = FontWeight.w300;
 final FontWeight fontWeightRegular = FontWeight.w400;

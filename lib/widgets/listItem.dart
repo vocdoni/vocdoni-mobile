@@ -7,7 +7,9 @@ enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String mainText;
+  final String secondaryText;
   final bool mainTextMultiline;
+  final bool secondaryTextMultiline;
   final IconData icon;
   final IconData rightIcon;
   final String rightText;
@@ -19,7 +21,9 @@ class ListItem extends StatelessWidget {
 
   ListItem(
       {this.mainText,
+      this.secondaryText,
       this.mainTextMultiline = true,
+      this.secondaryTextMultiline = false,
       this.icon,
       this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
@@ -41,16 +45,9 @@ class ListItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  buildIcon(icon: icon),
-                  Expanded(
-                    child: Text(mainText,
-                        maxLines: mainTextMultiline ? 3 : 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: new TextStyle(
-                            fontSize: fontSizeBase,
-                            color: getMainColor(style, disabled),
-                            fontWeight: FontWeight.w400)),
-                  ),
+                  buildIcon(icon: icon, isBig: secondaryText != null),
+                  buildTexts(mainText, secondaryText, mainTextMultiline,
+                      secondaryTextMultiline, disabled),
                   buildRightItem(
                       itemStyle: style,
                       icon: rightIcon,
@@ -59,30 +56,42 @@ class ListItem extends StatelessWidget {
                 ])));
   }
 
-  Color getMainColor(ItemStyle style, bool disabled) {
-    Color color = colorDescription;
-    if (style == ItemStyle.DANGER) color = colorRed;
-    if (style == ItemStyle.WARNING) color = colorOrange;
-    if (style == ItemStyle.GOOD) color = colorGreen;
-    if (style == ItemStyle.HIGHLIGHT) color = colorBlue;
-    if (disabled) color = color.withOpacity(opacityDisabled);
-    return color;
+  buildTexts(String mainText, String secondaryText, bool mainTextMultiline,
+      bool secondaryTextMultiline, bool disabled) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(mainText,
+              maxLines: mainTextMultiline ? 3 : 1,
+              overflow: TextOverflow.ellipsis,
+              style: new TextStyle(
+                  fontSize: fontSizeBase,
+                  color: getMainColor(style, disabled),
+                  fontWeight: FontWeight.w400)),
+          secondaryText == null
+              ? Container()
+              : Text(secondaryText,
+                  maxLines: secondaryTextMultiline ? 3 : 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: new TextStyle(
+                      fontSize: fontSizeSecondary,
+                      color: getSecondaryElementColor(style, disabled),
+                      fontWeight: FontWeight.w400)),
+        ],
+      ),
+    );
   }
 
-  Color getBackroundColor(ItemStyle style, bool disabled) {
-    if (style == ItemStyle.DEFAULT) return null;
-    return getMainColor(style, disabled).withOpacity(opacityBackgroundColor);
-  }
-
-  buildIcon({IconData icon = null}) {
+  buildIcon({IconData icon = null, bool isBig}) {
     if (icon == null) return Container();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
+      padding: EdgeInsets.fromLTRB(0, 0, paddingIcon, 0),
       child: Icon(
         icon,
         color: getMainColor(style, disabled),
-        size: iconSizeSmall,
+        size: isBig ? iconSizeMedium : iconSizeMedium,
       ),
     );
   }
@@ -130,10 +139,30 @@ class ListItem extends StatelessWidget {
     );
   }
 
+  Color getMainColor(ItemStyle style, bool disabled) {
+    Color color = colorDescription;
+    if (style == ItemStyle.DANGER) color = colorRed;
+    if (style == ItemStyle.WARNING) color = colorOrange;
+    if (style == ItemStyle.GOOD) color = colorGreen;
+    if (style == ItemStyle.HIGHLIGHT) color = colorBlue;
+    if (disabled) color = color.withOpacity(opacityDisabled);
+    return color;
+  }
+
+  Color getBackroundColor(ItemStyle style, bool disabled) {
+    if (style == ItemStyle.DEFAULT) return null;
+    return getMainColor(style, disabled).withOpacity(opacityBackgroundColor);
+  }
+
+  Color getSecondaryElementColor(ItemStyle itemStyle, bool disabled) {
+    return getMainColor(itemStyle, disabled)
+        .withOpacity(opacitySecondaryElement);
+  }
+
   Color getRightElementColor(
       ItemStyle itemStyle, RightItemStyle rightItemStyle, bool disabled) {
     if (rightItemStyle == RightItemStyle.DEFAULT)
-      return getMainColor(itemStyle, disabled)
+      return getSecondaryElementColor(itemStyle, disabled)
           .withOpacity(opacitySecondaryElement);
     return Colors.white;
   }

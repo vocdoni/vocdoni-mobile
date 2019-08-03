@@ -100,7 +100,51 @@ class DevUiElements extends StatelessWidget {
               style: ItemStyle.HIGHLIGHT,
               onTap: () {},
               disabled: true,
-            )
+            ),
+            ListItem(
+              mainText: "Simple item",
+              secondaryText: "With secondary text",
+            ),
+            ListItem(
+              mainText: "Item with no chevron",
+              secondaryText: "With secondary text",
+              rightIcon: null,
+            ),
+            ListItem(
+                mainText: "Item with default badge",
+                secondaryText: "With secondary text",
+                rightText: "3",
+                rightTextStyle: RightItemStyle.BADGE),
+            ListItem(
+                mainText: "Item with long badge",
+                secondaryText: "With secondary text",
+                rightText: "9323",
+                rightTextStyle: RightItemStyle.BADGE),
+            ListItem(
+              mainText: "Item with secondary text",
+              secondaryText: "With secondary text",
+              rightText: "Sat, Aug 3",
+            ),
+            ListItem(
+                mainText: "With icon",
+                secondaryText: "With secondary text",
+                secondaryTextMultiline: true,
+                icon: FeatherIcons.anchor),
+            ListItem(
+                mainText: "With icon",
+                secondaryText: "With very very very very long secondary text",
+                secondaryTextMultiline: true,
+                icon: FeatherIcons.anchor),
+            ListItem(
+                mainText: "With icon",
+                secondaryText: "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryTextMultiline: true,
+                icon: FeatherIcons.anchor),
+
+             ListItem(
+                mainText: "With icon",
+                secondaryText: "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                icon: FeatherIcons.anchor),
           ],
         ));
   }
