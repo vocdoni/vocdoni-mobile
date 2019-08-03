@@ -10,8 +10,6 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 
-
-
 class IdentityTab extends StatelessWidget {
   final AppState appState;
   final List<Identity> identities;
