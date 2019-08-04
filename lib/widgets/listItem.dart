@@ -107,29 +107,25 @@ class ListItem extends StatelessWidget {
   }
 
   buildIcon() {
-    if (avatarUrl != null || icon == null) return Container();
+    if (avatarUrl == null && icon == null) return Container();
 
     double size = iconIsSecondary || secondaryText == null
         ? iconSizeSmall
         : iconSizeMedium;
-    Avatar(
-      avatarUrl: avatarUrl,
-      size: size,
-    );
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, paddingIcon, 0),
-      child: avatarUrl == null
-          ? Icon(
-              icon,
-              color: getMainColor(),
-              size: size,
-            )
-          : Avatar(
-              avatarUrl: avatarUrl,
-              size: size,
-            ),
-    );
+        padding: EdgeInsets.fromLTRB(0, 0, paddingIcon, 0),
+        child: avatarUrl == null
+            ? Icon(
+                icon,
+                color: getMainColor(),
+                size: size,
+              )
+            : CircleAvatar(
+                backgroundColor: Colors.brown.shade800,
+                //child: avatarUrl == null ? Text('AH') : null,
+                backgroundImage: NetworkImage(avatarUrl),
+              ));
   }
 
   buildRightItem() {
@@ -144,7 +140,7 @@ class ListItem extends StatelessWidget {
       child: Icon(
         rightIcon,
         color: getRightElementColor(),
-        size: iconSizeSmall,
+        size: iconSizeTinny,
       ),
     );
   }

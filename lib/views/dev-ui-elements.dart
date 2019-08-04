@@ -6,6 +6,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 class DevUiElements extends StatelessWidget {
   @override
   Widget build(ctx) {
+    String avatarUrl =
+        "https://i.pinimg.com/originals/23/4c/88/234c888d9ffb6955eb440b0d99a37fd1.jpg";
     return Scaffold(
         appBar: TopNavigation(
           title: "List item variants",
@@ -176,7 +178,8 @@ class DevUiElements extends StatelessWidget {
                 iconIsSecondary: true,
                 icon: FeatherIcons.anchor),
             ListItem(
-                mainText: "Very long main text with more than one line. Bla bla bla bla bla",
+                mainText:
+                    "Very long main text with more than one line. Bla bla bla bla bla",
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 secondaryTextMultiline: true,
@@ -184,12 +187,46 @@ class DevUiElements extends StatelessWidget {
                 icon: FeatherIcons.anchor),
 
             ListItem(
-                mainText: "Very long main text with more than one line. Bla bla bla bla blan",
+                mainText:
+                    "Very long main text with more than one line. Bla bla bla bla blan",
                 secondaryText:
                     "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 iconIsSecondary: true,
                 secondaryTextMultiline: true,
                 icon: FeatherIcons.anchor),
+            ListItem(
+              mainText: "Item with avatar",
+              avatarUrl: avatarUrl,
+            ),
+
+            ListItem(
+              mainText: "Item with avatar and subtitle",
+              avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+            ),
+            ListItem(
+              mainText: "Item with secondary avatar and subtitle ",
+              avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+              iconIsSecondary: true,
+            ),
+
+            ListItem(
+              mainText: "Item with avatar",
+              avatarUrl: avatarUrl,
+            ),
+
+            ListItem(
+              mainText: "Item with avatar and subtitle",
+              //avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+            ),
+            ListItem(
+              mainText: "Item with secondary avatar and subtitle ",
+              //avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+              iconIsSecondary: true,
+            ),
           ],
         ));
   }
