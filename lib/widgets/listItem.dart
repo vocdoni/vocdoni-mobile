@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/widgets/avatar.dart';
 
 enum RightTextStyle { DEFAULT, BADGE, BADGE_DANGER }
 enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
@@ -12,6 +13,7 @@ class ListItem extends StatelessWidget {
   final bool mainTextMultiline;
   final bool secondaryTextMultiline;
   final IconData icon;
+  final String avatarUrl;
   final IconData rightIcon;
   final String rightText;
   final RightTextStyle rightTextStyle;
@@ -27,6 +29,7 @@ class ListItem extends StatelessWidget {
       this.mainTextMultiline = true,
       this.secondaryTextMultiline = false,
       this.icon,
+      this.avatarUrl,
       this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
       this.rightTextStyle = RightTextStyle.DEFAULT,
@@ -55,7 +58,7 @@ class ListItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                buildIcon(isBig: false),
+                                buildIcon(),
                                 Expanded(child: buildSecondaryText()),
                                 buildRightItem()
                               ]),
@@ -65,7 +68,7 @@ class ListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                        buildIcon(isBig: secondaryText != null),
+                        buildIcon(),
                         buildTextsColumn(),
                         buildRightItem()
                       ])));
@@ -103,16 +106,29 @@ class ListItem extends StatelessWidget {
             fontWeight: FontWeight.w400));
   }
 
-  buildIcon({bool isBig}) {
-    if (icon == null) return Container();
+  buildIcon() {
+    if (avatarUrl != null || icon == null) return Container();
+
+    double size = iconIsSecondary || secondaryText == null
+        ? iconSizeSmall
+        : iconSizeMedium;
+    Avatar(
+      avatarUrl: avatarUrl,
+      size: size,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 0, paddingIcon, 0),
-      child: Icon(
-        icon,
-        color: getMainColor(),
-        size: isBig ? iconSizeMedium : iconSizeSmall,
-      ),
+      child: avatarUrl == null
+          ? Icon(
+              icon,
+              color: getMainColor(),
+              size: size,
+            )
+          : Avatar(
+              avatarUrl: avatarUrl,
+              size: size,
+            ),
     );
   }
 
