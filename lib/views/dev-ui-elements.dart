@@ -137,15 +137,16 @@ class DevUiElements extends StatelessWidget {
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With icon",
-                secondaryText: "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryText:
+                    "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 secondaryTextMultiline: true,
                 icon: FeatherIcons.anchor),
 
-             ListItem(
+            ListItem(
                 mainText: "With icon",
-                secondaryText: "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryText:
+                    "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 icon: FeatherIcons.anchor),
-                
 
             //ICON IS SECONDARY
             ListItem(
@@ -162,15 +163,32 @@ class DevUiElements extends StatelessWidget {
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With secondary icon",
-                secondaryText: "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryText:
+                    "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 secondaryTextMultiline: true,
                 iconIsSecondary: true,
                 icon: FeatherIcons.anchor),
 
-             ListItem(
+            ListItem(
                 mainText: "With iconWith secondary icon",
-                secondaryText: "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryText:
+                    "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
+            ListItem(
+                mainText: "Very long main text with more than one line. Bla bla bla bla bla",
+                secondaryText:
+                    "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                secondaryTextMultiline: true,
+                iconIsSecondary: true,
+                icon: FeatherIcons.anchor),
+
+            ListItem(
+                mainText: "Very long main text with more than one line. Bla bla bla bla blan",
+                secondaryText:
+                    "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
+                iconIsSecondary: true,
+                secondaryTextMultiline: true,
                 icon: FeatherIcons.anchor),
           ],
         ));
