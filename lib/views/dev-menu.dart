@@ -3,7 +3,6 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/util/dev/populate.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/views/dev-ui-elements.dart';
 
 class DevMenu extends StatelessWidget {
   @override
@@ -26,11 +25,17 @@ class DevMenu extends StatelessWidget {
                   }
                 }),
             ListItem(
-              mainText: "See UI elements",
+              mainText: "ListItem variations (UI)",
               onTap: () {
-                Navigator.pushNamed(ctx, "/dev/ui-elements");
+                Navigator.pushNamed(ctx, "/dev/ui-listItem");
               },
-            )
+            ),
+            ListItem(
+              mainText: "Cards variations (UI)",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/ui-card");
+              },
+            ),
           ],
         ));
   }

@@ -122,7 +122,7 @@ class ListItem extends StatelessWidget {
                 size: size,
               )
             : CircleAvatar(
-                backgroundColor: Colors.brown.shade800,
+                backgroundColor: Colors.transparent,//.brown.shade800,
                 //child: avatarUrl == null ? Text('AH') : null,
                 backgroundImage: NetworkImage(avatarUrl),
               ));
