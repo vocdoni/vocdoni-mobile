@@ -121,12 +121,12 @@ class ListItem extends StatelessWidget {
       return buildRightText();
     }
 
-    if (icon == null) return Container();
+    if (rightIcon == null) return Container();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(paddingIcon, 0, 0, 0),
       child: Icon(
-        icon,
+        rightIcon,
         color: getRightElementColor(),
         size: iconSizeSmall,
       ),
