@@ -1,5 +1,7 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:dvote/dvote.dart';
 // import 'package:vocdoni/views/entity.dart';
@@ -33,9 +35,26 @@ class EntitiesTab extends StatelessWidget {
         itemCount: entities.length,
         itemBuilder: (BuildContext ctxt, int index) {
           final entity = entities[index];
-          return ListItem(
-              mainText: entity.name[entity.languages[0]],
-              onTap: () => onTapEntity(ctx, entity));
+          return BaseCard(children: [
+            ListItem(
+                mainText: entity.name[entity.languages[0]],
+                avatarUrl: entity.media.avatar,
+                onTap: () => onTapEntity(ctx, entity)),
+            ListItem(
+                mainText: "Feed",
+                icon: FeatherIcons.rss,
+                rightText: entity.newsFeed.entries.length.toString(),
+                rightTextIsBadge: true,
+                onTap: () => onTapEntity(ctx, entity),
+                disabled: entity.newsFeed.entries.length == 0),
+            ListItem(
+                mainText: "Participation",
+                icon: FeatherIcons.mail,
+                rightText: entity.votingProcesses.active.length.toString(),
+                rightTextIsBadge: true,
+                onTap: () => onTapEntity(ctx, entity),
+                disabled: entity.votingProcesses.active.length == 0)
+          ]);
         });
   }
 
