@@ -107,7 +107,7 @@ class ListItem extends StatelessWidget {
         style: new TextStyle(
             fontSize: fontSizeSecondary,
             color: getSecondaryElementColor(),
-            fontWeight: FontWeight.w400));
+            fontWeight: fontWeightRegular));
   }
 
   buildIcon() {
@@ -166,7 +166,7 @@ class ListItem extends StatelessWidget {
           style: TextStyle(
               fontSize: fontSizeSecondary,
               color: getRightElementColor(),
-              fontWeight: FontWeight.w400)),
+              fontWeight: fontWeightRegular)),
     );
   }
 

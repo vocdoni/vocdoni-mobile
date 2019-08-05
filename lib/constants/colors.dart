@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-final double opacitySecondaryElement = 0.5;
+final double opacitySecondaryElement = 0.7;
 final double opacityDecorationLines = 0.1;
 final double opacityBackgroundColor = 0.1;
 final double opacityDisabled = 0.4;

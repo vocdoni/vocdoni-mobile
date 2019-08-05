@@ -69,7 +69,7 @@ class DevUiListItem extends StatelessWidget {
                 rightTextPurpose: Purpose.WARNING,
                 rightTextIsBadge: true),
             ListItem(
-                mainText: "Item with start",
+                mainText: "Item with stars",
                 rightText: "★★★★★",
                 rightTextPurpose: Purpose.WARNING,
                 rightTextIsBadge: false),
