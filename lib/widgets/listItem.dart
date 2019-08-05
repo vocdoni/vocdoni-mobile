@@ -20,6 +20,8 @@ class ListItem extends StatelessWidget {
   final void Function() onLongPress;
   final Purpose purpose;
   final bool disabled;
+  final bool isTitle;
+  final bool isBold;
 
   ListItem(
       {this.mainText,
@@ -36,7 +38,9 @@ class ListItem extends StatelessWidget {
       this.onTap,
       this.onLongPress,
       this.purpose = Purpose.NONE,
-      this.disabled = false});
+      this.disabled = false,
+      this.isTitle = false,
+      this.isBold = false});
 
   @override
   Widget build(context) {
@@ -91,9 +95,9 @@ class ListItem extends StatelessWidget {
         maxLines: mainTextMultiline ? 3 : 1,
         overflow: TextOverflow.ellipsis,
         style: new TextStyle(
-            fontSize: fontSizeBase,
+            fontSize: isTitle?fontSizeTitle:fontSizeBase,
             color: getMainColor(),
-            fontWeight: FontWeight.w400));
+            fontWeight: isBold?fontWeightBold:fontWeightRegular));
   }
 
   buildSecondaryText() {

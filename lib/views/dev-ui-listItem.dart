@@ -14,6 +14,32 @@ class DevUiListItem extends StatelessWidget {
         ),
         body: ListView(
           children: <Widget>[
+            ListItem(
+              mainText: "Someone's name",
+              isTitle: true,
+              isBold: true,
+              rightIcon: FeatherIcons.copy,
+              iconIsSecondary: true,
+              secondaryText:
+                  "0x283471029483710295871892751298370129834710298347102934871029347812034871209438710923487102934701293478",
+            ),
+            ListItem(
+              mainText: "Participation page",
+              isTitle: true,
+              isBold: false,
+              icon: FeatherIcons.mail,
+              iconIsSecondary: true,
+              rightIcon: null,
+              secondaryTextMultiline: true,
+              secondaryText: "A very very long mutiline text that explains what this sections is in",
+            ),
+            ListItem(
+              mainText: "Important  bold item",
+              isBold: true,
+              rightIcon: null,
+              secondaryText:
+                  "0x283471029483710295871892751298370129834710298347102934871029347812034871209438710923487102934701293478",
+            ),
             ListItem(mainText: "Simple item"),
             ListItem(
               mainText: "Item with no chevron",
@@ -28,45 +54,36 @@ class DevUiListItem extends StatelessWidget {
                 rightText: "9323",
                 rightTextIsBadge: true),
             ListItem(
-              mainText: "Item with danger badge",
-              rightText: "!",
-              rightTextPurpose: Purpose.DANGER,
-              rightTextIsBadge: true
-            ),
+                mainText: "Item with danger badge",
+                rightText: "!",
+                rightTextPurpose: Purpose.DANGER,
+                rightTextIsBadge: true),
             ListItem(
-              mainText: "Item with danger badge",
-              rightText: "NEW!",
-              rightTextPurpose: Purpose.HIGHLIGHT,
-              rightTextIsBadge: true
-            ),
+                mainText: "Item with danger badge",
+                rightText: "NEW!",
+                rightTextPurpose: Purpose.HIGHLIGHT,
+                rightTextIsBadge: true),
             ListItem(
-              mainText: "Item with warning badge",
-              rightText: "Review",
-              rightTextPurpose: Purpose.WARNING,
-              rightTextIsBadge: true
-            ),
+                mainText: "Item with warning badge",
+                rightText: "Review",
+                rightTextPurpose: Purpose.WARNING,
+                rightTextIsBadge: true),
             ListItem(
-              mainText: "Item with start",
-              rightText: "★★★★★",
-              rightTextPurpose: Purpose.WARNING,
-              rightTextIsBadge: false
-            ),
+                mainText: "Item with start",
+                rightText: "★★★★★",
+                rightTextPurpose: Purpose.WARNING,
+                rightTextIsBadge: false),
             ListItem(
-              mainText: "Item with right text danger",
-              rightText: "Backup failed!",
-              rightTextPurpose: Purpose.DANGER,
-              rightTextIsBadge: false
-            ),
+                mainText: "Item with right text danger",
+                rightText: "Backup failed!",
+                rightTextPurpose: Purpose.DANGER,
+                rightTextIsBadge: false),
             ListItem(
-              mainText: "Edit suggestion",
-              rightTextPurpose: Purpose.HIGHLIGHT,
-              rightIcon: FeatherIcons.edit2,
-              rightTextIsBadge: false
-            ),
-            ListItem(
-              mainText: "Fire emoji",
-              rightText: "🔥"
-            ),
+                mainText: "Edit suggestion",
+                rightTextPurpose: Purpose.HIGHLIGHT,
+                rightIcon: FeatherIcons.edit2,
+                rightTextIsBadge: false),
+            ListItem(mainText: "Fire emoji", rightText: "🔥"),
             ListItem(
               mainText: "Item with secondary text",
               rightText: "Sat, Aug 3",
@@ -262,6 +279,14 @@ class DevUiListItem extends StatelessWidget {
               secondaryText: "This is a secondary text",
               iconIsSecondary: true,
               rightText: "Sat 3, MOn",
+            ),
+            ListItem(
+              mainText: "This is a title",
+              avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+              iconIsSecondary: true,
+              rightText: "Sat 3, MOn",
+              isTitle: true,
             ),
           ],
         ));

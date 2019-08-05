@@ -17,13 +17,12 @@ class DevUiCard extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          BaseCard(),
           BaseCard(image: headerImg),
           BaseCard(children: [ListItem(mainText: "Hello")]),
           BaseCard(image: headerImg, children: [ListItem(mainText: "Hello")]),
           BaseCard(image: headerImg, children: [
             ListItem(
-              mainText: "Where would you like the next retreat?,",
+              mainText: "Where would you like the next retreat?",
               icon: FeatherIcons.barChart2,
               avatarUrl: avatar,
               secondaryText: "Vocdoni",
@@ -31,6 +30,19 @@ class DevUiCard extends StatelessWidget {
               rightText: "Aug, Mon 2",
             )
           ]),
+
+          BaseCard(image: headerImg, children: [
+            ListItem(
+              mainText: "Where would you like the next retreat?",
+              icon: FeatherIcons.barChart2,
+              avatarUrl: avatar,
+              secondaryText: "Vocdoni",
+              iconIsSecondary: true,
+              rightText: "Aug, Mon 2",
+              isBold: true,
+            )
+          ]),
+
           BaseCard(children: [
             ListItem(
               mainText: "Vocdoni",
@@ -82,6 +94,7 @@ class DevUiCard extends StatelessWidget {
               icon: FeatherIcons.rss,
               rightText: "3",
               rightTextPurpose: Purpose.GUIDE,
+              
             )
           ]),
         ],
