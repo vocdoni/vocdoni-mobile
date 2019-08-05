@@ -22,15 +22,50 @@ class DevUiListItem extends StatelessWidget {
             ListItem(
                 mainText: "Item with default badge",
                 rightText: "3",
-                rightTextStyle: RightTextStyle.BADGE),
+                rightTextIsBadge: true),
             ListItem(
                 mainText: "Item with long badge",
                 rightText: "9323",
-                rightTextStyle: RightTextStyle.BADGE),
+                rightTextIsBadge: true),
             ListItem(
               mainText: "Item with danger badge",
               rightText: "!",
-              rightTextStyle: RightTextStyle.BADGE_DANGER,
+              rightTextPurpose: Purpose.DANGER,
+              rightTextIsBadge: true
+            ),
+            ListItem(
+              mainText: "Item with danger badge",
+              rightText: "NEW!",
+              rightTextPurpose: Purpose.HIGHLIGHT,
+              rightTextIsBadge: true
+            ),
+            ListItem(
+              mainText: "Item with warning badge",
+              rightText: "Review",
+              rightTextPurpose: Purpose.WARNING,
+              rightTextIsBadge: true
+            ),
+            ListItem(
+              mainText: "Item with start",
+              rightText: "★★★★★",
+              rightTextPurpose: Purpose.WARNING,
+              rightTextIsBadge: false
+            ),
+            ListItem(
+              mainText: "Item with right text danger",
+              rightText: "Backup failed!",
+              rightTextPurpose: Purpose.DANGER,
+              rightTextIsBadge: false
+            ),
+            ListItem(
+              mainText: "Edit suggestion",
+              rightTextPurpose: Purpose.HIGHLIGHT,
+              rightIcon: FeatherIcons.edit2,
+              rightTextIsBadge: false
+            ),
+            ListItem(
+              mainText: "Fire emoji",
+              rightText: "🔥"
             ),
             ListItem(
               mainText: "Item with secondary text",
@@ -64,28 +99,28 @@ class DevUiListItem extends StatelessWidget {
               mainText: "Item with DANGER style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
-              itemStyle: ItemStyle.DANGER,
+              purpose: Purpose.DANGER,
               onTap: () {},
             ),
             ListItem(
               mainText: "Item with WARNING style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
-              itemStyle: ItemStyle.WARNING,
+              purpose: Purpose.WARNING,
               onTap: () {},
             ),
             ListItem(
               mainText: "Item with GOOD style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
-              itemStyle: ItemStyle.GOOD,
+              purpose: Purpose.GOOD,
               onTap: () {},
             ),
             ListItem(
               mainText: "Item with HIGHLIGHT style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
-              itemStyle: ItemStyle.HIGHLIGHT,
+              purpose: Purpose.HIGHLIGHT,
               onTap: () {},
             ),
             ListItem(
@@ -99,7 +134,7 @@ class DevUiListItem extends StatelessWidget {
               mainText: "Item disabled with style ",
               rightText: "Sat, Aug 3",
               icon: FeatherIcons.anchor,
-              itemStyle: ItemStyle.HIGHLIGHT,
+              purpose: Purpose.HIGHLIGHT,
               onTap: () {},
               disabled: true,
             ),
@@ -116,12 +151,12 @@ class DevUiListItem extends StatelessWidget {
                 mainText: "Item with default badge",
                 secondaryText: "With secondary text",
                 rightText: "3",
-                rightTextStyle: RightTextStyle.BADGE),
+                rightTextPurpose: Purpose.GUIDE),
             ListItem(
                 mainText: "Item with long badge",
                 secondaryText: "With secondary text",
                 rightText: "9323",
-                rightTextStyle: RightTextStyle.BADGE),
+                rightTextPurpose: Purpose.GUIDE),
             ListItem(
               mainText: "Item with secondary text",
               secondaryText: "With secondary text",
@@ -218,14 +253,15 @@ class DevUiListItem extends StatelessWidget {
 
             ListItem(
               mainText: "Item with avatar and subtitle",
-              //avatarUrl: avatarUrl,
+              avatarUrl: avatarUrl,
               secondaryText: "This is a secondary text",
             ),
             ListItem(
               mainText: "Item with secondary avatar and subtitle ",
-              //avatarUrl: avatarUrl,
+              avatarUrl: avatarUrl,
               secondaryText: "This is a secondary text",
               iconIsSecondary: true,
+              rightText: "Sat 3, MOn",
             ),
           ],
         ));

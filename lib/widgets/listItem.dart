@@ -1,10 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/widgets/avatar.dart';
 
-enum RightTextStyle { DEFAULT, BADGE, BADGE_DANGER, BADGE_HIGHLIGHT }
-enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
+enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String mainText;
@@ -16,10 +14,11 @@ class ListItem extends StatelessWidget {
   final String avatarUrl;
   final IconData rightIcon;
   final String rightText;
-  final RightTextStyle rightTextStyle;
+  final Purpose rightTextPurpose;
+  final bool rightTextIsBadge;
   final void Function() onTap;
   final void Function() onLongPress;
-  final ItemStyle itemStyle;
+  final Purpose purpose;
   final bool disabled;
 
   ListItem(
@@ -32,10 +31,11 @@ class ListItem extends StatelessWidget {
       this.avatarUrl,
       this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
-      this.rightTextStyle = RightTextStyle.DEFAULT,
+      this.rightTextPurpose = Purpose.GUIDE,
+      this.rightTextIsBadge = false,
       this.onTap,
       this.onLongPress,
-      this.itemStyle = ItemStyle.DEFAULT,
+      this.purpose = Purpose.NONE,
       this.disabled = false});
 
   @override
@@ -45,7 +45,7 @@ class ListItem extends StatelessWidget {
         onLongPress: disabled ? null : onLongPress,
         child: Container(
             color: getBackroundColor(),
-            padding: EdgeInsets.fromLTRB(paddingPage, 16, paddingPage, 16),
+            padding: EdgeInsets.fromLTRB(paddingPage, 20, paddingPage, 20),
             child: iconIsSecondary
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,6 +123,7 @@ class ListItem extends StatelessWidget {
               )
             : Container(
                 constraints: BoxConstraints(maxWidth: size, maxHeight: size),
+                //TODO: Apply opacity when disabled
                 child: CircleAvatar(
                   backgroundColor: Colors.transparent, //.brown.shade800,
                   //child: avatarUrl == null ? Text('AH') : null,
@@ -154,7 +155,7 @@ class ListItem extends StatelessWidget {
       constraints: BoxConstraints(
           minWidth: fontSizeSecondary * 2, minHeight: fontSizeSecondary * 2),
       decoration: new BoxDecoration(
-          color: getRightElementBackgroundColor(rightTextStyle),
+          color: getRightElementBackgroundColor(),
           borderRadius:
               new BorderRadius.all(Radius.circular(fontSizeSecondary))),
       child: Text(rightText,
@@ -166,17 +167,13 @@ class ListItem extends StatelessWidget {
   }
 
   Color getMainColor() {
-    Color color = colorDescription;
-    if (itemStyle == ItemStyle.DANGER) color = colorRed;
-    if (itemStyle == ItemStyle.WARNING) color = colorOrange;
-    if (itemStyle == ItemStyle.GOOD) color = colorGreen;
-    if (itemStyle == ItemStyle.HIGHLIGHT) color = colorBlue;
+    Color color = getColorByPurpose(purpose);
     if (disabled) color = color.withOpacity(opacityDisabled);
     return color;
   }
 
   Color getBackroundColor() {
-    if (itemStyle == ItemStyle.DEFAULT) return null;
+    if (purpose == Purpose.NONE || purpose == Purpose.GUIDE) return null;
     return getMainColor().withOpacity(opacityBackgroundColor);
   }
 
@@ -185,14 +182,25 @@ class ListItem extends StatelessWidget {
   }
 
   Color getRightElementColor() {
-    if (rightTextStyle == RightTextStyle.DEFAULT)
+    if (rightTextIsBadge) return Colors.white;
+    if (purpose != Purpose.NONE && purpose != Purpose.GUIDE)
       return getSecondaryElementColor().withOpacity(opacitySecondaryElement);
-    return Colors.white;
+    else
+      return getColorByPurpose(rightTextPurpose);
   }
 
-  Color getRightElementBackgroundColor(RightTextStyle style) {
-    if (style == RightTextStyle.BADGE_DANGER) return colorRed;
-    if (style == RightTextStyle.BADGE) return colorGuide;
-    return Colors.transparent;
+  Color getRightElementBackgroundColor() {
+    if (!rightTextIsBadge) return null;
+    return getColorByPurpose(rightTextPurpose);
+  }
+
+  Color getColorByPurpose(Purpose purpose) {
+    if (purpose == Purpose.NONE) return colorDescription;
+    if (purpose == Purpose.GUIDE) return colorGuide;
+    if (purpose == Purpose.DANGER) return colorRed;
+    if (purpose == Purpose.WARNING) return colorOrange;
+    if (purpose == Purpose.GOOD) return colorGreen;
+    if (purpose == Purpose.HIGHLIGHT) return colorBlue;
+    return colorDescription;
   }
 }
