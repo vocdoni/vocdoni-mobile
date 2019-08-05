@@ -19,7 +19,7 @@ class DevUiListItem extends StatelessWidget {
               isTitle: true,
               isBold: true,
               rightIcon: FeatherIcons.copy,
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               secondaryText:
                   "0x283471029483710295871892751298370129834710298347102934871029347812034871209438710923487102934701293478",
             ),
@@ -28,7 +28,7 @@ class DevUiListItem extends StatelessWidget {
               isTitle: true,
               isBold: false,
               icon: FeatherIcons.mail,
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               rightIcon: null,
               secondaryTextMultiline: true,
               secondaryText: "A very very long mutiline text that explains what this sections is in",
@@ -207,27 +207,27 @@ class DevUiListItem extends StatelessWidget {
                 mainText: "With secondary icon",
                 secondaryText: "With secondary text",
                 secondaryTextMultiline: true,
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With secondary icon",
                 secondaryText: "With very very very very long secondary text",
                 secondaryTextMultiline: true,
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With secondary icon",
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 secondaryTextMultiline: true,
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
 
             ListItem(
                 mainText: "With iconWith secondary icon",
                 secondaryText:
                     "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText:
@@ -235,7 +235,7 @@ class DevUiListItem extends StatelessWidget {
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 secondaryTextMultiline: true,
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
 
             ListItem(
@@ -243,7 +243,7 @@ class DevUiListItem extends StatelessWidget {
                     "Very long main text with more than one line. Bla bla bla bla blan",
                 secondaryText:
                     "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
-                iconIsSecondary: true,
+                mainTextFullWidth: true,
                 secondaryTextMultiline: true,
                 icon: FeatherIcons.anchor),
             ListItem(
@@ -260,7 +260,7 @@ class DevUiListItem extends StatelessWidget {
               mainText: "Item with secondary avatar and subtitle ",
               avatarUrl: avatarUrl,
               secondaryText: "This is a secondary text",
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
             ),
 
             ListItem(
@@ -277,14 +277,14 @@ class DevUiListItem extends StatelessWidget {
               mainText: "Item with secondary avatar and subtitle ",
               avatarUrl: avatarUrl,
               secondaryText: "This is a secondary text",
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               rightText: "Sat 3, MOn",
             ),
             ListItem(
               mainText: "This is a title",
               avatarUrl: avatarUrl,
               secondaryText: "This is a secondary text",
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               rightText: "Sat 3, MOn",
               isTitle: true,
             ),

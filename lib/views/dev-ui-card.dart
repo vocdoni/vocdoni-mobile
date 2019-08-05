@@ -27,7 +27,7 @@ class DevUiCard extends StatelessWidget {
               icon: FeatherIcons.barChart2,
               avatarUrl: avatar,
               secondaryText: "Vocdoni",
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               rightText: "Aug, Mon 2",
             )
           ]),
@@ -37,7 +37,7 @@ class DevUiCard extends StatelessWidget {
               icon: FeatherIcons.barChart2,
               avatarUrl: avatar,
               secondaryText: "Vocdoni",
-              iconIsSecondary: true,
+              mainTextFullWidth: true,
               rightText: "Aug, Mon 2",
               isBold: true,
             )

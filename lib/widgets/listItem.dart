@@ -6,7 +6,7 @@ enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String mainText;
-  final bool iconIsSecondary;
+  final bool mainTextFullWidth;
   final String secondaryText;
   final bool mainTextMultiline;
   final bool secondaryTextMultiline;
@@ -25,7 +25,7 @@ class ListItem extends StatelessWidget {
 
   ListItem(
       {this.mainText,
-      this.iconIsSecondary = false,
+      this.mainTextFullWidth = false,
       this.secondaryText,
       this.mainTextMultiline = true,
       this.secondaryTextMultiline = false,
@@ -50,7 +50,7 @@ class ListItem extends StatelessWidget {
         child: Container(
             color: getBackroundColor(),
             padding: EdgeInsets.fromLTRB(paddingPage, 20, paddingPage, 20),
-            child: iconIsSecondary
+            child: mainTextFullWidth
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -113,7 +113,7 @@ class ListItem extends StatelessWidget {
   buildIcon() {
     if (avatarUrl == null && icon == null) return Container();
 
-    double size = iconIsSecondary || secondaryText == null
+    double size = mainTextFullWidth || secondaryText == null
         ? iconSizeSmall
         : iconSizeMedium;
 
