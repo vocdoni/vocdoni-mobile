@@ -30,7 +30,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
   double hitRadius = 20;
   int toasterDuration = 3;
   Color hitColor = Colors.transparent;
-  Color patternColor = blueColor;
+  Color patternColor = colorBlue;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
       hitColor: hitColor,
       canRepeatDot: false,
       patternColor: patternColor,
-      dotColor: descriptionColor,
+      dotColor: colorDescription,
       canDraw: true,
       onPatternStarted: onPatternStart,
       onPatternStopped: onPatternStop,
@@ -82,7 +82,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
 
   void onPatternStart(BuildContext context) {
     setState(() {
-      patternColor = blueColor;
+      patternColor = colorBlue;
     });
   }
 
@@ -101,7 +101,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
       await appStateBloc.trackAuthAttemp(false);
 
       setState(() {
-        patternColor = redColor;
+        patternColor = colorRed;
       });
 
       // TODO: Do not use this instance of context, because it does not

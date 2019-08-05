@@ -60,7 +60,7 @@ class ActivityPostScreen extends StatelessWidget {
     final uri = uriFromContent(html);
     return Container(
         padding: EdgeInsets.fromLTRB(
-            pagePadding, elementSpacing, pagePadding, elementSpacing),
+            paddingPage, spaceElement, paddingPage, spaceElement),
         width: double.infinity,
         height: 500,
         child: WebView(
@@ -75,7 +75,7 @@ class ActivityPostScreen extends StatelessWidget {
   html2(String htmlBody) {
     return Html(
       data: htmlBody,
-      padding: EdgeInsets.fromLTRB(pagePadding, 0, pagePadding, elementSpacing),
+      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, spaceElement),
       defaultTextStyle: TextStyle(fontSize: 16),
       onLinkTap: (url) => launchUrl(url),
       /*customRender: (node, children) {
@@ -105,7 +105,7 @@ class ActivityPostScreen extends StatelessWidget {
   }
 
   String styleHtml(String content) {
-    String hex = linkColor.value.toRadixString(16);
+    String hex = colorLink.value.toRadixString(16);
     String htmlLinkColor = hex.replaceRange(0, 2, '#');
 
     return '''<!DOCTYPE html>

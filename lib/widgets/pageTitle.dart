@@ -13,7 +13,7 @@ class PageTitle extends StatelessWidget {
     Color c = titleColor == null? titleColor: titleColor;
     return Container(
         padding: EdgeInsets.fromLTRB(
-            pagePadding, elementSpacing, pagePadding, elementSpacing),
+            paddingPage, spaceElement, paddingPage, spaceElement),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -26,7 +26,7 @@ class PageTitle extends StatelessWidget {
               Text(subtitle,
                   style: new TextStyle(
                       fontSize: 16,
-                      color: guideColor,
+                      color: colorGuide,
                       fontWeight: FontWeight.w400)),
             ]));
   }

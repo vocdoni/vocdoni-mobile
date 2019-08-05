@@ -20,7 +20,7 @@ class FeedItemCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.fromLTRB(
-            pagePadding, elementSpacing, pagePadding, elementSpacing),
+            paddingPage, spaceElement, paddingPage, spaceElement),
         child: Card(
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

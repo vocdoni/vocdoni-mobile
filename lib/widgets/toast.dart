@@ -4,7 +4,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:native_widgets/native_widgets.dart';
 
 final toasterTextStyle =
-    TextStyle(fontSize: 14, fontWeight: semiBoldFontWeight);
+    TextStyle(fontSize: 14, fontWeight: fontWeightBold);
 
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
@@ -20,7 +20,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: descriptionColor,
+    backgroundColor: colorDescription,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,
@@ -46,7 +46,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: greenColor,
+    backgroundColor: colorGreen,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,
@@ -72,7 +72,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: redColor,
+    backgroundColor: colorRed,
     duration: Duration(seconds: duration),
     action: SnackBarAction(
       label: buttonText,

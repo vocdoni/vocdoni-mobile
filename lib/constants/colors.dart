@@ -1,34 +1,46 @@
 import 'package:flutter/material.dart';
 
-final Color mainBackgroundColor = Color(0xFF548CFF);
-final Color altBackgroundColor = Color(0xFFE4534D);
-final Color alt2BackgroundColor = Color(0xFFFF682D);
+final double opacitySecondaryElement = 0.7;
+final double opacityDecorationLines = 0.1;
+final double opacityBackgroundColor = 0.1;
+final double opacityDisabled = 0.4;
 
-final Color mainTextColor = Color(0xFFFFFFFF); // white
+final Color colorRed = Color(0xFFFF7C7C);
+final Color colorOrange = Color(0xFFFFA800);
+final Color colorGreen = Color(0xFF66DD55);
+final Color colorBlue = Color(0xFF66BBEF);
 
-final successColor = Color(0xFF25bd5b);
-final dangerColor = altBackgroundColor;
+final Color colorBaseBackground = Color(0xFFF3F0ED);
+final Color colorCardBackround = Colors.white;
+final Color colorDescription = Color(0xFF444444);
+final Color colorGuide = colorDescription.withOpacity(opacitySecondaryElement);
+final Color colorLightGuide =
+    colorDescription.withOpacity(opacityDecorationLines);
 
-final Color baseBackgroundColor = Color(0xFFF3F0ED);
-final Color descriptionColor = Color(0xFF444444);
-final Color guideColor = Color(0xFF888888);
-final Color lightGuideColor = Color(0x66888888);
-final Color titleColor = Color(0xFF000000);
+final Color colorTitle = Color(0xFF000000);
+final Color colorChip = Color(0xFFFFEEBF);
+final Color colorLink = colorBlue;
 
-final Color chipColor = Color(0xFFFFEEBF);
+final double paddingPage = 24;
+final double paddingChip = 4;
+final double paddingButton = 8;
+final double paddingBadge = 10;
+final double paddingIcon = 24;
+final double spaceElement = 12;
+final double spaceCard = 24;
+final double spaceMainAndSecondary = 8;
+final double roundedCornerCard = 10;
 
-final Color blueColor = Color(0xFF66BBEF);
-final Color redColor = Color(0xFFFF7C7C);
-final Color greenColor = Color(0xFF77DD77);
+final double iconSizeTinny = 16;
+final double iconSizeSmall = 24;
+final double iconSizeMedium = 32;
+final double iconSizeLarge = 48;
 
-final Color linkColor = blueColor;
+final double fontSizeTitle = 24;
+final double fontSizeBase = 18;
+final double fontSizeSecondary = 16;
 
-final double pagePadding = 24;
-final double elementSpacing = 12;
-final double chipPadding = 4;
-final double buttonPadding = 8;
-
-final FontWeight lightFontWeight = FontWeight.w300;
-final FontWeight regularFontWeight = FontWeight.w400;
-final FontWeight semiBoldFontWeight = FontWeight.w600;
-final FontWeight boldFontWeight = FontWeight.w700;
+final FontWeight fontWeightLight = FontWeight.w300;
+final FontWeight fontWeightRegular = FontWeight.w400;
+final FontWeight fontWeightSemiBold = FontWeight.w600;
+final FontWeight fontWeightBold = FontWeight.w700;

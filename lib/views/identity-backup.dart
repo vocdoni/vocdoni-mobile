@@ -23,10 +23,10 @@ class MnemonicWord extends StatelessWidget {
       ),
       Container(
         alignment: Alignment(0, 0),
-        padding: EdgeInsets.all(chipPadding),
+        padding: EdgeInsets.all(paddingChip),
         constraints: BoxConstraints(maxWidth: 150, maxHeight: 40),
         decoration: new BoxDecoration(
-            color: chipColor,
+            color: colorChip,
             borderRadius: new BorderRadius.all(const Radius.circular(5.0))),
         child: Text(word, style: TextStyle(fontSize: 14)),
       )
@@ -86,11 +86,11 @@ class IdentityBackupScreen extends StatelessWidget {
               children: [
                 Mnemonic2Columns(mnemonic: words),
                 FlatButton(
-                  color: blueColor,
+                  color: colorBlue,
                   textColor: Colors.white,
                   disabledColor: Colors.grey,
                   disabledTextColor: Colors.black,
-                  padding: EdgeInsets.all(buttonPadding),
+                  padding: EdgeInsets.all(paddingButton),
                   splashColor: Colors.blueAccent,
                   onPressed: () {
                     Navigator.pop(context);

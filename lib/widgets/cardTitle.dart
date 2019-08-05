@@ -17,13 +17,13 @@ class CardTitle extends StatelessWidget {
               Text(subtitle,
                   style: new TextStyle(
                       fontSize: 12,
-                      color: guideColor,
+                      color: colorGuide,
                       fontWeight: FontWeight.w400)),
               SizedBox(height: 8),
               Text(title,
                   style: new TextStyle(
                       fontSize: 16,
-                      color: titleColor,
+                      color: colorTitle,
                       fontWeight: FontWeight.w700)),
             ]));
   }

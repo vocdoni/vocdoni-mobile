@@ -9,10 +9,10 @@ class Section extends StatelessWidget {
 
   @override
   Widget build(context) {
-    Color decorationColor = withDectoration? lightGuideColor:Colors.transparent;
+    Color decorationColor = withDectoration? colorLightGuide:Colors.transparent;
      
     return Container(
-        padding: EdgeInsets.fromLTRB(pagePadding, 24, pagePadding, 16),
+        padding: EdgeInsets.fromLTRB(paddingPage, 24, paddingPage, 16),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -24,7 +24,7 @@ class Section extends StatelessWidget {
                   child: Text(text,
                       style: new TextStyle(
                           fontSize: 16,
-                          color: guideColor,
+                          color: colorGuide,
                           fontWeight: FontWeight.w400))),
               Expanded(
                 child: Container(height: 1, color: decorationColor),

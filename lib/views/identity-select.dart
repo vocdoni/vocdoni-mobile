@@ -35,7 +35,7 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
             children: <Widget>[
               Section(text: "Select an identity"),
               buildExistingIdentities(ctx, identities),
-              ListItem(text: "Create a new one", onTap: () => createNew(ctx)),
+              ListItem(mainText: "Create a new one", onTap: () => createNew(ctx)),
             ],
           ),
         ));
@@ -47,7 +47,7 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
 
     for (var i = 0; i < identities.length; i++) {
       list.add(ListItem(
-        text: identities[i].alias,
+        mainText: identities[i].alias,
         onTap: () => onIdentitySelected(ctx, i),
       ));
     }
