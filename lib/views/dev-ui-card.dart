@@ -9,6 +9,7 @@ class DevUiCard extends StatelessWidget {
   Widget build(ctx) {
     String headerImg =
         "https://images.unsplash.com/photo-1535485654825-17b2e804ba9c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80";
+
     String avatar =
         "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Anonymous_emblem.svg/320px-Anonymous_emblem.svg.png";
     return Scaffold(
@@ -30,7 +31,6 @@ class DevUiCard extends StatelessWidget {
               rightText: "Aug, Mon 2",
             )
           ]),
-
           BaseCard(image: headerImg, children: [
             ListItem(
               mainText: "Where would you like the next retreat?",
@@ -42,7 +42,6 @@ class DevUiCard extends StatelessWidget {
               isBold: true,
             )
           ]),
-
           BaseCard(children: [
             ListItem(
               mainText: "Vocdoni",
@@ -53,21 +52,24 @@ class DevUiCard extends StatelessWidget {
               icon: FeatherIcons.award,
               rightText: "323",
               rightTextPurpose: Purpose.GUIDE,
+              rightTextIsBadge: true,
             ),
             ListItem(
               mainText: "Feed",
               icon: FeatherIcons.mail,
               rightText: "3",
-              rightTextPurpose: Purpose.GUIDE,
+              rightTextPurpose: Purpose.HIGHLIGHT,
+              rightTextIsBadge: true,
             ),
             ListItem(
               mainText: "Participation",
               icon: FeatherIcons.rss,
               rightText: "3",
               rightTextPurpose: Purpose.GUIDE,
+              rightTextIsBadge: true,
             )
           ]),
-          BaseCard (children: [
+          BaseCard(children: [
             ListItem(
               mainText: "Vocdoni",
               avatarUrl: avatar,
@@ -94,9 +96,26 @@ class DevUiCard extends StatelessWidget {
               icon: FeatherIcons.rss,
               rightText: "3",
               rightTextPurpose: Purpose.GUIDE,
-              
-            )
+            ),
           ]),
+          BaseCard(
+            children: [
+              ListItem(
+                mainText: "Alice",
+                avatarUrl:
+                    "https://i.pinimg.com/originals/23/4c/88/234c888d9ffb6955eb440b0d99a37fd1.jpg",
+              )
+            ],
+          ),
+          BaseCard(
+            children: [
+              ListItem(
+                mainText: "Bob",
+                avatarUrl:
+                    "https://i.pinimg.com/236x/bb/16/8f/bb168fccd16e48dc2850377c2203b065--spongebob-birthday-party-th-birthday.jpg",
+              )
+            ],
+          ),
         ],
       ),
     );
