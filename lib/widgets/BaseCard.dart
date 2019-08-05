@@ -9,12 +9,15 @@ class BaseCard extends StatelessWidget {
 
   @override
   Widget build(context) {
-    if (image != null) children.insert(0, buildImage());
-    
+    List<Widget> items = [];
+    if (image != null) items.insert(0, buildImage());
+    if (children != null) items = new List.from(items)..addAll(children);
+
     return Padding(
         padding: EdgeInsets.fromLTRB(
-            paddingPage, spaceCard * 0.5, paddingPage, spaceCard),
+            paddingPage, spaceCard * 0.5, paddingPage, spaceCard * 0.5),
         child: Container(
+          //padding: EdgeInsets.fromLTRB(0, image == null  ? 6 : 0, 0, children != null  ? 6:0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(roundedCornerCard),
             boxShadow: [
@@ -34,7 +37,7 @@ class BaseCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(roundedCornerCard),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children)),
+                  children: items)),
         ));
   }
 
@@ -44,7 +47,7 @@ class BaseCard extends StatelessWidget {
       child: Container(
         child: DecoratedBox(
           decoration: BoxDecoration(
-              color: Color(0xf70094b6),
+              color: Color(0xFFAADDFF),
               image: new DecorationImage(
                   image: new NetworkImage(image), fit: BoxFit.cover)),
         ),

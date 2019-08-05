@@ -31,10 +31,10 @@ final double spaceCard = 24;
 final double spaceMainAndSecondary = 10;
 final double roundedCornerCard = 10;
 
-final double iconSizeTinny = 24;
-final double iconSizeSmall = 32;
-final double iconSizeMedium = 48;
-final double iconSizeLarge = 64;
+final double iconSizeTinny = 16;
+final double iconSizeSmall = 24;
+final double iconSizeMedium = 32;
+final double iconSizeLarge = 48;
 
 final double fontSizeBase = 18;
 final double fontSizeSecondary = 16;

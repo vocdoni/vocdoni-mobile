@@ -3,7 +3,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/avatar.dart';
 
-enum RightTextStyle { DEFAULT, BADGE, BADGE_DANGER }
+enum RightTextStyle { DEFAULT, BADGE, BADGE_DANGER, BADGE_HIGHLIGHT }
 enum ItemStyle { DEFAULT, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
@@ -45,7 +45,7 @@ class ListItem extends StatelessWidget {
         onLongPress: disabled ? null : onLongPress,
         child: Container(
             color: getBackroundColor(),
-            padding: EdgeInsets.all(paddingPage),
+            padding: EdgeInsets.fromLTRB(paddingPage, 16, paddingPage, 16),
             child: iconIsSecondary
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,11 +121,13 @@ class ListItem extends StatelessWidget {
                 color: getMainColor(),
                 size: size,
               )
-            : CircleAvatar(
-                backgroundColor: Colors.transparent,//.brown.shade800,
-                //child: avatarUrl == null ? Text('AH') : null,
-                backgroundImage: NetworkImage(avatarUrl),
-              ));
+            : Container(
+                constraints: BoxConstraints(maxWidth: size, maxHeight: size),
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent, //.brown.shade800,
+                  //child: avatarUrl == null ? Text('AH') : null,
+                  backgroundImage: NetworkImage(avatarUrl),
+                )));
   }
 
   buildRightItem() {
@@ -140,7 +142,7 @@ class ListItem extends StatelessWidget {
       child: Icon(
         rightIcon,
         color: getRightElementColor(),
-        size: iconSizeTinny,
+        size: iconSizeSmall,
       ),
     );
   }
