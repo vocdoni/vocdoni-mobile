@@ -83,6 +83,16 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
     }
   }
 
+  Future<void> remove(String entityIdToRemove) async {
+    final entities = current;
+    entities.removeWhere(
+        (existingEntity) => existingEntity.entityId == entityIdToRemove);
+
+    await set(entities);
+
+    //TODO remove feed from newsFeedBloc
+  }
+
   Future<void> refreshFrom(List<EntitySummary> entities) async {
     // TODO:
     print("Unimplemented: entities > refreshFrom");
