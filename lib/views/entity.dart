@@ -35,22 +35,23 @@ class _EntityInfoState extends State<EntityInfo> {
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, entity)),
+              delegate:
+                  SliverChildListDelegate(getScaffoldChildren(ctx, entity)),
             );
           },
         ));
   }
 
-  getScaffoldChildren(
-    
-      BuildContext context, Entity entity) {
-        bool isSubscribed = identitiesBloc.isSubscribed(identitiesBloc.currentIdentity, entity);
+  getScaffoldChildren(BuildContext context, Entity entity) {
+    Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
     return [
       ListItem(
-        mainText: isSubscribed?"Unsubcribe":"Subscribe",
+        mainText: isSubscribed ? "Unsubcribe" : "Subscribe",
         icon: FeatherIcons.heart,
-        onTap: () => isSubscribed?subscribeToEntity(context, entity):subscribeToEntity(context, entity),
+        onTap: () => isSubscribed
+            ? subscribeToEntity(context, entity)
+            : subscribeToEntity(context, entity),
       ),
       ListItem(
         mainText: "Register",
@@ -70,7 +71,6 @@ class _EntityInfoState extends State<EntityInfo> {
           Navigator.pushNamed(context, "/entity/activity", arguments: entity);
         },
       ),
-
     ];
   }
 
@@ -143,7 +143,8 @@ class _EntityInfoState extends State<EntityInfo> {
     if (accepted == false) return;
 
     try {
-      await identitiesBloc.subscribe(entity);
+      Identity account = identitiesBloc.getCurrentAccount();
+      await identitiesBloc.subscribeEntityToAccount(entity, account);
 
       showMessage(Lang.of(ctx).get("The subscription has been registered"),
           context: ctx);
@@ -159,7 +160,6 @@ class _EntityInfoState extends State<EntityInfo> {
       }
     }
   }
-
 
   goBack(BuildContext ctx) {
     Navigator.pop(ctx, false);

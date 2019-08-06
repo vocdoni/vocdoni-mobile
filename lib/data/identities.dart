@@ -104,59 +104,85 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     set(super.current);
   }
 
-  Identity get currentIdentity {
-    return identitiesBloc.current[appStateBloc.current.selectedIdentity];
+  Identity getCurrentAccount() {
+    if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
+      throw FlutterError("Invalid selectedIdentity: out of bounds");
+
+    final identity =
+        identitiesBloc.current[appStateBloc.current.selectedIdentity];
+    if (!(identity is List<Identity>))
+      throw FlutterError("The current account is invalid");
+    return identity;
   }
 
-  bool isSubscribed(Identity identity, Entity entity) {
-    return identity.peers.entities.any((existingEntitiy) {
+  setCurrentAccount(Identity account) async {
+    final identitiesValue = identitiesBloc.current;
+    identitiesValue[appStateBloc.current.selectedIdentity] = account;
+    await set(identitiesValue);
+  }
+
+  makeEntitySummaryFromEntity(Entity entity) {
+    EntitySummary summary = EntitySummary();
+    summary.entityId = entity.entityId;
+    summary.resolverAddress = entity.contracts.resolverAddress;
+    summary.networkId = entity.contracts.networkId;
+    summary.entryPoints.addAll(entity.meta["entryPoints"] ?? []);
+    return summary;
+  }
+
+  addEntityPeerToAccount(EntitySummary es, Identity account) {
+    Identity_Peers peers = Identity_Peers();
+    peers.entities.addAll(account.peers.entities.followedBy([es]));
+    peers.identities.addAll(account.peers.identities);
+    account.peers = peers;
+  }
+
+  removeEntityPeerFromAccount(String entityIdToRemove, Identity account) {
+    Identity_Peers peers = Identity_Peers();
+    peers.entities.addAll(account.peers.entities);
+    peers.entities.removeWhere(
+        (existingEntity) => existingEntity.entityId == entityIdToRemove);
+    peers.identities.addAll(account.peers.identities);
+    account.peers = peers;
+  }
+
+  bool isSubscribed(Identity account, Entity entity) {
+    return account.peers.entities.any((existingEntitiy) {
       return entity.entityId == existingEntitiy.entityId;
     });
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribe(Entity newEntity) async {
-    if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
-      throw FlutterError("Invalid selectedIdentity: out of bounds");
-
+  subscribeEntityToAccount(Entity newEntity, Identity account) async {
     // Add the entity to the global registry if it does not exist
     await entitiesBloc.add(newEntity);
 
-    // Add the summary of the entity to the current identity
-    final currentIdentities = identitiesBloc.current;
-
-    final currentIdentity =
-        currentIdentities[appStateBloc.current.selectedIdentity];
-    if (!(currentIdentity is List<Identity>))
-      throw FlutterError("The current account is invalid");
-
-    final already = currentIdentity.peers.entities.any((entity) {
-      return entity.entityId == newEntity.entityId;
-    });
-    if (already)
+    if (isSubscribed(account, newEntity))
       throw FlutterError("You are already subscribed to this entity");
 
-    EntitySummary es = EntitySummary();
-    es.entityId = newEntity.entityId;
-    es.resolverAddress = newEntity.contracts.resolverAddress;
-    es.networkId = newEntity.contracts.networkId;
-    es.entryPoints.addAll(newEntity.meta["entryPoints"] ?? []);
-
-    // Update existing identities
-    Identity_Peers newPeers = Identity_Peers();
-    newPeers.entities.addAll(currentIdentity.peers.entities.followedBy([es]));
-    newPeers.identities.addAll(currentIdentity.peers.identities);
-    currentIdentity.peers = newPeers;
-
-    currentIdentities[appStateBloc.current.selectedIdentity] = currentIdentity;
-    await set(currentIdentities);
+    EntitySummary entitySummary = makeEntitySummaryFromEntity(newEntity);
+    addEntityPeerToAccount(entitySummary, account);
+    setCurrentAccount(account);
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribe(Entity entity) async {
+  unsubscribeEntityFromAccount(Entity entity, Identity account) async {
     // TODO: Remove the entity summary from the identity
+    removeEntityPeerFromAccount(entity.entityId, account);
+
     // TODO: Check if other identities are also subscribed
+    bool subcribedInOtherAccounts = false;
+    for (final existingAccount in identitiesBloc.current) {
+      if (isSubscribed(existingAccount, entity)) {
+        subcribedInOtherAccounts = true;
+        break;
+      }
+    }
+
     // TODO: Remove the full entity if not used elsewhere
     // TODO: Remove the entity feeds if not used elsewhere
+    if (!subcribedInOtherAccounts) {
+      await entitiesBloc.remove(entity.entityId);
+    }
   }
 }
