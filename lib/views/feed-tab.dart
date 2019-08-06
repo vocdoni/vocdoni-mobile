@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/activity-post.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
-import 'package:vocdoni/widgets/feedItemCard.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:intl/intl.dart';
