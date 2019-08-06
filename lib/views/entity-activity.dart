@@ -2,14 +2,15 @@ import "dart:convert";
 import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/widgets/feedItemCard.dart';
+import 'package:vocdoni/widgets/BaseCard.dart';
+import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
+import 'package:intl/intl.dart';
 
 import 'activity-post.dart';
 
@@ -44,9 +45,19 @@ class _EntityActivityState extends State<EntityActivity> {
         itemCount: feed.items.length,
         itemBuilder: (BuildContext context, int index) {
           final FeedPost post = feed.items[index];
-          return FeedItemCard(
-            post: post,
-            onTap: () => onTapItem(context, post),
+          return BaseCard(
+            image: post.image,
+            children: <Widget>[
+              ListItem(
+                mainText: post.title,
+                mainTextFullWidth: true,
+                secondaryText: entity.name[entity.languages[0]],
+                avatarUrl: entity.media.avatar,
+                rightText: DateFormat('MMMM dd')
+                    .format(DateTime.parse(post.datePublished).toLocal()),
+                onTap: () => onTapItem(context, post),
+              )
+            ],
           );
         },
       ),

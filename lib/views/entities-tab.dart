@@ -45,7 +45,10 @@ class EntitiesTab extends StatelessWidget {
                 icon: FeatherIcons.rss,
                 rightText: entity.newsFeed.entries.length.toString(),
                 rightTextIsBadge: true,
-                onTap: () => onTapEntity(ctx, entity),
+                onTap: () {
+                  Navigator.pushNamed(ctx, "/entity/activity",
+                      arguments: entity);
+                },
                 disabled: entity.newsFeed.entries.length == 0),
             ListItem(
                 mainText: "Participation",
