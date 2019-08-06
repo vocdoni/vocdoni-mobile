@@ -104,6 +104,16 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     set(super.current);
   }
 
+  Identity get currentIdentity {
+    return identitiesBloc.current[appStateBloc.current.selectedIdentity];
+  }
+
+  bool isSubscribed(Identity identity, Entity entity) {
+    return identity.peers.entities.any((existingEntitiy) {
+      return entity.entityId == existingEntitiy.entityId;
+    });
+  }
+
   /// Register the given organization as a subscribtion of the currently selected identity
   subscribe(Entity newEntity) async {
     if (super.state.value.length <= appStateBloc.current?.selectedIdentity)

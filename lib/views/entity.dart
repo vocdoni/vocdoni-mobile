@@ -1,10 +1,8 @@
-// import 'dart:io';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
-// import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -28,18 +26,6 @@ class _EntityInfoState extends State<EntityInfo> {
     final Entity entity = ModalRoute.of(context).settings.arguments;
     if (entity == null) return buildEmptyEntity(context);
 
-    bool alreadySubscribed = false;
-    if (appStateBloc.current != null &&
-        appStateBloc.current.selectedIdentity >= 0) {
-      final Identity currentIdentity =
-          identitiesBloc.current[appStateBloc.current.selectedIdentity];
-      if (currentIdentity != null &&
-          currentIdentity.peers.entities.length > 0) {
-        alreadySubscribed = currentIdentity.peers.entities
-            .any((o) => o.entityId == entity.entityId);
-      }
-    }
-
     return ScaffoldWithImage(
         headerImageUrl: entity.media.header,
         title: entity.name[entity.languages[0]] ?? "(entity)",
@@ -50,36 +36,41 @@ class _EntityInfoState extends State<EntityInfo> {
           builder: (ctx) {
             return SliverList(
               delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, entity, alreadySubscribed)),
+                  getScaffoldChildren(ctx, entity)),
             );
           },
         ));
   }
 
   getScaffoldChildren(
-      BuildContext context, Entity entity, bool alreadySubscribed) {
+    
+      BuildContext context, Entity entity) {
+        bool isSubscribed = identitiesBloc.isSubscribed(identitiesBloc.currentIdentity, entity);
     return [
+      ListItem(
+        mainText: isSubscribed?"Unsubcribe":"Subscribe",
+        icon: FeatherIcons.heart,
+        onTap: () => isSubscribed?subscribeToEntity(context, entity):subscribeToEntity(context, entity),
+      ),
+      ListItem(
+        mainText: "Register",
+        secondaryText: "It gives you acess to the voting processess",
+        secondaryTextMultiline: true,
+        icon: FeatherIcons.plus,
+        onTap: () => subscribeToEntity(context, entity),
+      ),
       Section(text: "Description"),
       Summary(
         text: entity.description[entity.languages[0]],
         maxLines: 5,
       ),
-      Section(text: "Actions"),
-      /*  ListItem(
-        text: "Subscribe",
-        onTap: () => subscribeToEntity(context, entity),
-      ), */
       ListItem(
         mainText: "Activity",
         onTap: () {
           Navigator.pushNamed(context, "/entity/activity", arguments: entity);
         },
       ),
-      (alreadySubscribed
-          ? buildAlreadySubscribed(context, entity) // CUSTOM ACTIONS
-          : buildSubscriptionTiles(context, entity) // SUBSCRIBE
 
-      ),
     ];
   }
 
@@ -98,7 +89,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
   /// ALREADY REGISTERED CONTENT
 
-  Widget buildAlreadySubscribed(BuildContext ctx, Entity entity) {
+  Widget buildActionList(BuildContext ctx, Entity entity) {
     // TODO: Handle all actions
     final List<Widget> actions = entity.actions
         .map((action) {
@@ -142,33 +133,6 @@ class _EntityInfoState extends State<EntityInfo> {
 
   /// PROMPT TO SUBSCRIBE
 
-  Widget buildSubscriptionTiles(BuildContext ctx, Entity entity) {
-    return Column(children: <Widget>[
-      ListItem(
-        mainText: "Subscribe",
-        onTap: () => subscribeToEntity(ctx, entity),
-      ),
-      SizedBox(height: 40),
-      Text(
-        Lang.of(ctx).get("You are about to subscribe to:"),
-        textAlign: TextAlign.center,
-      ),
-      Text(
-        entity.name[entity.languages[0]] ?? "(entity)",
-        textAlign: TextAlign.center,
-      ),
-      SizedBox(height: 20),
-      Text(
-        Lang.of(ctx).get("Using the identity:"),
-        textAlign: TextAlign.center,
-      ),
-      Text(
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
-        textAlign: TextAlign.center,
-      )
-    ]);
-  }
-
   subscribeToEntity(BuildContext ctx, Entity entity) async {
     final accepted = await showPrompt(
         context: ctx,
@@ -195,6 +159,7 @@ class _EntityInfoState extends State<EntityInfo> {
       }
     }
   }
+
 
   goBack(BuildContext ctx) {
     Navigator.pop(ctx, false);
