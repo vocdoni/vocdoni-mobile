@@ -10,7 +10,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
     {bool global,
     BuildContext context,
-    String buttonText = "OK",
     int duration = 6,
     Function onPressed}) {
   if (text == null) throw FlutterError("No text");
@@ -22,11 +21,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     ),
     backgroundColor: colorDescription,
     duration: Duration(seconds: duration),
-    action: SnackBarAction(
-      label: buttonText,
-      textColor: Colors.white,
-      onPressed: onPressed ?? () {},
-    ),
   );
 
   return _displaySnackBar(snackBar, global: global, context: context);
@@ -36,7 +30,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
     String text,
     {bool global,
     BuildContext context,
-    String buttonText = "OK",
     int duration = 6,
     Function onPressed}) {
   if (text == null) throw FlutterError("No text");
@@ -48,11 +41,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
     ),
     backgroundColor: colorGreen,
     duration: Duration(seconds: duration),
-    action: SnackBarAction(
-      label: buttonText,
-      textColor: Colors.white,
-      onPressed: onPressed ?? () {},
-    ),
   );
 
   return _displaySnackBar(snackBar, global: global, context: context);
@@ -62,7 +50,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
     String text,
     {bool global,
     BuildContext context,
-    String buttonText = "OK",
     int duration = 10,
     Function onPressed}) {
   if (text == null) throw FlutterError("No text");
@@ -74,11 +61,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
     ),
     backgroundColor: colorRed,
     duration: Duration(seconds: duration),
-    action: SnackBarAction(
-      label: buttonText,
-      textColor: Colors.white,
-      onPressed: onPressed ?? () {},
-    ),
   );
 
   return _displaySnackBar(snackBar, global: global, context: context);

@@ -138,7 +138,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
     debugPrint(pattern.length.toString());
     if (pattern.length < minPatternDots) {
       showErrorMessage("The pattern must have at least $minPatternDots points",
-          context: context, duration: toasterDuration, buttonText: "");
+          context: context, duration: toasterDuration );
       setState(() {
         patternColor = colorRed;
       });
