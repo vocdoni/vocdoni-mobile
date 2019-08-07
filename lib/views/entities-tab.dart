@@ -24,11 +24,15 @@ class EntitiesTab extends StatelessWidget {
         identities[appState.selectedIdentity].peers.entities.length == 0)
       return buildNoEntities(ctx);
 
-    int selectedIdentity = appState.selectedIdentity;
-    entities = identities[selectedIdentity].peers.entities.map((e) {
-      return entitiesBloc.current
-          .firstWhere((entity) => entity.entityId == e.entityId);
-    }).toList();
+    Identity account = identitiesBloc.getCurrentAccount();
+
+    account.peers.entities.forEach((entitySummary) {
+      for (Entity entity in entitiesBloc.current)
+        if (entity.entityId == entitySummary.entityId) {
+          entities.add(entity);
+        }
+    });
+
     if (entities.length == 0) return buildNoEntities(ctx);
 
     return ListView.builder(
