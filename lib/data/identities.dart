@@ -110,7 +110,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
 
     final identity =
         identitiesBloc.current[appStateBloc.current.selectedIdentity];
-    if (!(identity is List<Identity>))
+    if (!(identity is Identity))
       throw FlutterError("The current account is invalid");
     return identity;
   }
