@@ -288,6 +288,15 @@ class DevUiListItem extends StatelessWidget {
               rightText: "Sat 3, MOn",
               isTitle: true,
             ),
+            ListItem(
+              mainText: "This is disabled item with avatar",
+              avatarUrl: avatarUrl,
+              secondaryText: "This is a secondary text",
+              mainTextFullWidth: false,
+              rightText: "Sat 3, MOn",
+              isTitle: true,
+              disabled: true,
+            )
           ],
         ));
   }
