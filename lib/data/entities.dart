@@ -75,8 +75,8 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       currentEntities[currentIndex] = newEntity;
       await set(currentEntities);
     } else {
-      // Add it
-      await set(current.followedBy([newEntity]));
+      current.add(newEntity);
+      await set(current);
 
       // Fetch the news feeds if needed
       await newsFeedsBloc.fetchFromEntity(newEntity);

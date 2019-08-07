@@ -130,9 +130,10 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     return summary;
   }
 
-  addEntityPeerToAccount(EntitySummary es, Identity account) {
+  addEntityPeerToAccount(EntitySummary entitySummary, Identity account) {
     Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(account.peers.entities.followedBy([es]));
+    peers.entities.addAll(account.peers.entities);
+    peers.entities.add(entitySummary);
     peers.identities.addAll(account.peers.identities);
     account.peers = peers;
   }
