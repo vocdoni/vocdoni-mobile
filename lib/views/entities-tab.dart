@@ -39,6 +39,7 @@ class EntitiesTab extends StatelessWidget {
         itemCount: entities.length,
         itemBuilder: (BuildContext ctxt, int index) {
           final entity = entities[index];
+          final feedPostAmount = getFeedPostAmount(entity);
           return BaseCard(children: [
             ListItem(
                 mainText: entity.name[entity.languages[0]],
@@ -47,13 +48,13 @@ class EntitiesTab extends StatelessWidget {
             ListItem(
                 mainText: "Feed",
                 icon: FeatherIcons.rss,
-                rightText: entity.newsFeed.entries.length.toString(),
+                rightText: feedPostAmount.toString(),
                 rightTextIsBadge: true,
                 onTap: () {
                   Navigator.pushNamed(ctx, "/entity/activity",
                       arguments: entity);
                 },
-                disabled: entity.newsFeed.entries.length == 0),
+                disabled: feedPostAmount==0 ),
             ListItem(
                 mainText: "Participation",
                 icon: FeatherIcons.mail,
@@ -63,6 +64,12 @@ class EntitiesTab extends StatelessWidget {
                 disabled: entity.votingProcesses.active.length == 0)
           ]);
         });
+  }
+
+  int getFeedPostAmount(Entity entity)
+  {
+    //TODO Refactor NewsFeedBloc
+    return 10;
   }
 
   Widget buildNoEntities(BuildContext ctx) {
