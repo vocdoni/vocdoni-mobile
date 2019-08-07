@@ -4,7 +4,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:native_widgets/native_widgets.dart';
 
 final toasterTextStyle =
-    TextStyle(fontSize: 14, fontWeight: fontWeightBold);
+    TextStyle(fontSize: fontSizeBase, fontWeight: fontWeightRegular);
 
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,

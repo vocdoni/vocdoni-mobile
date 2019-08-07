@@ -47,11 +47,11 @@ class _EntityInfoState extends State<EntityInfo> {
     Identity account = identitiesBloc.getCurrentAccount();
     bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
     String subscribeText = isSubscribed ? "Unsubcribe" : "Subscribe";
-    subscribeText = processingSubscription ? "Processing" : subscribeText;
     return [
       ListItem(
         mainText: subscribeText,
         icon: FeatherIcons.heart,
+        disabled: processingSubscription,
         onTap: () => isSubscribed
             ? unsubscribeFromEntity(context, entity)
             : subscribeToEntity(context, entity),
@@ -142,6 +142,8 @@ class _EntityInfoState extends State<EntityInfo> {
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
+    showSuccessMessage(Lang.of(ctx).get("You are no longer subscribed"),
+          context: ctx);
     setState(() {
       processingSubscription = false;
     });
@@ -156,15 +158,15 @@ class _EntityInfoState extends State<EntityInfo> {
       Identity account = identitiesBloc.getCurrentAccount();
       await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showMessage(Lang.of(ctx).get("The subscription has been registered"),
+      showSuccessMessage(Lang.of(ctx).get("You are now subscribed"),
           context: ctx);
     } catch (err) {
       if (err == "Already subscribed") {
-        showMessage(
+        showErrorMessage(
             Lang.of(ctx).get("You are already subscribed to this entity"),
             context: ctx);
       } else {
-        showMessage(
+        showErrorMessage(
             Lang.of(ctx).get("The subscription could not be registered"),
             context: ctx);
       }
