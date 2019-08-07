@@ -21,6 +21,7 @@ class EntityInfo extends StatefulWidget {
 
 class _EntityInfoState extends State<EntityInfo> {
   bool collapsed = false;
+  bool processingSubscription = false;
   @override
   Widget build(context) {
     final Entity entity = ModalRoute.of(context).settings.arguments;
@@ -45,12 +46,14 @@ class _EntityInfoState extends State<EntityInfo> {
   getScaffoldChildren(BuildContext context, Entity entity) {
     Identity account = identitiesBloc.getCurrentAccount();
     bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+    String subscribeText = isSubscribed ? "Unsubcribe" : "Subscribe";
+    subscribeText = processingSubscription ? "Processing" : subscribeText;
     return [
       ListItem(
-        mainText: isSubscribed ? "Unsubcribe" : "Subscribe",
+        mainText: subscribeText,
         icon: FeatherIcons.heart,
         onTap: () => isSubscribed
-            ? subscribeToEntity(context, entity)
+            ? unsubscribeFromEntity(context, entity)
             : subscribeToEntity(context, entity),
       ),
       ListItem(
@@ -132,15 +135,22 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   /// PROMPT TO SUBSCRIBE
+  ///
+  unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
+    setState(() {
+      processingSubscription = true;
+    });
+    Identity account = identitiesBloc.getCurrentAccount();
+    await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
+    setState(() {
+      processingSubscription = false;
+    });
+  }
 
   subscribeToEntity(BuildContext ctx, Entity entity) async {
-    final accepted = await showPrompt(
-        context: ctx,
-        title: Lang.of(ctx).get("Entity"),
-        text: Lang.of(ctx).get("Do you want to subscribe to the entity?"),
-        okButton: Lang.of(ctx).get("Subscribe"));
-
-    if (accepted == false) return;
+    setState(() {
+      processingSubscription = true;
+    });
 
     try {
       Identity account = identitiesBloc.getCurrentAccount();
@@ -159,6 +169,9 @@ class _EntityInfoState extends State<EntityInfo> {
             context: ctx);
       }
     }
+    setState(() {
+      processingSubscription = false;
+    });
   }
 
   goBack(BuildContext ctx) {
