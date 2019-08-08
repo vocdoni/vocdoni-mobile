@@ -1,10 +1,10 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-// import 'package:vocdoni/modals/pattern-create-modal.dart';
+import 'package:flutter/services.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -21,16 +21,20 @@ class IdentityTab extends StatelessWidget {
     if (appState == null || identities == null || identities.length == null)
       return buildEmpty(ctx);
 
+    Identity account = identitiesBloc.getCurrentAccount();
+
     return ListView(
       children: <Widget>[
-        PageTitle(
-          title: appState != null && identities.length > 0
-              ? identities[appState.selectedIdentity].alias
-              : "",
-          subtitle: appState != null && identities.length > 0
-              ? identities[appState.selectedIdentity].identityId
-              : "",
-        ),
+        ListItem(
+            mainText: account.alias,
+            secondaryText: account.identityId,
+            isTitle: true,
+            isBold: true,
+            rightIcon: FeatherIcons.copy,
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: account.identityId));
+              showSuccessMessage("Identity ID copied on the clipboard", context: ctxgi);
+            }),
         Section(text: "Your identity"),
         ListItem(
           mainText: "Back up my identity",
@@ -44,10 +48,10 @@ class IdentityTab extends StatelessWidget {
         kReleaseMode // TODO: DEV BUTTON OUT
             ? Container()
             : ListItem(
-            mainText: "Development testing",
-            onTap: () {
-              onDevelopmentTesting(ctx);
-            })
+                mainText: "Development testing",
+                onTap: () {
+                  onDevelopmentTesting(ctx);
+                })
       ],
     );
   }
