@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
+import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:native_widgets/native_widgets.dart';
+import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/util/net.dart';
 
@@ -138,7 +140,7 @@ class _WebActionState extends State<WebAction> {
     final payload = message["payload"];
     if (!(payload is Map)) return null;
 
-    switch (payload["type"]) {
+    switch (payload["method"]) {
       case "getPublicKey":
         // ASK FOR PERMISSION
         // hasPublicReadPermission may be null
@@ -150,16 +152,44 @@ class _WebActionState extends State<WebAction> {
               context: context);
         }
 
+        // TODO: ADAPT THE CODE FOR USE WITH I3
+
         if (hasPublicReadPermission != true) // may be null as well
           return respondError(id, "Permission declined");
+        else if (identitiesBloc
+                .current[appStateBloc.current.selectedIdentity].keys.length <
+            1)
+          return respondError(
+              id, "The current identity doesn't have a public key");
 
-        // GET THE PUBLIC KEY
-        // TODO: USE A REAL PUBLIC KEY
-        final publicKey = identitiesBloc
-            .current[appStateBloc.current.selectedIdentity].identityId;
+        final identity =
+            identitiesBloc.current[appStateBloc.current.selectedIdentity];
+        final publicKey = identity.keys[0].publicKey;
 
         return respond(id, '''
             handleHostResponse(JSON.stringify({id: $id, data: "$publicKey" }));
+        ''');
+
+      case "signPayload":
+        final identity =
+            identitiesBloc.current[appStateBloc.current.selectedIdentity];
+        final encryptedPrivateKey = identity.keys[0].encryptedPrivateKey;
+
+        var result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (context) => PaternPromptModal(encryptedPrivateKey)));
+        if (result == null || result is InvalidPatternError) {
+          return respondError(id, "The pattern you entered is not valid");
+        }
+
+        String privateKey = await decryptString(encryptedPrivateKey, result);
+        final signature = await signString(payload["payload"], privateKey);
+        privateKey = "";
+
+        return respond(id, '''
+            handleHostResponse(JSON.stringify({id: $id, data: "$signature" }));
         ''');
 
       case "getLanguage":
@@ -174,7 +204,7 @@ class _WebActionState extends State<WebAction> {
 
       default:
         return respondError(
-            id, "Unsupported action type: '${payload["type"]}'");
+            id, "Unsupported action type: '${payload["method"]}'");
     }
   }
 
