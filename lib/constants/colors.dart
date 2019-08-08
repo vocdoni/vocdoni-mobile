@@ -10,6 +10,12 @@ final Color colorOrange = Color(0xFFFFA800);
 final Color colorGreen = Color(0xFF66DD55);
 final Color colorBlue = Color(0xFF66BBEF);
 
+final Color colorRedPale = Color(0xFFFF8282);
+final Color colorOrangePale = Color(0xFFFFBE3F);
+final Color colorGreenPale = Color(0xFFAADD77);
+final Color colorBluePale = Color(0xFF99CCEE);
+final Color colorDescriptionPale = Color(0xFFB4B0AD);
+
 final Color colorBaseBackground = Color(0xFFF3F0ED);
 final Color colorCardBackround = Colors.white;
 final Color colorDescription = Color(0xFF444444);
@@ -47,12 +53,21 @@ final FontWeight fontWeightBold = FontWeight.w700;
 
 enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
-Color getColorByPurpose(Purpose purpose) {
+Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
+  if (isPale) {
+    if (purpose == Purpose.NONE) return colorDescriptionPale;
+    if (purpose == Purpose.GUIDE) return colorDescriptionPale;
+    if (purpose == Purpose.DANGER) return colorRedPale;
+    if (purpose == Purpose.WARNING) return colorOrangePale;
+    if (purpose == Purpose.GOOD) return colorGreenPale;
+    if (purpose == Purpose.HIGHLIGHT) return colorBluePale;
+  } else {
     if (purpose == Purpose.NONE) return colorDescription;
     if (purpose == Purpose.GUIDE) return colorGuide;
     if (purpose == Purpose.DANGER) return colorRed;
     if (purpose == Purpose.WARNING) return colorOrange;
     if (purpose == Purpose.GOOD) return colorGreen;
     if (purpose == Purpose.HIGHLIGHT) return colorBlue;
-    return colorDescription;
   }
+  return colorDescription;
+}
