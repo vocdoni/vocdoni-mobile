@@ -10,6 +10,8 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
+import 'package:http/http.dart' as http;
+
 
 import 'package:dvote/dvote.dart' show Entity;
 
@@ -21,10 +23,19 @@ class EntityInfo extends StatefulWidget {
 class _EntityInfoState extends State<EntityInfo> {
   bool collapsed = false;
   bool processingSubscription = false;
+  List<Entity_Action> actionsToDisplay = [];
+  bool actionsLoading = false;
+
   @override
   Widget build(context) {
     final Entity entity = ModalRoute.of(context).settings.arguments;
     if (entity == null) return buildEmptyEntity(context);
+
+    if(!actionsLoading)
+    {
+      setActionsToDisplay(context, entity);
+      actionsLoading = true;
+    }
 
     return ScaffoldWithImage(
         headerImageUrl: entity.media.header,
@@ -46,19 +57,19 @@ class _EntityInfoState extends State<EntityInfo> {
     List<Widget> children = [];
     children.add(buildSubscribeItem(context, entity));
     children.addAll(buildActionList(context, entity));
-    children.add( ListItem(
-        icon: FeatherIcons.rss,
-        mainText: "Feed",
-        onTap: () {
-          Navigator.pushNamed(context, "/entity/activity", arguments: entity);
-        },
-      ));
+    children.add(ListItem(
+      icon: FeatherIcons.rss,
+      mainText: "Feed",
+      onTap: () {
+        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
+      },
+    ));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: entity.description[entity.languages[0]],
       maxLines: 5,
     ));
-      return children;
+    return children;
   }
 
   buildSubscribeItem(BuildContext context, Entity entity) {
@@ -69,13 +80,38 @@ class _EntityInfoState extends State<EntityInfo> {
       mainText: subscribeText,
       icon: FeatherIcons.heart,
       disabled: processingSubscription,
-      rightIcon: isSubscribed?FeatherIcons.check:null,
-      rightTextPurpose: isSubscribed?Purpose.GOOD:null,
-     // purpose: Purpose.HIGHLIGHT,
+      rightIcon: isSubscribed ? FeatherIcons.check : null,
+      rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
+      // purpose: Purpose.HIGHLIGHT,
       onTap: () => isSubscribed
           ? unsubscribeFromEntity(context, entity)
           : subscribeToEntity(context, entity),
     );
+  }
+
+  dynamic sign(String payload) async {
+    //TODO
+    return "";
+  }
+
+  Future<bool> actionIsVisible(Entity_Action action) async {
+    if (action.visible == null) return true;
+
+    if (action.visible == "always") return true;
+
+    String publicKey = identitiesBloc.getCurrentAccount().identityId;
+    int timestamp = new DateTime.now().millisecondsSinceEpoch;
+    dynamic payload = {
+      'publicKey': publicKey,
+      'signature': sign(timestamp.toString())
+    };
+
+    var response = await http.post(action.visible, body: payload);
+    if (response.statusCode != 200) return false;
+
+    if (response.body == "true") return true;
+
+    return false;
   }
 
   Widget buildEmptyEntity(BuildContext ctx) {
@@ -88,42 +124,22 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
+  Future<List<ListItem>> setActionsToDisplay(
+      BuildContext ctx, Entity entity) async {
+    final List<ListItem> actionsToShow = [];
+
+    for (Entity_Action action in entity.actions) {
+      var show = await actionIsVisible(action);
+      setState(() {
+        actionsToDisplay.add(action);
+      });
+    }
+  }
+
   List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
-    final List<ListItem> actions = entity.actions
-        .map((action) {
-          if (action.type == "browser") {
-            if (!(action.name is Map) ||
-                !(action.name[entity.languages[0]] is String)) return null;
-            return ListItem(
-              icon: FeatherIcons.arrowRightCircle,
-              mainText: action.name[entity.languages[0]],
-              onTap: () {
-                final String url = action.url;
-                final String title = action.name[entity.languages[0]] ??
-                    entity.name[entity.languages[0]];
+    final List<ListItem> actionsToShow = [];
 
-                final route = MaterialPageRoute(
-                    builder: (context) => WebAction(
-                          url: url,
-                          title: title,
-                        ));
-                Navigator.push(ctx, route);
-              },
-            );
-          } else {
-            return ListItem(
-              mainText: action.name[entity.languages[0]],
-              secondaryText: "Action type not supported yet: " + action.type,
-              icon: FeatherIcons.helpCircle,
-              disabled: true,
-            );
-          }
-        })
-        .toList()
-        .where((w) => w != null)
-        .toList();
-
-    if (actions.length == 0)
+    if (actionsToDisplay.length == 0)
       return [
         ListItem(
           mainText: "No Actions definied",
@@ -133,7 +149,42 @@ class _EntityInfoState extends State<EntityInfo> {
         )
       ];
 
-    return actions;
+    for (Entity_Action action in actionsToDisplay) {
+      ListItem item;
+      if (action.type == "browser") {
+        if (!(action.name is Map) ||
+            !(action.name[entity.languages[0]] is String)) return null;
+
+        item = ListItem(
+          icon: FeatherIcons.arrowRightCircle,
+          mainText: action.name[entity.languages[0]],
+          secondaryText: action.visible,
+          onTap: () {
+            final String url = action.url;
+            final String title = action.name[entity.languages[0]] ??
+                entity.name[entity.languages[0]];
+
+            final route = MaterialPageRoute(
+                builder: (context) => WebAction(
+                      url: url,
+                      title: title,
+                    ));
+            Navigator.push(ctx, route);
+          },
+        );
+      } else {
+        item = ListItem(
+          mainText: action.name[entity.languages[0]],
+          secondaryText: "Action type not supported yet: " + action.type,
+          icon: FeatherIcons.helpCircle,
+          disabled: true,
+        );
+      }
+
+      actionsToShow.add(item);
+    }
+
+    return actionsToShow;
   }
 
   unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
