@@ -11,7 +11,8 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     {bool global,
     BuildContext context,
     int duration = 6,
-    Function onPressed}) {
+    Function onPressed,
+    Purpose purpose = Purpose.NONE}) {
   if (text == null) throw FlutterError("No text");
 
   final snackBar = SnackBar(
@@ -19,47 +20,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: colorDescription,
-    duration: Duration(seconds: duration),
-  );
-
-  return _displaySnackBar(snackBar, global: global, context: context);
-}
-
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSuccessMessage(
-    String text,
-    {bool global,
-    BuildContext context,
-    int duration = 6,
-    Function onPressed}) {
-  if (text == null) throw FlutterError("No text");
-
-  final snackBar = SnackBar(
-    content: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Text(text, style: toasterTextStyle),
-    ),
-    backgroundColor: colorGreen,
-    duration: Duration(seconds: duration),
-  );
-
-  return _displaySnackBar(snackBar, global: global, context: context);
-}
-
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showErrorMessage(
-    String text,
-    {bool global,
-    BuildContext context,
-    int duration = 10,
-    Function onPressed}) {
-  if (text == null) throw FlutterError("No text");
-
-  final snackBar = SnackBar(
-    content: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Text(text, style: toasterTextStyle),
-    ),
-    backgroundColor: colorRed,
+    backgroundColor: getColorByPurpose(purpose),
     duration: Duration(seconds: duration),
   );
 

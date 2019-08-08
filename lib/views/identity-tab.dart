@@ -1,6 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup.dart';
@@ -33,7 +34,7 @@ class IdentityTab extends StatelessWidget {
             rightIcon: FeatherIcons.copy,
             onTap: () {
               Clipboard.setData(ClipboardData(text: account.identityId));
-              showSuccessMessage("Identity ID copied on the clipboard", context: ctxgi);
+              showMessage("Identity ID copied on the clipboard", context: ctx, purpose: Purpose.DANGER);
             }),
         Section(text: "Your identity"),
         ListItem(
@@ -74,7 +75,7 @@ class IdentityTab extends StatelessWidget {
                 PaternPromptModal(identity.keys[0].encryptedMnemonic)));
 
     if (result == null || result is InvalidPatternError) {
-      showErrorMessage("The pattern you entered is not valid", context: ctx);
+      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
       return;
     }
     final mnemonic =

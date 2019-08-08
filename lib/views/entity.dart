@@ -11,9 +11,7 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
 import 'package:http/http.dart' as http;
-
-
-import 'package:dvote/dvote.dart' show Entity;
+import 'package:vocdoni/constants/colors.dart';
 
 class EntityInfo extends StatefulWidget {
   @override
@@ -31,8 +29,7 @@ class _EntityInfoState extends State<EntityInfo> {
     final Entity entity = ModalRoute.of(context).settings.arguments;
     if (entity == null) return buildEmptyEntity(context);
 
-    if(!actionsLoading)
-    {
+    if (!actionsLoading) {
       setActionsToDisplay(context, entity);
       actionsLoading = true;
     }
@@ -193,8 +190,7 @@ class _EntityInfoState extends State<EntityInfo> {
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
-    showSuccessMessage(Lang.of(ctx).get("You are no longer subscribed"),
-        context: ctx);
+    showMessage(Lang.of(ctx).get("You are no longer subscribed"), context: ctx);
     setState(() {
       processingSubscription = false;
     });
@@ -209,17 +205,20 @@ class _EntityInfoState extends State<EntityInfo> {
       Identity account = identitiesBloc.getCurrentAccount();
       await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showSuccessMessage(Lang.of(ctx).get("You are now subscribed"),
-          context: ctx);
+      showMessage(Lang.of(ctx).get("You are now subscribed"), context: ctx);
     } catch (err) {
       if (err == "Already subscribed") {
-        showErrorMessage(
-            Lang.of(ctx).get("You are already subscribed to this entity"),
-            context: ctx);
+        showMessage(
+            Lang.of(ctx).get(
+              "You are already subscribed to this entity",
+            ),
+            context: ctx,
+            purpose: Purpose.DANGER);
       } else {
-        showErrorMessage(
+        showMessage(
             Lang.of(ctx).get("The subscription could not be registered"),
-            context: ctx);
+            context: ctx,
+            purpose: Purpose.DANGER);
       }
     }
     setState(() {
