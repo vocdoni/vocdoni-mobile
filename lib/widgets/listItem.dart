@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
-enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 class ListItem extends StatelessWidget {
   final String mainText;
@@ -197,15 +196,5 @@ class ListItem extends StatelessWidget {
   Color getRightElementBackgroundColor() {
     if (!rightTextIsBadge) return null;
     return getColorByPurpose(rightTextPurpose);
-  }
-
-  Color getColorByPurpose(Purpose purpose) {
-    if (purpose == Purpose.NONE) return colorDescription;
-    if (purpose == Purpose.GUIDE) return colorGuide;
-    if (purpose == Purpose.DANGER) return colorRed;
-    if (purpose == Purpose.WARNING) return colorOrange;
-    if (purpose == Purpose.GOOD) return colorGreen;
-    if (purpose == Purpose.HIGHLIGHT) return colorBlue;
-    return colorDescription;
   }
 }

@@ -44,3 +44,15 @@ final FontWeight fontWeightLight = FontWeight.w300;
 final FontWeight fontWeightRegular = FontWeight.w400;
 final FontWeight fontWeightSemiBold = FontWeight.w600;
 final FontWeight fontWeightBold = FontWeight.w700;
+
+enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
+
+Color getColorByPurpose(Purpose purpose) {
+    if (purpose == Purpose.NONE) return colorDescription;
+    if (purpose == Purpose.GUIDE) return colorGuide;
+    if (purpose == Purpose.DANGER) return colorRed;
+    if (purpose == Purpose.WARNING) return colorOrange;
+    if (purpose == Purpose.GOOD) return colorGreen;
+    if (purpose == Purpose.HIGHLIGHT) return colorBlue;
+    return colorDescription;
+  }
