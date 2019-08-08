@@ -32,7 +32,8 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
       }
     } catch (err) {
       print(err);
-      throw "There was an error while accessing the local data";
+      throw BlocRestoreError(
+          "There was an error while accessing the local data");
     }
 
     try {
@@ -41,7 +42,8 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
       state.add(store.items);
     } catch (err) {
       print(err);
-      throw "There was an error processing the local data";
+      throw BlocRestoreError(
+          "There was an error while processing the local data");
     }
   }
 
@@ -55,7 +57,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);
-      throw FlutterError("There was an error while storing the changes");
+      throw BlocPersistError("There was an error while storing the changes");
     }
   }
 
