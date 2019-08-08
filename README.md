@@ -131,7 +131,7 @@ Ask the host to close the browser window.
 
 ```javascript
 sendHostRequest({ method: "closeWindow" })
-	.then(response => console.log("Good Bye"))
+	.then(() => console.log("Good Bye"))
 	.catch(err => {
 		console.error(err);
 	});
