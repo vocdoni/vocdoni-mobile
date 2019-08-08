@@ -30,7 +30,8 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
       }
     } catch (err) {
       print(err);
-      throw "There was an error while accessing the local data";
+      throw BlocRestoreError(
+          "There was an error while accessing the local data");
     }
 
     try {
@@ -39,7 +40,8 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
       state.add(store.items);
     } catch (err) {
       print(err);
-      throw "There was an error processing the local data";
+      throw BlocRestoreError(
+          "There was an error while processing the local data");
     }
   }
 
@@ -53,7 +55,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);
-      throw "There was an error while storing the changes";
+      throw BlocPersistError("There was an error while storing the changes");
     }
   }
 

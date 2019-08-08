@@ -46,7 +46,8 @@ class AppStateBloc extends BlocComponent<AppState> {
       }
     } catch (err) {
       print(err);
-      throw "There was an error while accessing the local data";
+      throw BlocRestoreError(
+          "There was an error while accessing the local data");
     }
 
     // Assemble state object
@@ -70,7 +71,7 @@ class AppStateBloc extends BlocComponent<AppState> {
       print("TO DO: Store authFailures and authThresholdDate");
     } catch (err) {
       print(err);
-      throw "There was an error while storing the changes";
+      throw BlocPersistError("There was an error while storing the changes");
     }
   }
 

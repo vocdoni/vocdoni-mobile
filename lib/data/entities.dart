@@ -28,7 +28,8 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       }
     } catch (err) {
       print(err);
-      throw "There was an error while accessing the local data";
+      throw BlocRestoreError(
+          "There was an error while accessing the local data");
     }
 
     try {
@@ -37,7 +38,8 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       state.add(store.items);
     } catch (err) {
       print(err);
-      throw "There was an error processing the local data";
+      throw BlocRestoreError(
+          "There was an error while processing the local data");
     }
   }
 
@@ -50,7 +52,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
       print(err);
-      throw "There was an error while storing the changes";
+      throw BlocPersistError("There was an error while storing the changes");
     }
   }
 

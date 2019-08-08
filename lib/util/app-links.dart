@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
-import 'package:vocdoni/util/singletons.dart';
+// import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 // MAIN
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext context) async {
   if (!(newLink is Uri)) return null;
@@ -29,13 +29,13 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
           context: context);
     default:
       if (!kReleaseMode)
-        throw FlutterError("Invalid path"); // Throw on debug, ignore on release
+        throw LinkingError("Invalid path"); // Throw on debug, ignore on release
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 // HANDLERS
-///////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 
 Future fetchAndShowOrganization(
     {String resolverAddress,
@@ -45,15 +45,15 @@ Future fetchAndShowOrganization(
     BuildContext context}) async {
   if (!(resolverAddress is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{40}$").hasMatch(resolverAddress)) {
-    throw FlutterError("Invalid resolverAddress");
+    throw LinkingError("Invalid resolverAddress");
   } else if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
-    throw FlutterError("Invalid entityId");
+    throw LinkingError("Invalid entityId");
   } else if (!(networkId is String) ||
       !RegExp(r"^[0-9a-zA-Z]+$").hasMatch(networkId)) {
-    throw FlutterError("Invalid networkId");
+    throw LinkingError("Invalid networkId");
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
-    throw FlutterError("Invalid entryPoints");
+    throw LinkingError("Invalid entryPoints");
   }
 
   List<String> decodedEntryPoints = entryPoints
@@ -61,7 +61,7 @@ Future fetchAndShowOrganization(
         try {
           return Uri.decodeFull(uri);
         } catch (err) {
-          throw FlutterError("Invalid entry point URI");
+          throw LinkingError("Invalid entry point URI");
         }
       })
       .where((uri) => uri != null)
@@ -73,7 +73,7 @@ Future fetchAndShowOrganization(
     // Fetch organization data
     final org = await fetchEntityData(
         resolverAddress, entityId, networkId, decodedEntryPoints);
-    if (org == null) throw FlutterError("Could not fetch the details");
+    if (org == null) throw LinkingError("Could not fetch the details");
 
     hideLoading(global: true);
 
@@ -91,16 +91,27 @@ showSignatureScreen(
     @required String payload,
     @required String returnUri}) {
   if (!(payload is String) || payload.length == 0) {
-    throw FlutterError("Invalid payload");
+    throw LinkingError("Invalid payload");
   } else if (!(returnUri is String) || returnUri.length == 0) {
-    throw FlutterError("Invalid returnUri");
+    throw LinkingError("Invalid returnUri");
   }
 
   payload = Uri.decodeFull(payload);
   final rtnUri = Uri.parse(returnUri);
-  if (rtnUri == null) throw FlutterError("Invalid return URI");
+  if (rtnUri == null) throw LinkingError("Invalid return URI");
 
-  final SignModalArguments args = SignModalArguments(payload: payload, returnUri: rtnUri);
+  final SignModalArguments args =
+      SignModalArguments(payload: payload, returnUri: rtnUri);
 
   Navigator.pushNamed(context, "/signature", arguments: args);
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+// UTILITIES
+// ////////////////////////////////////////////////////////////////////////////
+
+class LinkingError implements Exception {
+  final String msg;
+  const LinkingError(this.msg);
+  String toString() => 'LinkingError: $msg';
 }

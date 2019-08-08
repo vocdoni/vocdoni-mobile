@@ -3,8 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
 import 'package:dvote/dvote.dart';
-// import 'package:vocdoni/util/random.dart';
-// import 'package:vocdoni/constants/vocdoni.dart';
+
+// ////////////////////////////////////////////////////////////////////////////
+// METHODS
+// ////////////////////////////////////////////////////////////////////////////
 
 Future<List<Gateway>> getBootNodes() async {
   try {
@@ -25,7 +27,7 @@ Future<List<Gateway>> getBootNodes() async {
     });
     return result;
   } catch (err) {
-    throw "The boot nodes cannot be loaded";
+    throw FetchError("The boot nodes cannot be loaded");
   }
 }
 
@@ -66,7 +68,7 @@ Future<Entity> fetchEntityData(String resolverAddress, String entityId,
       continue;
     }
   }
-  throw "The entity's data cannot be fetched";
+  throw FetchError("The entity's data cannot be fetched");
 }
 
 Future<String> fetchEntityNewsFeed(Entity entity, String lang) async {
@@ -94,5 +96,15 @@ Future<String> fetchEntityNewsFeed(Entity entity, String lang) async {
       continue;
     }
   }
-  throw "The news feed cannot be fetched";
+  throw FetchError("The news feed cannot be fetched");
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+// UTILITIES
+// ////////////////////////////////////////////////////////////////////////////
+
+class FetchError implements Exception {
+  final String msg;
+  const FetchError(this.msg);
+  String toString() => 'FetchError: $msg';
 }

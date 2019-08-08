@@ -102,9 +102,23 @@ Now you can run `sendHostRequest(<data>)` from anywhere in your code and get a p
 Ask the host to provide the public key of the current account.
 
 ```javascript
-sendHostRequest({ type: "getPublicKey" })
+sendHostRequest({ method: "getPublicKey" })
 	.then(response => {
 		console.log("PUBLIC KEY", response);
+	})
+	.catch(err => {
+		console.error(err);
+	});
+```
+
+#### Signature request
+
+Ask the host to sign a string payload using the private key of the current identity
+
+```javascript
+sendHostRequest({ method: "signPayload", payload: "Hello world" })
+	.then(response => {
+		console.log("SIGNATURE", response);
 	})
 	.catch(err => {
 		console.error(err);
@@ -116,7 +130,7 @@ sendHostRequest({ type: "getPublicKey" })
 Ask the host to close the browser window.
 
 ```javascript
-sendHostRequest({ type: "closeWindow" })
+sendHostRequest({ method: "closeWindow" })
 	.then(response => console.log("Good Bye"))
 	.catch(err => {
 		console.error(err);
