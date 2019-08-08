@@ -5,7 +5,6 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
@@ -44,43 +43,42 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   getScaffoldChildren(BuildContext context, Entity entity) {
-    Identity account = identitiesBloc.getCurrentAccount();
-    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
-    String subscribeText = isSubscribed ? "Unsubcribe" : "Subscribe";
-    return [
-      ListItem(
-        mainText: subscribeText,
-        icon: FeatherIcons.heart,
-        disabled: processingSubscription,
-        onTap: () => isSubscribed
-            ? unsubscribeFromEntity(context, entity)
-            : subscribeToEntity(context, entity),
-      ),
-      ListItem(
-        mainText: "Register",
-        secondaryText: "It gives you acess to the voting processess",
-        secondaryTextMultiline: true,
-        icon: FeatherIcons.plus,
-        onTap: () => subscribeToEntity(context, entity),
-      ),
-      Section(text: "Description"),
-      Summary(
-        text: entity.description[entity.languages[0]],
-        maxLines: 5,
-      ),
-      ListItem(
-        mainText: "Activity",
+    List<Widget> children = [];
+    children.add(buildSubscribeItem(context, entity));
+    children.addAll(buildActionList(context, entity));
+    children.add( ListItem(
+        icon: FeatherIcons.rss,
+        mainText: "Feed",
         onTap: () {
           Navigator.pushNamed(context, "/entity/activity", arguments: entity);
         },
-      ),
-    ];
+      ));
+    children.add(Section(text: "Details"));
+    children.add(Summary(
+      text: entity.description[entity.languages[0]],
+      maxLines: 5,
+    ));
+      return children;
   }
 
-  /// NO ENTITY
+  buildSubscribeItem(BuildContext context, Entity entity) {
+    Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+    String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
+    return ListItem(
+      mainText: subscribeText,
+      icon: FeatherIcons.heart,
+      disabled: processingSubscription,
+      rightIcon: isSubscribed?FeatherIcons.check:null,
+      rightTextPurpose: isSubscribed?Purpose.GOOD:null,
+     // purpose: Purpose.HIGHLIGHT,
+      onTap: () => isSubscribed
+          ? unsubscribeFromEntity(context, entity)
+          : subscribeToEntity(context, entity),
+    );
+  }
 
   Widget buildEmptyEntity(BuildContext ctx) {
-    // TODO: UI
     return Scaffold(
         appBar: TopNavigation(
           title: "",
@@ -90,16 +88,14 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
-  /// ALREADY REGISTERED CONTENT
-
-  Widget buildActionList(BuildContext ctx, Entity entity) {
-    // TODO: Handle all actions
-    final List<Widget> actions = entity.actions
+  List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
+    final List<ListItem> actions = entity.actions
         .map((action) {
           if (action.type == "browser") {
             if (!(action.name is Map) ||
                 !(action.name[entity.languages[0]] is String)) return null;
             return ListItem(
+              icon: FeatherIcons.arrowRightCircle,
               mainText: action.name[entity.languages[0]],
               onTap: () {
                 final String url = action.url;
@@ -114,28 +110,32 @@ class _EntityInfoState extends State<EntityInfo> {
                 Navigator.push(ctx, route);
               },
             );
-          } else if (action.type == "image") {
-            return ListItem(mainText: "TO DO: EntityActionImage");
           } else {
-            return null;
+            return ListItem(
+              mainText: action.name[entity.languages[0]],
+              secondaryText: "Action type not supported yet: " + action.type,
+              icon: FeatherIcons.helpCircle,
+              disabled: true,
+            );
           }
         })
         .toList()
         .where((w) => w != null)
         .toList();
 
-    return Column(children: <Widget>[
-      ...actions,
-      SizedBox(height: 40),
-      Text(
-        Lang.of(ctx).get("You are already subscribed"),
-        textAlign: TextAlign.center,
-      )
-    ]);
+    if (actions.length == 0)
+      return [
+        ListItem(
+          mainText: "No Actions definied",
+          disabled: true,
+          rightIcon: null,
+          icon: FeatherIcons.helpCircle,
+        )
+      ];
+
+    return actions;
   }
 
-  /// PROMPT TO SUBSCRIBE
-  ///
   unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
     setState(() {
       processingSubscription = true;
@@ -143,7 +143,7 @@ class _EntityInfoState extends State<EntityInfo> {
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
     showSuccessMessage(Lang.of(ctx).get("You are no longer subscribed"),
-          context: ctx);
+        context: ctx);
     setState(() {
       processingSubscription = false;
     });
