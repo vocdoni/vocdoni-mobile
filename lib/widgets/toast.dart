@@ -20,7 +20,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: getColorByPurpose(purpose),
+    backgroundColor: getColorByPurpose(purpose: purpose, isPale: true ),
     duration: Duration(seconds: duration),
   );
 

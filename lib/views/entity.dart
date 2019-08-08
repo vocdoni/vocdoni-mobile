@@ -190,7 +190,8 @@ class _EntityInfoState extends State<EntityInfo> {
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
-    showMessage(Lang.of(ctx).get("You are no longer subscribed"), context: ctx);
+    showMessage(Lang.of(ctx).get("You are no longer subscribed"),
+        context: ctx, purpose: Purpose.NONE);
     setState(() {
       processingSubscription = false;
     });
@@ -205,7 +206,8 @@ class _EntityInfoState extends State<EntityInfo> {
       Identity account = identitiesBloc.getCurrentAccount();
       await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showMessage(Lang.of(ctx).get("You are now subscribed"), context: ctx);
+      showMessage(Lang.of(ctx).get("You are now subscribed"),
+          context: ctx, purpose: Purpose.GOOD);
     } catch (err) {
       if (err == "Already subscribed") {
         showMessage(

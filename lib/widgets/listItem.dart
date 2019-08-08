@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
-
 class ListItem extends StatelessWidget {
   final String mainText;
   final bool mainTextFullWidth;
@@ -173,7 +172,7 @@ class ListItem extends StatelessWidget {
   }
 
   Color getMainColor() {
-    return getColorByPurpose(purpose);
+    return getColorByPurpose(purpose: purpose);
   }
 
   Color getBackroundColor() {
@@ -190,11 +189,11 @@ class ListItem extends StatelessWidget {
     if (purpose != Purpose.NONE && purpose != Purpose.GUIDE)
       return getSecondaryElementColor().withOpacity(opacitySecondaryElement);
     else
-      return getColorByPurpose(rightTextPurpose);
+      return getColorByPurpose(purpose: rightTextPurpose);
   }
 
   Color getRightElementBackgroundColor() {
     if (!rightTextIsBadge) return null;
-    return getColorByPurpose(rightTextPurpose);
+    return getColorByPurpose(purpose: rightTextPurpose);
   }
 }
