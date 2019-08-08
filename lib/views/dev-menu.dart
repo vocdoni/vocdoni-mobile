@@ -16,13 +16,7 @@ class DevMenu extends StatelessWidget {
             ListItem(
                 mainText: "Add fake organizations",
                 onTap: () async {
-                  // TODO: REMOVE
-                  try {
-                    await populateSampleData();
-                    showMessage("Completed", context: ctx);
-                  } catch (err) {
-                    showErrorMessage(err?.message ?? err, context: ctx);
-                  }
+                  await populateSampleData();
                 }),
             ListItem(
               mainText: "ListItem variations (UI)",

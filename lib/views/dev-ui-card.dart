@@ -116,6 +116,18 @@ class DevUiCard extends StatelessWidget {
               )
             ],
           ),
+          BaseCard(
+            children: [
+              ListItem(
+                purpose: Purpose.GOOD,
+                disabled:  true,
+                secondaryText: "Secondary text",
+                mainText: "Avatar disabled",
+                avatarUrl:
+                    "https://i.pinimg.com/originals/23/4c/88/234c888d9ffb6955eb440b0d99a37fd1.jpg",
+              )
+            ],
+          ),
         ],
       ),
     );

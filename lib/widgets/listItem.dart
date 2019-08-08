@@ -47,35 +47,39 @@ class ListItem extends StatelessWidget {
     return InkWell(
         onTap: disabled ? null : onTap,
         onLongPress: disabled ? null : onLongPress,
-        child: Container(
-            color: getBackroundColor(),
-            padding: EdgeInsets.fromLTRB(paddingPage, 20, paddingPage, 20),
-            child: mainTextFullWidth
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                        buildMainText(),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              0, spaceMainAndSecondary, 0, 0),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                buildIcon(),
-                                Expanded(child: buildSecondaryText()),
-                                buildRightItem()
-                              ]),
-                        )
-                      ])
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                        buildIcon(),
-                        buildTextsColumn(),
-                        buildRightItem()
-                      ])));
+        child: Opacity(
+          opacity: disabled ? 0.5 : 1,
+          child: Container(
+              color: getBackroundColor(),
+              padding: EdgeInsets.fromLTRB(paddingPage, 20, paddingPage, 20),
+              child: mainTextFullWidth
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                          buildMainText(),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                                0, spaceMainAndSecondary, 0, 0),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  buildIcon(),
+                                  Expanded(child: buildSecondaryText()),
+                                  buildRightItem()
+                                ]),
+                          )
+                        ])
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                          buildIcon(),
+                          buildTextsColumn(),
+                          buildRightItem()
+                        ])),
+        ));
   }
 
   buildTextsColumn() {
@@ -95,9 +99,9 @@ class ListItem extends StatelessWidget {
         maxLines: mainTextMultiline ? 3 : 1,
         overflow: TextOverflow.ellipsis,
         style: new TextStyle(
-            fontSize: isTitle?fontSizeTitle:fontSizeBase,
+            fontSize: isTitle ? fontSizeTitle : fontSizeBase,
             color: getMainColor(),
-            fontWeight: isBold?fontWeightBold:fontWeightRegular));
+            fontWeight: isBold ? fontWeightBold : fontWeightRegular));
   }
 
   buildSecondaryText() {
@@ -127,7 +131,6 @@ class ListItem extends StatelessWidget {
               )
             : Container(
                 constraints: BoxConstraints(maxWidth: size, maxHeight: size),
-                //TODO: Apply opacity when disabled
                 child: CircleAvatar(
                   backgroundColor: Colors.transparent, //.brown.shade800,
                   //child: avatarUrl == null ? Text('AH') : null,
@@ -171,9 +174,7 @@ class ListItem extends StatelessWidget {
   }
 
   Color getMainColor() {
-    Color color = getColorByPurpose(purpose);
-    if (disabled) color = color.withOpacity(opacityDisabled);
-    return color;
+    return getColorByPurpose(purpose);
   }
 
   Color getBackroundColor() {

@@ -24,17 +24,22 @@ class EntitiesTab extends StatelessWidget {
         identities[appState.selectedIdentity].peers.entities.length == 0)
       return buildNoEntities(ctx);
 
-    int selectedIdentity = appState.selectedIdentity;
-    entities = identities[selectedIdentity].peers.entities.map((e) {
-      return entitiesBloc.current
-          .firstWhere((entity) => entity.entityId == e.entityId);
-    }).toList();
+    Identity account = identitiesBloc.getCurrentAccount();
+
+    account.peers.entities.forEach((entitySummary) {
+      for (Entity entity in entitiesBloc.current)
+        if (entity.entityId == entitySummary.entityId) {
+          entities.add(entity);
+        }
+    });
+
     if (entities.length == 0) return buildNoEntities(ctx);
 
     return ListView.builder(
         itemCount: entities.length,
         itemBuilder: (BuildContext ctxt, int index) {
           final entity = entities[index];
+          final feedPostAmount = getFeedPostAmount(entity);
           return BaseCard(children: [
             ListItem(
                 mainText: entity.name[entity.languages[0]],
@@ -43,13 +48,13 @@ class EntitiesTab extends StatelessWidget {
             ListItem(
                 mainText: "Feed",
                 icon: FeatherIcons.rss,
-                rightText: entity.newsFeed.entries.length.toString(),
+                rightText: feedPostAmount.toString(),
                 rightTextIsBadge: true,
                 onTap: () {
                   Navigator.pushNamed(ctx, "/entity/activity",
                       arguments: entity);
                 },
-                disabled: entity.newsFeed.entries.length == 0),
+                disabled: feedPostAmount==0 ),
             ListItem(
                 mainText: "Participation",
                 icon: FeatherIcons.mail,
@@ -59,6 +64,12 @@ class EntitiesTab extends StatelessWidget {
                 disabled: entity.votingProcesses.active.length == 0)
           ]);
         });
+  }
+
+  int getFeedPostAmount(Entity entity)
+  {
+    //TODO Refactor NewsFeedBloc
+    return 10;
   }
 
   Widget buildNoEntities(BuildContext ctx) {

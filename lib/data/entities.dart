@@ -75,12 +75,22 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       currentEntities[currentIndex] = newEntity;
       await set(currentEntities);
     } else {
-      // Add it
-      await set(current.followedBy([newEntity]));
+      current.add(newEntity);
+      await set(current);
 
       // Fetch the news feeds if needed
       await newsFeedsBloc.fetchFromEntity(newEntity);
     }
+  }
+
+  Future<void> remove(String entityIdToRemove) async {
+    final entities = current;
+    entities.removeWhere(
+        (existingEntity) => existingEntity.entityId == entityIdToRemove);
+
+    await set(entities);
+
+    //TODO remove feed from newsFeedBloc
   }
 
   Future<void> refreshFrom(List<EntitySummary> entities) async {

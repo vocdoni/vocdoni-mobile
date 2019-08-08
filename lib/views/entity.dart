@@ -1,13 +1,10 @@
-// import 'dart:io';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
-// import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
@@ -23,22 +20,11 @@ class EntityInfo extends StatefulWidget {
 
 class _EntityInfoState extends State<EntityInfo> {
   bool collapsed = false;
+  bool processingSubscription = false;
   @override
   Widget build(context) {
     final Entity entity = ModalRoute.of(context).settings.arguments;
     if (entity == null) return buildEmptyEntity(context);
-
-    bool alreadySubscribed = false;
-    if (appStateBloc.current != null &&
-        appStateBloc.current.selectedIdentity >= 0) {
-      final Identity currentIdentity =
-          identitiesBloc.current[appStateBloc.current.selectedIdentity];
-      if (currentIdentity != null &&
-          currentIdentity.peers.entities.length > 0) {
-        alreadySubscribed = currentIdentity.peers.entities
-            .any((o) => o.entityId == entity.entityId);
-      }
-    }
 
     return ScaffoldWithImage(
         headerImageUrl: entity.media.header,
@@ -49,44 +35,50 @@ class _EntityInfoState extends State<EntityInfo> {
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, entity, alreadySubscribed)),
+              delegate:
+                  SliverChildListDelegate(getScaffoldChildren(ctx, entity)),
             );
           },
         ));
   }
 
-  getScaffoldChildren(
-      BuildContext context, Entity entity, bool alreadySubscribed) {
-    return [
-      Section(text: "Description"),
-      Summary(
-        text: entity.description[entity.languages[0]],
-        maxLines: 5,
-      ),
-      Section(text: "Actions"),
-      /*  ListItem(
-        text: "Subscribe",
-        onTap: () => subscribeToEntity(context, entity),
-      ), */
-      ListItem(
-        mainText: "Activity",
+  getScaffoldChildren(BuildContext context, Entity entity) {
+    List<Widget> children = [];
+    children.add(buildSubscribeItem(context, entity));
+    children.addAll(buildActionList(context, entity));
+    children.add( ListItem(
+        icon: FeatherIcons.rss,
+        mainText: "Feed",
         onTap: () {
           Navigator.pushNamed(context, "/entity/activity", arguments: entity);
         },
-      ),
-      (alreadySubscribed
-          ? buildAlreadySubscribed(context, entity) // CUSTOM ACTIONS
-          : buildSubscriptionTiles(context, entity) // SUBSCRIBE
-
-      ),
-    ];
+      ));
+    children.add(Section(text: "Details"));
+    children.add(Summary(
+      text: entity.description[entity.languages[0]],
+      maxLines: 5,
+    ));
+      return children;
   }
 
-  /// NO ENTITY
+  buildSubscribeItem(BuildContext context, Entity entity) {
+    Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+    String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
+    return ListItem(
+      mainText: subscribeText,
+      icon: FeatherIcons.heart,
+      disabled: processingSubscription,
+      rightIcon: isSubscribed?FeatherIcons.check:null,
+      rightTextPurpose: isSubscribed?Purpose.GOOD:null,
+     // purpose: Purpose.HIGHLIGHT,
+      onTap: () => isSubscribed
+          ? unsubscribeFromEntity(context, entity)
+          : subscribeToEntity(context, entity),
+    );
+  }
 
   Widget buildEmptyEntity(BuildContext ctx) {
-    // TODO: UI
     return Scaffold(
         appBar: TopNavigation(
           title: "",
@@ -96,16 +88,14 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
-  /// ALREADY REGISTERED CONTENT
-
-  Widget buildAlreadySubscribed(BuildContext ctx, Entity entity) {
-    // TODO: Handle all actions
-    final List<Widget> actions = entity.actions
+  List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
+    final List<ListItem> actions = entity.actions
         .map((action) {
           if (action.type == "browser") {
             if (!(action.name is Map) ||
                 !(action.name[entity.languages[0]] is String)) return null;
             return ListItem(
+              icon: FeatherIcons.arrowRightCircle,
               mainText: action.name[entity.languages[0]],
               onTap: () {
                 final String url = action.url;
@@ -120,80 +110,70 @@ class _EntityInfoState extends State<EntityInfo> {
                 Navigator.push(ctx, route);
               },
             );
-          } else if (action.type == "image") {
-            return ListItem(mainText: "TO DO: EntityActionImage");
           } else {
-            return null;
+            return ListItem(
+              mainText: action.name[entity.languages[0]],
+              secondaryText: "Action type not supported yet: " + action.type,
+              icon: FeatherIcons.helpCircle,
+              disabled: true,
+            );
           }
         })
         .toList()
         .where((w) => w != null)
         .toList();
 
-    return Column(children: <Widget>[
-      ...actions,
-      SizedBox(height: 40),
-      Text(
-        Lang.of(ctx).get("You are already subscribed"),
-        textAlign: TextAlign.center,
-      )
-    ]);
+    if (actions.length == 0)
+      return [
+        ListItem(
+          mainText: "No Actions definied",
+          disabled: true,
+          rightIcon: null,
+          icon: FeatherIcons.helpCircle,
+        )
+      ];
+
+    return actions;
   }
 
-  /// PROMPT TO SUBSCRIBE
-
-  Widget buildSubscriptionTiles(BuildContext ctx, Entity entity) {
-    return Column(children: <Widget>[
-      ListItem(
-        mainText: "Subscribe",
-        onTap: () => subscribeToEntity(ctx, entity),
-      ),
-      SizedBox(height: 40),
-      Text(
-        Lang.of(ctx).get("You are about to subscribe to:"),
-        textAlign: TextAlign.center,
-      ),
-      Text(
-        entity.name[entity.languages[0]] ?? "(entity)",
-        textAlign: TextAlign.center,
-      ),
-      SizedBox(height: 20),
-      Text(
-        Lang.of(ctx).get("Using the identity:"),
-        textAlign: TextAlign.center,
-      ),
-      Text(
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].alias,
-        textAlign: TextAlign.center,
-      )
-    ]);
+  unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
+    setState(() {
+      processingSubscription = true;
+    });
+    Identity account = identitiesBloc.getCurrentAccount();
+    await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
+    showSuccessMessage(Lang.of(ctx).get("You are no longer subscribed"),
+        context: ctx);
+    setState(() {
+      processingSubscription = false;
+    });
   }
 
   subscribeToEntity(BuildContext ctx, Entity entity) async {
-    final accepted = await showPrompt(
-        context: ctx,
-        title: Lang.of(ctx).get("Entity"),
-        text: Lang.of(ctx).get("Do you want to subscribe to the entity?"),
-        okButton: Lang.of(ctx).get("Subscribe"));
-
-    if (accepted == false) return;
+    setState(() {
+      processingSubscription = true;
+    });
 
     try {
-      await identitiesBloc.subscribe(entity);
+      Identity account = identitiesBloc.getCurrentAccount();
+      await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showMessage(Lang.of(ctx).get("The subscription has been registered"),
+      showSuccessMessage(Lang.of(ctx).get("You are now subscribed"),
           context: ctx);
     } catch (err) {
       if (err == "Already subscribed") {
-        showMessage(
+        showErrorMessage(
             Lang.of(ctx).get("You are already subscribed to this entity"),
             context: ctx);
       } else {
-        showMessage(
+        showErrorMessage(
             Lang.of(ctx).get("The subscription could not be registered"),
             context: ctx);
       }
     }
+    setState(() {
+      processingSubscription = false;
+    });
   }
 
   goBack(BuildContext ctx) {
