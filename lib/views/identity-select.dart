@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
@@ -79,7 +80,7 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
             builder: (context) =>
                 PaternPromptModal(identity.keys[0].encryptedPrivateKey)));
     if (result == null || result is InvalidPatternError) {
-      showErrorMessage("The pattern you entered is not valid", context: ctx);
+      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
       return;
     }
     appStateBloc.selectIdentity(idx);

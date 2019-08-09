@@ -137,8 +137,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   void onSettingPatternStop(BuildContext context, List<int> pattern) {
     debugPrint(pattern.length.toString());
     if (pattern.length < minPatternDots) {
-      showErrorMessage("The pattern must have at least $minPatternDots points",
-          context: context, duration: toasterDuration );
+      showMessage("The pattern must have at least $minPatternDots points",
+          context: context, duration: toasterDuration , purpose: Purpose.DANGER);
       setState(() {
         patternColor = colorRed;
       });
@@ -146,8 +146,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
     }
 
     if (pattern.length >= maxPatternDots) {
-      showErrorMessage("The pattern should not exceed $maxPatternDots points",
-          context: context, duration: toasterDuration);
+      showMessage("The pattern should not exceed $maxPatternDots points",
+          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
     debugPrint(pattern.toString());
@@ -191,8 +191,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         patternColor = colorRed;
       });
 
-      showErrorMessage("The patterns you entered don't match",
-          context: context, duration: toasterDuration);
+      showMessage("The patterns you entered don't match",
+          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
 

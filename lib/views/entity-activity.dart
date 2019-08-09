@@ -2,6 +2,7 @@ import "dart:convert";
 import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
@@ -128,9 +129,10 @@ class _EntityActivityState extends State<EntityActivity> {
         loading = false;
       });
     } catch (err) {
-      showErrorMessage(
+      showMessage(
           Lang.of(ctx).get("The activity can not be loaded at this time"),
-          context: ctx);
+          context: ctx,
+          purpose: Purpose.DANGER);
       setState(() {
         loading = false;
       });
