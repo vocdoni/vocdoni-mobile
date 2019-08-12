@@ -14,8 +14,8 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
   if (!(newLink is Uri)) return null;
 
   switch (newLink.path) {
-    case "/organization":
-      return fetchAndShowOrganization(
+    case "/entity":
+      return fetchAndShowEntity(
           resolverAddress: newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
           networkId: newLink.queryParameters["networkId"],
@@ -37,7 +37,7 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
 // HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future fetchAndShowOrganization(
+Future fetchAndShowEntity(
     {String resolverAddress,
     String entityId,
     String networkId,
@@ -70,15 +70,14 @@ Future fetchAndShowOrganization(
   showLoading(Lang.of(context).get("Connecting..."), global: true);
 
   try {
-    // Fetch organization data
-    final org = await fetchEntityData(
+    final entity = await fetchEntityData(
         resolverAddress, entityId, networkId, decodedEntryPoints);
-    if (org == null) throw LinkingError("Could not fetch the details");
+    if (entity == null) throw LinkingError("Could not fetch the details");
 
     hideLoading(global: true);
 
     // Show screen
-    Navigator.pushNamed(context, "/organization", arguments: org);
+    Navigator.pushNamed(context, "/entity", arguments: entity);
   } catch (err) {
     hideLoading(global: true);
 

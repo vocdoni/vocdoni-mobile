@@ -37,10 +37,10 @@ lang-compile:
 		--no-use-deferred-loading lib/lang/index.dart lib/lang/intl_*.arb
 
 launch-ios-org:
-	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/organization?resolverAddress=0x0dCA233CE5152d58c74E74693A3C496D01542244&entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&networkId=1234&entryPoints[]=__URI__&entryPoints[]=__URI2__"
+	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/entity?resolverAddress=0x0dCA233CE5152d58c74E74693A3C496D01542244&entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&networkId=1234&entryPoints[]=__URI__&entryPoints[]=__URI2__"
 
 launch-android-org:
-	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/organization?resolverAddress=0x0dCA233CE5152d58c74E74693A3C496D01542244&entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&networkId=1234&entryPoints[]=__URI__&entryPoints[]=__URI2__"'
+	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/entity?resolverAddress=0x0dCA233CE5152d58c74E74693A3C496D01542244&entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&networkId=1234&entryPoints[]=__URI__&entryPoints[]=__URI2__"'
 
 launch-ios-sign:
 	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"

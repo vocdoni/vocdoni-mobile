@@ -149,7 +149,7 @@ On developoment, you can test it by running `make launch-ios-org` or `make launc
 To point the user to an organization, use:
 
 ```
-vocdoni://vocdoni.app/organization?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
+vocdoni://vocdoni.app/entity?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
 ```
 
 - `resolverAddress`: The address of the entity resolver contract instance

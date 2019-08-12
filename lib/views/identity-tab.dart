@@ -34,7 +34,8 @@ class IdentityTab extends StatelessWidget {
             rightIcon: FeatherIcons.copy,
             onTap: () {
               Clipboard.setData(ClipboardData(text: account.identityId));
-              showMessage("Identity ID copied on the clipboard", context: ctx, purpose: Purpose.DANGER);
+              showMessage("Identity ID copied on the clipboard",
+                  context: ctx, purpose: Purpose.GOOD);
             }),
         Section(text: "Your identity"),
         ListItem(
@@ -74,8 +75,10 @@ class IdentityTab extends StatelessWidget {
             builder: (context) =>
                 PaternPromptModal(identity.keys[0].encryptedMnemonic)));
 
-    if (result == null || result is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
+    if (result == null) return;
+    else if (result is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
       return;
     }
     final mnemonic =

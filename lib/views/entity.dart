@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/modals/web-action.dart';
@@ -25,14 +27,22 @@ class _EntityInfoState extends State<EntityInfo> {
   bool actionsLoading = false;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    try {
+      final entity = ModalRoute.of(super.context).settings.arguments;
+      if (entity == null) return;
+      fetchVisibleActions(entity);
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  @override
   Widget build(context) {
     final Entity entity = ModalRoute.of(context).settings.arguments;
     if (entity == null) return buildEmptyEntity(context);
-
-    if (!actionsLoading) {
-      setActionsToDisplay(context, entity);
-      actionsLoading = true;
-    }
 
     return ScaffoldWithImage(
         headerImageUrl: entity.media.header,
@@ -86,27 +96,47 @@ class _EntityInfoState extends State<EntityInfo> {
     );
   }
 
-  dynamic sign(String payload) async {
-    //TODO
-    return "";
-  }
-
-  Future<bool> actionIsVisible(Entity_Action action) async {
-    if (action.visible == null) return true;
-
-    if (action.visible == "always") return true;
+  Future<bool> isActionVisible(Entity_Action action, String entityId) async {
+    if (action.visible == null || action.visible == "always") return true;
 
     String publicKey = identitiesBloc.getCurrentAccount().identityId;
     int timestamp = new DateTime.now().millisecondsSinceEpoch;
-    dynamic payload = {
-      'publicKey': publicKey,
-      'signature': sign(timestamp.toString())
-    };
 
-    var response = await http.post(action.visible, body: payload);
-    if (response.statusCode != 200) return false;
+    // TODO: Get the private key to sign appropriately
+    final privateKey = "";
+    debugPrint(
+        "TODO: Retrieve the private key to sign the action visibility request");
 
-    if (response.body == "true") return true;
+    try {
+      Map payload = {
+        "type": action.type,
+        'publicKey': publicKey,
+        "entityId": entityId,
+        "timestamp": timestamp,
+        "signature": ""
+      };
+
+      if (privateKey != "") {
+        payload["signature"] = await signString(
+            jsonEncode({"timestamp": timestamp.toString()}), privateKey);
+      } else {
+        payload["signature"] = "0x"; // TODO: TEMP
+      }
+
+      Map<String, String> headers = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      var response = await http.post(action.visible,
+          body: jsonEncode(payload), headers: headers);
+      if (response.statusCode != 200 || !(response.body is String))
+        return false;
+      final body = jsonDecode(response.body);
+      if (body is Map && body["visible"] == true) return true;
+    } catch (err) {
+      return false;
+    }
 
     return false;
   }
@@ -121,16 +151,21 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
-  Future<List<ListItem>> setActionsToDisplay(
-      BuildContext ctx, Entity entity) async {
-    final List<ListItem> actionsToShow = [];
+  Future<void> fetchVisibleActions(Entity entity) async {
+    final List<Entity_Action> actionsToShow = [];
+    setState(() {
+      actionsLoading = true;
+    });
 
     for (Entity_Action action in entity.actions) {
-      var show = await actionIsVisible(action);
-      setState(() {
-        actionsToDisplay.add(action);
-      });
+      if (await isActionVisible(action, entity.entityId)) {
+        actionsToShow.add(action);
+      }
     }
+    setState(() {
+      actionsToDisplay = actionsToShow;
+      actionsLoading = false;
+    });
   }
 
   List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
