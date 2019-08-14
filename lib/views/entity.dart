@@ -194,13 +194,15 @@ class _EntityInfoState extends State<EntityInfo> {
     if (_isRegistered)
       return ListItem(
         mainText: "Registered",
-        rightIcon: null,
+        rightIcon: FeatherIcons.check,
+        rightTextPurpose: Purpose.GOOD,
         icon: FeatherIcons.checkCircle,
       );
     else
       return ListItem(
         mainText: "Register now",
         icon: FeatherIcons.arrowRightCircle,
+        purpose: Purpose.HIGHLIGHT,
         onTap: () {
           if (_registerAction.type == "browser") {
             onBrowserAction(ctx, _registerAction, entity);
@@ -232,10 +234,9 @@ class _EntityInfoState extends State<EntityInfo> {
       ListItem noticeItem = ListItem(
         mainText: "Regsiter to $entityName first",
         secondaryText: null,
-        icon: FeatherIcons.helpCircle,
         rightIcon: null,
         disabled: false,
-        purpose: Purpose.GUIDE,
+        purpose: Purpose.HIGHLIGHT,
       );
       actionsToShow.add(noticeItem);
     }

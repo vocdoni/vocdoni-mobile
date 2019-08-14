@@ -106,7 +106,7 @@ String _makeEntity(String name) {
                 "fr": "Register"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "false",
+            "visible": "always",
             "register":true
         },
         {
