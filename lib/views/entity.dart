@@ -21,11 +21,9 @@ class EntityInfo extends StatefulWidget {
 }
 
 class _EntityInfoState extends State<EntityInfo> {
-  bool _collapsed = false;
   bool _processingSubscription = false;
   Entity_Action _registerAction;
   List<Entity_Action> _actionsToDisplay = [];
-  bool _actionsLoading = false;
   bool _isRegistered = false;
 
   @override
@@ -66,20 +64,24 @@ class _EntityInfoState extends State<EntityInfo> {
     List<Widget> children = [];
     children.add(buildRegisterItem(context, entity));
     children.add(buildSubscribeItem(context, entity));
+    children.add(buildFeedItem(context, entity));
     children.addAll(buildActionList(context, entity));
-    children.add(ListItem(
-      icon: FeatherIcons.rss,
-      mainText: "Feed",
-      onTap: () {
-        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
-      },
-    ));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: entity.description[entity.languages[0]],
       maxLines: 5,
     ));
     return children;
+  }
+
+  buildFeedItem(BuildContext context, Entity entity) {
+    return ListItem(
+      icon: FeatherIcons.rss,
+      mainText: "Feed",
+      onTap: () {
+        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
+      },
+    );
   }
 
   buildSubscribeItem(BuildContext context, Entity entity) {
@@ -158,13 +160,10 @@ class _EntityInfoState extends State<EntityInfo> {
     final List<Entity_Action> actionsToDisplay = [];
     Entity_Action registerAction;
 
-    setState(() {
-      _actionsLoading = true;
-    });
-
     for (Entity_Action action in entity.actions) {
       if (action.register == true) {
-        if (registerAction != null) continue; //only one registerAction is supported
+        if (registerAction != null)
+          continue; //only one registerAction is supported
         registerAction = action;
         bool isRegistered = await isActionVisible(action, entity.entityId);
         setState(() {
@@ -178,7 +177,6 @@ class _EntityInfoState extends State<EntityInfo> {
       }
     }
     setState(() {
-      _actionsLoading = false;
       _actionsToDisplay = actionsToDisplay;
     });
   }
@@ -189,7 +187,6 @@ class _EntityInfoState extends State<EntityInfo> {
     }
     return null;
   }
-
 
   Widget buildRegisterItem(BuildContext ctx, Entity entity) {
     if (_registerAction == null) return Container();
@@ -203,8 +200,7 @@ class _EntityInfoState extends State<EntityInfo> {
     else
       return ListItem(
         mainText: "Register now",
-        
-        icon: FeatherIcons.arrowDownCircle,
+        icon: FeatherIcons.arrowRightCircle,
         onTap: () {
           if (_registerAction.type == "browser") {
             onBrowserAction(ctx, _registerAction, entity);
@@ -213,8 +209,10 @@ class _EntityInfoState extends State<EntityInfo> {
       );
   }
 
-  List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
-    final List<ListItem> actionsToShow = [];
+  List<Widget> buildActionList(BuildContext ctx, Entity entity) {
+    final List<Widget> actionsToShow = [];
+
+    actionsToShow.add(Section(text: "Actions"));
 
     if (_actionsToDisplay.length == 0 || _registerAction == null) {
       return [
@@ -237,7 +235,7 @@ class _EntityInfoState extends State<EntityInfo> {
         icon: FeatherIcons.helpCircle,
         rightIcon: null,
         disabled: false,
-        purpose: Purpose.HIGHLIGHT,
+        purpose: Purpose.GUIDE,
       );
       actionsToShow.add(noticeItem);
     }
