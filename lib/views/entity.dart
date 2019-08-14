@@ -21,11 +21,11 @@ class EntityInfo extends StatefulWidget {
 }
 
 class _EntityInfoState extends State<EntityInfo> {
-  bool collapsed = false;
-  bool processingSubscription = false;
-  Entity_Action registerAction;
-  List<Entity_Action> actionsToDisplay = [];
-  bool actionsLoading = false;
+  bool _collapsed = false;
+  bool _processingSubscription = false;
+  Entity_Action _registerAction;
+  List<Entity_Action> _actionsToDisplay = [];
+  bool _actionsLoading = false;
   bool _isRegistered = false;
 
   @override
@@ -89,7 +89,7 @@ class _EntityInfoState extends State<EntityInfo> {
     return ListItem(
       mainText: subscribeText,
       icon: FeatherIcons.heart,
-      disabled: processingSubscription,
+      disabled: _processingSubscription,
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       // purpose: Purpose.HIGHLIGHT,
@@ -155,31 +155,31 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   Future<void> fetchVisibleActions(Entity entity) async {
-    final List<Entity_Action> toDisplay = [];
-    Entity_Action register;
+    final List<Entity_Action> actionsToDisplay = [];
+    Entity_Action registerAction;
 
     setState(() {
-      actionsLoading = true;
+      _actionsLoading = true;
     });
 
     for (Entity_Action action in entity.actions) {
       if (action.register == true) {
-        if (register != null) continue; //only one registerAction is supported
-        register = action;
+        if (registerAction != null) continue; //only one registerAction is supported
+        registerAction = action;
         bool isRegistered = await isActionVisible(action, entity.entityId);
         setState(() {
-          registerAction = register;
+          _registerAction = registerAction;
           _isRegistered = isRegistered;
         });
       } else {
         if (await isActionVisible(action, entity.entityId)) {
-          toDisplay.add(action);
+          actionsToDisplay.add(action);
         }
       }
     }
     setState(() {
-      actionsLoading = false;
-      actionsToDisplay = toDisplay;
+      _actionsLoading = false;
+      _actionsToDisplay = actionsToDisplay;
     });
   }
 
@@ -192,7 +192,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
 
   Widget buildRegisterItem(BuildContext ctx, Entity entity) {
-    if (registerAction == null) return Container();
+    if (_registerAction == null) return Container();
 
     if (_isRegistered)
       return ListItem(
@@ -206,8 +206,8 @@ class _EntityInfoState extends State<EntityInfo> {
         
         icon: FeatherIcons.arrowDownCircle,
         onTap: () {
-          if (registerAction.type == "browser") {
-            onBrowserAction(ctx, registerAction, entity);
+          if (_registerAction.type == "browser") {
+            onBrowserAction(ctx, _registerAction, entity);
           }
         },
       );
@@ -216,7 +216,7 @@ class _EntityInfoState extends State<EntityInfo> {
   List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
     final List<ListItem> actionsToShow = [];
 
-    if (actionsToDisplay.length == 0 || registerAction == null) {
+    if (_actionsToDisplay.length == 0 || _registerAction == null) {
       return [
         ListItem(
           mainText: "No Actions definied",
@@ -242,7 +242,7 @@ class _EntityInfoState extends State<EntityInfo> {
       actionsToShow.add(noticeItem);
     }
 
-    for (Entity_Action action in actionsToDisplay) {
+    for (Entity_Action action in _actionsToDisplay) {
       ListItem item;
       if (action.type == "browser") {
         if (!(action.name is Map) ||
@@ -287,20 +287,20 @@ class _EntityInfoState extends State<EntityInfo> {
 
   unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
     setState(() {
-      processingSubscription = true;
+      _processingSubscription = true;
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
     showMessage(Lang.of(ctx).get("You are no longer subscribed"),
         context: ctx, purpose: Purpose.NONE);
     setState(() {
-      processingSubscription = false;
+      _processingSubscription = false;
     });
   }
 
   subscribeToEntity(BuildContext ctx, Entity entity) async {
     setState(() {
-      processingSubscription = true;
+      _processingSubscription = true;
     });
 
     try {
@@ -325,7 +325,7 @@ class _EntityInfoState extends State<EntityInfo> {
       }
     }
     setState(() {
-      processingSubscription = false;
+      _processingSubscription = false;
     });
   }
 
