@@ -23,8 +23,10 @@ class EntityInfo extends StatefulWidget {
 class _EntityInfoState extends State<EntityInfo> {
   bool collapsed = false;
   bool processingSubscription = false;
+  Entity_Action registerAction;
   List<Entity_Action> actionsToDisplay = [];
   bool actionsLoading = false;
+  bool _isRegistered = false;
 
   @override
   void didChangeDependencies() {
@@ -62,6 +64,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
   getScaffoldChildren(BuildContext context, Entity entity) {
     List<Widget> children = [];
+    children.add(buildRegisterItem(context, entity));
     children.add(buildSubscribeItem(context, entity));
     children.addAll(buildActionList(context, entity));
     children.add(ListItem(
@@ -152,20 +155,69 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   Future<void> fetchVisibleActions(Entity entity) async {
-    final List<Entity_Action> actionsToShow = [];
+    final List<Entity_Action> toDisplay = [];
+    Entity_Action register;
+
     setState(() {
       actionsLoading = true;
     });
 
     for (Entity_Action action in entity.actions) {
-      if (await isActionVisible(action, entity.entityId)) {
-        actionsToShow.add(action);
+      if (action.register == true) {
+        if (register != null) continue; //only one registerAction is supported
+        register = action;
+        bool isRegistered = await isActionVisible(action, entity.entityId);
+        setState(() {
+          registerAction = register;
+          _isRegistered = isRegistered;
+        });
+      } else {
+        if (await isActionVisible(action, entity.entityId)) {
+          toDisplay.add(action);
+        }
       }
     }
     setState(() {
-      actionsToDisplay = actionsToShow;
       actionsLoading = false;
+      actionsToDisplay = toDisplay;
     });
+  }
+
+  Entity_Action getRegisterAction(Entity entity) {
+    for (Entity_Action action in entity.actions) {
+      if (action.register == true) return action;
+    }
+    return null;
+  }
+
+  /*bool isUserRegistered(Entity entity) async{
+    final registerAction = getRegisterAction(entity);
+    if(registerAction==null)
+      return false;
+    return isActionVisible(registerAction, entity.entityId);
+
+  }*/
+
+  Widget buildRegisterItem(BuildContext ctx, Entity entity) {
+    if (registerAction == null) return Container();
+
+    if (_isRegistered)
+      return ListItem(
+        mainText: "Registered",
+        rightIcon: null,
+        icon: FeatherIcons.checkCircle,
+      );
+    else
+      return ListItem(
+        mainText: "Register now",
+        rightIcon: null,
+        icon: FeatherIcons.arrowDownCircle,
+        onTap: () {
+          if (registerAction.type == "browser") {
+            onBrowserAction(ctx, registerAction, entity);
+          }
+        },
+      );
   }
 
   List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
@@ -192,16 +244,7 @@ class _EntityInfoState extends State<EntityInfo> {
           mainText: action.name[entity.languages[0]],
           secondaryText: action.visible,
           onTap: () {
-            final String url = action.url;
-            final String title = action.name[entity.languages[0]] ??
-                entity.name[entity.languages[0]];
-
-            final route = MaterialPageRoute(
-                builder: (context) => WebAction(
-                      url: url,
-                      title: title,
-                    ));
-            Navigator.push(ctx, route);
+            onBrowserAction(ctx, action, entity);
           },
         );
       } else {
@@ -217,6 +260,19 @@ class _EntityInfoState extends State<EntityInfo> {
     }
 
     return actionsToShow;
+  }
+
+  onBrowserAction(BuildContext ctx, Entity_Action action, Entity entity) {
+    final String url = action.url;
+    final String title =
+        action.name[entity.languages[0]] ?? entity.name[entity.languages[0]];
+
+    final route = MaterialPageRoute(
+        builder: (context) => WebAction(
+              url: url,
+              title: title,
+            ));
+    Navigator.push(ctx, route);
   }
 
   unsubscribeFromEntity(BuildContext ctx, Entity entity) async {

@@ -102,12 +102,32 @@ String _makeEntity(String name) {
         {
             "type": "browser",
             "name": {
-                "default": "Sign up to $name",
+                "default": "Register",
+                "fr": "Register"
+            },
+            "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
+            "visible": "always",
+            "register":false
+        },
+        {
+            "type": "browser",
+            "name": {
+                "default": "Frist action",
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
             "visible": "always",
-            "register":true
+            "register":false
+        },
+        {
+            "type": "browser",
+            "name": {
+                "default": "Second action",
+                "fr": "S'inscrire à $name"
+            },
+            "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
+            "visible": "always",
+            "register":false
         }
     ],
     "gatewayBootNodes": [
