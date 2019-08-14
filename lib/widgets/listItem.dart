@@ -176,8 +176,8 @@ class ListItem extends StatelessWidget {
   }
 
   Color getBackroundColor() {
-    if (purpose == Purpose.NONE || purpose == Purpose.GUIDE) return null;
-    return getMainColor().withOpacity(opacityBackgroundColor);
+    if (purpose == Purpose.NONE ) return null;
+    return getColorByPurpose(purpose: purpose, isPale: true).withOpacity(opacityBackgroundColor);
   }
 
   Color getSecondaryElementColor() {
