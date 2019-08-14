@@ -21,10 +21,10 @@ class EntityInfo extends StatefulWidget {
 }
 
 class _EntityInfoState extends State<EntityInfo> {
-  bool collapsed = false;
-  bool processingSubscription = false;
-  List<Entity_Action> actionsToDisplay = [];
-  bool actionsLoading = false;
+  bool _processingSubscription = false;
+  Entity_Action _registerAction;
+  List<Entity_Action> _actionsToDisplay = [];
+  bool _isRegistered = false;
 
   @override
   void didChangeDependencies() {
@@ -62,21 +62,26 @@ class _EntityInfoState extends State<EntityInfo> {
 
   getScaffoldChildren(BuildContext context, Entity entity) {
     List<Widget> children = [];
+    children.add(buildRegisterItem(context, entity));
     children.add(buildSubscribeItem(context, entity));
+    children.add(buildFeedItem(context, entity));
     children.addAll(buildActionList(context, entity));
-    children.add(ListItem(
-      icon: FeatherIcons.rss,
-      mainText: "Feed",
-      onTap: () {
-        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
-      },
-    ));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: entity.description[entity.languages[0]],
       maxLines: 5,
     ));
     return children;
+  }
+
+  buildFeedItem(BuildContext context, Entity entity) {
+    return ListItem(
+      icon: FeatherIcons.rss,
+      mainText: "Feed",
+      onTap: () {
+        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
+      },
+    );
   }
 
   buildSubscribeItem(BuildContext context, Entity entity) {
@@ -86,7 +91,7 @@ class _EntityInfoState extends State<EntityInfo> {
     return ListItem(
       mainText: subscribeText,
       icon: FeatherIcons.heart,
-      disabled: processingSubscription,
+      disabled: _processingSubscription,
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       // purpose: Purpose.HIGHLIGHT,
@@ -152,26 +157,66 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   Future<void> fetchVisibleActions(Entity entity) async {
-    final List<Entity_Action> actionsToShow = [];
-    setState(() {
-      actionsLoading = true;
-    });
+    final List<Entity_Action> actionsToDisplay = [];
+    Entity_Action registerAction;
 
     for (Entity_Action action in entity.actions) {
-      if (await isActionVisible(action, entity.entityId)) {
-        actionsToShow.add(action);
+      if (action.register == true) {
+        if (registerAction != null)
+          continue; //only one registerAction is supported
+        registerAction = action;
+        bool isRegistered = await isActionVisible(action, entity.entityId);
+        setState(() {
+          _registerAction = registerAction;
+          _isRegistered = isRegistered;
+        });
+      } else {
+        if (await isActionVisible(action, entity.entityId)) {
+          actionsToDisplay.add(action);
+        }
       }
     }
     setState(() {
-      actionsToDisplay = actionsToShow;
-      actionsLoading = false;
+      _actionsToDisplay = actionsToDisplay;
     });
   }
 
-  List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
-    final List<ListItem> actionsToShow = [];
+  Entity_Action getRegisterAction(Entity entity) {
+    for (Entity_Action action in entity.actions) {
+      if (action.register == true) return action;
+    }
+    return null;
+  }
 
-    if (actionsToDisplay.length == 0)
+  Widget buildRegisterItem(BuildContext ctx, Entity entity) {
+    if (_registerAction == null) return Container();
+
+    if (_isRegistered)
+      return ListItem(
+        mainText: "Registered",
+        rightIcon: FeatherIcons.check,
+        rightTextPurpose: Purpose.GOOD,
+        icon: FeatherIcons.checkCircle,
+      );
+    else
+      return ListItem(
+        mainText: "Register now",
+        icon: FeatherIcons.arrowRightCircle,
+        purpose: Purpose.HIGHLIGHT,
+        onTap: () {
+          if (_registerAction.type == "browser") {
+            onBrowserAction(ctx, _registerAction, entity);
+          }
+        },
+      );
+  }
+
+  List<Widget> buildActionList(BuildContext ctx, Entity entity) {
+    final List<Widget> actionsToShow = [];
+
+    actionsToShow.add(Section(text: "Actions"));
+
+    if (_actionsToDisplay.length == 0 || _registerAction == null) {
       return [
         ListItem(
           mainText: "No Actions definied",
@@ -180,8 +225,23 @@ class _EntityInfoState extends State<EntityInfo> {
           icon: FeatherIcons.helpCircle,
         )
       ];
+    }
 
-    for (Entity_Action action in actionsToDisplay) {
+    bool actionsDisabled = false;
+    if (!_isRegistered) {
+      actionsDisabled = true;
+      final entityName = entity.name[entity.languages[0]];
+      ListItem noticeItem = ListItem(
+        mainText: "Regsiter to $entityName first",
+        secondaryText: null,
+        rightIcon: null,
+        disabled: false,
+        purpose: Purpose.HIGHLIGHT,
+      );
+      actionsToShow.add(noticeItem);
+    }
+
+    for (Entity_Action action in _actionsToDisplay) {
       ListItem item;
       if (action.type == "browser") {
         if (!(action.name is Map) ||
@@ -191,17 +251,9 @@ class _EntityInfoState extends State<EntityInfo> {
           icon: FeatherIcons.arrowRightCircle,
           mainText: action.name[entity.languages[0]],
           secondaryText: action.visible,
+          disabled: actionsDisabled,
           onTap: () {
-            final String url = action.url;
-            final String title = action.name[entity.languages[0]] ??
-                entity.name[entity.languages[0]];
-
-            final route = MaterialPageRoute(
-                builder: (context) => WebAction(
-                      url: url,
-                      title: title,
-                    ));
-            Navigator.push(ctx, route);
+            onBrowserAction(ctx, action, entity);
           },
         );
       } else {
@@ -219,22 +271,35 @@ class _EntityInfoState extends State<EntityInfo> {
     return actionsToShow;
   }
 
+  onBrowserAction(BuildContext ctx, Entity_Action action, Entity entity) {
+    final String url = action.url;
+    final String title =
+        action.name[entity.languages[0]] ?? entity.name[entity.languages[0]];
+
+    final route = MaterialPageRoute(
+        builder: (context) => WebAction(
+              url: url,
+              title: title,
+            ));
+    Navigator.push(ctx, route);
+  }
+
   unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
     setState(() {
-      processingSubscription = true;
+      _processingSubscription = true;
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
     showMessage(Lang.of(ctx).get("You are no longer subscribed"),
         context: ctx, purpose: Purpose.NONE);
     setState(() {
-      processingSubscription = false;
+      _processingSubscription = false;
     });
   }
 
   subscribeToEntity(BuildContext ctx, Entity entity) async {
     setState(() {
-      processingSubscription = true;
+      _processingSubscription = true;
     });
 
     try {
@@ -259,7 +324,7 @@ class _EntityInfoState extends State<EntityInfo> {
       }
     }
     setState(() {
-      processingSubscription = false;
+      _processingSubscription = false;
     });
   }
 
