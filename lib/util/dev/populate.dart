@@ -106,8 +106,8 @@ String _makeEntity(String name) {
                 "fr": "Register"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
-            "register":false
+            "visible": "false",
+            "register":true
         },
         {
             "type": "browser",
@@ -116,7 +116,7 @@ String _makeEntity(String name) {
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
+            "visible": "false",
             "register":false
         },
         {

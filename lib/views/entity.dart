@@ -190,13 +190,6 @@ class _EntityInfoState extends State<EntityInfo> {
     return null;
   }
 
-  /*bool isUserRegistered(Entity entity) async{
-    final registerAction = getRegisterAction(entity);
-    if(registerAction==null)
-      return false;
-    return isActionVisible(registerAction, entity.entityId);
-
-  }*/
 
   Widget buildRegisterItem(BuildContext ctx, Entity entity) {
     if (registerAction == null) return Container();
@@ -210,7 +203,7 @@ class _EntityInfoState extends State<EntityInfo> {
     else
       return ListItem(
         mainText: "Register now",
-        rightIcon: null,
+        
         icon: FeatherIcons.arrowDownCircle,
         onTap: () {
           if (registerAction.type == "browser") {
@@ -223,7 +216,7 @@ class _EntityInfoState extends State<EntityInfo> {
   List<ListItem> buildActionList(BuildContext ctx, Entity entity) {
     final List<ListItem> actionsToShow = [];
 
-    if (actionsToDisplay.length == 0)
+    if (actionsToDisplay.length == 0 || registerAction == null) {
       return [
         ListItem(
           mainText: "No Actions definied",
@@ -232,6 +225,22 @@ class _EntityInfoState extends State<EntityInfo> {
           icon: FeatherIcons.helpCircle,
         )
       ];
+    }
+
+    bool actionsDisabled = false;
+    if (!_isRegistered) {
+      actionsDisabled = true;
+      final entityName = entity.name[entity.languages[0]];
+      ListItem noticeItem = ListItem(
+        mainText: "Regsiter to $entityName first",
+        secondaryText: null,
+        icon: FeatherIcons.helpCircle,
+        rightIcon: null,
+        disabled: false,
+        purpose: Purpose.HIGHLIGHT,
+      );
+      actionsToShow.add(noticeItem);
+    }
 
     for (Entity_Action action in actionsToDisplay) {
       ListItem item;
@@ -243,6 +252,7 @@ class _EntityInfoState extends State<EntityInfo> {
           icon: FeatherIcons.arrowRightCircle,
           mainText: action.name[entity.languages[0]],
           secondaryText: action.visible,
+          disabled: actionsDisabled,
           onTap: () {
             onBrowserAction(ctx, action, entity);
           },
