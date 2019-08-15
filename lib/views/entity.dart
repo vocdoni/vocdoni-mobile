@@ -52,6 +52,17 @@ class _EntityInfoState extends State<EntityInfo> {
         subtitle: entity.name[entity.languages[0]] ?? "(entity)",
         avatarUrl: entity.media.avatar,
         leftElement: buildRegisterItem(context, entity),
+        actions:<Widget>[
+                Icon(FeatherIcons.share2, color: Colors.white),
+                SizedBox(height: 48, width: paddingPage),
+                BaseButton(
+                  text: "Follow",
+                  color: Colors.white,
+                  secondary: true,
+                  isSmall: true,
+                ),
+                SizedBox(height: 48, width: paddingPage)
+              ],
         builder: Builder(
           builder: (ctx) {
             return SliverList(
