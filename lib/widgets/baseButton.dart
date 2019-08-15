@@ -5,23 +5,25 @@ class BaseButton extends StatelessWidget {
   final String text;
   final void Function() onTap;
   final Icon icon;
-  final Color color;
   final bool secondary;
   final bool isDisabled;
   final bool isSmall;
+  final double maxWidth;
+  final Purpose purpose;
 
   const BaseButton(
       {this.text,
       this.onTap,
       this.icon,
-      this.color,
       this.secondary = false,
       this.isDisabled = false,
-      this.isSmall = false});
+      this.isSmall = false,
+      this.maxWidth = null,
+      this.purpose});
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = color == null ? colorDescription : color;
+    Color c1 = getColorByPurpose(purpose: purpose);
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
@@ -35,13 +37,13 @@ class BaseButton extends StatelessWidget {
       ct = c2;
     }
 
-    double sidePadding = isSmall ? spaceElement * 0.5 : spaceElement;
+    double sidePadding = 24;
 
     return Align(
         alignment: Alignment.center,
         child: Container(
             height: isSmall ? 32 : 48,
-            constraints: BoxConstraints(maxWidth: 150, minHeight: 32),
+            constraints: maxWidth==null?null:BoxConstraints(maxWidth: 150, minHeight: 32),
             child: Material(
               color: c1,
               borderOnForeground: true,

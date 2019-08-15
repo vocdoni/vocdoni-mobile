@@ -36,6 +36,7 @@ final double spaceElement = 12;
 final double spaceCard = 24;
 final double spaceMainAndSecondary = 8;
 final double roundedCornerCard = 10;
+final double buttonDefaultWidth = 150;
 
 final double iconSizeTinny = 16;
 final double iconSizeSmall = 24;
