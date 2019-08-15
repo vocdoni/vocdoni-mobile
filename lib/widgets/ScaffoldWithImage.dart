@@ -1,8 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/widgets/avatar.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
@@ -13,6 +11,7 @@ class ScaffoldWithImage extends StatefulWidget {
   final String avatarUrl;
   final List<Widget> children;
   final Builder builder;
+  final Widget leftElement;
 
   const ScaffoldWithImage({
     this.title,
@@ -22,6 +21,7 @@ class ScaffoldWithImage extends StatefulWidget {
     this.subtitle,
     this.avatarUrl,
     this.builder,
+    this.leftElement,
   });
 
   @override
@@ -124,13 +124,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
-                                    BaseButton(
-                                      purpose: Purpose.HIGHLIGHT,
-                                      
-                                      text: "Register to ",
-                                      isSmall: false,
-                                      secondary: false,
-                                    ),
+                                   widget.leftElement==null?Container():widget.leftElement,
                                   ],
                                 )
                               ],
