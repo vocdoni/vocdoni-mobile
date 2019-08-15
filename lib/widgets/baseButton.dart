@@ -10,6 +10,8 @@ class BaseButton extends StatelessWidget {
   final bool isSmall;
   final double maxWidth;
   final Purpose purpose;
+  final IconData leftIconData;
+  final IconData rightIconData;
 
   const BaseButton(
       {this.text,
@@ -19,6 +21,8 @@ class BaseButton extends StatelessWidget {
       this.isDisabled = false,
       this.isSmall = false,
       this.maxWidth = null,
+      this.leftIconData = null,
+      this.rightIconData = null,
       this.purpose});
 
   @override
@@ -43,7 +47,9 @@ class BaseButton extends StatelessWidget {
         alignment: Alignment.center,
         child: Container(
             height: isSmall ? 32 : 48,
-            constraints: maxWidth==null?null:BoxConstraints(maxWidth: 150, minHeight: 32),
+            constraints: maxWidth == null
+                ? null
+                : BoxConstraints(maxWidth: 150, minHeight: 32),
             child: Material(
               color: c1,
               borderOnForeground: true,
@@ -58,11 +64,35 @@ class BaseButton extends StatelessWidget {
                       child: Padding(
                     padding:
                         EdgeInsets.fromLTRB(sidePadding, 0, sidePadding, 0),
-                    child: Text(text,
-                        style: TextStyle(
-                            color: ct,
-                            fontWeight: fontWeightSemiBold,
-                            fontSize: 16)),
+                    child: Row(
+                      children: <Widget>[
+                        leftIconData == null
+                            ? Container()
+                            : Padding(
+                                padding:
+                                    EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
+                                child: Icon(
+                                  leftIconData,
+                                  color: ct,
+                                ),
+                              ),
+                        Text(text,
+                            style: TextStyle(
+                                color: ct,
+                                fontWeight: fontWeightSemiBold,
+                                fontSize: 16)),
+                        rightIconData == null
+                            ? Container()
+                            : Padding(
+                                padding:
+                                    EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
+                                child: Icon(
+                                  rightIconData,
+                                  color: ct,
+                                ),
+                              ),
+                      ],
+                    ),
                   )),
                 ),
               ),
