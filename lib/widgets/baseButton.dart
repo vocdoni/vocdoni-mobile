@@ -8,6 +8,7 @@ class BaseButton extends StatelessWidget {
   final Color color;
   final bool secondary;
   final bool isDisabled;
+  final bool isSmall;
 
   const BaseButton(
       {this.text,
@@ -15,7 +16,8 @@ class BaseButton extends StatelessWidget {
       this.icon,
       this.color,
       this.secondary = false,
-      this.isDisabled = false});
+      this.isDisabled = false,
+      this.isSmall = false});
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +35,12 @@ class BaseButton extends StatelessWidget {
       ct = c2;
     }
 
+    double sidePadding = isSmall ? spaceElement * 0.5 : spaceElement;
+
     return Align(
         alignment: Alignment.center,
         child: Container(
-          height: 48,
+            height: isSmall ? 32 : 48,
             constraints: BoxConstraints(maxWidth: 150, minHeight: 32),
             child: Material(
               color: c1,
@@ -50,12 +54,12 @@ class BaseButton extends StatelessWidget {
                 child: SizedBox(
                   child: Center(
                       child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        spaceElement, 0, spaceElement, 0),
+                    padding:
+                        EdgeInsets.fromLTRB(sidePadding, 0, sidePadding, 0),
                     child: Text(text,
                         style: TextStyle(
                             color: ct,
-                            fontWeight: fontWeightBold,
+                            fontWeight: fontWeightSemiBold,
                             fontSize: 16)),
                   )),
                 ),
