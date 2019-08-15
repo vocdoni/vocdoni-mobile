@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/avatar.dart';
+import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
@@ -13,15 +14,15 @@ class ScaffoldWithImage extends StatefulWidget {
   final List<Widget> children;
   final Builder builder;
 
-  const ScaffoldWithImage(
-      {this.title,
-      this.collapsedTitle,
-      this.headerImageUrl,
-      this.children,
-      this.subtitle,
-      this.avatarUrl,
-      this.builder,
-      });
+  const ScaffoldWithImage({
+    this.title,
+    this.collapsedTitle,
+    this.headerImageUrl,
+    this.children,
+    this.subtitle,
+    this.avatarUrl,
+    this.builder,
+  });
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
@@ -33,7 +34,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   Widget build(context) {
     double headerImageHeight = 400;
     double titleHeight = 86;
-    double avatarHeight = widget.avatarUrl == null ? 0 : 96;
+    double avatarHeight = widget.avatarUrl == null ? 0 : 128;
     double avatarY = headerImageHeight - avatarHeight * 0.5;
     double titleY = widget.avatarUrl == null
         ? headerImageHeight + spaceElement
@@ -95,25 +96,48 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                           fontWeight: fontWeightLight),
                     ),
                     background: Stack(children: [
-                      Column(children: [
-                        Container(
-                          child: Image.network(widget.headerImageUrl,
-                              fit: BoxFit.cover,
-                              height: headerImageHeight,
-                              width: double.infinity),
-                        ),
-                      ]),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            paddingPage, avatarY, paddingPage, 0),
-                        child: widget.avatarUrl == null
-                            ? Container()
-                            : Avatar(
-                                avatarUrl: widget.avatarUrl,
-                                size: avatarHeight,
-                              ),
+                      Container(
+                        child: Image.network(widget.headerImageUrl,
+                            fit: BoxFit.cover,
+                            height: headerImageHeight,
+                            width: double.infinity),
                       ),
                       Container(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              paddingPage, avatarY, paddingPage, 0),
+                          child: Container(
+                            height: avatarHeight,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Container(
+                                  constraints: BoxConstraints(
+                                      minWidth: avatarHeight,
+                                      minHeight: avatarHeight),
+                                  child: CircleAvatar(
+                                      backgroundColor: Colors.indigo,
+                                      backgroundImage:
+                                          NetworkImage(widget.avatarUrl)),
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    BaseButton(
+                                      text: "Register",
+                                      isSmall: false,
+                                      secondary: true,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        //color: Colors.green,
                         padding: EdgeInsets.fromLTRB(0, titleY, 0, 0),
                         width: double.infinity,
                         child: PageTitle(
@@ -124,7 +148,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       )
                     ]));
               })),
-              widget.builder
+          widget.builder
           /* SliverList(
             delegate: SliverChildListDelegate(widget.children),
           ), */
