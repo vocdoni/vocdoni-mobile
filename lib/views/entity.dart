@@ -192,22 +192,21 @@ class _EntityInfoState extends State<EntityInfo> {
   Widget buildRegisterItem(BuildContext ctx, Entity entity) {
     if (_registerAction == null) return Container();
 
-    if (_isRegistered)
+    if (true)
       return BaseButton(
         purpose: Purpose.GOOD,
         rightIconData: FeatherIcons.check,
         text: "Registered",
-        isSmall: false,
-        //secondary: true,
+        isSmall: true,
+        secondary: false,
         isDisabled: true,
-        //hasBackground: true,
       );
     else
       return BaseButton(
         purpose: Purpose.HIGHLIGHT,
         rightIconData: FeatherIcons.feather,
         text: "Register",
-        isSmall: false,
+        isSmall: true,
         secondary: false,
         onTap: () {
           if (_registerAction.type == "browser") {

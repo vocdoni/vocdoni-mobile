@@ -29,7 +29,9 @@ class BaseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = getColorByPurpose(purpose: purpose,);
+    Color c1 = getColorByPurpose(
+      purpose: purpose,
+    );
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
@@ -43,8 +45,7 @@ class BaseButton extends StatelessWidget {
       ct = c2;
     }
 
-    if (!hasBackground)
-    {
+    if (!hasBackground) {
       ct = getColorByPurpose(purpose: purpose);
       c1 = Colors.transparent;
       c2 = Colors.transparent;
@@ -89,7 +90,9 @@ class BaseButton extends StatelessWidget {
                         Text(text,
                             style: TextStyle(
                                 color: ct,
-                                fontWeight: fontWeightSemiBold,
+                                fontWeight: isSmall
+                                    ? fontWeightRegular
+                                    : fontWeightSemiBold,
                                 fontSize: 16)),
                         rightIconData == null
                             ? Container()
