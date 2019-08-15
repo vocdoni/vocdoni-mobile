@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
+import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/summary.dart';
@@ -50,6 +51,7 @@ class _EntityInfoState extends State<EntityInfo> {
         collapsedTitle: entity.name[entity.languages[0]] ?? "(entity)",
         subtitle: entity.name[entity.languages[0]] ?? "(entity)",
         avatarUrl: entity.media.avatar,
+        leftElement: buildRegisterItem(context, entity),
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -62,7 +64,6 @@ class _EntityInfoState extends State<EntityInfo> {
 
   getScaffoldChildren(BuildContext context, Entity entity) {
     List<Widget> children = [];
-    children.add(buildRegisterItem(context, entity));
     children.add(buildSubscribeItem(context, entity));
     children.add(buildFeedItem(context, entity));
     children.addAll(buildActionList(context, entity));
@@ -192,17 +193,22 @@ class _EntityInfoState extends State<EntityInfo> {
     if (_registerAction == null) return Container();
 
     if (_isRegistered)
-      return ListItem(
-        mainText: "Registered",
-        rightIcon: FeatherIcons.check,
-        rightTextPurpose: Purpose.GOOD,
-        icon: FeatherIcons.checkCircle,
+      return BaseButton(
+        purpose: Purpose.GOOD,
+        rightIconData: FeatherIcons.check,
+        text: "Registered",
+        isSmall: false,
+        //secondary: true,
+        isDisabled: true,
+        //hasBackground: true,
       );
     else
-      return ListItem(
-        mainText: "Register now",
-        icon: FeatherIcons.arrowRightCircle,
+      return BaseButton(
         purpose: Purpose.HIGHLIGHT,
+        rightIconData: FeatherIcons.feather,
+        text: "Register",
+        isSmall: false,
+        secondary: false,
         onTap: () {
           if (_registerAction.type == "browser") {
             onBrowserAction(ctx, _registerAction, entity);
