@@ -12,6 +12,7 @@ class ScaffoldWithImage extends StatefulWidget {
   final List<Widget> children;
   final Builder builder;
   final Widget leftElement;
+  final List<Widget> actions;
 
   const ScaffoldWithImage({
     this.title,
@@ -22,6 +23,7 @@ class ScaffoldWithImage extends StatefulWidget {
     this.avatarUrl,
     this.builder,
     this.leftElement,
+    this.actions,
   });
 
   @override
@@ -40,7 +42,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
         ? headerImageHeight + spaceElement
         : headerImageHeight + spaceElement + avatarHeight * 0.5;
     double totalHeaderHeight = titleY + titleHeight;
-    double interpolationHeight = 40;
+    double interpolationHeight = 96;
     double pos = 0;
     double interpolation = 0;
     double collapseTrigger = 0.9;
@@ -54,7 +56,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
               snap: false,
               pinned: true,
               elevation: 0,
-              backgroundColor: colorBaseBackground,
+              backgroundColor: Colors.transparent,
               expandedHeight: totalHeaderHeight,
               leading: InkWell(
                   onTap: () => Navigator.pop(context),
@@ -62,6 +64,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                     FeatherIcons.arrowLeft,
                     color: collapsed ? colorDescription : Colors.white,
                   )),
+              actions: widget.actions,
               flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                 pos = constraints.biggest.height;
@@ -85,6 +88,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                   });
                 }
 
+                double blackShadeHeight = 96 +
+                    headerImageHeight * (1.4 * (1 - (pos / totalHeaderHeight)));
                 return FlexibleSpaceBar(
                     collapseMode: CollapseMode.pin,
                     centerTitle: true,
@@ -103,9 +108,31 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                             width: double.infinity),
                       ),
                       Container(
-                        child: Padding(
+                        height: blackShadeHeight,
+                        //color: collapsed ? Colors.blue : Colors.red,
+                        decoration: BoxDecoration(
+                          // Box decoration takes a gradient
+                          gradient: LinearGradient(
+                            // Where the linear gradient begins and ends
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            // Add one stop foopacityr each color. Stops should increase from 0 to 1
+                            stops: [1-(pos/totalHeaderHeight),1],
+                            colors: [
+                              // Colors are easy thanks to Flutter's Colors class.
+                              Colors.black.withOpacity(0.5),
+                              Colors.black.withOpacity(0)
+                            ],
+                          ),
+                        ),
+                      ),
+                      Column(children: [
+                        Spacer(
+                          flex: 1,
+                        ),
+                        Padding(
                           padding: EdgeInsets.fromLTRB(
-                              paddingPage, avatarY, paddingPage, 0),
+                              paddingPage, 0, paddingPage, 0),
                           child: Container(
                             height: avatarHeight,
                             child: Row(
@@ -124,24 +151,27 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
-                                   widget.leftElement==null?Container():widget.leftElement,
+                                    widget.leftElement == null
+                                        ? Container()
+                                        : widget.leftElement,
                                   ],
                                 )
                               ],
                             ),
                           ),
                         ),
-                      ),
-                      Container(
-                        //color: Colors.green,
-                        padding: EdgeInsets.fromLTRB(0, titleY, 0, 0),
-                        width: double.infinity,
-                        child: PageTitle(
-                          title: widget.title,
-                          subtitle: widget.subtitle,
-                          titleColor: colorTitle.withOpacity(interpolation),
+                        Container(
+                          //color: Colors.green,
+                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          width: double.infinity,
+                          child: PageTitle(
+                            title: widget.title,
+                            subtitle: widget.subtitle,
+                            titleColor: colorTitle.withOpacity(interpolation),
+                          ),
                         ),
-                      )
+                        //Text((1-(pos/totalHeaderHeight)).toString()),
+                      ]),
                     ]));
               })),
           widget.builder
