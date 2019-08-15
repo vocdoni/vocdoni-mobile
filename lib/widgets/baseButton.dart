@@ -12,6 +12,7 @@ class BaseButton extends StatelessWidget {
   final Purpose purpose;
   final IconData leftIconData;
   final IconData rightIconData;
+  final bool hasBackground;
 
   const BaseButton(
       {this.text,
@@ -20,14 +21,15 @@ class BaseButton extends StatelessWidget {
       this.secondary = false,
       this.isDisabled = false,
       this.isSmall = false,
-      this.maxWidth = null,
-      this.leftIconData = null,
-      this.rightIconData = null,
+      this.maxWidth,
+      this.leftIconData,
+      this.rightIconData,
+      this.hasBackground = true,
       this.purpose});
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = getColorByPurpose(purpose: purpose);
+    Color c1 = getColorByPurpose(purpose: purpose,);
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
@@ -39,6 +41,13 @@ class BaseButton extends StatelessWidget {
       c2 = c1;
       c1 = Colors.transparent;
       ct = c2;
+    }
+
+    if (!hasBackground)
+    {
+      ct = getColorByPurpose(purpose: purpose);
+      c1 = Colors.transparent;
+      c2 = Colors.transparent;
     }
 
     double sidePadding = 24;
@@ -65,6 +74,7 @@ class BaseButton extends StatelessWidget {
                     padding:
                         EdgeInsets.fromLTRB(sidePadding, 0, sidePadding, 0),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         leftIconData == null
                             ? Container()
