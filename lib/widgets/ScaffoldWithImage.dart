@@ -125,9 +125,11 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: <Widget>[
                                     BaseButton(
-                                      text: "Register",
+                                      purpose: Purpose.HIGHLIGHT,
+                                      
+                                      text: "Register to ",
                                       isSmall: false,
-                                      secondary: true,
+                                      secondary: false,
                                     ),
                                   ],
                                 )

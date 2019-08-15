@@ -75,6 +75,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
                   child: patternStep != PatternStep.PATTERN_WAITING_CONFIRM
                       ? null
                       : BaseButton(
+                          maxWidth: buttonDefaultWidth,
                           text: "Continue",
                           // isDisabled:patternState != SetPatternState.waitingConfirmation,
                           secondary: false,
