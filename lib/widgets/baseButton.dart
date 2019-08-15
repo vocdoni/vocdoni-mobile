@@ -13,6 +13,7 @@ class BaseButton extends StatelessWidget {
   final IconData leftIconData;
   final IconData rightIconData;
   final bool hasBackground;
+  final Color color;
 
   const BaseButton(
       {this.text,
@@ -25,13 +26,16 @@ class BaseButton extends StatelessWidget {
       this.leftIconData,
       this.rightIconData,
       this.hasBackground = true,
+      this.color,
       this.purpose});
 
   @override
   Widget build(BuildContext context) {
-    Color c1 = getColorByPurpose(
-      purpose: purpose,
-    );
+    Color c1 = color == null
+        ? getColorByPurpose(
+            purpose: purpose,
+          )
+        : color;
     Color c2 = Colors.transparent;
     Color ct = Colors.white;
 
