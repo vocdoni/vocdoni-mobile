@@ -1,3 +1,4 @@
+import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
@@ -23,15 +24,15 @@ Future populateSampleData() async {
   Identity_Peers newPeers = Identity_Peers();
   newPeers.entities.addAll(newEnts);
   newPeers.identities.addAll(
-      currentIdentities[appStateBloc.value.selectedIdentity]
-          .peers
-          .identities);
+      currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
   currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
   await identitiesBloc.set(currentIdentities);
 
   final List<Feed> feeds = _makeNewsFeeds(entities);
   final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
+  final ProcessMock process = parseProcess(_makeProcess());
+
 }
 
 List<Entity> _makeEntities() {
@@ -251,4 +252,65 @@ String _makeFeed(Entity org) {
     }
   ]
 }''';
+}
+
+String _makeProcess() {
+  return '''
+  {
+    "version": "1.0",
+    "type": "snark-vote",
+    "startBlock": 10000,
+    "numberOfBlocks": 400,
+    "census": {
+        "id": "0x1234...",
+        "merkleRoot": "0x1234...",
+        "messagingUris": [
+            "<messaging uri>",
+            "..."
+        ]
+    },
+    "details": {
+        "entityId": "0x123",
+        "encryptionPublicKey": " 0x1123",
+        "title": {
+            "en": "Universal Basic Income",
+            "ca": "Renda Bàsica Universal"
+        },
+        "description": {
+            "en": "## Markdown text goes here ### Abstract",
+            "ca": "## El markdown va aquí ### Resum"
+        },
+        "headerImage": "<content uri>",
+        "questions": [
+            {
+                "type": "single-choice", 
+                "question": {
+                    "en": "Should universal basic income become a human right?",
+                    "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
+                },
+                "description": {
+                    "en": "## Markdown text goes here ### Abstract",
+                    "ca": "## El markdown va aquí ### Resum"
+                },
+                "voteOptions": [
+                    {
+                        "title": {
+                            "en": "Yes",
+                            "ca": "Sí"
+                        },
+                        "value": "1"
+                    },
+                    {
+                        "title": {
+                            "en": "No",
+                            "ca": "No"
+                        },
+                        "value": "2"
+                    }
+                ]
+            }
+        ]
+    }
+}
+  ''';
 }
