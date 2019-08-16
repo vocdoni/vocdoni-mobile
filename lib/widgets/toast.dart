@@ -10,7 +10,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
     {bool global,
     BuildContext context,
-    int duration = 6,
+    int duration = 4,
     Function onPressed,
     Purpose purpose = Purpose.NONE}) {
   if (text == null) throw FlutterError("No text");
