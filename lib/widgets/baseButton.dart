@@ -12,7 +12,7 @@ class BaseButton extends StatelessWidget {
   final Purpose purpose;
   final IconData leftIconData;
   final IconData rightIconData;
-  final bool hasBackground;
+  final withoutBackground;
   final Color color;
 
   const BaseButton(
@@ -25,7 +25,7 @@ class BaseButton extends StatelessWidget {
       this.maxWidth,
       this.leftIconData,
       this.rightIconData,
-      this.hasBackground = true,
+      this.withoutBackground = false,
       this.color,
       this.purpose});
 
@@ -49,13 +49,13 @@ class BaseButton extends StatelessWidget {
       ct = c2;
     }
 
-    if (!hasBackground) {
-      ct = getColorByPurpose(purpose: purpose);
+    if (withoutBackground) {
+      ct = c1;
       c1 = Colors.transparent;
       c2 = Colors.transparent;
     }
 
-    double sidePadding = 24;
+    double sidePadding = withoutBackground ? 0 : 24;
 
     return Align(
         alignment: Alignment.center,
@@ -81,38 +81,45 @@ class BaseButton extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        leftIconData == null
+                        buildIcon(
+                            iconData: leftIconData,
+                            color: ct,
+                            isLeft: true,
+                            size: isSmall ? iconSizeTinny : iconSizeSmall),
+                        text == null
                             ? Container()
-                            : Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(0, 0, spaceElement, 0),
-                                child: Icon(
-                                  leftIconData,
-                                  color: ct,
-                                ),
-                              ),
-                        Text(text,
-                            style: TextStyle(
-                                color: ct,
-                                fontWeight: isSmall
-                                    ? fontWeightRegular
-                                    : fontWeightSemiBold,
-                                fontSize: 16)),
-                        rightIconData == null
-                            ? Container()
-                            : Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
-                                child: Icon(
-                                  rightIconData,
-                                  color: ct,
-                                ),
-                              ),
+                            : Text(text,
+                                style: TextStyle(
+                                    color: ct,
+                                    fontWeight: isSmall
+                                        ? fontWeightRegular
+                                        : fontWeightSemiBold,
+                                    fontSize: 16)),
+                        buildIcon(
+                            iconData: rightIconData,
+                            color: ct,
+                            isLeft: false,
+                            size: isSmall ? iconSizeTinny : iconSizeSmall),
                       ],
                     ),
                   )),
                 ),
               ),
             )));
+  }
+
+  buildIcon({IconData iconData, Color color, bool isLeft, double size}) {
+    return iconData == null
+        ? Container()
+        : Padding(
+            padding: isLeft
+                ? EdgeInsets.fromLTRB(0, 0, spaceElement, 0)
+                : EdgeInsets.fromLTRB(spaceElement, 0, 0, 0),
+            child: Icon(
+              iconData,
+              size: size,
+              color: color,
+            ),
+          );
   }
 }
