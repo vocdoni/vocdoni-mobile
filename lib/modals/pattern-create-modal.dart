@@ -78,7 +78,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
                           maxWidth: buttonDefaultWidth,
                           text: "Continue",
                           // isDisabled:patternState != SetPatternState.waitingConfirmation,
-                          secondary: false,
                           onTap: () => onApprovePattern(),
                         ),
                 ),
