@@ -52,17 +52,12 @@ class _EntityInfoState extends State<EntityInfo> {
         subtitle: entity.name[entity.languages[0]] ?? "(entity)",
         avatarUrl: entity.media.avatar,
         leftElement: buildRegisterItem(context, entity),
-        actions:<Widget>[
-                Icon(FeatherIcons.share2, color: Colors.white),
-                SizedBox(height: 48, width: paddingPage),
-                BaseButton(
-                  text: "Follow",
-                  color: Colors.white,
-                  secondary: true,
-                  isSmall: true,
-                ),
-                SizedBox(height: 48, width: paddingPage)
-              ],
+        actions: <Widget>[
+          Icon(FeatherIcons.share2, color: Colors.white),
+          SizedBox(height: 48, width: paddingPage),
+          buildSubscribeButton(context, entity),
+          SizedBox(height: 48, width: paddingPage)
+        ],
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -95,7 +90,8 @@ class _EntityInfoState extends State<EntityInfo> {
       },
     );
   }
-
+  
+  /*
   buildSubscribeItem(BuildContext context, Entity entity) {
     Identity account = identitiesBloc.getCurrentAccount();
     bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
@@ -107,6 +103,24 @@ class _EntityInfoState extends State<EntityInfo> {
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       // purpose: Purpose.HIGHLIGHT,
+      onTap: () => isSubscribed
+          ? unsubscribeFromEntity(context, entity)
+          : subscribeToEntity(context, entity),
+    );
+  }*/
+
+  buildSubscribeButton(BuildContext context, Entity entity) {
+    Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+    String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
+    return BaseButton(
+      text: subscribeText,
+      leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
+      isDisabled: _processingSubscription,
+      purpose: isSubscribed ? Purpose.GOOD : null,
+      isSmall: true,
+      secondary: true,
+      color: Colors.white,
       onTap: () => isSubscribed
           ? unsubscribeFromEntity(context, entity)
           : subscribeToEntity(context, entity),
@@ -206,7 +220,7 @@ class _EntityInfoState extends State<EntityInfo> {
     if (true)
       return BaseButton(
         purpose: Purpose.GOOD,
-        rightIconData: FeatherIcons.check,
+        leftIconData: FeatherIcons.check,
         text: "Registered",
         isSmall: true,
         secondary: false,
@@ -215,7 +229,7 @@ class _EntityInfoState extends State<EntityInfo> {
     else
       return BaseButton(
         purpose: Purpose.HIGHLIGHT,
-        rightIconData: FeatherIcons.feather,
+        leftIconData: FeatherIcons.feather,
         text: "Register",
         isSmall: true,
         secondary: false,
