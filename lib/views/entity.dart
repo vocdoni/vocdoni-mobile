@@ -74,8 +74,31 @@ class _EntityInfoState extends State<EntityInfo> {
     ];
   }
 
+  buildTest() {
+    double avatarHeight = 120;
+    return Container(
+      height: avatarHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            constraints:
+                BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
+            child: CircleAvatar(
+                backgroundColor: Colors.indigo,
+                backgroundImage: NetworkImage(
+                    "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
+          ),
+        ],
+      ),
+    );
+  }
+
   getScaffoldChildren(BuildContext context, Entity entity) {
     List<Widget> children = [];
+    //children.add(buildTest());
+    children.add(buildTitle(context, entity));
     children.add(buildSubscribeItem(context, entity));
     children.add(buildFeedItem(context, entity));
     children.addAll(buildActionList(context, entity));
@@ -84,7 +107,18 @@ class _EntityInfoState extends State<EntityInfo> {
       text: entity.description[entity.languages[0]],
       maxLines: 5,
     ));
+
     return children;
+  }
+
+  buildTitle(BuildContext context, Entity entity) {
+    return ListItem(
+      mainText: entity.name[entity.languages[0]],
+      secondaryText: entity.entityId,
+      isTitle: true,
+      rightIcon: null,
+      isBold: true,
+    );
   }
 
   buildFeedItem(BuildContext context, Entity entity) {
@@ -334,8 +368,11 @@ class _EntityInfoState extends State<EntityInfo> {
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
-    showMessage(Lang.of(ctx).get("You are no longer subscribed"),
-        context: ctx, purpose: Purpose.NONE);
+    showMessage(
+        Lang.of(ctx)
+            .get("You will no longer see this organization in your feed"),
+        context: ctx,
+        purpose: Purpose.NONE);
     setState(() {
       _processingSubscription = false;
     });
@@ -350,7 +387,7 @@ class _EntityInfoState extends State<EntityInfo> {
       Identity account = identitiesBloc.getCurrentAccount();
       await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showMessage(Lang.of(ctx).get("You are now subscribed"),
+      showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
     } catch (err) {
       if (err == "Already subscribed") {

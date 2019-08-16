@@ -35,17 +35,12 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   @override
   Widget build(context) {
     double headerImageHeight = 400;
-    double titleHeight = 86;
-    double avatarHeight = widget.avatarUrl == null ? 0 : 128;
-    double avatarY = headerImageHeight - avatarHeight * 0.5;
-    double titleY = widget.avatarUrl == null
-        ? headerImageHeight + spaceElement
-        : headerImageHeight + spaceElement + avatarHeight * 0.5;
-    double totalHeaderHeight = titleY + titleHeight;
-    double interpolationHeight = 96;
+    double avatarHeight = 128;
+    double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
+    double interpolationHeight = 64;
     double pos = 0;
     double interpolation = 0;
-    double collapseTrigger = 0.9;
+    double collapseTrigger = 1;
 
     return Scaffold(body: new Builder(
       builder: (BuildContext context) {
@@ -57,7 +52,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                 snap: false,
                 pinned: true,
                 elevation: 0,
-                backgroundColor: Colors.transparent,
+                backgroundColor: colorBaseBackground.withOpacity(0.9),
                 expandedHeight: totalHeaderHeight,
                 leading: InkWell(
                     onTap: () => Navigator.pop(context),
@@ -73,7 +68,6 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                   double minAppBarHeight = 48;
                   double o = ((pos - minAppBarHeight) / (interpolationHeight));
                   interpolation = o < 1 ? o : 1;
-                  debugPrint(interpolation.toString());
 
                   if (o < collapseTrigger && collapsed == false) {
                     Future.delayed(const Duration(milliseconds: 100), () {
@@ -92,14 +86,17 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                   double blackShadeHeight = 96 +
                       headerImageHeight *
                           (1.4 * (1 - (pos / totalHeaderHeight)));
+
+                  double interpolationOpacity = 1- interpolation;
                   return FlexibleSpaceBar(
+                    
                       collapseMode: CollapseMode.pin,
                       centerTitle: true,
                       title: Text(
                         widget.collapsedTitle,
                         style: TextStyle(
                             color:
-                                colorDescription.withOpacity(1 - interpolation),
+                                colorDescription.withOpacity(interpolationOpacity),
                             fontWeight: fontWeightLight),
                       ),
                       background: Stack(children: [
@@ -122,8 +119,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                               stops: [1 - (pos / totalHeaderHeight), 1],
                               colors: [
                                 // Colors are easy thanks to Flutter's Colors class.
-                                Colors.black.withOpacity(0.5),
-                                Colors.black.withOpacity(0)
+                                Colors.black.withOpacity(0.5*interpolation),
+                                Colors.black.withOpacity(0*interpolation)
                               ],
                             ),
                           ),
@@ -163,16 +160,6 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                               ),
                             ),
                           ),
-                          Container(
-                            //color: Colors.green,
-                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            width: double.infinity,
-                            child: PageTitle(
-                              title: widget.title,
-                              subtitle: widget.subtitle,
-                              titleColor: colorTitle.withOpacity(interpolation),
-                            ),
-                          ),
                           //Text((1-(pos/totalHeaderHeight)).toString()),
                         ]),
                       ]));
@@ -188,6 +175,6 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   }
 
   List<Widget> buildActions(BuildContext context) {
-    return widget.actionsBuilder(context);
+    return collapsed ? null : widget.actionsBuilder(context);
   }
 }
