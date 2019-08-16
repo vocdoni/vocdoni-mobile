@@ -33,7 +33,7 @@ void main() async {
 
   // DETERMINE THE FIRST SCREEN
   Widget home;
-  if (identitiesBloc.current.length > 0 ?? false) {
+  if (identitiesBloc.value.length > 0 ?? false) {
     home = IdentitySelectScreen();
   } else {
     home = IdentityCreateScreen();

@@ -22,13 +22,13 @@ class FeedTab extends StatelessWidget {
         identities?.elementAt(appState?.selectedIdentity ?? 0);
     if (currentIdentity == null) return buildNoEntries(ctx);
 
-    final entities = entitiesBloc.current.where((entity) {
+    final entities = entitiesBloc.value.where((entity) {
       return currentIdentity.peers.entities
               .indexWhere((e) => e.entityId == entity.entityId) >=
           0;
     }).toList();
 
-    newsFeedsBloc.current.forEach((feed) {
+    newsFeedsBloc.value.forEach((feed) {
       final matched = 0 <=
           entities.indexWhere((entity) {
             if (feed.meta["entityId"] != entity.entityId)

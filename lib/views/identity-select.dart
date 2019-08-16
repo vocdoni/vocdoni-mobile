@@ -71,7 +71,7 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
   /////////////////////////////////////////////////////////////////////////////
 
   onIdentitySelected(BuildContext ctx, int idx) async {
-    final identity = identitiesBloc.current[idx];
+    final identity = identitiesBloc.value[idx];
 
     var result = await Navigator.push(
         ctx,

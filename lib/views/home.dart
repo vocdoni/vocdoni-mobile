@@ -56,14 +56,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // DETERMINE INITIAL TAB
     // No organizations => identity
-    if (identitiesBloc.current == null || identitiesBloc.current == null) {
+    if (identitiesBloc.value == null || identitiesBloc.value == null) {
       selectedTab = 2;
     } else if (appStateBloc != null &&
-        appStateBloc.current != null &&
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+        appStateBloc.value != null &&
+        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers
                 .entities !=
             null &&
-        identitiesBloc.current[appStateBloc.current.selectedIdentity].peers
+        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers
                 .entities.length ==
             0) {
       selectedTab = 2;

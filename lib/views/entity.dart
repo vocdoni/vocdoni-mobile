@@ -268,7 +268,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
     if (true)
       return BaseButton(
-        purpose: Purpose.GOOD,
+        purpose: Purpose.GUIDE,
         leftIconData: FeatherIcons.check,
         text: "Registered",
         isSmall: true,

@@ -6,10 +6,10 @@ import 'package:dvote/util/parsers.dart';
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
   final List<Entity> entities = _makeEntities();
-  final currentEntities = entitiesBloc.current;
+  final currentEntities = entitiesBloc.value;
   currentEntities.addAll(entities);
   await entitiesBloc.set(currentEntities);
-  final currentIdentities = identitiesBloc.current;
+  final currentIdentities = identitiesBloc.value;
 
   final newEnts = entities.map((e) {
     EntitySummary entity = EntitySummary();
@@ -23,20 +23,20 @@ Future populateSampleData() async {
   Identity_Peers newPeers = Identity_Peers();
   newPeers.entities.addAll(newEnts);
   newPeers.identities.addAll(
-      currentIdentities[appStateBloc.current.selectedIdentity]
+      currentIdentities[appStateBloc.value.selectedIdentity]
           .peers
           .identities);
-  currentIdentities[appStateBloc.current.selectedIdentity].peers = newPeers;
+  currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
   await identitiesBloc.set(currentIdentities);
 
   final List<Feed> feeds = _makeNewsFeeds(entities);
-  final newFeeds = newsFeedsBloc.current.followedBy(feeds).toList();
+  final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
 }
 
 List<Entity> _makeEntities() {
-  Identity currentIdent = identitiesBloc.current
-      ?.elementAt(appStateBloc.current?.selectedIdentity ?? 0);
+  Identity currentIdent = identitiesBloc.value
+      ?.elementAt(appStateBloc.value?.selectedIdentity ?? 0);
   if (currentIdent == null) throw "No current identity";
 
   final ids = ["0x1", "0x2", "0x3"];

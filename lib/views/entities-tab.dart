@@ -27,7 +27,7 @@ class EntitiesTab extends StatelessWidget {
     Identity account = identitiesBloc.getCurrentAccount();
 
     account.peers.entities.forEach((entitySummary) {
-      for (Entity entity in entitiesBloc.current)
+      for (Entity entity in entitiesBloc.value)
         if (entity.entityId == entitySummary.entityId) {
           entities.add(entity);
         }

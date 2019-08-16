@@ -70,15 +70,15 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
       throw FlutterError("The entity parameter is invalid");
 
     final currentIndex =
-        current.indexWhere((e) => e.entityId == newEntity.entityId);
+        value.indexWhere((e) => e.entityId == newEntity.entityId);
     // Already exists
     if (currentIndex >= 0) {
-      final currentEntities = current;
+      final currentEntities = value;
       currentEntities[currentIndex] = newEntity;
       await set(currentEntities);
     } else {
-      current.add(newEntity);
-      await set(current);
+      value.add(newEntity);
+      await set(value);
 
       // Fetch the news feeds if needed
       await newsFeedsBloc.fetchFromEntity(newEntity);
@@ -86,7 +86,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   }
 
   Future<void> remove(String entityIdToRemove) async {
-    final entities = current;
+    final entities = value;
     entities.removeWhere(
         (existingEntity) => existingEntity.entityId == entityIdToRemove);
 

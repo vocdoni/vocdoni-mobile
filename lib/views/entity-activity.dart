@@ -98,10 +98,10 @@ class _EntityActivityState extends State<EntityActivity> {
     // Already fetched?
     if (remoteNewsFeed != null)
       return remoteNewsFeed;
-    else if (newsFeedsBloc.current == null) return null;
+    else if (newsFeedsBloc.value == null) return null;
 
     // TODO: DETECT THE CURRENT LANGUAGE
-    final feeds = newsFeedsBloc.current.where((feed) {
+    final feeds = newsFeedsBloc.value.where((feed) {
       if (feed.meta["entityId"] != entity.entityId)
         return false;
       else if (feed.meta["language"] != entity.languages[0]) return false;

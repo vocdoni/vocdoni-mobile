@@ -28,7 +28,7 @@ abstract class BlocComponent<T> {
   Observable<T> get stream => state.stream;
 
   /// Provides the latest value sent to the stream
-  T get current => state.value;
+  T get value => state.value;
 
   // Setters
 
