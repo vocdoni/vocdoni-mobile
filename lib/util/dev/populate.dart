@@ -3,6 +3,8 @@ import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/data/_processMock.dart';
+
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
@@ -31,7 +33,11 @@ Future populateSampleData() async {
   final List<Feed> feeds = _makeNewsFeeds(entities);
   final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
+
   final ProcessMock process = parseProcess(_makeProcess());
+  final currentProcessess = processesBloc.value;
+  currentProcessess.add(process);
+  await processesBloc.set(currentProcessess);
 
 }
 
@@ -88,8 +94,8 @@ String _makeEntity(String name) {
         "networkId": "goerli"
     },
     "votingProcesses": {
-        "active": [],
-        "ended": []
+        "active": ["processId01", "processId02"],
+        "ended": ["processId03"]
     },
     "newsFeed": {
         "default": "https://hipsterpixel.co/feed.json",

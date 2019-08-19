@@ -51,6 +51,12 @@ class VoteOption {
   }
 }
 
+class ProcessReference
+{
+  String processId;
+  String resolverContract;
+}
+
 //PROCESSESS
 
 Census parseCensus(dynamic mapCensus) {
