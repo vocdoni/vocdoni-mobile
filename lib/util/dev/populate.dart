@@ -264,10 +264,7 @@ String _makeProcess() {
     "census": {
         "id": "0x1234...",
         "merkleRoot": "0x1234...",
-        "messagingUris": [
-            "<messaging uri>",
-            "..."
-        ]
+        "messagingUri": "<messaging uri>"
     },
     "details": {
         "entityId": "0x123",

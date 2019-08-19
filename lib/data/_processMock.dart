@@ -13,7 +13,7 @@ class ProcessMock {
 class Census {
   String id;
   String merkleRoot;
-  List<String> messagingUris;
+  String messagingUri;
 }
 
 class ProcessDetails {
@@ -44,14 +44,90 @@ class Question {
 
 class VoteOption {
   Map<String, String> title;
-  int value;
+  String value;
 
-  VoteOptions() {
+  VoteOption() {
     title = new Map();
   }
 }
 
 //PROCESSESS
+
+Census parseCensus(dynamic mapCensus) {
+  Census censusResult = Census();
+  if (mapCensus["id"] != null) censusResult.id = mapCensus["id"];
+  if (mapCensus["merkleRoot"] != null)
+    censusResult.merkleRoot = mapCensus["merkleRoot"];
+  if (mapCensus["messagingUri"] != null)
+    censusResult.messagingUri = mapCensus["messagingUri"];
+  return censusResult;
+}
+
+ProcessDetails parseDetails(dynamic mapDetails) {
+  ProcessDetails detailsResult = new ProcessDetails();
+
+  if (mapDetails["entityId"] != null)
+    detailsResult.entityId = mapDetails["entityId"];
+  if (mapDetails["encryptionPublicKey"] != null)
+    detailsResult.encryptionPublicKey = mapDetails["encryptionPublicKey"];
+  if (mapDetails["headerImage"] != null)
+    detailsResult.headerImage = mapDetails["headerImage"];
+  if (mapDetails["title"] != null)
+    detailsResult.title
+        .addAll(mapDetails["title"].cast<String, String>() ?? {});
+  if (mapDetails["description"] != null)
+    detailsResult.description
+        .addAll(mapDetails["description"].cast<String, String>() ?? {});
+
+  dynamic mapQuestions;
+  if (mapDetails["questions"] != null) mapQuestions = mapDetails["questions"];
+  detailsResult.questions = parseQuestions(mapQuestions);
+
+  return detailsResult;
+}
+
+List<Question> parseQuestions(dynamic mapQuestions) {
+  List<Question> questionsResults = new List<Question>();
+
+  if (mapQuestions is List)
+    mapQuestions.whereType<Map>().map((mapQuestion) {
+      Question questionResult = new Question();
+
+      if (mapQuestion["type"] != null)
+        questionResult.type = mapQuestion["type"];
+
+      if (mapQuestion["question"] != null)
+        questionResult.question
+            .addAll(mapQuestion["question"].cast<String, String>() ?? {});
+
+      if (mapQuestion["description"] != null)
+        questionResult.description
+            .addAll(mapQuestion["description"].cast<String, String>() ?? {});
+
+      dynamic mapVoteOptions;
+      List<VoteOption> voteOptionsResults = new List<VoteOption>();
+      if (mapQuestion["voteOptions"] != null)
+        mapVoteOptions = mapQuestion["voteOptions"];
+
+      if (mapVoteOptions is List)
+        mapVoteOptions.whereType<Map>().map((mapVoteOption) {
+          VoteOption voteOptionResult = new VoteOption();
+
+          if (mapVoteOption["title"] != null)
+            voteOptionResult.title
+                .addAll(mapVoteOption["title"].cast<String, String>() ?? {});
+
+          if (mapVoteOption["value"] != null)
+            voteOptionResult.value = mapVoteOption["value"];
+
+          voteOptionsResults.add(voteOptionResult);
+        }).toList();
+      questionResult.voteOptions = voteOptionsResults;
+      questionsResults.add(questionResult);
+    }).toList();
+  return questionsResults;
+}
+
 ProcessMock parseProcess(String json) {
   try {
     ProcessMock result = ProcessMock();
@@ -66,74 +142,12 @@ ProcessMock parseProcess(String json) {
       result.numberOfBlocks = mapProcess["numberOfBlocks"];
 
     dynamic mapCensus;
-    Census censusResult = Census();
     if (mapProcess["census"] != null) mapCensus = mapProcess["census"];
-    if (mapCensus["id"] != null) censusResult.id = mapCensus["id"];
-    if (mapCensus["merkleRoot"] != null)
-      censusResult.merkleRoot = mapCensus["merkleRoot"];
-    if (mapCensus["messagingUris"] is List)
-      mapCensus["messagingUris"].whereType<Map>().map((uri) {
-        censusResult.messagingUris.add(uri);
-      });
-
-    result.census = censusResult;
+    result.census = parseCensus(mapCensus);
 
     dynamic mapDetails;
-    ProcessDetails detailsResult = new ProcessDetails();
     if (mapProcess["details"] != null) mapDetails = mapProcess["details"];
-    if (mapDetails["entityId"] != null)
-      detailsResult.entityId = mapDetails["entityId"];
-    if (mapDetails["encryptionPublicKey"] != null)
-      detailsResult.encryptionPublicKey = mapDetails["encryptionPublicKey"];
-    if (mapDetails["headerImage"] != null)
-      detailsResult.headerImage = mapDetails["headerImage"];
-    if (mapDetails["title"] != null)
-      detailsResult.title
-          .addAll(mapDetails["title"].cast<String, String>() ?? {});
-    if (mapDetails["description"] != null)
-      detailsResult.description
-          .addAll(mapDetails["description"].cast<String, String>() ?? {});
-
-    dynamic mapQuestions;
-    List<Question> questionsResults = new List<Question>();
-    if (mapDetails["questions"] != null) mapQuestions = mapDetails["questions"];
-
-    if (mapQuestions is List)
-      mapQuestions.whereType<Map>().map((mapQuestion) {
-        Question questionResult = new Question();
-
-        if (mapQuestion["type"] != null)
-          questionResult.type = mapQuestion["type"];
-
-        if (mapQuestion["question"] != null)
-          questionResult.question
-              .addAll(mapQuestion["question"].cast<String, String>() ?? {});
-
-        if (mapQuestion["description"] != null)
-          questionResult.description
-              .addAll(mapQuestion["description"].cast<String, String>() ?? {});
-
-        dynamic mapVoteOptions;
-        List<VoteOption> voteOptionsResults = new List<VoteOption>();
-        if (mapQuestion["voteOptions"] != null)
-          mapVoteOptions = mapQuestion["voteOptions"];
-
-        if (mapVoteOptions is List)
-          mapVoteOptions.whereType<Map>().map((mapVoteOption) {
-            VoteOption voteOptionResult = new VoteOption();
-
-            if (mapVoteOption["title"] != null)
-              voteOptionResult.title = mapVoteOption["title"];
-
-            if (mapVoteOption["value"] != null)
-              voteOptionResult.value = mapVoteOption["value"];
-
-            voteOptionsResults.add(voteOptionResult);
-          });
-        questionsResults.add(questionResult);
-      });
-      detailsResult.questions = questionsResults;
-      result.details = detailsResult;
+    result.details = parseDetails(mapDetails);
 
     return result;
   } catch (err) {
