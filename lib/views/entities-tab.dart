@@ -60,7 +60,7 @@ class EntitiesTab extends StatelessWidget {
                 icon: FeatherIcons.mail,
                 rightText: entity.votingProcesses.active.length.toString(),
                 rightTextIsBadge: true,
-                onTap: () => onTapEntity(ctx, entity),
+                onTap: () => onTapParticipation(ctx, entity),
                 disabled: entity.votingProcesses.active.length == 0)
           ]);
         });
@@ -81,5 +81,9 @@ class EntitiesTab extends StatelessWidget {
 
   onTapEntity(BuildContext ctx, Entity entity) {
     Navigator.pushNamed(ctx, "/entity", arguments: entity);
+  }
+
+  onTapParticipation(BuildContext ctx, Entity entity) {
+    Navigator.pushNamed(ctx, "/entity/participation", arguments: entity);
   }
 }

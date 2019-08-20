@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
+import 'package:vocdoni/views/entity-participation.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
 
@@ -65,6 +66,7 @@ void main() async {
       "/entity": (context) => EntityInfo(),
       "/entity/activity": (context) => EntityActivity(),
       "/entity/activity/post": (context) => ActivityPostScreen(),
+      "/entity/participation": (context) => EntityParticipation(),
       "/identity/backup": (context) => IdentityBackupScreen(),
 
       // GLOBAL

@@ -94,7 +94,7 @@ String _makeEntity(String name) {
         "networkId": "goerli"
     },
     "votingProcesses": {
-        "active": ["processId01", "processId02"],
+        "active": ["processId01", "processId02", "processId04"],
         "ended": ["processId03"]
     },
     "newsFeed": {
@@ -276,36 +276,36 @@ String _makeProcess() {
         "entityId": "0x123",
         "encryptionPublicKey": " 0x1123",
         "title": {
-            "en": "Universal Basic Income",
+            "default": "Universal Basic Income",
             "ca": "Renda Bàsica Universal"
         },
         "description": {
-            "en": "## Markdown text goes here ### Abstract",
+            "default": "## Markdown text goes here ### Abstract",
             "ca": "## El markdown va aquí ### Resum"
         },
-        "headerImage": "<content uri>",
+        "headerImage": "https://images.unsplash.com/photo-1489533119213-66a5cd877091?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1502&q=80",
         "questions": [
             {
                 "type": "single-choice", 
                 "question": {
-                    "en": "Should universal basic income become a human right?",
+                    "default": "Should universal basic income become a human right?",
                     "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
                 },
                 "description": {
-                    "en": "## Markdown text goes here ### Abstract",
+                    "default": "## Markdown text goes here ### Abstract",
                     "ca": "## El markdown va aquí ### Resum"
                 },
                 "voteOptions": [
                     {
                         "title": {
-                            "en": "Yes",
+                            "default": "Yes",
                             "ca": "Sí"
                         },
                         "value": "1"
                     },
                     {
                         "title": {
-                            "en": "No",
+                            "default": "No",
                             "ca": "No"
                         },
                         "value": "2"

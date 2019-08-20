@@ -52,7 +52,7 @@ class ProcessesBloc extends BlocComponent<List<ProcessMock>> {
   @override
   Future<void> set(List<ProcessMock> data) async {
     super.set(data);
-    await persist();
+    //await persist();
   }
 
   // CUSTOM OPERATIONS
