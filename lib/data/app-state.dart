@@ -103,7 +103,7 @@ class AppStateBloc extends BlocComponent<AppState> {
 
     // Trigger updates elsewhere
     entitiesBloc
-        .refreshFrom(identitiesBloc.current[identityIdx].peers.entities)
+        .refreshFrom(identitiesBloc.value[identityIdx].peers.entities)
         .catchError((_) {
       print(
           "Error: Unable to refresh the entities from the newly selected identity");
@@ -121,7 +121,7 @@ class AppStateBloc extends BlocComponent<AppState> {
   }
 
   Future trackAuthAttemp(bool successful) async {
-    final newState = current;
+    final newState = value;
     var now = DateTime.now();
     if (successful) {
       newState.authFailures = 0;

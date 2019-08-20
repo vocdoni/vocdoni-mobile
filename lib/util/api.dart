@@ -50,7 +50,7 @@ Future<String> addressFromMnemonic(String mnemonic) {
 Future<Entity> fetchEntityData(String resolverAddress, String entityId,
     String networkId, List<String> entryPoints) async {
   // Create a random cloned list
-  var bootnodes = appStateBloc.current.bootnodes
+  var bootnodes = appStateBloc.value.bootnodes
       .where((gw) => gw.meta["networkId"] == networkId)
       .toList();
   bootnodes.shuffle();
@@ -80,7 +80,7 @@ Future<String> fetchEntityNewsFeed(Entity entity, String lang) async {
   else if (!(entity.newsFeed[lang] is String)) return null;
 
   // Create a random cloned list
-  var bootnodes = appStateBloc.current.bootnodes.skip(0).toList();
+  var bootnodes = appStateBloc.value.bootnodes.skip(0).toList();
   bootnodes.shuffle();
 
   final String contentUri = entity.newsFeed[lang];

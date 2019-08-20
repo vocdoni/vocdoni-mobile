@@ -36,7 +36,7 @@ class SignModal extends StatelessWidget {
           ),
           Text("Using: " +
               identitiesBloc
-                  .current[appStateBloc.current.selectedIdentity].alias +
+                  .value[appStateBloc.value.selectedIdentity].alias +
               "?")
         ]),
       ),

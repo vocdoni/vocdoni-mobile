@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/util/dev/populate.dart';
-import 'package:vocdoni/widgets/toast.dart';
 
 class DevMenu extends StatelessWidget {
   @override

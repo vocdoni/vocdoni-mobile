@@ -66,7 +66,7 @@ class IdentityTab extends StatelessWidget {
 
   showIdentityBackup(BuildContext ctx) async {
     final identity =
-        identitiesBloc.current[appStateBloc.current.selectedIdentity];
+        identitiesBloc.value[appStateBloc.value.selectedIdentity];
 
     var result = await Navigator.push(
         ctx,

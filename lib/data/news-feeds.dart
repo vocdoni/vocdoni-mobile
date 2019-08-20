@@ -74,7 +74,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
   /// on the local storage
   Future<void> fetchFromEntity(Entity entity) async {
     if (entity.languages == null || entity.languages.length < 1) return;
-    final feeds = current;
+    final feeds = value;
 
     await Future.wait(entity.languages.map((lang) async {
       final strFeed = await fetchEntityNewsFeed(entity, lang);

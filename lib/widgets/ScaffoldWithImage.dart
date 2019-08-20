@@ -1,7 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/widgets/avatar.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
@@ -12,16 +11,20 @@ class ScaffoldWithImage extends StatefulWidget {
   final String avatarUrl;
   final List<Widget> children;
   final Builder builder;
+  final Widget leftElement;
+  final List<Widget> Function(BuildContext) actionsBuilder;
 
-  const ScaffoldWithImage(
-      {this.title,
-      this.collapsedTitle,
-      this.headerImageUrl,
-      this.children,
-      this.subtitle,
-      this.avatarUrl,
-      this.builder,
-      });
+  const ScaffoldWithImage({
+    this.title,
+    this.collapsedTitle,
+    this.headerImageUrl,
+    this.children,
+    this.subtitle,
+    this.avatarUrl,
+    this.builder,
+    this.leftElement,
+    this.actionsBuilder,
+  });
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
@@ -32,104 +35,146 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   @override
   Widget build(context) {
     double headerImageHeight = 400;
-    double titleHeight = 86;
-    double avatarHeight = widget.avatarUrl == null ? 0 : 96;
-    double avatarY = headerImageHeight - avatarHeight * 0.5;
-    double titleY = widget.avatarUrl == null
-        ? headerImageHeight + spaceElement
-        : headerImageHeight + spaceElement + avatarHeight * 0.5;
-    double totalHeaderHeight = titleY + titleHeight;
-    double interpolationHeight = 40;
+    double avatarHeight = 128;
+    double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
+    double interpolationHeight = 64;
     double pos = 0;
     double interpolation = 0;
-    double collapseTrigger = 0.9;
+    double collapseTrigger = 1;
 
-    return Scaffold(
-      body: CustomScrollView(
-        controller: ScrollController(),
-        slivers: [
-          SliverAppBar(
-              floating: false,
-              snap: false,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: colorBaseBackground,
-              expandedHeight: totalHeaderHeight,
-              leading: InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(
-                    FeatherIcons.arrowLeft,
-                    color: collapsed ? colorDescription : Colors.white,
-                  )),
-              flexibleSpace: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                pos = constraints.biggest.height;
+    return Scaffold(body: new Builder(
+      builder: (BuildContext context) {
+        return CustomScrollView(
+          controller: ScrollController(),
+          slivers: [
+            SliverAppBar(
+                floating: false,
+                snap: false,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: colorBaseBackground.withOpacity(0.9),
+                expandedHeight: totalHeaderHeight,
+                leading: InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      FeatherIcons.arrowLeft,
+                      color: collapsed ? colorDescription : Colors.white,
+                    )),
+                actions: buildActions(context),
+                flexibleSpace: LayoutBuilder(builder:
+                    (BuildContext context, BoxConstraints constraints) {
+                  pos = constraints.biggest.height;
 
-                double minAppBarHeight = 48;
-                double o = ((pos - minAppBarHeight) / (interpolationHeight));
-                interpolation = o < 1 ? o : 1;
-                debugPrint(interpolation.toString());
+                  double minAppBarHeight = 48;
+                  double o = ((pos - minAppBarHeight) / (interpolationHeight));
+                  interpolation = o < 1 ? o : 1;
 
-                if (o < collapseTrigger && collapsed == false) {
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    setState(() {
-                      collapsed = true;
+                  if (o < collapseTrigger && collapsed == false) {
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      setState(() {
+                        collapsed = true;
+                      });
                     });
-                  });
-                } else if (o >= collapseTrigger && collapsed == true) {
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    setState(() {
-                      collapsed = false;
+                  } else if (o >= collapseTrigger && collapsed == true) {
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      setState(() {
+                        collapsed = false;
+                      });
                     });
-                  });
-                }
+                  }
 
-                return FlexibleSpaceBar(
-                    collapseMode: CollapseMode.pin,
-                    centerTitle: true,
-                    title: Text(
-                      widget.collapsedTitle,
-                      style: TextStyle(
-                          color:
-                              colorDescription.withOpacity(1 - interpolation),
-                          fontWeight: fontWeightLight),
-                    ),
-                    background: Stack(children: [
-                      Column(children: [
+                  double blackShadeHeight = 96 +
+                      headerImageHeight *
+                          (1.4 * (1 - (pos / totalHeaderHeight)));
+
+                  double interpolationOpacity = 1- interpolation;
+                  return FlexibleSpaceBar(
+                    
+                      collapseMode: CollapseMode.pin,
+                      centerTitle: true,
+                      title: Text(
+                        widget.collapsedTitle,
+                        style: TextStyle(
+                            color:
+                                colorDescription.withOpacity(interpolationOpacity),
+                            fontWeight: fontWeightLight),
+                      ),
+                      background: Stack(children: [
                         Container(
                           child: Image.network(widget.headerImageUrl,
                               fit: BoxFit.cover,
                               height: headerImageHeight,
                               width: double.infinity),
                         ),
-                      ]),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            paddingPage, avatarY, paddingPage, 0),
-                        child: widget.avatarUrl == null
-                            ? Container()
-                            : Avatar(
-                                avatarUrl: widget.avatarUrl,
-                                size: avatarHeight,
-                              ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.fromLTRB(0, titleY, 0, 0),
-                        width: double.infinity,
-                        child: PageTitle(
-                          title: widget.title,
-                          subtitle: widget.subtitle,
-                          titleColor: colorTitle.withOpacity(interpolation),
+                        Container(
+                          height: blackShadeHeight,
+                          //color: collapsed ? Colors.blue : Colors.red,
+                          decoration: BoxDecoration(
+                            // Box decoration takes a gradient
+                            gradient: LinearGradient(
+                              // Where the linear gradient begins and ends
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              // Add one stop foopacityr each color. Stops should increase from 0 to 1
+                              stops: [1 - (pos / totalHeaderHeight), 1],
+                              colors: [
+                                // Colors are easy thanks to Flutter's Colors class.
+                                Colors.black.withOpacity(0.5*interpolation),
+                                Colors.black.withOpacity(0*interpolation)
+                              ],
+                            ),
+                          ),
                         ),
-                      )
-                    ]));
-              })),
-              widget.builder
-          /* SliverList(
-            delegate: SliverChildListDelegate(widget.children),
-          ), */
-        ],
-      ),
-    );
+                        Column(children: [
+                          Spacer(
+                            flex: 1,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                                paddingPage, 0, paddingPage, 0),
+                            child: Container(
+                              height: avatarHeight,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Container(
+                                    constraints: BoxConstraints(
+                                        minWidth: avatarHeight,
+                                        minHeight: avatarHeight),
+                                    child: CircleAvatar(
+                                        backgroundColor: Colors.indigo,
+                                        backgroundImage:
+                                            NetworkImage(widget.avatarUrl)),
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      widget.leftElement == null
+                                          ? Container()
+                                          : widget.leftElement,
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          //Text((1-(pos/totalHeaderHeight)).toString()),
+                        ]),
+                      ]));
+                })),
+            widget.builder
+            /* SliverList(
+              delegate: SliverChildListDelegate(widget.children),
+            ), */
+          ],
+        );
+      },
+    ));
+  }
+
+  List<Widget> buildActions(BuildContext context) {
+    return collapsed ? null : widget.actionsBuilder(context);
   }
 }

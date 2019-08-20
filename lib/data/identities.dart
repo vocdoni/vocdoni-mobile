@@ -76,7 +76,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
       throw FlutterError("Invalid encryptionKey");
 
     alias = alias.trim();
-    if (super.current.where((item) => item.alias == alias).length > 0) {
+    if (super.value.where((item) => item.alias == alias).length > 0) {
       throw "The account already exists";
     }
 
@@ -102,24 +102,24 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     newIdentity.keys.add(k);
 
     // Add to existing, notify and store
-    super.current.add(newIdentity);
-    set(super.current);
+    super.value.add(newIdentity);
+    set(super.value);
   }
 
   Identity getCurrentAccount() {
-    if (super.state.value.length <= appStateBloc.current?.selectedIdentity)
+    if (super.state.value.length <= appStateBloc.value?.selectedIdentity)
       throw FlutterError("Invalid selectedIdentity: out of bounds");
 
     final identity =
-        identitiesBloc.current[appStateBloc.current.selectedIdentity];
+        identitiesBloc.value[appStateBloc.value.selectedIdentity];
     if (!(identity is Identity))
       throw FlutterError("The current account is invalid");
     return identity;
   }
 
   setCurrentAccount(Identity account) async {
-    final identitiesValue = identitiesBloc.current;
-    identitiesValue[appStateBloc.current.selectedIdentity] = account;
+    final identitiesValue = identitiesBloc.value;
+    identitiesValue[appStateBloc.value.selectedIdentity] = account;
     await set(identitiesValue);
   }
 
@@ -175,7 +175,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
 
     // TODO: Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
-    for (final existingAccount in identitiesBloc.current) {
+    for (final existingAccount in identitiesBloc.value) {
       if (isSubscribed(existingAccount, entity)) {
         subcribedInOtherAccounts = true;
         break;

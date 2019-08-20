@@ -157,13 +157,13 @@ class _WebActionState extends State<WebAction> {
         if (hasPublicReadPermission != true) // may be null as well
           return respondError(id, "Permission declined");
         else if (identitiesBloc
-                .current[appStateBloc.current.selectedIdentity].keys.length <
+                .value[appStateBloc.value.selectedIdentity].keys.length <
             1)
           return respondError(
               id, "The current identity doesn't have a public key");
 
         final identity =
-            identitiesBloc.current[appStateBloc.current.selectedIdentity];
+            identitiesBloc.value[appStateBloc.value.selectedIdentity];
         final publicKey = identity.keys[0].publicKey;
 
         return respond(id, '''
@@ -172,7 +172,7 @@ class _WebActionState extends State<WebAction> {
 
       case "signPayload":
         final identity =
-            identitiesBloc.current[appStateBloc.current.selectedIdentity];
+            identitiesBloc.value[appStateBloc.value.selectedIdentity];
         final encryptedPrivateKey = identity.keys[0].encryptedPrivateKey;
 
         var result = await Navigator.push(

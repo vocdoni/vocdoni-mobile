@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
+import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/summary.dart';
@@ -50,6 +52,8 @@ class _EntityInfoState extends State<EntityInfo> {
         collapsedTitle: entity.name[entity.languages[0]] ?? "(entity)",
         subtitle: entity.name[entity.languages[0]] ?? "(entity)",
         avatarUrl: entity.media.avatar,
+        leftElement: buildRegisterButton(context, entity),
+        actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -60,9 +64,41 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
+  List<Widget> actionsBuilder(BuildContext context) {
+    final Entity entity = ModalRoute.of(context).settings.arguments;
+    return [
+      buildShareButton(context, entity),
+      SizedBox(height: 48, width: paddingPage),
+      buildSubscribeButton(context, entity),
+      SizedBox(height: 48, width: paddingPage)
+    ];
+  }
+
+  buildTest() {
+    double avatarHeight = 120;
+    return Container(
+      height: avatarHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            constraints:
+                BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
+            child: CircleAvatar(
+                backgroundColor: Colors.indigo,
+                backgroundImage: NetworkImage(
+                    "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
+          ),
+        ],
+      ),
+    );
+  }
+
   getScaffoldChildren(BuildContext context, Entity entity) {
     List<Widget> children = [];
-    children.add(buildRegisterItem(context, entity));
+    //children.add(buildTest());
+    children.add(buildTitle(context, entity));
     children.add(buildSubscribeItem(context, entity));
     children.add(buildFeedItem(context, entity));
     children.addAll(buildActionList(context, entity));
@@ -71,7 +107,18 @@ class _EntityInfoState extends State<EntityInfo> {
       text: entity.description[entity.languages[0]],
       maxLines: 5,
     ));
+
     return children;
+  }
+
+  buildTitle(BuildContext context, Entity entity) {
+    return ListItem(
+      mainText: entity.name[entity.languages[0]],
+      secondaryText: entity.entityId,
+      isTitle: true,
+      rightIcon: null,
+      isBold: true,
+    );
   }
 
   buildFeedItem(BuildContext context, Entity entity) {
@@ -99,6 +146,34 @@ class _EntityInfoState extends State<EntityInfo> {
           ? unsubscribeFromEntity(context, entity)
           : subscribeToEntity(context, entity),
     );
+  }
+
+  buildSubscribeButton(BuildContext context, Entity entity) {
+    Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+    String subscribeText = isSubscribed ? "Following" : "Follow";
+    return BaseButton(
+      text: subscribeText,
+      leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
+      isDisabled: _processingSubscription,
+      isSmall: true,
+      style: BaseButtonStyle.OUTLINE_WHITE,
+      onTap: () => isSubscribed
+          ? unsubscribeFromEntity(context, entity)
+          : subscribeToEntity(context, entity),
+    );
+  }
+
+  buildShareButton(BuildContext context, Entity entity) {
+    return BaseButton(
+        leftIconData: FeatherIcons.share2,
+        isSmall: false,
+        style: BaseButtonStyle.NO_BACKGROUND_WHITE,
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: entity.entityId));
+          showMessage("Identity ID copied on the clipboard",
+              context: context, purpose: Purpose.GUIDE);
+        });
   }
 
   Future<bool> isActionVisible(Entity_Action action, String entityId) async {
@@ -188,21 +263,24 @@ class _EntityInfoState extends State<EntityInfo> {
     return null;
   }
 
-  Widget buildRegisterItem(BuildContext ctx, Entity entity) {
+  Widget buildRegisterButton(BuildContext ctx, Entity entity) {
     if (_registerAction == null) return Container();
 
-    if (_isRegistered)
-      return ListItem(
-        mainText: "Registered",
-        rightIcon: FeatherIcons.check,
-        rightTextPurpose: Purpose.GOOD,
-        icon: FeatherIcons.checkCircle,
+    if (true)
+      return BaseButton(
+        purpose: Purpose.GUIDE,
+        leftIconData: FeatherIcons.check,
+        text: "Registered",
+        isSmall: true,
+        style: BaseButtonStyle.FILLED,
+        isDisabled: true,
       );
     else
-      return ListItem(
-        mainText: "Register now",
-        icon: FeatherIcons.arrowRightCircle,
+      return BaseButton(
         purpose: Purpose.HIGHLIGHT,
+        leftIconData: FeatherIcons.feather,
+        text: "Register",
+        isSmall: true,
         onTap: () {
           if (_registerAction.type == "browser") {
             onBrowserAction(ctx, _registerAction, entity);
@@ -290,8 +368,11 @@ class _EntityInfoState extends State<EntityInfo> {
     });
     Identity account = identitiesBloc.getCurrentAccount();
     await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
-    showMessage(Lang.of(ctx).get("You are no longer subscribed"),
-        context: ctx, purpose: Purpose.NONE);
+    showMessage(
+        Lang.of(ctx)
+            .get("You will no longer see this organization in your feed"),
+        context: ctx,
+        purpose: Purpose.NONE);
     setState(() {
       _processingSubscription = false;
     });
@@ -306,7 +387,7 @@ class _EntityInfoState extends State<EntityInfo> {
       Identity account = identitiesBloc.getCurrentAccount();
       await identitiesBloc.subscribeEntityToAccount(entity, account);
 
-      showMessage(Lang.of(ctx).get("You are now subscribed"),
+      showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
     } catch (err) {
       if (err == "Already subscribed") {

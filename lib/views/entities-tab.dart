@@ -27,7 +27,7 @@ class EntitiesTab extends StatelessWidget {
     Identity account = identitiesBloc.getCurrentAccount();
 
     account.peers.entities.forEach((entitySummary) {
-      for (Entity entity in entitiesBloc.current)
+      for (Entity entity in entitiesBloc.value)
         if (entity.entityId == entitySummary.entityId) {
           entities.add(entity);
         }
@@ -60,7 +60,7 @@ class EntitiesTab extends StatelessWidget {
                 icon: FeatherIcons.mail,
                 rightText: entity.votingProcesses.active.length.toString(),
                 rightTextIsBadge: true,
-                onTap: () => onTapEntity(ctx, entity),
+                onTap: () => onTapParticipation(ctx, entity),
                 disabled: entity.votingProcesses.active.length == 0)
           ]);
         });
@@ -81,5 +81,9 @@ class EntitiesTab extends StatelessWidget {
 
   onTapEntity(BuildContext ctx, Entity entity) {
     Navigator.pushNamed(ctx, "/entity", arguments: entity);
+  }
+
+  onTapParticipation(BuildContext ctx, Entity entity) {
+    Navigator.pushNamed(ctx, "/entity/participation", arguments: entity);
   }
 }

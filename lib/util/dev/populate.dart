@@ -1,15 +1,18 @@
+import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/data/_processMock.dart';
+
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
   final List<Entity> entities = _makeEntities();
-  final currentEntities = entitiesBloc.current;
+  final currentEntities = entitiesBloc.value;
   currentEntities.addAll(entities);
   await entitiesBloc.set(currentEntities);
-  final currentIdentities = identitiesBloc.current;
+  final currentIdentities = identitiesBloc.value;
 
   final newEnts = entities.map((e) {
     EntitySummary entity = EntitySummary();
@@ -23,20 +26,24 @@ Future populateSampleData() async {
   Identity_Peers newPeers = Identity_Peers();
   newPeers.entities.addAll(newEnts);
   newPeers.identities.addAll(
-      currentIdentities[appStateBloc.current.selectedIdentity]
-          .peers
-          .identities);
-  currentIdentities[appStateBloc.current.selectedIdentity].peers = newPeers;
+      currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
+  currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
   await identitiesBloc.set(currentIdentities);
 
   final List<Feed> feeds = _makeNewsFeeds(entities);
-  final newFeeds = newsFeedsBloc.current.followedBy(feeds).toList();
+  final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
+
+  final ProcessMock process = parseProcess(_makeProcess());
+  final currentProcessess = processesBloc.value;
+  currentProcessess.add(process);
+  await processesBloc.set(currentProcessess);
+
 }
 
 List<Entity> _makeEntities() {
-  Identity currentIdent = identitiesBloc.current
-      ?.elementAt(appStateBloc.current?.selectedIdentity ?? 0);
+  Identity currentIdent = identitiesBloc.value
+      ?.elementAt(appStateBloc.value?.selectedIdentity ?? 0);
   if (currentIdent == null) throw "No current identity";
 
   final ids = ["0x1", "0x2", "0x3"];
@@ -87,8 +94,8 @@ String _makeEntity(String name) {
         "networkId": "goerli"
     },
     "votingProcesses": {
-        "active": [],
-        "ended": []
+        "active": ["processId01", "processId02", "processId04"],
+        "ended": ["processId03"]
     },
     "newsFeed": {
         "default": "https://hipsterpixel.co/feed.json",
@@ -251,4 +258,62 @@ String _makeFeed(Entity org) {
     }
   ]
 }''';
+}
+
+String _makeProcess() {
+  return '''
+  {
+    "version": "1.0",
+    "type": "snark-vote",
+    "startBlock": 10000,
+    "numberOfBlocks": 400,
+    "census": {
+        "id": "0x1234...",
+        "merkleRoot": "0x1234...",
+        "messagingUri": "<messaging uri>"
+    },
+    "details": {
+        "entityId": "0x123",
+        "encryptionPublicKey": " 0x1123",
+        "title": {
+            "default": "Universal Basic Income",
+            "ca": "Renda Bàsica Universal"
+        },
+        "description": {
+            "default": "## Markdown text goes here ### Abstract",
+            "ca": "## El markdown va aquí ### Resum"
+        },
+        "headerImage": "https://images.unsplash.com/photo-1489533119213-66a5cd877091?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1502&q=80",
+        "questions": [
+            {
+                "type": "single-choice", 
+                "question": {
+                    "default": "Should universal basic income become a human right?",
+                    "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
+                },
+                "description": {
+                    "default": "## Markdown text goes here ### Abstract",
+                    "ca": "## El markdown va aquí ### Resum"
+                },
+                "voteOptions": [
+                    {
+                        "title": {
+                            "default": "Yes",
+                            "ca": "Sí"
+                        },
+                        "value": "1"
+                    },
+                    {
+                        "title": {
+                            "default": "No",
+                            "ca": "No"
+                        },
+                        "value": "2"
+                    }
+                ]
+            }
+        ]
+    }
+}
+  ''';
 }

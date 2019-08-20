@@ -82,7 +82,7 @@ class _IdentityCreateScreen extends State {
 
       await identitiesBloc.create(alias, newPattern);
 
-      int currentIndex = identitiesBloc.current.length - 1;
+      int currentIndex = identitiesBloc.value.length - 1;
       appStateBloc.selectIdentity(currentIndex);
 
       showHomePage(context);
