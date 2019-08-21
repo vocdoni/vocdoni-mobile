@@ -1,4 +1,5 @@
 import 'package:vocdoni/data/_processMock.dart';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
@@ -13,22 +14,6 @@ Future populateSampleData() async {
   final currentEntities = entitiesBloc.value;
   currentEntities.addAll(entitiesMetadata);
   await entitiesBloc.set(currentEntities);
-  final currentIdentities = identitiesBloc.value;
-
-  final account = identitiesBloc.getCurrentAccount();
-
-  Identity_Peers newPeers = Identity_Peers();
-  newPeers.entities.addAll(entitySummaries);
-  newPeers.identities.addAll(account.peers.identities);//should add the new ones
-
-  account.peers = newPeers;
-  identitiesBloc.setCurrentAccount(account);
-//   currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
- // currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
-
-final acount2 =  identitiesBloc.getCurrentAccount();
-
-  //await identitiesBloc.set(currentIdentities);
 
   final List<Feed> feeds = _makeNewsFeeds(entitiesMetadata);
   final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
@@ -38,6 +23,16 @@ final acount2 =  identitiesBloc.getCurrentAccount();
   final currentProcessess = processesBloc.value;
   currentProcessess.add(process);
   await processesBloc.set(currentProcessess);
+
+  await subscribe(entitySummaries);
+  
+}
+
+subscribe(List<EntitySummary> entitySummaries) {
+  entitySummaries.forEach((entitySummary) {
+    Ent ent = Ent(entitySummary);
+    account.subscribe(ent);
+  });
 }
 
 List<EntitySummary> _makeEntitySummaries() {
@@ -78,7 +73,7 @@ List<Feed> _makeNewsFeeds(List<Entity> entities) {
 
 String _makeEntityMetadata(String name) {
   String entityId = "0xinvalid";
-      
+
   return '''{
     "version": "1.0",
     "entityId":"$entityId",

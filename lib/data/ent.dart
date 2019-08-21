@@ -32,7 +32,9 @@ class Ent {
     this.feed = Feed.fromJson(jsonDecode(feedString));
   }
 
-  persist() {}
+  persist() {
+    entitiesBloc.add(this.entityMetadata, this.entitySummary);
+  }
 
   Feed makeFeed(EntitySummary _entitySummary, Entity _entityMetadata) {
     final feeds = newsFeedsBloc.value.where((f) {
@@ -42,8 +44,7 @@ class Ent {
       return true;
     }).toList();
 
-    return feeds.length>0?feeds[1]:null;
-
+    return feeds.length > 0 ? feeds[1] : null;
   }
 
   List<ProcessMock> makeProcessess(Entity entityMetadata) {
@@ -57,13 +58,17 @@ class Account {
   List<String> languages = ['default'];
 
   Account() {
+    init();
+  }
+
+  init() {
     this.identity = identitiesBloc.getCurrentAccount();
     this.identity.peers.entities.forEach((entitySummary) {
       for (Entity entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {
           Ent ent = new Ent(entitySummary);
-          if(ent.entityMetadata==null){
-            throw("Ent has no metadata");
+          if (ent.entityMetadata == null) {
+            throw ("Ent has no metadata");
           }
           this.ents.add(ent);
         }
@@ -72,5 +77,13 @@ class Account {
 
   isSubscribed(EntitySummary _entitySummary) {
     return identitiesBloc.isSubscribed(this.identity, _entitySummary);
+  }
+
+  subscribe(Ent ent) async {
+    //ent.persist();
+    //account.ents.add(ent);
+    await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
+    init();
+    //identity = identitiesBloc.getCurrentAccount();//necessary
   }
 }
