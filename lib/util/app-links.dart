@@ -1,10 +1,10 @@
 import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/data/data-utils.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 // import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 

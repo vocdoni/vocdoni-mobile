@@ -1,5 +1,5 @@
 import 'package:vocdoni/data/_processMock.dart';
-import 'package:vocdoni/data/data-utils.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
