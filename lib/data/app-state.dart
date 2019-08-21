@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
@@ -108,7 +109,12 @@ class AppStateBloc extends BlocComponent<AppState> {
       print(
           "Error: Unable to refresh the entities from the newly selected identity");
     });
+
+    account = new Account();
+
   }
+
+  
 
   setBootNodes(List<Gateway> bootnodes) async {
     if (!(bootnodes is List<Gateway>)) throw "Invalid bootnode list";

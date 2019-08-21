@@ -47,20 +47,20 @@ Future<String> addressFromMnemonic(String mnemonic) {
   return mnemonicToAddress(mnemonic);
 }
 
-Future<Entity> fetchEntityData(String resolverAddress, String entityId,
-    String networkId, List<String> entryPoints) async {
+Future<Entity> fetchEntityData(EntitySummary entitySummary) async {
   // Create a random cloned list
-  var bootnodes = appStateBloc.value.bootnodes
-      .where((gw) => gw.meta["networkId"] == networkId)
+  List<Gateway> bootnodes = appStateBloc.value.bootnodes
+      .where((gw) => gw.meta["networkId"] == entitySummary.networkId)
       .toList();
   bootnodes.shuffle();
 
+//TODO: Currently not using entrypoints
   // Attempt for every node available
   for (Gateway node in bootnodes) {
     try {
-      final Entity entity = await fetchEntity(
-          entityId, resolverAddress, node.dvote, node.web3,
-          networkId: networkId, entryPoints: entryPoints);
+      final Entity entity = await fetchEntity(entitySummary.entityId,
+          entitySummary.resolverAddress, node.dvote, node.web3,
+          networkId: entitySummary.networkId, entryPoints: []);
 
       return entity;
     } catch (err) {

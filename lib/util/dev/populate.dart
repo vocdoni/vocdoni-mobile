@@ -1,36 +1,36 @@
 import 'package:vocdoni/data/_processMock.dart';
+import 'package:vocdoni/data/data-utils.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/_processMock.dart';
 
-
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 Future populateSampleData() async {
-  final List<Entity> entities = _makeEntities();
+  final entitySummaries = _makeEntitySummaries();
+  final List<Entity> entitiesMetadata = _makeEntitiesMetadata(entitySummaries);
   final currentEntities = entitiesBloc.value;
-  currentEntities.addAll(entities);
+  currentEntities.addAll(entitiesMetadata);
   await entitiesBloc.set(currentEntities);
   final currentIdentities = identitiesBloc.value;
 
-  final newEnts = entities.map((e) {
-    EntitySummary entity = EntitySummary();
-    entity.entityId = e.entityId;
-    entity.resolverAddress = e.contracts.resolverAddress;
-    entity.networkId = e.contracts.networkId;
-    // entity.entryPoints.addAll(...);
-    return entity;
-  }).toList();
+  final account = identitiesBloc.getCurrentAccount();
 
   Identity_Peers newPeers = Identity_Peers();
-  newPeers.entities.addAll(newEnts);
-  newPeers.identities.addAll(
-      currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
-  currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
-  await identitiesBloc.set(currentIdentities);
+  newPeers.entities.addAll(entitySummaries);
+  newPeers.identities.addAll(account.peers.identities);//should add the new ones
 
-  final List<Feed> feeds = _makeNewsFeeds(entities);
+  account.peers = newPeers;
+  identitiesBloc.setCurrentAccount(account);
+//   currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
+ // currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
+
+final acount2 =  identitiesBloc.getCurrentAccount();
+
+  //await identitiesBloc.set(currentIdentities);
+
+  final List<Feed> feeds = _makeNewsFeeds(entitiesMetadata);
   final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
 
@@ -38,18 +38,23 @@ Future populateSampleData() async {
   final currentProcessess = processesBloc.value;
   currentProcessess.add(process);
   await processesBloc.set(currentProcessess);
-
 }
 
-List<Entity> _makeEntities() {
-  Identity currentIdent = identitiesBloc.value
-      ?.elementAt(appStateBloc.value?.selectedIdentity ?? 0);
-  if (currentIdent == null) throw "No current identity";
-
+List<EntitySummary> _makeEntitySummaries() {
   final ids = ["0x1", "0x2", "0x3"];
   return ids.map((id) {
-    String strEntity = _makeEntity("Entity #$id");
+    EntitySummary entitySummary = makeEntitySummary(
+        entityId: "Entity #$id", resolverAddress: "0xFFF", networkId: "xxx");
+    return entitySummary;
+  }).toList();
+}
+
+List<Entity> _makeEntitiesMetadata(List<EntitySummary> entitySummaries) {
+  return entitySummaries.map((entitySummary) {
+    String entityId = entitySummary.entityId;
+    String strEntity = _makeEntityMetadata("Entity #$entityId");
     final entity = parseEntity(strEntity);
+    entity.meta["entityId"] = entitySummary.entityId;
     return entity;
   }).toList();
 }
@@ -71,9 +76,9 @@ List<Feed> _makeNewsFeeds(List<Entity> entities) {
   return result;
 }
 
-String _makeEntity(String name) {
-  String entityId =
-      "0x" + randomString() + randomString() + randomString() + randomString();
+String _makeEntityMetadata(String name) {
+  String entityId = "0xinvalid";
+      
   return '''{
     "version": "1.0",
     "entityId":"$entityId",
@@ -123,7 +128,7 @@ String _makeEntity(String name) {
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "false",
+            "visible": "",
             "register":false
         },
         {

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/data/ent.dart';
 import '../data/news-feeds.dart';
 import "../data/app-state.dart";
 import "../data/identities.dart";
@@ -20,6 +21,7 @@ IdentitiesBloc identitiesBloc = IdentitiesBloc();
 EntitiesBloc entitiesBloc = EntitiesBloc();
 ProcessesBloc processesBloc = ProcessesBloc();
 NewsFeedsBloc newsFeedsBloc = NewsFeedsBloc();
+Account  account;
 
 // Global scaffold key for snackbars
 GlobalKey<ScaffoldState> homePageScaffoldKey = new GlobalKey<ScaffoldState>();

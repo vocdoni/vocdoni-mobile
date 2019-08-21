@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -33,9 +34,9 @@ class _EntityInfoState extends State<EntityInfo> {
     super.didChangeDependencies();
 
     try {
-      final entity = ModalRoute.of(super.context).settings.arguments;
-      if (entity == null) return;
-      fetchVisibleActions(entity);
+      final Ent ent = ModalRoute.of(super.context).settings.arguments;
+      if (ent == null) return;
+      fetchVisibleActions(ent.entityMetadata);
     } catch (err) {
       print(err);
     }
@@ -43,33 +44,33 @@ class _EntityInfoState extends State<EntityInfo> {
 
   @override
   Widget build(context) {
-    final Entity entity = ModalRoute.of(context).settings.arguments;
-    if (entity == null) return buildEmptyEntity(context);
+    final Ent ent = ModalRoute.of(context).settings.arguments;
+    if (ent == null) return buildEmptyEntity(context);
 
     return ScaffoldWithImage(
-        headerImageUrl: entity.media.header,
-        title: entity.name[entity.languages[0]] ?? "(entity)",
-        collapsedTitle: entity.name[entity.languages[0]] ?? "(entity)",
-        subtitle: entity.name[entity.languages[0]] ?? "(entity)",
-        avatarUrl: entity.media.avatar,
-        leftElement: buildRegisterButton(context, entity),
+        headerImageUrl: ent.entityMetadata.media.header,
+        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
+        collapsedTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
+        subtitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
+        avatarUrl: ent.entityMetadata.media.avatar,
+        leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
               delegate:
-                  SliverChildListDelegate(getScaffoldChildren(ctx, entity)),
+                  SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
             );
           },
         ));
   }
 
   List<Widget> actionsBuilder(BuildContext context) {
-    final Entity entity = ModalRoute.of(context).settings.arguments;
+    final Ent ent = ModalRoute.of(context).settings.arguments;
     return [
-      buildShareButton(context, entity),
+      buildShareButton(context, ent),
       SizedBox(height: 48, width: paddingPage),
-      buildSubscribeButton(context, entity),
+      buildSubscribeButton(context, ent),
       SizedBox(height: 48, width: paddingPage)
     ];
   }
@@ -95,16 +96,16 @@ class _EntityInfoState extends State<EntityInfo> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Entity entity) {
+  getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, entity));
-    children.add(buildSubscribeItem(context, entity));
-    children.add(buildFeedItem(context, entity));
-    children.addAll(buildActionList(context, entity));
+    children.add(buildTitle(context, ent.entityMetadata));
+    children.add(buildSubscribeItem(context, ent));
+    children.add(buildFeedItem(context, ent.entityMetadata));
+    children.addAll(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
-      text: entity.description[entity.languages[0]],
+      text: ent.entityMetadata.description[ent.entityMetadata.languages[0]],
       maxLines: 5,
     ));
 
@@ -131,9 +132,9 @@ class _EntityInfoState extends State<EntityInfo> {
     );
   }
 
-  buildSubscribeItem(BuildContext context, Entity entity) {
-    Identity account = identitiesBloc.getCurrentAccount();
-    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+  buildSubscribeItem(BuildContext context, Ent ent) {
+    //Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = account.isSubscribed(ent.entitySummary);
     String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
     return ListItem(
       mainText: subscribeText,
@@ -143,14 +144,14 @@ class _EntityInfoState extends State<EntityInfo> {
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       // purpose: Purpose.HIGHLIGHT,
       onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, entity)
-          : subscribeToEntity(context, entity),
+          ? unsubscribeFromEntity(context, ent)
+          : subscribeToEntity(context, ent),
     );
   }
 
-  buildSubscribeButton(BuildContext context, Entity entity) {
-    Identity account = identitiesBloc.getCurrentAccount();
-    bool isSubscribed = identitiesBloc.isSubscribed(account, entity);
+  buildSubscribeButton(BuildContext context, Ent ent) {
+    //Identity account = identitiesBloc.getCurrentAccount();
+    bool isSubscribed = account.isSubscribed(ent.entitySummary);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
       text: subscribeText,
@@ -159,18 +160,18 @@ class _EntityInfoState extends State<EntityInfo> {
       isSmall: true,
       style: BaseButtonStyle.OUTLINE_WHITE,
       onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, entity)
-          : subscribeToEntity(context, entity),
+          ? unsubscribeFromEntity(context, ent)
+          : subscribeToEntity(context, ent),
     );
   }
 
-  buildShareButton(BuildContext context, Entity entity) {
+  buildShareButton(BuildContext context, Ent ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: entity.entityId));
+          Clipboard.setData(ClipboardData(text: ent.entitySummary.entityId));
           showMessage("Identity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });
@@ -207,6 +208,8 @@ class _EntityInfoState extends State<EntityInfo> {
         'Content-type': 'application/json',
         'Accept': 'application/json',
       };
+
+      String a = action.visible;
 
       var response = await http.post(action.visible,
           body: jsonEncode(payload), headers: headers);
@@ -263,7 +266,7 @@ class _EntityInfoState extends State<EntityInfo> {
     return null;
   }
 
-  Widget buildRegisterButton(BuildContext ctx, Entity entity) {
+  Widget buildRegisterButton(BuildContext ctx, Ent ent) {
     if (_registerAction == null) return Container();
 
     if (true)
@@ -283,13 +286,13 @@ class _EntityInfoState extends State<EntityInfo> {
         isSmall: true,
         onTap: () {
           if (_registerAction.type == "browser") {
-            onBrowserAction(ctx, _registerAction, entity);
+            onBrowserAction(ctx, _registerAction, ent);
           }
         },
       );
   }
 
-  List<Widget> buildActionList(BuildContext ctx, Entity entity) {
+  List<Widget> buildActionList(BuildContext ctx, Ent ent) {
     final List<Widget> actionsToShow = [];
 
     actionsToShow.add(Section(text: "Actions"));
@@ -308,7 +311,7 @@ class _EntityInfoState extends State<EntityInfo> {
     bool actionsDisabled = false;
     if (!_isRegistered) {
       actionsDisabled = true;
-      final entityName = entity.name[entity.languages[0]];
+      final entityName = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
       ListItem noticeItem = ListItem(
         mainText: "Regsiter to $entityName first",
         secondaryText: null,
@@ -323,20 +326,20 @@ class _EntityInfoState extends State<EntityInfo> {
       ListItem item;
       if (action.type == "browser") {
         if (!(action.name is Map) ||
-            !(action.name[entity.languages[0]] is String)) return null;
+            !(action.name[ent.entityMetadata.languages[0]] is String)) return null;
 
         item = ListItem(
           icon: FeatherIcons.arrowRightCircle,
-          mainText: action.name[entity.languages[0]],
+          mainText: action.name[ent.entityMetadata.languages[0]],
           secondaryText: action.visible,
           disabled: actionsDisabled,
           onTap: () {
-            onBrowserAction(ctx, action, entity);
+            onBrowserAction(ctx, action, ent);
           },
         );
       } else {
         item = ListItem(
-          mainText: action.name[entity.languages[0]],
+          mainText: action.name[ent.entityMetadata.languages[0]],
           secondaryText: "Action type not supported yet: " + action.type,
           icon: FeatherIcons.helpCircle,
           disabled: true,
@@ -349,10 +352,10 @@ class _EntityInfoState extends State<EntityInfo> {
     return actionsToShow;
   }
 
-  onBrowserAction(BuildContext ctx, Entity_Action action, Entity entity) {
+  onBrowserAction(BuildContext ctx, Entity_Action action, Ent ent) {
     final String url = action.url;
     final String title =
-        action.name[entity.languages[0]] ?? entity.name[entity.languages[0]];
+        action.name[ent.entityMetadata.languages[0]] ?? ent.entityMetadata.name[ent.entityMetadata.languages[0]];
 
     final route = MaterialPageRoute(
         builder: (context) => WebAction(
@@ -362,12 +365,12 @@ class _EntityInfoState extends State<EntityInfo> {
     Navigator.push(ctx, route);
   }
 
-  unsubscribeFromEntity(BuildContext ctx, Entity entity) async {
+  unsubscribeFromEntity(BuildContext ctx, Ent ent) async {
     setState(() {
       _processingSubscription = true;
     });
     Identity account = identitiesBloc.getCurrentAccount();
-    await identitiesBloc.unsubscribeEntityFromAccount(entity, account);
+    await identitiesBloc.unsubscribeEntityFromAccount(ent, account);
     showMessage(
         Lang.of(ctx)
             .get("You will no longer see this organization in your feed"),
@@ -378,14 +381,14 @@ class _EntityInfoState extends State<EntityInfo> {
     });
   }
 
-  subscribeToEntity(BuildContext ctx, Entity entity) async {
+  subscribeToEntity(BuildContext ctx, Ent ent) async {
     setState(() {
       _processingSubscription = true;
     });
 
     try {
       Identity account = identitiesBloc.getCurrentAccount();
-      await identitiesBloc.subscribeEntityToAccount(entity, account);
+      await identitiesBloc.subscribeEntityToAccount(ent, account);
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
