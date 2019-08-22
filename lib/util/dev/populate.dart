@@ -33,7 +33,7 @@ Future populateSampleData() async {
     if (account.isSubscribed(ent.entitySummary) == false)
       account.subscribe(ent);
   });
-  account.refereshLocal();
+  account.sync();
 }
 
 List<EntitySummary> makeEntitySummaries() {
