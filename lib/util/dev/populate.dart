@@ -20,8 +20,9 @@ Future populateSampleData() async {
   entitySummaries.forEach((entitySummary) {
     Ent ent = Ent(entitySummary);
     ents.add(ent);
-    entitiesMetadata.add(makeEntityMetadata(entitySummary));
-    feeds.addAll(makeFeeds(ent));
+    Entity entityMetadata = makeEntityMetadata(entitySummary);
+    entitiesMetadata.add(entityMetadata);
+    feeds.addAll(makeFeeds(entityMetadata));
     processess.add(makeFakeProcess());
   });
 
@@ -53,10 +54,10 @@ Entity makeEntityMetadata(EntitySummary entitySummary) {
   return entityMetadata;
 }
 
-List<Feed> makeFeeds(Ent ent) {
-  return ent.entityMetadata.languages.map((lang) {
-    Feed f = parseFeed(getFeedString(ent.entityMetadata));
-    f.meta['entityId'] = ent.entitySummary.entityId;
+List<Feed> makeFeeds(Entity entityMetadata) {
+  return entityMetadata.languages.map((lang) {
+    Feed f = parseFeed(getFeedString(entityMetadata));
+    f.meta['entityId'] = entityMetadata.meta['entityId'];
     f.meta['language'] = lang;
     return f;
   }).toList();

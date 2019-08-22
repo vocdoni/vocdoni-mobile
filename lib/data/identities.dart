@@ -176,7 +176,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     // TODO: Remove the full entity if not used elsewhere
     // TODO: Remove the entity feeds if not used elsewhere
     if (!subcribedInOtherAccounts) {
-      await entitiesBloc.remove(ent.entitySummary.entityId);
+      await entitiesBloc.remove(entitySummary.entityId);
     }
   }
 }
