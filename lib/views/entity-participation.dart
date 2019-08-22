@@ -2,6 +2,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/data/_processMock.dart';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -21,15 +22,15 @@ class _EntityParticipationState extends State<EntityParticipation> {
 
   @override
   Widget build(context) {
-    final Entity entity = ModalRoute.of(context).settings.arguments;
+    final Ent ent = ModalRoute.of(context).settings.arguments;
     if (_loading) {
-      fetchProcessess(context, entity);
+      fetchProcessess(context, ent.entityMetadata);
       return buildLoading(context);
-    } else if (entity == null) return buildEmptyEntity(context);
+    } else if (ent == null) return buildEmptyEntity(context);
 
     return Scaffold(
       appBar: TopNavigation(
-        title: entity.name[entity.languages[0]],
+        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       ),
       body: ListView.builder(
         itemCount: _processess.length,
@@ -39,10 +40,10 @@ class _EntityParticipationState extends State<EntityParticipation> {
             image: process.details.headerImage,
             children: <Widget>[
               ListItem(
-                mainText: process.details.title[entity.languages[0]],
+                mainText: process.details.title[ent.entityMetadata.languages[0]],
                 mainTextFullWidth: true,
-                secondaryText: entity.name[entity.languages[0]],
-                avatarUrl: entity.media.avatar,
+                secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+                avatarUrl: ent.entityMetadata.media.avatar,
                 /*rightText: DateFormat('MMMM dd')
                     .format(DateTime.parse(process.datePublished).toLocal()),
                 onTap: () => onTapItem(context, process),*/

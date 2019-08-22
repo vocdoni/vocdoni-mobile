@@ -18,29 +18,14 @@ class FeedTab extends StatelessWidget {
     if (newsFeeds == null) return buildNoEntries(ctx);
 
     List<FeedPost> newsPosts = List<FeedPost>();
-    final Identity currentIdentity =
-        identities?.elementAt(appState?.selectedIdentity ?? 0);
-    if (currentIdentity == null) return buildNoEntries(ctx);
 
-    final entities = entitiesBloc.value.where((entity) {
-      return currentIdentity.peers.entities
-              .indexWhere((e) => e.entityId == entity.entityId) >=
-          0;
-    }).toList();
+    if (account.ents.length == 0) return buildNoEntries(ctx);
 
-    newsFeedsBloc.value.forEach((feed) {
-      final matched = 0 <=
-          entities.indexWhere((entity) {
-            if (feed.meta["entityId"] != entity.entityId)
-              return false;
-            // TODO: DETECT THE CURRENT LANGUAGE
-            else if (feed.meta["language"] != entity.languages[0]) return false;
-            return true;
-          });
-      if (!matched) return;
-      newsPosts.addAll(feed.items);
+
+    account.ents.forEach((ent){
+      newsPosts.addAll(ent.feed.items);
     });
-
+          
     if (newsPosts.length == 0) return buildNoEntries(ctx);
     newsPosts.sort((a, b) {
       if (!(a?.datePublished is DateTime) && !(b?.datePublished is DateTime))

@@ -15,19 +15,25 @@ class Ent {
   List<ProcessMock> processess;
 
   Ent(EntitySummary _entitySummary) {
-    entitySummary = _entitySummary;
+    this.entitySummary = _entitySummary;
 
-    for (Entity _entityMetadata in entitiesBloc.value) {
-      if (_entityMetadata.meta['entityId'] == _entitySummary.entityId) {
-        this.entityMetadata = _entityMetadata;
-        this.feed = makeFeed(_entitySummary, _entityMetadata);
-        this.processess = makeProcessess(_entityMetadata);
-      }
+    //for (Entity _entityMetadata in entitiesBloc.value) {
+    int index = entitiesBloc.value.indexWhere((e) {
+      return e.meta['entityId'] == _entitySummary.entityId;
+    });
+
+    if (index == -1) {
+      this.entityMetadata = new Entity();
+      this.entityMetadata.meta['entityId'] = _entitySummary.entityId;
+    } else {
+      this.entityMetadata = entitiesBloc.value[index];
+      this.feed = makeFeed(_entitySummary, this.entityMetadata);
+      this.processess = makeProcessess(this.entityMetadata);
     }
   }
 
   refresh(String lang) async {
-    this.entityMetadata = await fetchEntityData(entitySummary);
+    entityMetadata = await fetchEntityData(entitySummary);
     final feedString = await fetchEntityNewsFeed(entityMetadata, lang);
     this.feed = Feed.fromJson(jsonDecode(feedString));
   }
@@ -44,7 +50,7 @@ class Ent {
       return true;
     }).toList();
 
-    return feeds.length > 0 ? feeds[1] : null;
+    return feeds.length > 0 ? feeds[1] : new Feed();
   }
 
   List<ProcessMock> makeProcessess(Entity entityMetadata) {

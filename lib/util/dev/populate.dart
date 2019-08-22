@@ -8,14 +8,14 @@ import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/_processMock.dart';
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
-Future populateSampleData() async {
+/*Future populateSampleData() async {
   final entitySummaries = _makeEntitySummaries();
   final List<Entity> entitiesMetadata = _makeEntitiesMetadata(entitySummaries);
   final currentEntities = entitiesBloc.value;
   currentEntities.addAll(entitiesMetadata);
   await entitiesBloc.set(currentEntities);
 
-  final List<Feed> feeds = _makeNewsFeeds(entitiesMetadata);
+  final List<Feed> feeds = _makeNewsFeeds(ents);
   final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
   await newsFeedsBloc.set(newFeeds);
 
@@ -25,12 +25,29 @@ Future populateSampleData() async {
   await processesBloc.set(currentProcessess);
 
   await subscribe(entitySummaries);
-  
-}
+}*/
 
-subscribe(List<EntitySummary> entitySummaries) {
+Future populateSampleData() async {
+  List<Entity> entitiesMetadata = new List<Entity>();
+  List<Feed> feeds = new List<Feed>();
+  List<ProcessMock> processess = new List<ProcessMock>();
+  List<Ent> ents = new List<Ent>();
+
+  final entitySummaries = _makeEntitySummaries();
+
   entitySummaries.forEach((entitySummary) {
     Ent ent = Ent(entitySummary);
+    ents.add(ent);
+    entitiesMetadata.add(makeEntityMetadata(entitySummary));
+    feeds.addAll(makeFeeds(ent));
+    processess.add(parseProcess(_makeProcess()));
+  });
+
+  await entitiesBloc.set(entitiesMetadata);
+  await newsFeedsBloc.set(feeds);
+  await processesBloc.set(processess);
+
+  ents.forEach((ent) {
     account.subscribe(ent);
   });
 }
@@ -44,7 +61,7 @@ List<EntitySummary> _makeEntitySummaries() {
   }).toList();
 }
 
-List<Entity> _makeEntitiesMetadata(List<EntitySummary> entitySummaries) {
+/*List<Entity> makeEnts(List<EntitySummary> entitySummaries) {
   return entitySummaries.map((entitySummary) {
     String entityId = entitySummary.entityId;
     String strEntity = _makeEntityMetadata("Entity #$entityId");
@@ -52,23 +69,50 @@ List<Entity> _makeEntitiesMetadata(List<EntitySummary> entitySummaries) {
     entity.meta["entityId"] = entitySummary.entityId;
     return entity;
   }).toList();
+}*/
+
+/*List<Entity> _makeEntitiesMetadata(List<EntitySummary> entitySummaries) {
+  return entitySummaries.map((entitySummary) {
+    String entityId = entitySummary.entityId;
+    String strEntity = _makeEntityMetadata("Entity #$entityId");
+    final entity = parseEntity(strEntity);
+    entity.meta["entityId"] = entitySummary.entityId;
+    return entity;
+  }).toList();
+}*/
+
+Entity makeEntityMetadata(EntitySummary entitySummary) {
+  String entityId = entitySummary.entityId;
+  String strEntity = _makeEntityMetadata("Entity #$entityId");
+  final entityMetadata = parseEntity(strEntity);
+  entityMetadata.meta["entityId"] = entitySummary.entityId;
+  return entityMetadata;
 }
 
-List<Feed> _makeNewsFeeds(List<Entity> entities) {
-  if (entities?.length == 0 ?? false) throw "No entities";
+/*List<Feed> _makeNewsFeeds(List<Ent> ents) {
+  if (ents?.length == 0 ?? false) throw "No entities";
 
   List<Feed> result = [];
-  entities.forEach((entity) {
-    List<Feed> feeds = entity.languages.map((lang) {
-      Feed f = parseFeed(_makeFeed(entity));
-      // external metadata
-      f.meta.addAll({"entityId": entity.entityId, "language": lang});
+  ents.forEach((ent) {
+    List<Feed> feeds = ent.entityMetadata.languages.map((lang) {
+      Feed f = parseFeed(_makeFeed(ent.entityMetadata));
+      f.meta['entityId'] = ent.entitySummary.entityId;
+      f.meta['language'] = lang;
       return f;
     }).toList();
     result.addAll(feeds);
   });
 
   return result;
+}*/
+
+List<Feed> makeFeeds(Ent ent) {
+  return ent.entityMetadata.languages.map((lang) {
+    Feed f = parseFeed(_makeFeed(ent.entityMetadata));
+    f.meta['entityId'] = ent.entitySummary.entityId;
+    f.meta['language'] = lang;
+    return f;
+  }).toList();
 }
 
 String _makeEntityMetadata(String name) {
