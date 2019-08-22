@@ -160,14 +160,14 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribeEntityFromAccount(Ent ent, Identity account) async {
+  unsubscribeEntityFromAccount(EntitySummary entitySummary, Identity account) async {
     // TODO: Remove the entity summary from the identity
-    removeEntityPeerFromAccount(ent.entitySummary.entityId, account);
+    removeEntityPeerFromAccount(entitySummary.entityId, account);
 
     // TODO: Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
     for (final existingAccount in identitiesBloc.value) {
-      if (isSubscribed(existingAccount, ent.entitySummary)) {
+      if (isSubscribed(existingAccount, entitySummary)) {
         subcribedInOtherAccounts = true;
         break;
       }

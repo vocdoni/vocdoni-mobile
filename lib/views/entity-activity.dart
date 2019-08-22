@@ -33,20 +33,14 @@ class _EntityActivityState extends State<EntityActivity> {
       return buildLoading(context);
     else if (ent == null) return buildEmptyEntity(context);
 
-    final feed = digestEntityFeed(context, ent.entityMetadata);
-    if (feed == null) {
-      loadRemoteFeed(context, ent.entityMetadata);
-      return buildEmptyPosts(context);
-    }
-
     return Scaffold(
       appBar: TopNavigation(
         title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       ),
       body: ListView.builder(
-        itemCount: feed.items.length,
+        itemCount: ent.feed.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final FeedPost post = feed.items[index];
+          final FeedPost post = ent.feed.items[index];
           return BaseCard(
             image: post.image,
             children: <Widget>[
@@ -95,22 +89,6 @@ class _EntityActivityState extends State<EntityActivity> {
         arguments: ActivityPostArguments(post));
   }
 
-  Feed digestEntityFeed(BuildContext context, Entity entity) {
-    // Already fetched?
-    if (remoteNewsFeed != null)
-      return remoteNewsFeed;
-    else if (newsFeedsBloc.value == null) return null;
-
-    // TODO: DETECT THE CURRENT LANGUAGE
-    final feeds = newsFeedsBloc.value.where((feed) {
-      if (feed.meta["entityId"] != entity.entityId)
-        return false;
-      else if (feed.meta["language"] != entity.languages[0]) return false;
-      return true;
-    }).toList();
-
-    return feeds[0] ?? null;
-  }
 
   Future loadRemoteFeed(BuildContext ctx, Entity entity) async {
     if (remoteFetched) return;

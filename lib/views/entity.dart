@@ -49,17 +49,20 @@ class _EntityInfoState extends State<EntityInfo> {
 
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
-        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
-        collapsedTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
-        subtitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ?? "(entity)",
+        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+            "(entity)",
+        collapsedTitle:
+            ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+                "(entity)",
+        subtitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+            "(entity)",
         avatarUrl: ent.entityMetadata.media.avatar,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate:
-                  SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
+              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
             );
           },
         ));
@@ -101,7 +104,7 @@ class _EntityInfoState extends State<EntityInfo> {
     //children.add(buildTest());
     children.add(buildTitle(context, ent.entityMetadata));
     children.add(buildSubscribeItem(context, ent));
-    children.add(buildFeedItem(context, ent.entityMetadata));
+    children.add(buildFeedItem(context, ent));
     children.addAll(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
@@ -122,12 +125,12 @@ class _EntityInfoState extends State<EntityInfo> {
     );
   }
 
-  buildFeedItem(BuildContext context, Entity entity) {
+  buildFeedItem(BuildContext context, Ent ent) {
     return ListItem(
       icon: FeatherIcons.rss,
       mainText: "Feed",
       onTap: () {
-        Navigator.pushNamed(context, "/entity/activity", arguments: entity);
+        Navigator.pushNamed(context, "/entity/activity", arguments: ent);
       },
     );
   }
@@ -178,7 +181,8 @@ class _EntityInfoState extends State<EntityInfo> {
   }
 
   Future<bool> isActionVisible(Entity_Action action, String entityId) async {
-    if (action.visible == null || action.visible == "always") return true;
+    if (action.visible == "true") return true;
+    if (action.visible == null || action.visible == "false") return false;
 
     String publicKey = identitiesBloc.getCurrentAccount().identityId;
     int timestamp = new DateTime.now().millisecondsSinceEpoch;
@@ -311,7 +315,8 @@ class _EntityInfoState extends State<EntityInfo> {
     bool actionsDisabled = false;
     if (!_isRegistered) {
       actionsDisabled = true;
-      final entityName = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
+      final entityName =
+          ent.entityMetadata.name[ent.entityMetadata.languages[0]];
       ListItem noticeItem = ListItem(
         mainText: "Regsiter to $entityName first",
         secondaryText: null,
@@ -326,7 +331,8 @@ class _EntityInfoState extends State<EntityInfo> {
       ListItem item;
       if (action.type == "browser") {
         if (!(action.name is Map) ||
-            !(action.name[ent.entityMetadata.languages[0]] is String)) return null;
+            !(action.name[ent.entityMetadata.languages[0]] is String))
+          return null;
 
         item = ListItem(
           icon: FeatherIcons.arrowRightCircle,
@@ -354,8 +360,8 @@ class _EntityInfoState extends State<EntityInfo> {
 
   onBrowserAction(BuildContext ctx, Entity_Action action, Ent ent) {
     final String url = action.url;
-    final String title =
-        action.name[ent.entityMetadata.languages[0]] ?? ent.entityMetadata.name[ent.entityMetadata.languages[0]];
+    final String title = action.name[ent.entityMetadata.languages[0]] ??
+        ent.entityMetadata.name[ent.entityMetadata.languages[0]];
 
     final route = MaterialPageRoute(
         builder: (context) => WebAction(
@@ -369,8 +375,7 @@ class _EntityInfoState extends State<EntityInfo> {
     setState(() {
       _processingSubscription = true;
     });
-    Identity account = identitiesBloc.getCurrentAccount();
-    await identitiesBloc.unsubscribeEntityFromAccount(ent, account);
+    account.unsubscribe(ent.entitySummary);
     showMessage(
         Lang.of(ctx)
             .get("You will no longer see this organization in your feed"),
@@ -387,8 +392,7 @@ class _EntityInfoState extends State<EntityInfo> {
     });
 
     try {
-      Identity account = identitiesBloc.getCurrentAccount();
-      await identitiesBloc.subscribeEntityToAccount(ent, account);
+      await account.subscribe(ent);
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);

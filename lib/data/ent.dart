@@ -13,36 +13,44 @@ class Ent {
   Entity entityMetadata;
   Feed feed;
   List<ProcessMock> processess;
+  String lang = "default";
 
-  Ent(EntitySummary _entitySummary) {
-    this.entitySummary = _entitySummary;
-
-    //for (Entity _entityMetadata in entitiesBloc.value) {
-    int index = entitiesBloc.value.indexWhere((e) {
-      return e.meta['entityId'] == _entitySummary.entityId;
-    });
-
-    if (index == -1) {
-      this.entityMetadata = new Entity();
-      this.entityMetadata.meta['entityId'] = _entitySummary.entityId;
-    } else {
-      this.entityMetadata = entitiesBloc.value[index];
-      this.feed = makeFeed(_entitySummary, this.entityMetadata);
-      this.processess = makeProcessess(this.entityMetadata);
-    }
+  Ent(EntitySummary entitySummary) {
+    this.entitySummary = entitySummary;
+    syncLocal();
   }
 
-  refresh(String lang) async {
-    entityMetadata = await fetchEntityData(entitySummary);
-    final feedString = await fetchEntityNewsFeed(entityMetadata, lang);
+  update() async {
+    this.entityMetadata = await fetchEntityData(entitySummary);
+    final feedString =
+        await fetchEntityNewsFeed(this.entityMetadata, this.lang);
     this.feed = Feed.fromJson(jsonDecode(feedString));
   }
 
-  persist() {
-    entitiesBloc.add(this.entityMetadata, this.entitySummary);
+  syncLocal() async {
+    syncEntityMetadata(entitySummary);
+    if (this.entityMetadata == null) {
+      this.feed = null;
+      this.processess = null;
+    } else {
+      syncFeed(entitySummary, this.entityMetadata);
+      syncProcessess(this.entityMetadata, this.entitySummary);
+    }
   }
 
-  Feed makeFeed(EntitySummary _entitySummary, Entity _entityMetadata) {
+  syncEntityMetadata(EntitySummary entitySummary) {
+    int index = entitiesBloc.value.indexWhere((e) {
+      return e.meta['entityId'] == entitySummary.entityId;
+    });
+
+    if (index == -1) {
+      this.entityMetadata = null;
+    } else {
+      this.entityMetadata = entitiesBloc.value[index];
+    }
+  }
+
+  syncFeed(EntitySummary _entitySummary, Entity _entityMetadata) {
     final feeds = newsFeedsBloc.value.where((f) {
       if (f.meta["entityId"] != _entitySummary.entityId)
         return false;
@@ -50,11 +58,16 @@ class Ent {
       return true;
     }).toList();
 
-    return feeds.length > 0 ? feeds[1] : new Feed();
+    this.feed = feeds.length > 0 ? this.feed = feeds[0] : this.feed = null;
   }
 
-  List<ProcessMock> makeProcessess(Entity entityMetadata) {
-    return null;
+  syncProcessess(Entity entityMetadata, EntitySummary entitySummary) {
+    final _processess = processesBloc.value.where((process) {
+      return process.meta['entityId'] == entitySummary.entityId;
+    }).toList();
+
+    this.processess =
+        _processess.length > 0 ? this.processess : this.processess = null;
   }
 }
 
@@ -73,11 +86,14 @@ class Account {
       for (Entity entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {
           Ent ent = new Ent(entitySummary);
-          if (ent.entityMetadata == null) {
-            throw ("Ent has no metadata");
-          }
           this.ents.add(ent);
         }
+    });
+  }
+
+  sync() {
+    this.ents.forEach((Ent ent) {
+      ent.syncLocal();
     });
   }
 
@@ -86,10 +102,12 @@ class Account {
   }
 
   subscribe(Ent ent) async {
-    //ent.persist();
-    //account.ents.add(ent);
     await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
-    init();
-    //identity = identitiesBloc.getCurrentAccount();//necessary
+    sync();
+  }
+
+  unsubscribe(EntitySummary _entitySummary) async {
+    await identitiesBloc.unsubscribeEntityFromAccount(
+        _entitySummary, account.identity);
   }
 }

@@ -8,6 +8,7 @@ class ProcessMock {
   int numberOfBlocks;
   Census census;
   ProcessDetails details;
+  Map<String, String> meta = new Map<String, String>();
 }
 
 class Census {

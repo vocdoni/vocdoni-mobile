@@ -8,24 +8,6 @@ import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/_processMock.dart';
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
-/*Future populateSampleData() async {
-  final entitySummaries = _makeEntitySummaries();
-  final List<Entity> entitiesMetadata = _makeEntitiesMetadata(entitySummaries);
-  final currentEntities = entitiesBloc.value;
-  currentEntities.addAll(entitiesMetadata);
-  await entitiesBloc.set(currentEntities);
-
-  final List<Feed> feeds = _makeNewsFeeds(ents);
-  final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
-  await newsFeedsBloc.set(newFeeds);
-
-  final ProcessMock process = parseProcess(_makeProcess());
-  final currentProcessess = processesBloc.value;
-  currentProcessess.add(process);
-  await processesBloc.set(currentProcessess);
-
-  await subscribe(entitySummaries);
-}*/
 
 Future populateSampleData() async {
   List<Entity> entitiesMetadata = new List<Entity>();
@@ -33,14 +15,14 @@ Future populateSampleData() async {
   List<ProcessMock> processess = new List<ProcessMock>();
   List<Ent> ents = new List<Ent>();
 
-  final entitySummaries = _makeEntitySummaries();
+  final entitySummaries = makeEntitySummaries();
 
   entitySummaries.forEach((entitySummary) {
     Ent ent = Ent(entitySummary);
     ents.add(ent);
     entitiesMetadata.add(makeEntityMetadata(entitySummary));
     feeds.addAll(makeFeeds(ent));
-    processess.add(parseProcess(_makeProcess()));
+    processess.add(makeFakeProcess());
   });
 
   await entitiesBloc.set(entitiesMetadata);
@@ -48,11 +30,13 @@ Future populateSampleData() async {
   await processesBloc.set(processess);
 
   ents.forEach((ent) {
-    account.subscribe(ent);
+    if (account.isSubscribed(ent.entitySummary) == false)
+      account.subscribe(ent);
   });
+  account.refereshLocal();
 }
 
-List<EntitySummary> _makeEntitySummaries() {
+List<EntitySummary> makeEntitySummaries() {
   final ids = ["0x1", "0x2", "0x3"];
   return ids.map((id) {
     EntitySummary entitySummary = makeEntitySummary(
@@ -61,61 +45,28 @@ List<EntitySummary> _makeEntitySummaries() {
   }).toList();
 }
 
-/*List<Entity> makeEnts(List<EntitySummary> entitySummaries) {
-  return entitySummaries.map((entitySummary) {
-    String entityId = entitySummary.entityId;
-    String strEntity = _makeEntityMetadata("Entity #$entityId");
-    final entity = parseEntity(strEntity);
-    entity.meta["entityId"] = entitySummary.entityId;
-    return entity;
-  }).toList();
-}*/
-
-/*List<Entity> _makeEntitiesMetadata(List<EntitySummary> entitySummaries) {
-  return entitySummaries.map((entitySummary) {
-    String entityId = entitySummary.entityId;
-    String strEntity = _makeEntityMetadata("Entity #$entityId");
-    final entity = parseEntity(strEntity);
-    entity.meta["entityId"] = entitySummary.entityId;
-    return entity;
-  }).toList();
-}*/
-
 Entity makeEntityMetadata(EntitySummary entitySummary) {
   String entityId = entitySummary.entityId;
-  String strEntity = _makeEntityMetadata("Entity #$entityId");
+  String strEntity = getEntityMetadataString("Entity #$entityId");
   final entityMetadata = parseEntity(strEntity);
   entityMetadata.meta["entityId"] = entitySummary.entityId;
   return entityMetadata;
 }
 
-/*List<Feed> _makeNewsFeeds(List<Ent> ents) {
-  if (ents?.length == 0 ?? false) throw "No entities";
-
-  List<Feed> result = [];
-  ents.forEach((ent) {
-    List<Feed> feeds = ent.entityMetadata.languages.map((lang) {
-      Feed f = parseFeed(_makeFeed(ent.entityMetadata));
-      f.meta['entityId'] = ent.entitySummary.entityId;
-      f.meta['language'] = lang;
-      return f;
-    }).toList();
-    result.addAll(feeds);
-  });
-
-  return result;
-}*/
-
 List<Feed> makeFeeds(Ent ent) {
   return ent.entityMetadata.languages.map((lang) {
-    Feed f = parseFeed(_makeFeed(ent.entityMetadata));
+    Feed f = parseFeed(getFeedString(ent.entityMetadata));
     f.meta['entityId'] = ent.entitySummary.entityId;
     f.meta['language'] = lang;
     return f;
   }).toList();
 }
 
-String _makeEntityMetadata(String name) {
+ProcessMock makeFakeProcess() {
+  return parseProcess(getProcessString());
+}
+
+String getEntityMetadataString(String name) {
   String entityId = "0xinvalid";
 
   return '''{
@@ -157,7 +108,7 @@ String _makeEntityMetadata(String name) {
                 "fr": "Register"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
+            "visible": "true",
             "register":true
         },
         {
@@ -167,7 +118,7 @@ String _makeEntityMetadata(String name) {
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "",
+            "visible": "false",
             "register":false
         },
         {
@@ -177,7 +128,7 @@ String _makeEntityMetadata(String name) {
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
+            "visible": "true",
             "register":false
         }
     ],
@@ -205,7 +156,7 @@ String _makeEntityMetadata(String name) {
 }''';
 }
 
-String _makeFeed(Entity org) {
+String getFeedString(Entity org) {
   return '''{
   "version": "https://jsonfeed.org/version/1",
   "title": "${org.name["default"] ?? "Entity"}",
@@ -304,7 +255,7 @@ String _makeFeed(Entity org) {
 }''';
 }
 
-String _makeProcess() {
+String getProcessString() {
   return '''
   {
     "version": "1.0",
