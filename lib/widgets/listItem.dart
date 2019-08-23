@@ -99,7 +99,7 @@ class ListItem extends StatelessWidget {
         style: new TextStyle(
             fontSize: isTitle ? fontSizeTitle : fontSizeBase,
             color: getMainColor(),
-            fontWeight: isBold ? fontWeightBold : fontWeightRegular));
+            fontWeight: isBold ? fontWeightSemiBold : fontWeightRegular));
   }
 
   buildSecondaryText() {

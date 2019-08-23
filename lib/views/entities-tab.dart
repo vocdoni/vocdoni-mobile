@@ -46,7 +46,9 @@ class EntitiesTab extends StatelessWidget {
             ListItem(
                 mainText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
                 avatarUrl: ent.entityMetadata.media.avatar,
+                isBold: true,
                 onTap: () => onTapEntity(ctx, ent)),
+                
             ListItem(
                 mainText: "Feed",
                 icon: FeatherIcons.rss,
