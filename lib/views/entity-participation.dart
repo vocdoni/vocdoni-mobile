@@ -1,10 +1,15 @@
 import "dart:async";
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
+import 'package:vocdoni/widgets/dashboardItem.dart';
+import 'package:vocdoni/widgets/dashboardRow.dart';
+import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
@@ -39,14 +44,47 @@ class _EntityParticipationState extends State<EntityParticipation> {
           return BaseCard(
             image: process.details.headerImage,
             children: <Widget>[
+              DashboardRow(
+                children: <Widget>[
+                  DashboardItem(
+                    label: "Poll",
+                    item: Icon(
+                      FeatherIcons.barChart2,
+                      size: iconSizeMedium,
+                    ),
+                  ),
+                  DashboardItem(
+                    label: "Participation",
+                    item: DashboardText(
+                        mainText: "55",
+                        secondaryText: "%",
+                        purpose: Purpose.WARNING),
+                  ),
+                  DashboardItem(
+                    label: "Time left",
+                    item: DashboardText(
+                        mainText: "2",
+                        secondaryText: " days",
+                        purpose: Purpose.GOOD),
+                  ),
+                  DashboardItem(
+                    label: "Vote now!",
+                    item: Icon(
+                      FeatherIcons.arrowRightCircle,
+                      size: iconSizeMedium,
+                      color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
+                    ),
+                  )
+                ],
+              ),
               ListItem(
-                mainText: process.details.title[ent.entityMetadata.languages[0]],
+                mainText:
+                    process.details.title[ent.entityMetadata.languages[0]],
                 mainTextFullWidth: true,
-                secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+                secondaryText:
+                    ent.entityMetadata.name[ent.entityMetadata.languages[0]],
                 avatarUrl: ent.entityMetadata.media.avatar,
-                /*rightText: DateFormat('MMMM dd')
-                    .format(DateTime.parse(process.datePublished).toLocal()),
-                onTap: () => onTapItem(context, process),*/
+                rightIcon: null,
               )
             ],
           );
