@@ -6,6 +6,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/pollPage.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
 import 'package:vocdoni/widgets/dashboardRow.dart';
@@ -42,6 +43,10 @@ class _EntityParticipationState extends State<EntityParticipation> {
         itemBuilder: (BuildContext context, int index) {
           final ProcessMock process = _processess[index];
           return BaseCard(
+            onTap: () {
+              Navigator.pushNamed(context, "/entity/participation/poll",
+                  arguments: PollPageArgs(ent: ent, process: process));
+            },
             image: process.details.headerImage,
             children: <Widget>[
               DashboardRow(
