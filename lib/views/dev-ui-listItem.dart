@@ -4,12 +4,13 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/constants/colors.dart';
 
-
 class DevUiListItem extends StatelessWidget {
   @override
   Widget build(ctx) {
     String avatarUrl =
         "https://i.pinimg.com/originals/23/4c/88/234c888d9ffb6955eb440b0d99a37fd1.jpg";
+    String longhex =
+        "0x283471029483710295871892751298370129834710298347102934871029347812034871209438710923487102934701293478";
     return Scaffold(
         appBar: TopNavigation(
           title: "List item variants",
@@ -17,13 +18,22 @@ class DevUiListItem extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(
+              mainText: "Process title ",
+              isTitle: true,
+              isBold: true,
+              icon: FeatherIcons.barChart2,
+              rightIcon: null,
+              mainTextFullWidth: false,
+              secondaryText: longhex,
+            ),
+            ListItem(
               mainText: "Someone's name",
               isTitle: true,
               isBold: true,
               rightIcon: FeatherIcons.copy,
               mainTextFullWidth: true,
               secondaryText:
-                  "0x283471029483710295871892751298370129834710298347102934871029347812034871209438710923487102934701293478",
+                  longhex,
             ),
             ListItem(
               mainText: "Participation page",
@@ -33,7 +43,8 @@ class DevUiListItem extends StatelessWidget {
               mainTextFullWidth: true,
               rightIcon: null,
               secondaryTextMultiline: true,
-              secondaryText: "A very very long mutiline text that explains what this sections is in",
+              secondaryText:
+                  "A very very long mutiline text that explains what this sections is in",
             ),
             ListItem(
               mainText: "Important  bold item",
