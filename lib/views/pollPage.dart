@@ -100,7 +100,7 @@ class _PollPageState extends State<PollPage> {
     ));
     children.add(buildRawItem(context, process));
     children.addAll(buildQuestions(context, process));
-    children.add(Section(text: "Details"));
+    
 
     return children;
   }
@@ -155,18 +155,21 @@ class _PollPageState extends State<PollPage> {
     }
 
     List<Widget> items = new List<Widget>();
+    int index = 1;
     for (Question question in process.details.questions) {
-      items.addAll(buildQuestion(question));
+      items.addAll(buildQuestion(question, index));
+      index ++;
     }
 
     return items;
   }
 
-  List<Widget> buildQuestion(Question question) {
+  List<Widget> buildQuestion(Question question, int index) {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
-      items.add(buildQuestionTitle(question));
+      items.add(Section());
+      items.add(buildQuestionTitle(question, index));
     } else {
       String questionType = question.type;
       buildError("Unknown question type: $questionType");
@@ -183,12 +186,13 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildQuestionTitle(Question question) {
+  buildQuestionTitle(Question question, int index) {
     return ListItem(
-        icon: FeatherIcons.arrowRightCircle,
-        mainText: question.question['default'],
+        mainText: index.toString() + ". "+ question.question['default'],
         secondaryText: question.description['default'],
-        secondaryTextMultiline: true);
+        secondaryTextMultiline: true,
+        rightIcon:null,
+        );
   }
 
   goBack(BuildContext ctx) {
