@@ -49,12 +49,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
-        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-            "(entity)",
-        collapsedTitle:
-            ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-                "(entity)",
-        subtitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
             "(entity)",
         avatarUrl: ent.entityMetadata.media.avatar,
         leftElement: buildRegisterButton(context, ent),
@@ -212,8 +207,6 @@ class _EntityInfoState extends State<EntityInfo> {
         'Content-type': 'application/json',
         'Accept': 'application/json',
       };
-
-      String a = action.visible;
 
       var response = await http.post(action.visible,
           body: jsonEncode(payload), headers: headers);
