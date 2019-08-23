@@ -20,7 +20,7 @@ class DashboardItem extends StatelessWidget {
     return Text(label,
         overflow: TextOverflow.ellipsis,
         style: new TextStyle(
-            fontSize: fontSizeBase,
+            fontSize: fontSizeSecondary,
             color: colorGuide,
             fontWeight: fontWeightLight));
   }

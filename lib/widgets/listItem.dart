@@ -86,6 +86,7 @@ class ListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           buildMainText(),
+          secondaryText == null ? Container() : SizedBox(height: spaceMainAndSecondary),
           secondaryText == null ? Container() : buildSecondaryText(),
         ],
       ),
