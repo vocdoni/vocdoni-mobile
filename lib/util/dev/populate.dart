@@ -276,7 +276,7 @@ String getProcessString() {
             "ca": "Renda Bàsica Universal"
         },
         "description": {
-            "default": "## Markdown text goes here ### Abstract",
+            "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             "ca": "## El markdown va aquí ### Resum"
         },
         "headerImage": "https://images.unsplash.com/photo-1489533119213-66a5cd877091?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1502&q=80",
@@ -288,7 +288,34 @@ String getProcessString() {
                     "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
                 },
                 "description": {
-                    "default": "## Markdown text goes here ### Abstract",
+                    "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "ca": "## El markdown va aquí ### Resum"
+                },
+                "voteOptions": [
+                    {
+                        "title": {
+                            "default": "Yes",
+                            "ca": "Sí"
+                        },
+                        "value": "1"
+                    },
+                    {
+                        "title": {
+                            "default": "No",
+                            "ca": "No"
+                        },
+                        "value": "2"
+                    }
+                ]
+            },
+            {
+                "type": "single-choice", 
+                "question": {
+                    "default": "Should universal basic income become a human right?",
+                    "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
+                },
+                "description": {
+                    "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                     "ca": "## El markdown va aquí ### Resum"
                 },
                 "voteOptions": [
