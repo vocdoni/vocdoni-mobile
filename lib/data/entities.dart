@@ -65,23 +65,27 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
 
   // CUSTOM OPERATIONS
 
-  Future<void> add(Entity newEntity) async {
-    if (!(newEntity is Entity))
+  Future<void> add(
+      Entity newEntityMetadata, EntitySummary entitySummary) async {
+    /*if (!(newEntityMetadata is Entity))
       throw FlutterError("The entity parameter is invalid");
+      */
 
-    final currentIndex =
-        value.indexWhere((e) => e.entityId == newEntity.entityId);
+    newEntityMetadata.meta["entityId"] = entitySummary.entityId;
+
+    final currentIndex = value
+        .indexWhere((e) => e.meta['entityId'] == newEntityMetadata.entityId);
     // Already exists
     if (currentIndex >= 0) {
       final currentEntities = value;
-      currentEntities[currentIndex] = newEntity;
+      currentEntities[currentIndex] = newEntityMetadata;
       await set(currentEntities);
     } else {
-      value.add(newEntity);
+      value.add(newEntityMetadata);
       await set(value);
 
       // Fetch the news feeds if needed
-      await newsFeedsBloc.fetchFromEntity(newEntity);
+      //await newsFeedsBloc.fetchFromEntity(newEntityMetadata);
     }
   }
 

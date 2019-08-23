@@ -27,7 +27,7 @@ final Color colorTitle = Color(0xFF000000);
 final Color colorChip = Color(0xFFFFEEBF);
 final Color colorLink = colorBlue;
 
-final double paddingPage = 24;
+final double paddingPage = 32;
 final double paddingChip = 4;
 final double paddingButton = 8;
 final double paddingBadge = 10;
@@ -52,6 +52,7 @@ final FontWeight fontWeightRegular = FontWeight.w400;
 final FontWeight fontWeightSemiBold = FontWeight.w600;
 final FontWeight fontWeightBold = FontWeight.w700;
 
+final String fallbackImageUrlPoll = "https://images.unsplash.com/photo-1444664361762-afba083a4d77?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80";
 enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 Color getColorByPurpose({Purpose purpose, bool isPale = false}) {

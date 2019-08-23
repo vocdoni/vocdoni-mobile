@@ -4,9 +4,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  final String collapsedTitle;
+  final String appBarTitle;
   final String headerImageUrl;
   final String avatarUrl;
   final List<Widget> children;
@@ -15,11 +13,9 @@ class ScaffoldWithImage extends StatefulWidget {
   final List<Widget> Function(BuildContext) actionsBuilder;
 
   const ScaffoldWithImage({
-    this.title,
-    this.collapsedTitle,
+    this.appBarTitle,
     this.headerImageUrl,
     this.children,
-    this.subtitle,
     this.avatarUrl,
     this.builder,
     this.leftElement,
@@ -87,16 +83,15 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       headerImageHeight *
                           (1.4 * (1 - (pos / totalHeaderHeight)));
 
-                  double interpolationOpacity = 1- interpolation;
+                  double interpolationOpacity = 1 - interpolation;
                   return FlexibleSpaceBar(
-                    
                       collapseMode: CollapseMode.pin,
                       centerTitle: true,
                       title: Text(
-                        widget.collapsedTitle,
+                        widget.appBarTitle,
                         style: TextStyle(
-                            color:
-                                colorDescription.withOpacity(interpolationOpacity),
+                            color: colorDescription
+                                .withOpacity(interpolationOpacity),
                             fontWeight: fontWeightLight),
                       ),
                       background: Stack(children: [
@@ -119,8 +114,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                               stops: [1 - (pos / totalHeaderHeight), 1],
                               colors: [
                                 // Colors are easy thanks to Flutter's Colors class.
-                                Colors.black.withOpacity(0.5*interpolation),
-                                Colors.black.withOpacity(0*interpolation)
+                                Colors.black.withOpacity(0.5 * interpolation),
+                                Colors.black.withOpacity(0 * interpolation)
                               ],
                             ),
                           ),
@@ -139,15 +134,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
-                                  Container(
-                                    constraints: BoxConstraints(
-                                        minWidth: avatarHeight,
-                                        minHeight: avatarHeight),
-                                    child: CircleAvatar(
-                                        backgroundColor: Colors.indigo,
-                                        backgroundImage:
-                                            NetworkImage(widget.avatarUrl)),
-                                  ),
+                                  buildAvatar(avatarHeight),
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
@@ -176,5 +163,16 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
 
   List<Widget> buildActions(BuildContext context) {
     return collapsed ? null : widget.actionsBuilder(context);
+  }
+
+  Widget buildAvatar(double avatarHeight) {
+    if (widget.avatarUrl == null) return Container();
+    return Container(
+      constraints:
+          BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
+      child: CircleAvatar(
+          backgroundColor: Colors.indigo,
+          backgroundImage: NetworkImage(widget.avatarUrl)),
+    );
   }
 }

@@ -9,8 +9,9 @@ class Section extends StatelessWidget {
 
   @override
   Widget build(context) {
-    Color decorationColor = withDectoration? colorLightGuide:Colors.transparent;
-     
+    Color decorationColor =
+        withDectoration ? colorLightGuide : Colors.transparent;
+
     return Container(
         padding: EdgeInsets.fromLTRB(paddingPage, 24, paddingPage, 16),
         child: Row(
@@ -19,16 +20,19 @@ class Section extends StatelessWidget {
               Expanded(
                 child: Container(height: 1, color: decorationColor),
               ),
-              Padding(
-                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 24),
-                  child: Text(text,
-                      style: new TextStyle(
-                          fontSize: 16,
-                          color: colorGuide,
-                          fontWeight: FontWeight.w400))),
+              buildText(text),
               Expanded(
                 child: Container(height: 1, color: decorationColor),
               ),
             ]));
+  }
+
+  Widget buildText(String text) {
+    if (text == null) return Container();
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 24),
+        child: Text(text,
+            style: new TextStyle(
+                fontSize: 16, color: colorGuide, fontWeight: FontWeight.w400)));
   }
 }

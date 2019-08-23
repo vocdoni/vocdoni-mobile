@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
@@ -27,33 +28,27 @@ class _EntityActivityState extends State<EntityActivity> {
 
   @override
   Widget build(context) {
-    final Entity entity = ModalRoute.of(context).settings.arguments;
+    final Ent ent = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
-    else if (entity == null) return buildEmptyEntity(context);
-
-    final feed = digestEntityFeed(context, entity);
-    if (feed == null) {
-      loadRemoteFeed(context, entity);
-      return buildEmptyPosts(context);
-    }
+    else if (ent == null) return buildEmptyEntity(context);
 
     return Scaffold(
       appBar: TopNavigation(
-        title: entity.name[entity.languages[0]],
+        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       ),
       body: ListView.builder(
-        itemCount: feed.items.length,
+        itemCount: ent.feed.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final FeedPost post = feed.items[index];
+          final FeedPost post = ent.feed.items[index];
           return BaseCard(
             image: post.image,
             children: <Widget>[
               ListItem(
                 mainText: post.title,
                 mainTextFullWidth: true,
-                secondaryText: entity.name[entity.languages[0]],
-                avatarUrl: entity.media.avatar,
+                secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+                avatarUrl: ent.entityMetadata.media.avatar,
                 rightText: DateFormat('MMMM dd')
                     .format(DateTime.parse(post.datePublished).toLocal()),
                 onTap: () => onTapItem(context, post),
@@ -94,22 +89,6 @@ class _EntityActivityState extends State<EntityActivity> {
         arguments: ActivityPostArguments(post));
   }
 
-  Feed digestEntityFeed(BuildContext context, Entity entity) {
-    // Already fetched?
-    if (remoteNewsFeed != null)
-      return remoteNewsFeed;
-    else if (newsFeedsBloc.value == null) return null;
-
-    // TODO: DETECT THE CURRENT LANGUAGE
-    final feeds = newsFeedsBloc.value.where((feed) {
-      if (feed.meta["entityId"] != entity.entityId)
-        return false;
-      else if (feed.meta["language"] != entity.languages[0]) return false;
-      return true;
-    }).toList();
-
-    return feeds[0] ?? null;
-  }
 
   Future loadRemoteFeed(BuildContext ctx, Entity entity) async {
     if (remoteFetched) return;

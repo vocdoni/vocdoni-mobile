@@ -5,6 +5,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
 import 'package:vocdoni/views/entity-participation.dart';
+import 'package:vocdoni/views/pollPage.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
 
@@ -67,6 +68,7 @@ void main() async {
       "/entity/activity": (context) => EntityActivity(),
       "/entity/activity/post": (context) => ActivityPostScreen(),
       "/entity/participation": (context) => EntityParticipation(),
+      "/entity/participation/poll": (context) => PollPage(),
       "/identity/backup": (context) => IdentityBackupScreen(),
 
       // GLOBAL

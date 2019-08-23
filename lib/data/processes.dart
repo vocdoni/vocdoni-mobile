@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/generic.dart';
-import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/dev/populate.dart';
 import 'package:vocdoni/util/singletons.dart';
+
 
 class ProcessesBloc extends BlocComponent<List<ProcessMock>> {
   final String _storageFile = PROCESSES_STORE_FILE;
@@ -16,6 +16,8 @@ class ProcessesBloc extends BlocComponent<List<ProcessMock>> {
   /// Read and construct the data structures
   @override
   Future<void> restore() async {
+
+    state.add([makeFakeProcess()]);
     // File fd;
     // ProcessesStore store;
 

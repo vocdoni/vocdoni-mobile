@@ -4,8 +4,9 @@ import 'package:vocdoni/constants/colors.dart';
 class BaseCard extends StatelessWidget {
   final String image;
   final List<Widget> children;
+  final void Function() onTap;
 
-  BaseCard({this.image, this.children});
+  BaseCard({this.image, this.children, this.onTap});
 
   @override
   Widget build(context) {
@@ -35,9 +36,12 @@ class BaseCard extends StatelessWidget {
           ),
           child: ClipRRect(
               borderRadius: BorderRadius.circular(roundedCornerCard),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: items)),
+              child: InkWell(
+                onTap: onTap,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: items),
+              )),
         ));
   }
 

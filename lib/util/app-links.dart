@@ -1,8 +1,10 @@
+import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 // import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
@@ -67,17 +69,25 @@ Future fetchAndShowEntity(
       .where((uri) => uri != null)
       .toList();
 
+//TODO Make use of entryPoints;
+  EntitySummary entitySummary = makeEntitySummary(
+      entityId: entityId,
+      resolverAddress: resolverAddress,
+      networkId: networkId,
+      entryPoints: []);
+
   showLoading(Lang.of(context).get("Connecting..."), global: true);
 
   try {
-    final entity = await fetchEntityData(
-        resolverAddress, entityId, networkId, decodedEntryPoints);
-    if (entity == null) throw LinkingError("Could not fetch the details");
+    final entityMetadata = await fetchEntityData(entitySummary);
+
+    if (entityMetadata == null)
+      throw LinkingError("Could not fetch the details");
 
     hideLoading(global: true);
 
     // Show screen
-    Navigator.pushNamed(context, "/entity", arguments: entity);
+    Navigator.pushNamed(context, "/entity", arguments: entityMetadata);
   } catch (err) {
     hideLoading(global: true);
 

@@ -1,79 +1,75 @@
 import 'package:vocdoni/data/_processMock.dart';
+import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/random.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/_processMock.dart';
 
-
 /// INTENDED FOR INTERNAL TESTING PURPOSES
+
 Future populateSampleData() async {
-  final List<Entity> entities = _makeEntities();
-  final currentEntities = entitiesBloc.value;
-  currentEntities.addAll(entities);
-  await entitiesBloc.set(currentEntities);
-  final currentIdentities = identitiesBloc.value;
+  List<Entity> entitiesMetadata = new List<Entity>();
+  List<Feed> feeds = new List<Feed>();
+  List<ProcessMock> processess = new List<ProcessMock>();
+  List<Ent> ents = new List<Ent>();
 
-  final newEnts = entities.map((e) {
-    EntitySummary entity = EntitySummary();
-    entity.entityId = e.entityId;
-    entity.resolverAddress = e.contracts.resolverAddress;
-    entity.networkId = e.contracts.networkId;
-    // entity.entryPoints.addAll(...);
-    return entity;
-  }).toList();
+  final entitySummaries = makeEntitySummaries();
 
-  Identity_Peers newPeers = Identity_Peers();
-  newPeers.entities.addAll(newEnts);
-  newPeers.identities.addAll(
-      currentIdentities[appStateBloc.value.selectedIdentity].peers.identities);
-  currentIdentities[appStateBloc.value.selectedIdentity].peers = newPeers;
-  await identitiesBloc.set(currentIdentities);
-
-  final List<Feed> feeds = _makeNewsFeeds(entities);
-  final newFeeds = newsFeedsBloc.value.followedBy(feeds).toList();
-  await newsFeedsBloc.set(newFeeds);
-
-  final ProcessMock process = parseProcess(_makeProcess());
-  final currentProcessess = processesBloc.value;
-  currentProcessess.add(process);
-  await processesBloc.set(currentProcessess);
-
-}
-
-List<Entity> _makeEntities() {
-  Identity currentIdent = identitiesBloc.value
-      ?.elementAt(appStateBloc.value?.selectedIdentity ?? 0);
-  if (currentIdent == null) throw "No current identity";
-
-  final ids = ["0x1", "0x2", "0x3"];
-  return ids.map((id) {
-    String strEntity = _makeEntity("Entity #$id");
-    final entity = parseEntity(strEntity);
-    return entity;
-  }).toList();
-}
-
-List<Feed> _makeNewsFeeds(List<Entity> entities) {
-  if (entities?.length == 0 ?? false) throw "No entities";
-
-  List<Feed> result = [];
-  entities.forEach((entity) {
-    List<Feed> feeds = entity.languages.map((lang) {
-      Feed f = parseFeed(_makeFeed(entity));
-      // external metadata
-      f.meta.addAll({"entityId": entity.entityId, "language": lang});
-      return f;
-    }).toList();
-    result.addAll(feeds);
+  entitySummaries.forEach((entitySummary) {
+    Ent ent = Ent(entitySummary);
+    ents.add(ent);
+    Entity entityMetadata = makeEntityMetadata(entitySummary);
+    entitiesMetadata.add(entityMetadata);
+    feeds.addAll(makeFeeds(entityMetadata));
+    processess.add(makeFakeProcess());
   });
 
-  return result;
+  await entitiesBloc.set(entitiesMetadata);
+  await newsFeedsBloc.set(feeds);
+  await processesBloc.set(processess);
+
+  ents.forEach((ent) {
+    if (account.isSubscribed(ent.entitySummary) == false)
+      account.subscribe(ent);
+  });
+  account.sync();
 }
 
-String _makeEntity(String name) {
-  String entityId =
-      "0x" + randomString() + randomString() + randomString() + randomString();
+List<EntitySummary> makeEntitySummaries() {
+  final ids = ["0x1", "0x2", "0x3"];
+  return ids.map((id) {
+    EntitySummary entitySummary = makeEntitySummary(
+        entityId: "Entity #$id", resolverAddress: "0xFFF", networkId: "xxx");
+    return entitySummary;
+  }).toList();
+}
+
+Entity makeEntityMetadata(EntitySummary entitySummary) {
+  String entityId = entitySummary.entityId;
+  String strEntity = getEntityMetadataString("Entity #$entityId");
+  final entityMetadata = parseEntity(strEntity);
+  entityMetadata.meta["entityId"] = entitySummary.entityId;
+  return entityMetadata;
+}
+
+List<Feed> makeFeeds(Entity entityMetadata) {
+  return entityMetadata.languages.map((lang) {
+    Feed f = parseFeed(getFeedString(entityMetadata));
+    f.meta['entityId'] = entityMetadata.meta['entityId'];
+    f.meta['language'] = lang;
+    return f;
+  }).toList();
+}
+
+ProcessMock makeFakeProcess() {
+  return parseProcess(getProcessString());
+}
+
+String getEntityMetadataString(String name) {
+  String entityId = "0xinvalid";
+
   return '''{
     "version": "1.0",
     "entityId":"$entityId",
@@ -113,7 +109,7 @@ String _makeEntity(String name) {
                 "fr": "Register"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
+            "visible": "true",
             "register":true
         },
         {
@@ -133,7 +129,7 @@ String _makeEntity(String name) {
                 "fr": "S'inscrire à $name"
             },
             "url": "https://cloudflare-ipfs.com/ipfs/QmUNZNB1u31eoAw1ooqXRGxGvSQg4Y7MdTTLUwjEp86WnE",
-            "visible": "always",
+            "visible": "true",
             "register":false
         }
     ],
@@ -161,7 +157,7 @@ String _makeEntity(String name) {
 }''';
 }
 
-String _makeFeed(Entity org) {
+String getFeedString(Entity org) {
   return '''{
   "version": "https://jsonfeed.org/version/1",
   "title": "${org.name["default"] ?? "Entity"}",
@@ -260,7 +256,7 @@ String _makeFeed(Entity org) {
 }''';
 }
 
-String _makeProcess() {
+String getProcessString() {
   return '''
   {
     "version": "1.0",
@@ -280,7 +276,7 @@ String _makeProcess() {
             "ca": "Renda Bàsica Universal"
         },
         "description": {
-            "default": "## Markdown text goes here ### Abstract",
+            "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             "ca": "## El markdown va aquí ### Resum"
         },
         "headerImage": "https://images.unsplash.com/photo-1489533119213-66a5cd877091?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1502&q=80",
@@ -292,7 +288,34 @@ String _makeProcess() {
                     "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
                 },
                 "description": {
-                    "default": "## Markdown text goes here ### Abstract",
+                    "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                    "ca": "## El markdown va aquí ### Resum"
+                },
+                "voteOptions": [
+                    {
+                        "title": {
+                            "default": "Yes",
+                            "ca": "Sí"
+                        },
+                        "value": "1"
+                    },
+                    {
+                        "title": {
+                            "default": "No",
+                            "ca": "No"
+                        },
+                        "value": "2"
+                    }
+                ]
+            },
+            {
+                "type": "single-choice", 
+                "question": {
+                    "default": "Should universal basic income become a human right?",
+                    "ca": "Estàs d'acord amb que la renda bàsica universal sigui un dret humà?"
+                },
+                "description": {
+                    "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                     "ca": "## El markdown va aquí ### Resum"
                 },
                 "voteOptions": [

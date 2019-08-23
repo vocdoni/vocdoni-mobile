@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:flutter/material.dart';
+import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/data/generic.dart';
 import 'package:vocdoni/util/api.dart';
 import "dart:async";
@@ -110,8 +111,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     if (super.state.value.length <= appStateBloc.value?.selectedIdentity)
       throw FlutterError("Invalid selectedIdentity: out of bounds");
 
-    final identity =
-        identitiesBloc.value[appStateBloc.value.selectedIdentity];
+    final identity = identitiesBloc.value[appStateBloc.value.selectedIdentity];
     if (!(identity is Identity))
       throw FlutterError("The current account is invalid");
     return identity;
@@ -121,15 +121,6 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     final identitiesValue = identitiesBloc.value;
     identitiesValue[appStateBloc.value.selectedIdentity] = account;
     await set(identitiesValue);
-  }
-
-  makeEntitySummaryFromEntity(Entity entity) {
-    EntitySummary summary = EntitySummary();
-    summary.entityId = entity.entityId;
-    summary.resolverAddress = entity.contracts.resolverAddress;
-    summary.networkId = entity.contracts.networkId;
-    summary.entryPoints.addAll(entity.meta["entryPoints"] ?? []);
-    return summary;
   }
 
   addEntityPeerToAccount(EntitySummary entitySummary, Identity account) {
@@ -149,34 +140,34 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     account.peers = peers;
   }
 
-  bool isSubscribed(Identity account, Entity entity) {
+  bool isSubscribed(Identity account, EntitySummary entitySummary) {
     return account.peers.entities.any((existingEntitiy) {
-      return entity.entityId == existingEntitiy.entityId;
+      return entitySummary.entityId == existingEntitiy.entityId;
     });
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribeEntityToAccount(Entity newEntity, Identity account) async {
+  subscribeEntityToAccount(Ent ent, Identity account) async {
     // Add the entity to the global registry if it does not exist
-    await entitiesBloc.add(newEntity);
+    await entitiesBloc.add(ent.entityMetadata, ent.entitySummary);
 
-    if (isSubscribed(account, newEntity))
+    if (isSubscribed(account, ent.entitySummary))
       throw FlutterError("You are already subscribed to this entity");
 
-    EntitySummary entitySummary = makeEntitySummaryFromEntity(newEntity);
-    addEntityPeerToAccount(entitySummary, account);
+    //EntitySummary entitySummary = makeEntitySummaryFromEntity(entityMetadata);
+    addEntityPeerToAccount(ent.entitySummary, account);
     setCurrentAccount(account);
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribeEntityFromAccount(Entity entity, Identity account) async {
+  unsubscribeEntityFromAccount(EntitySummary entitySummary, Identity account) async {
     // TODO: Remove the entity summary from the identity
-    removeEntityPeerFromAccount(entity.entityId, account);
+    removeEntityPeerFromAccount(entitySummary.entityId, account);
 
     // TODO: Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
     for (final existingAccount in identitiesBloc.value) {
-      if (isSubscribed(existingAccount, entity)) {
+      if (isSubscribed(existingAccount, entitySummary)) {
         subcribedInOtherAccounts = true;
         break;
       }
@@ -185,7 +176,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     // TODO: Remove the full entity if not used elsewhere
     // TODO: Remove the entity feeds if not used elsewhere
     if (!subcribedInOtherAccounts) {
-      await entitiesBloc.remove(entity.entityId);
+      await entitiesBloc.remove(entitySummary.entityId);
     }
   }
 }

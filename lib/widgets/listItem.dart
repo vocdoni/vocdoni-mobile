@@ -86,6 +86,7 @@ class ListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           buildMainText(),
+          secondaryText == null ? Container() : SizedBox(height: spaceMainAndSecondary),
           secondaryText == null ? Container() : buildSecondaryText(),
         ],
       ),
@@ -99,7 +100,7 @@ class ListItem extends StatelessWidget {
         style: new TextStyle(
             fontSize: isTitle ? fontSizeTitle : fontSizeBase,
             color: getMainColor(),
-            fontWeight: isBold ? fontWeightBold : fontWeightRegular));
+            fontWeight: isBold ? fontWeightSemiBold : fontWeightRegular));
   }
 
   buildSecondaryText() {
