@@ -4,9 +4,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  final String collapsedTitle;
+  final String appBarTitle;
   final String headerImageUrl;
   final String avatarUrl;
   final List<Widget> children;
@@ -15,11 +13,9 @@ class ScaffoldWithImage extends StatefulWidget {
   final List<Widget> Function(BuildContext) actionsBuilder;
 
   const ScaffoldWithImage({
-    this.title,
-    this.collapsedTitle,
+    this.appBarTitle,
     this.headerImageUrl,
     this.children,
-    this.subtitle,
     this.avatarUrl,
     this.builder,
     this.leftElement,
@@ -93,7 +89,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       collapseMode: CollapseMode.pin,
                       centerTitle: true,
                       title: Text(
-                        widget.collapsedTitle,
+                        widget.appBarTitle,
                         style: TextStyle(
                             color:
                                 colorDescription.withOpacity(interpolationOpacity),

@@ -6,6 +6,48 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
+
+class Account {
+  List<Ent> ents = new List<Ent>();
+  Identity identity;
+  List<String> languages = ['default'];
+
+  Account() {
+    init();
+  }
+
+  init() {
+    this.identity = identitiesBloc.getCurrentAccount();
+    this.identity.peers.entities.forEach((entitySummary) {
+      for (Entity entity in entitiesBloc.value)
+        if (entity.meta['entityId'] == entitySummary.entityId) {
+          Ent ent = new Ent(entitySummary);
+          this.ents.add(ent);
+        }
+    });
+  }
+
+  sync() {
+    this.ents.forEach((Ent ent) {
+      ent.syncLocal();
+    });
+  }
+
+  isSubscribed(EntitySummary _entitySummary) {
+    return identitiesBloc.isSubscribed(this.identity, _entitySummary);
+  }
+
+  subscribe(Ent ent) async {
+    await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
+    sync();
+  }
+
+  unsubscribe(EntitySummary _entitySummary) async {
+    await identitiesBloc.unsubscribeEntityFromAccount(
+        _entitySummary, account.identity);
+  }
+}
+
 // Ent exist only on runtime. It is not stored as such
 // Ent exists for the selected identity only
 class Ent {
@@ -71,43 +113,3 @@ class Ent {
   }
 }
 
-class Account {
-  List<Ent> ents = new List<Ent>();
-  Identity identity;
-  List<String> languages = ['default'];
-
-  Account() {
-    init();
-  }
-
-  init() {
-    this.identity = identitiesBloc.getCurrentAccount();
-    this.identity.peers.entities.forEach((entitySummary) {
-      for (Entity entity in entitiesBloc.value)
-        if (entity.meta['entityId'] == entitySummary.entityId) {
-          Ent ent = new Ent(entitySummary);
-          this.ents.add(ent);
-        }
-    });
-  }
-
-  sync() {
-    this.ents.forEach((Ent ent) {
-      ent.syncLocal();
-    });
-  }
-
-  isSubscribed(EntitySummary _entitySummary) {
-    return identitiesBloc.isSubscribed(this.identity, _entitySummary);
-  }
-
-  subscribe(Ent ent) async {
-    await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
-    sync();
-  }
-
-  unsubscribe(EntitySummary _entitySummary) async {
-    await identitiesBloc.unsubscribeEntityFromAccount(
-        _entitySummary, account.identity);
-  }
-}
