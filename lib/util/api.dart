@@ -8,16 +8,16 @@ import 'package:dvote/dvote.dart';
 // METHODS
 // ////////////////////////////////////////////////////////////////////////////
 
-Future<List<Gateway>> getBootNodes() async {
+Future<List<GatewayInfo>> getBootNodes() async {
   try {
-    List<Gateway> result = List<Gateway>();
+    List<GatewayInfo> result = List<GatewayInfo>();
     final strBootnodes = await http.read(bootnodesUrl);
     Map<String, dynamic> networkItems = jsonDecode(strBootnodes);
     networkItems.forEach((networkId, network) {
       if (!(network is List)) return;
       network.forEach((item) {
         if (!(item is Map)) return;
-        Gateway gw = Gateway();
+        GatewayInfo gw = GatewayInfo();
         gw.dvote = item["dvote"] ?? "";
         gw.web3 = item["web3"] ?? "";
         gw.publicKey = item["pubKey"] ?? "";
@@ -47,20 +47,22 @@ Future<String> addressFromMnemonic(String mnemonic) {
   return mnemonicToAddress(mnemonic);
 }
 
-Future<Entity> fetchEntityData(EntitySummary entitySummary) async {
+Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   // Create a random cloned list
-  List<Gateway> bootnodes = appStateBloc.value.bootnodes
-      .where((gw) => gw.meta["networkId"] == entitySummary.networkId)
+  //TODO: Only used gateways with the currently selected networkId
+  //gw.meta["networkId"] == currentlySelecctedNetworkId
+  List<GatewayInfo> bootnodes = appStateBloc.value.bootnodes
+      .where((gw) => true)
       .toList();
   bootnodes.shuffle();
+  
 
 //TODO: Currently not using entrypoints
   // Attempt for every node available
-  for (Gateway node in bootnodes) {
+  for (GatewayInfo node in bootnodes) {
     try {
-      final Entity entity = await fetchEntity(entitySummary.entityId,
-          entitySummary.resolverAddress, node.dvote, node.web3,
-          networkId: entitySummary.networkId, entryPoints: []);
+      final EntityMetadata entity = await fetchEntity(entityReference,
+           node.dvote, node.web3);
 
       return entity;
     } catch (err) {
@@ -71,22 +73,22 @@ Future<Entity> fetchEntityData(EntitySummary entitySummary) async {
   throw FetchError("The entity's data cannot be fetched");
 }
 
-Future<String> fetchEntityNewsFeed(Entity entity, String lang) async {
+Future<String> fetchEntityNewsFeed(EntityMetadata entityMetadata, String lang) async {
   // Attempt for every node available
-  if (!(entity is Entity))
+  if (!(entityMetadata is EntityMetadata))
     return null;
-  else if (!(entity.newsFeed is Map<String, String>))
+  else if (!(entityMetadata.newsFeed is Map<String, String>))
     return null;
-  else if (!(entity.newsFeed[lang] is String)) return null;
+  else if (!(entityMetadata.newsFeed[lang] is String)) return null;
 
   // Create a random cloned list
   var bootnodes = appStateBloc.value.bootnodes.skip(0).toList();
   bootnodes.shuffle();
 
-  final String contentUri = entity.newsFeed[lang];
+  final String contentUri = entityMetadata.newsFeed[lang];
 
   // Attempt for every node available
-  for (Gateway node in bootnodes) {
+  for (GatewayInfo node in bootnodes) {
     try {
       ContentURI cUri = ContentURI(contentUri);
       final result = await fetchFileString(cUri, node.dvote);

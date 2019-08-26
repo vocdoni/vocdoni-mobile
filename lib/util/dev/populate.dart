@@ -12,7 +12,7 @@ import 'package:vocdoni/data/_processMock.dart';
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 
 Future populateSampleData() async {
-  List<Entity> entitiesMetadata = new List<Entity>();
+  List<EntityMetadata> entitiesMetadata = new List<EntityMetadata>();
   List<Feed> feeds = new List<Feed>();
   List<ProcessMock> processess = new List<ProcessMock>();
   List<Ent> ents = new List<Ent>();
@@ -22,7 +22,7 @@ Future populateSampleData() async {
   entitySummaries.forEach((entitySummary) {
     Ent ent = Ent(entitySummary);
     ents.add(ent);
-    Entity entityMetadata = makeEntityMetadata(entitySummary);
+    EntityMetadata entityMetadata = makeEntityMetadata(entitySummary);
     entitiesMetadata.add(entityMetadata);
     feeds.addAll(makeFeeds(entityMetadata));
     entityMetadata.votingProcesses.active.forEach((processId) {
@@ -41,24 +41,24 @@ Future populateSampleData() async {
   account.sync();
 }
 
-List<EntitySummary> makeEntitySummaries() {
+List<EntityReference> makeEntitySummaries() {
   final ids = ["0x1", "0x2", "0x3"];
   return ids.map((id) {
-    EntitySummary entitySummary = makeEntitySummary(
+    EntityReference entitySummary = makeEntityReference(
         entityId: "Entity #$id", resolverAddress: "0xFFF", networkId: "xxx");
     return entitySummary;
   }).toList();
 }
 
-Entity makeEntityMetadata(EntitySummary entitySummary) {
+EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
   String entityId = entitySummary.entityId;
   String strEntity = getEntityMetadataString("Entity #$entityId");
-  final entityMetadata = parseEntity(strEntity);
+  final entityMetadata = parseEntityMetadata(strEntity);
   entityMetadata.meta["entityId"] = entitySummary.entityId;
   return entityMetadata;
 }
 
-List<Feed> makeFeeds(Entity entityMetadata) {
+List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
     Feed f = parseFeed(getFeedString(entityMetadata));
     f.meta['entityId'] = entityMetadata.meta['entityId'];
@@ -67,7 +67,7 @@ List<Feed> makeFeeds(Entity entityMetadata) {
   }).toList();
 }
 
-ProcessMock makeFakeProcess(EntitySummary entitySummary, String processId) {
+ProcessMock makeFakeProcess(EntityReference entitySummary, String processId) {
   Random random = new Random();
   ProcessMock process = parseProcess(getProcessString());
   process.meta['processId'] = processId;
@@ -165,7 +165,7 @@ String getEntityMetadataString(String name) {
 }''';
 }
 
-String getFeedString(Entity org) {
+String getFeedString(EntityMetadata org) {
   return '''{
   "version": "https://jsonfeed.org/version/1",
   "title": "${org.name["default"] ?? "Entity"}",

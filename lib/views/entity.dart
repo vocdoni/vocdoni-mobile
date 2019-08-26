@@ -25,8 +25,8 @@ class EntityInfo extends StatefulWidget {
 
 class _EntityInfoState extends State<EntityInfo> {
   bool _processingSubscription = false;
-  Entity_Action _registerAction;
-  List<Entity_Action> _actionsToDisplay = [];
+  EntityMetadata_Action _registerAction;
+  List<EntityMetadata_Action> _actionsToDisplay = [];
   bool _isRegistered = false;
 
   @override
@@ -36,7 +36,7 @@ class _EntityInfoState extends State<EntityInfo> {
     try {
       final Ent ent = ModalRoute.of(super.context).settings.arguments;
       if (ent == null) return;
-      fetchVisibleActions(ent.entityMetadata);
+      fetchVisibleActions(ent);
     } catch (err) {
       print(err);
     }
@@ -116,7 +116,7 @@ class _EntityInfoState extends State<EntityInfo> {
     return ListItem(
       mainTextTag: ent.entitySummary.entityId + title,
       mainText: title,
-      secondaryText: ent.entityMetadata.entityId,
+      secondaryText: ent.entitySummary.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -178,7 +178,7 @@ class _EntityInfoState extends State<EntityInfo> {
         });
   }
 
-  Future<bool> isActionVisible(Entity_Action action, String entityId) async {
+  Future<bool> isActionVisible(EntityMetadata_Action action, String entityId) async {
     if (action.visible == "true") return true;
     if (action.visible == null || action.visible == "false") return false;
 
@@ -234,22 +234,22 @@ class _EntityInfoState extends State<EntityInfo> {
         ));
   }
 
-  Future<void> fetchVisibleActions(Entity entity) async {
-    final List<Entity_Action> actionsToDisplay = [];
-    Entity_Action registerAction;
+  Future<void> fetchVisibleActions(Ent ent) async {
+    final List<EntityMetadata_Action> actionsToDisplay = [];
+    EntityMetadata_Action registerAction;
 
-    for (Entity_Action action in entity.actions) {
+    for (EntityMetadata_Action action in ent.entityMetadata.actions) {
       if (action.register == true) {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
-        bool isRegistered = await isActionVisible(action, entity.entityId);
+        bool isRegistered = await isActionVisible(action, ent.entitySummary.entityId);
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
         });
       } else {
-        if (await isActionVisible(action, entity.entityId)) {
+        if (await isActionVisible(action, ent.entitySummary.entityId)) {
           actionsToDisplay.add(action);
         }
       }
@@ -259,8 +259,8 @@ class _EntityInfoState extends State<EntityInfo> {
     });
   }
 
-  Entity_Action getRegisterAction(Entity entity) {
-    for (Entity_Action action in entity.actions) {
+  EntityMetadata_Action getRegisterAction(EntityMetadata entity) {
+    for (EntityMetadata_Action action in entity.actions) {
       if (action.register == true) return action;
     }
     return null;
@@ -323,7 +323,7 @@ class _EntityInfoState extends State<EntityInfo> {
       actionsToShow.add(noticeItem);
     }
 
-    for (Entity_Action action in _actionsToDisplay) {
+    for (EntityMetadata_Action action in _actionsToDisplay) {
       ListItem item;
       if (action.type == "browser") {
         if (!(action.name is Map) ||
@@ -354,7 +354,7 @@ class _EntityInfoState extends State<EntityInfo> {
     return actionsToShow;
   }
 
-  onBrowserAction(BuildContext ctx, Entity_Action action, Ent ent) {
+  onBrowserAction(BuildContext ctx, EntityMetadata_Action action, Ent ent) {
     final String url = action.url;
     final String title = action.name[ent.entityMetadata.languages[0]] ??
         ent.entityMetadata.name[ent.entityMetadata.languages[0]];

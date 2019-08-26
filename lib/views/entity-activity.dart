@@ -91,7 +91,7 @@ class _EntityActivityState extends State<EntityActivity> {
   }
 
 
-  Future loadRemoteFeed(BuildContext ctx, Entity entity) async {
+  Future loadRemoteFeed(BuildContext ctx, EntityMetadata entityMetadata) async {
     if (remoteFetched) return;
     remoteFetched = true;
     Timer(Duration(milliseconds: 10), () {
@@ -101,7 +101,7 @@ class _EntityActivityState extends State<EntityActivity> {
     });
 
     try {
-      final result = await fetchEntityNewsFeed(entity, entity.languages[0]);
+      final result = await fetchEntityNewsFeed(entityMetadata, entityMetadata.languages[0]);
       final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {

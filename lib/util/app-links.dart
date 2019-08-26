@@ -70,7 +70,7 @@ Future fetchAndShowEntity(
       .toList();
 
 //TODO Make use of entryPoints;
-  EntitySummary entitySummary = makeEntitySummary(
+  EntityReference entitySummary = makeEntityReference(
       entityId: entityId,
       resolverAddress: resolverAddress,
       networkId: networkId,

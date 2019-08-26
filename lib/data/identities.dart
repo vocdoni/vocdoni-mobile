@@ -123,7 +123,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     await set(identitiesValue);
   }
 
-  addEntityPeerToAccount(EntitySummary entitySummary, Identity account) {
+  addEntityPeerToAccount(EntityReference entitySummary, Identity account) {
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(account.peers.entities);
     peers.entities.add(entitySummary);
@@ -140,7 +140,7 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     account.peers = peers;
   }
 
-  bool isSubscribed(Identity account, EntitySummary entitySummary) {
+  bool isSubscribed(Identity account, EntityReference entitySummary) {
     return account.peers.entities.any((existingEntitiy) {
       return entitySummary.entityId == existingEntitiy.entityId;
     });
@@ -154,13 +154,13 @@ class IdentitiesBloc extends BlocComponent<List<Identity>> {
     if (isSubscribed(account, ent.entitySummary))
       throw FlutterError("You are already subscribed to this entity");
 
-    //EntitySummary entitySummary = makeEntitySummaryFromEntity(entityMetadata);
+    //EntityReference entitySummary = makeEntityReferenceFromEntity(entityMetadata);
     addEntityPeerToAccount(ent.entitySummary, account);
     setCurrentAccount(account);
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribeEntityFromAccount(EntitySummary entitySummary, Identity account) async {
+  unsubscribeEntityFromAccount(EntityReference entitySummary, Identity account) async {
     // TODO: Remove the entity summary from the identity
     removeEntityPeerFromAccount(entitySummary.entityId, account);
 

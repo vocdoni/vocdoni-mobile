@@ -34,16 +34,16 @@ class AppStateBloc extends BlocComponent<AppState> {
   @override
   Future<void> restore() async {
     File fd;
-    GatewaysStore gwStore;
+    GatewayInfoStore gwStore;
 
     // Gateway boot nodes
     try {
       fd = File("${storageDir.path}/$_storageFileBootNodes");
       if (await fd.exists()) {
         final bytes = await fd.readAsBytes();
-        gwStore = GatewaysStore.fromBuffer(bytes);
+        gwStore = GatewayInfoStore.fromBuffer(bytes);
       } else {
-        gwStore = GatewaysStore();
+        gwStore = GatewayInfoStore();
       }
     } catch (err) {
       print(err);
@@ -64,7 +64,7 @@ class AppStateBloc extends BlocComponent<AppState> {
     try {
       // Gateway boot nodes
       File fd = File("${storageDir.path}/$_storageFileBootNodes");
-      GatewaysStore store = GatewaysStore();
+      GatewayInfoStore store = GatewayInfoStore();
       store.items.addAll(state.value.bootnodes);
       await fd.writeAsBytes(store.writeToBuffer());
 
@@ -116,8 +116,8 @@ class AppStateBloc extends BlocComponent<AppState> {
 
   
 
-  setBootNodes(List<Gateway> bootnodes) async {
-    if (!(bootnodes is List<Gateway>)) throw "Invalid bootnode list";
+  setBootNodes(List<GatewayInfo> bootnodes) async {
+    if (!(bootnodes is List<GatewayInfo>)) throw "Invalid bootnode list";
 
     AppState newState = AppState()
       ..selectedIdentity = state.value.selectedIdentity
@@ -148,7 +148,7 @@ class AppState {
   /// All Gateways known to us, regardless of the entity.
   /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
   /// it can be filtered.
-  List<Gateway> bootnodes = [];
+  List<GatewayInfo> bootnodes = [];
 
   /// How many failed auth attempts happened since the last
   /// successful one.

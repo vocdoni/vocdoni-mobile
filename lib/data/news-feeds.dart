@@ -23,7 +23,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
   @override
   Future<void> restore() async {
     File fd;
-    FeedsStore store;
+    FeedStore store;
 
     try {
       fd = File("${storageDir.path}/$_storageFile");
@@ -38,7 +38,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
 
     try {
       final bytes = await fd.readAsBytes();
-      store = FeedsStore.fromBuffer(bytes);
+      store = FeedStore.fromBuffer(bytes);
       state.add(store.items);
     } catch (err) {
       print(err);
@@ -52,7 +52,7 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
     // Gateway boot nodes
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      FeedsStore store = FeedsStore();
+      FeedStore store = FeedStore();
       store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
@@ -72,18 +72,18 @@ class NewsFeedsBloc extends BlocComponent<List<Feed>> {
 
   /// Fetch the feeds of the given entity and update their entries
   /// on the local storage
-  Future<void> fetchFromEntity(Entity entity) async {
-    if (entity.languages == null || entity.languages.length < 1) return;
+  Future<void> fetchFromEntity(EntityMetadata entityMetadata) async {
+    if (entityMetadata.languages == null || entityMetadata.languages.length < 1) return;
     final feeds = value;
 
-    await Future.wait(entity.languages.map((lang) async {
-      final strFeed = await fetchEntityNewsFeed(entity, lang);
+    await Future.wait(entityMetadata.languages.map((lang) async {
+      final strFeed = await fetchEntityNewsFeed(entityMetadata, lang);
       final newFeed = parseFeed(strFeed);
-      newFeed.meta["entityId"] = entity.entityId; // metadata
+      newFeed.meta["entityId"] = entityMetadata.meta['entityId']; // metadata
       newFeed.meta["language"] = lang;
 
       final alreadyIdx = feeds.indexWhere((feed) =>
-          feed.meta["entityId"] == entity.entityId && // metadata
+          feed.meta["entityId"] == entityMetadata.meta['entityId'] && // metadata
           feed.meta["language"] == lang);
       if (alreadyIdx >= 0) {
         // Update existing

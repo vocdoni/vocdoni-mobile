@@ -6,7 +6,7 @@ import "dart:async";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
-class EntitiesBloc extends BlocComponent<List<Entity>> {
+class EntitiesBloc extends BlocComponent<List<EntityMetadata>> {
   final String _storageFile = ENTITIES_STORE_FILE;
 
   EntitiesBloc() {
@@ -19,7 +19,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   @override
   Future<void> restore() async {
     File fd;
-    EntitiesStore store;
+  EntityMetadataStore store;
 
     try {
       fd = File("${storageDir.path}/$_storageFile");
@@ -34,7 +34,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
 
     try {
       final bytes = await fd.readAsBytes();
-      store = EntitiesStore.fromBuffer(bytes);
+      store = EntityMetadataStore.fromBuffer(bytes);
       state.add(store.items);
     } catch (err) {
       print(err);
@@ -47,7 +47,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   Future<void> persist() async {
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      EntitiesStore store = EntitiesStore();
+      EntityMetadataStore store = EntityMetadataStore();
       store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
@@ -58,7 +58,7 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  Future<void> set(List<Entity> data) async {
+  Future<void> set(List<EntityMetadata> data) async {
     super.set(data);
     await persist();
   }
@@ -66,40 +66,40 @@ class EntitiesBloc extends BlocComponent<List<Entity>> {
   // CUSTOM OPERATIONS
 
   Future<void> add(
-      Entity newEntityMetadata, EntitySummary entitySummary) async {
-    /*if (!(newEntityMetadata is Entity))
+      EntityMetadata entityMetadata, EntityReference entitySummary) async {
+    /*if (!(entityMetadata is Entity))
       throw FlutterError("The entity parameter is invalid");
       */
 
-    newEntityMetadata.meta["entityId"] = entitySummary.entityId;
+    entityMetadata.meta["entityId"] = entitySummary.entityId;
 
     final currentIndex = value
-        .indexWhere((e) => e.meta['entityId'] == newEntityMetadata.entityId);
+        .indexWhere((e) => e.meta['entityId'] == entitySummary.entityId);
     // Already exists
     if (currentIndex >= 0) {
       final currentEntities = value;
-      currentEntities[currentIndex] = newEntityMetadata;
+      currentEntities[currentIndex] = entityMetadata;
       await set(currentEntities);
     } else {
-      value.add(newEntityMetadata);
+      value.add(entityMetadata);
       await set(value);
 
       // Fetch the news feeds if needed
-      //await newsFeedsBloc.fetchFromEntity(newEntityMetadata);
+      //await newsFeedsBloc.fetchFromEntity(entityMetadata);
     }
   }
 
   Future<void> remove(String entityIdToRemove) async {
     final entities = value;
     entities.removeWhere(
-        (existingEntity) => existingEntity.entityId == entityIdToRemove);
+        (existingEntity) => existingEntity.meta['entityId'] == entityIdToRemove);
 
     await set(entities);
 
     //TODO remove feed from newsFeedBloc
   }
 
-  Future<void> refreshFrom(List<EntitySummary> entities) async {
+  Future<void> refreshFrom(List<EntityReference> entities) async {
     // TODO:
     print("Unimplemented: entities > refreshFrom");
   }
