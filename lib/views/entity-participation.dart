@@ -23,31 +23,29 @@ class EntityParticipation extends StatefulWidget {
 }
 
 class _EntityParticipationState extends State<EntityParticipation> {
-  List<ProcessMock> _processess = new List<ProcessMock>();
   bool _loading = true;
 
   @override
   Widget build(context) {
     final Ent ent = ModalRoute.of(context).settings.arguments;
-    if (_loading) {
-      fetchProcessess(context, ent.entityMetadata);
-      return buildLoading(context);
-    } else if (ent == null) return buildEmptyEntity(context);
+    if (ent.processess == null) return buildNoProcessesess(context);
 
     return Scaffold(
       appBar: TopNavigation(
         title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       ),
       body: ListView.builder(
-        itemCount: _processess.length,
+        itemCount: ent.processess.length,
         itemBuilder: (BuildContext context, int index) {
-          final ProcessMock process = _processess[index];
+          final ProcessMock process = ent.processess[index];
+          String tag = process.meta['processId'] + process.details.headerImage;
           return BaseCard(
             onTap: () {
               Navigator.pushNamed(context, "/entity/participation/poll",
                   arguments: PollPageArgs(ent: ent, process: process));
             },
             image: process.details.headerImage,
+            imageTag: tag,
             children: <Widget>[
               DashboardRow(
                 children: <Widget>[
@@ -79,18 +77,10 @@ class _EntityParticipationState extends State<EntityParticipation> {
                       size: iconSizeMedium,
                       color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
                     ),
-                  )
+                  ),
                 ],
               ),
-              ListItem(
-                mainText:
-                    process.details.title[ent.entityMetadata.languages[0]],
-                mainTextFullWidth: true,
-                secondaryText:
-                    ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarUrl: ent.entityMetadata.media.avatar,
-                rightIcon: null,
-              )
+              buildTitle(ent, process),
             ],
           );
         },
@@ -98,10 +88,22 @@ class _EntityParticipationState extends State<EntityParticipation> {
     );
   }
 
-  Widget buildEmptyEntity(BuildContext ctx) {
+  Widget buildTitle(Ent ent, ProcessMock process) {
+    String title = process.details.title[ent.entityMetadata.languages[0]];
+    return ListItem(
+      // mainTextTag: process.meta['processId'] + title,
+      mainText: title,
+      mainTextFullWidth: true,
+      secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+      avatarUrl: ent.entityMetadata.media.avatar,
+      rightIcon: null,
+    );
+  }
+
+  Widget buildNoProcessesess(BuildContext ctx) {
     return Scaffold(
         body: Center(
-      child: Text("(No entity)"),
+      child: Text("(No processess)"),
     ));
   }
 
@@ -110,26 +112,5 @@ class _EntityParticipationState extends State<EntityParticipation> {
         body: Center(
       child: Text("Loading..."),
     ));
-  }
-
-  /*onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/entity/participation/post",
-        arguments: ActivityPostArguments(post));
-  }
-*/
-  Future<List<ProcessMock>> fetchProcessess(
-      BuildContext context, Entity entity) async {
-    List<ProcessMock> processess = new List<ProcessMock>();
-    List<String> active = entity.votingProcesses.active;
-    for (String processId in active) {
-      ProcessReference ref = new ProcessReference();
-      ref.processId = processId;
-      processess.add(await processesBloc.get(ref));
-    }
-
-    setState(() {
-      _processess = processess;
-      _loading = false;
-    });
   }
 }

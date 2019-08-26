@@ -6,6 +6,7 @@ import 'package:vocdoni/widgets/pageTitle.dart';
 class ScaffoldWithImage extends StatefulWidget {
   final String appBarTitle;
   final String headerImageUrl;
+  final String headerTag;
   final String avatarUrl;
   final List<Widget> children;
   final Builder builder;
@@ -15,6 +16,7 @@ class ScaffoldWithImage extends StatefulWidget {
   const ScaffoldWithImage({
     this.appBarTitle,
     this.headerImageUrl,
+    this.headerTag,
     this.children,
     this.avatarUrl,
     this.builder,
@@ -96,10 +98,13 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       ),
                       background: Stack(children: [
                         Container(
-                          child: Image.network(widget.headerImageUrl,
-                              fit: BoxFit.cover,
-                              height: headerImageHeight,
-                              width: double.infinity),
+                          child: Hero(
+                            tag: widget.headerTag,
+                            child: Image.network(widget.headerImageUrl,
+                                fit: BoxFit.cover,
+                                height: headerImageHeight,
+                                width: double.infinity),
+                          ),
                         ),
                         Container(
                           height: blackShadeHeight,

@@ -23,7 +23,7 @@ class DashboardText extends StatelessWidget {
         style: new TextStyle(
             fontSize: fontSizeTitle,
             color: getColorByPurpose(purpose: purpose),
-            fontWeight: fontWeightSemiBold));
+            fontWeight: fontWeightRegular));
   }
 
   builSecondary() {
@@ -31,6 +31,6 @@ class DashboardText extends StatelessWidget {
         style: new TextStyle(
             fontSize: fontSizeBase,
             color: getColorByPurpose(purpose: purpose),
-            fontWeight: fontWeightSemiBold));
+            fontWeight: fontWeightRegular));
   }
 }

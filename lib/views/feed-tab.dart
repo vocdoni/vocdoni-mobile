@@ -43,7 +43,9 @@ class FeedTab extends StatelessWidget {
         itemBuilder: (BuildContext ctx, int index) {
           final post = newsPosts[index];
           return BaseCard(
+            
             image: post.image,
+            imageTag: post.id,
             children: <Widget>[
               ListItem(
                 mainText: post.title,
