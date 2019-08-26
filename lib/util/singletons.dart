@@ -17,10 +17,10 @@ export "../data/feedBloc.dart";
 
 // Bloc entities
 AppStateBloc appStateBloc = AppStateBloc();
-IdentitiesBloc identitiesBloc = IdentitiesBloc();
-EntitiesBloc entitiesBloc = EntitiesBloc();
-ProcessesBloc processesBloc = ProcessesBloc();
-NewsFeedsBloc newsFeedsBloc = NewsFeedsBloc();
+IdentityBloc identitiesBloc = IdentityBloc();
+EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
+ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
+FeedBloc newsFeedsBloc = FeedBloc();
 Account  account;
 
 // Global scaffold key for snackbars

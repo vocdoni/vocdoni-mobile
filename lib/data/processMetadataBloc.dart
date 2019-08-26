@@ -3,10 +3,10 @@ import 'package:vocdoni/data/genericBloc.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 
-class ProcessesBloc extends BlocComponent<List<ProcessMetadata>> {
+class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
   final String _storageFile = PROCESSES_STORE_FILE;
 
-  ProcessesBloc() {
+  ProccessMetadataBloc() {
     state.add([]);
   }
 

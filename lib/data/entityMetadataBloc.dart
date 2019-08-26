@@ -6,10 +6,10 @@ import "dart:async";
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
-class EntitiesBloc extends BlocComponent<List<EntityMetadata>> {
+class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
   final String _storageFile = ENTITIES_STORE_FILE;
 
-  EntitiesBloc() {
+  EntityMetadataBloc() {
     state.add([]);
   }
 

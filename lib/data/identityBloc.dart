@@ -9,10 +9,10 @@ import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
 
-class IdentitiesBloc extends BlocComponent<List<Identity>> {
+class IdentityBloc extends GenericBloc<List<Identity>> {
   final String _storageFile = IDENTITIES_STORE_FILE;
 
-  IdentitiesBloc() {
+  IdentityBloc() {
     state.add([]);
   }
 

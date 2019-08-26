@@ -10,7 +10,7 @@ import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-class AppStateBloc extends BlocComponent<AppState> {
+class AppStateBloc extends GenericBloc<AppState> {
   final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
 
   AppStateBloc() {
