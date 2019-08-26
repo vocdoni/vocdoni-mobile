@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
 
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -20,7 +19,7 @@ import 'package:vocdoni/constants/colors.dart';
 
 class PollPageArgs {
   Ent ent;
-  ProcessMock process;
+  ProcessMetadata process;
 
   PollPageArgs({this.ent, this.process});
 }
@@ -37,7 +36,7 @@ class _PollPageState extends State<PollPage> {
   void didChangeDependencies() {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
-    ProcessMock process = args.process;
+    ProcessMetadata process = args.process;
     process.details.questions.forEach((question) {
       responses.add("");
     });
@@ -49,7 +48,7 @@ class _PollPageState extends State<PollPage> {
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
     Ent ent = args.ent;
-    ProcessMock process = args.process;
+    ProcessMetadata process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
 
@@ -100,7 +99,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, ProcessMock process) {
+  getScaffoldChildren(BuildContext context, Ent ent, ProcessMetadata process) {
     List<Widget> children = [];
     //children.add(buildTest());
     children.add(buildTitle(context, process));
@@ -114,7 +113,7 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, ProcessMock process) {
+  buildTitle(BuildContext context, ProcessMetadata process) {
     String title = process.details.title['default'];
     return ListItem(
       mainTextTag: process.meta['processId'] + title,
@@ -126,7 +125,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildRawItem(BuildContext context, ProcessMock process) {
+  buildRawItem(BuildContext context, ProcessMetadata process) {
     return ListItem(
       icon: FeatherIcons.code,
       mainText: "Raw details",
@@ -160,14 +159,14 @@ class _PollPageState extends State<PollPage> {
         ));
   }
 
-  List<Widget> buildQuestions(BuildContext ctx, ProcessMock process) {
+  List<Widget> buildQuestions(BuildContext ctx, ProcessMetadata process) {
     if (process.details.questions.length == 0) {
       return [buildError("No questions defined")];
     }
 
     List<Widget> items = new List<Widget>();
     int questionIndex = 0;
-    for (Question question in process.details.questions) {
+    for (ProcessMetadata_Details_Question question in process.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }
@@ -175,7 +174,7 @@ class _PollPageState extends State<PollPage> {
     return items;
   }
 
-  List<Widget> buildQuestion(Question question, int questionIndex) {
+  List<Widget> buildQuestion(ProcessMetadata_Details_Question question, int questionIndex) {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
@@ -234,7 +233,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildQuestionTitle(Question question, int index) {
+  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
     return ListItem(
       mainText: index.toString() + ". " + question.question['default'],
       secondaryText: question.description['default'],

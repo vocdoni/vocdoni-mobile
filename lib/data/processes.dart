@@ -1,11 +1,9 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/generic.dart';
-import 'package:vocdoni/util/dev/populate.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 
-class ProcessesBloc extends BlocComponent<List<ProcessMock>> {
+class ProcessesBloc extends BlocComponent<List<ProcessMetadata>> {
   final String _storageFile = PROCESSES_STORE_FILE;
 
   ProcessesBloc() {
@@ -53,18 +51,17 @@ class ProcessesBloc extends BlocComponent<List<ProcessMock>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  Future<void> set(List<ProcessMock> data) async {
+  Future<void> set(List<ProcessMetadata> data) async {
     super.set(data);
     //await persist();
   }
 
   // CUSTOM OPERATIONS
 
- Future< ProcessMock> get(ProcessReference ref) async {
+ Future< ProcessMetadata> get(String  processIds) async {
 
    return processesBloc.value[0];
   }
-
 
 }
 

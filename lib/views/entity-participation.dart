@@ -1,11 +1,8 @@
-import "dart:async";
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
-import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/pollPage.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
@@ -14,8 +11,6 @@ import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
-
-import 'activity-post.dart';
 
 class EntityParticipation extends StatefulWidget {
   @override
@@ -37,7 +32,7 @@ class _EntityParticipationState extends State<EntityParticipation> {
       body: ListView.builder(
         itemCount: ent.processess.length,
         itemBuilder: (BuildContext context, int index) {
-          final ProcessMock process = ent.processess[index];
+          final ProcessMetadata process = ent.processess[index];
           String tag = process.meta['processId'] + process.details.headerImage;
           return BaseCard(
             onTap: () {
@@ -88,7 +83,7 @@ class _EntityParticipationState extends State<EntityParticipation> {
     );
   }
 
-  Widget buildTitle(Ent ent, ProcessMock process) {
+  Widget buildTitle(Ent ent, ProcessMetadata process) {
     String title = process.details.title[ent.entityMetadata.languages[0]];
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,

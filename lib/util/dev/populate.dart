@@ -1,20 +1,16 @@
 import 'dart:math';
-
-import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/factories.dart';
-import 'dart:math';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
-import 'package:vocdoni/data/_processMock.dart';
 
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 
 Future populateSampleData() async {
   List<EntityMetadata> entitiesMetadata = new List<EntityMetadata>();
   List<Feed> feeds = new List<Feed>();
-  List<ProcessMock> processess = new List<ProcessMock>();
+  List<ProcessMetadata> processess = new List<ProcessMetadata>();
   List<Ent> ents = new List<Ent>();
 
   final entitySummaries = makeEntitySummaries();
@@ -67,9 +63,9 @@ List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   }).toList();
 }
 
-ProcessMock makeFakeProcess(EntityReference entitySummary, String processId) {
+ProcessMetadata makeFakeProcess(EntityReference entitySummary, String processId) {
   Random random = new Random();
-  ProcessMock process = parseProcess(getProcessString());
+  ProcessMetadata process = parseProcessMetadata(getProcessString());
   process.meta['processId'] = processId;
   process.meta['entityId'] = entitySummary.entityId;
   return process;

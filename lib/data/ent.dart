@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:vocdoni/data/_processMock.dart';
-
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -59,7 +57,7 @@ class Ent {
   EntityReference entitySummary;
   EntityMetadata entityMetadata;
   Feed feed;
-  List<ProcessMock> processess;
+  List<ProcessMetadata> processess;
   String lang = "default";
 
   Ent(EntityReference entitySummary) {
