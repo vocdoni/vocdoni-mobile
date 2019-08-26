@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:flutter/material.dart';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/data/generic.dart';
 import 'package:vocdoni/util/api.dart';
 import "dart:async";

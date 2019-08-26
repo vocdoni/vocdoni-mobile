@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/factories.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";

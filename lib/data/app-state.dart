@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
