@@ -1,17 +1,17 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/account.dart';
-import '../data/news-feeds.dart';
+import '../data/feedBloc.dart';
 import "../data/app-state.dart";
-import "../data/identities.dart";
-import "../data/entities.dart";
-import "../data/processes.dart";
+import "../data/identityBloc.dart";
+import "../data/entityMetadataBloc.dart";
+import "../data/processMetadataBloc.dart";
 
 // Export classes
 export "../data/app-state.dart";
-export "../data/identities.dart";
-export "../data/entities.dart";
-export "../data/processes.dart";
-export "../data/news-feeds.dart";
+export "../data/identityBloc.dart";
+export "../data/entityMetadataBloc.dart";
+export "../data/processMetadataBloc.dart";
+export "../data/feedBloc.dart";
 
 // EXPORTED SINGLETON INSTANCES
 

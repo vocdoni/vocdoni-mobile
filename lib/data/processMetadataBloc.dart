@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/data/genericBloc.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 

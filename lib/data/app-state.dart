@@ -6,7 +6,7 @@ import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
-import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/singletons.dart';
 

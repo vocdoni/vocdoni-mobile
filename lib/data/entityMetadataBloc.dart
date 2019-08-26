@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/data/genericBloc.dart';
 import "dart:async";
 
 import 'package:vocdoni/util/singletons.dart';
