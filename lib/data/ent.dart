@@ -6,7 +6,6 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-
 class Account {
   List<Ent> ents = new List<Ent>();
   Identity identity;
@@ -28,8 +27,9 @@ class Account {
   }
 
   sync() {
-    this.ents.forEach((Ent ent) {
-      ent.syncLocal();
+    this.ents = new List<Ent>();
+    this.identity.peers.entities.forEach((EntitySummary entitySummary) {
+      ents.add(Ent(entitySummary));
     });
   }
 
@@ -39,12 +39,17 @@ class Account {
 
   subscribe(Ent ent) async {
     await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
+    this.ents.add(ent);
     sync();
   }
 
   unsubscribe(EntitySummary _entitySummary) async {
     await identitiesBloc.unsubscribeEntityFromAccount(
         _entitySummary, account.identity);
+    int index = ents.indexWhere((ent) {
+      _entitySummary.entityId = ent.entitySummary.entityId;
+    });
+    if (index != -1) ents.removeAt(index);
   }
 }
 
@@ -108,8 +113,6 @@ class Ent {
       return process.meta['entityId'] == entitySummary.entityId;
     }).toList();
 
-    this.processess =
-        _processess.length > 0 ? this.processess : this.processess = null;
+    this.processess = _processess.length > 0 ? _processess : null;
   }
 }
-

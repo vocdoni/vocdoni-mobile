@@ -49,6 +49,7 @@ class _EntityInfoState extends State<EntityInfo> {
 
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
+        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
             "(entity)",
         avatarUrl: ent.entityMetadata.media.avatar,
@@ -97,7 +98,7 @@ class _EntityInfoState extends State<EntityInfo> {
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, ent.entityMetadata));
+    children.add(buildTitle(context, ent));
     children.add(buildSubscribeItem(context, ent));
     children.add(buildFeedItem(context, ent));
     children.addAll(buildActionList(context, ent));
@@ -110,10 +111,12 @@ class _EntityInfoState extends State<EntityInfo> {
     return children;
   }
 
-  buildTitle(BuildContext context, Entity entity) {
+  buildTitle(BuildContext context, Ent ent) {
+    String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
-      mainText: entity.name[entity.languages[0]],
-      secondaryText: entity.entityId,
+      mainTextTag: ent.entitySummary.entityId + title,
+      mainText: title,
+      secondaryText: ent.entityMetadata.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,

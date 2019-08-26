@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:vocdoni/data/_processMock.dart';
 import 'package:vocdoni/data/ent.dart';
 import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/random.dart';
+import 'dart:math';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
@@ -23,7 +25,9 @@ Future populateSampleData() async {
     Entity entityMetadata = makeEntityMetadata(entitySummary);
     entitiesMetadata.add(entityMetadata);
     feeds.addAll(makeFeeds(entityMetadata));
-    processess.add(makeFakeProcess());
+    entityMetadata.votingProcesses.active.forEach((processId) {
+      processess.add(makeFakeProcess(entitySummary, processId));
+    });
   });
 
   await entitiesBloc.set(entitiesMetadata);
@@ -63,8 +67,12 @@ List<Feed> makeFeeds(Entity entityMetadata) {
   }).toList();
 }
 
-ProcessMock makeFakeProcess() {
-  return parseProcess(getProcessString());
+ProcessMock makeFakeProcess(EntitySummary entitySummary, String processId) {
+  Random random = new Random();
+  ProcessMock process = parseProcess(getProcessString());
+  process.meta['processId'] = processId;
+  process.meta['entityId'] = entitySummary.entityId;
+  return process;
 }
 
 String getEntityMetadataString(String name) {
@@ -294,17 +302,31 @@ String getProcessString() {
                 "voteOptions": [
                     {
                         "title": {
-                            "default": "Yes",
+                            "default": "Likley yes, but not super sure about it",
+                            "ca": "Sí"
+                        },
+                        "value": "0"
+                    },
+                    {
+                        "title": {
+                            "default": "I like cheese",
                             "ca": "Sí"
                         },
                         "value": "1"
                     },
                     {
                         "title": {
-                            "default": "No",
-                            "ca": "No"
+                            "default": "Very long ansser Very long ansserVery long ansser Very long ansserVery long ansser Very long ansser",
+                            "ca": "Sí"
                         },
                         "value": "2"
+                    },
+                    {
+                        "title": {
+                            "default": "BLANK",
+                            "ca": "No"
+                        },
+                        "value": "3"
                     }
                 ]
             },

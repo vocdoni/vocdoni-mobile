@@ -24,7 +24,7 @@ class EntitiesTab extends StatelessWidget {
         identities[appState.selectedIdentity] == null ||
         identities[appState.selectedIdentity].peers.entities.length == 0)
         */
-   // if (account.ents == 0) return buildNoEntities(ctx);
+    // if (account.ents == 0) return buildNoEntities(ctx);
 
     //Identity account = identitiesBloc.getCurrentAccount();
 
@@ -43,29 +43,17 @@ class EntitiesTab extends StatelessWidget {
           final ent = account.ents[index];
           final feedPostAmount = getFeedPostAmount(ent);
           return BaseCard(children: [
-            ListItem(
-                mainText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarUrl: ent.entityMetadata.media.avatar,
-                isBold: true,
-                onTap: () => onTapEntity(ctx, ent)),
-                
+            buildName(ctx, ent),
             ListItem(
                 mainText: "Feed",
                 icon: FeatherIcons.rss,
                 rightText: feedPostAmount.toString(),
                 rightTextIsBadge: true,
                 onTap: () {
-                  Navigator.pushNamed(ctx, "/entity/activity",
-                      arguments: ent);
+                  Navigator.pushNamed(ctx, "/entity/activity", arguments: ent);
                 },
                 disabled: feedPostAmount == 0),
-            ListItem(
-                mainText: "Participation",
-                icon: FeatherIcons.mail,
-                rightText: ent.entityMetadata.votingProcesses.active.length.toString(),
-                rightTextIsBadge: true,
-                onTap: () => onTapParticipation(ctx, ent),
-                disabled: ent.entityMetadata.votingProcesses.active.length == 0)
+            buildParticipationItem(ctx, ent),
           ]);
         });
   }
@@ -73,6 +61,27 @@ class EntitiesTab extends StatelessWidget {
   int getFeedPostAmount(Ent ent) {
     //TODO Refactor NewsFeedBloc
     return 10;
+  }
+
+  Widget buildName(BuildContext ctx, Ent ent) {
+    String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
+    return ListItem(
+        mainTextTag: ent.entitySummary.entityId + title,
+        mainText: title,
+        avatarUrl: ent.entityMetadata.media.avatar,
+        isBold: true,
+        onTap: () => onTapEntity(ctx, ent));
+  }
+
+  buildParticipationItem(BuildContext ctx, Ent ent) {
+    if (ent.processess == null) return Container();
+    return ListItem(
+        mainText: "Participation",
+        icon: FeatherIcons.mail,
+        rightText: ent.processess.length.toString(),
+        rightTextIsBadge: true,
+        onTap: () => onTapParticipation(ctx, ent),
+        disabled: ent.processess.length == 0);
   }
 
   Widget buildNoEntities(BuildContext ctx) {

@@ -43,6 +43,7 @@ class _EntityActivityState extends State<EntityActivity> {
           final FeedPost post = ent.feed.items[index];
           return BaseCard(
             image: post.image,
+            imageTag:post.id+post.image,
             children: <Widget>[
               ListItem(
                 mainText: post.title,

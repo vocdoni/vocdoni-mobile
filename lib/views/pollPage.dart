@@ -31,11 +31,20 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
+  List<String> responses = [];
+
   @override
   void didChangeDependencies() {
+    PollPageArgs args = ModalRoute.of(context).settings.arguments;
+
+    ProcessMock process = args.process;
+    process.details.questions.forEach((question) {
+      responses.add("");
+    });
     super.didChangeDependencies();
   }
 
+  @override
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
@@ -49,6 +58,7 @@ class _PollPageState extends State<PollPage> {
         : process.details.headerImage;
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
+        headerTag: process.meta['processId'] + headerUrl,
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -100,13 +110,14 @@ class _PollPageState extends State<PollPage> {
     ));
     children.add(buildRawItem(context, process));
     children.addAll(buildQuestions(context, process));
-    
 
     return children;
   }
 
   buildTitle(BuildContext context, ProcessMock process) {
+    String title = process.details.title['default'];
     return ListItem(
+      mainTextTag: process.meta['processId'] + title,
       mainText: process.details.title['default'],
       secondaryText: process.meta['entityId'],
       isTitle: true,
@@ -155,24 +166,61 @@ class _PollPageState extends State<PollPage> {
     }
 
     List<Widget> items = new List<Widget>();
-    int index = 1;
+    int questionIndex = 0;
     for (Question question in process.details.questions) {
-      items.addAll(buildQuestion(question, index));
-      index ++;
+      items.addAll(buildQuestion(question, questionIndex));
+      questionIndex++;
     }
 
     return items;
   }
 
-  List<Widget> buildQuestion(Question question, int index) {
+  List<Widget> buildQuestion(Question question, int questionIndex) {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
       items.add(Section());
-      items.add(buildQuestionTitle(question, index));
+      items.add(buildQuestionTitle(question, questionIndex));
+
+      List<Widget> options = new List<Widget>();
+      question.voteOptions.forEach((voteOption) {
+        options.add(Padding(
+          padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+          child: ChoiceChip(
+            backgroundColor: colorLightGuide,
+            
+            selectedColor: colorBlue,
+            padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+            label: Text(
+              voteOption.title['default'],
+              style: TextStyle(
+                  fontSize: fontSizeSecondary,
+                  fontWeight: fontWeightRegular,
+                  color: responses[questionIndex] == voteOption.value
+                      ? Colors.white
+                      : colorDescription),
+            ),
+            selected: responses[questionIndex] == voteOption.value,
+            onSelected: (bool selected) {
+              if (selected) {
+                setState(() {
+                  responses[questionIndex] = voteOption.value;
+                });
+              }
+            },
+          ),
+        ));
+      });
+
+      items.add(
+        Column(
+          children: options,
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      );
     } else {
       String questionType = question.type;
-      buildError("Unknown question type: $questionType");
+      buildError("Question type not supported: $questionType");
     }
     return items;
   }
@@ -188,11 +236,11 @@ class _PollPageState extends State<PollPage> {
 
   buildQuestionTitle(Question question, int index) {
     return ListItem(
-        mainText: index.toString() + ". "+ question.question['default'],
-        secondaryText: question.description['default'],
-        secondaryTextMultiline: true,
-        rightIcon:null,
-        );
+      mainText: index.toString() + ". " + question.question['default'],
+      secondaryText: question.description['default'],
+      secondaryTextMultiline: true,
+      rightIcon: null,
+    );
   }
 
   goBack(BuildContext ctx) {

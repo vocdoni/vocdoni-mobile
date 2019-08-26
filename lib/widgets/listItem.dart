@@ -4,6 +4,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 class ListItem extends StatelessWidget {
   final String mainText;
+  final String mainTextTag;
   final bool mainTextFullWidth;
   final String secondaryText;
   final bool mainTextMultiline;
@@ -23,6 +24,7 @@ class ListItem extends StatelessWidget {
 
   ListItem(
       {this.mainText,
+      this.mainTextTag,
       this.mainTextFullWidth = false,
       this.secondaryText,
       this.mainTextMultiline = true,
@@ -54,7 +56,7 @@ class ListItem extends StatelessWidget {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                          buildMainText(),
+                          buildMainTextWithHero(),
                           Padding(
                             padding: EdgeInsets.fromLTRB(
                                 0, spaceMainAndSecondary, 0, 0),
@@ -85,8 +87,10 @@ class ListItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          buildMainText(),
-          secondaryText == null ? Container() : SizedBox(height: spaceMainAndSecondary),
+          buildMainTextWithHero(),
+          secondaryText == null
+              ? Container()
+              : SizedBox(height: spaceMainAndSecondary),
           secondaryText == null ? Container() : buildSecondaryText(),
         ],
       ),
@@ -101,6 +105,15 @@ class ListItem extends StatelessWidget {
             fontSize: isTitle ? fontSizeTitle : fontSizeBase,
             color: getMainColor(),
             fontWeight: isBold ? fontWeightSemiBold : fontWeightRegular));
+  }
+
+  buildMainTextWithHero() {
+    return mainTextTag == null
+        ? buildMainText()
+        : Hero(
+            tag: mainTextTag,
+            child: buildMainText(),
+          );
   }
 
   buildSecondaryText() {
@@ -177,8 +190,9 @@ class ListItem extends StatelessWidget {
   }
 
   Color getBackroundColor() {
-    if (purpose == Purpose.NONE ) return null;
-    return getColorByPurpose(purpose: purpose, isPale: true).withOpacity(opacityBackgroundColor);
+    if (purpose == Purpose.NONE) return null;
+    return getColorByPurpose(purpose: purpose, isPale: true)
+        .withOpacity(opacityBackgroundColor);
   }
 
   Color getSecondaryElementColor() {

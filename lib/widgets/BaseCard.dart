@@ -3,15 +3,16 @@ import 'package:vocdoni/constants/colors.dart';
 
 class BaseCard extends StatelessWidget {
   final String image;
+  final String imageTag;
   final List<Widget> children;
   final void Function() onTap;
 
-  BaseCard({this.image, this.children, this.onTap});
+  BaseCard({this.image, this.children, this.onTap, this.imageTag});
 
   @override
   Widget build(context) {
     List<Widget> items = [];
-    if (image != null) items.insert(0, buildImage());
+    if (image != null) items.insert(0, buildImageWithHero());
     if (children != null) items = new List.from(items)..addAll(children);
 
     return Padding(
@@ -46,15 +47,19 @@ class BaseCard extends StatelessWidget {
   }
 
   buildImage() {
+    return Image.network(
+      image,
+      fit: BoxFit.cover,
+    );
+  }
+
+  buildImageWithHero() {
     return AspectRatio(
       aspectRatio: 9 / 4,
       child: Container(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-              color: Color(0xFFAADDFF),
-              image: new DecorationImage(
-                  image: new NetworkImage(image), fit: BoxFit.cover)),
-        ),
+        child: imageTag == null
+            ? buildImage()
+            : Hero(tag: imageTag, child: buildImage()),
       ),
     );
   }
