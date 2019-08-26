@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'package:vocdoni/controllers/account.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';

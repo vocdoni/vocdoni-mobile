@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/account.dart';
 import '../data/news-feeds.dart';
 import "../data/app-state.dart";
 import "../data/identities.dart";
