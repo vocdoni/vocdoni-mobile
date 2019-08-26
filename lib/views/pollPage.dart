@@ -102,7 +102,7 @@ class _PollPageState extends State<PollPage> {
   getScaffoldChildren(BuildContext context, Ent ent, ProcessMetadata process) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, process));
+    children.add(buildTitle(context, ent, process));
     children.add(Summary(
       text: process.details.description['default'],
       maxLines: 5,
@@ -113,7 +113,7 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, ProcessMetadata process) {
+  buildTitle(BuildContext context, Ent ent, ProcessMetadata process) {
     String title = process.details.title['default'];
     return ListItem(
       mainTextTag: process.meta['processId'] + title,
@@ -122,6 +122,8 @@ class _PollPageState extends State<PollPage> {
       isTitle: true,
       rightIcon: null,
       isBold: true,
+      avatarUrl: ent.entityMetadata.media.avatar,
+      mainTextFullWidth: true,
     );
   }
 
@@ -166,7 +168,8 @@ class _PollPageState extends State<PollPage> {
 
     List<Widget> items = new List<Widget>();
     int questionIndex = 0;
-    for (ProcessMetadata_Details_Question question in process.details.questions) {
+    for (ProcessMetadata_Details_Question question
+        in process.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }
@@ -174,7 +177,8 @@ class _PollPageState extends State<PollPage> {
     return items;
   }
 
-  List<Widget> buildQuestion(ProcessMetadata_Details_Question question, int questionIndex) {
+  List<Widget> buildQuestion(
+      ProcessMetadata_Details_Question question, int questionIndex) {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
@@ -187,7 +191,6 @@ class _PollPageState extends State<PollPage> {
           padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
           child: ChoiceChip(
             backgroundColor: colorLightGuide,
-            
             selectedColor: colorBlue,
             padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
             label: Text(
