@@ -301,7 +301,9 @@ class _PollPageState extends State<PollPage> {
     return ListItem(
       mainText: question.question['default'],
       secondaryText: question.description['default'],
-      secondaryTextMultiline: true,
+      
+      secondaryTextMultiline: 100,
+      
       rightIcon: null,
     );
   }
