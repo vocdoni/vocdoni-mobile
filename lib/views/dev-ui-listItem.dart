@@ -42,7 +42,7 @@ class DevUiListItem extends StatelessWidget {
               icon: FeatherIcons.mail,
               mainTextFullWidth: true,
               rightIcon: null,
-              secondaryTextMultiline: true,
+              secondaryTextMultiline: 5,
               secondaryText:
                   "A very very long mutiline text that explains what this sections is in",
             ),
@@ -123,7 +123,7 @@ class DevUiListItem extends StatelessWidget {
               mainText:
                   "Lon text with multiline disabled. Bla bla bla bla bla bla bla bla bla bla",
               rightIcon: null,
-              mainTextMultiline: false,
+              mainTextMultiline: 1,
             ),
             ListItem(
               mainText: "Item with DANGER purpose ",
@@ -202,18 +202,18 @@ class DevUiListItem extends StatelessWidget {
             ListItem(
                 mainText: "With icon",
                 secondaryText: "With secondary text",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With icon",
                 secondaryText: "With very very very very long secondary text",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With icon",
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 icon: FeatherIcons.anchor),
 
             ListItem(
@@ -226,20 +226,20 @@ class DevUiListItem extends StatelessWidget {
             ListItem(
                 mainText: "With secondary icon",
                 secondaryText: "With secondary text",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With secondary icon",
                 secondaryText: "With very very very very long secondary text",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
             ListItem(
                 mainText: "With secondary icon",
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
 
@@ -254,7 +254,7 @@ class DevUiListItem extends StatelessWidget {
                     "Very long main text with more than one line. Bla bla bla bla bla",
                 secondaryText:
                     "With a very very very very long secondary text that does not not fit in three lines. Bla bla bla bla bla bla bla",
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 mainTextFullWidth: true,
                 icon: FeatherIcons.anchor),
 
@@ -264,7 +264,7 @@ class DevUiListItem extends StatelessWidget {
                 secondaryText:
                     "Multiline disabled. text that does not not fit in three lines. Bla bla bla bla bla bla bla",
                 mainTextFullWidth: true,
-                secondaryTextMultiline: true,
+                secondaryTextMultiline: 5,
                 icon: FeatherIcons.anchor),
             ListItem(
               mainText: "Item with avatar",

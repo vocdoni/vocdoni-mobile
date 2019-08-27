@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/factories.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
@@ -57,8 +57,8 @@ EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
 List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
     Feed f = parseFeed(getFeedString(entityMetadata));
-    f.meta['entityId'] = entityMetadata.meta['entityId'];
-    f.meta['language'] = lang;
+    f.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];
+    f.meta[META_LANGUAGE] = lang;
     return f;
   }).toList();
 }
@@ -66,8 +66,8 @@ List<Feed> makeFeeds(EntityMetadata entityMetadata) {
 ProcessMetadata makeFakeProcess(EntityReference entitySummary, String processId) {
   Random random = new Random();
   ProcessMetadata process = parseProcessMetadata(getProcessString());
-  process.meta['processId'] = processId;
-  process.meta['entityId'] = entitySummary.entityId;
+  process.meta[META_PROCESS_ID] = processId;
+  process.meta[META_ENTITY_ID] = entitySummary.entityId;
   return process;
 }
 

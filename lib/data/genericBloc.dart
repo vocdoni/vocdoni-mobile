@@ -9,7 +9,7 @@ const BOOTNODES_STORE_FILE = "bootnodes.dat";
 const PROCESSES_STORE_FILE = "processes.dat";
 const NEWSFEED_STORE_FILE = "feed.dat";
 
-abstract class BlocComponent<T> {
+abstract class GenericBloc<T> {
   // Data stream
   @protected
   BehaviorSubject<T> state = BehaviorSubject<T>.seeded(null);

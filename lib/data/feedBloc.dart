@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/parsers.dart';
-import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/data/genericBloc.dart';
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
 /// of the subscribed entities
-class NewsFeedsBloc extends BlocComponent<List<Feed>> {
+class FeedBloc extends GenericBloc<List<Feed>> {
   final String _storageFile = NEWSFEED_STORE_FILE;
 
-  NewsFeedsBloc() {
+  FeedBloc() {
     state.add([]);
   }
 

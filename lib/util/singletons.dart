@@ -1,27 +1,33 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/data/ent.dart';
-import '../data/news-feeds.dart';
+import 'package:vocdoni/controllers/account.dart';
+import '../data/feedBloc.dart';
 import "../data/app-state.dart";
-import "../data/identities.dart";
-import "../data/entities.dart";
-import "../data/processes.dart";
+import "../data/identityBloc.dart";
+import "../data/entityMetadataBloc.dart";
+import "../data/processMetadataBloc.dart";
 
 // Export classes
 export "../data/app-state.dart";
-export "../data/identities.dart";
-export "../data/entities.dart";
-export "../data/processes.dart";
-export "../data/news-feeds.dart";
+export "../data/identityBloc.dart";
+export "../data/entityMetadataBloc.dart";
+export "../data/processMetadataBloc.dart";
+export "../data/feedBloc.dart";
 
 // EXPORTED SINGLETON INSTANCES
 
 // Bloc entities
 AppStateBloc appStateBloc = AppStateBloc();
-IdentitiesBloc identitiesBloc = IdentitiesBloc();
-EntitiesBloc entitiesBloc = EntitiesBloc();
-ProcessesBloc processesBloc = ProcessesBloc();
-NewsFeedsBloc newsFeedsBloc = NewsFeedsBloc();
+IdentityBloc identitiesBloc = IdentityBloc();
+EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
+ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
+FeedBloc newsFeedsBloc = FeedBloc();
 Account  account;
 
 // Global scaffold key for snackbars
 GlobalKey<ScaffoldState> homePageScaffoldKey = new GlobalKey<ScaffoldState>();
+
+
+// Const
+const META_ENTITY_ID = "entityId";
+const META_PROCESS_ID = "processId";
+const META_LANGUAGE = "language";

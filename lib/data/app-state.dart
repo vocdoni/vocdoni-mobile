@@ -1,15 +1,16 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/account.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
-import 'package:vocdoni/data/generic.dart';
+import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-class AppStateBloc extends BlocComponent<AppState> {
+class AppStateBloc extends GenericBloc<AppState> {
   final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
 
   AppStateBloc() {
@@ -103,12 +104,12 @@ class AppStateBloc extends BlocComponent<AppState> {
     state.add(newState);
 
     // Trigger updates elsewhere
-    entitiesBloc
+    /*entitiesBloc
         .refreshFrom(identitiesBloc.value[identityIdx].peers.entities)
         .catchError((_) {
       print(
           "Error: Unable to refresh the entities from the newly selected identity");
-    });
+    });*/
 
     account = new Account();
 

@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:vocdoni/data/ent.dart';
-
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -13,8 +10,6 @@ import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
-import '../lang/index.dart';
-import 'package:http/http.dart' as http;
 import 'package:vocdoni/constants/colors.dart';
 
 class PollPageArgs {
@@ -31,6 +26,8 @@ class PollPage extends StatefulWidget {
 
 class _PollPageState extends State<PollPage> {
   List<String> responses = [];
+  String responsesStateMessage = '';
+  bool responsesAreValid = false;
 
   @override
   void didChangeDependencies() {
@@ -40,9 +37,12 @@ class _PollPageState extends State<PollPage> {
     process.details.questions.forEach((question) {
       responses.add("");
     });
+
+    checkResponseState();
     super.didChangeDependencies();
   }
 
+  
   @override
   @override
   Widget build(context) {
@@ -102,18 +102,21 @@ class _PollPageState extends State<PollPage> {
   getScaffoldChildren(BuildContext context, Ent ent, ProcessMetadata process) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, process));
+    children.add(buildTitle(context, ent, process));
     children.add(Summary(
       text: process.details.description['default'],
       maxLines: 5,
     ));
     children.add(buildRawItem(context, process));
     children.addAll(buildQuestions(context, process));
+    children.add(Section());
+    children.add(buildSubmitInfo());
+    children.add(buildSubmitVoteButton());
 
     return children;
   }
 
-  buildTitle(BuildContext context, ProcessMetadata process) {
+  buildTitle(BuildContext context, Ent ent, ProcessMetadata process) {
     String title = process.details.title['default'];
     return ListItem(
       mainTextTag: process.meta['processId'] + title,
@@ -122,6 +125,8 @@ class _PollPageState extends State<PollPage> {
       isTitle: true,
       rightIcon: null,
       isBold: true,
+      avatarUrl: ent.entityMetadata.media.avatar,
+      mainTextFullWidth: true,
     );
   }
 
@@ -135,6 +140,63 @@ class _PollPageState extends State<PollPage> {
       },
       disabled: true,
     );
+  }
+
+  setResponse(int questionIndex, String value) {
+    setState(() {
+      responses[questionIndex] = value;
+    });
+
+    checkResponseState();
+  }
+
+  checkResponseState() {
+    bool allGood = true;
+    int idx = 1;
+    for (final response in responses) {
+      if (response == '') {
+        allGood = false;
+        setState(() {
+          responsesAreValid = false;
+          responsesStateMessage = 'Question #$idx needs to be answered';
+        });
+        break;
+      }
+        idx++;
+    }
+
+    if (allGood) {
+      setState(() {
+        responsesAreValid = true;
+        responsesStateMessage = '';
+      });
+    }
+  }
+
+  buildSubmitVoteButton() {
+    return Padding(
+      padding: EdgeInsets.all(paddingPage),
+      child: BaseButton(
+          text: "Submit",
+          isSmall: false,
+          style: BaseButtonStyle.FILLED,
+          purpose: Purpose.HIGHLIGHT,
+          isDisabled: responsesAreValid == false,
+          onTap: () {}),
+    );
+  }
+
+  buildSubmitInfo() {
+    return responsesAreValid == false
+        ? ListItem(
+            mainText: responsesStateMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          )
+        : ListItem(
+            mainText: responsesStateMessage,
+            rightIcon: null,
+          );
   }
 
   buildShareButton(BuildContext context, Ent ent) {
@@ -166,7 +228,9 @@ class _PollPageState extends State<PollPage> {
 
     List<Widget> items = new List<Widget>();
     int questionIndex = 0;
-    for (ProcessMetadata_Details_Question question in process.details.questions) {
+
+    for (ProcessMetadata_Details_Question question
+        in process.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }
@@ -174,11 +238,12 @@ class _PollPageState extends State<PollPage> {
     return items;
   }
 
-  List<Widget> buildQuestion(ProcessMetadata_Details_Question question, int questionIndex) {
+  List<Widget> buildQuestion(
+      ProcessMetadata_Details_Question question, int questionIndex) {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
-      items.add(Section());
+      items.add(Section(text:(questionIndex+1).toString()));
       items.add(buildQuestionTitle(question, questionIndex));
 
       List<Widget> options = new List<Widget>();
@@ -187,11 +252,12 @@ class _PollPageState extends State<PollPage> {
           padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
           child: ChoiceChip(
             backgroundColor: colorLightGuide,
-            
             selectedColor: colorBlue,
             padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
             label: Text(
               voteOption.title['default'],
+              overflow: TextOverflow.ellipsis,
+              maxLines: 5,
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
@@ -202,9 +268,7 @@ class _PollPageState extends State<PollPage> {
             selected: responses[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
-                setState(() {
-                  responses[questionIndex] = voteOption.value;
-                });
+                setResponse(questionIndex, voteOption.value);
               }
             },
           ),
@@ -235,9 +299,11 @@ class _PollPageState extends State<PollPage> {
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
     return ListItem(
-      mainText: index.toString() + ". " + question.question['default'],
+      mainText: question.question['default'],
       secondaryText: question.description['default'],
-      secondaryTextMultiline: true,
+      
+      secondaryTextMultiline: 100,
+      
       rightIcon: null,
     );
   }

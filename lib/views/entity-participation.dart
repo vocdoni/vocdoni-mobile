@@ -2,7 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data/ent.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/views/pollPage.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';

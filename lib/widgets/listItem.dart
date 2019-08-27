@@ -7,8 +7,8 @@ class ListItem extends StatelessWidget {
   final String mainTextTag;
   final bool mainTextFullWidth;
   final String secondaryText;
-  final bool mainTextMultiline;
-  final bool secondaryTextMultiline;
+  final int mainTextMultiline;
+  final int secondaryTextMultiline;
   final IconData icon;
   final String avatarUrl;
   final IconData rightIcon;
@@ -27,8 +27,8 @@ class ListItem extends StatelessWidget {
       this.mainTextTag,
       this.mainTextFullWidth = false,
       this.secondaryText,
-      this.mainTextMultiline = true,
-      this.secondaryTextMultiline = false,
+      this.mainTextMultiline = 1,
+      this.secondaryTextMultiline = 1,
       this.icon,
       this.avatarUrl,
       this.rightIcon = FeatherIcons.chevronRight,
@@ -99,7 +99,7 @@ class ListItem extends StatelessWidget {
 
   buildMainText() {
     return Text(mainText,
-        maxLines: mainTextMultiline ? 3 : 1,
+        maxLines: mainTextMultiline,
         overflow: TextOverflow.ellipsis,
         style: new TextStyle(
             fontSize: isTitle ? fontSizeTitle : fontSizeBase,
@@ -118,7 +118,7 @@ class ListItem extends StatelessWidget {
 
   buildSecondaryText() {
     return Text(secondaryText,
-        maxLines: secondaryTextMultiline ? 3 : 1,
+        maxLines: secondaryTextMultiline,
         overflow: TextOverflow.ellipsis,
         style: new TextStyle(
             fontSize: fontSizeSecondary,
