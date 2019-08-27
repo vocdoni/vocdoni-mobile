@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -36,7 +35,7 @@ class Ent {
 
   syncEntityMetadata(EntityReference entitySummary) {
     int index = entitiesBloc.value.indexWhere((e) {
-      return e.meta['entityId'] == entitySummary.entityId;
+      return e.meta[META_ENTITY_ID] == entitySummary.entityId;
     });
 
     if (index == -1) {
@@ -48,9 +47,10 @@ class Ent {
 
   syncFeed(EntityReference _entitySummary, EntityMetadata _entityMetadata) {
     final feeds = newsFeedsBloc.value.where((f) {
-      if (f.meta["entityId"] != _entitySummary.entityId)
+      if (f.meta[META_ENTITY_ID] != _entitySummary.entityId)
         return false;
-      else if (f.meta["language"] != _entityMetadata.languages[0]) return false;
+      else if (f.meta[META_LANGUAGE] != _entityMetadata.languages[0])
+        return false;
       return true;
     }).toList();
 
@@ -58,9 +58,18 @@ class Ent {
   }
 
   syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
+    
     final _processess = processesBloc.value.where((process) {
-      return process.meta['entityId'] == entitySummary.entityId;
+      //Process is listed as active
+      bool isActive = entityMetadata.votingProcesses.active.indexOf(process.meta[META_PROCESS_ID])!=-1;
+      //Process belongs to the org that created it.
+      bool isFromEntity = process.meta[META_ENTITY_ID] == entitySummary.entityId;
+      return isActive && isFromEntity;
     }).toList();
+
+    entityMetadata.votingProcesses.active.forEach((processId) {
+
+    });
 
     this.processess = _processess.length > 0 ? _processess : null;
   }
