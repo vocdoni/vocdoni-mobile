@@ -228,6 +228,7 @@ class _PollPageState extends State<PollPage> {
 
     List<Widget> items = new List<Widget>();
     int questionIndex = 0;
+
     for (ProcessMetadata_Details_Question question
         in process.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
@@ -242,7 +243,7 @@ class _PollPageState extends State<PollPage> {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
-      items.add(Section());
+      items.add(Section(text:(questionIndex+1).toString()));
       items.add(buildQuestionTitle(question, questionIndex));
 
       List<Widget> options = new List<Widget>();
@@ -298,7 +299,7 @@ class _PollPageState extends State<PollPage> {
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
     return ListItem(
-      mainText: index.toString() + ". " + question.question['default'],
+      mainText: question.question['default'],
       secondaryText: question.description['default'],
       secondaryTextMultiline: true,
       rightIcon: null,
