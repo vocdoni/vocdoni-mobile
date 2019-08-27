@@ -104,12 +104,12 @@ class AppStateBloc extends GenericBloc<AppState> {
     state.add(newState);
 
     // Trigger updates elsewhere
-    entitiesBloc
+    /*entitiesBloc
         .refreshFrom(identitiesBloc.value[identityIdx].peers.entities)
         .catchError((_) {
       print(
           "Error: Unable to refresh the entities from the newly selected identity");
-    });
+    });*/
 
     account = new Account();
 

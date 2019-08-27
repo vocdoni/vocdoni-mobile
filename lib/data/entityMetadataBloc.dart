@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import "dart:async";
-
-import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
   final String _storageFile = ENTITIES_STORE_FILE;
@@ -19,7 +17,7 @@ class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
   @override
   Future<void> restore() async {
     File fd;
-  EntityMetadataStore store;
+    EntityMetadataStore store;
 
     try {
       fd = File("${storageDir.path}/$_storageFile");
@@ -71,10 +69,10 @@ class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
       throw FlutterError("The entity parameter is invalid");
       */
 
-    entityMetadata.meta["entityId"] = entitySummary.entityId;
+    entityMetadata.meta[META_ENTITY_ID] = entitySummary.entityId;
 
-    final currentIndex = value
-        .indexWhere((e) => e.meta['entityId'] == entitySummary.entityId);
+    final currentIndex =
+        value.indexWhere((e) => e.meta[META_ENTITY_ID] == entitySummary.entityId);
     // Already exists
     if (currentIndex >= 0) {
       final currentEntities = value;
@@ -91,16 +89,16 @@ class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
 
   Future<void> remove(String entityIdToRemove) async {
     final entities = value;
-    entities.removeWhere(
-        (existingEntity) => existingEntity.meta['entityId'] == entityIdToRemove);
+    entities.removeWhere((existingEntity) =>
+        existingEntity.meta[META_ENTITY_ID] == entityIdToRemove);
 
     await set(entities);
 
     //TODO remove feed from newsFeedBloc
   }
 
-  Future<void> refreshFrom(List<EntityReference> entities) async {
+  /*Future<void> refreshFrom(List<EntityReference> entities) async {
     // TODO:
     print("Unimplemented: entities > refreshFrom");
-  }
+  }*/
 }
