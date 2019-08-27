@@ -4,7 +4,6 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
-
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -195,6 +194,8 @@ class _PollPageState extends State<PollPage> {
             padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
             label: Text(
               voteOption.title['default'],
+              overflow: TextOverflow.ellipsis ,
+              maxLines: 5,
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
