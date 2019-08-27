@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
@@ -12,8 +10,6 @@ import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
-import '../lang/index.dart';
-import 'package:http/http.dart' as http;
 import 'package:vocdoni/constants/colors.dart';
 
 class PollPageArgs {
@@ -30,6 +26,8 @@ class PollPage extends StatefulWidget {
 
 class _PollPageState extends State<PollPage> {
   List<String> responses = [];
+  String responsesStateMessage = '';
+  bool responsesAreValid = false;
 
   @override
   void didChangeDependencies() {
@@ -39,9 +37,12 @@ class _PollPageState extends State<PollPage> {
     process.details.questions.forEach((question) {
       responses.add("");
     });
+
+    checkResponseState();
     super.didChangeDependencies();
   }
 
+  
   @override
   @override
   Widget build(context) {
@@ -108,6 +109,9 @@ class _PollPageState extends State<PollPage> {
     ));
     children.add(buildRawItem(context, process));
     children.addAll(buildQuestions(context, process));
+    children.add(Section());
+    children.add(buildSubmitInfo());
+    children.add(buildSubmitVoteButton());
 
     return children;
   }
@@ -136,6 +140,63 @@ class _PollPageState extends State<PollPage> {
       },
       disabled: true,
     );
+  }
+
+  setResponse(int questionIndex, String value) {
+    setState(() {
+      responses[questionIndex] = value;
+    });
+
+    checkResponseState();
+  }
+
+  checkResponseState() {
+    bool allGood = true;
+    int idx = 1;
+    for (final response in responses) {
+      if (response == '') {
+        allGood = false;
+        setState(() {
+          responsesAreValid = false;
+          responsesStateMessage = 'Question #$idx needs to be answered';
+        });
+        break;
+      }
+        idx++;
+    }
+
+    if (allGood) {
+      setState(() {
+        responsesAreValid = true;
+        responsesStateMessage = '';
+      });
+    }
+  }
+
+  buildSubmitVoteButton() {
+    return Padding(
+      padding: EdgeInsets.all(paddingPage),
+      child: BaseButton(
+          text: "Submit",
+          isSmall: false,
+          style: BaseButtonStyle.FILLED,
+          purpose: Purpose.HIGHLIGHT,
+          isDisabled: responsesAreValid == false,
+          onTap: () {}),
+    );
+  }
+
+  buildSubmitInfo() {
+    return responsesAreValid == false
+        ? ListItem(
+            mainText: responsesStateMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          )
+        : ListItem(
+            mainText: responsesStateMessage,
+            rightIcon: null,
+          );
   }
 
   buildShareButton(BuildContext context, Ent ent) {
@@ -194,7 +255,7 @@ class _PollPageState extends State<PollPage> {
             padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
             label: Text(
               voteOption.title['default'],
-              overflow: TextOverflow.ellipsis ,
+              overflow: TextOverflow.ellipsis,
               maxLines: 5,
               style: TextStyle(
                   fontSize: fontSizeSecondary,
@@ -206,9 +267,7 @@ class _PollPageState extends State<PollPage> {
             selected: responses[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
-                setState(() {
-                  responses[questionIndex] = voteOption.value;
-                });
+                setResponse(questionIndex, voteOption.value);
               }
             },
           ),
