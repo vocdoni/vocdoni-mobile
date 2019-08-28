@@ -1,13 +1,19 @@
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 class Account {
   List<Ent> ents = new List<Ent>();
   Identity identity;
-  List<String> languages = ['default'];
+  List<String> languages = [];
+  String networkId;
 
   Account() {
+
+    languages = ['default'];
+    networkId =  '5';
+
     init();
   }
 
