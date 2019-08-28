@@ -21,11 +21,10 @@ class FeedTab extends StatelessWidget {
 
     if (account.ents.length == 0) return buildNoEntries(ctx);
 
-
-    account.ents.forEach((ent){
-      newsPosts.addAll(ent.feed.items);
+    account.ents.forEach((ent) {
+      if (ent.feed != null) newsPosts.addAll(ent.feed.items);
     });
-          
+
     if (newsPosts.length == 0) return buildNoEntries(ctx);
     newsPosts.sort((a, b) {
       if (!(a?.datePublished is DateTime) && !(b?.datePublished is DateTime))
@@ -43,7 +42,6 @@ class FeedTab extends StatelessWidget {
         itemBuilder: (BuildContext ctx, int index) {
           final post = newsPosts[index];
           return BaseCard(
-            
             image: post.image,
             imageTag: post.id,
             children: <Widget>[
@@ -51,7 +49,8 @@ class FeedTab extends StatelessWidget {
                 mainText: post.title,
                 mainTextFullWidth: true,
                 secondaryText: post.author.name,
-                rightText: DateFormat('MMMM dd').format(DateTime.parse(post.datePublished).toLocal()),
+                rightText: DateFormat('MMMM dd')
+                    .format(DateTime.parse(post.datePublished).toLocal()),
                 onTap: () => onTapItem(ctx, post),
               )
             ],
@@ -62,7 +61,7 @@ class FeedTab extends StatelessWidget {
   Widget buildNoEntries(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text("No votes available"),
+      child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
     );
   }
 

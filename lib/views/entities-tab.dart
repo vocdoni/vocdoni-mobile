@@ -59,8 +59,7 @@ class EntitiesTab extends StatelessWidget {
   }
 
   int getFeedPostAmount(Ent ent) {
-    //TODO Refactor NewsFeedBloc
-    return 10;
+    return ent.feed==null?0:ent.feed.items.length;
   }
 
   Widget buildName(BuildContext ctx, Ent ent) {

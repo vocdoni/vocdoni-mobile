@@ -11,6 +11,7 @@ EntityReference makeEntityReference(
   return summary;
 }
 
+//TODO Hardcode them propery
 GatewayInfo getInitialBootnode() {
   GatewayInfo node = new GatewayInfo();
   //node.mergeFromJson(bootNodeJson);
