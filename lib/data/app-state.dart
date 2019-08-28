@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'package:dvote/net/gateway.dart';
 import 'package:vocdoni/controllers/account.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
@@ -23,11 +24,17 @@ class AppStateBloc extends GenericBloc<AppState> {
   Future<void> init() async {
     await super.init();
 
-    // POST-BOOTSTRAP ACTIONS
+   /* // POST-BOOTSTRAP ACTIONS
     Timer(Duration(seconds: 2), () {
       loadBootNodes().catchError((_) {
         print("Error: Unable to load the boot nodes");
       });
+    });*/
+  }
+
+  Future<void> load() async {
+    await loadBootNodes().catchError((_) {
+      print("Error: Unable to load the boot nodes");
     });
   }
 
@@ -112,10 +119,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     });*/
 
     account = new Account();
-
   }
-
-  
 
   setBootNodes(List<GatewayInfo> bootnodes) async {
     if (!(bootnodes is List<GatewayInfo>)) throw "Invalid bootnode list";
@@ -149,6 +153,9 @@ class AppState {
   /// All Gateways known to us, regardless of the entity.
   /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
   /// it can be filtered.
+  ///
+
+  //node.web3='https://gwdev1.vocdoni.net/web3';
   List<GatewayInfo> bootnodes = [];
 
   /// How many failed auth attempts happened since the last
@@ -159,4 +166,43 @@ class AppState {
   DateTime authThresholdDate = DateTime.now();
 
   AppState({this.selectedIdentity = 0, this.bootnodes = const []});
+
+  /*static GatewayInfo getInitialBootnode() {
+    GatewayInfo node = new GatewayInfo();
+    //node.mergeFromJson(bootNodeJson);
+    node.web3 = 'https://gwdev1.vocdoni.net/web3';
+    return node;
+  }
+
+  static String bootNodeJson = ''' {
+      "web3":[
+         {
+            "uri":"https://gwdev1.vocdoni.net/web3"
+         },
+         {
+            "uri":"https://gwdev2.vocdoni.net/web3"
+         }
+      ],
+      "dvote":[
+         {
+            "uri":"wss://gwdev1.vocdoni.net/dvote",
+            "apis":[
+               "file",
+               "vote",
+               "census"
+            ],
+            "pubKey":"02325f284f50fa52d53579c7873a480b351cc20f7780fa556929f5017283ad2449"
+         },
+         {
+            "uri":"wss://gwdev2.vocdoni.net/dvote",
+            "apis":[
+               "file",
+               "vote",
+               "census"
+            ],
+            "pubKey":"0381290a9b7fabe99c24d8edcf4746859f17ee8e6099288fcf9170c356545fcac0"
+         }
+      ]
+   }''';
+   */
 }
