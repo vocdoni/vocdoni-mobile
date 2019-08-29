@@ -105,6 +105,17 @@ Color getAvatarTextColor(String hexSource) {
   return tinted;
 }
 
+Color getHeaderColor(String hexSource) {
+  double saturation = 1;
+  double lightness = 0.65;
+  double hue = hexStringToHue(hexSource);
+  HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
+  Color rgb = hsl.toColor();
+  Color tint = Colors.orange;
+  Color tinted = dye(rgb, tint, 0.3);
+  return tinted;
+}
+
 Color dye(Color original, Color tint, double strength) {
   int red =
       (original.red * (1 - strength)).toInt() + (tint.red * strength).toInt();
