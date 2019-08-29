@@ -52,7 +52,8 @@ final FontWeight fontWeightRegular = FontWeight.w400;
 final FontWeight fontWeightSemiBold = FontWeight.w600;
 final FontWeight fontWeightBold = FontWeight.w700;
 
-final String fallbackImageUrlPoll = "https://images.unsplash.com/photo-1444664361762-afba083a4d77?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80";
+final String fallbackImageUrlPoll =
+    "https://images.unsplash.com/photo-1444664361762-afba083a4d77?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80";
 enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 
 Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
@@ -74,31 +75,44 @@ Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
   return colorDescription;
 }
 
-
-
-double hexStringToHue (String hexSource){
-  String short = hexSource.substring(0,8);
+double hexStringToHue(String hexSource) {
+  String short = hexSource.substring(0, 8);
   int i = int.parse(short);
   return i * 360 / 0xffffff;
 }
 
-Color getAvatarBackgroundColor(String hexSource){
-  double saturation = 0.5;
-  double lightness = 0.5;
+Color getAvatarBackgroundColor(String hexSource) {
+  double saturation = 1;
+  double lightness = 0.65;
   double hue = hexStringToHue(hexSource);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
-  return hsl.toColor();
+  Color rgb = hsl.toColor();
+  Color tint = Colors.orange;
+  Color tinted = dye(rgb, tint, 0.5);
+  return tinted;
 }
 
-Color getAvatarTextColor(String hexSource)
-{
-  double saturation = 0.5;
-  double lightness = 1;
+Color getAvatarTextColor(String hexSource) {
+  double saturation = 1;
+  double lightness = 0.2;
   double hue = hexStringToHue(hexSource);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
-  return hsl.toColor();
+  Color rgb = hsl.toColor();
+  Color tint = Colors.orange;
+  Color tinted = dye(rgb, tint, 0.5);
+  return tinted;
 }
 
-getAvatarText(String text){
-  return text.substring(0,1);
+Color dye(Color original, Color tint, double strength) {
+  int red =
+      (original.red * (1 - strength)).toInt() + (tint.red * strength).toInt();
+  int green = (original.green * (1 - strength)).toInt() +
+      (tint.green * strength).toInt();
+  int blue =
+      (original.blue * (1 - strength)).toInt() + (tint.blue * strength).toInt();
+  return Color.fromARGB(original.alpha, red, green, blue);
+}
+
+getAvatarText(String text) {
+  return text.substring(0, 1);
 }
