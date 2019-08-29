@@ -79,13 +79,11 @@ class _EntityInfoState extends State<EntityInfo> {
 
   buildScaffold(Ent ent) {
     return ScaffoldWithImage(
-        headerImageUrl:
-            ent.entityMetadata == null ? null : ent.entityMetadata.media.header,
-        headerTag: ent.entityMetadata == null
-            ? null
-            : ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        headerImageUrl:ent.entityMetadata.media.header,
+        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
+        avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarHexSource: ent.entitySummary.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,

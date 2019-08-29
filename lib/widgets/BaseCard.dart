@@ -48,6 +48,7 @@ class BaseCard extends StatelessWidget {
 
   buildImage() {
     return Image.network(
+      
       image,
       fit: BoxFit.cover,
     );

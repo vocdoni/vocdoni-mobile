@@ -50,6 +50,8 @@ class _EntityActivityState extends State<EntityActivity> {
                 mainTextFullWidth: true,
                 secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
                 avatarUrl: ent.entityMetadata.media.avatar,
+                avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+                avatarHexSource: ent.entitySummary.entityId,
                 rightText: DateFormat('MMMM dd')
                     .format(DateTime.parse(post.datePublished).toLocal()),
                 onTap: () => onTapItem(context, post),
