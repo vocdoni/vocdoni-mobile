@@ -39,7 +39,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   Widget build(context) {
     bool hasAvatar = widget.avatarUrl != null || widget.avatarHexSource != null;
     bool hasHeaderImage = widget.headerImageUrl != null;
-    double headerImageHeight = hasHeaderImage?400:300;
+    double headerImageHeight = hasHeaderImage ? 400 : 300;
     double avatarHeight = hasAvatar ? iconSizeHuge : 16;
     double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
     double interpolationHeight = 64;
@@ -187,19 +187,25 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   }
 
   Widget buildHeader(headerImageHeight) {
-    return widget.headerImageUrl == null
-        ? Container(
-            color: getHeaderColor(widget.avatarHexSource),
-            height: headerImageHeight,
-            width: double.infinity,
-          )
-        : Hero(
-            tag: widget.headerTag,
-            child: Image.network(widget.headerImageUrl,
-                color: getHeaderColor(widget.avatarHexSource),
-                fit: BoxFit.cover,
-                height: headerImageHeight,
-                width: double.infinity),
-          );
+    return Stack(
+      children: [
+        AnimatedContainer(
+          duration: Duration(seconds: 2),
+          color: getHeaderColor(widget.avatarHexSource),
+          height: headerImageHeight,
+          width: double.infinity,
+        ),
+        widget.headerImageUrl == null
+            ? Container()
+            : Hero(
+                tag: widget.headerTag,
+                child: Image.network(widget.headerImageUrl,
+                    color: getHeaderColor(widget.avatarHexSource),
+                    fit: BoxFit.cover,
+                    height: headerImageHeight,
+                    width: double.infinity),
+              )
+      ],
+    );
   }
 }

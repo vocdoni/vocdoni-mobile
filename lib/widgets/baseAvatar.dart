@@ -17,24 +17,30 @@ class BaseAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isValidAvatarUrl = avatarUrl != null && avatarUrl != "";
 
-    return Container(
-      constraints: BoxConstraints(
-          maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
-      child: CircleAvatar(
-        backgroundColor: getAvatarBackgroundColor(hexSource),
-        foregroundColor: getAvatarTextColor(
-          hexSource,
-        ),
-        child: Text(
-          getAvatarText(text),
-          style: TextStyle(
-              // fontFamily: "Open Sans",
-              fontWeight: fontWeightSemiBold,
-              fontSize: getFontSize(size, getAvatarText(text))),
-        ),
-        backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
-      ),
-    );
+    return Stack(children: [
+      Container(
+          constraints: BoxConstraints(
+              maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
+          child: CircleAvatar(
+            backgroundColor: getAvatarBackgroundColor(hexSource),
+            foregroundColor: getAvatarTextColor(
+              hexSource,
+            ),
+            child: Text(
+              getAvatarText(text),
+              style: TextStyle(
+                  fontWeight: fontWeightSemiBold,
+                  fontSize: getFontSize(size, getAvatarText(text))),
+            ),
+          )),
+      Container(
+          constraints: BoxConstraints(
+              maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
+          )),
+    ]);
   }
 
   getFontSize(size, text) {
