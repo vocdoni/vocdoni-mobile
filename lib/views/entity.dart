@@ -48,17 +48,11 @@ class _EntityInfoState extends State<EntityInfo> {
     if (ent.entityMetadata == null) return buildScaffoldWithoutMetadata(ent);
 
     return ScaffoldWithImage(
-        headerImageUrl:
-            ent.entityMetadata == null ? null : ent.entityMetadata.media.header,
-        headerTag: ent.entityMetadata == null
-            ? null
-            : ent.entitySummary.entityId + ent.entityMetadata.media.header,
-        appBarTitle: ent.entityMetadata == null
-            ? "Loading"
-            : ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-                "(entity)",
-        avatarUrl:
-            ent.entityMetadata == null ? null : ent.entityMetadata.media.avatar,
+        headerImageUrl: ent.entityMetadata.media.header,
+        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+        avatarUrl: ent.entityMetadata.media.avatar,
+        avatarHexSource: ent.entitySummary.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -76,13 +70,14 @@ class _EntityInfoState extends State<EntityInfo> {
         headerTag: null,
         appBarTitle: "Loading",
         avatarUrl: null,
+        avatarHexSource: ent.entitySummary.entityId,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
                 delegate: SliverChildListDelegate(
               [
                 Center(
-                  child: Text("Loading"),
+                  child: Text("Loading "+ent.entitySummary.entityId)
                 )
               ],
             ));
@@ -101,8 +96,8 @@ class _EntityInfoState extends State<EntityInfo> {
             ? "Loading"
             : ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
                 "(entity)",
-        avatarUrl:
-            ent.entityMetadata == null ? null : ent.entityMetadata.media.avatar,
+        avatarUrl: ent.entityMetadata.media.avatar,
+        avatarHexSource: ent.entitySummary.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(

@@ -1,10 +1,13 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/widgets/baseAvatar.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
   final String appBarTitle;
+  final String avatarText;
+  final String avatarHexSource;
   final String headerImageUrl;
   final String headerTag;
   final String avatarUrl;
@@ -15,6 +18,8 @@ class ScaffoldWithImage extends StatefulWidget {
 
   const ScaffoldWithImage({
     this.appBarTitle,
+    this.avatarText,
+    this.avatarHexSource,
     this.headerImageUrl,
     this.headerTag,
     this.children,
@@ -32,8 +37,9 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   bool collapsed = false;
   @override
   Widget build(context) {
+    bool hasAvatar =  widget.avatarUrl != null || widget.avatarHexSource != null;
     double headerImageHeight = 400;
-    double avatarHeight =  widget.avatarUrl==null?16:iconSizeHuge;
+    double avatarHeight = hasAvatar ? iconSizeHuge : 16;
     double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
     double interpolationHeight = 64;
     double pos = 0;
@@ -58,7 +64,9 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       FeatherIcons.arrowLeft,
                       color: collapsed ? colorDescription : Colors.white,
                     )),
-                actions: widget.actionsBuilder == null? null:buildActions(context),
+                actions: widget.actionsBuilder == null
+                    ? null
+                    : buildActions(context),
                 flexibleSpace: LayoutBuilder(builder:
                     (BuildContext context, BoxConstraints constraints) {
                   pos = constraints.biggest.height;
@@ -97,15 +105,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                             fontWeight: fontWeightLight),
                       ),
                       background: Stack(children: [
-                        Container(
-                          child: Hero(
-                            tag: widget.headerTag,
-                            child: Image.network(widget.headerImageUrl,
-                                fit: BoxFit.cover,
-                                height: headerImageHeight,
-                                width: double.infinity),
-                          ),
-                        ),
+                        Container(child: buildHeader(headerImageHeight)),
                         Container(
                           height: blackShadeHeight,
                           //color: collapsed ? Colors.blue : Colors.red,
@@ -139,7 +139,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
-                                  buildAvatar(avatarHeight),
+                                  buildAvatar(hasAvatar, avatarHeight),
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
@@ -170,14 +170,30 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
     return collapsed ? null : widget.actionsBuilder(context);
   }
 
-  Widget buildAvatar(double avatarHeight) {
-    if (widget.avatarUrl == null) return Container();
-    return Container(
-      constraints:
-          BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
-      child: CircleAvatar(
-          backgroundColor: Colors.indigo,
-          backgroundImage: NetworkImage(widget.avatarUrl)),
-    );
+  Widget buildAvatar(bool hasAvatar, double avatarHeight) {
+    return hasAvatar
+        ? BaseAvatar(
+            text: widget.avatarText,
+            size: iconSizeHuge,
+            hexSource: widget.avatarHexSource,
+            avatarUrl: widget.avatarUrl,
+          )
+        : Container();
+  }
+
+  Widget buildHeader(headerImageHeight) {
+    return widget.headerImageUrl == null
+        ? Container(
+          color: getHeaderColor(widget.avatarHexSource),
+          height: headerImageHeight,
+          width: double.infinity,
+        )
+        : Hero(
+            tag: widget.headerTag,
+            child: Image.network(widget.headerImageUrl,
+                fit: BoxFit.cover,
+                height: headerImageHeight,
+                width: double.infinity),
+          );
   }
 }
