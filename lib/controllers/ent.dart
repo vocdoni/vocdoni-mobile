@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
+import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -20,7 +21,7 @@ class Ent {
     final feedString =
         await fetchEntityNewsFeed(this.entityMetadata, this.lang);
     this.feed =
-        feedString == null ? null : Feed.fromJson(jsonDecode(feedString));
+        feedString == null ? null : parseFeed(feedString);
   }
 
   syncLocal() async {

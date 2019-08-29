@@ -24,6 +24,7 @@ class EntityInfo extends StatefulWidget {
 }
 
 class _EntityInfoState extends State<EntityInfo> {
+  Ent _ent;
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -34,9 +35,10 @@ class _EntityInfoState extends State<EntityInfo> {
     super.didChangeDependencies();
 
     try {
-      final Ent ent = ModalRoute.of(super.context).settings.arguments;
-      if (ent == null) return;
-      fetchVisibleActions(ent);
+     _ent = ModalRoute.of(super.context).settings.arguments;
+      refresh(super.context, _ent);
+      if (_ent == null) return;
+      fetchVisibleActions(_ent);
     } catch (err) {
       print(err);
     }
@@ -44,24 +46,10 @@ class _EntityInfoState extends State<EntityInfo> {
 
   @override
   Widget build(context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
-    if (ent.entityMetadata == null) return buildScaffoldWithoutMetadata(ent);
-
-    return ScaffoldWithImage(
-        headerImageUrl: ent.entityMetadata.media.header,
-        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
-        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-        avatarUrl: ent.entityMetadata.media.avatar,
-        avatarHexSource: ent.entitySummary.entityId,
-        leftElement: buildRegisterButton(context, ent),
-        actionsBuilder: actionsBuilder,
-        builder: Builder(
-          builder: (ctx) {
-            return SliverList(
-              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
-            );
-          },
-        ));
+    //final Ent ent = ModalRoute.of(context).settings.arguments;
+    return _ent.entityMetadata == null
+        ? buildScaffoldWithoutMetadata(_ent)
+        : buildScaffold(_ent);
   }
 
   buildScaffoldWithoutMetadata(Ent ent) {
@@ -76,9 +64,13 @@ class _EntityInfoState extends State<EntityInfo> {
             return SliverList(
                 delegate: SliverChildListDelegate(
               [
+                buildTitleWithoutEntityMeta(ctx, ent),
                 Center(
-                  child: Text("Loading "+ent.entitySummary.entityId)
-                )
+                    child: Text(
+                  "Loading... ",
+                  style: TextStyle(
+                      fontSize: fontSizeTitle, fontWeight: fontWeightLight),
+                ))
               ],
             ));
           },
@@ -92,10 +84,7 @@ class _EntityInfoState extends State<EntityInfo> {
         headerTag: ent.entityMetadata == null
             ? null
             : ent.entitySummary.entityId + ent.entityMetadata.media.header,
-        appBarTitle: ent.entityMetadata == null
-            ? "Loading"
-            : ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-                "(entity)",
+        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarHexSource: ent.entitySummary.entityId,
         leftElement: buildRegisterButton(context, ent),
@@ -161,6 +150,16 @@ class _EntityInfoState extends State<EntityInfo> {
     return ListItem(
       mainTextTag: ent.entitySummary.entityId + title,
       mainText: title,
+      secondaryText: ent.entitySummary.entityId,
+      isTitle: true,
+      rightIcon: null,
+      isBold: true,
+    );
+  }
+
+  buildTitleWithoutEntityMeta(BuildContext context, Ent ent) {
+    return ListItem(
+      mainText: "...",
       secondaryText: ent.entitySummary.entityId,
       isTitle: true,
       rightIcon: null,
@@ -459,6 +458,17 @@ class _EntityInfoState extends State<EntityInfo> {
     setState(() {
       _processingSubscription = false;
     });
+  }
+
+  refresh(BuildContext ctx, Ent ent) async {
+    //showLoading(Lang.of(ctx).get("Connecting..."), global: true);
+    await ent.update();
+
+    setState(() {
+      _ent = ent;
+    });
+    
+    //hideLoading(global: true);
   }
 
   goBack(BuildContext ctx) {

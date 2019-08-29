@@ -81,29 +81,8 @@ Future fetchAndShowEntity(
       networkId: networkId,
       entryPoints: []);
 
-  showLoading(Lang.of(context).get("Connecting..."), global: true);
-
   final ent = new Ent(entitySummary);
-  await ent.update();
-  hideLoading(global: true);
   Navigator.pushNamed(context, "/entity", arguments: ent);
-/*
-  try {
-    final entityMetadata = await fetchEntityData(entitySummary);
-
-    if (entityMetadata == null)
-      throw LinkingError("Could not fetch the details");
-
-    hideLoading(global: true);
-
-    // Show screen
-    Navigator.pushNamed(context, "/entity", arguments: entityMetadata);
-  } catch (err) {
-    hideLoading(global: true);
-
-    throw err;
-  }
-  */
 }
 
 showSignatureScreen(

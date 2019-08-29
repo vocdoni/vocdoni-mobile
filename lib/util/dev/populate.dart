@@ -64,7 +64,6 @@ List<Feed> makeFeeds(EntityMetadata entityMetadata) {
 }
 
 ProcessMetadata makeFakeProcess(EntityReference entitySummary, String processId) {
-  Random random = new Random();
   ProcessMetadata process = parseProcessMetadata(getProcessString());
   process.meta[META_PROCESS_ID] = processId;
   process.meta[META_ENTITY_ID] = entitySummary.entityId;
