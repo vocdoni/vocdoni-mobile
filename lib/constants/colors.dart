@@ -114,6 +114,3 @@ Color dye(Color original, Color tint, double strength) {
   return Color.fromARGB(original.alpha, red, green, blue);
 }
 
-getAvatarText(String text) {
-  return text.substring(0, 1);
-}

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 
@@ -16,16 +18,30 @@ class BaseAvatar extends StatelessWidget {
     bool isValidAvatarUrl = avatarUrl != null && avatarUrl != "";
 
     return Container(
-      constraints: BoxConstraints(maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
+      constraints: BoxConstraints(
+          maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
       child: CircleAvatar(
         backgroundColor: getAvatarBackgroundColor(hexSource),
         foregroundColor: getAvatarTextColor(hexSource),
         child: Text(
           getAvatarText(text),
-          style: TextStyle(fontWeight: fontWeightBold),
+          style: TextStyle(
+             // fontFamily: "Open Sans",
+              fontWeight: fontWeightSemiBold,
+              fontSize: getFontSize(size, text)),
         ),
         backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
       ),
     );
+  }
+
+  getFontSize(size, text) {
+    return text.length == 1
+        ? size * (1 / log(size)) * 1.5
+        : size * (1 / log(size)) * 1.3;
+  }
+
+  getAvatarText(String text) {
+    return text.substring(0, 1);
   }
 }
