@@ -44,6 +44,7 @@ class BaseAvatar extends StatelessWidget {
   }
 
   getAvatarText(String text) {
+    if (text == null || text == "") return "";
     return text.substring(0, 1);
   }
 }
