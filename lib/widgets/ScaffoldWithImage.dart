@@ -37,8 +37,9 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   bool collapsed = false;
   @override
   Widget build(context) {
-    bool hasAvatar =  widget.avatarUrl != null || widget.avatarHexSource != null;
-    double headerImageHeight = 400;
+    bool hasAvatar = widget.avatarUrl != null || widget.avatarHexSource != null;
+    bool hasHeaderImage = widget.headerImageUrl != null;
+    double headerImageHeight = hasHeaderImage?400:300;
     double avatarHeight = hasAvatar ? iconSizeHuge : 16;
     double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
     double interpolationHeight = 64;
@@ -106,25 +107,29 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       ),
                       background: Stack(children: [
                         Container(child: buildHeader(headerImageHeight)),
-                        Container(
-                          height: blackShadeHeight,
-                          //color: collapsed ? Colors.blue : Colors.red,
-                          decoration: BoxDecoration(
-                            // Box decoration takes a gradient
-                            gradient: LinearGradient(
-                              // Where the linear gradient begins and ends
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              // Add one stop foopacityr each color. Stops should increase from 0 to 1
-                              stops: [1 - (pos / totalHeaderHeight), 1],
-                              colors: [
-                                // Colors are easy thanks to Flutter's Colors class.
-                                Colors.black.withOpacity(0.5 * interpolation),
-                                Colors.black.withOpacity(0 * interpolation)
-                              ],
-                            ),
-                          ),
-                        ),
+                        hasHeaderImage
+                            ? Container(
+                                height: blackShadeHeight,
+                                //color: collapsed ? Colors.blue : Colors.red,
+                                decoration: BoxDecoration(
+                                  // Box decoration takes a gradient
+                                  gradient: LinearGradient(
+                                    // Where the linear gradient begins and ends
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    // Add one stop foopacityr each color. Stops should increase from 0 to 1
+                                    stops: [1 - (pos / totalHeaderHeight), 1],
+                                    colors: [
+                                      // Colors are easy thanks to Flutter's Colors class.
+                                      Colors.black
+                                          .withOpacity(0.5 * interpolation),
+                                      Colors.black
+                                          .withOpacity(0 * interpolation)
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Container(),
                         Column(children: [
                           Spacer(
                             flex: 1,
@@ -184,10 +189,10 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   Widget buildHeader(headerImageHeight) {
     return widget.headerImageUrl == null
         ? Container(
-          color: getHeaderColor(widget.avatarHexSource),
-          height: headerImageHeight,
-          width: double.infinity,
-        )
+            color: getHeaderColor(widget.avatarHexSource),
+            height: headerImageHeight,
+            width: double.infinity,
+          )
         : Hero(
             tag: widget.headerTag,
             child: Image.network(widget.headerImageUrl,
