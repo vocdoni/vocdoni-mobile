@@ -15,11 +15,17 @@ class BaseAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isValidAvatarUrl = avatarUrl != null && avatarUrl != "";
 
-    return CircleAvatar(
-      backgroundColor: getAvatarBackgroundColor(hexSource),
-      foregroundColor: getAvatarTextColor(hexSource),
-      child: Text(getAvatarText(text), style: TextStyle(fontWeight: fontWeightBold),),
-      backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
+    return Container(
+      constraints: BoxConstraints(maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
+      child: CircleAvatar(
+        backgroundColor: getAvatarBackgroundColor(hexSource),
+        foregroundColor: getAvatarTextColor(hexSource),
+        child: Text(
+          getAvatarText(text),
+          style: TextStyle(fontWeight: fontWeightBold),
+        ),
+        backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
+      ),
     );
   }
 }
