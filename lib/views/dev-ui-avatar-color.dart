@@ -20,7 +20,7 @@ class DevUiAvatarColor extends StatelessWidget {
     List<Widget> smallAvatars = List.generate(100, (i) {
       return BaseAvatar(
         avatarUrl: null,
-        text: "A",
+        text: "Abc Def",
         hexSource: randomHex(),
         size: iconSizeSmall,
       );
@@ -28,23 +28,23 @@ class DevUiAvatarColor extends StatelessWidget {
     List<Widget> mediumAvatars = List.generate(50, (i) {
       return BaseAvatar(
         avatarUrl: null,
-        text: "A",
+        text: "Abc Def",
         hexSource: randomHex(),
         size: iconSizeMedium,
       );
     });
-    List<Widget> largeAvatars = List.generate(10, (i) {
+    List<Widget> largeAvatars = List.generate(30, (i) {
       return BaseAvatar(
         avatarUrl: null,
-        text: "A",
+        text: "Abc Def",
         hexSource: randomHex(),
         size: iconSizeLarge,
       );
     });
-    List<Widget> hugeAvatars = List.generate(5, (i) {
+    List<Widget> hugeAvatars = List.generate(15, (i) {
       return BaseAvatar(
         avatarUrl: null,
-        text: "A",
+        text: "Abc Def",
         hexSource: randomHex(),
         size: iconSizeHuge,
       );
