@@ -126,6 +126,8 @@ class _PollPageState extends State<PollPage> {
       rightIcon: null,
       isBold: true,
       avatarUrl: ent.entityMetadata.media.avatar,
+      avatarText: process.details.title['default'],
+      avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
     );
   }
