@@ -18,12 +18,12 @@ import '../lang/index.dart';
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/constants/colors.dart';
 
-class EntityInfo extends StatefulWidget {
+class EntityInfoPage extends StatefulWidget {
   @override
-  _EntityInfoState createState() => _EntityInfoState();
+  _EntityInfoPageState createState() => _EntityInfoPageState();
 }
 
-class _EntityInfoState extends State<EntityInfo> {
+class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
   String _status = '';
   bool _processingSubscription = false;
@@ -182,7 +182,7 @@ class _EntityInfoState extends State<EntityInfo> {
       icon: FeatherIcons.rss,
       mainText: "Feed",
       onTap: () {
-        Navigator.pushNamed(context, "/entity/activity", arguments: ent);
+        Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
     );
   }

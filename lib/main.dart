@@ -7,7 +7,9 @@ import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/views/dev-ui-avatar-color.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
+import 'package:vocdoni/views/entity-feed-page.dart';
 import 'package:vocdoni/views/entity-participation.dart';
+import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/pollPage.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
@@ -15,9 +17,7 @@ import 'util/singletons.dart';
 import 'package:vocdoni/views/identity-select.dart';
 import "package:vocdoni/views/identity-create.dart";
 import 'package:vocdoni/views/identity-backup.dart';
-import 'package:vocdoni/views/entity.dart';
-import 'package:vocdoni/views/entity-activity.dart';
-import 'package:vocdoni/views/activity-post.dart';
+import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/views/dev-menu.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 import "views/home.dart";
@@ -67,9 +67,9 @@ void main() async {
 
       // WHEN THERE IS AN IDENTITY
       "/home": (context) => HomeScreen(),
-      "/entity": (context) => EntityInfo(),
-      "/entity/activity": (context) => EntityActivity(),
-      "/entity/activity/post": (context) => ActivityPostScreen(),
+      "/entity": (context) => EntityInfoPage(),
+      "/entity/feed": (context) => EntityFeedPage(),
+      "/entity/feed/post": (context) => FeedPostPage(),
       "/entity/participation": (context) => EntityParticipation(),
       "/entity/participation/poll": (context) => PollPage(),
       "/identity/backup": (context) => IdentityBackupScreen(),

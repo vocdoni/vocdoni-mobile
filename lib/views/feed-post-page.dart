@@ -11,16 +11,16 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
-class ActivityPostArguments {
+class FeedPostArgs {
   final FeedPost post;
 
-  ActivityPostArguments(this.post);
+  FeedPostArgs(this.post);
 }
 
-class ActivityPostScreen extends StatelessWidget {
+class FeedPostPage extends StatelessWidget {
   @override
   Widget build(ctx) {
-    final ActivityPostArguments args = ModalRoute.of(ctx).settings.arguments;
+    final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
 
     FeedPost post = args.post;
 

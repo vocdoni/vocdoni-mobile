@@ -1,17 +1,17 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/activity-post.dart';
+import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:intl/intl.dart';
 
-class FeedTab extends StatelessWidget {
+class HomeTab extends StatelessWidget {
   final AppState appState;
   final List<Identity> identities;
   final List<Feed> newsFeeds;
 
-  FeedTab({this.appState, this.identities, this.newsFeeds});
+  HomeTab({this.appState, this.identities, this.newsFeeds});
 
   @override
   Widget build(ctx) {
@@ -67,6 +67,6 @@ class FeedTab extends StatelessWidget {
 
   onTapItem(BuildContext ctx, FeedPost post) {
     Navigator.of(ctx).pushNamed("/entity/activity/post",
-        arguments: ActivityPostArguments(post));
+        arguments: FeedPostArgs(post));
   }
 }
