@@ -22,13 +22,15 @@ class BaseAvatar extends StatelessWidget {
           maxWidth: size, maxHeight: size, minWidth: size, minHeight: size),
       child: CircleAvatar(
         backgroundColor: getAvatarBackgroundColor(hexSource),
-        foregroundColor: getAvatarTextColor(hexSource),
+        foregroundColor: getAvatarTextColor(
+          hexSource,
+        ),
         child: Text(
           getAvatarText(text),
           style: TextStyle(
-             // fontFamily: "Open Sans",
+              // fontFamily: "Open Sans",
               fontWeight: fontWeightSemiBold,
-              fontSize: getFontSize(size, text)),
+              fontSize: getFontSize(size, getAvatarText(text))),
         ),
         backgroundImage: isValidAvatarUrl ? NetworkImage(avatarUrl) : null,
       ),
@@ -36,9 +38,9 @@ class BaseAvatar extends StatelessWidget {
   }
 
   getFontSize(size, text) {
-    return text.length == 1
-        ? size * (1 / log(size)) * 1.5
-        : size * (1 / log(size)) * 1.3;
+    double f = size * (1 / log(size));
+
+    return text.length == 1 ? f * 1.8 : f * 1.3;
   }
 
   getAvatarText(String text) {
