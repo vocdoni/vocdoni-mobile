@@ -54,7 +54,7 @@ EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
   return entityMetadata;
 }
 
-List<Feed> makeFeedts(EntityMetadata entityMetadata) {
+List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
     Feed f = parseFeed(getFeedString(entityMetadata));
     f.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];

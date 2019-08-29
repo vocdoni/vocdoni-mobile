@@ -58,7 +58,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                       FeatherIcons.arrowLeft,
                       color: collapsed ? colorDescription : Colors.white,
                     )),
-                actions: buildActions(context),
+                actions: widget.actionsBuilder == null? null:buildActions(context),
                 flexibleSpace: LayoutBuilder(builder:
                     (BuildContext context, BoxConstraints constraints) {
                   pos = constraints.biggest.height;

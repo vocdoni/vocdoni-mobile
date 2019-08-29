@@ -45,14 +45,64 @@ class _EntityInfoState extends State<EntityInfo> {
   @override
   Widget build(context) {
     final Ent ent = ModalRoute.of(context).settings.arguments;
-    if (ent == null) return buildEmptyEntity(context);
+    if (ent.entityMetadata == null) return buildScaffoldWithoutMetadata(ent);
 
     return ScaffoldWithImage(
-        headerImageUrl: ent.entityMetadata.media.header,
-        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
-        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-            "(entity)",
-        avatarUrl: ent.entityMetadata.media.avatar,
+        headerImageUrl:
+            ent.entityMetadata == null ? null : ent.entityMetadata.media.header,
+        headerTag: ent.entityMetadata == null
+            ? null
+            : ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        appBarTitle: ent.entityMetadata == null
+            ? "Loading"
+            : ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+                "(entity)",
+        avatarUrl:
+            ent.entityMetadata == null ? null : ent.entityMetadata.media.avatar,
+        leftElement: buildRegisterButton(context, ent),
+        actionsBuilder: actionsBuilder,
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
+            );
+          },
+        ));
+  }
+
+  buildScaffoldWithoutMetadata(Ent ent) {
+    return ScaffoldWithImage(
+        headerImageUrl: null,
+        headerTag: null,
+        appBarTitle: "Loading",
+        avatarUrl: null,
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+                delegate: SliverChildListDelegate(
+              [
+                Center(
+                  child: Text("Loading"),
+                )
+              ],
+            ));
+          },
+        ));
+  }
+
+  buildScaffold(Ent ent) {
+    return ScaffoldWithImage(
+        headerImageUrl:
+            ent.entityMetadata == null ? null : ent.entityMetadata.media.header,
+        headerTag: ent.entityMetadata == null
+            ? null
+            : ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        appBarTitle: ent.entityMetadata == null
+            ? "Loading"
+            : ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
+                "(entity)",
+        avatarUrl:
+            ent.entityMetadata == null ? null : ent.entityMetadata.media.avatar,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -178,7 +228,8 @@ class _EntityInfoState extends State<EntityInfo> {
         });
   }
 
-  Future<bool> isActionVisible(EntityMetadata_Action action, String entityId) async {
+  Future<bool> isActionVisible(
+      EntityMetadata_Action action, String entityId) async {
     if (action.visible == "true") return true;
     if (action.visible == null || action.visible == "false") return false;
 
@@ -238,12 +289,15 @@ class _EntityInfoState extends State<EntityInfo> {
     final List<EntityMetadata_Action> actionsToDisplay = [];
     EntityMetadata_Action registerAction;
 
+    if (ent.entityMetadata == null) return;
+
     for (EntityMetadata_Action action in ent.entityMetadata.actions) {
       if (action.register == true) {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
-        bool isRegistered = await isActionVisible(action, ent.entitySummary.entityId);
+        bool isRegistered =
+            await isActionVisible(action, ent.entitySummary.entityId);
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
