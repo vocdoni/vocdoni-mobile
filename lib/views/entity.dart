@@ -25,6 +25,7 @@ class EntityInfo extends StatefulWidget {
 
 class _EntityInfoState extends State<EntityInfo> {
   Ent _ent;
+  String _status = '';
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -35,8 +36,8 @@ class _EntityInfoState extends State<EntityInfo> {
     super.didChangeDependencies();
 
     try {
-     _ent = ModalRoute.of(super.context).settings.arguments;
-      refresh(super.context, _ent);
+      _ent = ModalRoute.of(super.context).settings.arguments;
+      refresh();
       if (_ent == null) return;
       fetchVisibleActions(_ent);
     } catch (err) {
@@ -65,21 +66,32 @@ class _EntityInfoState extends State<EntityInfo> {
                 delegate: SliverChildListDelegate(
               [
                 buildTitleWithoutEntityMeta(ctx, ent),
-                Center(
-                    child: Text(
-                  "Loading... ",
-                  style: TextStyle(
-                      fontSize: fontSizeTitle, fontWeight: fontWeightLight),
-                ))
+                buildStatus(_status),
               ],
             ));
           },
         ));
   }
 
+  Widget buildStatus(String status) {
+    if (status == "loading")
+      return ListItem(
+        mainText: "Loading details...",
+        rightIcon: null,
+      );
+    if (status == "fail")
+      return ListItem(
+        mainText: "Unable to load details",
+        purpose: Purpose.DANGER,
+        rightIcon: FeatherIcons.refreshCw,
+        onTap: refresh,
+      );
+    if (status == "ok") return Container();
+  }
+
   buildScaffold(Ent ent) {
     return ScaffoldWithImage(
-        headerImageUrl:ent.entityMetadata.media.header,
+        headerImageUrl: ent.entityMetadata.media.header,
         headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
@@ -315,7 +327,7 @@ class _EntityInfoState extends State<EntityInfo> {
   Widget buildRegisterButton(BuildContext ctx, Ent ent) {
     if (_registerAction == null) return Container();
 
-    if (true)
+    if (_isRegistered)
       return BaseButton(
         purpose: Purpose.GUIDE,
         leftIconData: FeatherIcons.check,
@@ -458,15 +470,23 @@ class _EntityInfoState extends State<EntityInfo> {
     });
   }
 
-  refresh(BuildContext ctx, Ent ent) async {
-    //showLoading(Lang.of(ctx).get("Connecting..."), global: true);
-    await ent.update();
+  refresh() async {
+    try {
+      setState(() {
+        _status = "loading";
+      });
+      await _ent.update();
+      setState(() {
+        _ent = _ent;
+        _status = "ok";
+      });
+    } catch (err) {
+      setState(() {
+        _ent = _ent;
 
-    setState(() {
-      _ent = ent;
-    });
-    
-    //hideLoading(global: true);
+        _status = "fail";
+      });
+    }
   }
 
   goBack(BuildContext ctx) {
