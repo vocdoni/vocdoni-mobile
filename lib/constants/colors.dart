@@ -73,3 +73,32 @@ Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
   }
   return colorDescription;
 }
+
+
+
+double hexStringToHue (String hexSource){
+  String short = hexSource.substring(0,8);
+  int i = int.parse(short);
+  return i * 360 / 0xffffff;
+}
+
+Color getAvatarBackgroundColor(String hexSource){
+  double saturation = 0.5;
+  double lightness = 0.5;
+  double hue = hexStringToHue(hexSource);
+  HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
+  return hsl.toColor();
+}
+
+Color getAvatarTextColor(String hexSource)
+{
+  double saturation = 0.5;
+  double lightness = 1;
+  double hue = hexStringToHue(hexSource);
+  HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
+  return hsl.toColor();
+}
+
+getAvatarText(String text){
+  return text.substring(0,1);
+}
