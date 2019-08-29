@@ -91,6 +91,8 @@ class _EntityParticipationState extends State<EntityParticipation> {
       mainTextFullWidth: true,
       secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       avatarUrl: ent.entityMetadata.media.avatar,
+      avatarHexSource: ent.entitySummary.entityId,
+      avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       rightIcon: null,
     );
   }
