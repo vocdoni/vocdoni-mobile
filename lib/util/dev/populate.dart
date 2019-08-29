@@ -38,10 +38,10 @@ Future populateSampleData() async {
 }
 
 List<EntityReference> makeEntitySummaries() {
-  final ids = ["0x1", "0x2", "0x3"];
+  final ids = ["0x123459", "0x543210", "0x9312341"];
   return ids.map((id) {
     EntityReference entitySummary = makeEntityReference(
-        entityId: "Entity #$id", resolverAddress: "0xFFF", networkId: "xxx");
+        entityId: id, resolverAddress: "", networkId: "xxx");
     return entitySummary;
   }).toList();
 }
@@ -54,7 +54,7 @@ EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
   return entityMetadata;
 }
 
-List<Feed> makeFeeds(EntityMetadata entityMetadata) {
+List<Feed> makeFeedts(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
     Feed f = parseFeed(getFeedString(entityMetadata));
     f.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];
