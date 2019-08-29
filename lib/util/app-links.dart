@@ -6,6 +6,7 @@ import 'package:vocdoni/modals/sign-modal.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -18,9 +19,7 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
   switch (newLink.path) {
     case "/entity":
       return fetchAndShowEntity(
-          resolverAddress: newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
-          networkId: newLink.queryParameters["networkId"],
           entryPoints: newLink.queryParametersAll["entryPoints[]"],
           context: context);
       break;
@@ -40,25 +39,15 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
 // /////////////////////////////////////////////////////////////////////////////
 
 Future fetchAndShowEntity(
-    {String resolverAddress,
-    String entityId,
-    String networkId,
-    List<String> entryPoints,
-    BuildContext context}) async {
-  if (!(resolverAddress is String) ||
-      !RegExp(r"^0x[a-zA-Z0-9]{40}$").hasMatch(resolverAddress)) {
-    throw LinkingError("Invalid resolverAddress");
-  } else if (!(entityId is String) ||
+    {String entityId, List<String> entryPoints, BuildContext context}) async {
+  if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw LinkingError("Invalid entityId");
-  } else if (!(networkId is String) ||
-      !RegExp(r"^[0-9a-zA-Z]+$").hasMatch(networkId)) {
-    throw LinkingError("Invalid networkId");
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
     throw LinkingError("Invalid entryPoints");
   }
 
-  List<String> decodedEntryPoints = entryPoints
+  List<String> validEntryPoints = entryPoints
       .map((String uri) {
         try {
           return Uri.decodeFull(uri);
@@ -69,17 +58,13 @@ Future fetchAndShowEntity(
       .where((uri) => uri != null)
       .toList();
 
-//TODO Make use of entryPoints;
-  EntityReference entitySummary = makeEntityReference(
-      entityId: entityId,
-      resolverAddress: resolverAddress,
-      networkId: networkId,
-      entryPoints: []);
+  EntityReference entityRef =
+      makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
 
   showLoading(Lang.of(context).get("Connecting..."), global: true);
 
   try {
-    final entityMetadata = await fetchEntityData(entitySummary);
+    final entityMetadata = await fetchEntityData(entityRef);
 
     if (entityMetadata == null)
       throw LinkingError("Could not fetch the details");

@@ -2,8 +2,6 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:math';
 import 'package:vocdoni/controllers/account.dart';
-import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/util/api.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:dvote/models/dart/gateway.pb.dart';
 import 'package:vocdoni/data/genericBloc.dart';
@@ -24,7 +22,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     await super.init();
 
     // POST-BOOTSTRAP ACTIONS
-    Timer(Duration(seconds: 2), () {
+    Timer(Duration(seconds: 1), () {
       loadBootNodes().catchError((_) {
         print("Error: Unable to load the boot nodes");
       });
@@ -35,16 +33,16 @@ class AppStateBloc extends GenericBloc<AppState> {
   @override
   Future<void> restore() async {
     File fd;
-    GatewayInfoStore gwStore;
+    BootNodeGateways gwStore;
 
     // Gateway boot nodes
     try {
       fd = File("${storageDir.path}/$_storageFileBootNodes");
       if (await fd.exists()) {
         final bytes = await fd.readAsBytes();
-        gwStore = GatewayInfoStore.fromBuffer(bytes);
+        gwStore = BootNodeGateways.fromBuffer(bytes);
       } else {
-        gwStore = GatewayInfoStore();
+        gwStore = BootNodeGateways();
       }
     } catch (err) {
       print(err);
@@ -55,7 +53,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     // Assemble state object
     AppState newState = AppState()
       ..selectedIdentity = state.value.selectedIdentity
-      ..bootnodes = gwStore.items;
+      ..bootnodes = gwStore;
 
     state.add(newState);
   }
@@ -65,9 +63,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     try {
       // Gateway boot nodes
       File fd = File("${storageDir.path}/$_storageFileBootNodes");
-      GatewayInfoStore store = GatewayInfoStore();
-      store.items.addAll(state.value.bootnodes);
-      await fd.writeAsBytes(store.writeToBuffer());
+      await fd.writeAsBytes(state.value.bootnodes.writeToBuffer());
 
       // TODO: Store authFailures and authThresholdDate
       print("TO DO: Store authFailures and authThresholdDate");
@@ -88,7 +84,7 @@ class AppStateBloc extends GenericBloc<AppState> {
 
   Future loadBootNodes() async {
     try {
-      final bnList = await getBootNodes();
+      final bnList = await getDefaultGatewaysInfo();
       await setBootNodes(bnList);
     } catch (err) {
       print("ERR: $err");
@@ -112,13 +108,11 @@ class AppStateBloc extends GenericBloc<AppState> {
     });*/
 
     account = new Account();
-
   }
 
-  
-
-  setBootNodes(List<GatewayInfo> bootnodes) async {
-    if (!(bootnodes is List<GatewayInfo>)) throw "Invalid bootnode list";
+  setBootNodes(BootNodeGateways bootnodes) async {
+    if (!(bootnodes is BootNodeGateways))
+      throw Exception("Invalid bootnode list");
 
     AppState newState = AppState()
       ..selectedIdentity = state.value.selectedIdentity
@@ -147,9 +141,7 @@ class AppState {
   int selectedIdentity = 0;
 
   /// All Gateways known to us, regardless of the entity.
-  /// `gateway.meta["networkId"]` should contain the ID of the Ethereum network, so
-  /// it can be filtered.
-  List<GatewayInfo> bootnodes = [];
+  BootNodeGateways bootnodes;
 
   /// How many failed auth attempts happened since the last
   /// successful one.
@@ -158,5 +150,5 @@ class AppState {
   /// Date after which a new auth attempt can be made
   DateTime authThresholdDate = DateTime.now();
 
-  AppState({this.selectedIdentity = 0, this.bootnodes = const []});
+  AppState({this.selectedIdentity = 0, this.bootnodes});
 }

@@ -60,11 +60,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       selectedTab = 2;
     } else if (appStateBloc != null &&
         appStateBloc.value != null &&
-        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers
-                .entities !=
+        identitiesBloc
+                .value[appStateBloc.value.selectedIdentity].peers.entities !=
             null &&
-        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers
-                .entities.length ==
+        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers.entities
+                .length ==
             0) {
       selectedTab = 2;
     }
@@ -73,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleLink(Uri givenUri) {
+    if (givenUri == null) return;
+
     handleIncomingLink(givenUri, homePageScaffoldKey.currentContext)
         .catchError(handleIncomingLinkError);
   }
