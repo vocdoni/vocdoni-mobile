@@ -190,7 +190,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
     return Stack(
       children: [
         AnimatedContainer(
-          duration: Duration(seconds: 2),
+          duration: Duration(milliseconds: 200),
           color: getHeaderColor(widget.avatarHexSource),
           height: headerImageHeight,
           width: double.infinity,

@@ -58,6 +58,7 @@ class _PollPageState extends State<PollPage> {
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: process.meta['processId'] + headerUrl,
+        avatarHexSource: process.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -125,9 +126,9 @@ class _PollPageState extends State<PollPage> {
       isTitle: true,
       rightIcon: null,
       isBold: true,
-      avatarUrl: ent.entityMetadata.media.avatar,
-      avatarText: process.details.title['default'],
-      avatarHexSource: ent.entitySummary.entityId,
+      //avatarUrl: ent.entityMetadata.media.avatar,
+      //avatarText: process.details.title['default'],
+      //avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
     );
   }

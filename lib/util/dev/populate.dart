@@ -93,7 +93,7 @@ String getEntityMetadataString(String name) {
         "networkId": "goerli"
     },
     "votingProcesses": {
-        "active": ["processId01", "processId02", "processId04"],
+        "active": ["0x5534523452", "0x435363453", "0x8544344"],
         "ended": ["processId03"]
     },
     "newsFeed": {

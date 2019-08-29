@@ -10,7 +10,7 @@ import 'package:vocdoni/views/dev-ui-listItem.dart';
 import 'package:vocdoni/views/entity-feed-page.dart';
 import 'package:vocdoni/views/entity-participation.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/views/pollPage.dart';
+import 'package:vocdoni/views/poll-page.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
 
