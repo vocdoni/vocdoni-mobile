@@ -68,6 +68,8 @@ class EntitiesTab extends StatelessWidget {
         mainTextTag: ent.entitySummary.entityId + title,
         mainText: title,
         avatarUrl: ent.entityMetadata.media.avatar,
+        avatarText: title,
+        avatarHexSource: ent.entitySummary.entityId,
         isBold: true,
         onTap: () => onTapEntity(ctx, ent));
   }

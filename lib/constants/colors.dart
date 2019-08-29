@@ -32,6 +32,7 @@ final double paddingChip = 4;
 final double paddingButton = 8;
 final double paddingBadge = 10;
 final double paddingIcon = 24;
+final double paddingAvatar = 18;
 final double spaceElement = 12;
 final double spaceCard = 24;
 final double spaceMainAndSecondary = 8;
@@ -84,7 +85,7 @@ double hexStringToHue(String hexSource) {
 
 Color getAvatarBackgroundColor(String hexSource) {
   double saturation = 1;
-  double lightness = 0.65;
+  double lightness = 0.7;
   double hue = hexStringToHue(hexSource);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
   Color rgb = hsl.toColor();
