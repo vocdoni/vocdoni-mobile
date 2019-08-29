@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/views/dev-ui-avatar-color.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
 import 'package:vocdoni/views/entity-participation.dart';
@@ -80,6 +81,7 @@ void main() async {
       "/dev": (context) => DevMenu(),
       "/dev/ui-listItem": (context) => DevUiListItem(),
       "/dev/ui-card": (context) => DevUiCard(),
+      "/dev/ui-avatar-colors":(context)=> DevUiAvatarColor(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,

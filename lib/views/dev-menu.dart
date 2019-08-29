@@ -31,6 +31,12 @@ class DevMenu extends StatelessWidget {
               },
             ),
             ListItem(
+              mainText: "Avatar color generation (UI)",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/ui-avatar-colors");
+              },
+            ),
+            ListItem(
               mainText: "Handle deeplink",
               onTap: () {
                 String link =
