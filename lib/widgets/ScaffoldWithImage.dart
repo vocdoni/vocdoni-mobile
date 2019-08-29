@@ -33,7 +33,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   @override
   Widget build(context) {
     double headerImageHeight = 400;
-    double avatarHeight =  widget.avatarUrl==null?16:128;
+    double avatarHeight =  widget.avatarUrl==null?16:iconSizeHuge;
     double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
     double interpolationHeight = 64;
     double pos = 0;

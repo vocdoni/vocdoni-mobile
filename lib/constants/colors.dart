@@ -42,6 +42,7 @@ final double iconSizeTinny = 16;
 final double iconSizeSmall = 24;
 final double iconSizeMedium = 32;
 final double iconSizeLarge = 48;
+final double iconSizeHuge = 128;
 
 final double fontSizeTitle = 24;
 final double fontSizeBase = 18;
