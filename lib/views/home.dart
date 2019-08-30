@@ -172,11 +172,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         break;
       // SUBSCRIBED ENTITIES
       case 1:
-        body = EntitiesTab(appState: appState, identities: identities);
+        body = EntitiesTab();
         break;
       // IDENTITY INFO
       case 2:
-        body = IdentityTab(appState: appState, identities: identities);
+        body = IdentityTab();
         break;
       default:
         body = Container(

@@ -10,10 +10,9 @@ import 'package:dvote/dvote.dart';
 // import 'package:vocdoni/widgets/section.dart';
 
 class EntitiesTab extends StatelessWidget {
-  final AppState appState;
-  final List<Identity> identities;
+  
 
-  EntitiesTab({this.appState, this.identities});
+  EntitiesTab();
 
   @override
   Widget build(ctx) {

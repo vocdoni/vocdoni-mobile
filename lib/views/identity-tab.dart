@@ -12,17 +12,12 @@ import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 
 class IdentityTab extends StatelessWidget {
-  final AppState appState;
-  final List<Identity> identities;
 
-  IdentityTab({this.appState, this.identities});
+
+  IdentityTab();
 
   @override
   Widget build(ctx) {
-    if (appState == null || identities == null || identities.length == null)
-      return buildEmpty(ctx);
-
-    
 
     return ListView(
       children: <Widget>[
