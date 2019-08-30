@@ -5,10 +5,8 @@ import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
@@ -36,7 +34,7 @@ class FeedPostPage extends StatelessWidget {
             cardId: post.id,
             elementId: post.image),
         avatarHexSource: post.id,
-        appBarTitle: "Poll",
+        appBarTitle: "Post",
         //actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
