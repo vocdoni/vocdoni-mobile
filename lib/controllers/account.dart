@@ -10,9 +10,8 @@ class Account {
   String networkId;
 
   Account() {
-
     languages = ['default'];
-    networkId =  '5';
+    networkId = '5';
 
     init();
   }
@@ -48,9 +47,8 @@ class Account {
   unsubscribe(EntityReference _entitySummary) async {
     await identitiesBloc.unsubscribeEntityFromAccount(
         _entitySummary, account.identity);
-    int index = ents.indexWhere((ent) {
-      _entitySummary.entityId = ent.entitySummary.entityId;
-    });
+    int index = ents.indexWhere(
+        (ent) => _entitySummary.entityId == ent.entitySummary.entityId);
     if (index != -1) ents.removeAt(index);
   }
 }

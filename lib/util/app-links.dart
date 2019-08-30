@@ -16,8 +16,6 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
   switch (newLink.path) {
     case "/entity":
       return fetchAndShowEntity(
-          //TODO: Needs to be resolved via ENS
-          //newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
           entryPoints: newLink.queryParametersAll["entryPoints[]"],
           context: context);

@@ -25,7 +25,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
-  String _status = '';
+  String _status = ''; // loading, ok, fail, disposed
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -35,6 +35,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (_status == "disposed") return;
+
     try {
       _ent = ModalRoute.of(super.context).settings.arguments;
       refresh();
@@ -43,6 +45,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     } catch (err) {
       print(err);
     }
+  }
+
+  @override
+  void dispose() {
+    setState(() {
+      _status = "disposed";
+    });
+    super.dispose();
   }
 
   @override
@@ -471,11 +481,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
+    if (_status == "disposed") return;
+
     try {
       setState(() {
         _status = "loading";
       });
       await _ent.update();
+      if (_status == "disposed") return;
       setState(() {
         _ent = _ent;
         _status = "ok";
