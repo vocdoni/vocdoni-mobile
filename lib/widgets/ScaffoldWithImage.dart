@@ -189,8 +189,8 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   Widget buildHeader(headerImageHeight) {
     return Stack(
       children: [
-        buildHeaderImage(headerImageHeight),
         buildHeaderBackground(headerImageHeight),
+        buildHeaderImage(headerImageHeight),
       ],
     );
   }
@@ -201,8 +201,6 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
         : Hero(
             tag: widget.headerTag,
             child: Image.network(widget.headerImageUrl,
-                color: Colors
-                    .transparent, //getHeaderColor(widget.avatarHexSource),
                 fit: BoxFit.cover,
                 height: headerImageHeight,
                 width: double.infinity),
