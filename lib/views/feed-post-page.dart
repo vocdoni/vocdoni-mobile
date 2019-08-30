@@ -1,6 +1,10 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
+import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,9 +13,10 @@ import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
 class FeedPostArgs {
+  Ent ent;
   final FeedPost post;
 
-  FeedPostArgs(this.post);
+  FeedPostArgs({this.ent, this.post});
 }
 
 class FeedPostPage extends StatelessWidget {
@@ -20,36 +25,49 @@ class FeedPostPage extends StatelessWidget {
     final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
 
     FeedPost post = args.post;
+    Ent ent = args.ent;
 
     if (post == null) return buildNoPosts(ctx);
 
-    return Scaffold(
-        appBar: TopNavigation(
-          title: "Post",
-        ),
-        body: ListView(
-          children: <Widget>[
-            Container(
-              height: 300,
-              width: double.infinity,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                    color: Color(0xff7c94b6),
-                    image: new DecorationImage(
-                        image: new NetworkImage(post.image),
-                        fit: BoxFit.cover)),
-              ),
-            ),
-            PageTitle(
-              title: post.title,
-              subtitle: post.author.name,
-            ),
-            //Section(text: "HTML render 1"),
-            //html1(post.contentHtml),
-            //Section(text: "HTML render 2"),
-            html2(post.contentHtml),
-          ],
+    return ScaffoldWithImage(
+        headerImageUrl: post.image,
+        headerTag: makeElementTag(
+            entityId: ent.entityReference.entityId,
+            cardId: post.id,
+            elementId: post.image),
+        avatarHexSource: post.id,
+        appBarTitle: "Poll",
+        //actionsBuilder: actionsBuilder,
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+              delegate:
+                  SliverChildListDelegate(getScaffoldChildren(ctx, ent, post)),
+            );
+          },
         ));
+  }
+
+  getScaffoldChildren(BuildContext context, Ent ent, FeedPost post) {
+    List<Widget> children = [];
+    children.add(buildTitle(context, ent, post));
+    children.add(html2(post.contentHtml));
+    return children;
+  }
+
+  buildTitle(BuildContext context, Ent ent, FeedPost post) {
+    return ListItem(
+      //mainTextTag: process.meta['processId'] + title,
+      mainText: post.title,
+      secondaryText: ent.entityMetadata.name['default'],
+      isTitle: true,
+      rightIcon: null,
+      isBold: true,
+      //avatarUrl: ent.entityMetadata.media.avatar,
+      //avatarText: process.details.title['default'],
+      //avatarHexSource: ent.entitySummary.entityId,
+      mainTextFullWidth: true,
+    );
   }
 
   html1(String htmlBody) {
