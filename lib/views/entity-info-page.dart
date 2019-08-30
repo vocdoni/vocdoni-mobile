@@ -119,14 +119,17 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
-    children.add(buildSubscribeItem(context, ent));
     children.add(buildFeedItem(context, ent));
+    children.add(buildParticipationItem(context,ent));
     children.addAll(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: ent.entityMetadata.description[ent.entityMetadata.languages[0]],
       maxLines: 5,
     ));
+    children.add(Section(text: "Manage"));
+    children.add(buildShareItem(context, ent));
+    children.add(buildSubscribeItem(context, ent));
 
     return children;
   }
@@ -157,15 +160,29 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ListItem(
       icon: FeatherIcons.rss,
       mainText: "Feed",
+      rightText: ent.feed.items.length.toString(),
+      rightTextIsBadge: true,
       onTap: () {
         Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
     );
   }
 
+  buildParticipationItem(BuildContext context, Ent ent) {
+    return ListItem(
+      icon: FeatherIcons.mail,
+      mainText: "Participation",
+      rightText: ent.processess.length.toString(),
+      rightTextIsBadge: true,
+      onTap: () {
+        Navigator.pushNamed(context, "/entity/participation", arguments: ent);
+      },
+    );
+  }
+
   buildSubscribeItem(BuildContext context, Ent ent) {
     bool isSubscribed = account.isSubscribed(ent.entityReference);
-    String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
+    String subscribeText = isSubscribed ? "Following" : "Follow";
     return ListItem(
       mainText: subscribeText,
       icon: FeatherIcons.heart,
@@ -193,16 +210,30 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
+  buildShareItem(BuildContext context, Ent ent) {
+    return ListItem(
+        mainText: "Share organization",
+        icon: FeatherIcons.share2,
+        rightIcon:null,
+        onTap: () {
+          onShare(ent);
+        });
+  }
+
   buildShareButton(BuildContext context, Ent ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
-          showMessage("Identity ID copied on the clipboard",
-              context: context, purpose: Purpose.GUIDE);
+          onShare(ent);
         });
+  }
+
+  onShare(Ent ent) {
+    Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
+    showMessage("Identity ID copied on the clipboard",
+        context: context, purpose: Purpose.GUIDE);
   }
 
   Future<bool> isActionVisible(
