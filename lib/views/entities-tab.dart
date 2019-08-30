@@ -49,7 +49,7 @@ class EntitiesTab extends StatelessWidget {
           rightText: feedPostAmount.toString(),
           rightTextIsBadge: true,
           onTap: () {
-            Navigator.pushNamed(ctx, "/entity/activity", arguments: ent);
+            Navigator.pushNamed(ctx, "/entity/feed", arguments: ent);
           },
           disabled: feedPostAmount == 0),
       buildParticipationItem(ctx, ent),
