@@ -1,12 +1,9 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-// import 'package:vocdoni/modals/web-viewer.dart';
-import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pageTitle.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
