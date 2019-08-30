@@ -58,7 +58,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: null,
         headerTag: null,
         appBarTitle: "Loading",
-        avatarUrl: null,
+        avatarText: "",
         avatarHexSource: ent.entityReference.entityId,
         builder: Builder(
           builder: (ctx) {
@@ -275,9 +275,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
+        
         bool isRegistered =
             await isActionVisible(action, ent.entityReference.entityId);
+
         if (!mounted) return;
+
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
