@@ -49,7 +49,10 @@ class HomeTab extends StatelessWidget {
         itemBuilder: (BuildContext ctx, int index) {
           final item = items[index];
           if (item.post != null)
-            return buildFeedPostCard(ctx:ctx, ent:item.ent, post:item.post);
+            return buildFeedPostCard(ctx: ctx, ent: item.ent, post: item.post);
+          else if (item.process != null)
+            return buildProcessCard(
+                ctx: ctx, ent: item.ent, process: item.process);
           else
             return Container();
         });
@@ -82,6 +85,4 @@ class HomeTab extends StatelessWidget {
     //Todo implement
     return DateTime.now();
   }
-
-  
 }
