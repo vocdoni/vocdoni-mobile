@@ -488,6 +488,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         _status = "loading";
       });
       await _ent.update();
+
+      if (account.isSubscribed(_ent.entitySummary)) _ent.save();
+
       if (_status == "disposed") return;
       setState(() {
         _ent = _ent;

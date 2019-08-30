@@ -18,10 +18,17 @@ class Ent {
 
   update() async {
     this.entityMetadata = await fetchEntityData(entitySummary);
+
     final feedString =
         await fetchEntityNewsFeed(this.entityMetadata, this.lang);
-    this.feed =
-        feedString == null ? null : parseFeed(feedString);
+    this.feed = feedString == null ? null : parseFeed(feedString);
+  }
+
+  save() async {
+    if (this.entityMetadata != null)
+      await entitiesBloc.add(this.entityMetadata, this.entitySummary);
+    if (this.feed != null)
+      await newsFeedsBloc.add(this.lang, this.feed, this.entitySummary);
   }
 
   syncLocal() async {

@@ -39,8 +39,12 @@ class Account {
   }
 
   subscribe(Ent ent) async {
-    await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
+    await identitiesBloc.subscribeEntityToAccount(
+        ent.entitySummary, account.identity);
     this.ents.add(ent);
+
+    await ent.save();
+
     sync();
   }
 
