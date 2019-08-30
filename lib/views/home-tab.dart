@@ -4,6 +4,7 @@ import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/widgets/listItem.dart';
 
 class CardContentWrapper {
   final Ent ent;
@@ -48,7 +49,7 @@ class HomeTab extends StatelessWidget {
         itemBuilder: (BuildContext ctx, int index) {
           final item = items[index];
           if (item.post != null)
-            return buildFeedPostCard(ctx, item.ent, item.post);
+            return buildFeedPostCard(ctx:ctx, ent:item.ent, post:item.post);
           else
             return Container();
         });
@@ -81,4 +82,6 @@ class HomeTab extends StatelessWidget {
     //Todo implement
     return DateTime.now();
   }
+
+  
 }

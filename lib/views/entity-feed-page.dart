@@ -40,7 +40,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         itemCount: ent.feed.items.length,
         itemBuilder: (BuildContext context, int index) {
           final FeedPost post = ent.feed.items[index];
-          return  buildFeedPostCard(context,  ent, post);
+          return buildFeedPostCard(ctx: context, ent: ent, post: post);
         },
       ),
     );
@@ -71,10 +71,9 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/entity/feed/post",
-        arguments: FeedPostArgs(post));
+    Navigator.of(ctx)
+        .pushNamed("/entity/feed/post", arguments: FeedPostArgs(post));
   }
-
 
   Future loadRemoteFeed(BuildContext ctx, EntityMetadata entityMetadata) async {
     if (remoteFetched) return;
@@ -86,7 +85,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     });
 
     try {
-      final result = await fetchEntityNewsFeed(entityMetadata, entityMetadata.languages[0]);
+      final result = await fetchEntityNewsFeed(
+          entityMetadata, entityMetadata.languages[0]);
       final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {
