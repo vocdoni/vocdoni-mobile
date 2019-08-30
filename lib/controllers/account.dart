@@ -16,7 +16,7 @@ class Account {
   }
 
   init() {
-    this.identity = identitiesBloc.getCurrentAccount();
+    this.identity = identitiesBloc.getCurrentIdentity();
     this.identity.peers.entities.forEach((entitySummary) {
       for (EntityMetadata entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {

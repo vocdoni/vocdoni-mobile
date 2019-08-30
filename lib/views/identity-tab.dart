@@ -22,7 +22,7 @@ class IdentityTab extends StatelessWidget {
     if (appState == null || identities == null || identities.length == null)
       return buildEmpty(ctx);
 
-    Identity account = identitiesBloc.getCurrentAccount();
+    Identity account = identitiesBloc.getCurrentIdentity();
 
     return ListView(
       children: <Widget>[

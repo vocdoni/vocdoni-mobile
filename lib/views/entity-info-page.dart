@@ -212,7 +212,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     if (action.visible == "true") return true;
     if (action.visible == null || action.visible == "false") return false;
 
-    String publicKey = identitiesBloc.getCurrentAccount().identityId;
+    String publicKey = account.identity.identityId;
     int timestamp = new DateTime.now().millisecondsSinceEpoch;
 
     // TODO: Get the private key to sign appropriately

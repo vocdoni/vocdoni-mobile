@@ -107,7 +107,7 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
     set(super.value);
   }
 
-  Identity getCurrentAccount() {
+  Identity getCurrentIdentity() {
     if (super.state.value.length <= appStateBloc.value?.selectedIdentity)
       throw FlutterError("Invalid selectedIdentity: out of bounds");
 
