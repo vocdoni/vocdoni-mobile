@@ -78,9 +78,16 @@ Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
 }
 
 double hexStringToHue(String hexSource) {
-  String short = hexSource.substring(0, 8);
-  int i = int.parse(short);
-  return i * 360 / 0xffffff;
+  bool isHex = hexSource.substring(2) == '0x';
+  if (isHex) {
+    String short = hexSource.substring(0, 8);
+    int i = int.parse(short);
+    return i * 360 / 0xffffff;
+  }
+  else{
+    //TODO: Deterministically compute and int from random string
+    return 360;
+  }
 }
 
 Color getAvatarBackgroundColor(String hexSource) {
@@ -125,4 +132,3 @@ Color dye(Color original, Color tint, double strength) {
       (original.blue * (1 - strength)).toInt() + (tint.blue * strength).toInt();
   return Color.fromARGB(original.alpha, red, green, blue);
 }
-
