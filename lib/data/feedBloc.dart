@@ -3,10 +3,12 @@ import "dart:async";
 
 // import 'package:vocdoni/util/singletons.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/data/genericBloc.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
 /// of the subscribed entities
@@ -73,7 +75,8 @@ class FeedBloc extends GenericBloc<List<Feed>> {
   /// Fetch the feeds of the given entity and update their entries
   /// on the local storage
   Future<void> fetchFromEntity(EntityMetadata entityMetadata) async {
-    if (entityMetadata.languages == null || entityMetadata.languages.length < 1) return;
+    if (entityMetadata.languages == null || entityMetadata.languages.length < 1)
+      return;
     final feeds = value;
 
     await Future.wait(entityMetadata.languages.map((lang) async {
@@ -83,7 +86,8 @@ class FeedBloc extends GenericBloc<List<Feed>> {
       newFeed.meta["language"] = lang;
 
       final alreadyIdx = feeds.indexWhere((feed) =>
-          feed.meta["entityId"] == entityMetadata.meta['entityId'] && // metadata
+          feed.meta["entityId"] ==
+              entityMetadata.meta['entityId'] && // metadata
           feed.meta["language"] == lang);
       if (alreadyIdx >= 0) {
         // Update existing
@@ -95,5 +99,25 @@ class FeedBloc extends GenericBloc<List<Feed>> {
     }));
 
     await set(feeds);
+  }
+
+  Future<void> add(
+      String language, Feed feed, EntityReference entitySummary) async {
+    feed.meta[META_ENTITY_ID] = entitySummary.entityId;
+    feed.meta[META_LANGUAGE] = language;
+
+    final currentIndex = value.indexWhere((f) =>
+        f.meta[META_ENTITY_ID] == entitySummary.entityId &&
+        f.meta[META_LANGUAGE] == language);
+
+    // Already exists
+    if (currentIndex >= 0) {
+      final currentFeeds = value;
+      currentFeeds[currentIndex] = feed;
+      await set(currentFeeds);
+    } else {
+      value.add(feed);
+      await set(value);
+    }
   }
 }
