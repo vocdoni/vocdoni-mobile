@@ -59,7 +59,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerTag: null,
         appBarTitle: "Loading",
         avatarUrl: null,
-        avatarHexSource: ent.entitySummary.entityId,
+        avatarHexSource: ent.entityReference.entityId,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -92,11 +92,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildScaffold(Ent ent) {
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
-        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        headerTag: ent.entityReference.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-        avatarHexSource: ent.entitySummary.entityId,
+        avatarHexSource: ent.entityReference.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -136,9 +136,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitle(BuildContext context, Ent ent) {
     String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
-      mainTextTag: ent.entitySummary.entityId + title,
+      mainTextTag: ent.entityReference.entityId + title,
       mainText: title,
-      secondaryText: ent.entitySummary.entityId,
+      secondaryText: ent.entityReference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -148,7 +148,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitleWithoutEntityMeta(BuildContext context, Ent ent) {
     return ListItem(
       mainText: "...",
-      secondaryText: ent.entitySummary.entityId,
+      secondaryText: ent.entityReference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -166,7 +166,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildSubscribeItem(BuildContext context, Ent ent) {
-    bool isSubscribed = account.isSubscribed(ent.entitySummary);
+    bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
     return ListItem(
       mainText: subscribeText,
@@ -181,7 +181,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildSubscribeButton(BuildContext context, Ent ent) {
-    bool isSubscribed = account.isSubscribed(ent.entitySummary);
+    bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
       text: subscribeText,
@@ -201,7 +201,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entitySummary.entityId));
+          Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
           showMessage("Identity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });
@@ -276,14 +276,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           continue; //only one registerAction is supported
         registerAction = action;
         bool isRegistered =
-            await isActionVisible(action, ent.entitySummary.entityId);
+            await isActionVisible(action, ent.entityReference.entityId);
         if (!mounted) return;
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
         });
       } else {
-        if (await isActionVisible(action, ent.entitySummary.entityId)) {
+        if (await isActionVisible(action, ent.entityReference.entityId)) {
           actionsToDisplay.add(action);
         }
       }
@@ -406,7 +406,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     setState(() {
       _processingSubscription = true;
     });
-    await account.unsubscribe(ent.entitySummary);
+    await account.unsubscribe(ent.entityReference);
     showMessage(
         Lang.of(ctx)
             .get("You will no longer see this organization in your feed"),
@@ -457,7 +457,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       });
       await _ent.update();
 
-      if (account.isSubscribed(_ent.entitySummary)) _ent.save();
+      if (account.isSubscribed(_ent.entityReference)) _ent.save();
 
       if (!mounted) return;
       setState(() {

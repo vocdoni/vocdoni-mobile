@@ -208,7 +208,7 @@ class _PollPageState extends State<PollPage> {
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entitySummary.entityId));
+          Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
           showMessage("Identity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });

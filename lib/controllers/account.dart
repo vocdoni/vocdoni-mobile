@@ -39,7 +39,7 @@ class Account {
 
   subscribe(Ent ent) async {
     await identitiesBloc.subscribeEntityToAccount(
-        ent.entitySummary, account.identity);
+        ent.entityReference, account.identity);
     this.ents.add(ent);
 
     await ent.save();
@@ -51,7 +51,7 @@ class Account {
     await identitiesBloc.unsubscribeEntityFromAccount(
         _entitySummary, account.identity);
     int index = ents.indexWhere(
-        (ent) => _entitySummary.entityId == ent.entitySummary.entityId);
+        (ent) => _entitySummary.entityId == ent.entityReference.entityId);
     if (index != -1) ents.removeAt(index);
   }
 }

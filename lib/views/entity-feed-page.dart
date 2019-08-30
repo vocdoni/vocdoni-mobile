@@ -49,7 +49,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
                 avatarUrl: ent.entityMetadata.media.avatar,
                 avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarHexSource: ent.entitySummary.entityId,
+                avatarHexSource: ent.entityReference.entityId,
                 rightText: DateFormat('MMMM dd')
                     .format(DateTime.parse(post.datePublished).toLocal()),
                 onTap: () => onTapItem(context, post),

@@ -31,7 +31,7 @@ Future populateSampleData() async {
   await processesBloc.set(processess);
 
   ents.forEach((ent) {
-    if (account.isSubscribed(ent.entitySummary) == false)
+    if (account.isSubscribed(ent.entityReference) == false)
       account.subscribe(ent);
   });
   account.sync();

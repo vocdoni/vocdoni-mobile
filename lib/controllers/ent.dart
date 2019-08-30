@@ -1,23 +1,22 @@
-import 'dart:convert';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 class Ent {
-  EntityReference entitySummary;
+  EntityReference entityReference;
   EntityMetadata entityMetadata;
   Feed feed;
   List<ProcessMetadata> processess;
   String lang = "default";
 
   Ent(EntityReference entitySummary) {
-    this.entitySummary = entitySummary;
+    this.entityReference = entitySummary;
     syncLocal();
   }
 
   update() async {
-    this.entityMetadata = await fetchEntityData(entitySummary);
+    this.entityMetadata = await fetchEntityData(entityReference);
 
     final feedString =
         await fetchEntityNewsFeed(this.entityMetadata, this.lang);
@@ -26,19 +25,19 @@ class Ent {
 
   save() async {
     if (this.entityMetadata != null)
-      await entitiesBloc.add(this.entityMetadata, this.entitySummary);
+      await entitiesBloc.add(this.entityMetadata, this.entityReference);
     if (this.feed != null)
-      await newsFeedsBloc.add(this.lang, this.feed, this.entitySummary);
+      await newsFeedsBloc.add(this.lang, this.feed, this.entityReference);
   }
 
   syncLocal() async {
-    syncEntityMetadata(entitySummary);
+    syncEntityMetadata(entityReference);
     if (this.entityMetadata == null) {
       this.feed = null;
       this.processess = null;
     } else {
-      syncFeed(entitySummary, this.entityMetadata);
-      syncProcessess(this.entityMetadata, this.entitySummary);
+      syncFeed(entityReference, this.entityMetadata);
+      syncProcessess(this.entityMetadata, this.entityReference);
     }
   }
 

@@ -32,8 +32,8 @@ class EntitiesTab extends StatelessWidget {
   Widget buildEmptyMetadataCard(BuildContext ctx, Ent ent) {
     return BaseCard(children: [
       ListItem(
-          mainText: ent.entitySummary.entityId,
-          avatarHexSource: ent.entitySummary.entityId,
+          mainText: ent.entityReference.entityId,
+          avatarHexSource: ent.entityReference.entityId,
           isBold: true,
           onTap: () => onTapEntity(ctx, ent))
     ]);
@@ -63,11 +63,11 @@ class EntitiesTab extends StatelessWidget {
   Widget buildName(BuildContext ctx, Ent ent) {
     String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
-        mainTextTag: ent.entitySummary.entityId + title,
+        mainTextTag: ent.entityReference.entityId + title,
         mainText: title,
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: title,
-        avatarHexSource: ent.entitySummary.entityId,
+        avatarHexSource: ent.entityReference.entityId,
         isBold: true,
         onTap: () => onTapEntity(ctx, ent));
   }
