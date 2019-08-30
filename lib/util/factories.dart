@@ -3,6 +3,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
@@ -23,8 +24,12 @@ EntityReference makeEntityReference(
 
 Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
   return BaseCard(
+      onTap: () => onPostCardTap(ctx, post, ent),
       image: post.image,
-      imageTag: post.id + post.image,
+      imageTag: makeElementTag(
+          entityId: ent.entityReference.entityId,
+          cardId: post.id,
+          elementId: post.image),
       children: <Widget>[
         ListItem(
           mainText: post.title,
@@ -36,14 +41,17 @@ Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
           avatarHexSource: ent.entityReference.entityId,
           rightText: DateFormat('MMMM dd')
               .format(DateTime.parse(post.datePublished).toLocal()),
-          onTap: () => onPostCardTap(ctx, post),
         )
       ]);
 }
 
-onPostCardTap(BuildContext ctx, FeedPost post) {
-  Navigator.of(ctx)
-      .pushNamed("/entity/feed/post", arguments: FeedPostArgs(post));
+makeElementTag({String entityId, String cardId, String elementId}) {
+  return entityId + cardId + elementId;
+}
+
+onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
+  Navigator.of(ctx).pushNamed("/entity/feed/post",
+      arguments: FeedPostArgs(ent: ent, post: post));
 }
 
 buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
@@ -55,7 +63,10 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
           arguments: PollPageArgs(ent: ent, process: process));
     },
     image: process.details.headerImage,
-    imageTag: tag,
+    imageTag: makeElementTag(
+        entityId: ent.entityReference.entityId,
+        cardId: process.meta[META_PROCESS_ID],
+        elementId: process.details.headerImage),
     children: <Widget>[
       DashboardRow(
         children: <Widget>[
