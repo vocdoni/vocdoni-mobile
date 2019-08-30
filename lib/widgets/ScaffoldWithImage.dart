@@ -189,23 +189,32 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   Widget buildHeader(headerImageHeight) {
     return Stack(
       children: [
-        AnimatedContainer(
-          duration: Duration(milliseconds: 200),
-          color: getHeaderColor(widget.avatarHexSource),
-          height: headerImageHeight,
-          width: double.infinity,
-        ),
-        widget.headerImageUrl == null
-            ? Container()
-            : Hero(
-                tag: widget.headerTag,
-                child: Image.network(widget.headerImageUrl,
-                    color: getHeaderColor(widget.avatarHexSource),
-                    fit: BoxFit.cover,
-                    height: headerImageHeight,
-                    width: double.infinity),
-              )
+        buildHeaderImage(headerImageHeight),
+        buildHeaderBackground(headerImageHeight),
       ],
+    );
+  }
+
+  Widget buildHeaderImage(headerImageHeight) {
+    return widget.headerImageUrl == null
+        ? Container()
+        : Hero(
+            tag: widget.headerTag,
+            child: Image.network(widget.headerImageUrl,
+                color: Colors
+                    .transparent, //getHeaderColor(widget.avatarHexSource),
+                fit: BoxFit.cover,
+                height: headerImageHeight,
+                width: double.infinity),
+          );
+  }
+
+  Widget buildHeaderBackground(headerImageHeight) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      color: getHeaderColor(widget.avatarHexSource),
+      height: headerImageHeight,
+      width: double.infinity,
     );
   }
 }
