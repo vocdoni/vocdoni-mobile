@@ -59,8 +59,7 @@ class EntitiesTab extends StatelessWidget {
   }
 
   int getFeedPostAmount(Ent ent) {
-    //TODO Refactor NewsFeedBloc
-    return 10;
+    return ent.feed==null?0:ent.feed.items.length;
   }
 
   Widget buildName(BuildContext ctx, Ent ent) {
@@ -69,6 +68,8 @@ class EntitiesTab extends StatelessWidget {
         mainTextTag: ent.entitySummary.entityId + title,
         mainText: title,
         avatarUrl: ent.entityMetadata.media.avatar,
+        avatarText: title,
+        avatarHexSource: ent.entitySummary.entityId,
         isBold: true,
         onTap: () => onTapEntity(ctx, ent));
   }

@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 

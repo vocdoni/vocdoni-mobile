@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/widgets/baseAvatar.dart';
 
 class ListItem extends StatelessWidget {
   final String mainText;
@@ -11,6 +12,8 @@ class ListItem extends StatelessWidget {
   final int secondaryTextMultiline;
   final IconData icon;
   final String avatarUrl;
+  final String avatarText;
+  final String avatarHexSource;
   final IconData rightIcon;
   final String rightText;
   final Purpose rightTextPurpose;
@@ -31,6 +34,8 @@ class ListItem extends StatelessWidget {
       this.secondaryTextMultiline = 1,
       this.icon,
       this.avatarUrl,
+      this.avatarText,
+      this.avatarHexSource,
       this.rightIcon = FeatherIcons.chevronRight,
       this.rightText,
       this.rightTextPurpose = Purpose.GUIDE,
@@ -129,25 +134,27 @@ class ListItem extends StatelessWidget {
   buildIcon() {
     if (avatarUrl == null && icon == null) return Container();
 
-    double size = mainTextFullWidth || secondaryText == null
+    double iconSize = mainTextFullWidth || secondaryText == null
         ? iconSizeSmall
         : iconSizeMedium;
+    double avatarSize = mainTextFullWidth || secondaryText == null
+        ? iconSizeSmall + (paddingIcon - paddingAvatar)
+        : iconSizeMedium + (paddingIcon - paddingAvatar);
 
+    double padding = avatarUrl == null ? paddingIcon : paddingAvatar;
     return Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, paddingIcon, 0),
+        padding: EdgeInsets.fromLTRB(0, 0, padding, 0),
         child: avatarUrl == null
             ? Icon(
                 icon,
                 color: getMainColor(),
-                size: size,
+                size: iconSize,
               )
-            : Container(
-                constraints: BoxConstraints(maxWidth: size, maxHeight: size),
-                child: CircleAvatar(
-                  backgroundColor: Colors.transparent, //.brown.shade800,
-                  //child: avatarUrl == null ? Text('AH') : null,
-                  backgroundImage: NetworkImage(avatarUrl),
-                )));
+            : BaseAvatar(
+                size: avatarSize,
+                text: avatarText,
+                hexSource: avatarHexSource,
+                avatarUrl: avatarUrl));
   }
 
   buildRightItem() {

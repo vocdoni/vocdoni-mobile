@@ -1,10 +1,12 @@
 import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 // import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -19,7 +21,11 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
   switch (newLink.path) {
     case "/entity":
       return fetchAndShowEntity(
+          //TODO: Needs to be resolved via ENS
+          resolverAddress:
+              '0xcabc15238ac8eafe46e8bd58d9a3af1c8a0e855a', //newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
+          networkId: account.networkId, //newLink.queryParameters["networkId"],
           entryPoints: newLink.queryParametersAll["entryPoints[]"],
           context: context);
       break;
@@ -46,8 +52,9 @@ Future fetchAndShowEntity(
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
     throw LinkingError("Invalid entryPoints");
   }
-
-  List<String> validEntryPoints = entryPoints
+//TODO Make use of entryPoints;
+/*
+  List<String> decodedEntryPoints = entryPoints
       .map((String uri) {
         try {
           return Uri.decodeFull(uri);
@@ -57,27 +64,15 @@ Future fetchAndShowEntity(
       })
       .where((uri) => uri != null)
       .toList();
+*/
 
-  EntityReference entityRef =
-      makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
+  EntityReference entitySummary = makeEntityReference(
+      entityId: entityId,
+      resolverAddress: resolverAddress,
+      entryPoints: []);
 
-  showLoading(Lang.of(context).get("Connecting..."), global: true);
-
-  try {
-    final entityMetadata = await fetchEntityData(entityRef);
-
-    if (entityMetadata == null)
-      throw LinkingError("Could not fetch the details");
-
-    hideLoading(global: true);
-
-    // Show screen
-    Navigator.pushNamed(context, "/entity", arguments: entityMetadata);
-  } catch (err) {
-    hideLoading(global: true);
-
-    throw err;
-  }
+  final ent = new Ent(entitySummary);
+  Navigator.pushNamed(context, "/entity", arguments: ent);
 }
 
 showSignatureScreen(

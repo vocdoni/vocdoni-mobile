@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/views/pollPage.dart';
+import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
 import 'package:vocdoni/widgets/dashboardRow.dart';
@@ -91,6 +91,8 @@ class _EntityParticipationState extends State<EntityParticipation> {
       mainTextFullWidth: true,
       secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       avatarUrl: ent.entityMetadata.media.avatar,
+      avatarHexSource: ent.entitySummary.entityId,
+      avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
       rightIcon: null,
     );
   }

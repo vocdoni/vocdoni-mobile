@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
+import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -19,7 +20,8 @@ class Ent {
     this.entityMetadata = await fetchEntityData(entitySummary);
     final feedString =
         await fetchEntityNewsFeed(this.entityMetadata, this.lang);
-    this.feed = Feed.fromJson(jsonDecode(feedString));
+    this.feed =
+        feedString == null ? null : parseFeed(feedString);
   }
 
   syncLocal() async {
@@ -58,18 +60,18 @@ class Ent {
   }
 
   syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
-    
     final _processess = processesBloc.value.where((process) {
       //Process is listed as active
-      bool isActive = entityMetadata.votingProcesses.active.indexOf(process.meta[META_PROCESS_ID])!=-1;
+      bool isActive = entityMetadata.votingProcesses.active
+              .indexOf(process.meta[META_PROCESS_ID]) !=
+          -1;
       //Process belongs to the org that created it.
-      bool isFromEntity = process.meta[META_ENTITY_ID] == entitySummary.entityId;
+      bool isFromEntity =
+          process.meta[META_ENTITY_ID] == entitySummary.entityId;
       return isActive && isFromEntity;
     }).toList();
 
-    entityMetadata.votingProcesses.active.forEach((processId) {
-
-    });
+    entityMetadata.votingProcesses.active.forEach((processId) {});
 
     this.processess = _processess.length > 0 ? _processess : null;
   }

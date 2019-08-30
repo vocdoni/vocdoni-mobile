@@ -1,20 +1,14 @@
-// import 'dart:io';
 import 'dart:async';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
-
-import 'package:vocdoni/views/feed-tab.dart';
+import 'package:vocdoni/views/home-tab.dart';
 import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
-
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
-import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lang/index.dart';
-// import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
@@ -173,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         body = StreamBuilder(
             stream: newsFeedsBloc.stream,
             builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
-              return FeedTab(
+              return HomeTab(
                   appState: appState,
                   identities: identities,
                   newsFeeds: newsFeeds.data ?? <Feed>[]);

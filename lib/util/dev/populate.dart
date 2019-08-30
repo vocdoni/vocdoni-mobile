@@ -38,10 +38,10 @@ Future populateSampleData() async {
 }
 
 List<EntityReference> makeEntitySummaries() {
-  final ids = ["0x1", "0x2", "0x3"];
+  final ids = ["0x123459", "0x543210", "0x9312341"];
   return ids.map((id) {
     EntityReference entitySummary = makeEntityReference(
-        entityId: "Entity #$id", resolverAddress: "0xFFF");
+        entityId: id, resolverAddress: "0xfff ");
     return entitySummary;
   }).toList();
 }
@@ -64,7 +64,6 @@ List<Feed> makeFeeds(EntityMetadata entityMetadata) {
 }
 
 ProcessMetadata makeFakeProcess(EntityReference entitySummary, String processId) {
-  Random random = new Random();
   ProcessMetadata process = parseProcessMetadata(getProcessString());
   process.meta[META_PROCESS_ID] = processId;
   process.meta[META_ENTITY_ID] = entitySummary.entityId;
@@ -94,7 +93,7 @@ String getEntityMetadataString(String name) {
         "networkId": "goerli"
     },
     "votingProcesses": {
-        "active": ["processId01", "processId02", "processId04"],
+        "active": ["0x5534523452", "0x435363453", "0x8544344"],
         "ended": ["processId03"]
     },
     "newsFeed": {

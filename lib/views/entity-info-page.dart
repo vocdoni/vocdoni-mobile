@@ -18,12 +18,14 @@ import '../lang/index.dart';
 import 'package:http/http.dart' as http;
 import 'package:vocdoni/constants/colors.dart';
 
-class EntityInfo extends StatefulWidget {
+class EntityInfoPage extends StatefulWidget {
   @override
-  _EntityInfoState createState() => _EntityInfoState();
+  _EntityInfoPageState createState() => _EntityInfoPageState();
 }
 
-class _EntityInfoState extends State<EntityInfo> {
+class _EntityInfoPageState extends State<EntityInfoPage> {
+  Ent _ent;
+  String _status = '';
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -34,9 +36,10 @@ class _EntityInfoState extends State<EntityInfo> {
     super.didChangeDependencies();
 
     try {
-      final Ent ent = ModalRoute.of(super.context).settings.arguments;
-      if (ent == null) return;
-      fetchVisibleActions(ent);
+      _ent = ModalRoute.of(super.context).settings.arguments;
+      refresh();
+      if (_ent == null) return;
+      fetchVisibleActions(_ent);
     } catch (err) {
       print(err);
     }
@@ -44,15 +47,56 @@ class _EntityInfoState extends State<EntityInfo> {
 
   @override
   Widget build(context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
-    if (ent == null) return buildEmptyEntity(context);
+    //final Ent ent = ModalRoute.of(context).settings.arguments;
+    return _ent.entityMetadata == null
+        ? buildScaffoldWithoutMetadata(_ent)
+        : buildScaffold(_ent);
+  }
 
+  buildScaffoldWithoutMetadata(Ent ent) {
+    return ScaffoldWithImage(
+        headerImageUrl: null,
+        headerTag: null,
+        appBarTitle: "Loading",
+        avatarUrl: null,
+        avatarHexSource: ent.entitySummary.entityId,
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+                delegate: SliverChildListDelegate(
+              [
+                buildTitleWithoutEntityMeta(ctx, ent),
+                buildStatus(_status),
+              ],
+            ));
+          },
+        ));
+  }
+
+  Widget buildStatus(String status) {
+    if (status == "loading")
+      return ListItem(
+        mainText: "Loading details...",
+        rightIcon: null,
+      );
+    if (status == "fail")
+      return ListItem(
+        mainText: "Unable to load details",
+        purpose: Purpose.DANGER,
+        rightIcon: FeatherIcons.refreshCw,
+        onTap: refresh,
+      );
+    if (status == "ok") return Container();
+  }
+
+  buildScaffold(Ent ent) {
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
         headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
-        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]] ??
-            "(entity)",
+        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
+        avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+        avatarHexSource: ent.entitySummary.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -123,12 +167,22 @@ class _EntityInfoState extends State<EntityInfo> {
     );
   }
 
+  buildTitleWithoutEntityMeta(BuildContext context, Ent ent) {
+    return ListItem(
+      mainText: "...",
+      secondaryText: ent.entitySummary.entityId,
+      isTitle: true,
+      rightIcon: null,
+      isBold: true,
+    );
+  }
+
   buildFeedItem(BuildContext context, Ent ent) {
     return ListItem(
       icon: FeatherIcons.rss,
       mainText: "Feed",
       onTap: () {
-        Navigator.pushNamed(context, "/entity/activity", arguments: ent);
+        Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
     );
   }
@@ -178,7 +232,8 @@ class _EntityInfoState extends State<EntityInfo> {
         });
   }
 
-  Future<bool> isActionVisible(EntityMetadata_Action action, String entityId) async {
+  Future<bool> isActionVisible(
+      EntityMetadata_Action action, String entityId) async {
     if (action.visible == "true") return true;
     if (action.visible == null || action.visible == "false") return false;
 
@@ -238,12 +293,15 @@ class _EntityInfoState extends State<EntityInfo> {
     final List<EntityMetadata_Action> actionsToDisplay = [];
     EntityMetadata_Action registerAction;
 
+    if (ent.entityMetadata == null) return;
+
     for (EntityMetadata_Action action in ent.entityMetadata.actions) {
       if (action.register == true) {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
-        bool isRegistered = await isActionVisible(action, ent.entitySummary.entityId);
+        bool isRegistered =
+            await isActionVisible(action, ent.entitySummary.entityId);
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
@@ -269,7 +327,7 @@ class _EntityInfoState extends State<EntityInfo> {
   Widget buildRegisterButton(BuildContext ctx, Ent ent) {
     if (_registerAction == null) return Container();
 
-    if (true)
+    if (_isRegistered)
       return BaseButton(
         purpose: Purpose.GUIDE,
         leftIconData: FeatherIcons.check,
@@ -410,6 +468,25 @@ class _EntityInfoState extends State<EntityInfo> {
     setState(() {
       _processingSubscription = false;
     });
+  }
+
+  refresh() async {
+    try {
+      setState(() {
+        _status = "loading";
+      });
+      await _ent.update();
+      setState(() {
+        _ent = _ent;
+        _status = "ok";
+      });
+    } catch (err) {
+      setState(() {
+        _ent = _ent;
+
+        _status = "fail";
+      });
+    }
   }
 
   goBack(BuildContext ctx) {

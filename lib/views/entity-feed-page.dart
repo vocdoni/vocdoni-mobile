@@ -5,8 +5,8 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -14,14 +14,12 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:intl/intl.dart';
 
-import 'activity-post.dart';
-
-class EntityActivity extends StatefulWidget {
+class EntityFeedPage extends StatefulWidget {
   @override
-  _EntityActivityState createState() => _EntityActivityState();
+  _EntityFeedPageState createState() => _EntityFeedPageState();
 }
 
-class _EntityActivityState extends State<EntityActivity> {
+class _EntityFeedPageState extends State<EntityFeedPage> {
   Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
@@ -50,6 +48,8 @@ class _EntityActivityState extends State<EntityActivity> {
                 mainTextFullWidth: true,
                 secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
                 avatarUrl: ent.entityMetadata.media.avatar,
+                avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+                avatarHexSource: ent.entitySummary.entityId,
                 rightText: DateFormat('MMMM dd')
                     .format(DateTime.parse(post.datePublished).toLocal()),
                 onTap: () => onTapItem(context, post),
@@ -86,8 +86,8 @@ class _EntityActivityState extends State<EntityActivity> {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/entity/activity/post",
-        arguments: ActivityPostArguments(post));
+    Navigator.of(ctx).pushNamed("/entity/feed/post",
+        arguments: FeedPostArgs(post));
   }
 
 
