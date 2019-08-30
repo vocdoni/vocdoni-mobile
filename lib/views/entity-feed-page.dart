@@ -6,6 +6,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -39,23 +40,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         itemCount: ent.feed.items.length,
         itemBuilder: (BuildContext context, int index) {
           final FeedPost post = ent.feed.items[index];
-          return BaseCard(
-            image: post.image,
-            imageTag:post.id+post.image,
-            children: <Widget>[
-              ListItem(
-                mainText: post.title,
-                mainTextFullWidth: true,
-                secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarUrl: ent.entityMetadata.media.avatar,
-                avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarHexSource: ent.entityReference.entityId,
-                rightText: DateFormat('MMMM dd')
-                    .format(DateTime.parse(post.datePublished).toLocal()),
-                onTap: () => onTapItem(context, post),
-              )
-            ],
-          );
+          return  buildFeedPostCard(context,  ent, post);
         },
       ),
     );
