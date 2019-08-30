@@ -1,5 +1,4 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
 

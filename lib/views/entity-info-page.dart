@@ -25,7 +25,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
-  String _status = ''; // loading, ok, fail, disposed
+  String _status = ''; // loading, ok, fail
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -35,7 +35,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_status == "disposed") return;
 
     try {
       _ent = ModalRoute.of(super.context).settings.arguments;
@@ -48,16 +47,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   @override
-  void dispose() {
-    setState(() {
-      _status = "disposed";
-    });
-    super.dispose();
-  }
-
-  @override
   Widget build(context) {
-    //final Ent ent = ModalRoute.of(context).settings.arguments;
     return _ent.entityMetadata == null
         ? buildScaffoldWithoutMetadata(_ent)
         : buildScaffold(_ent);
@@ -128,30 +118,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     ];
   }
 
-  buildTest() {
-    double avatarHeight = 120;
-    return Container(
-      height: avatarHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            constraints:
-                BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
-            child: CircleAvatar(
-                backgroundColor: Colors.indigo,
-                backgroundImage: NetworkImage(
-                    "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
-          ),
-        ],
-      ),
-    );
-  }
-
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
-    //children.add(buildTest());
     children.add(buildTitle(context, ent));
     children.add(buildSubscribeItem(context, ent));
     children.add(buildFeedItem(context, ent));
@@ -198,7 +166,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildSubscribeItem(BuildContext context, Ent ent) {
-    //Identity account = identitiesBloc.getCurrentAccount();
     bool isSubscribed = account.isSubscribed(ent.entitySummary);
     String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
     return ListItem(
@@ -207,7 +174,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       disabled: _processingSubscription,
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
-      // purpose: Purpose.HIGHLIGHT,
       onTap: () => isSubscribed
           ? unsubscribeFromEntity(context, ent)
           : subscribeToEntity(context, ent),
@@ -215,7 +181,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildSubscribeButton(BuildContext context, Ent ent) {
-    //Identity account = identitiesBloc.getCurrentAccount();
     bool isSubscribed = account.isSubscribed(ent.entitySummary);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
@@ -312,6 +277,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         registerAction = action;
         bool isRegistered =
             await isActionVisible(action, ent.entitySummary.entityId);
+        if (!mounted) return;
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
@@ -322,6 +288,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         }
       }
     }
+    if (!mounted) return;
     setState(() {
       _actionsToDisplay = actionsToDisplay;
     });
@@ -439,12 +406,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     setState(() {
       _processingSubscription = true;
     });
-    account.unsubscribe(ent.entitySummary);
+    await account.unsubscribe(ent.entitySummary);
     showMessage(
         Lang.of(ctx)
             .get("You will no longer see this organization in your feed"),
         context: ctx,
         purpose: Purpose.NONE);
+    if (!mounted) return;
     setState(() {
       _processingSubscription = false;
     });
@@ -475,13 +443,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             purpose: Purpose.DANGER);
       }
     }
+    if (!mounted) return;
     setState(() {
       _processingSubscription = false;
     });
   }
 
   refresh() async {
-    if (_status == "disposed") return;
 
     try {
       setState(() {
@@ -491,12 +459,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
       if (account.isSubscribed(_ent.entitySummary)) _ent.save();
 
-      if (_status == "disposed") return;
+      if (!mounted) return;
       setState(() {
         _ent = _ent;
         _status = "ok";
       });
     } catch (err) {
+      if (!mounted) return;
       setState(() {
         _ent = _ent;
 
