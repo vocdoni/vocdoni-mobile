@@ -1,5 +1,4 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -11,13 +10,13 @@ class Account {
 
   Account() {
     languages = ['default'];
-    networkId = '5';
+    networkId = 'goerli';
 
     init();
   }
 
   init() {
-    this.identity = identitiesBloc.getCurrentAccount();
+    this.identity = identitiesBloc.getCurrentIdentity();
     this.identity.peers.entities.forEach((entitySummary) {
       for (EntityMetadata entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {
@@ -39,8 +38,12 @@ class Account {
   }
 
   subscribe(Ent ent) async {
-    await identitiesBloc.subscribeEntityToAccount(ent, account.identity);
+    await identitiesBloc.subscribeEntityToAccount(
+        ent.entityReference, account.identity);
     this.ents.add(ent);
+
+    await ent.save();
+
     sync();
   }
 
@@ -48,7 +51,7 @@ class Account {
     await identitiesBloc.unsubscribeEntityFromAccount(
         _entitySummary, account.identity);
     int index = ents.indexWhere(
-        (ent) => _entitySummary.entityId == ent.entitySummary.entityId);
+        (ent) => _entitySummary.entityId == ent.entityReference.entityId);
     if (index != -1) ents.removeAt(index);
   }
 }

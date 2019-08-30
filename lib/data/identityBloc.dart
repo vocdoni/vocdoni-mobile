@@ -107,7 +107,7 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
     set(super.value);
   }
 
-  Identity getCurrentAccount() {
+  Identity getCurrentIdentity() {
     if (super.state.value.length <= appStateBloc.value?.selectedIdentity)
       throw FlutterError("Invalid selectedIdentity: out of bounds");
 
@@ -147,15 +147,13 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribeEntityToAccount(Ent ent, Identity account) async {
+  subscribeEntityToAccount(EntityReference entityReference, Identity account) async {
     // Add the entity to the global registry if it does not exist
-    await entitiesBloc.add(ent.entityMetadata, ent.entitySummary);
-
-    if (isSubscribed(account, ent.entitySummary))
+    if (isSubscribed(account, entityReference))
       throw FlutterError("You are already subscribed to this entity");
 
     //EntityReference entitySummary = makeEntityReferenceFromEntity(entityMetadata);
-    addEntityPeerToAccount(ent.entitySummary, account);
+    addEntityPeerToAccount(entityReference, account);
     setCurrentAccount(account);
   }
 

@@ -12,28 +12,23 @@ import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 
 class IdentityTab extends StatelessWidget {
-  final AppState appState;
-  final List<Identity> identities;
 
-  IdentityTab({this.appState, this.identities});
+
+  IdentityTab();
 
   @override
   Widget build(ctx) {
-    if (appState == null || identities == null || identities.length == null)
-      return buildEmpty(ctx);
-
-    Identity account = identitiesBloc.getCurrentAccount();
 
     return ListView(
       children: <Widget>[
         ListItem(
-            mainText: account.alias,
-            secondaryText: account.identityId,
+            mainText: account.identity.alias,
+            secondaryText: account.identity.identityId,
             isTitle: true,
             isBold: true,
             rightIcon: FeatherIcons.copy,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: account.identityId));
+              Clipboard.setData(ClipboardData(text: account.identity.identityId));
               showMessage("Identity ID copied on the clipboard",
                   context: ctx, purpose: Purpose.GOOD);
             }),

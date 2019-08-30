@@ -2,6 +2,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -42,7 +44,6 @@ class _PollPageState extends State<PollPage> {
     super.didChangeDependencies();
   }
 
-  
   @override
   @override
   Widget build(context) {
@@ -53,11 +54,16 @@ class _PollPageState extends State<PollPage> {
     if (ent == null) return buildEmptyEntity(context);
 
     String headerUrl = process.details.headerImage == null
-        ? fallbackImageUrlPoll
+        ? null
         : process.details.headerImage;
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
-        headerTag: process.meta['processId'] + headerUrl,
+        headerTag: headerUrl == null
+            ? null
+            : makeElementTag(
+                entityId: ent.entityReference.entityId,
+                cardId: process.meta[META_PROCESS_ID],
+                elementId: headerUrl),
         avatarHexSource: process.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
@@ -120,7 +126,7 @@ class _PollPageState extends State<PollPage> {
   buildTitle(BuildContext context, Ent ent, ProcessMetadata process) {
     String title = process.details.title['default'];
     return ListItem(
-      mainTextTag: process.meta['processId'] + title,
+      // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: process.meta[META_PROCESS_ID], elementId: process.details.headerImage)
       mainText: process.details.title['default'],
       secondaryText: process.meta['entityId'],
       isTitle: true,
@@ -165,7 +171,7 @@ class _PollPageState extends State<PollPage> {
         });
         break;
       }
-        idx++;
+      idx++;
     }
 
     if (allGood) {
@@ -208,7 +214,7 @@ class _PollPageState extends State<PollPage> {
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entitySummary.entityId));
+          Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
           showMessage("Identity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });
@@ -246,7 +252,7 @@ class _PollPageState extends State<PollPage> {
     List<Widget> items = new List<Widget>();
 
     if (question.type == "single-choice") {
-      items.add(Section(text:(questionIndex+1).toString()));
+      items.add(Section(text: (questionIndex + 1).toString()));
       items.add(buildQuestionTitle(question, questionIndex));
 
       List<Widget> options = new List<Widget>();
@@ -304,9 +310,7 @@ class _PollPageState extends State<PollPage> {
     return ListItem(
       mainText: question.question['default'],
       secondaryText: question.description['default'],
-      
       secondaryTextMultiline: 100,
-      
       rightIcon: null,
     );
   }

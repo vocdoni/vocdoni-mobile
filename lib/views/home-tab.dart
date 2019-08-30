@@ -1,60 +1,60 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:intl/intl.dart';
+
+class CardContentWrapper {
+  final Ent ent;
+  final ProcessMetadata process;
+  final FeedPost post;
+  final DateTime date;
+
+  CardContentWrapper({this.ent, this.date, this.process, this.post});
+}
 
 class HomeTab extends StatelessWidget {
-  final AppState appState;
-  final List<Identity> identities;
-  final List<Feed> newsFeeds;
-
-  HomeTab({this.appState, this.identities, this.newsFeeds});
+  HomeTab();
 
   @override
   Widget build(ctx) {
-    if (newsFeeds == null) return buildNoEntries(ctx);
-
-    List<FeedPost> newsPosts = List<FeedPost>();
-
-    if (account.ents.length == 0) return buildNoEntries(ctx);
-
+    List<CardContentWrapper> items = [];
     account.ents.forEach((ent) {
-      if (ent.feed != null) newsPosts.addAll(ent.feed.items);
+      if (ent.feed != null) {
+        ent.feed.items.forEach((FeedPost post) {
+          DateTime date = DateTime.parse(post.datePublished);
+          CardContentWrapper item = new CardContentWrapper(
+              ent: ent, date: date, post: post, process: null);
+          items.add(item);
+        });
+      }
+      if (ent.processess != null) {
+        ent.processess.forEach((ProcessMetadata process) {
+          DateTime date = getDateFromBlockNumber(process.startBlock);
+          CardContentWrapper item = new CardContentWrapper(
+              ent: ent, date: date, post: null, process: process);
+          items.add(item);
+        });
+      }
     });
 
-    if (newsPosts.length == 0) return buildNoEntries(ctx);
-    newsPosts.sort((a, b) {
-      if (!(a?.datePublished is DateTime) && !(b?.datePublished is DateTime))
-        return 0;
-      else if (!(a?.datePublished is DateTime))
-        return -1;
-      else if (!(b?.datePublished is DateTime)) return 1;
-      return b.datePublished.compareTo(a.datePublished);
-    });
+    if (items.length == 0) return buildNoEntries(ctx);
 
-    // TODO: UI
+    sort(items);
 
     return ListView.builder(
-        itemCount: newsPosts.length,
+        itemCount: items.length,
         itemBuilder: (BuildContext ctx, int index) {
-          final post = newsPosts[index];
-          return BaseCard(
-            image: post.image,
-            imageTag: post.id,
-            children: <Widget>[
-              ListItem(
-                mainText: post.title,
-                mainTextFullWidth: true,
-                secondaryText: post.author.name,
-                rightText: DateFormat('MMMM dd')
-                    .format(DateTime.parse(post.datePublished).toLocal()),
-                onTap: () => onTapItem(ctx, post),
-              )
-            ],
-          );
+          final item = items[index];
+          if (item.post != null)
+            return buildFeedPostCard(ctx: ctx, ent: item.ent, post: item.post);
+          else if (item.process != null)
+            return buildProcessCard(
+                ctx: ctx, ent: item.ent, process: item.process);
+          else
+            return Container();
         });
   }
 
@@ -66,7 +66,23 @@ class HomeTab extends StatelessWidget {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/entity/activity/post",
-        arguments: FeedPostArgs(post));
+    Navigator.of(ctx)
+        .pushNamed("/entity/activity/post", arguments: FeedPostArgs(post));
+  }
+
+  sort(List<CardContentWrapper> items) {
+    items.sort((a, b) {
+      if (!(a?.date is DateTime) && !(b?.date is DateTime))
+        return 0;
+      else if (!(a?.date is DateTime))
+        return -1;
+      else if (!(b?.date is DateTime)) return 1;
+      return b.date.compareTo(a.date);
+    });
+  }
+
+  DateTime getDateFromBlockNumber(int blockNumber) {
+    //Todo implement
+    return DateTime.now();
   }
 }

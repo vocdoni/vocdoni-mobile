@@ -25,7 +25,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
-  String _status = ''; // loading, ok, fail, disposed
+  String _status = ''; // loading, ok, fail
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -35,29 +35,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_status == "disposed") return;
-
     try {
       _ent = ModalRoute.of(super.context).settings.arguments;
       refresh();
-      if (_ent == null) return;
-      fetchVisibleActions(_ent);
     } catch (err) {
       print(err);
     }
   }
 
   @override
-  void dispose() {
-    setState(() {
-      _status = "disposed";
-    });
-    super.dispose();
-  }
-
-  @override
   Widget build(context) {
-    //final Ent ent = ModalRoute.of(context).settings.arguments;
     return _ent.entityMetadata == null
         ? buildScaffoldWithoutMetadata(_ent)
         : buildScaffold(_ent);
@@ -68,8 +55,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: null,
         headerTag: null,
         appBarTitle: "Loading",
-        avatarUrl: null,
-        avatarHexSource: ent.entitySummary.entityId,
+        avatarText: "",
+        avatarHexSource: ent.entityReference.entityId,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -102,11 +89,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildScaffold(Ent ent) {
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
-        headerTag: ent.entitySummary.entityId + ent.entityMetadata.media.header,
+        headerTag:
+            ent.entityReference.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-        avatarHexSource: ent.entitySummary.entityId,
+        avatarHexSource: ent.entityReference.entityId,
         leftElement: buildRegisterButton(context, ent),
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -128,39 +116,20 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     ];
   }
 
-  buildTest() {
-    double avatarHeight = 120;
-    return Container(
-      height: avatarHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            constraints:
-                BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
-            child: CircleAvatar(
-                backgroundColor: Colors.indigo,
-                backgroundImage: NetworkImage(
-                    "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
-          ),
-        ],
-      ),
-    );
-  }
-
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
-    //children.add(buildTest());
     children.add(buildTitle(context, ent));
-    children.add(buildSubscribeItem(context, ent));
     children.add(buildFeedItem(context, ent));
+    children.add(buildParticipationItem(context,ent));
     children.addAll(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: ent.entityMetadata.description[ent.entityMetadata.languages[0]],
       maxLines: 5,
     ));
+    children.add(Section(text: "Manage"));
+    children.add(buildShareItem(context, ent));
+    children.add(buildSubscribeItem(context, ent));
 
     return children;
   }
@@ -168,9 +137,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitle(BuildContext context, Ent ent) {
     String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
-      mainTextTag: ent.entitySummary.entityId + title,
+      mainTextTag: ent.entityReference.entityId + title,
       mainText: title,
-      secondaryText: ent.entitySummary.entityId,
+      secondaryText: ent.entityReference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -180,7 +149,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitleWithoutEntityMeta(BuildContext context, Ent ent) {
     return ListItem(
       mainText: "...",
-      secondaryText: ent.entitySummary.entityId,
+      secondaryText: ent.entityReference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -191,23 +160,35 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ListItem(
       icon: FeatherIcons.rss,
       mainText: "Feed",
+      rightText: ent.feed.items.length.toString(),
+      rightTextIsBadge: true,
       onTap: () {
         Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
     );
   }
 
+  buildParticipationItem(BuildContext context, Ent ent) {
+    return ListItem(
+      icon: FeatherIcons.mail,
+      mainText: "Participation",
+      rightText: ent.processess.length.toString(),
+      rightTextIsBadge: true,
+      onTap: () {
+        Navigator.pushNamed(context, "/entity/participation", arguments: ent);
+      },
+    );
+  }
+
   buildSubscribeItem(BuildContext context, Ent ent) {
-    //Identity account = identitiesBloc.getCurrentAccount();
-    bool isSubscribed = account.isSubscribed(ent.entitySummary);
-    String subscribeText = isSubscribed ? "Subscribed" : "Subscribe";
+    bool isSubscribed = account.isSubscribed(ent.entityReference);
+    String subscribeText = isSubscribed ? "Following" : "Follow";
     return ListItem(
       mainText: subscribeText,
       icon: FeatherIcons.heart,
       disabled: _processingSubscription,
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
-      // purpose: Purpose.HIGHLIGHT,
       onTap: () => isSubscribed
           ? unsubscribeFromEntity(context, ent)
           : subscribeToEntity(context, ent),
@@ -215,8 +196,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildSubscribeButton(BuildContext context, Ent ent) {
-    //Identity account = identitiesBloc.getCurrentAccount();
-    bool isSubscribed = account.isSubscribed(ent.entitySummary);
+    bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
       text: subscribeText,
@@ -230,16 +210,30 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
+  buildShareItem(BuildContext context, Ent ent) {
+    return ListItem(
+        mainText: "Share organization",
+        icon: FeatherIcons.share2,
+        rightIcon:null,
+        onTap: () {
+          onShare(ent);
+        });
+  }
+
   buildShareButton(BuildContext context, Ent ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entitySummary.entityId));
-          showMessage("Identity ID copied on the clipboard",
-              context: context, purpose: Purpose.GUIDE);
+          onShare(ent);
         });
+  }
+
+  onShare(Ent ent) {
+    Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
+    showMessage("Identity ID copied on the clipboard",
+        context: context, purpose: Purpose.GUIDE);
   }
 
   Future<bool> isActionVisible(
@@ -247,7 +241,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     if (action.visible == "true") return true;
     if (action.visible == null || action.visible == "false") return false;
 
-    String publicKey = identitiesBloc.getCurrentAccount().identityId;
+    String publicKey = account.identity.identityId;
     int timestamp = new DateTime.now().millisecondsSinceEpoch;
 
     // TODO: Get the private key to sign appropriately
@@ -310,18 +304,23 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
+
         bool isRegistered =
-            await isActionVisible(action, ent.entitySummary.entityId);
+            await isActionVisible(action, ent.entityReference.entityId);
+
+        if (!mounted) return;
+
         setState(() {
           _registerAction = registerAction;
           _isRegistered = isRegistered;
         });
       } else {
-        if (await isActionVisible(action, ent.entitySummary.entityId)) {
+        if (await isActionVisible(action, ent.entityReference.entityId)) {
           actionsToDisplay.add(action);
         }
       }
     }
+    if (!mounted) return;
     setState(() {
       _actionsToDisplay = actionsToDisplay;
     });
@@ -439,12 +438,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     setState(() {
       _processingSubscription = true;
     });
-    account.unsubscribe(ent.entitySummary);
+    await account.unsubscribe(ent.entityReference);
     showMessage(
         Lang.of(ctx)
             .get("You will no longer see this organization in your feed"),
         context: ctx,
         purpose: Purpose.NONE);
+    if (!mounted) return;
     setState(() {
       _processingSubscription = false;
     });
@@ -475,25 +475,29 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             purpose: Purpose.DANGER);
       }
     }
+    if (!mounted) return;
     setState(() {
       _processingSubscription = false;
     });
   }
 
   refresh() async {
-    if (_status == "disposed") return;
-
     try {
       setState(() {
         _status = "loading";
       });
       await _ent.update();
-      if (_status == "disposed") return;
+      if (_ent == null) return;
+      if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
+      if (account.isSubscribed(_ent.entityReference)) _ent.save();
+
+      if (!mounted) return;
       setState(() {
         _ent = _ent;
         _status = "ok";
       });
     } catch (err) {
+      if (!mounted) return;
       setState(() {
         _ent = _ent;
 

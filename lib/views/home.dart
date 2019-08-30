@@ -167,19 +167,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         body = StreamBuilder(
             stream: newsFeedsBloc.stream,
             builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
-              return HomeTab(
-                  appState: appState,
-                  identities: identities,
-                  newsFeeds: newsFeeds.data ?? <Feed>[]);
+              return HomeTab();
             });
         break;
       // SUBSCRIBED ENTITIES
       case 1:
-        body = EntitiesTab(appState: appState, identities: identities);
+        body = EntitiesTab();
         break;
       // IDENTITY INFO
       case 2:
-        body = IdentityTab(appState: appState, identities: identities);
+        body = IdentityTab();
         break;
       default:
         body = Container(

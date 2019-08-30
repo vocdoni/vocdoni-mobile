@@ -134,6 +134,8 @@ class ListItem extends StatelessWidget {
   buildIcon() {
     if (avatarUrl == null && icon == null) return Container();
 
+    bool hasAvatar = avatarUrl != null || avatarHexSource != null;
+
     double iconSize = mainTextFullWidth || secondaryText == null
         ? iconSizeSmall
         : iconSizeMedium;
@@ -144,17 +146,17 @@ class ListItem extends StatelessWidget {
     double padding = avatarUrl == null ? paddingIcon : paddingAvatar;
     return Padding(
         padding: EdgeInsets.fromLTRB(0, 0, padding, 0),
-        child: avatarUrl == null
-            ? Icon(
-                icon,
-                color: getMainColor(),
-                size: iconSize,
-              )
-            : BaseAvatar(
+        child: hasAvatar
+            ? BaseAvatar(
                 size: avatarSize,
                 text: avatarText,
                 hexSource: avatarHexSource,
-                avatarUrl: avatarUrl));
+                avatarUrl: avatarUrl)
+            : Icon(
+                icon,
+                color: getMainColor(),
+                size: iconSize,
+              ));
   }
 
   buildRightItem() {

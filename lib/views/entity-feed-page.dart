@@ -6,6 +6,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/BaseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -39,23 +40,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         itemCount: ent.feed.items.length,
         itemBuilder: (BuildContext context, int index) {
           final FeedPost post = ent.feed.items[index];
-          return BaseCard(
-            image: post.image,
-            imageTag:post.id+post.image,
-            children: <Widget>[
-              ListItem(
-                mainText: post.title,
-                mainTextFullWidth: true,
-                secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarUrl: ent.entityMetadata.media.avatar,
-                avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-                avatarHexSource: ent.entitySummary.entityId,
-                rightText: DateFormat('MMMM dd')
-                    .format(DateTime.parse(post.datePublished).toLocal()),
-                onTap: () => onTapItem(context, post),
-              )
-            ],
-          );
+          return buildFeedPostCard(ctx: context, ent: ent, post: post);
         },
       ),
     );
@@ -86,10 +71,9 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   }
 
   onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx).pushNamed("/entity/feed/post",
-        arguments: FeedPostArgs(post));
+    Navigator.of(ctx)
+        .pushNamed("/entity/feed/post", arguments: FeedPostArgs(post));
   }
-
 
   Future loadRemoteFeed(BuildContext ctx, EntityMetadata entityMetadata) async {
     if (remoteFetched) return;
@@ -101,7 +85,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     });
 
     try {
-      final result = await fetchEntityNewsFeed(entityMetadata, entityMetadata.languages[0]);
+      final result = await fetchEntityNewsFeed(
+          entityMetadata, entityMetadata.languages[0]);
       final decoded = Feed.fromJson(jsonDecode(result));
 
       setState(() {
