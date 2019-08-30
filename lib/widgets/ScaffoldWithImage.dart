@@ -11,7 +11,6 @@ class ScaffoldWithImage extends StatefulWidget {
   final String headerImageUrl;
   final String headerTag;
   final String avatarUrl;
-  final List<Widget> children;
   final Builder builder;
   final Widget leftElement;
   final List<Widget> Function(BuildContext) actionsBuilder;
@@ -22,7 +21,6 @@ class ScaffoldWithImage extends StatefulWidget {
     this.avatarHexSource,
     this.headerImageUrl,
     this.headerTag,
-    this.children,
     this.avatarUrl,
     this.builder,
     this.leftElement,
@@ -157,14 +155,10 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
                               ),
                             ),
                           ),
-                          //Text((1-(pos/totalHeaderHeight)).toString()),
                         ]),
                       ]));
                 })),
             widget.builder
-            /* SliverList(
-              delegate: SliverChildListDelegate(widget.children),
-            ), */
           ],
         );
       },
