@@ -120,7 +120,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
     children.add(buildFeedItem(context, ent));
-    children.add(buildParticipationItem(context,ent));
+    children.add(buildParticipationItem(context, ent));
     children.addAll(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
@@ -157,11 +157,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildFeedItem(BuildContext context, Ent ent) {
+    int postsNum = 0;
+    if (ent.feed != null) postsNum = ent.feed.items.length;
     return ListItem(
       icon: FeatherIcons.rss,
       mainText: "Feed",
-      rightText: ent.feed.items.length.toString(),
+      rightText: postsNum.toString(),
       rightTextIsBadge: true,
+      disabled: postsNum==0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
@@ -169,11 +172,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildParticipationItem(BuildContext context, Ent ent) {
+    int processNum = 0;
+    if (ent.processess != null) processNum = ent.processess.length;
     return ListItem(
       icon: FeatherIcons.mail,
       mainText: "Participation",
-      rightText: ent.processess.length.toString(),
+      rightText: processNum.toString(),
       rightTextIsBadge: true,
+      disabled: processNum==0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/participation", arguments: ent);
       },
@@ -214,7 +220,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ListItem(
         mainText: "Share organization",
         icon: FeatherIcons.share2,
-        rightIcon:null,
+        rightIcon: null,
         onTap: () {
           onShare(ent);
         });
