@@ -107,7 +107,7 @@ Color getAvatarTextColor(String hexSource) {
 
 Color getHeaderColor(String hexSource) {
   double saturation = 1;
-  double lightness = 0.65;
+  double lightness = 0.9;
   double hue = hexStringToHue(hexSource);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
   Color rgb = hsl.toColor();
