@@ -1,13 +1,8 @@
 import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
-// import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/toast.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
@@ -22,10 +17,8 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
     case "/entity":
       return fetchAndShowEntity(
           //TODO: Needs to be resolved via ENS
-          resolverAddress:
-              '0xcabc15238ac8eafe46e8bd58d9a3af1c8a0e855a', //newLink.queryParameters["resolverAddress"],
+          //newLink.queryParameters["resolverAddress"],
           entityId: newLink.queryParameters["entityId"],
-          networkId: account.networkId, //newLink.queryParameters["networkId"],
           entryPoints: newLink.queryParametersAll["entryPoints[]"],
           context: context);
       break;
@@ -43,7 +36,6 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
 // /////////////////////////////////////////////////////////////////////////////
 // HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
-
 Future fetchAndShowEntity(
     {String entityId, List<String> entryPoints, BuildContext context}) async {
   if (!(entityId is String) ||
@@ -52,9 +44,8 @@ Future fetchAndShowEntity(
   } else if (!(entryPoints is List) || entryPoints.length == 0) {
     throw LinkingError("Invalid entryPoints");
   }
-//TODO Make use of entryPoints;
-/*
-  List<String> decodedEntryPoints = entryPoints
+
+  List<String> validEntryPoints = entryPoints
       .map((String uri) {
         try {
           return Uri.decodeFull(uri);
@@ -64,16 +55,15 @@ Future fetchAndShowEntity(
       })
       .where((uri) => uri != null)
       .toList();
-*/
 
-  EntityReference entitySummary = makeEntityReference(
-      entityId: entityId,
-      resolverAddress: resolverAddress,
-      entryPoints: []);
+  EntityReference entityRef =
+      makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
 
-  final ent = new Ent(entitySummary);
+  
+  final ent = new Ent(entityRef);
   Navigator.pushNamed(context, "/entity", arguments: ent);
 }
+
 
 showSignatureScreen(
     {@required BuildContext context,
