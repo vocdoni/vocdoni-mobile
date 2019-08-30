@@ -1,35 +1,10 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/constants/settings.dart' show bootnodesUrl;
 import 'package:dvote/dvote.dart';
+import 'package:flutter/foundation.dart'; // for kReleaseMode
 
 // ////////////////////////////////////////////////////////////////////////////
 // METHODS
 // ////////////////////////////////////////////////////////////////////////////
-
-Future<List<GatewayInfo>> getBootNodes() async {
-  try {
-    List<GatewayInfo> result = List<GatewayInfo>();
-    final strBootnodes = await http.read(bootnodesUrl);
-    Map<String, dynamic> networkItems = jsonDecode(strBootnodes);
-    networkItems.forEach((networkId, network) {
-      if (!(network is List)) return;
-      network.forEach((item) {
-        if (!(item is Map)) return;
-        GatewayInfo gw = GatewayInfo();
-        gw.dvote = item["dvote"] ?? "";
-        gw.web3 = item["web3"] ?? "";
-        gw.publicKey = item["pubKey"] ?? "";
-        gw.meta.addAll({"networkId": networkId ?? ""});
-        result.add(gw);
-      });
-    });
-    return result;
-  } catch (err) {
-    throw FetchError("The boot nodes cannot be loaded");
-  }
-}
 
 Future<String> makeMnemonic() {
   return generateMnemonic(size: 192);
@@ -48,32 +23,20 @@ Future<String> addressFromMnemonic(String mnemonic) {
 }
 
 Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
-  // Create a random cloned list
-  //TODO: Only used gateways with the currently selected networkId
-  //gw.meta["networkId"] == currentlySelecctedNetworkId
-  List<GatewayInfo> bootnodes = appStateBloc.value.bootnodes
-      .where((gw) => true)
-      .toList();
-  bootnodes.shuffle();
-  
+  if (!(entityReference is EntityReference)) return null;
 
-//TODO: Currently not using entrypoints
-  // Attempt for every node available
-  for (GatewayInfo node in bootnodes) {
-    try {
-      final EntityMetadata entity = await fetchEntity(entityReference,
-           node.dvote, node.web3);
+  try {
+    final gw = _selectRandomGatewayInfo();
 
-      return entity;
-    } catch (err) {
-      print(err);
-      continue;
-    }
+    return fetchEntity(entityReference, gw.dvote, gw.web3, gatewayPublicKey: gw.publicKey);
+  } catch (err) {
+    if (!kReleaseMode) print(err);
+    throw FetchError("The entity's data cannot be fetched");
   }
-  throw FetchError("The entity's data cannot be fetched");
 }
 
-Future<String> fetchEntityNewsFeed(EntityMetadata entityMetadata, String lang) async {
+Future<String> fetchEntityNewsFeed(
+    EntityMetadata entityMetadata, String lang) async {
   // Attempt for every node available
   if (!(entityMetadata is EntityMetadata))
     return null;
@@ -81,24 +44,20 @@ Future<String> fetchEntityNewsFeed(EntityMetadata entityMetadata, String lang) a
     return null;
   else if (!(entityMetadata.newsFeed[lang] is String)) return null;
 
-  // Create a random cloned list
-  var bootnodes = appStateBloc.value.bootnodes.skip(0).toList();
-  bootnodes.shuffle();
+  final gw = _selectRandomGatewayInfo();
 
   final String contentUri = entityMetadata.newsFeed[lang];
 
   // Attempt for every node available
-  for (GatewayInfo node in bootnodes) {
-    try {
-      ContentURI cUri = ContentURI(contentUri);
-      final result = await fetchFileString(cUri, node.dvote);
-      return result;
-    } catch (err) {
-      print(err);
-      continue;
-    }
+  try {
+    ContentURI cUri = ContentURI(contentUri);
+    final result =
+        await fetchFileString(cUri, gw.dvote, gatewayPublicKey: gw.publicKey);
+    return result;
+  } catch (err) {
+    print(err);
+    throw FetchError("The news feed cannot be fetched");
   }
-  throw FetchError("The news feed cannot be fetched");
 }
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -109,4 +68,38 @@ class FetchError implements Exception {
   final String msg;
   const FetchError(this.msg);
   String toString() => 'FetchError: $msg';
+}
+
+GatewayInfo _selectRandomGatewayInfo() {
+  if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
+    return null;
+
+  final gw = GatewayInfo();
+
+  if (kReleaseMode) {
+    // PROD
+    int dvoteIdx =
+        random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
+    int web3Idx =
+        random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
+
+    gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
+    gw.publicKey =
+        appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
+    gw.supportedApis
+        .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
+    gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
+  } else {
+    int dvoteIdx =
+        random.nextInt(appStateBloc.value.bootnodes.goerli.dvote.length);
+    int web3Idx =
+        random.nextInt(appStateBloc.value.bootnodes.goerli.web3.length);
+
+    gw.dvote = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].uri;
+    gw.publicKey = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].pubKey;
+    gw.supportedApis
+        .addAll(appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].apis);
+    gw.web3 = appStateBloc.value.bootnodes.goerli.web3[web3Idx].uri;
+  }
+  return gw;
 }

@@ -78,7 +78,6 @@ Future fetchAndShowEntity(
   EntityReference entitySummary = makeEntityReference(
       entityId: entityId,
       resolverAddress: resolverAddress,
-      networkId: networkId,
       entryPoints: []);
 
   final ent = new Ent(entitySummary);

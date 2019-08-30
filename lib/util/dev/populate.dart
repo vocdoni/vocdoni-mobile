@@ -41,7 +41,7 @@ List<EntityReference> makeEntitySummaries() {
   final ids = ["0x123459", "0x543210", "0x9312341"];
   return ids.map((id) {
     EntityReference entitySummary = makeEntityReference(
-        entityId: id, resolverAddress: "", networkId: "xxx");
+        entityId: id, resolverAddress: "0xfff ");
     return entitySummary;
   }).toList();
 }

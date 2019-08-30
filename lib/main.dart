@@ -31,7 +31,6 @@ void main() async {
   await processesBloc.init();
 
   await appStateBloc.load();
-  appStateBloc.setBootNodes([getInitialBootnode()]);
 
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
