@@ -2,9 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/widgets/listItem.dart';
 
 class CardContentWrapper {
   final Ent ent;
@@ -63,11 +61,6 @@ class HomeTab extends StatelessWidget {
     return Center(
       child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
     );
-  }
-
-  onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx)
-        .pushNamed("/entity/activity/post", arguments: FeedPostArgs(post));
   }
 
   sort(List<CardContentWrapper> items) {

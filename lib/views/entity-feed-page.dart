@@ -8,12 +8,9 @@ import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/widgets/BaseCard.dart';
-import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
-import 'package:intl/intl.dart';
 
 class EntityFeedPage extends StatefulWidget {
   @override
@@ -68,11 +65,6 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         body: Center(
       child: Text("Loading..."),
     ));
-  }
-
-  onTapItem(BuildContext ctx, FeedPost post) {
-    Navigator.of(ctx)
-        .pushNamed("/entity/feed/post", arguments: FeedPostArgs(post));
   }
 
   Future loadRemoteFeed(BuildContext ctx, EntityMetadata entityMetadata) async {
