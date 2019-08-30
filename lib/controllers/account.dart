@@ -11,7 +11,7 @@ class Account {
 
   Account() {
     languages = ['default'];
-    networkId = '5';
+    networkId = 'goerli';
 
     init();
   }
