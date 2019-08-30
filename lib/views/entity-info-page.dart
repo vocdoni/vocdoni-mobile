@@ -35,12 +35,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-
     try {
       _ent = ModalRoute.of(super.context).settings.arguments;
       refresh();
-      if (_ent == null) return;
-      fetchVisibleActions(_ent);
     } catch (err) {
       print(err);
     }
@@ -92,7 +89,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildScaffold(Ent ent) {
     return ScaffoldWithImage(
         headerImageUrl: ent.entityMetadata.media.header,
-        headerTag: ent.entityReference.entityId + ent.entityMetadata.media.header,
+        headerTag:
+            ent.entityReference.entityId + ent.entityMetadata.media.header,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
@@ -275,7 +273,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         if (registerAction != null)
           continue; //only one registerAction is supported
         registerAction = action;
-        
+
         bool isRegistered =
             await isActionVisible(action, ent.entityReference.entityId);
 
@@ -453,13 +451,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
-
     try {
       setState(() {
         _status = "loading";
       });
       await _ent.update();
-
+      if (_ent == null) return;
+      if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
       if (account.isSubscribed(_ent.entityReference)) _ent.save();
 
       if (!mounted) return;
