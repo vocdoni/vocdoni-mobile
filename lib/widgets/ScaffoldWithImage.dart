@@ -37,7 +37,7 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
   bool collapsed = false;
   @override
   Widget build(context) {
-    bool hasAvatar = widget.avatarUrl != null || widget.avatarHexSource != null;
+    bool hasAvatar = widget.avatarUrl != null || widget.avatarText != null;
     bool hasHeaderImage = widget.headerImageUrl != null;
     double headerImageHeight = hasHeaderImage ? 400 : 300;
     double avatarHeight = hasAvatar ? iconSizeHuge : 16;
