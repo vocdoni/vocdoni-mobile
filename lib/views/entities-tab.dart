@@ -17,49 +17,47 @@ class EntitiesTab extends StatelessWidget {
 
   @override
   Widget build(ctx) {
-    //List<Entity> entities = [];
-/*
-    if (appState == null ||
-        identities == null ||
-        identities[appState.selectedIdentity] == null ||
-        identities[appState.selectedIdentity].peers.entities.length == 0)
-        */
-    // if (account.ents == 0) return buildNoEntities(ctx);
-
-    //Identity account = identitiesBloc.getCurrentAccount();
-
-    /*account.peers.entities.forEach((entitySummary) {
-      for (Entity entity in entitiesBloc.value)
-        if (entity.entityId == entitySummary.entityId) {
-          entities.add(entity);
-        }
-    });*/
-
     if (account.ents.length == 0) return buildNoEntities(ctx);
 
     return ListView.builder(
         itemCount: account.ents.length,
         itemBuilder: (BuildContext ctxt, int index) {
           final ent = account.ents[index];
-          final feedPostAmount = getFeedPostAmount(ent);
-          return BaseCard(children: [
-            buildName(ctx, ent),
-            ListItem(
-                mainText: "Feed",
-                icon: FeatherIcons.rss,
-                rightText: feedPostAmount.toString(),
-                rightTextIsBadge: true,
-                onTap: () {
-                  Navigator.pushNamed(ctx, "/entity/activity", arguments: ent);
-                },
-                disabled: feedPostAmount == 0),
-            buildParticipationItem(ctx, ent),
-          ]);
+          return ent.entityMetadata == null
+              ? buildEmptyMetadataCard(ctx, ent)
+              : buildCard(ctx, ent);
         });
   }
 
+  Widget buildEmptyMetadataCard(BuildContext ctx, Ent ent) {
+    return BaseCard(children: [
+      ListItem(
+          mainText: ent.entitySummary.entityId,
+          avatarHexSource: ent.entitySummary.entityId,
+          isBold: true,
+          onTap: () => onTapEntity(ctx, ent))
+    ]);
+  }
+
+  Widget buildCard(BuildContext ctx, Ent ent) {
+    final feedPostAmount = getFeedPostAmount(ent);
+    return BaseCard(children: [
+      buildName(ctx, ent),
+      ListItem(
+          mainText: "Feed",
+          icon: FeatherIcons.rss,
+          rightText: feedPostAmount.toString(),
+          rightTextIsBadge: true,
+          onTap: () {
+            Navigator.pushNamed(ctx, "/entity/activity", arguments: ent);
+          },
+          disabled: feedPostAmount == 0),
+      buildParticipationItem(ctx, ent),
+    ]);
+  }
+
   int getFeedPostAmount(Ent ent) {
-    return ent.feed==null?0:ent.feed.items.length;
+    return ent.feed == null ? 0 : ent.feed.items.length;
   }
 
   Widget buildName(BuildContext ctx, Ent ent) {
