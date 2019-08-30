@@ -22,18 +22,18 @@ class IdentityTab extends StatelessWidget {
     if (appState == null || identities == null || identities.length == null)
       return buildEmpty(ctx);
 
-    Identity account = identitiesBloc.getCurrentIdentity();
+    
 
     return ListView(
       children: <Widget>[
         ListItem(
-            mainText: account.alias,
-            secondaryText: account.identityId,
+            mainText: account.identity.alias,
+            secondaryText: account.identity.identityId,
             isTitle: true,
             isBold: true,
             rightIcon: FeatherIcons.copy,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: account.identityId));
+              Clipboard.setData(ClipboardData(text: account.identity.identityId));
               showMessage("Identity ID copied on the clipboard",
                   context: ctx, purpose: Purpose.GOOD);
             }),
