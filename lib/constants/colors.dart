@@ -80,18 +80,18 @@ Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
   return colorDescription;
 }
 
-double hexStringToHue(String hexSource) {
-  var bytes = utf8.encode(hexSource); // data being hashed
-  var source = sha256.convert(bytes);
-  String short = source.toString().substring(0, 6);
+double hexStringToHue(String source) {
+  var bytes = utf8.encode(source); // data being hashed
+  var hexSource = sha256.convert(bytes);
+  String short = hexSource.toString().substring(0, 6);
   int i = int.parse(short, radix: 16);
   return i * 360 / 0xffffff;
 }
 
-Color getAvatarBackgroundColor(String hexSource) {
+Color getAvatarBackgroundColor(String source) {
   double saturation = 1;
   double lightness = 0.7;
-  double hue = hexStringToHue(hexSource);
+  double hue = hexStringToHue(source);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
   Color rgb = hsl.toColor();
   Color tint = Colors.orange;
@@ -99,10 +99,10 @@ Color getAvatarBackgroundColor(String hexSource) {
   return tinted;
 }
 
-Color getAvatarTextColor(String hexSource) {
+Color getAvatarTextColor(String source) {
   double saturation = 1;
   double lightness = 0.2;
-  double hue = hexStringToHue(hexSource);
+  double hue = hexStringToHue(source);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
   Color rgb = hsl.toColor();
   Color tint = Colors.orange;
@@ -110,10 +110,10 @@ Color getAvatarTextColor(String hexSource) {
   return tinted;
 }
 
-Color getHeaderColor(String hexSource) {
+Color getHeaderColor(String source) {
   double saturation = 1;
   double lightness = 0.9;
-  double hue = hexStringToHue(hexSource);
+  double hue = hexStringToHue(source);
   HSLColor hsl = HSLColor.fromAHSL(1, hue, saturation, lightness);
   Color rgb = hsl.toColor();
   Color tint = Colors.orange;
