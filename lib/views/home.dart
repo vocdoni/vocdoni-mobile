@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
+import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/views/home-tab.dart';
@@ -142,6 +144,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 return WillPopScope(
                     onWillPop: handleWillPop,
                     child: Scaffold(
+                      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+                      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+                      floatingActionButton: selectedTab==1?FloatingActionButton(
+                          backgroundColor: colorDescription,
+                          child: Icon(
+                            FeatherIcons.plus,
+                          ),
+                          elevation: 5.0):null,
                       appBar: TopNavigation(
                         title: getTabName(selectedTab),
                         showBackButton: false,
