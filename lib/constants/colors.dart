@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:crypto/crypto.dart';
 
 final double opacitySecondaryElement = 0.5;
 final double opacityDecorationLines = 0.1;
@@ -78,16 +81,11 @@ Color getColorByPurpose({Purpose purpose, bool isPale = false}) {
 }
 
 double hexStringToHue(String hexSource) {
-  bool isHex = hexSource.substring(2) == '0x';
-  if (isHex) {
-    String short = hexSource.substring(0, 8);
-    int i = int.parse(short);
-    return i * 360 / 0xffffff;
-  }
-  else{
-    //TODO: Deterministically compute and int from random string
-    return 360;
-  }
+  var bytes = utf8.encode(hexSource); // data being hashed
+  var source = sha256.convert(bytes);
+  String short = source.toString().substring(0, 6);
+  int i = int.parse(short, radix: 16);
+  return i * 360 / 0xffffff;
 }
 
 Color getAvatarBackgroundColor(String hexSource) {
