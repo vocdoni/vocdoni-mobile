@@ -1,2 +1,3 @@
 // PATTERN SCREEN SETTINGS
-int patternGridSize = 5;
+const int PATTERN_GRID_SIZE = 5;
+const String NETWORK_ID = "goerli";

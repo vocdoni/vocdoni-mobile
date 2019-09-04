@@ -66,7 +66,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
 
     return DrawPattern(
       key: Key("ConfirmPattern"),
-      gridSize: patternGridSize,
+      gridSize: PATTERN_GRID_SIZE,
       widthSize: widthSize,
       dotRadius: dotRadius,
       hitRadius: hitRadius,
@@ -88,7 +88,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
 
   onPatternStop(BuildContext context, List<int> pattern) async {
     try {
-      String passphrase = patternToString(pattern, gridSize: patternGridSize);
+      String passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
       String decryptedPayload =
           await dvote.decryptString(widget.encryptedText, passphrase);
       if (decryptedPayload == null)

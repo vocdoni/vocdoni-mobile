@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:flutter/material.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:vocdoni/util/api.dart';
@@ -72,13 +71,13 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
   /// Registers a new identity with an empty list of organizations
   Future create(String alias, String encryptionKey) async {
     if (!(alias is String) || alias.length < 2)
-      throw FlutterError("Invalid alias");
+      throw Exception("Invalid alias");
     else if (!(encryptionKey is String) || encryptionKey.length < 2)
-      throw FlutterError("Invalid encryptionKey");
+      throw Exception("Invalid encryptionKey");
 
     alias = alias.trim();
     if (super.value.where((item) => item.alias == alias).length > 0) {
-      throw "The account already exists";
+      throw Exception("The account already exists");
     }
 
     final mnemonic = await makeMnemonic();
@@ -109,11 +108,11 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
 
   Identity getCurrentIdentity() {
     if (super.state.value.length <= appStateBloc.value?.selectedIdentity)
-      throw FlutterError("Invalid selectedIdentity: out of bounds");
+      throw Exception("Invalid selectedIdentity: out of bounds");
 
     final identity = identitiesBloc.value[appStateBloc.value.selectedIdentity];
     if (!(identity is Identity))
-      throw FlutterError("The current account is invalid");
+      throw Exception("The current account is invalid");
     return identity;
   }
 
@@ -147,10 +146,11 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
-  subscribeEntityToAccount(EntityReference entityReference, Identity account) async {
+  subscribeEntityToAccount(
+      EntityReference entityReference, Identity account) async {
     // Add the entity to the global registry if it does not exist
     if (isSubscribed(account, entityReference))
-      throw FlutterError("You are already subscribed to this entity");
+      throw Exception("You are already subscribed to this entity");
 
     //EntityReference entitySummary = makeEntityReferenceFromEntity(entityMetadata);
     addEntityPeerToAccount(entityReference, account);
@@ -158,7 +158,8 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribeEntityFromAccount(EntityReference entitySummary, Identity account) async {
+  unsubscribeEntityFromAccount(
+      EntityReference entitySummary, Identity account) async {
     // TODO: Remove the entity summary from the identity
     removeEntityPeerFromAccount(entitySummary.entityId, account);
 

@@ -114,7 +114,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   DrawPattern buildSetting() {
     return DrawPattern(
         key: Key("SetPattern"),
-        gridSize: patternGridSize,
+        gridSize: PATTERN_GRID_SIZE,
         widthSize: widthSize,
         dotRadius: dotRadius,
         hitRadius: hitRadius,
@@ -163,7 +163,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   DrawPattern buildConfirming() {
     return DrawPattern(
       key: Key("ConfirmPattern"),
-      gridSize: patternGridSize,
+      gridSize: PATTERN_GRID_SIZE,
       widthSize: widthSize,
       dotRadius: dotRadius,
       hitRadius: hitRadius,
@@ -196,7 +196,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       return;
     }
 
-    String stringPattern = patternToString(pattern, gridSize: patternGridSize);
+    String stringPattern = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
     Navigator.pop(context, stringPattern);
   }
 }

@@ -5,6 +5,7 @@ import 'package:vocdoni/controllers/account.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/constants/settings.dart';
 
 class AppStateBloc extends GenericBloc<AppState> {
   final String _storageFileBootNodes = BOOTNODES_STORE_FILE;
@@ -82,7 +83,7 @@ class AppStateBloc extends GenericBloc<AppState> {
 
   Future loadBootNodes() async {
     try {
-      final bnList = await getDefaultGatewaysInfo();
+      final bnList = await getDefaultGatewaysInfo(NETWORK_ID);
       await setBootNodes(bnList);
     } catch (err) {
       print("ERR: $err");
