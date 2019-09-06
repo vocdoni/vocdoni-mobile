@@ -2,7 +2,6 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseAvatar.dart';
-import 'package:vocdoni/widgets/pageTitle.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
   final String appBarTitle;
@@ -15,23 +14,23 @@ class ScaffoldWithImage extends StatefulWidget {
   final Widget leftElement;
   final List<Widget> Function(BuildContext) actionsBuilder;
 
-  const ScaffoldWithImage({
-    this.appBarTitle,
-    this.avatarText,
-    this.avatarHexSource,
-    this.headerImageUrl,
-    this.headerTag,
-    this.avatarUrl,
-    this.builder,
-    this.leftElement,
-    this.actionsBuilder,
-  });
+  const ScaffoldWithImage(
+      {this.appBarTitle,
+      this.avatarText,
+      this.avatarHexSource,
+      this.headerImageUrl,
+      this.headerTag,
+      this.avatarUrl,
+      this.builder,
+      this.leftElement,
+      this.actionsBuilder,
+      });
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
 }
 
-class _ScaffoldWithImageState extends State<ScaffoldWithImage> {
+class _ScaffoldWithImageState extends State<ScaffoldWithImage>  with TickerProviderStateMixin{
   bool collapsed = false;
   @override
   Widget build(context) {
