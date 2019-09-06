@@ -13,6 +13,7 @@ import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
+import 'package:qrcode_reader/qrcode_reader.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -144,14 +145,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 return WillPopScope(
                     onWillPop: handleWillPop,
                     child: Scaffold(
-                      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-                      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-                      floatingActionButton: selectedTab==1?FloatingActionButton(
-                          backgroundColor: colorDescription,
-                          child: Icon(
-                            FeatherIcons.plus,
-                          ),
-                          elevation: 5.0):null,
+                      floatingActionButtonLocation:
+                          FloatingActionButtonLocation.endFloat,
+                      floatingActionButtonAnimator:
+                          FloatingActionButtonAnimator.scaling,
+                      floatingActionButton: selectedTab == 1
+                          ? FloatingActionButton(
+                              onPressed: () async {
+                                String string = await new QRCodeReader()
+                                    .setAutoFocusIntervalInMs(
+                                        400) // default 5000
+                                    .setForceAutoFocus(true) // default false
+                                    .setTorchEnabled(true) // default false
+                                    .setHandlePermissions(true) // default true
+                                    .setExecuteAfterPermissionGranted(
+                                        true) // default true
+                                    .scan();
+                                    Uri link = Uri.parse(string);
+                                handleIncomingLink(link, context);
+                              },
+                              backgroundColor: colorDescription,
+                              child: Icon(
+                                FeatherIcons.plus,
+                              ),
+                              elevation: 5.0)
+                          : null,
                       appBar: TopNavigation(
                         title: getTabName(selectedTab),
                         showBackButton: false,
