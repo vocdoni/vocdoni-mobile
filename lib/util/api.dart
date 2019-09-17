@@ -26,9 +26,13 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
 
   try {
-    final gw = _selectRandomGatewayInfo();
+    final gwInfo = _selectRandomGatewayInfo();
 
-    return fetchEntity(entityReference, gw.dvote, gw.web3, gatewayPublicKey: gw.publicKey);
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
+
+    return fetchEntity(entityReference, dvoteGw, web3Gw);
   } catch (err) {
     if (!kReleaseMode) print(err);
     throw FetchError("The entity's data cannot be fetched");
@@ -51,8 +55,8 @@ Future<String> fetchEntityNewsFeed(
   // Attempt for every node available
   try {
     ContentURI cUri = ContentURI(contentUri);
-    final result =
-        await fetchFileString(cUri, gw.dvote, gatewayPublicKey: gw.publicKey);
+    DVoteGateway gateway = DVoteGateway(gw.dvote);
+    final result = await fetchFileString(cUri, gateway);
     return result;
   } catch (err) {
     print(err);

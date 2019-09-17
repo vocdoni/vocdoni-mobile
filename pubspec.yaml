@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dvote: ^0.5.17
+  dvote: ^0.5.18
   webview_flutter: ^0.3.10+3
   rxdart: ^0.22.0
   protobuf: ^0.13.15
