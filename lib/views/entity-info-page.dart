@@ -289,15 +289,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return false;
   }
 
-  Widget buildEmptyEntity(BuildContext ctx) {
-    return Scaffold(
-        appBar: TopNavigation(
-          title: "",
-        ),
-        body: Center(
-          child: Text("(No entity)"),
-        ));
-  }
 
   Future<void> fetchVisibleActions(Ent ent) async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
