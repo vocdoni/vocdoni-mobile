@@ -16,12 +16,11 @@ class Ent {
   }
 
   update() async {
-    this.entityMetadata = await fetchEntityData(entityReference);
-    this.processess = await fetchProcessess(entityReference, entityMetadata);
-
-    final feedString =
-        await fetchEntityNewsFeed(this.entityMetadata, this.lang);
-    this.feed = feedString == null ? null : parseFeed(feedString);
+    this.entityMetadata = await fetchEntityData(this.entityReference);
+    this.processess =
+        await fetchProcessess(this.entityReference, this.entityMetadata);
+    this.feed = await fetchEntityNewsFeed(
+        this.entityReference, this.entityMetadata, this.lang);
   }
 
   save() async {

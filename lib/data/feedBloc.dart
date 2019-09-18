@@ -74,7 +74,7 @@ class FeedBloc extends GenericBloc<List<Feed>> {
 
   /// Fetch the feeds of the given entity and update their entries
   /// on the local storage
-  Future<void> fetchFromEntity(EntityMetadata entityMetadata) async {
+ /* Future<void> fetchFromEntity(EntityMetadata entityMetadata) async {
     if (entityMetadata.languages == null || entityMetadata.languages.length < 1)
       return;
     final feeds = value;
@@ -99,13 +99,11 @@ class FeedBloc extends GenericBloc<List<Feed>> {
     }));
 
     await set(feeds);
-  }
+  }*/
 
   Future<void> add(
       String language, Feed feed, EntityReference entitySummary) async {
-    feed.meta[META_ENTITY_ID] = entitySummary.entityId;
-    feed.meta[META_LANGUAGE] = language;
-
+    
     final currentIndex = value.indexWhere((f) =>
         f.meta[META_ENTITY_ID] == entitySummary.entityId &&
         f.meta[META_LANGUAGE] == language);

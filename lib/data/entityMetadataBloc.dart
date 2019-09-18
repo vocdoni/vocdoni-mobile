@@ -65,14 +65,8 @@ class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
 
   Future<void> add(
       EntityMetadata entityMetadata, EntityReference entitySummary) async {
-    /*if (!(entityMetadata is Entity))
-      throw FlutterError("The entity parameter is invalid");
-      */
-
-    entityMetadata.meta[META_ENTITY_ID] = entitySummary.entityId;
-
-    final currentIndex =
-        value.indexWhere((e) => e.meta[META_ENTITY_ID] == entitySummary.entityId);
+    final currentIndex = value
+        .indexWhere((e) => e.meta[META_ENTITY_ID] == entitySummary.entityId);
     // Already exists
     if (currentIndex >= 0) {
       final currentEntities = value;
@@ -81,9 +75,6 @@ class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
     } else {
       value.add(entityMetadata);
       await set(value);
-
-      // Fetch the news feeds if needed
-      //await newsFeedsBloc.fetchFromEntity(entityMetadata);
     }
   }
 

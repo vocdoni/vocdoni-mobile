@@ -1,3 +1,4 @@
+import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -32,7 +33,11 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
     final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
 
-    return fetchEntity(entityReference, dvoteGw, web3Gw);
+    EntityMetadata entityMetadata =
+        await fetchEntity(entityReference, dvoteGw, web3Gw);
+    entityMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
+
+    return entityMetadata;
   } catch (err) {
     if (!kReleaseMode) print(err);
     throw FetchError("The entity's data cannot be fetched");
@@ -63,7 +68,7 @@ Future<List<ProcessMetadata>> fetchProcessess(
   }
 }
 
-Future<String> fetchEntityNewsFeed(
+Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     EntityMetadata entityMetadata, String lang) async {
   // Attempt for every node available
   if (!(entityMetadata is EntityMetadata))
@@ -81,7 +86,10 @@ Future<String> fetchEntityNewsFeed(
     ContentURI cUri = ContentURI(contentUri);
     DVoteGateway gateway = DVoteGateway(gw.dvote);
     final result = await fetchFileString(cUri, gateway);
-    return result;
+    Feed feed = parseFeed(result);
+    feed.meta[META_ENTITY_ID] = entityReference.entityId;
+    feed.meta[META_LANGUAGE] = lang;
+    return feed;
   } catch (err) {
     print(err);
     throw FetchError("The news feed cannot be fetched");
