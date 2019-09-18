@@ -67,32 +67,4 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     ));
   }
 
-  Future loadRemoteFeed(BuildContext ctx, EntityMetadata entityMetadata) async {
-    if (remoteFetched) return;
-    remoteFetched = true;
-    Timer(Duration(milliseconds: 10), () {
-      setState(() {
-        loading = true;
-      });
-    });
-
-    try {
-      final result = await fetchEntityNewsFeed(
-          entityMetadata, entityMetadata.languages[0]);
-      final decoded = Feed.fromJson(jsonDecode(result));
-
-      setState(() {
-        remoteNewsFeed = decoded;
-        loading = false;
-      });
-    } catch (err) {
-      showMessage(
-          Lang.of(ctx).get("The activity can not be loaded at this time"),
-          context: ctx,
-          purpose: Purpose.DANGER);
-      setState(() {
-        loading = false;
-      });
-    }
-  }
 }

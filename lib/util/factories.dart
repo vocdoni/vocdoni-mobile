@@ -55,8 +55,6 @@ onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
 }
 
 buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
-  String tag = process.meta['processId'] + process.details.headerImage;
-
   return BaseCard(
     onTap: () {
       Navigator.pushNamed(ctx, "/entity/participation/poll",

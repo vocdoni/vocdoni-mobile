@@ -62,16 +62,11 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
     await persist();
   }
 
-  Future<void> add(ProcessMetadata processMetadata, String processId,
-      String entityId) async {
-    if (!(processMetadata is ProcessMetadata))
-      throw FlutterError("The entity parameter is invalid");
-
-    processMetadata.meta[META_PROCESS_ID] = processId;
-    processMetadata.meta[META_ENTITY_ID] = entityId;
-
-    final currentIndex =
-        value.indexWhere((e) => e.meta[META_PROCESS_ID] == processId);
+  Future<void> add(
+    ProcessMetadata processMetadata,
+  ) async {
+    final currentIndex = value.indexWhere((e) =>
+        e.meta[META_PROCESS_ID] == processMetadata.meta[META_PROCESS_ID]);
     // Already exists
     if (currentIndex >= 0) {
       final currentProcessess = value;
@@ -83,6 +78,6 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
     }
 
     // CUSTOM OPERATIONS
-
   }
+
 }

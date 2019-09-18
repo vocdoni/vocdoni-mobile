@@ -16,16 +16,21 @@ class Ent {
   }
 
   update() async {
-    this.entityMetadata = await fetchEntityData(entityReference);
-
-    final feedString =
-        await fetchEntityNewsFeed(this.entityMetadata, this.lang);
-    this.feed = feedString == null ? null : parseFeed(feedString);
+    this.entityMetadata = await fetchEntityData(this.entityReference);
+    this.processess =
+        await fetchProcessess(this.entityReference, this.entityMetadata);
+    this.feed = await fetchEntityNewsFeed(
+        this.entityReference, this.entityMetadata, this.lang);
   }
 
   save() async {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);
+    if (this.processess != null) {
+      for (ProcessMetadata process in this.processess) {
+        await processesBloc.add(process);
+      }
+    }
     if (this.feed != null)
       await newsFeedsBloc.add(this.lang, this.feed, this.entityReference);
   }
