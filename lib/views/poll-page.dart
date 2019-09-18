@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -118,7 +119,7 @@ class _PollPageState extends State<PollPage> {
     children.addAll(buildQuestions(context, process));
     children.add(Section());
     children.add(buildSubmitInfo());
-    children.add(buildSubmitVoteButton());
+    children.add(buildSubmitVoteButton(context));
 
     return children;
   }
@@ -182,7 +183,7 @@ class _PollPageState extends State<PollPage> {
     }
   }
 
-  buildSubmitVoteButton() {
+  buildSubmitVoteButton(ctx) {
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -191,8 +192,22 @@ class _PollPageState extends State<PollPage> {
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
           isDisabled: responsesAreValid == false,
-          onTap: () {}),
+          onTap: (){onSubmit(ctx);}
+          ),
     );
+  }
+
+  onSubmit(ctx) async {
+    var result = await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) =>
+                PaternPromptModal(account.identity.keys[0].encryptedPrivateKey)));
+    if (result == null || result is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
+      return;
+    }
   }
 
   buildSubmitInfo() {
