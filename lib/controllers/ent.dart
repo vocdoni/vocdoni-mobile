@@ -17,6 +17,7 @@ class Ent {
 
   update() async {
     this.entityMetadata = await fetchEntityData(entityReference);
+    this.processess = await fetchProcessess(entityReference, entityMetadata);
 
     final feedString =
         await fetchEntityNewsFeed(this.entityMetadata, this.lang);
@@ -26,6 +27,11 @@ class Ent {
   save() async {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);
+    if (this.processess != null) {
+      for (ProcessMetadata process in this.processess) {
+        await processesBloc.add(process);
+      }
+    }
     if (this.feed != null)
       await newsFeedsBloc.add(this.lang, this.feed, this.entityReference);
   }
