@@ -39,6 +39,30 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   }
 }
 
+Future<List<ProcessMetadata>> fetchProcessess(
+    EntityReference entityReference, EntityMetadata entityMetadata) async {
+  try {
+    final gwInfo = _selectRandomGatewayInfo();
+
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
+
+    List<ProcessMetadata> activeProcessess = await getProcessesMetadata(
+        entityMetadata.votingProcesses.active, dvoteGw, web3Gw);
+    for (int i = 0; i < entityMetadata.votingProcesses.active.length; i++) {
+      activeProcessess[i].meta[META_PROCESS_ID] =
+          entityMetadata.votingProcesses.active[i];
+      activeProcessess[i].meta[META_ENTITY_ID] = entityReference.entityId;
+    }
+
+    return activeProcessess;
+  } catch (err) {
+    if (!kReleaseMode) print(err);
+    throw FetchError("The Active processess can't be fetched");
+  }
+}
+
 Future<String> fetchEntityNewsFeed(
     EntityMetadata entityMetadata, String lang) async {
   // Attempt for every node available
