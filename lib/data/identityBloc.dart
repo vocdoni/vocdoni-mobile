@@ -94,11 +94,13 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;
+    //TODO Either the encryptedMnemonic or the encryptedPrivateKey should exists. Single source of truth
     k.encryptedMnemonic = encryptedMenmonic;
     k.encryptedPrivateKey = encryptedPrivateKey;
     k.publicKey = publicKey;
     k.address = address;
 
+    //TOOD check why
     newIdentity.keys.add(k);
 
     // Add to existing, notify and store
