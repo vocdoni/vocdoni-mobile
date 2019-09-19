@@ -193,6 +193,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       mainText: subscribeText,
       icon: FeatherIcons.heart,
       disabled: _processingSubscription,
+      isSpinning: _processingSubscription,
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       onTap: () => isSubscribed
