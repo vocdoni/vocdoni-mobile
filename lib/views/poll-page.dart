@@ -5,6 +5,7 @@ import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -28,9 +29,9 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
-  List<String> responses = [];
-  String responsesStateMessage = '';
-  bool responsesAreValid = false;
+  List<String> _answers = [];
+  String _responsesStateMessage = '';
+  bool _responsesAreValid = false;
 
   @override
   void didChangeDependencies() {
@@ -38,7 +39,7 @@ class _PollPageState extends State<PollPage> {
 
     ProcessMetadata process = args.process;
     process.details.questions.forEach((question) {
-      responses.add("");
+      _answers.add("");
     });
 
     checkResponseState();
@@ -119,7 +120,7 @@ class _PollPageState extends State<PollPage> {
     children.addAll(buildQuestions(context, process));
     children.add(Section());
     children.add(buildSubmitInfo());
-    children.add(buildSubmitVoteButton(context));
+    children.add(buildSubmitVoteButton(context, process));
 
     return children;
   }
@@ -154,7 +155,7 @@ class _PollPageState extends State<PollPage> {
 
   setResponse(int questionIndex, String value) {
     setState(() {
-      responses[questionIndex] = value;
+      _answers[questionIndex] = value;
     });
 
     checkResponseState();
@@ -163,12 +164,12 @@ class _PollPageState extends State<PollPage> {
   checkResponseState() {
     bool allGood = true;
     int idx = 1;
-    for (final response in responses) {
+    for (final response in _answers) {
       if (response == '') {
         allGood = false;
         setState(() {
-          responsesAreValid = false;
-          responsesStateMessage = 'Question #$idx needs to be answered';
+          _responsesAreValid = false;
+          _responsesStateMessage = 'Question #$idx needs to be answered';
         });
         break;
       }
@@ -177,13 +178,13 @@ class _PollPageState extends State<PollPage> {
 
     if (allGood) {
       setState(() {
-        responsesAreValid = true;
-        responsesStateMessage = '';
+        _responsesAreValid = true;
+        _responsesStateMessage = '';
       });
     }
   }
 
-  buildSubmitVoteButton(ctx) {
+  buildSubmitVoteButton(BuildContext ctx, ProcessMetadata processMetadata) {
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -191,34 +192,50 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled: responsesAreValid == false,
-          onTap: (){onSubmit(ctx);}
-          ),
+          isDisabled: _responsesAreValid == false,
+          onTap: () {
+            onSubmit(ctx, processMetadata);
+          }),
     );
   }
 
-  onSubmit(ctx) async {
-    var result = await Navigator.push(
+  onSubmit(ctx, processMetadata) async {
+    var privateKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) =>
-                PaternPromptModal(account.identity.keys[0].encryptedPrivateKey)));
-    if (result == null || result is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
+            builder: (context) => PaternPromptModal(
+                account.identity.keys[0].encryptedPrivateKey)));
+    if (privateKey == null || privateKey is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
+      return;
+    }
+
+    await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => PollPackaging(
+                privateKey: privateKey,
+                processMetadata: processMetadata,
+                answers: _answers)));
+    if (privateKey == null || privateKey is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
       return;
     }
   }
 
   buildSubmitInfo() {
-    return responsesAreValid == false
+    return _responsesAreValid == false
         ? ListItem(
-            mainText: responsesStateMessage,
+            mainText: _responsesStateMessage,
             purpose: Purpose.WARNING,
             rightIcon: null,
           )
         : ListItem(
-            mainText: responsesStateMessage,
+            mainText: _responsesStateMessage,
             rightIcon: null,
           );
   }
@@ -285,11 +302,11 @@ class _PollPageState extends State<PollPage> {
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
-                  color: responses[questionIndex] == voteOption.value
+                  color: _answers[questionIndex] == voteOption.value
                       ? Colors.white
                       : colorDescription),
             ),
-            selected: responses[questionIndex] == voteOption.value,
+            selected: _answers[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
                 setResponse(questionIndex, voteOption.value);

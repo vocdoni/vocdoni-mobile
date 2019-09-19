@@ -1,3 +1,4 @@
+import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
@@ -5,6 +6,12 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 
 class PollPackaging extends StatefulWidget {
+  String privateKey;
+  ProcessMetadata processMetadata;
+  List<String> answers;
+
+  PollPackaging({this.privateKey, this.processMetadata, this.answers});
+
   @override
   _PollPackagingState createState() => _PollPackagingState();
 }
