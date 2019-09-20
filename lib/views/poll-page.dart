@@ -16,6 +16,8 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
 
+enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
+
 class PollPageArgs {
   Ent ent;
   ProcessMetadata process;
@@ -32,7 +34,7 @@ class _PollPageState extends State<PollPage> {
   List<String> _answers = [];
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
-  bool _canVote = false;
+  CensusState _censusState = CensusState.UNKNOWN;
   bool _isCheckingCensus = true;
   bool _hasVoted = false;
 
@@ -161,26 +163,47 @@ class _PollPageState extends State<PollPage> {
 
   buildCensusItem(BuildContext context, ProcessMetadata process) {
     String text = "Checking census";
+    Purpose purpose = null;
+    IconData icon = null;
 
-    if (!_isCheckingCensus) {
-      if (_canVote) {
-        text = "You are in the census";
-      } else {
-        text = "You are NOT in the census";
-      }
+    if (_censusState == CensusState.UNKNOWN) {
+      text = "Check census state";
+    }
+
+    if (_censusState == CensusState.CHECKING) {
+      text = "Checking census";
+    }
+
+    if (_censusState == CensusState.IN) {
+      text = "You are in the census";
+      purpose = Purpose.GOOD;
+      icon = FeatherIcons.check;
+    }
+
+    if (_censusState == CensusState.OUT) {
+      text = "You are in the census";
+      purpose = Purpose.DANGER;
+      icon = FeatherIcons.x;
+    }
+
+    if (_censusState == CensusState.ERROR) {
+      text = "Unable to check census";
+      icon = FeatherIcons.alertTriangle;
     }
 
     return ListItem(
-        icon: FeatherIcons.users,
-        mainText: text,
-        isSpinning: _isCheckingCensus,
-        onTap: () {
-          setState(() {
-            _isCheckingCensus = true;
-          });
-        },
-        purpose: _canVote ? Purpose.GOOD : Purpose.DANGER,
-        rightIcon: _canVote ? FeatherIcons.check : FeatherIcons.crosshair);
+      icon: FeatherIcons.users,
+      mainText: text,
+      isSpinning: _isCheckingCensus,
+      onTap: () {
+        setState(() {
+          _isCheckingCensus = true;
+        });
+      },
+      rightTextPurpose: purpose,
+      rightIcon: icon,
+      purpose: _censusState == CensusState.ERROR ? Purpose.DANGER : null,
+    );
   }
 
   buildPollItem(BuildContext context, ProcessMetadata process) {
