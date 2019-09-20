@@ -29,6 +29,7 @@ class _PollPackagingState extends State<PollPackaging> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Spacer(),
               Section(
                 text: "Preparing vote",
                 withDectoration: false,
@@ -41,6 +42,7 @@ class _PollPackagingState extends State<PollPackaging> {
               buildStep("Generating proof", "Proof generated", 1),
               buildStep("Sending", "Sent", 2),
               buildStep("Waiting confirmation", "Confirmed", 3),
+              Spacer(),
               Padding(
                 padding: EdgeInsets.all(48),
                 child: BaseButton(

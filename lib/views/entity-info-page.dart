@@ -12,7 +12,6 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
 import 'package:http/http.dart' as http;
