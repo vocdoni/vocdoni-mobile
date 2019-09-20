@@ -63,14 +63,6 @@ class BaseButton extends StatelessWidget {
       );
     }
 
-    if (style == BaseButtonStyle.NO_BACKGROUND) {
-      backgroundColor = Colors.transparent;
-      outlineColor = Colors.transparent;
-      textColor = getColorByPurpose(
-        purpose: purpose,
-      );
-    }
-
     if (style == BaseButtonStyle.NO_BACKGROUND_WHITE) {
       backgroundColor = Colors.transparent;
       outlineColor = Colors.transparent;
@@ -96,7 +88,7 @@ class BaseButton extends StatelessWidget {
                 borderOnForeground: true,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
-                    side: BorderSide(width: 2.0, color: outlineColor)),
+                    side: BorderSide(width: 1.0, color: outlineColor)),
                 child: InkWell(
                   splashColor: isDisabled ? Colors.transparent : null,
                   onTap: () => isDisabled ? null : onTap(),

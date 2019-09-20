@@ -24,6 +24,7 @@ class ListItem extends StatelessWidget {
   final bool disabled;
   final bool isTitle;
   final bool isBold;
+  final bool isSpinning;
 
   ListItem(
       {this.mainText,
@@ -45,7 +46,8 @@ class ListItem extends StatelessWidget {
       this.purpose = Purpose.NONE,
       this.disabled = false,
       this.isTitle = false,
-      this.isBold = false});
+      this.isBold = false,
+      this.isSpinning = false});
 
   @override
   Widget build(context) {
@@ -160,6 +162,10 @@ class ListItem extends StatelessWidget {
   }
 
   buildRightItem() {
+    if (isSpinning) {
+      return buildSpinner();
+    }
+
     if (rightText != null) {
       return buildRightText();
     }
@@ -174,6 +180,19 @@ class ListItem extends StatelessWidget {
         size: iconSizeSmall,
       ),
     );
+  }
+
+  Widget buildSpinner() {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+        child: SizedBox(
+          height: iconSizeTinny,
+          width: iconSizeTinny,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: new AlwaysStoppedAnimation<Color>(colorGuide),
+          ),
+        ));
   }
 
   Widget buildRightText() {

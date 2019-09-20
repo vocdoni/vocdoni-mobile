@@ -5,6 +5,7 @@ import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -14,6 +15,8 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
+
+enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
 
 class PollPageArgs {
   Ent ent;
@@ -28,9 +31,12 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
-  List<String> responses = [];
-  String responsesStateMessage = '';
-  bool responsesAreValid = false;
+  List<String> _answers = [];
+  String _responsesStateMessage = '';
+  bool _responsesAreValid = false;
+  CensusState _censusState = CensusState.UNKNOWN;
+  bool _isCheckingCensus = true;
+  bool _hasVoted = false;
 
   @override
   void didChangeDependencies() {
@@ -38,7 +44,7 @@ class _PollPageState extends State<PollPage> {
 
     ProcessMetadata process = args.process;
     process.details.questions.forEach((question) {
-      responses.add("");
+      _answers.add("");
     });
 
     checkResponseState();
@@ -115,11 +121,13 @@ class _PollPageState extends State<PollPage> {
       text: process.details.description['default'],
       maxLines: 5,
     ));
-    children.add(buildRawItem(context, process));
+    children.add(buildPollItem(context, process));
+    children.add(buildCensusItem(context, process));
+    children.add(buildTimeItem(context, process));
     children.addAll(buildQuestions(context, process));
     children.add(Section());
     children.add(buildSubmitInfo());
-    children.add(buildSubmitVoteButton(context));
+    children.add(buildSubmitVoteButton(context, process));
 
     return children;
   }
@@ -128,13 +136,14 @@ class _PollPageState extends State<PollPage> {
     String title = process.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: process.meta[META_PROCESS_ID], elementId: process.details.headerImage)
-      mainText: process.details.title['default'],
-      secondaryText: process.meta['entityId'],
+      mainText: title,
+      secondaryText: ent.entityMetadata.name['default'],
       isTitle: true,
       rightIcon: null,
       isBold: true,
-      //avatarUrl: ent.entityMetadata.media.avatar,
-      //avatarText: process.details.title['default'],
+      avatarUrl: ent.entityMetadata.media.avatar,
+      avatarText: ent.entityMetadata.name['default'],
+      avatarHexSource: ent.entityReference.entityId,
       //avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
     );
@@ -152,9 +161,73 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
+  buildCensusItem(BuildContext context, ProcessMetadata process) {
+    String text = "Checking census";
+    Purpose purpose = null;
+    IconData icon = null;
+
+    if (_censusState == CensusState.UNKNOWN) {
+      text = "Check census state";
+    }
+
+    if (_censusState == CensusState.CHECKING) {
+      text = "Checking census";
+    }
+
+    if (_censusState == CensusState.IN) {
+      text = "You are in the census";
+      purpose = Purpose.GOOD;
+      icon = FeatherIcons.check;
+    }
+
+    if (_censusState == CensusState.OUT) {
+      text = "You are in the census";
+      purpose = Purpose.DANGER;
+      icon = FeatherIcons.x;
+    }
+
+    if (_censusState == CensusState.ERROR) {
+      text = "Unable to check census";
+      icon = FeatherIcons.alertTriangle;
+    }
+
+    return ListItem(
+      icon: FeatherIcons.users,
+      mainText: text,
+      isSpinning: _isCheckingCensus,
+      onTap: () {
+        setState(() {
+          _isCheckingCensus = true;
+        });
+      },
+      rightTextPurpose: purpose,
+      rightIcon: icon,
+      purpose: _censusState == CensusState.ERROR ? Purpose.DANGER : null,
+    );
+  }
+
+  buildPollItem(BuildContext context, ProcessMetadata process) {
+    return ListItem(
+      icon: FeatherIcons.barChart2,
+      mainText: "Not anonymous poll",
+      rightIcon: null,
+      disabled: false,
+    );
+  }
+
+  buildTimeItem(BuildContext context, ProcessMetadata process) {
+    return ListItem(
+      icon: FeatherIcons.clock,
+      mainText: "This process ends in 3h",
+      //secondaryText: "18/09/2019 at 19:00",
+      rightIcon: null,
+      disabled: false,
+    );
+  }
+
   setResponse(int questionIndex, String value) {
     setState(() {
-      responses[questionIndex] = value;
+      _answers[questionIndex] = value;
     });
 
     checkResponseState();
@@ -163,12 +236,12 @@ class _PollPageState extends State<PollPage> {
   checkResponseState() {
     bool allGood = true;
     int idx = 1;
-    for (final response in responses) {
+    for (final response in _answers) {
       if (response == '') {
         allGood = false;
         setState(() {
-          responsesAreValid = false;
-          responsesStateMessage = 'Question #$idx needs to be answered';
+          _responsesAreValid = false;
+          _responsesStateMessage = 'Question #$idx needs to be answered';
         });
         break;
       }
@@ -177,13 +250,13 @@ class _PollPageState extends State<PollPage> {
 
     if (allGood) {
       setState(() {
-        responsesAreValid = true;
-        responsesStateMessage = '';
+        _responsesAreValid = true;
+        _responsesStateMessage = '';
       });
     }
   }
 
-  buildSubmitVoteButton(ctx) {
+  buildSubmitVoteButton(BuildContext ctx, ProcessMetadata processMetadata) {
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -191,34 +264,50 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled: responsesAreValid == false,
-          onTap: (){onSubmit(ctx);}
-          ),
+          isDisabled: _responsesAreValid == false,
+          onTap: () {
+            onSubmit(ctx, processMetadata);
+          }),
     );
   }
 
-  onSubmit(ctx) async {
-    var result = await Navigator.push(
+  onSubmit(ctx, processMetadata) async {
+    var privateKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) =>
-                PaternPromptModal(account.identity.keys[0].encryptedPrivateKey)));
-    if (result == null || result is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
+            builder: (context) => PaternPromptModal(
+                account.identity.keys[0].encryptedPrivateKey)));
+    if (privateKey == null || privateKey is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
+      return;
+    }
+
+    await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => PollPackaging(
+                privateKey: privateKey,
+                processMetadata: processMetadata,
+                answers: _answers)));
+    if (privateKey == null || privateKey is InvalidPatternError) {
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
       return;
     }
   }
 
   buildSubmitInfo() {
-    return responsesAreValid == false
+    return _responsesAreValid == false
         ? ListItem(
-            mainText: responsesStateMessage,
+            mainText: _responsesStateMessage,
             purpose: Purpose.WARNING,
             rightIcon: null,
           )
         : ListItem(
-            mainText: responsesStateMessage,
+            mainText: _responsesStateMessage,
             rightIcon: null,
           );
   }
@@ -285,11 +374,11 @@ class _PollPageState extends State<PollPage> {
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
-                  color: responses[questionIndex] == voteOption.value
+                  color: _answers[questionIndex] == voteOption.value
                       ? Colors.white
                       : colorDescription),
             ),
-            selected: responses[questionIndex] == voteOption.value,
+            selected: _answers[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
                 setResponse(questionIndex, voteOption.value);
