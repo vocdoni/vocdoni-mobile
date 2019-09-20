@@ -32,6 +32,9 @@ class _PollPageState extends State<PollPage> {
   List<String> _answers = [];
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
+  bool _canVote = false;
+  bool _isCheckingCensus = true;
+  bool _hasVoted = false;
 
   @override
   void didChangeDependencies() {
@@ -116,7 +119,9 @@ class _PollPageState extends State<PollPage> {
       text: process.details.description['default'],
       maxLines: 5,
     ));
-    children.add(buildRawItem(context, process));
+    children.add(buildPollItem(context, process));
+    children.add(buildCensusItem(context, process));
+    children.add(buildTimeItem(context, process));
     children.addAll(buildQuestions(context, process));
     children.add(Section());
     children.add(buildSubmitInfo());
@@ -129,13 +134,14 @@ class _PollPageState extends State<PollPage> {
     String title = process.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: process.meta[META_PROCESS_ID], elementId: process.details.headerImage)
-      mainText: process.details.title['default'],
-      secondaryText: process.meta['entityId'],
+      mainText: title,
+      secondaryText: ent.entityMetadata.name['default'],
       isTitle: true,
       rightIcon: null,
       isBold: true,
-      //avatarUrl: ent.entityMetadata.media.avatar,
-      //avatarText: process.details.title['default'],
+      avatarUrl: ent.entityMetadata.media.avatar,
+      avatarText: ent.entityMetadata.name['default'],
+      avatarHexSource: ent.entityReference.entityId,
       //avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
     );
@@ -150,6 +156,49 @@ class _PollPageState extends State<PollPage> {
             arguments: process);
       },
       disabled: true,
+    );
+  }
+
+  buildCensusItem(BuildContext context, ProcessMetadata process) {
+    String text = "Checking census";
+
+    if (!_isCheckingCensus) {
+      if (_canVote) {
+        text = "You are in the census";
+      } else {
+        text = "You are NOT in the census";
+      }
+    }
+
+    return ListItem(
+        icon: FeatherIcons.users,
+        mainText: text,
+        isSpinning: _isCheckingCensus,
+        onTap: () {
+          setState(() {
+            _isCheckingCensus = true;
+          });
+        },
+        purpose: _canVote ? Purpose.GOOD : Purpose.DANGER,
+        rightIcon: _canVote ? FeatherIcons.check : FeatherIcons.crosshair);
+  }
+
+  buildPollItem(BuildContext context, ProcessMetadata process) {
+    return ListItem(
+      icon: FeatherIcons.barChart2,
+      mainText: "Not anonymous poll",
+      rightIcon: null,
+      disabled: false,
+    );
+  }
+
+  buildTimeItem(BuildContext context, ProcessMetadata process) {
+    return ListItem(
+      icon: FeatherIcons.clock,
+      mainText: "This process ends in 3h",
+      //secondaryText: "18/09/2019 at 19:00",
+      rightIcon: null,
+      disabled: false,
     );
   }
 
