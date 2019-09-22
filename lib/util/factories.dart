@@ -132,15 +132,15 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
 }
 
 Widget buildProcessTitle(Ent ent, ProcessMetadata process) {
-  String title = process.details.title[ent.entityMetadata.languages[0]];
+  String title = process.details.title.values.first;
   return ListItem(
     // mainTextTag: process.meta['processId'] + title,
     mainText: title,
     mainTextFullWidth: true,
-    secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+    secondaryText: ent.entityMetadata.name.values.first,
     avatarUrl: ent.entityMetadata.media.avatar,
     avatarHexSource: ent.entityReference.entityId,
-    avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+    avatarText: ent.entityMetadata.name.values.first,
     rightIcon: null,
   );
 }
