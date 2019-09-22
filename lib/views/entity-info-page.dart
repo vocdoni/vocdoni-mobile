@@ -90,6 +90,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: ent.entityMetadata.media.header,
         headerTag:
             ent.entityReference.entityId + ent.entityMetadata.media.header,
+            forceHeader: true,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
