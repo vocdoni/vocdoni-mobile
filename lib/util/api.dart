@@ -27,7 +27,7 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
 
   try {
-    final gwInfo = _selectRandomGatewayInfo();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -47,7 +47,7 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
 Future<List<ProcessMetadata>> fetchProcessess(
     EntityReference entityReference, EntityMetadata entityMetadata) async {
   try {
-    final gwInfo = _selectRandomGatewayInfo();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -77,7 +77,7 @@ Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     return null;
   else if (!(entityMetadata.newsFeed[lang] is String)) return null;
 
-  final gw = _selectRandomGatewayInfo();
+  final gw = selectRandomGatewayInfo();
 
   final String contentUri = entityMetadata.newsFeed[lang];
 
@@ -106,7 +106,7 @@ class FetchError implements Exception {
   String toString() => 'FetchError: $msg';
 }
 
-GatewayInfo _selectRandomGatewayInfo() {
+GatewayInfo selectRandomGatewayInfo() {
   if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
     return null;
 
