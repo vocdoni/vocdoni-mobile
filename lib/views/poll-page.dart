@@ -272,24 +272,22 @@ class _PollPageState extends State<PollPage> {
   }
 
   onSubmit(ctx, processMetadata) async {
-    var privateKey = await Navigator.push(
+    var encryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
                 account.identity.keys[0].encryptedPrivateKey)));
-    if (privateKey == null || privateKey is InvalidPatternError) {
+    if (encryptionKey == null || encryptionKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
 
-    //var intAnswers = _answers.map(int.parse).toList();
-    var l = _answers.length;
-    List<int> intAnswers = [];
-    _answers.forEach((i) {
-      intAnswers.add(int.parse(i));
-    });
+    var intAnswers = _answers.map(int.parse).toList();
+
+    final privateKey = await decryptString(
+        account.identity.keys[0].encryptedPrivateKey, encryptionKey);
 
     await Navigator.push(
         ctx,
