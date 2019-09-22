@@ -7,6 +7,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
+import 'package:vocdoni/util/api.dart';
 
 class PollPackaging extends StatefulWidget {
   final String privateKey;
@@ -27,10 +28,10 @@ class _PollPackagingState extends State<PollPackaging> {
   void initState() {
     super.initState();
     _currentStep = 0;
-    makeEnvelop();
+    stepMakeEnvelop();
   }
 
-  void makeEnvelop() async {
+  void stepMakeEnvelop() async {
     Map<String, String> envelope = await generatePollVoteEnvelope(
         widget.answers,
         widget.processMetadata.census.merkleRoot,
@@ -41,6 +42,29 @@ class _PollPackagingState extends State<PollPackaging> {
       _envelope = envelope;
       _currentStep = _currentStep + 1;
     });
+
+    stepSend();
+  }
+
+  void stepSend() async {
+    final gwInfo = selectRandomGatewayInfo();
+
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+    try {
+      bool success = false;
+      success = await sumbitEnvelope(
+          _envelope, widget.processMetadata.meta[META_PROCESS_ID], dvoteGw);
+
+      if (success) {
+        setState(() {
+          _currentStep = _currentStep + 1;
+        });
+      }
+    } catch (error) {
+       //Todo: handle timeut
+    }
   }
 
   @override
@@ -62,9 +86,9 @@ class _PollPackagingState extends State<PollPackaging> {
                   text:
                       "This may take some time, please do not close this screen"),*/
               buildStep("Sigining", "Signed", 0),
-              buildStep("Generating proof", "Proof generated", 1),
-              buildStep("Sending", "Sent", 2),
-              buildStep("Waiting confirmation", "Confirmed", 3),
+              // buildStep("Generating proof", "Proof generated", 1),
+              buildStep("Sending", "Sent", 1),
+              buildStep("Waiting confirmation", "Confirmed", 2),
               Spacer(),
               Padding(
                 padding: EdgeInsets.all(48),
