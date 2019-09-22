@@ -61,9 +61,7 @@ class _PollPageState extends State<PollPage> {
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl = process.details.headerImage == null
-        ? null
-        : process.details.headerImage;
+    String headerUrl = validUriOrNull(process.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null

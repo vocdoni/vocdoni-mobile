@@ -73,6 +73,16 @@ onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
       arguments: FeedPostArgs(ent: ent, post: post));
 }
 
+String validUriOrNull(String str) {
+  try {
+    final uri = Uri.parse(str);
+    if (uri.scheme == "") return null;
+    return str;
+  } catch (e) {
+    return null;
+  }
+}
+
 buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
   //
   final gwInfo = selectRandomGatewayInfo();
@@ -80,7 +90,7 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
   //TODO Do not open a connection to check each process time
   final DVoteGateway dvoteGw =
       DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-    int timeLeft = 0;
+  int timeLeft = 0;
   /*getProcessRemainingTime(process.meta[META_PROCESS_ID],process.startBlock, process.numberOfBlocks, dvoteGw).then((timeLeft){
     //TODO set timeleft
   });*/
@@ -89,7 +99,7 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
       Navigator.pushNamed(ctx, "/entity/participation/poll",
           arguments: PollPageArgs(ent: ent, process: process));
     },
-    image: process.details.headerImage,
+    image: validUriOrNull(process.details.headerImage),
     imageTag: makeElementTag(
         entityId: ent.entityReference.entityId,
         cardId: process.meta[META_PROCESS_ID],
