@@ -1,16 +1,17 @@
+import 'package:dvote/dvote.dart';
 import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/summary.dart';
 
 class PollPackaging extends StatefulWidget {
   final String privateKey;
   final ProcessMetadata processMetadata;
-  final List<String> answers;
+  final List<int> answers;
 
   PollPackaging({this.privateKey, this.processMetadata, this.answers});
 
@@ -19,7 +20,29 @@ class PollPackaging extends StatefulWidget {
 }
 
 class _PollPackagingState extends State<PollPackaging> {
-  int _current_step = 0;
+  int _currentStep;
+  Map<String, String> _envelope;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStep = 0;
+    makeEnvelop();
+  }
+
+  void makeEnvelop() async {
+    Map<String, String> envelope = await generatePollVoteEnvelope(
+        widget.answers,
+        widget.processMetadata.census.merkleRoot,
+        widget.processMetadata.meta[META_PROCESS_ID],
+        widget.privateKey);
+
+    setState(() {
+      _envelope = envelope;
+      _currentStep = _currentStep + 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +54,7 @@ class _PollPackagingState extends State<PollPackaging> {
             children: <Widget>[
               Spacer(),
               Section(
-                text: "Preparing vote",
+                text: "Preparing vote " + _currentStep.toString(),
                 withDectoration: false,
               ),
               /*Summary(
@@ -54,10 +77,9 @@ class _PollPackagingState extends State<PollPackaging> {
                     //isDisabled: true,
                     onTap: () {
                       setState(() {
-                        _current_step++;
+                        _currentStep++;
                       });
-                      if(_current_step==5)
-                       Navigator.pop(context, false);
+                      if (_currentStep == 5) Navigator.pop(context, false);
                     }),
               ),
             ],
@@ -69,16 +91,16 @@ class _PollPackagingState extends State<PollPackaging> {
 
   Widget buildStep(String presentText, String pastText, int step) {
     String text = presentText;
-    if (_current_step == step)
+    if (_currentStep == step)
       text = presentText;
-    else if (_current_step > step) text = pastText;
+    else if (_currentStep > step) text = pastText;
     return ListItem(
       mainText: text,
-      rightIcon: _current_step > step ? FeatherIcons.check : null,
-      isSpinning: _current_step == step,
+      rightIcon: _currentStep > step ? FeatherIcons.check : null,
+      isSpinning: _currentStep == step,
       rightTextPurpose: Purpose.GOOD,
-      isBold: _current_step == step,
-      disabled: _current_step < step,
+      isBold: _currentStep == step,
+      disabled: _currentStep < step,
     );
   }
 }

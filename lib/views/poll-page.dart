@@ -43,15 +43,15 @@ class _PollPageState extends State<PollPage> {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
     ProcessMetadata process = args.process;
-    process.details.questions.forEach((question) {
-      _answers.add("");
-    });
+    if (_answers.length == 0)
+      process.details.questions.forEach((question) {
+        _answers.add("");
+      });
 
     checkResponseState();
     super.didChangeDependencies();
   }
 
-  @override
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
@@ -284,6 +284,13 @@ class _PollPageState extends State<PollPage> {
       return;
     }
 
+    //var intAnswers = _answers.map(int.parse).toList();
+    var l = _answers.length;
+    List<int> intAnswers = [];
+    _answers.forEach((i) {
+      intAnswers.add(int.parse(i));
+    });
+
     await Navigator.push(
         ctx,
         MaterialPageRoute(
@@ -291,12 +298,7 @@ class _PollPageState extends State<PollPage> {
             builder: (context) => PollPackaging(
                 privateKey: privateKey,
                 processMetadata: processMetadata,
-                answers: _answers)));
-    if (privateKey == null || privateKey is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid",
-          context: ctx, purpose: Purpose.DANGER);
-      return;
-    }
+                answers: intAnswers)));
   }
 
   buildSubmitInfo() {
