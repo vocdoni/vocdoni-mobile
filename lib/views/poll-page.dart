@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/poll-packaging.dart';
@@ -35,7 +36,7 @@ class _PollPageState extends State<PollPage> {
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
   CensusState _censusState = CensusState.UNKNOWN;
-  bool _isCheckingCensus = true;
+  bool _isCheckingCensus = false;
   bool _hasVoted = false;
 
   @override
@@ -196,14 +197,37 @@ class _PollPageState extends State<PollPage> {
       mainText: text,
       isSpinning: _isCheckingCensus,
       onTap: () {
-        setState(() {
-          _isCheckingCensus = true;
-        });
+        checkProof(process);
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
       purpose: _censusState == CensusState.ERROR ? Purpose.DANGER : null,
     );
+  }
+
+  checkProof(ProcessMetadata processMetadata) async {
+    if (_isCheckingCensus) return;
+
+    setState(() {
+      _isCheckingCensus = true;
+    });
+    final gwInfo = selectRandomGatewayInfo();
+
+    String base64Claim =
+        await digestHexClaim(account.identity.keys[0].publicKey);
+    try {
+      final proof = await generateProof(
+          processMetadata.census.merkleRoot, base64Claim, gwInfo);
+    } catch (error) {
+      setState(() {
+      _isCheckingCensus = false;
+      _censusState = CensusState.ERROR;
+    });
+    }
+
+    setState(() {
+      _isCheckingCensus = false;
+    });
   }
 
   buildPollItem(BuildContext context, ProcessMetadata process) {
