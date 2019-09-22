@@ -212,12 +212,14 @@ class _PollPageState extends State<PollPage> {
       _isCheckingCensus = true;
     });
     final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     String base64Claim =
         await digestHexClaim(account.identity.keys[0].publicKey);
     try {
       final proof = await generateProof(
-          processMetadata.census.merkleRoot, base64Claim, gwInfo);
+          processMetadata.census.merkleRoot, base64Claim, dvoteGw);
     } catch (error) {
       setState(() {
       _isCheckingCensus = false;
