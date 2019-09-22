@@ -3,6 +3,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -45,6 +46,24 @@ Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
       ]);
 }
 
+getFriendlyTimeLeft(int seconds) {
+  return seconds;
+}
+
+//TODO use dvote api instead once they removed getEnvelopHeight
+int getSecondsUntilBlock(
+    DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
+  int blocksLeftFromReference = blockNumber - referenceBlock;
+  Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
+  Duration nowToReference = DateTime.now().difference(referenceTimeStamp);
+  return referenceToBlock.inSeconds - nowToReference.inSeconds;
+}
+
+Duration blocksToDuration(int blocks) {
+  int averageBlockTime = 5; //seconds
+  return new Duration(seconds: averageBlockTime * blocks);
+}
+
 makeElementTag({String entityId, String cardId, String elementId}) {
   return entityId + cardId + elementId;
 }
@@ -55,6 +74,16 @@ onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
 }
 
 buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
+  //
+  final gwInfo = selectRandomGatewayInfo();
+
+  //TODO Do not open a connection to check each process time
+  final DVoteGateway dvoteGw =
+      DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    int timeLeft = 0;
+  /*getProcessRemainingTime(process.meta[META_PROCESS_ID],process.startBlock, process.numberOfBlocks, dvoteGw).then((timeLeft){
+    //TODO set timeleft
+  });*/
   return BaseCard(
     onTap: () {
       Navigator.pushNamed(ctx, "/entity/participation/poll",
@@ -83,7 +112,9 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
           DashboardItem(
             label: "Time left",
             item: DashboardText(
-                mainText: "2", secondaryText: " days", purpose: Purpose.GOOD),
+                mainText: timeLeft.toString(),
+                secondaryText: " days",
+                purpose: Purpose.GOOD),
           ),
           DashboardItem(
             label: "Vote now!",
