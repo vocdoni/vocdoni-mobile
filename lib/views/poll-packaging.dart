@@ -62,7 +62,11 @@ class _PollPackagingState extends State<PollPackaging> {
           _currentStep = _currentStep + 1;
         });
       }
+      else{
+        debugPrint("failed to send the vote");
+      }
     } catch (error) {
+      
        //Todo: handle timeut
     }
   }
