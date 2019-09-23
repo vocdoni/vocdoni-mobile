@@ -47,22 +47,20 @@ Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
       ]);
 }
 
-getFriendlyTimeLeft(int seconds) {
-  return seconds;
+getFriendlyTimeLeftNumber(DateTime date, String unit) {
+  final timeLeft = DateTime.now().difference(date);
+  if (unit == 'days') return timeLeft.inDays;
+  if (unit == 'hours') return timeLeft.inHours;
+  if (unit == 'min') return timeLeft.inMinutes;
+  return timeLeft.inSeconds;
 }
 
-//TODO use dvote api instead once they removed getEnvelopHeight
-int getSecondsUntilBlock(
-    DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
-  int blocksLeftFromReference = blockNumber - referenceBlock;
-  Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
-  Duration nowToReference = DateTime.now().difference(referenceTimeStamp);
-  return referenceToBlock.inSeconds - nowToReference.inSeconds;
-}
-
-Duration blocksToDuration(int blocks) {
-  int averageBlockTime = 5; //seconds
-  return new Duration(seconds: averageBlockTime * blocks);
+getFriendlyTimeLeftUnit(DateTime date) {
+  final timeLeft = DateTime.now().difference(date);
+  if (timeLeft.inDays > 2) return 'days';
+  if (timeLeft.inHours > 2) return 'hours';
+  if (timeLeft.inMinutes > 2) return 'min';
+  return 'sec';
 }
 
 makeElementTag({String entityId, String cardId, String elementId}) {
@@ -85,13 +83,14 @@ String validUriOrNull(String str) {
 }
 
 buildProcessCard({BuildContext ctx, Ent ent, Process process}) {
-  //
   final gwInfo = selectRandomGatewayInfo();
 
   //TODO Do not open a connection to check each process time
   final DVoteGateway dvoteGw =
       DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-  int timeLeft = 0;
+  
+  String timeUnits = getFriendlyTimeLeftUnit(process.getEndDate());
+  int timeLeft = getFriendlyTimeLeftNumber(process.getEndDate(), timeUnits);
   /*getProcessRemainingTime(process.meta[META_PROCESS_ID],process.startBlock, process.numberOfBlocks, dvoteGw).then((timeLeft){
     //TODO set timeleft
   });*/
