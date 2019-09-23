@@ -14,8 +14,6 @@ class Process {
     this.processMetadata = processMetadata;
   }
 
-  
-
   update() async {
     // Sync process times
     // Check if active?
@@ -35,7 +33,7 @@ class Process {
     // Save results
   }
 
-  syncLocal(){
+  syncLocal() {
     syncCensusState();
   }
 
@@ -72,5 +70,29 @@ class Process {
     } catch (error) {
       censusState = CensusState.OUT;
     }
+  }
+
+  DateTime getStartDate(){
+     return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
+        processMetadata.startBlock));
+  }
+
+  DateTime getEndDate() {
+    return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
+        processMetadata.startBlock + processMetadata.numberOfBlocks));
+  }
+
+  //TODO use dvote api instead once they removed getEnvelopHeight
+  Duration getDurationUntilBlock(
+    DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
+    int blocksLeftFromReference = blockNumber - referenceBlock;
+    Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
+    Duration nowToReference = DateTime.now().difference(referenceTimeStamp);
+    return nowToReference - referenceToBlock;
+  }
+
+  Duration blocksToDuration(int blocks) {
+    int averageBlockTime = 5; //seconds
+    return new Duration(seconds: averageBlockTime * blocks);
   }
 }
