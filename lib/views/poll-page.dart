@@ -16,6 +16,7 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:intl/intl.dart';
 
 class PollPageArgs {
   Ent ent;
@@ -120,7 +121,7 @@ class _PollPageState extends State<PollPage> {
     ));
     children.add(buildPollItem(context, process.processMetadata));
     children.add(buildCensusItem(context, process));
-    children.add(buildTimeItem(context, process.processMetadata));
+    children.add(buildTimeItem(context, process));
     children.addAll(buildQuestions(context, process.processMetadata));
     children.add(Section());
     children.add(buildSubmitInfo(process));
@@ -212,10 +213,11 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildTimeItem(BuildContext context, ProcessMetadata process) {
+  buildTimeItem(BuildContext context, Process process) {
+    String formattedTime = 	DateFormat("dd/MM, H:m:s").format(process.getEndDate()); 
     return ListItem(
       icon: FeatherIcons.clock,
-      mainText: "This process ends in 3h",
+      mainText: "Process ends on "+formattedTime,
       //secondaryText: "18/09/2019 at 19:00",
       rightIcon: null,
       disabled: false,
