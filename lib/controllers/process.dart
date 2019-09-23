@@ -38,12 +38,16 @@ class Process {
   }
 
   syncCensusState() {
-    censusState = CensusState.values.firstWhere(
-        (e) =>
-            e.toString() ==
-            'CensusState.' +
-                this.processMetadata.meta[META_PROCESS_CENSUS_STATE],
-        orElse: () => censusState = CensusState.UNKNOWN);
+    try {
+      censusState = CensusState.values.firstWhere(
+          (e) =>
+              e.toString() ==
+              'CensusState.' +
+                  this.processMetadata.meta[META_PROCESS_CENSUS_STATE],
+          orElse: () => censusState = CensusState.UNKNOWN);
+    } catch (e) {
+      censusState = CensusState.UNKNOWN;
+    }
   }
 
   saveCensusState() {
@@ -72,19 +76,21 @@ class Process {
     }
   }
 
-  DateTime getStartDate(){
-     return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
-        processMetadata.startBlock));
+  DateTime getStartDate() {
+    return DateTime.now().add(getDurationUntilBlock(
+        vochainTimeRef, vochainBlockRef, processMetadata.startBlock));
   }
 
   DateTime getEndDate() {
-    return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
+    return DateTime.now().add(getDurationUntilBlock(
+        vochainTimeRef,
+        vochainBlockRef,
         processMetadata.startBlock + processMetadata.numberOfBlocks));
   }
 
   //TODO use dvote api instead once they removed getEnvelopHeight
   Duration getDurationUntilBlock(
-    DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
+      DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
     int blocksLeftFromReference = blockNumber - referenceBlock;
     Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
     Duration nowToReference = DateTime.now().difference(referenceTimeStamp);
