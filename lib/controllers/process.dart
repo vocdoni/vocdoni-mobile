@@ -95,7 +95,8 @@ class Process {
   Future<double> getParticipation() async {
     int total = await getTotalParticipants();
     int current = await getCurrentParticipants();
-    return current / total;
+    int p = (current / total * 1000).round();
+    return p / 10;
   }
 
   DateTime getStartDate() {

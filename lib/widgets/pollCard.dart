@@ -26,7 +26,22 @@ class PollCard extends StatefulWidget {
 }
 
 class _PollCardState extends State<PollCard> {
-  bool collapsed = true;
+  String _participation = "";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _participation = "?";
+    updatePartcipation();
+  }
+
+  updatePartcipation() async {
+    double p = await widget.process.getParticipation();
+    setState(() {
+      _participation = p.toString();
+    });
+  }
 
   @override
   Widget build(ctx) {
@@ -66,7 +81,7 @@ class _PollCardState extends State<PollCard> {
             DashboardItem(
               label: "Participation",
               item: DashboardText(
-                  mainText: "55", secondaryText: "%", purpose: Purpose.WARNING),
+                  mainText: _participation, secondaryText: "%", purpose: Purpose.WARNING),
             ),
             DashboardItem(
               label: "Time left",
