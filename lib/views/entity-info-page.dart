@@ -364,7 +364,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     if (_actionsToDisplay.length == 0 || _registerAction == null) {
       return [
         ListItem(
-          mainText: "No Actions definied",
+          mainText: "No actions defined",
           disabled: true,
           rightIcon: null,
           icon: FeatherIcons.helpCircle,
