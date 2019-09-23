@@ -8,7 +8,7 @@ import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
-import 'package:vocdoni/widgets/BaseCard.dart';
+import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
 import 'package:vocdoni/widgets/dashboardRow.dart';
 import 'package:vocdoni/widgets/dashboardText.dart';
