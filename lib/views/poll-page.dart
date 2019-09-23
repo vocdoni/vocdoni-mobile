@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/poll-packaging.dart';
@@ -18,12 +17,9 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
 
-enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
-
 class PollPageArgs {
   Ent ent;
   Process process;
-
   PollPageArgs({this.ent, this.process});
 }
 
@@ -36,8 +32,6 @@ class _PollPageState extends State<PollPage> {
   List<String> _answers = [];
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
-  CensusState _censusState = CensusState.UNKNOWN;
-  bool _isCheckingCensus = false;
   bool _hasVoted = false;
 
   @override
@@ -51,7 +45,7 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
-    if (_censusState == CensusState.UNKNOWN) checkProof(process.processMetadata);
+    if (process.censusState == CensusState.UNKNOWN) process.checkCensusState();
 
     super.didChangeDependencies();
   }
@@ -64,7 +58,8 @@ class _PollPageState extends State<PollPage> {
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl = validUriOrNull(process.processMetadata.details.headerImage);
+    String headerUrl =
+        validUriOrNull(process.processMetadata.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
@@ -80,7 +75,7 @@ class _PollPageState extends State<PollPage> {
           builder: (ctx) {
             return SliverList(
               delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, ent, process.processMetadata)),
+                  getScaffoldChildren(ctx, ent, process)),
             );
           },
         ));
@@ -115,20 +110,20 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, ProcessMetadata process) {
+  getScaffoldChildren(BuildContext context, Ent ent, Process process) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, ent, process));
+    children.add(buildTitle(context, ent, process.processMetadata));
     children.add(Summary(
-      text: process.details.description['default'],
+      text: process.processMetadata.details.description['default'],
       maxLines: 5,
     ));
-    children.add(buildPollItem(context, process));
+    children.add(buildPollItem(context, process.processMetadata));
     children.add(buildCensusItem(context, process));
-    children.add(buildTimeItem(context, process));
-    children.addAll(buildQuestions(context, process));
+    children.add(buildTimeItem(context, process.processMetadata));
+    children.addAll(buildQuestions(context, process.processMetadata));
     children.add(Section());
-    children.add(buildSubmitInfo());
+    children.add(buildSubmitInfo(process));
     children.add(buildSubmitVoteButton(context, process));
 
     return children;
@@ -163,32 +158,32 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildCensusItem(BuildContext context, ProcessMetadata process) {
+  buildCensusItem(BuildContext context, Process process) {
     String text = "Checking census";
     Purpose purpose = null;
     IconData icon = null;
 
-    if (_censusState == CensusState.UNKNOWN) {
+    if (process.censusState == CensusState.UNKNOWN) {
       text = "Check census state";
     }
 
-    if (_censusState == CensusState.CHECKING) {
+    if (process.censusState == CensusState.CHECKING) {
       text = "Checking census";
     }
 
-    if (_censusState == CensusState.IN) {
+    if (process.censusState == CensusState.IN) {
       text = "You are in the census";
       purpose = Purpose.GOOD;
       icon = FeatherIcons.check;
     }
 
-    if (_censusState == CensusState.OUT) {
+    if (process.censusState == CensusState.OUT) {
       text = "You are NOT in the census";
       purpose = Purpose.DANGER;
       icon = FeatherIcons.x;
     }
 
-    if (_censusState == CensusState.ERROR) {
+    if (process.censusState == CensusState.ERROR) {
       text = "Unable to check census";
       icon = FeatherIcons.alertTriangle;
     }
@@ -196,56 +191,16 @@ class _PollPageState extends State<PollPage> {
     return ListItem(
       icon: FeatherIcons.users,
       mainText: text,
-      isSpinning: _isCheckingCensus,
+      isSpinning: process.censusState==CensusState.CHECKING,
       onTap: () {
-        checkProof(process);
+        process.checkCensusState();
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
-      purpose:
-          _censusState == CensusState.ERROR ? Purpose.DANGER : Purpose.NONE,
+      purpose: process.censusState == CensusState.ERROR
+          ? Purpose.DANGER
+          : Purpose.NONE,
     );
-  }
-
-  checkProof(ProcessMetadata processMetadata) async {
-    if (_isCheckingCensus) return;
-
-    setState(() {
-      _isCheckingCensus = true;
-      _censusState = CensusState.CHECKING;
-    });
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-
-    String base64Claim =
-        await digestHexClaim(account.identity.keys[0].publicKey);
-    try {
-      final proof = await generateProof(
-          processMetadata.census.merkleRoot, base64Claim, dvoteGw);
-      if (proof == "GOOD") {
-        setState(() {
-          _isCheckingCensus = false;
-          _censusState = CensusState.IN;
-        });
-      } else {
-        setState(() {
-          _isCheckingCensus = false;
-          _censusState = CensusState.OUT;
-        });
-      }
-    } catch (error) {
-      setState(() {
-//_isCheckingCensus = false;
-        //_censusState = CensusState.ERROR;
-        _isCheckingCensus = false;
-        _censusState = CensusState.OUT;
-      });
-    }
-
-    setState(() {
-      _isCheckingCensus = false;
-    });
   }
 
   buildPollItem(BuildContext context, ProcessMetadata process) {
@@ -298,8 +253,8 @@ class _PollPageState extends State<PollPage> {
     }
   }
 
-  buildSubmitVoteButton(BuildContext ctx, ProcessMetadata processMetadata) {
-    if (_censusState != CensusState.IN) return Container();
+  buildSubmitVoteButton(BuildContext ctx, Process process) {
+    if (process.censusState != CensusState.IN) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -308,9 +263,9 @@ class _PollPageState extends State<PollPage> {
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
           isDisabled:
-              _responsesAreValid == false || _censusState != CensusState.IN,
+              _responsesAreValid == false || process.censusState != CensusState.IN,
           onTap: () {
-            onSubmit(ctx, processMetadata);
+            onSubmit(ctx, process.processMetadata);
           }),
     );
   }
@@ -343,8 +298,8 @@ class _PollPageState extends State<PollPage> {
                 answers: intAnswers)));
   }
 
-  buildSubmitInfo() {
-    if (_censusState == CensusState.IN) {
+  buildSubmitInfo(Process process) {
+    if (process.censusState == CensusState.IN) {
       return _responsesAreValid == false
           ? ListItem(
               mainText: _responsesStateMessage,
@@ -355,7 +310,7 @@ class _PollPageState extends State<PollPage> {
               mainText: _responsesStateMessage,
               rightIcon: null,
             );
-    } else if (_censusState == CensusState.OUT) {
+    } else if (process.censusState == CensusState.OUT) {
       return ListItem(
         mainText: "You are not part of this census",
         secondaryText:
@@ -364,7 +319,7 @@ class _PollPageState extends State<PollPage> {
         purpose: Purpose.HIGHLIGHT,
         rightIcon: null,
       );
-    } else if (_censusState == CensusState.ERROR) {
+    } else if (process.censusState == CensusState.ERROR) {
       return ListItem(
         mainText: "Unable to check if you are part of the census",
         mainTextMultiline: 3,

@@ -10,6 +10,7 @@ class Ent {
   Feed feed;
   List<Process> processess;
   String lang = "default";
+  bool entityMetadataUpdated = false;
 
   Ent(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -17,13 +18,19 @@ class Ent {
   }
 
   update() async {
-    this.entityMetadata = await fetchEntityData(this.entityReference);
+    try {
+      this.entityMetadata = await fetchEntityData(this.entityReference);
+      entityMetadataUpdated = true;
+    } catch (e) {
+      entityMetadataUpdated = false;
+      return;
+    }
 
-    //TOOD Not make Process directly.
+    //TOOD Should only create procees that does not exist locally
     // - check activeProcess from entity
     // - make new Process if they don't exists locally
     // - call Process.update() on each of them
-  
+
     final processessMetadata =
         await fetchProcessess(this.entityReference, this.entityMetadata);
     this.processess = processessMetadata.map((processMetadata) {
@@ -81,8 +88,7 @@ class Ent {
   }
 
   syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
-
-    final _processess = processesBloc.value.where((process) {
+    final processessMetadata = processesBloc.value.where((process) {
       /*
       //Process is listed as active
       bool isActive = entityMetadata.votingProcesses.active
@@ -91,14 +97,17 @@ class Ent {
 
           */
       //Process belongs to the org that created it.
-      bool isFromEntity =
-          process.meta[META_ENTITY_ID] == entitySummary.entityId;
-      return isFromEntity;
+
+      return process.meta[META_ENTITY_ID] == entitySummary.entityId;
     }).toList();
 
-    final processessMetadata = _processess.length > 0 ? _processess : null;
-    this.processess = processessMetadata.map((processMetadata) {
-      return new Process(processMetadata);
-    }).toList();
+    if (processessMetadata.length == 0)
+      this.processess = null;
+    else
+      this.processess = processessMetadata.map((processMetadata) {
+        final process = new Process(processMetadata);
+        process.syncLocal();
+        return process;
+      }).toList();
   }
 }
