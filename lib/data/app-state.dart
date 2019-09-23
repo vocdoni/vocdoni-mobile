@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:vocdoni/controllers/account.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/settings.dart';
 
@@ -55,6 +56,8 @@ class AppStateBloc extends GenericBloc<AppState> {
       ..bootnodes = gwStore;
 
     state.add(newState);
+
+    await syncBlockHeight();
   }
 
   @override
@@ -88,6 +91,20 @@ class AppStateBloc extends GenericBloc<AppState> {
     } catch (err) {
       print("ERR: $err");
     }
+  }
+
+  syncBlockHeight() async {
+    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+    try {
+      int blockHeight = await getBlockHeight(dvoteGw);
+      vochainBlockRef = blockHeight;
+    } catch (e) {
+      vochainBlockRef = 0;
+    }
+    vochainTimeRef = DateTime.now();
   }
 
   selectIdentity(int identityIdx) {
