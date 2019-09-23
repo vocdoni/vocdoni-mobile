@@ -53,6 +53,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
+        forceHeader: true,
         appBarTitle: "Loading",
         avatarText: "",
         avatarHexSource: ent.entityReference.entityId,
@@ -74,13 +75,15 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return ListItem(
         mainText: "Loading details...",
         rightIcon: null,
+        isSpinning: true,
       );
     if (status == "fail")
       return ListItem(
-        mainText: "Unable to load details",
+        mainText: "Unable to update details",
         purpose: Purpose.DANGER,
-        rightIcon: FeatherIcons.refreshCw,
+        rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
+        rightIcon: FeatherIcons.refreshCw,
       );
     if (status == "ok") return Container();
   }
@@ -90,6 +93,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: ent.entityMetadata.media.header,
         headerTag:
             ent.entityReference.entityId + ent.entityMetadata.media.header,
+        forceHeader: true,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
@@ -118,6 +122,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
+    children.add(buildStatus(_status));
     children.add(buildFeedItem(context, ent));
     children.add(buildParticipationItem(context, ent));
     children.addAll(buildActionList(context, ent));
@@ -163,7 +168,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       mainText: "Feed",
       rightText: postsNum.toString(),
       rightTextIsBadge: true,
-      disabled: postsNum==0,
+      disabled: postsNum == 0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
@@ -178,7 +183,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       mainText: "Participation",
       rightText: processNum.toString(),
       rightTextIsBadge: true,
-      disabled: processNum==0,
+      disabled: processNum == 0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/participation", arguments: ent);
       },
@@ -288,7 +293,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     return false;
   }
-
 
   Future<void> fetchVisibleActions(Ent ent) async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
@@ -485,6 +489,18 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       });
       await _ent.update();
       if (_ent == null) return;
+      if (_ent.entityMetadataUpdated) {
+        setState(() {
+          _ent = _ent;
+          _status = "ok";
+        });
+      } else {
+        setState(() {
+          _ent = _ent;
+          _status = "fail";
+        });
+        return;
+      }
       if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
       if (account.isSubscribed(_ent.entityReference)) _ent.save();
 

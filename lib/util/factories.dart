@@ -3,6 +3,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -45,6 +47,22 @@ Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
       ]);
 }
 
+getFriendlyTimeLeftNumber(DateTime date, String unit) {
+  final timeLeft = DateTime.now().difference(date);
+  if (unit == 'days') return timeLeft.inDays;
+  if (unit == 'hours') return timeLeft.inHours;
+  if (unit == 'min') return timeLeft.inMinutes;
+  return timeLeft.inSeconds;
+}
+
+getFriendlyTimeLeftUnit(DateTime date) {
+  final timeLeft = DateTime.now().difference(date);
+  if (timeLeft.inDays > 2) return 'days';
+  if (timeLeft.inHours > 2) return 'hours';
+  if (timeLeft.inMinutes > 2) return 'min';
+  return 'sec';
+}
+
 makeElementTag({String entityId, String cardId, String elementId}) {
   return entityId + cardId + elementId;
 }
@@ -54,17 +72,38 @@ onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
       arguments: FeedPostArgs(ent: ent, post: post));
 }
 
-buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
+String validUriOrNull(String str) {
+  try {
+    final uri = Uri.parse(str);
+    if (uri.scheme == "") return null;
+    return str;
+  } catch (e) {
+    return null;
+  }
+}
+
+buildProcessCard({BuildContext ctx, Ent ent, Process process}) {
+  final gwInfo = selectRandomGatewayInfo();
+
+  //TODO Do not open a connection to check each process time
+  final DVoteGateway dvoteGw =
+      DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+  
+  String timeUnits = getFriendlyTimeLeftUnit(process.getEndDate());
+  int timeLeft = getFriendlyTimeLeftNumber(process.getEndDate(), timeUnits);
+  /*getProcessRemainingTime(process.meta[META_PROCESS_ID],process.startBlock, process.numberOfBlocks, dvoteGw).then((timeLeft){
+    //TODO set timeleft
+  });*/
   return BaseCard(
     onTap: () {
       Navigator.pushNamed(ctx, "/entity/participation/poll",
           arguments: PollPageArgs(ent: ent, process: process));
     },
-    image: process.details.headerImage,
+    image: validUriOrNull(process.processMetadata.details.headerImage),
     imageTag: makeElementTag(
         entityId: ent.entityReference.entityId,
-        cardId: process.meta[META_PROCESS_ID],
-        elementId: process.details.headerImage),
+        cardId: process.processMetadata.meta[META_PROCESS_ID],
+        elementId: process.processMetadata.details.headerImage),
     children: <Widget>[
       DashboardRow(
         children: <Widget>[
@@ -83,7 +122,9 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
           DashboardItem(
             label: "Time left",
             item: DashboardText(
-                mainText: "2", secondaryText: " days", purpose: Purpose.GOOD),
+                mainText: timeLeft.toString(),
+                secondaryText: " days",
+                purpose: Purpose.GOOD),
           ),
           DashboardItem(
             label: "Vote now!",
@@ -95,21 +136,21 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
           ),
         ],
       ),
-      buildProcessTitle(ent, process),
+      buildProcessTitle(ent, process.processMetadata),
     ],
   );
 }
 
 Widget buildProcessTitle(Ent ent, ProcessMetadata process) {
-  String title = process.details.title[ent.entityMetadata.languages[0]];
+  String title = process.details.title.values.first;
   return ListItem(
     // mainTextTag: process.meta['processId'] + title,
     mainText: title,
     mainTextFullWidth: true,
-    secondaryText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+    secondaryText: ent.entityMetadata.name.values.first,
     avatarUrl: ent.entityMetadata.media.avatar,
     avatarHexSource: ent.entityReference.entityId,
-    avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+    avatarText: ent.entityMetadata.name.values.first,
     rightIcon: null,
   );
 }

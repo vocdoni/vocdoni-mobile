@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -15,13 +16,11 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
-
-enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
+import 'package:intl/intl.dart';
 
 class PollPageArgs {
   Ent ent;
-  ProcessMetadata process;
-
+  Process process;
   PollPageArgs({this.ent, this.process});
 }
 
@@ -34,44 +33,43 @@ class _PollPageState extends State<PollPage> {
   List<String> _answers = [];
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
-  CensusState _censusState = CensusState.UNKNOWN;
-  bool _isCheckingCensus = true;
   bool _hasVoted = false;
 
   @override
   void didChangeDependencies() {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
-    ProcessMetadata process = args.process;
-    process.details.questions.forEach((question) {
-      _answers.add("");
-    });
+    Process process = args.process;
+    if (_answers.length == 0)
+      process.processMetadata.details.questions.forEach((question) {
+        _answers.add("");
+      });
 
     checkResponseState();
+    if (process.censusState == CensusState.UNKNOWN) process.checkCensusState();
+
     super.didChangeDependencies();
   }
 
   @override
-  @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
     Ent ent = args.ent;
-    ProcessMetadata process = args.process;
+    Process process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl = process.details.headerImage == null
-        ? null
-        : process.details.headerImage;
+    String headerUrl =
+        validUriOrNull(process.processMetadata.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
                 entityId: ent.entityReference.entityId,
-                cardId: process.meta[META_PROCESS_ID],
+                cardId: process.processMetadata.meta[META_PROCESS_ID],
                 elementId: headerUrl),
-        avatarHexSource: process.meta['processId'],
+        avatarHexSource: process.processMetadata.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -113,20 +111,20 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, ProcessMetadata process) {
+  getScaffoldChildren(BuildContext context, Ent ent, Process process) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, ent, process));
+    children.add(buildTitle(context, ent, process.processMetadata));
     children.add(Summary(
-      text: process.details.description['default'],
+      text: process.processMetadata.details.description['default'],
       maxLines: 5,
     ));
-    children.add(buildPollItem(context, process));
+    children.add(buildPollItem(context, process.processMetadata));
     children.add(buildCensusItem(context, process));
     children.add(buildTimeItem(context, process));
-    children.addAll(buildQuestions(context, process));
+    children.addAll(buildQuestions(context, process.processMetadata));
     children.add(Section());
-    children.add(buildSubmitInfo());
+    children.add(buildSubmitInfo(process));
     children.add(buildSubmitVoteButton(context, process));
 
     return children;
@@ -161,32 +159,32 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildCensusItem(BuildContext context, ProcessMetadata process) {
+  buildCensusItem(BuildContext context, Process process) {
     String text = "Checking census";
     Purpose purpose = null;
     IconData icon = null;
 
-    if (_censusState == CensusState.UNKNOWN) {
+    if (process.censusState == CensusState.UNKNOWN) {
       text = "Check census state";
     }
 
-    if (_censusState == CensusState.CHECKING) {
+    if (process.censusState == CensusState.CHECKING) {
       text = "Checking census";
     }
 
-    if (_censusState == CensusState.IN) {
+    if (process.censusState == CensusState.IN) {
       text = "You are in the census";
       purpose = Purpose.GOOD;
       icon = FeatherIcons.check;
     }
 
-    if (_censusState == CensusState.OUT) {
-      text = "You are in the census";
+    if (process.censusState == CensusState.OUT) {
+      text = "You are NOT in the census";
       purpose = Purpose.DANGER;
       icon = FeatherIcons.x;
     }
 
-    if (_censusState == CensusState.ERROR) {
+    if (process.censusState == CensusState.ERROR) {
       text = "Unable to check census";
       icon = FeatherIcons.alertTriangle;
     }
@@ -194,15 +192,15 @@ class _PollPageState extends State<PollPage> {
     return ListItem(
       icon: FeatherIcons.users,
       mainText: text,
-      isSpinning: _isCheckingCensus,
+      isSpinning: process.censusState==CensusState.CHECKING,
       onTap: () {
-        setState(() {
-          _isCheckingCensus = true;
-        });
+        process.checkCensusState();
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
-      purpose: _censusState == CensusState.ERROR ? Purpose.DANGER : null,
+      purpose: process.censusState == CensusState.ERROR
+          ? Purpose.DANGER
+          : Purpose.NONE,
     );
   }
 
@@ -215,10 +213,11 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildTimeItem(BuildContext context, ProcessMetadata process) {
+  buildTimeItem(BuildContext context, Process process) {
+    String formattedTime = 	DateFormat("dd/MM, H:m:s").format(process.getEndDate()); 
     return ListItem(
       icon: FeatherIcons.clock,
-      mainText: "This process ends in 3h",
+      mainText: "Process ends on "+formattedTime,
       //secondaryText: "18/09/2019 at 19:00",
       rightIcon: null,
       disabled: false,
@@ -256,7 +255,8 @@ class _PollPageState extends State<PollPage> {
     }
   }
 
-  buildSubmitVoteButton(BuildContext ctx, ProcessMetadata processMetadata) {
+  buildSubmitVoteButton(BuildContext ctx, Process process) {
+    if (process.censusState != CensusState.IN) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -264,25 +264,31 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled: _responsesAreValid == false,
+          isDisabled:
+              _responsesAreValid == false || process.censusState != CensusState.IN,
           onTap: () {
-            onSubmit(ctx, processMetadata);
+            onSubmit(ctx, process.processMetadata);
           }),
     );
   }
 
   onSubmit(ctx, processMetadata) async {
-    var privateKey = await Navigator.push(
+    var encryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
                 account.identity.keys[0].encryptedPrivateKey)));
-    if (privateKey == null || privateKey is InvalidPatternError) {
+    if (encryptionKey == null || encryptionKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
+
+    var intAnswers = _answers.map(int.parse).toList();
+
+    final privateKey = await decryptString(
+        account.identity.keys[0].encryptedPrivateKey, encryptionKey);
 
     await Navigator.push(
         ctx,
@@ -291,25 +297,40 @@ class _PollPageState extends State<PollPage> {
             builder: (context) => PollPackaging(
                 privateKey: privateKey,
                 processMetadata: processMetadata,
-                answers: _answers)));
-    if (privateKey == null || privateKey is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid",
-          context: ctx, purpose: Purpose.DANGER);
-      return;
-    }
+                answers: intAnswers)));
   }
 
-  buildSubmitInfo() {
-    return _responsesAreValid == false
-        ? ListItem(
-            mainText: _responsesStateMessage,
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          )
-        : ListItem(
-            mainText: _responsesStateMessage,
-            rightIcon: null,
-          );
+  buildSubmitInfo(Process process) {
+    if (process.censusState == CensusState.IN) {
+      return _responsesAreValid == false
+          ? ListItem(
+              mainText: _responsesStateMessage,
+              purpose: Purpose.WARNING,
+              rightIcon: null,
+            )
+          : ListItem(
+              mainText: _responsesStateMessage,
+              rightIcon: null,
+            );
+    } else if (process.censusState == CensusState.OUT) {
+      return ListItem(
+        mainText: "You are not part of this census",
+        secondaryText:
+            "Register to this organization to participate in the future",
+        secondaryTextMultiline: 5,
+        purpose: Purpose.HIGHLIGHT,
+        rightIcon: null,
+      );
+    } else if (process.censusState == CensusState.ERROR) {
+      return ListItem(
+        mainText: "Unable to check if you are part of the census",
+        mainTextMultiline: 3,
+        secondaryText: "Please, try to validate again.",
+        secondaryTextMultiline: 5,
+        purpose: Purpose.WARNING,
+        rightIcon: null,
+      );
+    }
   }
 
   buildShareButton(BuildContext context, Ent ent) {

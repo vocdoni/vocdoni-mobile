@@ -27,7 +27,7 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
 
   try {
-    final gwInfo = _selectRandomGatewayInfo();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -47,7 +47,7 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
 Future<List<ProcessMetadata>> fetchProcessess(
     EntityReference entityReference, EntityMetadata entityMetadata) async {
   try {
-    final gwInfo = _selectRandomGatewayInfo();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -55,7 +55,8 @@ Future<List<ProcessMetadata>> fetchProcessess(
 
     List<ProcessMetadata> activeProcessess = await getProcessesMetadata(
         entityMetadata.votingProcesses.active, dvoteGw, web3Gw);
-    for (int i = 0; i < entityMetadata.votingProcesses.active.length; i++) {
+
+    for (int i = 0; i < activeProcessess.length; i++) {
       activeProcessess[i].meta[META_PROCESS_ID] =
           entityMetadata.votingProcesses.active[i];
       activeProcessess[i].meta[META_ENTITY_ID] = entityReference.entityId;
@@ -63,8 +64,8 @@ Future<List<ProcessMetadata>> fetchProcessess(
 
     return activeProcessess;
   } catch (err) {
-    if (!kReleaseMode) print(err);
-    throw FetchError("The Active processess can't be fetched");
+  
+    throw FetchError("Unable to fetch active processess");
   }
 }
 
@@ -77,7 +78,7 @@ Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     return null;
   else if (!(entityMetadata.newsFeed[lang] is String)) return null;
 
-  final gw = _selectRandomGatewayInfo();
+  final gw = selectRandomGatewayInfo();
 
   final String contentUri = entityMetadata.newsFeed[lang];
 
@@ -106,7 +107,7 @@ class FetchError implements Exception {
   String toString() => 'FetchError: $msg';
 }
 
-GatewayInfo _selectRandomGatewayInfo() {
+GatewayInfo selectRandomGatewayInfo() {
   if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
     return null;
 

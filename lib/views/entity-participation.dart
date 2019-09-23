@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
@@ -24,7 +25,7 @@ class _EntityParticipationState extends State<EntityParticipation> {
       body: ListView.builder(
         itemCount: ent.processess.length,
         itemBuilder: (BuildContext ctx, int index) {
-          final ProcessMetadata process = ent.processess[index];
+          final Process process = ent.processess[index];
           return buildProcessCard(ctx:ctx,ent: ent, process:process);
         },
       ),

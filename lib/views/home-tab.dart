@@ -1,12 +1,13 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
 class CardContentWrapper {
   final Ent ent;
-  final ProcessMetadata process;
+  final Process process;
   final FeedPost post;
   final DateTime date;
 
@@ -29,8 +30,8 @@ class HomeTab extends StatelessWidget {
         });
       }
       if (ent.processess != null) {
-        ent.processess.forEach((ProcessMetadata process) {
-          DateTime date = getDateFromBlockNumber(process.startBlock);
+        ent.processess.forEach((Process process) {
+          DateTime date = getDateFromBlockNumber(process.processMetadata.startBlock);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: null, process: process);
           items.add(item);

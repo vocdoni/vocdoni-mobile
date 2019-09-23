@@ -9,34 +9,38 @@ class ScaffoldWithImage extends StatefulWidget {
   final String avatarHexSource;
   final String headerImageUrl;
   final String headerTag;
+  final bool forceHeader ;
   final String avatarUrl;
   final Builder builder;
   final Widget leftElement;
   final List<Widget> Function(BuildContext) actionsBuilder;
 
-  const ScaffoldWithImage(
-      {this.appBarTitle,
-      this.avatarText,
-      this.avatarHexSource,
-      this.headerImageUrl,
-      this.headerTag,
-      this.avatarUrl,
-      this.builder,
-      this.leftElement,
-      this.actionsBuilder,
-      });
+  const ScaffoldWithImage({
+    this.appBarTitle,
+    this.avatarText,
+    this.avatarHexSource,
+    this.headerImageUrl,
+    this.headerTag,
+    this.forceHeader = false,
+    this.avatarUrl,
+    this.builder,
+    this.leftElement,
+    this.actionsBuilder,
+  });
 
   @override
   _ScaffoldWithImageState createState() => _ScaffoldWithImageState();
 }
 
-class _ScaffoldWithImageState extends State<ScaffoldWithImage>  with TickerProviderStateMixin{
+class _ScaffoldWithImageState extends State<ScaffoldWithImage>
+    with TickerProviderStateMixin {
   bool collapsed = false;
   @override
   Widget build(context) {
     bool hasAvatar = widget.avatarUrl != null || widget.avatarText != null;
     bool hasHeaderImage = widget.headerImageUrl != null;
-    double headerImageHeight = hasHeaderImage ? 400 : 300;
+    double headerImageHeight =
+        hasHeaderImage ? 400 : widget.forceHeader ? 200 : 0;
     double avatarHeight = hasAvatar ? iconSizeHuge : 16;
     double totalHeaderHeight = headerImageHeight + avatarHeight * 0.5;
     double interpolationHeight = 64;

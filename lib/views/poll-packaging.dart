@@ -1,16 +1,18 @@
+import 'package:dvote/dvote.dart';
 import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/summary.dart';
+import 'package:vocdoni/util/api.dart';
 
 class PollPackaging extends StatefulWidget {
   final String privateKey;
   final ProcessMetadata processMetadata;
-  final List<String> answers;
+  final List<int> answers;
 
   PollPackaging({this.privateKey, this.processMetadata, this.answers});
 
@@ -19,7 +21,56 @@ class PollPackaging extends StatefulWidget {
 }
 
 class _PollPackagingState extends State<PollPackaging> {
-  int _current_step = 0;
+  int _currentStep;
+  Map<String, String> _envelope;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStep = 0;
+    stepMakeEnvelop();
+  }
+
+  void stepMakeEnvelop() async {
+    Map<String, String> envelope = await generatePollVoteEnvelope(
+        widget.answers,
+        widget.processMetadata.census.merkleRoot,
+        widget.processMetadata.meta[META_PROCESS_ID],
+        widget.privateKey);
+
+    setState(() {
+      _envelope = envelope;
+      _currentStep = _currentStep + 1;
+    });
+
+    stepSend();
+  }
+
+  void stepSend() async {
+    final gwInfo = selectRandomGatewayInfo();
+
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+    try {
+      bool success = false;
+      success = await sumbitEnvelope(
+          _envelope, widget.processMetadata.meta[META_PROCESS_ID], dvoteGw);
+
+      if (success) {
+        setState(() {
+          _currentStep = _currentStep + 1;
+        });
+      }
+      else{
+        debugPrint("failed to send the vote");
+      }
+    } catch (error) {
+      
+       //Todo: handle timeut
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +82,7 @@ class _PollPackagingState extends State<PollPackaging> {
             children: <Widget>[
               Spacer(),
               Section(
-                text: "Preparing vote",
+                text: "Preparing vote " + _currentStep.toString(),
                 withDectoration: false,
               ),
               /*Summary(
@@ -39,9 +90,9 @@ class _PollPackagingState extends State<PollPackaging> {
                   text:
                       "This may take some time, please do not close this screen"),*/
               buildStep("Sigining", "Signed", 0),
-              buildStep("Generating proof", "Proof generated", 1),
-              buildStep("Sending", "Sent", 2),
-              buildStep("Waiting confirmation", "Confirmed", 3),
+              // buildStep("Generating proof", "Proof generated", 1),
+              buildStep("Sending", "Sent", 1),
+              buildStep("Waiting confirmation", "Confirmed", 2),
               Spacer(),
               Padding(
                 padding: EdgeInsets.all(48),
@@ -54,10 +105,9 @@ class _PollPackagingState extends State<PollPackaging> {
                     //isDisabled: true,
                     onTap: () {
                       setState(() {
-                        _current_step++;
+                        _currentStep++;
                       });
-                      if(_current_step==5)
-                       Navigator.pop(context, false);
+                      if (_currentStep == 5) Navigator.pop(context, false);
                     }),
               ),
             ],
@@ -69,16 +119,16 @@ class _PollPackagingState extends State<PollPackaging> {
 
   Widget buildStep(String presentText, String pastText, int step) {
     String text = presentText;
-    if (_current_step == step)
+    if (_currentStep == step)
       text = presentText;
-    else if (_current_step > step) text = pastText;
+    else if (_currentStep > step) text = pastText;
     return ListItem(
       mainText: text,
-      rightIcon: _current_step > step ? FeatherIcons.check : null,
-      isSpinning: _current_step == step,
+      rightIcon: _currentStep > step ? FeatherIcons.check : null,
+      isSpinning: _currentStep == step,
       rightTextPurpose: Purpose.GOOD,
-      isBold: _current_step == step,
-      disabled: _current_step < step,
+      isBold: _currentStep == step,
+      disabled: _currentStep < step,
     );
   }
 }

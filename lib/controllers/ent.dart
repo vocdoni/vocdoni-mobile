@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -7,8 +7,10 @@ class Ent {
   EntityReference entityReference;
   EntityMetadata entityMetadata;
   Feed feed;
-  List<ProcessMetadata> processess;
+  List<Process> processess;
   String lang = "default";
+  bool entityMetadataUpdated = false;
+  bool processessMetadataUpdated = false;
 
   Ent(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -16,9 +18,30 @@ class Ent {
   }
 
   update() async {
-    this.entityMetadata = await fetchEntityData(this.entityReference);
-    this.processess =
-        await fetchProcessess(this.entityReference, this.entityMetadata);
+    try {
+      this.entityMetadata = await fetchEntityData(this.entityReference);
+      entityMetadataUpdated = true;
+    } catch (e) {
+      entityMetadataUpdated = false;
+      return;
+    }
+
+    //TOOD Should only create procees that does not exist locally
+    // - check activeProcess from entity
+    // - make new Process if they don't exists locally
+    // - call Process.update() on each of them
+    try {
+      final processessMetadata =
+          await fetchProcessess(this.entityReference, this.entityMetadata);
+      this.processess = processessMetadata.map((processMetadata) {
+        return new Process(processMetadata);
+      }).toList();
+      processessMetadataUpdated = true;
+    } catch (e) {
+      processessMetadataUpdated = false;
+      this.processess = null;
+    }
+
     this.feed = await fetchEntityNewsFeed(
         this.entityReference, this.entityMetadata, this.lang);
   }
@@ -27,8 +50,8 @@ class Ent {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);
     if (this.processess != null) {
-      for (ProcessMetadata process in this.processess) {
-        await processesBloc.add(process);
+      for (Process process in this.processess) {
+        process.save();
       }
     }
     if (this.feed != null)
@@ -71,19 +94,26 @@ class Ent {
   }
 
   syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
-    final _processess = processesBloc.value.where((process) {
+    final processessMetadata = processesBloc.value.where((process) {
+      /*
       //Process is listed as active
       bool isActive = entityMetadata.votingProcesses.active
               .indexOf(process.meta[META_PROCESS_ID]) !=
           -1;
+
+          */
       //Process belongs to the org that created it.
-      bool isFromEntity =
-          process.meta[META_ENTITY_ID] == entitySummary.entityId;
-      return isActive && isFromEntity;
+
+      return process.meta[META_ENTITY_ID] == entitySummary.entityId;
     }).toList();
 
-    entityMetadata.votingProcesses.active.forEach((processId) {});
-
-    this.processess = _processess.length > 0 ? _processess : null;
+    if (processessMetadata.length == 0)
+      this.processess = null;
+    else
+      this.processess = processessMetadata.map((processMetadata) {
+        final process = new Process(processMetadata);
+        process.syncLocal();
+        return process;
+      }).toList();
   }
 }
