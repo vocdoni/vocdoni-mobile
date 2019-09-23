@@ -3,6 +3,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
@@ -83,7 +84,7 @@ String validUriOrNull(String str) {
   }
 }
 
-buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
+buildProcessCard({BuildContext ctx, Ent ent, Process process}) {
   //
   final gwInfo = selectRandomGatewayInfo();
 
@@ -99,11 +100,11 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
       Navigator.pushNamed(ctx, "/entity/participation/poll",
           arguments: PollPageArgs(ent: ent, process: process));
     },
-    image: validUriOrNull(process.details.headerImage),
+    image: validUriOrNull(process.processMetadata.details.headerImage),
     imageTag: makeElementTag(
         entityId: ent.entityReference.entityId,
-        cardId: process.meta[META_PROCESS_ID],
-        elementId: process.details.headerImage),
+        cardId: process.processMetadata.meta[META_PROCESS_ID],
+        elementId: process.processMetadata.details.headerImage),
     children: <Widget>[
       DashboardRow(
         children: <Widget>[
@@ -136,7 +137,7 @@ buildProcessCard({BuildContext ctx, Ent ent, ProcessMetadata process}) {
           ),
         ],
       ),
-      buildProcessTitle(ent, process),
+      buildProcessTitle(ent, process.processMetadata),
     ],
   );
 }

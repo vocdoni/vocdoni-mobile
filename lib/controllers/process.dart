@@ -10,11 +10,10 @@ class Process {
 
   Process(ProcessMetadata processMetadata) {
     this.processMetadata = processMetadata;
-    syncLocal();
   }
 
   update() async {
-    syncLocal();
+    
     // Sync process times
     // Check if active?
     // Check census
@@ -25,6 +24,7 @@ class Process {
   }
 
   save() async {
+     await processesBloc.add(this.processMetadata);
     // Save metadata
     // Save census_state
     // Save census_size
@@ -32,8 +32,5 @@ class Process {
     // Save results
   }
 
-  syncLocal() async {
-   // Recover processMetadata
-   // Recover 
-  }
+  
 }

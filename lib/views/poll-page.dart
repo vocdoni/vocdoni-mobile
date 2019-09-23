@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/factories.dart';
@@ -21,7 +22,7 @@ enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
 
 class PollPageArgs {
   Ent ent;
-  ProcessMetadata process;
+  Process process;
 
   PollPageArgs({this.ent, this.process});
 }
@@ -43,14 +44,14 @@ class _PollPageState extends State<PollPage> {
   void didChangeDependencies() {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
-    ProcessMetadata process = args.process;
+    Process process = args.process;
     if (_answers.length == 0)
-      process.details.questions.forEach((question) {
+      process.processMetadata.details.questions.forEach((question) {
         _answers.add("");
       });
 
     checkResponseState();
-    if (_censusState == CensusState.UNKNOWN) checkProof(process);
+    if (_censusState == CensusState.UNKNOWN) checkProof(process.processMetadata);
 
     super.didChangeDependencies();
   }
@@ -59,27 +60,27 @@ class _PollPageState extends State<PollPage> {
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
     Ent ent = args.ent;
-    ProcessMetadata process = args.process;
+    Process process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl = validUriOrNull(process.details.headerImage);
+    String headerUrl = validUriOrNull(process.processMetadata.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
                 entityId: ent.entityReference.entityId,
-                cardId: process.meta[META_PROCESS_ID],
+                cardId: process.processMetadata.meta[META_PROCESS_ID],
                 elementId: headerUrl),
-        avatarHexSource: process.meta['processId'],
+        avatarHexSource: process.processMetadata.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
               delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, ent, process)),
+                  getScaffoldChildren(ctx, ent, process.processMetadata)),
             );
           },
         ));

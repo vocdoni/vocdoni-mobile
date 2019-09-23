@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -7,7 +8,7 @@ class Ent {
   EntityReference entityReference;
   EntityMetadata entityMetadata;
   Feed feed;
-  List<ProcessMetadata> processess;
+  List<Process> processess;
   String lang = "default";
 
   Ent(EntityReference entitySummary) {
@@ -17,8 +18,17 @@ class Ent {
 
   update() async {
     this.entityMetadata = await fetchEntityData(this.entityReference);
-    this.processess =
+
+    //TOOD Not make Process directly.
+    // - check activeProcess from entity
+    // - make new Process if they don't exists locally
+    // - call Process.update() on each of them
+  
+    final processessMetadata =
         await fetchProcessess(this.entityReference, this.entityMetadata);
+    this.processess = processessMetadata.map((processMetadata) {
+      return new Process(processMetadata);
+    }).toList();
     this.feed = await fetchEntityNewsFeed(
         this.entityReference, this.entityMetadata, this.lang);
   }
@@ -27,8 +37,8 @@ class Ent {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);
     if (this.processess != null) {
-      for (ProcessMetadata process in this.processess) {
-        await processesBloc.add(process);
+      for (Process process in this.processess) {
+        process.save();
       }
     }
     if (this.feed != null)
@@ -71,19 +81,24 @@ class Ent {
   }
 
   syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
+
     final _processess = processesBloc.value.where((process) {
+      /*
       //Process is listed as active
       bool isActive = entityMetadata.votingProcesses.active
               .indexOf(process.meta[META_PROCESS_ID]) !=
           -1;
+
+          */
       //Process belongs to the org that created it.
       bool isFromEntity =
           process.meta[META_ENTITY_ID] == entitySummary.entityId;
-      return isActive && isFromEntity;
+      return isFromEntity;
     }).toList();
 
-    entityMetadata.votingProcesses.active.forEach((processId) {});
-
-    this.processess = _processess.length > 0 ? _processess : null;
+    final processessMetadata = _processess.length > 0 ? _processess : null;
+    this.processess = processessMetadata.map((processMetadata) {
+      return new Process(processMetadata);
+    }).toList();
   }
 }
