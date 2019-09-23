@@ -1,5 +1,4 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -11,6 +10,7 @@ class Ent {
   List<Process> processess;
   String lang = "default";
   bool entityMetadataUpdated = false;
+  bool processessMetadataUpdated = false;
 
   Ent(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -30,12 +30,18 @@ class Ent {
     // - check activeProcess from entity
     // - make new Process if they don't exists locally
     // - call Process.update() on each of them
+    try {
+      final processessMetadata =
+          await fetchProcessess(this.entityReference, this.entityMetadata);
+      this.processess = processessMetadata.map((processMetadata) {
+        return new Process(processMetadata);
+      }).toList();
+      processessMetadataUpdated = true;
+    } catch (e) {
+      processessMetadataUpdated = false;
+      this.processess = null;
+    }
 
-    final processessMetadata =
-        await fetchProcessess(this.entityReference, this.entityMetadata);
-    this.processess = processessMetadata.map((processMetadata) {
-      return new Process(processMetadata);
-    }).toList();
     this.feed = await fetchEntityNewsFeed(
         this.entityReference, this.entityMetadata, this.lang);
   }
