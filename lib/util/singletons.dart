@@ -22,6 +22,8 @@ EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
 ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
 FeedBloc newsFeedsBloc = FeedBloc();
 Account  account;
+int vochainBlockRef;
+DateTime vochainTimeRef;
 
 // Global scaffold key for snackbars
 GlobalKey<ScaffoldState> homePageScaffoldKey = new GlobalKey<ScaffoldState>();
