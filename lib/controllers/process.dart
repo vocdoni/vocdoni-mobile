@@ -8,7 +8,7 @@ enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
 class Process {
   ProcessMetadata processMetadata;
   String lang = "default";
-  CensusState censusState;
+  CensusState censusState = CensusState.UNKNOWN;
 
   Process(ProcessMetadata processMetadata) {
     this.processMetadata = processMetadata;
