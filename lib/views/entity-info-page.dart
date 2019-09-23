@@ -53,6 +53,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
+        forceHeader: true,
         appBarTitle: "Loading",
         avatarText: "",
         avatarHexSource: ent.entityReference.entityId,
@@ -92,7 +93,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: ent.entityMetadata.media.header,
         headerTag:
             ent.entityReference.entityId + ent.entityMetadata.media.header,
-            forceHeader: true,
+        forceHeader: true,
         appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
         avatarUrl: ent.entityMetadata.media.avatar,
         avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
@@ -167,7 +168,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       mainText: "Feed",
       rightText: postsNum.toString(),
       rightTextIsBadge: true,
-      disabled: postsNum==0,
+      disabled: postsNum == 0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/feed", arguments: ent);
       },
@@ -182,7 +183,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       mainText: "Participation",
       rightText: processNum.toString(),
       rightTextIsBadge: true,
-      disabled: processNum==0,
+      disabled: processNum == 0,
       onTap: () {
         Navigator.pushNamed(context, "/entity/participation", arguments: ent);
       },
@@ -292,7 +293,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     return false;
   }
-
 
   Future<void> fetchVisibleActions(Ent ent) async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
@@ -489,11 +489,17 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       });
       await _ent.update();
       if (_ent == null) return;
-      if(_ent.entityMetadataUpdated==false){
+      if (_ent.entityMetadataUpdated) {
         setState(() {
-        _ent = _ent;
-        _status = "fail";
-      });
+          _ent = _ent;
+          _status = "ok";
+        });
+      } else {
+        setState(() {
+          _ent = _ent;
+          _status = "fail";
+        });
+        return;
       }
       if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
       if (account.isSubscribed(_ent.entityReference)) _ent.save();
