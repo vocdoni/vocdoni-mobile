@@ -3,12 +3,12 @@ import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 // Watchout changing this
-enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
+enum CensusState { IN, OUT, UNKNOWN, ERROR }
 
 class Process {
   ProcessMetadata processMetadata;
   String lang = "default";
-  CensusState censusState;
+  CensusState censusState = CensusState.UNKNOWN;
 
   Process(ProcessMetadata processMetadata) {
     this.processMetadata = processMetadata;
@@ -38,12 +38,16 @@ class Process {
   }
 
   syncCensusState() {
-    censusState = CensusState.values.firstWhere(
-        (e) =>
-            e.toString() ==
-            'CensusState.' +
-                this.processMetadata.meta[META_PROCESS_CENSUS_STATE],
-        orElse: () => censusState = CensusState.UNKNOWN);
+    try {
+      censusState = CensusState.values.firstWhere(
+          (e) =>
+              e.toString() ==
+              'CensusState.' +
+                  this.processMetadata.meta[META_PROCESS_CENSUS_STATE],
+          orElse: () => censusState = CensusState.UNKNOWN);
+    } catch (e) {
+      censusState = CensusState.UNKNOWN;
+    }
   }
 
   saveCensusState() {
@@ -52,8 +56,6 @@ class Process {
   }
 
   checkCensusState() async {
-    censusState = CensusState.CHECKING;
-
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -68,23 +70,50 @@ class Process {
       else
         censusState = CensusState.OUT;
     } catch (error) {
-      censusState = CensusState.OUT;
+      censusState = CensusState.ERROR;
     }
+    saveCensusState();
   }
 
-  DateTime getStartDate(){
-     return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
-        processMetadata.startBlock));
+  Future<int> getTotalParticipants() async {
+    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    int total = await getCensusSize(processMetadata.census.merkleRoot, dvoteGw);
+    return total;
+  }
+
+  Future<int> getCurrentParticipants() async {
+    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    int current =
+        await getEnvelopeHeight(processMetadata.meta[META_PROCESS_ID], dvoteGw);
+    return current;
+  }
+
+  Future<double> getParticipation() async {
+    int total = await getTotalParticipants();
+    int current = await getCurrentParticipants();
+    int p = (current / total * 1000).round();
+    return p / 10;
+  }
+
+  DateTime getStartDate() {
+    return DateTime.now().add(getDurationUntilBlock(
+        vochainTimeRef, vochainBlockRef, processMetadata.startBlock));
   }
 
   DateTime getEndDate() {
-    return DateTime.now().add(getDurationUntilBlock(vochainTimeRef, vochainBlockRef,
+    return DateTime.now().add(getDurationUntilBlock(
+        vochainTimeRef,
+        vochainBlockRef,
         processMetadata.startBlock + processMetadata.numberOfBlocks));
   }
 
   //TODO use dvote api instead once they removed getEnvelopHeight
   Duration getDurationUntilBlock(
-    DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
+      DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
     int blocksLeftFromReference = blockNumber - referenceBlock;
     Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
     Duration nowToReference = DateTime.now().difference(referenceTimeStamp);

@@ -1,6 +1,6 @@
 import 'package:dvote/net/gateway.dart';
 import "package:flutter/material.dart";
-import 'package:vocdoni/widgets/BaseCard.dart';
+import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/baseAvatar.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';

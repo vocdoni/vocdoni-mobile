@@ -2,16 +2,10 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/widgets/BaseCard.dart';
+import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:dvote/dvote.dart';
-// import 'package:vocdoni/views/entity.dart';
-// import 'package:vocdoni/widgets/pageTitle.dart';
-// import 'package:vocdoni/widgets/section.dart';
 
 class EntitiesTab extends StatelessWidget {
-  
-
   EntitiesTab();
 
   @override

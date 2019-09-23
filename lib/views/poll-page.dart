@@ -34,49 +34,50 @@ class _PollPageState extends State<PollPage> {
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
   bool _hasVoted = false;
+  bool _checkingCensus = false;
+  Process _process;
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
-    Process process = args.process;
+    _process = args.process;
     if (_answers.length == 0)
-      process.processMetadata.details.questions.forEach((question) {
+      _process.processMetadata.details.questions.forEach((question) {
         _answers.add("");
       });
 
     checkResponseState();
-    if (process.censusState == CensusState.UNKNOWN) process.checkCensusState();
-
-    super.didChangeDependencies();
+    if (_process.censusState == CensusState.UNKNOWN)
+      checkCensusState();
   }
 
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
     Ent ent = args.ent;
-    Process process = args.process;
+    //Process process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
 
     String headerUrl =
-        validUriOrNull(process.processMetadata.details.headerImage);
+        validUriOrNull(_process.processMetadata.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
                 entityId: ent.entityReference.entityId,
-                cardId: process.processMetadata.meta[META_PROCESS_ID],
+                cardId: _process.processMetadata.meta[META_PROCESS_ID],
                 elementId: headerUrl),
-        avatarHexSource: process.processMetadata.meta['processId'],
+        avatarHexSource: _process.processMetadata.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, ent, process)),
+              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
             );
           },
         ));
@@ -111,29 +112,29 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, Process process) {
+  getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     //children.add(buildTest());
-    children.add(buildTitle(context, ent, process.processMetadata));
+    children.add(buildTitle(context, ent));
     children.add(Summary(
-      text: process.processMetadata.details.description['default'],
+      text: _process.processMetadata.details.description['default'],
       maxLines: 5,
     ));
-    children.add(buildPollItem(context, process.processMetadata));
-    children.add(buildCensusItem(context, process));
-    children.add(buildTimeItem(context, process));
-    children.addAll(buildQuestions(context, process.processMetadata));
+    children.add(buildPollItem(context));
+    children.add(buildCensusItem(context));
+    children.add(buildTimeItem(context));
+    children.addAll(buildQuestions(context));
     children.add(Section());
-    children.add(buildSubmitInfo(process));
-    children.add(buildSubmitVoteButton(context, process));
+    children.add(buildSubmitInfo());
+    children.add(buildSubmitVoteButton(context));
 
     return children;
   }
 
-  buildTitle(BuildContext context, Ent ent, ProcessMetadata process) {
-    String title = process.details.title['default'];
+  buildTitle(BuildContext context, Ent ent) {
+    String title = _process.processMetadata.details.title['default'];
     return ListItem(
-      // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: process.meta[META_PROCESS_ID], elementId: process.details.headerImage)
+      // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
       mainText: title,
       secondaryText: ent.entityMetadata.name['default'],
       isTitle: true,
@@ -159,52 +160,63 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildCensusItem(BuildContext context, Process process) {
-    String text = "Checking census";
-    Purpose purpose = null;
-    IconData icon = null;
+  buildCensusItem(BuildContext context) {
+    String text;
+    Purpose purpose;
+    IconData icon;
 
-    if (process.censusState == CensusState.UNKNOWN) {
+    if (_process.censusState == CensusState.UNKNOWN) {
       text = "Check census state";
     }
 
-    if (process.censusState == CensusState.CHECKING) {
-      text = "Checking census";
-    }
-
-    if (process.censusState == CensusState.IN) {
+    if (_process.censusState == CensusState.IN) {
       text = "You are in the census";
       purpose = Purpose.GOOD;
       icon = FeatherIcons.check;
     }
 
-    if (process.censusState == CensusState.OUT) {
-      text = "You are NOT in the census";
+    if (_process.censusState == CensusState.OUT) {
+      text = "You are not in this census";
       purpose = Purpose.DANGER;
       icon = FeatherIcons.x;
     }
 
-    if (process.censusState == CensusState.ERROR) {
+    if (_process.censusState == CensusState.ERROR) {
       text = "Unable to check census";
       icon = FeatherIcons.alertTriangle;
+    }
+
+    if (_checkingCensus) {
+      text = "Checking census";
     }
 
     return ListItem(
       icon: FeatherIcons.users,
       mainText: text,
-      isSpinning: process.censusState==CensusState.CHECKING,
+      isSpinning: _checkingCensus,
       onTap: () {
-        process.checkCensusState();
+        checkCensusState();
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
-      purpose: process.censusState == CensusState.ERROR
+      purpose: _process.censusState == CensusState.ERROR
           ? Purpose.DANGER
           : Purpose.NONE,
     );
   }
 
-  buildPollItem(BuildContext context, ProcessMetadata process) {
+  checkCensusState() async {
+    setState((){
+      _checkingCensus = true;
+    });
+    await _process.checkCensusState();
+    setState(() {
+      _process = _process;
+      _checkingCensus = false;
+    });
+  }
+
+  buildPollItem(BuildContext context) {
     return ListItem(
       icon: FeatherIcons.barChart2,
       mainText: "Not anonymous poll",
@@ -213,11 +225,12 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildTimeItem(BuildContext context, Process process) {
-    String formattedTime = 	DateFormat("dd/MM, H:m:s").format(process.getEndDate()); 
+  buildTimeItem(BuildContext context) {
+    String formattedTime =
+        DateFormat("dd/MM, H:m:s").format(_process.getEndDate());
     return ListItem(
       icon: FeatherIcons.clock,
-      mainText: "Process ends on "+formattedTime,
+      mainText: "Process ends on " + formattedTime,
       //secondaryText: "18/09/2019 at 19:00",
       rightIcon: null,
       disabled: false,
@@ -255,8 +268,8 @@ class _PollPageState extends State<PollPage> {
     }
   }
 
-  buildSubmitVoteButton(BuildContext ctx, Process process) {
-    if (process.censusState != CensusState.IN) return Container();
+  buildSubmitVoteButton(BuildContext ctx) {
+    if (_process.censusState != CensusState.IN) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -264,10 +277,10 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled:
-              _responsesAreValid == false || process.censusState != CensusState.IN,
+          isDisabled: _responsesAreValid == false ||
+              _process.censusState != CensusState.IN,
           onTap: () {
-            onSubmit(ctx, process.processMetadata);
+            onSubmit(ctx, _process.processMetadata);
           }),
     );
   }
@@ -300,8 +313,8 @@ class _PollPageState extends State<PollPage> {
                 answers: intAnswers)));
   }
 
-  buildSubmitInfo(Process process) {
-    if (process.censusState == CensusState.IN) {
+  buildSubmitInfo() {
+    if (_process.censusState == CensusState.IN) {
       return _responsesAreValid == false
           ? ListItem(
               mainText: _responsesStateMessage,
@@ -312,7 +325,7 @@ class _PollPageState extends State<PollPage> {
               mainText: _responsesStateMessage,
               rightIcon: null,
             );
-    } else if (process.censusState == CensusState.OUT) {
+    } else if (_process.censusState == CensusState.OUT) {
       return ListItem(
         mainText: "You are not part of this census",
         secondaryText:
@@ -321,7 +334,7 @@ class _PollPageState extends State<PollPage> {
         purpose: Purpose.HIGHLIGHT,
         rightIcon: null,
       );
-    } else if (process.censusState == CensusState.ERROR) {
+    } else if (_process.censusState == CensusState.ERROR) {
       return ListItem(
         mainText: "Unable to check if you are part of the census",
         mainTextMultiline: 3,
@@ -355,8 +368,8 @@ class _PollPageState extends State<PollPage> {
         ));
   }
 
-  List<Widget> buildQuestions(BuildContext ctx, ProcessMetadata process) {
-    if (process.details.questions.length == 0) {
+  List<Widget> buildQuestions(BuildContext ctx) {
+    if (_process.processMetadata.details.questions.length == 0) {
       return [buildError("No questions defined")];
     }
 
@@ -364,7 +377,7 @@ class _PollPageState extends State<PollPage> {
     int questionIndex = 0;
 
     for (ProcessMetadata_Details_Question question
-        in process.details.questions) {
+        in _process.processMetadata.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }

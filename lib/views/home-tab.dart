@@ -4,6 +4,7 @@ import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
   final Ent ent;
@@ -31,7 +32,8 @@ class HomeTab extends StatelessWidget {
       }
       if (ent.processess != null) {
         ent.processess.forEach((Process process) {
-          DateTime date = getDateFromBlockNumber(process.processMetadata.startBlock);
+          DateTime date =
+              getDateFromBlockNumber(process.processMetadata.startBlock);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: null, process: process);
           items.add(item);
@@ -50,8 +52,7 @@ class HomeTab extends StatelessWidget {
           if (item.post != null)
             return buildFeedPostCard(ctx: ctx, ent: item.ent, post: item.post);
           else if (item.process != null)
-            return buildProcessCard(
-                ctx: ctx, ent: item.ent, process: item.process);
+            return PollCard(ent: item.ent, process: item.process);
           else
             return Container();
         });
