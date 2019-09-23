@@ -489,6 +489,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       });
       await _ent.update();
       if (_ent == null) return;
+      if (!mounted) return;
       if (_ent.entityMetadataUpdated) {
         setState(() {
           _ent = _ent;

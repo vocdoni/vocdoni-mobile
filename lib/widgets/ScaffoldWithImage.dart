@@ -79,12 +79,14 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage>
 
                   if (o < collapseTrigger && collapsed == false) {
                     Future.delayed(const Duration(milliseconds: 100), () {
+                      if (!mounted) return;
                       setState(() {
                         collapsed = true;
                       });
                     });
                   } else if (o >= collapseTrigger && collapsed == true) {
                     Future.delayed(const Duration(milliseconds: 100), () {
+                      if (!mounted) return;
                       setState(() {
                         collapsed = false;
                       });
