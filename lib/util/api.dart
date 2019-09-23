@@ -1,4 +1,5 @@
 import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/controllers/process.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -57,9 +58,11 @@ Future<List<ProcessMetadata>> fetchProcessess(
         entityMetadata.votingProcesses.active, dvoteGw, web3Gw);
 
     for (int i = 0; i < activeProcessess.length; i++) {
+     String activeProcess = activeProcessess[i].meta[META_PROCESS_ID];
       activeProcessess[i].meta[META_PROCESS_ID] =
           entityMetadata.votingProcesses.active[i];
       activeProcessess[i].meta[META_ENTITY_ID] = entityReference.entityId;
+      activeProcessess[i].meta[META_PROCESS_CENSUS_STATE] = CensusState.UNKNOWN.toString(); 
     }
 
     return activeProcessess;
