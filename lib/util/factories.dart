@@ -1,17 +1,8 @@
 import 'package:dvote/dvote.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
-import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
-import 'package:vocdoni/widgets/dashboardItem.dart';
-import 'package:vocdoni/widgets/dashboardRow.dart';
-import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:intl/intl.dart';
