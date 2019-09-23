@@ -3,7 +3,7 @@ import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 // Watchout changing this
-enum CensusState { IN, OUT, UNKNOWN, CHECKING, ERROR }
+enum CensusState { IN, OUT, UNKNOWN, ERROR }
 
 class Process {
   ProcessMetadata processMetadata;
@@ -56,8 +56,6 @@ class Process {
   }
 
   checkCensusState() async {
-    censusState = CensusState.CHECKING;
-
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -72,8 +70,9 @@ class Process {
       else
         censusState = CensusState.OUT;
     } catch (error) {
-      censusState = CensusState.OUT;
+      censusState = CensusState.ERROR;
     }
+    saveCensusState();
   }
 
   DateTime getStartDate() {

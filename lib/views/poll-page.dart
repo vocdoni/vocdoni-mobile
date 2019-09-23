@@ -34,6 +34,7 @@ class _PollPageState extends State<PollPage> {
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
   bool _hasVoted = false;
+  bool _checkingCensus = false;
   Process _process;
 
   @override
@@ -49,7 +50,7 @@ class _PollPageState extends State<PollPage> {
 
     checkResponseState();
     if (_process.censusState == CensusState.UNKNOWN)
-      _process.checkCensusState();
+      checkCensusState();
   }
 
   @override
@@ -76,8 +77,7 @@ class _PollPageState extends State<PollPage> {
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, ent)),
+              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
             );
           },
         ));
@@ -169,10 +169,6 @@ class _PollPageState extends State<PollPage> {
       text = "Check census state";
     }
 
-    if (_process.censusState == CensusState.CHECKING) {
-      text = "Checking census";
-    }
-
     if (_process.censusState == CensusState.IN) {
       text = "You are in the census";
       purpose = Purpose.GOOD;
@@ -180,7 +176,7 @@ class _PollPageState extends State<PollPage> {
     }
 
     if (_process.censusState == CensusState.OUT) {
-      text = "You are NOT in the census";
+      text = "You are not in this census";
       purpose = Purpose.DANGER;
       icon = FeatherIcons.x;
     }
@@ -190,12 +186,16 @@ class _PollPageState extends State<PollPage> {
       icon = FeatherIcons.alertTriangle;
     }
 
+    if (_checkingCensus) {
+      text = "Checking census";
+    }
+
     return ListItem(
       icon: FeatherIcons.users,
       mainText: text,
-      isSpinning: _process.censusState == CensusState.CHECKING,
+      isSpinning: _checkingCensus,
       onTap: () {
-        _process.checkCensusState();
+        checkCensusState();
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
@@ -203,6 +203,17 @@ class _PollPageState extends State<PollPage> {
           ? Purpose.DANGER
           : Purpose.NONE,
     );
+  }
+
+  checkCensusState() async {
+    setState((){
+      _checkingCensus = true;
+    });
+    await _process.checkCensusState();
+    setState(() {
+      _process = _process;
+      _checkingCensus = false;
+    });
   }
 
   buildPollItem(BuildContext context) {
