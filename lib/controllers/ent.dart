@@ -23,7 +23,7 @@ class Ent {
       entityMetadataUpdated = true;
     } catch (e) {
       entityMetadataUpdated = false;
-      return;
+      
     }
 
     //TOOD Should only create procees that does not exist locally
