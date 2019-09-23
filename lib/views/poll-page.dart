@@ -50,6 +50,8 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
+    if (_censusState == CensusState.UNKNOWN) checkProof(process);
+
     super.didChangeDependencies();
   }
 
@@ -180,7 +182,7 @@ class _PollPageState extends State<PollPage> {
     }
 
     if (_censusState == CensusState.OUT) {
-      text = "You are in the census";
+      text = "You are NOT in the census";
       purpose = Purpose.DANGER;
       icon = FeatherIcons.x;
     }
@@ -199,7 +201,8 @@ class _PollPageState extends State<PollPage> {
       },
       rightTextPurpose: purpose,
       rightIcon: icon,
-      purpose: _censusState == CensusState.ERROR ? Purpose.DANGER : null,
+      purpose:
+          _censusState == CensusState.ERROR ? Purpose.DANGER : Purpose.NONE,
     );
   }
 
@@ -208,6 +211,7 @@ class _PollPageState extends State<PollPage> {
 
     setState(() {
       _isCheckingCensus = true;
+      _censusState = CensusState.CHECKING;
     });
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
@@ -218,11 +222,24 @@ class _PollPageState extends State<PollPage> {
     try {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
+      if (proof == "GOOD") {
+        setState(() {
+          _isCheckingCensus = false;
+          _censusState = CensusState.IN;
+        });
+      } else {
+        setState(() {
+          _isCheckingCensus = false;
+          _censusState = CensusState.OUT;
+        });
+      }
     } catch (error) {
       setState(() {
-      _isCheckingCensus = false;
-      _censusState = CensusState.ERROR;
-    });
+//_isCheckingCensus = false;
+        //_censusState = CensusState.ERROR;
+        _isCheckingCensus = false;
+        _censusState = CensusState.OUT;
+      });
     }
 
     setState(() {
@@ -281,6 +298,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx, ProcessMetadata processMetadata) {
+    if (_censusState != CensusState.IN) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -288,7 +306,8 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled: _responsesAreValid == false,
+          isDisabled:
+              _responsesAreValid == false || _censusState != CensusState.IN,
           onTap: () {
             onSubmit(ctx, processMetadata);
           }),
@@ -324,16 +343,36 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitInfo() {
-    return _responsesAreValid == false
-        ? ListItem(
-            mainText: _responsesStateMessage,
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          )
-        : ListItem(
-            mainText: _responsesStateMessage,
-            rightIcon: null,
-          );
+    if (_censusState == CensusState.IN) {
+      return _responsesAreValid == false
+          ? ListItem(
+              mainText: _responsesStateMessage,
+              purpose: Purpose.WARNING,
+              rightIcon: null,
+            )
+          : ListItem(
+              mainText: _responsesStateMessage,
+              rightIcon: null,
+            );
+    } else if (_censusState == CensusState.OUT) {
+      return ListItem(
+        mainText: "You are not part of this census",
+        secondaryText:
+            "Register to this organization to participate in the future",
+        secondaryTextMultiline: 5,
+        purpose: Purpose.HIGHLIGHT,
+        rightIcon: null,
+      );
+    } else if (_censusState == CensusState.ERROR) {
+      return ListItem(
+        mainText: "Unable to check if you are part of the census",
+        mainTextMultiline: 3,
+        secondaryText: "Please, try to validate again.",
+        secondaryTextMultiline: 5,
+        purpose: Purpose.WARNING,
+        rightIcon: null,
+      );
+    }
   }
 
   buildShareButton(BuildContext context, Ent ent) {
