@@ -74,13 +74,15 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return ListItem(
         mainText: "Loading details...",
         rightIcon: null,
+        isSpinning: true,
       );
     if (status == "fail")
       return ListItem(
-        mainText: "Unable to load details",
+        mainText: "Unable to update details",
         purpose: Purpose.DANGER,
-        rightIcon: FeatherIcons.refreshCw,
+        rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
+        rightIcon: FeatherIcons.refreshCw,
       );
     if (status == "ok") return Container();
   }
@@ -119,6 +121,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
+    children.add(buildStatus(_status));
     children.add(buildFeedItem(context, ent));
     children.add(buildParticipationItem(context, ent));
     children.addAll(buildActionList(context, ent));
@@ -486,6 +489,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       });
       await _ent.update();
       if (_ent == null) return;
+      if(_ent.entityMetadataUpdated==false){
+        setState(() {
+        _ent = _ent;
+        _status = "fail";
+      });
+      }
       if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
       if (account.isSubscribed(_ent.entityReference)) _ent.save();
 
