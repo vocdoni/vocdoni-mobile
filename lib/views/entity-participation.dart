@@ -2,9 +2,8 @@ import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/controllers/process.dart';
-import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/widgets/pollCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:dvote/dvote.dart';
 
 class EntityParticipation extends StatefulWidget {
   @override
@@ -12,7 +11,6 @@ class EntityParticipation extends StatefulWidget {
 }
 
 class _EntityParticipationState extends State<EntityParticipation> {
-
   @override
   Widget build(context) {
     final Ent ent = ModalRoute.of(context).settings.arguments;
@@ -26,13 +24,11 @@ class _EntityParticipationState extends State<EntityParticipation> {
         itemCount: ent.processess.length,
         itemBuilder: (BuildContext ctx, int index) {
           final Process process = ent.processess[index];
-          return buildProcessCard(ctx:ctx,ent: ent, process:process);
+          return PollCard(ent: ent, process: process);
         },
       ),
     );
   }
-
-  
 
   Widget buildNoProcessesess(BuildContext ctx) {
     return Scaffold(
