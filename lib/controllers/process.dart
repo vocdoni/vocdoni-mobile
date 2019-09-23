@@ -75,6 +75,29 @@ class Process {
     saveCensusState();
   }
 
+  Future<int> getTotalParticipants() async {
+    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    int total = await getCensusSize(processMetadata.census.merkleRoot, dvoteGw);
+    return total;
+  }
+
+  Future<int> getCurrentParticipants() async {
+    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    int current =
+        await getEnvelopeHeight(processMetadata.meta[META_PROCESS_ID], dvoteGw);
+    return current;
+  }
+
+  Future<double> getParticipation() async {
+    int total = await getTotalParticipants();
+    int current = await getCurrentParticipants();
+    return current / total;
+  }
+
   DateTime getStartDate() {
     return DateTime.now().add(getDurationUntilBlock(
         vochainTimeRef, vochainBlockRef, processMetadata.startBlock));
