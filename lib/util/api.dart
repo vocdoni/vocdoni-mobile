@@ -55,7 +55,8 @@ Future<List<ProcessMetadata>> fetchProcessess(
 
     List<ProcessMetadata> activeProcessess = await getProcessesMetadata(
         entityMetadata.votingProcesses.active, dvoteGw, web3Gw);
-    for (int i = 0; i < entityMetadata.votingProcesses.active.length; i++) {
+
+    for (int i = 0; i < activeProcessess.length; i++) {
       activeProcessess[i].meta[META_PROCESS_ID] =
           entityMetadata.votingProcesses.active[i];
       activeProcessess[i].meta[META_ENTITY_ID] = entityReference.entityId;
@@ -63,8 +64,8 @@ Future<List<ProcessMetadata>> fetchProcessess(
 
     return activeProcessess;
   } catch (err) {
-    if (!kReleaseMode) print(err);
-    throw FetchError("The Active processess can't be fetched");
+  
+    throw FetchError("Unable to fetch active processess");
   }
 }
 
