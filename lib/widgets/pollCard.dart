@@ -26,7 +26,7 @@ class PollCard extends StatefulWidget {
 }
 
 class _PollCardState extends State<PollCard> {
-  String _participation = "";
+  String _participation = "-";
 
   @override
   void initState() {
@@ -38,26 +38,18 @@ class _PollCardState extends State<PollCard> {
 
   updatePartcipation() async {
     double p = await widget.process.getParticipation();
+    if (!mounted) return;
     setState(() {
-      _participation = p.toString();
+      _participation = p == -1 ? '-' : p.toString();
     });
   }
 
   @override
   Widget build(ctx) {
-    // Widget build({BuildContext ctx, Ent ent, Process process}) {
-    final gwInfo = selectRandomGatewayInfo();
-
-    //TODO Do not open a connection to check each process time
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-
     String timeUnits = getFriendlyTimeLeftUnit(widget.process.getEndDate());
     int timeLeft =
         getFriendlyTimeLeftNumber(widget.process.getEndDate(), timeUnits);
-    /*getProcessRemainingTime(process.meta[META_PROCESS_ID],process.startBlock, process.numberOfBlocks, dvoteGw).then((timeLeft){
-    //TODO set timeleft
-  });*/
+
     return BaseCard(
       onTap: () {
         Navigator.pushNamed(ctx, "/entity/participation/poll",
@@ -81,13 +73,15 @@ class _PollCardState extends State<PollCard> {
             DashboardItem(
               label: "Participation",
               item: DashboardText(
-                  mainText: _participation, secondaryText: "%", purpose: Purpose.WARNING),
+                  mainText: _participation,
+                  secondaryText: _participation == '-' ? '' : '%',
+                  purpose: Purpose.WARNING),
             ),
             DashboardItem(
               label: "Time left",
               item: DashboardText(
                   mainText: timeLeft.toString(),
-                  secondaryText: " days",
+                  secondaryText: timeUnits,
                   purpose: Purpose.GOOD),
             ),
             DashboardItem(

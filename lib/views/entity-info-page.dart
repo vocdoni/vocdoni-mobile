@@ -29,6 +29,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
   bool _isRegistered = false;
+  String _errorMessage;
 
   @override
   void didChangeDependencies() {
@@ -73,13 +74,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   Widget buildStatus(String status) {
     if (status == "loading")
       return ListItem(
-        mainText: "Loading details...",
+        mainText: "Updating details...",
         rightIcon: null,
         isSpinning: true,
       );
     if (status == "fail")
       return ListItem(
-        mainText: "Unable to update details",
+        mainText: _errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
@@ -483,41 +484,35 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
-    try {
-      setState(() {
-        _status = "loading";
-      });
-      await _ent.update();
-      if (_ent == null) return;
-      if (!mounted) return;
-      if (_ent.entityMetadataUpdated) {
-        setState(() {
-          _ent = _ent;
-          _status = "ok";
-        });
-      } else {
-        setState(() {
-          _ent = _ent;
-          _status = "fail";
-        });
-        return;
-      }
-      if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
-      if (account.isSubscribed(_ent.entityReference)) _ent.save();
+    setState(() {
+      _status = "loading";
+    });
 
-      if (!mounted) return;
-      setState(() {
-        _ent = _ent;
-        _status = "ok";
-      });
-    } catch (err) {
-      if (!mounted) return;
-      setState(() {
-        _ent = _ent;
+    await _ent.update();
 
-        _status = "fail";
-      });
+    String errorMessage = "";
+    bool fail = false;
+
+    if (_ent.entityMetadataUpdated == false) {
+      errorMessage = "Unable to retrieve details";
+      fail = true;
+    } else if (_ent.processessMetadataUpdated == false) {
+      errorMessage = "Unable to retrieve processess";
+      fail = true;
+    } else if (_ent.feedUpdated == false) {
+      errorMessage = "Unable to retrieve news feed";
+      fail = true;
     }
+
+    if (!mounted) return;
+    setState(() {
+      _ent = _ent;
+      _status = fail ? "fail" : "ok";
+      _errorMessage = errorMessage;
+    });
+
+    if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
+    if (account.isSubscribed(_ent.entityReference)) _ent.save();
   }
 
   goBack(BuildContext ctx) {
