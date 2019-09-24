@@ -59,7 +59,7 @@ class AppStateBloc extends GenericBloc<AppState> {
       print("Error: Unable to load the boot nodes");
     });
 
-    await syncBlockHeight();
+    syncBlockHeight();
   }
 
 
