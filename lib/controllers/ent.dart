@@ -11,6 +11,7 @@ class Ent {
   String lang = "default";
   bool entityMetadataUpdated = false;
   bool processessMetadataUpdated = false;
+  bool feedUpdated = false;
 
   Ent(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -23,9 +24,14 @@ class Ent {
       entityMetadataUpdated = true;
     } catch (e) {
       entityMetadataUpdated = false;
-      
     }
-
+    try {
+      await updateProcesses();
+      processessMetadataUpdated = true;
+    } catch (e) {
+      processessMetadataUpdated = false;
+    }
+    /*
     //TOOD Should only create procees that does not exist locally
     // - check activeProcess from entity
     // - make new Process if they don't exists locally
@@ -40,10 +46,55 @@ class Ent {
     } catch (e) {
       processessMetadataUpdated = false;
       this.processess = null;
+    }*/
+    try {
+      this.feed = await fetchEntityNewsFeed(
+          this.entityReference, this.entityMetadata, this.lang);
+      feedUpdated = true;
+    } catch (e) {
+      feedUpdated = false;
     }
+  }
 
-    this.feed = await fetchEntityNewsFeed(
-        this.entityReference, this.entityMetadata, this.lang);
+  updateProcesses() async {
+    // go over active processess
+    // if Process exists, update
+    // If Process does not exits, create new one and update
+
+    final updatedProcessess =
+        this.entityMetadata.votingProcesses.active.map((String processId) {
+      Process p;
+      //Get  Process if exist
+      if (this.processess != null) {
+        p = this.processess.firstWhere((Process process) {
+          return process.processId == processId;
+        }, orElse: () {
+          return null;
+        });
+      }
+
+      // Update
+      if (p != null) {
+        p.update();
+        return p;
+      } else {
+        //Make new one and update
+        final newProcess = new Process(
+            processId: processId, entityReference: this.entityReference);
+        newProcess.update();
+        return newProcess;
+      }
+    }).toList();
+
+    this.processess = updatedProcessess;
+  }
+
+  syncProcessess() {
+    this.processess =
+        this.entityMetadata.votingProcesses.active.map((String processId) {
+      return new Process(
+          processId: processId, entityReference: this.entityReference);
+    }).toList();
   }
 
   save() async {
@@ -65,7 +116,7 @@ class Ent {
       this.processess = null;
     } else {
       syncFeed(entityReference, this.entityMetadata);
-      syncProcessess(this.entityMetadata, this.entityReference);
+      //syncProcessess(this.entityMetadata, this.entityReference);
     }
   }
 
@@ -93,7 +144,7 @@ class Ent {
     this.feed = feeds.length > 0 ? this.feed = feeds[0] : this.feed = null;
   }
 
-  syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
+  /*//syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
     final processessMetadata = processesBloc.value.where((process) {
       /*
       //Process is listed as active
@@ -115,5 +166,5 @@ class Ent {
         process.syncLocal();
         return process;
       }).toList();
-  }
+  }*/
 }

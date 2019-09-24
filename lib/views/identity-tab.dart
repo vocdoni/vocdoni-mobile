@@ -38,7 +38,7 @@ class IdentityTab extends StatelessWidget {
           onTap: () => showIdentityBackup(ctx),
         ),
         ListItem(
-            mainText: "Identities",
+            mainText: "Log out",
             onTap: () {
               onLogOut(ctx);
             }),

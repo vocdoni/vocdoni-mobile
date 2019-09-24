@@ -161,7 +161,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     .setExecuteAfterPermissionGranted(
                                         true) // default true
                                     .scan();
-                                    Uri link = Uri.parse(string);
+                                Uri link;
+                                try {
+                                  link = Uri.parse(string);
+                                } catch (e) {}
                                 handleIncomingLink(link, context);
                               },
                               backgroundColor: colorDescription,

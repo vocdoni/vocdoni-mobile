@@ -45,6 +45,26 @@ Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   }
 }
 
+Future<ProcessMetadata> fetchProcess(
+    EntityReference entityReference, String processId) async {
+  try {
+    final gwInfo = selectRandomGatewayInfo();
+
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
+
+    ProcessMetadata process =
+        await getProcessMetadata(processId, dvoteGw, web3Gw);
+    process.meta[META_PROCESS_ID] = processId;
+    process.meta[META_ENTITY_ID] = entityReference.entityId;
+    process.meta[META_PROCESS_CENSUS_STATE] = CensusState.UNKNOWN.toString();
+    return process;
+  } catch (err) {
+    throw FetchError("Unable to fetch process " + processId);
+  }
+}
+
 Future<List<ProcessMetadata>> fetchProcessess(
     EntityReference entityReference, EntityMetadata entityMetadata) async {
   try {
@@ -58,16 +78,16 @@ Future<List<ProcessMetadata>> fetchProcessess(
         entityMetadata.votingProcesses.active, dvoteGw, web3Gw);
 
     for (int i = 0; i < activeProcessess.length; i++) {
-     String activeProcess = activeProcessess[i].meta[META_PROCESS_ID];
+      String activeProcess = activeProcessess[i].meta[META_PROCESS_ID];
       activeProcessess[i].meta[META_PROCESS_ID] =
           entityMetadata.votingProcesses.active[i];
       activeProcessess[i].meta[META_ENTITY_ID] = entityReference.entityId;
-      activeProcessess[i].meta[META_PROCESS_CENSUS_STATE] = CensusState.UNKNOWN.toString(); 
+      activeProcessess[i].meta[META_PROCESS_CENSUS_STATE] =
+          CensusState.UNKNOWN.toString();
     }
 
     return activeProcessess;
   } catch (err) {
-  
     throw FetchError("Unable to fetch active processess");
   }
 }

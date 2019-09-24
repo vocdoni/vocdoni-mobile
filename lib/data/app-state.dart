@@ -22,12 +22,6 @@ class AppStateBloc extends GenericBloc<AppState> {
     await super.init();
   }
 
-  Future<void> load() async {
-    await loadBootNodes().catchError((_) {
-      print("Error: Unable to load the boot nodes");
-    });
-  }
-
   /// Read and construct the data structures
   @override
   Future<void> restore() async {
@@ -57,8 +51,17 @@ class AppStateBloc extends GenericBloc<AppState> {
 
     state.add(newState);
 
-    await syncBlockHeight();
+    
   }
+
+   Future<void> load() async {
+    await loadBootNodes().catchError((_) {
+      print("Error: Unable to load the boot nodes");
+    });
+
+    syncBlockHeight();
+  }
+
 
   @override
   Future<void> persist() async {
@@ -107,6 +110,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     vochainTimeRef = DateTime.now();
   }
 
+ 
   selectIdentity(int identityIdx) {
     AppState newState = AppState()
       ..selectedIdentity = identityIdx
