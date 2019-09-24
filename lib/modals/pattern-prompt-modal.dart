@@ -99,6 +99,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
       Navigator.pop(context, passphrase);
     } catch (err) {
       await appStateBloc.trackAuthAttemp(false);
+      if (!mounted) return;
 
       setState(() {
         patternColor = colorRed;
