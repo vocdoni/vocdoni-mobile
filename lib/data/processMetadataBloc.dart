@@ -65,6 +65,7 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
   Future<void> add(
     ProcessMetadata processMetadata,
   ) async {
+    if (processMetadata == null) return;
     final currentIndex = value.indexWhere((e) =>
         e.meta[META_PROCESS_ID] == processMetadata.meta[META_PROCESS_ID]);
     // Already exists
@@ -79,5 +80,4 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
 
     // CUSTOM OPERATIONS
   }
-
 }

@@ -81,15 +81,21 @@ class Process {
     try {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
-      if (await checkProof(
-          processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw))
-        censusState = CensusState.IN;
-      else
+      if (!(proof is String) || !proof.startsWith("0x")) {
         censusState = CensusState.OUT;
+        return;
+      }
+
+      // final valid = await checkProof(
+      //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
+      // if (!valid) {
+      //   censusState = CensusState.OUT;
+      //   return;
+      // }
+      censusState = CensusState.IN;
     } catch (error) {
       censusState = CensusState.ERROR;
     }
-    
   }
 
   censusStateToMeta() async {
