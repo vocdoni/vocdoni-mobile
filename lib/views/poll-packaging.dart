@@ -97,7 +97,7 @@ class _PollPackagingState extends State<PollPackaging> {
               Padding(
                 padding: EdgeInsets.all(48),
                 child: BaseButton(
-                    text: "Submit",
+                    text: "Return",
                     isSmall: true,
                     style: BaseButtonStyle.OUTLINE,
                     maxWidth: buttonDefaultWidth,
