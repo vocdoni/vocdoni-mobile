@@ -65,7 +65,8 @@ class Process {
     try {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
-      if (proof == "GOOD")
+      if (await checkProof(
+          processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw))
         censusState = CensusState.IN;
       else
         censusState = CensusState.OUT;

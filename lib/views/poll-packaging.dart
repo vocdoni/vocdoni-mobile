@@ -32,7 +32,7 @@ class _PollPackagingState extends State<PollPackaging> {
   }
 
   void stepMakeEnvelop() async {
-    Map<String, String> envelope = await generatePollVoteEnvelope(
+    Map<String, String> envelope = await packagePollEnvelope(
         widget.answers,
         widget.processMetadata.census.merkleRoot,
         widget.processMetadata.meta[META_PROCESS_ID],
@@ -54,8 +54,7 @@ class _PollPackagingState extends State<PollPackaging> {
 
     try {
       bool success = false;
-      success = await sumbitEnvelope(
-          _envelope, widget.processMetadata.meta[META_PROCESS_ID], dvoteGw);
+      await submitEnvelope(_envelope, dvoteGw);
 
       if (success) {
         setState(() {
