@@ -85,6 +85,13 @@ class Process {
         censusState = CensusState.OUT;
         return;
       }
+      RegExp emptyProofRegexp =
+          RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
+
+      if (emptyProofRegexp.hasMatch(proof))  // 0x0000000000.....
+        censusState = CensusState.OUT;
+      else
+        censusState = CensusState.IN;
 
       // final valid = await checkProof(
       //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
@@ -92,7 +99,6 @@ class Process {
       //   censusState = CensusState.OUT;
       //   return;
       // }
-      censusState = CensusState.IN;
     } catch (error) {
       censusState = CensusState.ERROR;
     }
