@@ -7,10 +7,11 @@ class Analytics {
   final _user$ = StreamController<String>.broadcast();
   MixpanelAnalytics _mixpanel;
   MixpanelAnalytics _mixpanelBatch;
+  String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
   Analytics() {
     _mixpanel = MixpanelAnalytics(
-      token: 'XXXX',
+      token: _mixpanelToken,
       userId$: _user$.stream,
       verbose: true,
       shouldAnonymize: true,
@@ -19,7 +20,7 @@ class Analytics {
     );
 
     _mixpanelBatch = MixpanelAnalytics.batch(
-        token: 'XXXX',
+        token: _mixpanelToken,
         userId$: _user$.stream,
         uploadInterval: Duration(seconds: 30),
         shouldAnonymize: true,
