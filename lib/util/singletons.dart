@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/account.dart';
+import 'package:vocdoni/controllers/analtyics.dart';
 import '../data/feedBloc.dart';
 import "../data/app-state.dart";
 import "../data/identityBloc.dart";
@@ -22,6 +23,7 @@ EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
 ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
 FeedBloc newsFeedsBloc = FeedBloc();
 Account  account;
+Analytics analytics;
 int vochainBlockRef;
 DateTime vochainTimeRef;
 
