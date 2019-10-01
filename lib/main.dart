@@ -1,9 +1,8 @@
-import 'package:dvote/models/dart/gateway.pb.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/views/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev-ui-avatar-color.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
@@ -13,7 +12,6 @@ import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
-
 import 'package:vocdoni/views/identity-select.dart';
 import "package:vocdoni/views/identity-create.dart";
 import 'package:vocdoni/views/identity-backup.dart';
@@ -81,6 +79,7 @@ void main() async {
       "/dev/ui-listItem": (context) => DevUiListItem(),
       "/dev/ui-card": (context) => DevUiCard(),
       "/dev/ui-avatar-colors":(context)=> DevUiAvatarColor(),
+      "/dev/analytics-tests":(context)=> AnalyticsTests(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,

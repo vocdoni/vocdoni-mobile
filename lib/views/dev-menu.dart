@@ -14,6 +14,12 @@ class DevMenu extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(
+              mainText: "Analytics",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/analytics-tests");
+              },
+            ),
+            ListItem(
                 mainText: "Add fake organizations",
                 onTap: () async {
                   await populateSampleData();
