@@ -9,7 +9,7 @@ class Analytics {
   MixpanelAnalytics _mixpanelBatch;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  Analytics() {
+  init() {
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
       userId$: _user$.stream,
@@ -27,7 +27,9 @@ class Analytics {
         shaFn: (value) => value,
         verbose: true,
         onError: (e) => () {});
+  }
 
+  setUser() {
     _user$.add(getUserId());
   }
 
@@ -36,7 +38,31 @@ class Analytics {
     return account.identity.keys[0].publicKey;
   }
 
-  track(String eventId) {
-    _mixpanel.track(event: eventId, properties: {'prop1': 'value1'});
+  //OS, OS version, screen size...
+  getSystem() {}
+
+  //lang, preferences...
+  getProfile() {}
+
+  //version, enviroment...
+  getAppDetails() {}
+
+  trackError(Error error) {}
+
+  trackPage(
+      {String pageId,
+      String entityId = null,
+      String processId = null,
+      String postTitle = null}) {
+    Map<String, String> properties = {'pageId': pageId};
+    if (entityId != null) properties.putIfAbsent('entityId', () => entityId);
+    if (processId != null) properties.putIfAbsent('processId', () => processId);
+    if (postTitle != null) properties.putIfAbsent('postTitle', () => postTitle);
+
+    _mixpanel.track(event: pageId, properties: properties);
   }
+
+  trackAction({String actionId}) {}
+
+  trackEvent({String eventId}) {}
 }
