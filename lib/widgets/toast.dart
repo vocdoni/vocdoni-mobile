@@ -57,6 +57,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _displaySnackBar(
     homePageScaffoldKey.currentState.hideCurrentSnackBar();
     return homePageScaffoldKey.currentState.showSnackBar(snackBar);
   } else if (context is BuildContext) {
+    // TODO: FAILS WHEN DISPLAYED FROM THE PATTERN LOCK SCREEN
     Scaffold.of(context).hideCurrentSnackBar();
     return Scaffold.of(context).showSnackBar(snackBar);
   }
