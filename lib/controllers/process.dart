@@ -54,6 +54,7 @@ class Process {
   }
 
   syncCensusState() {
+    if (processMetadata == null) return;
     try {
       censusState = CensusState.values.firstWhere(
           (e) =>
@@ -72,6 +73,7 @@ class Process {
   }
 
   checkCensusState() async {
+    if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -105,6 +107,7 @@ class Process {
   }
 
   censusStateToMeta() async {
+    if (processMetadata == null) return null;
     if (this.censusState == CensusState.IN ||
         this.censusState == CensusState.OUT) {
       this.processMetadata.meta[META_PROCESS_CENSUS_STATE] =
@@ -113,6 +116,7 @@ class Process {
   }
 
   Future<int> getTotalParticipants() async {
+    if (processMetadata == null) return 0;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -126,6 +130,7 @@ class Process {
   }
 
   Future<int> getCurrentParticipants() async {
+    if (processMetadata == null) return 0;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
@@ -146,15 +151,18 @@ class Process {
   }
 
   DateTime getStartDate() {
+    if (processMetadata == null) return null;
     return DateTime.now().add(getDurationUntilBlock(
         vochainTimeRef, vochainBlockRef, processMetadata.startBlock));
   }
 
   DateTime getEndDate() {
+    if (processMetadata == null) return null;
     return DateTime.now().add(getDurationUntilBlock(
         vochainTimeRef,
         vochainBlockRef,
-        processMetadata.startBlock + processMetadata.numberOfBlocks));
+        processMetadata.startBlock +
+            processMetadata.numberOfBlocks));
   }
 
   //TODO use dvote api instead once they removed getEnvelopHeight

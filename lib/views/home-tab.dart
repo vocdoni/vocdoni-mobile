@@ -32,6 +32,7 @@ class HomeTab extends StatelessWidget {
       }
       if (ent.processess != null) {
         ent.processess.forEach((Process process) {
+          if (process.processMetadata == null) return;
           DateTime date =
               getDateFromBlockNumber(process.processMetadata.startBlock);
           CardContentWrapper item = new CardContentWrapper(

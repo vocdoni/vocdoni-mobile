@@ -46,9 +46,10 @@ class _PollCardState extends State<PollCard> {
 
   @override
   Widget build(ctx) {
-    String timeUnits = getFriendlyTimeLeftUnit(widget.process.getEndDate());
+    final endDate = widget.process.getEndDate();
+    String timeUnits = endDate != null ? getFriendlyTimeLeftUnit(endDate) : "";
     int timeLeft =
-        getFriendlyTimeLeftNumber(widget.process.getEndDate(), timeUnits);
+        endDate != null ? getFriendlyTimeLeftNumber(endDate, timeUnits) : 0;
 
     return BaseCard(
       onTap: () {
