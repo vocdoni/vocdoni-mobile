@@ -7,20 +7,22 @@ import 'package:vocdoni/views/dev-ui-avatar-color.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
 import 'package:vocdoni/views/entity-feed-page.dart';
-import 'package:vocdoni/views/entity-participation.dart';
+import 'package:vocdoni/views/entity-participation-page.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'lang/index.dart';
 import 'util/singletons.dart';
-import 'package:vocdoni/views/identity-select.dart';
-import "package:vocdoni/views/identity-create.dart";
-import 'package:vocdoni/views/identity-backup.dart';
+import 'package:vocdoni/views/identity-select-page.dart';
+import "package:vocdoni/views/identity-create-page.dart";
+import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/views/dev-menu.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 import "views/home.dart";
 
 void main() async {
+  
+  analytics.init();
   // RESTORE DATA
   await appStateBloc.init();
   await entitiesBloc.init();
@@ -36,9 +38,9 @@ void main() async {
   // DETERMINE THE FIRST SCREEN
   Widget home;
   if (identitiesBloc.value.length > 0 ?? false) {
-    home = IdentitySelectScreen();
+    home = IdentitySelectPage();
   } else {
-    home = IdentityCreateScreen();
+    home = IdentityCreatePage();
   }
 
   // RUN THE APP
@@ -54,8 +56,8 @@ void main() async {
     home: home,
     routes: {
       // NO IDENTITIES YET
-      "/identity/create": (context) => IdentityCreateScreen(),
-      "/identity/select": (context) => IdentitySelectScreen(),
+      "/identity/create": (context) => IdentityCreatePage(),
+      "/identity/select": (context) => IdentitySelectPage(),
 
       // "/welcome": (context) => WelcomeOnboardingScreen(),  // ?
       // "/welcome/identity": (context) => WelcomeIdentityScreen(),
@@ -67,9 +69,9 @@ void main() async {
       "/entity": (context) => EntityInfoPage(),
       "/entity/feed": (context) => EntityFeedPage(),
       "/entity/feed/post": (context) => FeedPostPage(),
-      "/entity/participation": (context) => EntityParticipation(),
+      "/entity/participation": (context) => EntityParticipationPage(),
       "/entity/participation/poll": (context) => PollPage(),
-      "/identity/backup": (context) => IdentityBackupScreen(),
+      "/identity/backup": (context) => IdentityBackupPage(),
 
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
