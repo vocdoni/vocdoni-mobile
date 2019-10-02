@@ -1,18 +1,23 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/modals/pattern-create-modal.dart';
-// import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
-import 'package:vocdoni/widgets/toast.dart';
 import '../lang/index.dart';
 
-class IdentityCreateScreen extends StatefulWidget {
+class IdentityCreatePage extends StatefulWidget {
   @override
   _IdentityCreateScreen createState() => _IdentityCreateScreen();
 }
 
 class _IdentityCreateScreen extends State {
   bool generating = false;
+
+    @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "IdentityCreatePage");
+  }
+
 
   @override
   Widget build(context) {
@@ -26,7 +31,7 @@ class _IdentityCreateScreen extends State {
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
                 color: Color(0x00ff0000),
                 child: generating
-                    ? Text("Generating sovereign identity...",
+                    ? Text("Generating identity keys...",
                         style: TextStyle(fontSize: 18))
                     : buildWelcome(context),
               ),

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/util/factories.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -17,7 +18,27 @@ class FeedPostArgs {
   FeedPostArgs({this.ent, this.post});
 }
 
-class FeedPostPage extends StatelessWidget {
+class FeedPostPage extends StatefulWidget {
+  @override
+  _FeedPostPageState createState() => _FeedPostPageState();
+}
+
+class _FeedPostPageState extends State<FeedPostPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    try {
+      FeedPostArgs args = ModalRoute.of(super.context).settings.arguments;
+      analytics.trackPage(
+          pageId: "FeedPostPage",
+          entityId: args.ent.entityReference.entityId,
+          postTitle: args.post.title);
+    } catch (err) {
+      print(err);
+    }
+  }
+
   @override
   Widget build(ctx) {
     final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;

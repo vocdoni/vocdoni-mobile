@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/pattern.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -38,6 +39,14 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   Color patternColor = colorBlue;
   PatternStep patternStep = PatternStep.PATTERN_SETTING;
   List<int> setPattern = [];
+
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "PatternCreateModal");
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

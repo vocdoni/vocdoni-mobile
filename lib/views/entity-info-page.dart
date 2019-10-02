@@ -37,6 +37,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     try {
       _ent = ModalRoute.of(super.context).settings.arguments;
+      analytics.trackPage(
+          pageId: "EntityInfoPage", entityId: _ent.entityReference.entityId);
+
       refresh();
     } catch (err) {
       print(err);

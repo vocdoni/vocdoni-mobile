@@ -1,14 +1,8 @@
-import "dart:convert";
-import "dart:async";
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
@@ -21,6 +15,19 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    try {
+      Ent ent = ModalRoute.of(super.context).settings.arguments;
+      analytics.trackPage(
+          pageId: "EntityFeedPage", entityId: ent.entityReference.entityId);
+    } catch (err) {
+      print(err);
+    }
+  }
 
   @override
   Widget build(context) {
@@ -66,5 +73,4 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
       child: Text("Loading..."),
     ));
   }
-
 }

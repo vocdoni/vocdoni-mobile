@@ -27,6 +27,11 @@ class _PollPackagingState extends State<PollPackaging> {
   @override
   void initState() {
     super.initState();
+    analytics.trackPage(
+        pageId: "PollPackaging",
+        entityId: widget.processMetadata.meta[META_ENTITY_ID],
+        processId: widget.processMetadata.meta[META_PROCESS_ID]);
+
     _currentStep = 0;
     stepMakeEnvelop();
   }
@@ -60,13 +65,11 @@ class _PollPackagingState extends State<PollPackaging> {
         setState(() {
           _currentStep = _currentStep + 1;
         });
-      }
-      else{
+      } else {
         debugPrint("failed to send the vote");
       }
     } catch (error) {
-      
-       //Todo: handle timeut
+      //Todo: handle timeut
     }
   }
 

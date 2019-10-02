@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 class IdentityBackupArguments {
   final String alias;
@@ -70,7 +71,18 @@ class Mnemonic2Columns extends StatelessWidget {
   }
 }
 
-class IdentityBackupScreen extends StatelessWidget {
+class IdentityBackupPage extends StatefulWidget {
+  @override
+  _IdentityBackupPageState createState() => _IdentityBackupPageState();
+}
+
+class _IdentityBackupPageState extends State<IdentityBackupPage> {
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "IdentityBackupPage");
+  }
+
   @override
   Widget build(context) {
     final IdentityBackupArguments args =

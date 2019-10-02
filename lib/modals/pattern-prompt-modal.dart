@@ -33,6 +33,12 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
   Color patternColor = colorBlue;
 
   @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "PatternPrompModal");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: TopNavigation(

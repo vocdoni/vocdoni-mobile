@@ -13,8 +13,8 @@ class AnalyticsTests extends StatelessWidget {
         body: ListView(
           children: <Widget>[
             ListItem(
-              mainText: "Track 1",
-              onTap: analytics.track("Track1Tap"),
+              mainText: "Track page Page1",
+              onTap: analytics.trackPage(pageId:"Page1"),
             ),
           ],
         ));
