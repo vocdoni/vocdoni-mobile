@@ -32,12 +32,12 @@ class _PollCardState extends State<PollCard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _participation = "?";
+    // _participation = "?";
     updatePartcipation();
   }
 
   updatePartcipation() async {
-    double p = await widget.process.getParticipation();
+    int p = await widget.process.getParticipation();
     if (!mounted) return;
     setState(() {
       _participation = p == -1 ? '-' : p.toString();
@@ -113,19 +113,21 @@ class _PollCardState extends State<PollCard> {
     );
   }
 
-  getFriendlyTimeLeftNumber(DateTime date, String unit) {
+  int getFriendlyTimeLeftNumber(DateTime date, String unit) {
     final timeLeft = DateTime.now().difference(date);
-    if (unit == 'days') return timeLeft.inDays;
-    if (unit == 'hours') return timeLeft.inHours;
-    if (unit == 'min') return timeLeft.inMinutes;
+    if (unit == 'd')
+      return timeLeft.inDays;
+    else if (unit == 'h')
+      return timeLeft.inHours;
+    else if (unit == 'm') return timeLeft.inMinutes;
     return timeLeft.inSeconds;
   }
 
-  getFriendlyTimeLeftUnit(DateTime date) {
+  String getFriendlyTimeLeftUnit(DateTime date) {
     final timeLeft = DateTime.now().difference(date);
-    if (timeLeft.inDays > 2) return 'days';
-    if (timeLeft.inHours > 2) return 'hours';
-    if (timeLeft.inMinutes > 2) return 'min';
-    return 'sec';
+    if (timeLeft.inDays > 2) return 'd';
+    if (timeLeft.inHours > 2) return 'h';
+    if (timeLeft.inMinutes > 2) return 'm';
+    return 's';
   }
 }

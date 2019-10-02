@@ -49,8 +49,7 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
-    if (_process.censusState == CensusState.UNKNOWN)
-      checkCensusState();
+    if (_process.censusState == CensusState.UNKNOWN) checkCensusState();
   }
 
   @override
@@ -206,10 +205,11 @@ class _PollPageState extends State<PollPage> {
   }
 
   checkCensusState() async {
-    setState((){
+    setState(() {
       _checkingCensus = true;
     });
     await _process.checkCensusState();
+    if (!mounted) return;
     setState(() {
       _process = _process;
       _checkingCensus = false;

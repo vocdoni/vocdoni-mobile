@@ -88,7 +88,7 @@ class Process {
       RegExp emptyProofRegexp =
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
-      if (emptyProofRegexp.hasMatch(proof))  // 0x0000000000.....
+      if (emptyProofRegexp.hasMatch(proof)) // 0x0000000000.....
         censusState = CensusState.OUT;
       else
         censusState = CensusState.IN;
@@ -138,12 +138,11 @@ class Process {
     return current;
   }
 
-  Future<double> getParticipation() async {
+  Future<int> getParticipation() async {
     int total = await getTotalParticipants();
     int current = await getCurrentParticipants();
-    if (total == -1 || current == -1) return -1;
-    int p = (current / total * 1000).round();
-    return p / 10;
+    if (total <= 0 || current <= 0) return -1;
+    return (current * 100 / total).round();
   }
 
   DateTime getStartDate() {
