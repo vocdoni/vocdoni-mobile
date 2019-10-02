@@ -129,7 +129,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     });*/
 
     account = new Account();
-    analytics = new Analytics();
+    analytics.setUser();
   }
 
   setBootNodes(BootNodeGateways bootnodes) async {

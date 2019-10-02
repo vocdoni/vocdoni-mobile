@@ -22,8 +22,8 @@ IdentityBloc identitiesBloc = IdentityBloc();
 EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
 ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
 FeedBloc newsFeedsBloc = FeedBloc();
-Account  account;
-Analytics analytics;
+Account  account = Account();
+Analytics analytics = Analytics();
 int vochainBlockRef;
 DateTime vochainTimeRef;
 
