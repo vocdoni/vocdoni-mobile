@@ -4,21 +4,29 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/views/identity-backup.dart';
+import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 
-class IdentityTab extends StatelessWidget {
-
-
+class IdentityTab extends StatefulWidget {
   IdentityTab();
 
   @override
-  Widget build(ctx) {
+  _IdentityTabState createState() => _IdentityTabState();
+}
 
+class _IdentityTabState extends State<IdentityTab> {
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "IdentityTab");
+  }
+
+  @override
+  Widget build(ctx) {
     return ListView(
       children: <Widget>[
         ListItem(
@@ -28,7 +36,8 @@ class IdentityTab extends StatelessWidget {
             isBold: true,
             rightIcon: FeatherIcons.copy,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: account.identity.identityId));
+              Clipboard.setData(
+                  ClipboardData(text: account.identity.identityId));
               showMessage("Identity ID copied on the clipboard",
                   context: ctx, purpose: Purpose.GOOD);
             }),
@@ -60,8 +69,7 @@ class IdentityTab extends StatelessWidget {
   }
 
   showIdentityBackup(BuildContext ctx) async {
-    final identity =
-        identitiesBloc.value[appStateBloc.value.selectedIdentity];
+    final identity = identitiesBloc.value[appStateBloc.value.selectedIdentity];
 
     var result = await Navigator.push(
         ctx,
@@ -70,7 +78,8 @@ class IdentityTab extends StatelessWidget {
             builder: (context) =>
                 PaternPromptModal(identity.keys[0].encryptedMnemonic)));
 
-    if (result == null) return;
+    if (result == null)
+      return;
     else if (result is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);

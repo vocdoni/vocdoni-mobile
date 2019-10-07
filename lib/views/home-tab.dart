@@ -15,8 +15,19 @@ class CardContentWrapper {
   CardContentWrapper({this.ent, this.date, this.process, this.post});
 }
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   HomeTab();
+
+  @override
+  _HomeTabState createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "HomeTab");
+  }
 
   @override
   Widget build(ctx) {

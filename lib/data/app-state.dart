@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:math';
 import 'package:vocdoni/controllers/account.dart';
+import 'package:vocdoni/controllers/analtyics.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/util/api.dart';
@@ -128,6 +129,7 @@ class AppStateBloc extends GenericBloc<AppState> {
     });*/
 
     account = new Account();
+    analytics.setUser();
   }
 
   setBootNodes(BootNodeGateways bootnodes) async {

@@ -5,8 +5,19 @@ import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 
-class EntitiesTab extends StatelessWidget {
+class EntitiesTab extends StatefulWidget {
   EntitiesTab();
+
+  @override
+  _EntitiesTabState createState() => _EntitiesTabState();
+}
+
+class _EntitiesTabState extends State<EntitiesTab> {
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "EntitiesTab");
+  }
 
   @override
   Widget build(ctx) {

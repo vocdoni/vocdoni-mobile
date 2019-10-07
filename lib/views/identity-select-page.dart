@@ -7,12 +7,18 @@ import 'package:vocdoni/widgets/toast.dart';
 import '../util/singletons.dart';
 import 'package:dvote/dvote.dart';
 
-class IdentitySelectScreen extends StatefulWidget {
+class IdentitySelectPage extends StatefulWidget {
   @override
-  _IdentitySelectScreenState createState() => _IdentitySelectScreenState();
+  _IdentitySelectPageState createState() => _IdentitySelectPageState();
 }
 
-class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
+class _IdentitySelectPageState extends State<IdentitySelectPage> {
+  @override
+  void initState() {
+    super.initState();
+    analytics.trackPage(pageId: "IdentitySelectPage");
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -36,7 +42,8 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
             children: <Widget>[
               Section(text: "Select an identity"),
               buildExistingIdentities(ctx, identities),
-              ListItem(mainText: "Create a new one", onTap: () => createNew(ctx)),
+              ListItem(
+                  mainText: "Create a new one", onTap: () => createNew(ctx)),
             ],
           ),
         ));
@@ -80,7 +87,8 @@ class _IdentitySelectScreenState extends State<IdentitySelectScreen> {
             builder: (context) =>
                 PaternPromptModal(identity.keys[0].encryptedPrivateKey)));
     if (result == null || result is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid", context: ctx, purpose: Purpose.DANGER);
+      showMessage("The pattern you entered is not valid",
+          context: ctx, purpose: Purpose.DANGER);
       return;
     }
     appStateBloc.selectIdentity(idx);

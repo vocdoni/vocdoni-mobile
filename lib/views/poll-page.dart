@@ -42,6 +42,11 @@ class _PollPageState extends State<PollPage> {
     super.didChangeDependencies();
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
+    analytics.trackPage(
+          pageId: "PollPage",
+          entityId: args.ent.entityReference.entityId,
+          processId: args.process.processId);
+
     _process = args.process;
     if (_answers.length == 0)
       _process.processMetadata.details.questions.forEach((question) {

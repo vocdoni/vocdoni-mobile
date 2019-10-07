@@ -2,15 +2,29 @@ import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/controllers/ent.dart';
 import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
-class EntityParticipation extends StatefulWidget {
+class EntityParticipationPage extends StatefulWidget {
   @override
-  _EntityParticipationState createState() => _EntityParticipationState();
+  _EntityParticipationPageState createState() => _EntityParticipationPageState();
 }
 
-class _EntityParticipationState extends State<EntityParticipation> {
+class _EntityParticipationPageState extends State<EntityParticipationPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    try {
+      Ent ent = ModalRoute.of(super.context).settings.arguments;
+      analytics.trackPage(
+          pageId: "EntityParticipationPage", entityId: ent.entityReference.entityId);
+    } catch (err) {
+      print(err);
+    }
+  }
+
   @override
   Widget build(context) {
     final Ent ent = ModalRoute.of(context).settings.arguments;

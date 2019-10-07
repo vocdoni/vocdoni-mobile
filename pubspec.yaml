@@ -32,6 +32,7 @@ dependencies:
   flutter_html: ^0.10.4
   url_launcher: ^5.1.0
   path_provider: ^1.2.0
+  mixpanel_analytics: ^1.1.0
   qrcode_reader:
     git:
       url: https://github.com/bcko/flutter_qrcode_reader.git
