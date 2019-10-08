@@ -1,11 +1,13 @@
 import 'package:dvote/dvote.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 // Watchout changing this
-enum CensusState { IN, OUT, UNKNOWN, ERROR }
+enum CensusState { IN, OUT, CHECKING, UNKNOWN, ERROR }
+enum ProcessTags { CENSUS_STATE, VOTE_CONFIRMED }
 
-class Process {
+class Process extends StatesRebuilder {
   String processId;
   EntityReference entityReference;
   ProcessMetadata processMetadata;
@@ -65,6 +67,7 @@ class Process {
     } catch (e) {
       censusState = CensusState.UNKNOWN;
     }
+    rebuildStates([ProcessTags.CENSUS_STATE]);
   }
 
   fetchCensusStateIfNeeded() async {
@@ -73,6 +76,8 @@ class Process {
   }
 
   checkCensusState() async {
+    this.censusState=CensusState.CHECKING;
+    rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
@@ -84,16 +89,19 @@ class Process {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        censusState = CensusState.OUT;
+        this.censusState = CensusState.OUT;
+        rebuildStates([ProcessTags.CENSUS_STATE]);
         return;
       }
       RegExp emptyProofRegexp =
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
       if (emptyProofRegexp.hasMatch(proof)) // 0x0000000000.....
-        censusState = CensusState.OUT;
+        this.censusState = CensusState.OUT;
       else
         censusState = CensusState.IN;
+
+      rebuildStates([ProcessTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
       //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
@@ -102,7 +110,8 @@ class Process {
       //   return;
       // }
     } catch (error) {
-      censusState = CensusState.ERROR;
+      this.censusState = CensusState.ERROR;
+      rebuildStates([ProcessTags.CENSUS_STATE]);
     }
   }
 
@@ -161,8 +170,7 @@ class Process {
     return DateTime.now().add(getDurationUntilBlock(
         vochainTimeRef,
         vochainBlockRef,
-        processMetadata.startBlock +
-            processMetadata.numberOfBlocks));
+        processMetadata.startBlock + processMetadata.numberOfBlocks));
   }
 
   //TODO use dvote api instead once they removed getEnvelopHeight
