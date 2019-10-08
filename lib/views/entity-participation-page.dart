@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
@@ -37,7 +37,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
       body: ListView.builder(
         itemCount: ent.processess.length,
         itemBuilder: (BuildContext ctx, int index) {
-          final Process process = ent.processess[index];
+          final ProcessModel process = ent.processess[index];
           return PollCard(ent: ent, process: process);
         },
       ),

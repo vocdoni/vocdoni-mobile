@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
@@ -8,7 +8,7 @@ import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
   final Ent ent;
-  final Process process;
+  final ProcessModel process;
   final FeedPost post;
   final DateTime date;
 
@@ -42,7 +42,7 @@ class _HomeTabState extends State<HomeTab> {
         });
       }
       if (ent.processess != null) {
-        ent.processess.forEach((Process process) {
+        ent.processess.forEach((ProcessModel process) {
           if (process.processMetadata == null) return;
           DateTime date =
               getDateFromBlockNumber(process.processMetadata.startBlock);

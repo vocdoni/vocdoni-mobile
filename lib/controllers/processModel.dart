@@ -5,16 +5,18 @@ import 'package:vocdoni/util/singletons.dart';
 
 // Watchout changing this
 enum CensusState { IN, OUT, CHECKING, UNKNOWN, ERROR }
-enum ProcessTags { CENSUS_STATE, VOTE_CONFIRMED }
+enum ProcessTags { CENSUS_STATE, PARTICIPATION, VOTE_CONFIRMED }
 
-class Process extends StatesRebuilder {
+class ProcessModel extends StatesRebuilder {
   String processId;
   EntityReference entityReference;
   ProcessMetadata processMetadata;
   String lang = "default";
   CensusState censusState = CensusState.UNKNOWN;
+  int participantsTotal;
+  int participantsCurrent;
 
-  Process({this.processId, this.entityReference}) {
+  ProcessModel({this.processId, this.entityReference}) {
     syncLocal();
   }
 
@@ -32,6 +34,7 @@ class Process extends StatesRebuilder {
 
     // Sync process times
     // Check if active?
+    // Check participation
     // Check census
     // Check if voted
     // Fetch results
@@ -76,7 +79,7 @@ class Process extends StatesRebuilder {
   }
 
   checkCensusState() async {
-    this.censusState=CensusState.CHECKING;
+    this.censusState = CensusState.CHECKING;
     rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
@@ -152,11 +155,15 @@ class Process extends StatesRebuilder {
     return current;
   }
 
-  Future<int> getParticipation() async {
-    int total = await getTotalParticipants();
-    int current = await getCurrentParticipants();
-    if (total <= 0 || current <= 0) return -1;
-    return (current * 100 / total).round();
+  updateParticipation() async {
+    this.participantsTotal = await getTotalParticipants();
+    this.participantsCurrent = await getCurrentParticipants();
+    rebuildStates([ProcessTags.PARTICIPATION]);
+  }
+
+  double get participation {
+    if (this.participantsTotal <= 0) return 0.0;
+    return this.participantsCurrent * 100 / this.participantsTotal;
   }
 
   DateTime getStartDate() {

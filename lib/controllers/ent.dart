@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
@@ -7,7 +7,7 @@ class Ent {
   EntityReference entityReference;
   EntityMetadata entityMetadata;
   Feed feed;
-  List<Process> processess;
+  List<ProcessModel> processess;
   String lang = "default";
   bool entityMetadataUpdated = false;
   bool processessMetadataUpdated = false;
@@ -63,10 +63,10 @@ class Ent {
 
     final updatedProcessess =
         this.entityMetadata.votingProcesses.active.map((String processId) {
-      Process p;
+      ProcessModel p;
       //Get  Process if exist
       if (this.processess != null) {
-        p = this.processess.firstWhere((Process process) {
+        p = this.processess.firstWhere((ProcessModel process) {
           return process.processId == processId;
         }, orElse: () {
           return null;
@@ -79,7 +79,7 @@ class Ent {
         return p;
       } else {
         //Make new one and update
-        final newProcess = new Process(
+        final newProcess = new ProcessModel(
             processId: processId, entityReference: this.entityReference);
         newProcess.update();
         return newProcess;
@@ -92,7 +92,7 @@ class Ent {
   syncProcessess() {
     this.processess =
         this.entityMetadata.votingProcesses.active.map((String processId) {
-      return new Process(
+      return new ProcessModel(
           processId: processId, entityReference: this.entityReference);
     }).toList();
   }
@@ -101,7 +101,7 @@ class Ent {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);
     if (this.processess != null) {
-      for (Process process in this.processess) {
+      for (ProcessModel process in this.processess) {
         process.save();
       }
     }

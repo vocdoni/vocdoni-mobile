@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -21,7 +21,7 @@ import 'package:intl/intl.dart';
 
 class PollPageArgs {
   Ent ent;
-  Process process;
+  ProcessModel process;
   PollPageArgs({this.ent, this.process});
 }
 
@@ -34,9 +34,7 @@ class _PollPageState extends State<PollPage> {
   List<String> _answers = [];
   String _responsesStateMessage = '';
   bool _responsesAreValid = false;
-  //bool _hasVoted = false;
-  // _checkingCensus = false;
-  Process processBloc;
+  ProcessModel processModel;
 
   @override
   void didChangeDependencies() {
@@ -48,15 +46,15 @@ class _PollPageState extends State<PollPage> {
         entityId: args.ent.entityReference.entityId,
         processId: args.process.processId);
 
-    processBloc = args.process;
+    processModel = args.process;
     if (_answers.length == 0)
-      processBloc.processMetadata.details.questions.forEach((question) {
+      processModel.processMetadata.details.questions.forEach((question) {
         _answers.add("");
       });
 
     checkResponseState();
-    if (processBloc.censusState == CensusState.UNKNOWN)
-      processBloc.checkCensusState();
+    if (processModel.censusState == CensusState.UNKNOWN)
+      processModel.checkCensusState();
   }
 
   @override
@@ -68,16 +66,16 @@ class _PollPageState extends State<PollPage> {
     if (ent == null) return buildEmptyEntity(context);
 
     String headerUrl =
-        validUriOrNull(processBloc.processMetadata.details.headerImage);
+        validUriOrNull(processModel.processMetadata.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
                 entityId: ent.entityReference.entityId,
-                cardId: processBloc.processMetadata.meta[META_PROCESS_ID],
+                cardId: processModel.processMetadata.meta[META_PROCESS_ID],
                 elementId: headerUrl),
-        avatarHexSource: processBloc.processMetadata.meta['processId'],
+        avatarHexSource: processModel.processMetadata.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -123,7 +121,7 @@ class _PollPageState extends State<PollPage> {
     //children.add(buildTest());
     children.add(buildTitle(context, ent));
     children.add(Summary(
-      text: processBloc.processMetadata.details.description['default'],
+      text: processModel.processMetadata.details.description['default'],
       maxLines: 5,
     ));
     children.add(buildPollItem(context));
@@ -138,7 +136,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTitle(BuildContext context, Ent ent) {
-    String title = processBloc.processMetadata.details.title['default'];
+    String title = processModel.processMetadata.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
       mainText: title,
@@ -168,48 +166,48 @@ class _PollPageState extends State<PollPage> {
 
   buildCensusItem(BuildContext context) {
     return StateBuilder(
-        viewModels: [processBloc],
+        viewModels: [processModel],
         tag: ProcessTags.CENSUS_STATE,
         builder: (ctx, tagId) {
           String text;
           Purpose purpose;
           IconData icon;
 
-          if (processBloc.censusState == CensusState.UNKNOWN) {
+          if (processModel.censusState == CensusState.UNKNOWN) {
             text = "Check census state";
           }
 
-          if (processBloc.censusState == CensusState.IN) {
+          if (processModel.censusState == CensusState.IN) {
             text = "You are in the census";
             purpose = Purpose.GOOD;
             icon = FeatherIcons.check;
           }
 
-          if (processBloc.censusState == CensusState.OUT) {
+          if (processModel.censusState == CensusState.OUT) {
             text = "You are not in this census";
             purpose = Purpose.DANGER;
             icon = FeatherIcons.x;
           }
 
-          if (processBloc.censusState == CensusState.ERROR) {
+          if (processModel.censusState == CensusState.ERROR) {
             text = "Unable to check census";
             icon = FeatherIcons.alertTriangle;
           }
 
-          if (processBloc.censusState == CensusState.CHECKING) {
+          if (processModel.censusState == CensusState.CHECKING) {
             text = "Checking census";
           }
 
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processBloc.censusState == CensusState.CHECKING,
+            isSpinning: processModel.censusState == CensusState.CHECKING,
             onTap: () {
-              processBloc.checkCensusState();
+              processModel.checkCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processBloc.censusState == CensusState.ERROR
+            purpose: processModel.censusState == CensusState.ERROR
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -226,7 +224,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    final dat = processBloc.getEndDate();
+    final dat = processModel.getEndDate();
     String formattedTime =
         dat != null ? DateFormat("dd/MM, H:m:s").format(dat) : "";
     return ListItem(
@@ -270,7 +268,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processBloc.censusState != CensusState.IN) return Container();
+    if (processModel.censusState != CensusState.IN) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -279,9 +277,9 @@ class _PollPageState extends State<PollPage> {
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
           isDisabled: _responsesAreValid == false ||
-              processBloc.censusState != CensusState.IN,
+              processModel.censusState != CensusState.IN,
           onTap: () {
-            onSubmit(ctx, processBloc.processMetadata);
+            onSubmit(ctx, processModel.processMetadata);
           }),
     );
   }
@@ -316,10 +314,10 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitInfo() {
     return StateBuilder(
-      viewModels: [processBloc],
+      viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
-        if (processBloc.censusState == CensusState.IN) {
+        if (processModel.censusState == CensusState.IN) {
           return _responsesAreValid == false
               ? ListItem(
                   mainText: _responsesStateMessage,
@@ -330,7 +328,7 @@ class _PollPageState extends State<PollPage> {
                   mainText: _responsesStateMessage,
                   rightIcon: null,
                 );
-        } else if (processBloc.censusState == CensusState.OUT) {
+        } else if (processModel.censusState == CensusState.OUT) {
           return ListItem(
             mainText: "You are not part of this census",
             secondaryText:
@@ -339,7 +337,7 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.HIGHLIGHT,
             rightIcon: null,
           );
-        } else if (processBloc.censusState == CensusState.ERROR) {
+        } else if (processModel.censusState == CensusState.ERROR) {
           return ListItem(
             mainText: "Unable to check if you are part of the census",
             mainTextMultiline: 3,
@@ -379,7 +377,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (processBloc.processMetadata.details.questions.length == 0) {
+    if (processModel.processMetadata.details.questions.length == 0) {
       return [buildError("No questions defined")];
     }
 
@@ -387,7 +385,7 @@ class _PollPageState extends State<PollPage> {
     int questionIndex = 0;
 
     for (ProcessMetadata_Details_Question question
-        in processBloc.processMetadata.details.questions) {
+        in processModel.processMetadata.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }

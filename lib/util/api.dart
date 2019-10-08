@@ -1,5 +1,5 @@
 import 'package:dvote/util/parsers.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -56,6 +56,7 @@ Future<ProcessMetadata> fetchProcess(
 
     ProcessMetadata process =
         await getProcessMetadata(processId, dvoteGw, web3Gw);
+        //TODO move this logic to the processModel
     process.meta[META_PROCESS_ID] = processId;
     process.meta[META_ENTITY_ID] = entityReference.entityId;
     process.meta[META_PROCESS_CENSUS_STATE] = CensusState.UNKNOWN.toString();
