@@ -53,8 +53,7 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
-    if (processModel.censusState == CensusState.UNKNOWN)
-      processModel.checkCensusState();
+    processModel.updateCensus();
   }
 
   @override
@@ -173,41 +172,35 @@ class _PollPageState extends State<PollPage> {
           Purpose purpose;
           IconData icon;
 
-          if (processModel.censusState == CensusState.UNKNOWN) {
-            text = "Check census state";
-          }
-
-          if (processModel.censusState == CensusState.IN) {
-            text = "You are in the census";
-            purpose = Purpose.GOOD;
-            icon = FeatherIcons.check;
-          }
-
-          if (processModel.censusState == CensusState.OUT) {
-            text = "You are not in this census";
-            purpose = Purpose.DANGER;
-            icon = FeatherIcons.x;
-          }
-
-          if (processModel.censusState == CensusState.ERROR) {
+          if (processModel.censusDataState == DataState.GOOD) {
+            if (processModel.censusIsIn) {
+              text = "You are in the census";
+              purpose = Purpose.GOOD;
+              icon = FeatherIcons.check;
+            } else {
+              text = "You are not in this census";
+              purpose = Purpose.DANGER;
+              icon = FeatherIcons.x;
+            }
+          } else if (processModel.censusDataState == DataState.ERROR) {
             text = "Unable to check census";
             icon = FeatherIcons.alertTriangle;
-          }
-
-          if (processModel.censusState == CensusState.CHECKING) {
+          } else if (processModel.censusDataState == DataState.CHECKING) {
             text = "Checking census";
+          } else if (processModel.censusDataState == DataState.UNKNOWN) {
+            text = "Check census state";
           }
 
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.censusState == CensusState.CHECKING,
+            isSpinning: processModel.censusDataState == DataState.CHECKING,
             onTap: () {
               processModel.checkCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.censusState == CensusState.ERROR
+            purpose: processModel.censusDataState == DataState.ERROR
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -268,7 +261,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.censusState != CensusState.IN) return Container();
+    if (processModel.censusIsIn == false) return Container();
     return Padding(
       padding: EdgeInsets.all(paddingPage),
       child: BaseButton(
@@ -276,8 +269,8 @@ class _PollPageState extends State<PollPage> {
           isSmall: false,
           style: BaseButtonStyle.FILLED,
           purpose: Purpose.HIGHLIGHT,
-          isDisabled: _responsesAreValid == false ||
-              processModel.censusState != CensusState.IN,
+          isDisabled:
+              _responsesAreValid == false || processModel.censusIsIn == false,
           onTap: () {
             onSubmit(ctx, processModel.processMetadata);
           }),
@@ -317,27 +310,29 @@ class _PollPageState extends State<PollPage> {
       viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
-        if (processModel.censusState == CensusState.IN) {
-          return _responsesAreValid == false
-              ? ListItem(
-                  mainText: _responsesStateMessage,
-                  purpose: Purpose.WARNING,
-                  rightIcon: null,
-                )
-              : ListItem(
-                  mainText: _responsesStateMessage,
-                  rightIcon: null,
-                );
-        } else if (processModel.censusState == CensusState.OUT) {
-          return ListItem(
-            mainText: "You are not part of this census",
-            secondaryText:
-                "Register to this organization to participate in the future",
-            secondaryTextMultiline: 5,
-            purpose: Purpose.HIGHLIGHT,
-            rightIcon: null,
-          );
-        } else if (processModel.censusState == CensusState.ERROR) {
+        if (processModel.censusDataState == DataState.GOOD) {
+          if (processModel.censusIsIn) {
+            return _responsesAreValid == false
+                ? ListItem(
+                    mainText: _responsesStateMessage,
+                    purpose: Purpose.WARNING,
+                    rightIcon: null,
+                  )
+                : ListItem(
+                    mainText: _responsesStateMessage,
+                    rightIcon: null,
+                  );
+          } else {
+            return ListItem(
+              mainText: "You are not part of this census",
+              secondaryText:
+                  "Register to this organization to participate in the future",
+              secondaryTextMultiline: 5,
+              purpose: Purpose.HIGHLIGHT,
+              rightIcon: null,
+            );
+          }
+        } else {
           return ListItem(
             mainText: "Unable to check if you are part of the census",
             mainTextMultiline: 3,
@@ -346,9 +341,6 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
-        }
-        else{
-          return Container();
         }
       },
     );

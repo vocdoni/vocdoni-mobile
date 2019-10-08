@@ -3,8 +3,7 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-// Watchout changing this
-enum CensusState { IN, OUT, CHECKING, UNKNOWN, ERROR }
+enum DataState { UNKNOWN, CHECKING, GOOD, ERROR }
 enum ProcessTags { CENSUS_STATE, PARTICIPATION, VOTE_CONFIRMED }
 
 class ProcessModel extends StatesRebuilder {
@@ -12,7 +11,11 @@ class ProcessModel extends StatesRebuilder {
   EntityReference entityReference;
   ProcessMetadata processMetadata;
   String lang = "default";
-  CensusState censusState = CensusState.UNKNOWN;
+
+  DataState censusDataState = DataState.UNKNOWN;
+  bool censusIsIn;
+
+  DataState participationDataState = DataState.UNKNOWN;
   int participantsTotal;
   int participantsCurrent;
 
@@ -29,7 +32,7 @@ class ProcessModel extends StatesRebuilder {
     syncProcessMetadata();
     await fetchProcessMetadataIfNeeded();
     syncCensusState();
-    await fetchCensusStateIfNeeded();
+    await updateCensus();
     save();
 
     // Sync process times
@@ -61,25 +64,29 @@ class ProcessModel extends StatesRebuilder {
   syncCensusState() {
     if (processMetadata == null) return;
     try {
-      censusState = CensusState.values.firstWhere(
-          (e) =>
-              e.toString() ==
-              'CensusState.' +
-                  this.processMetadata.meta[META_PROCESS_CENSUS_STATE],
-          orElse: () => censusState = CensusState.UNKNOWN);
+      String str = this.processMetadata.meta[META_PROCESS_CENSUS_STATE];
+      if (str == 'true')
+        this.censusIsIn = true;
+      else if (str == 'false')
+        this.censusIsIn = false;
+      else
+        this.censusIsIn = null;
     } catch (e) {
-      censusState = CensusState.UNKNOWN;
+      this.censusIsIn = null;
     }
+    if (this.censusIsIn == null)
+      this.censusDataState = DataState.UNKNOWN;
+    else
+      this.censusDataState = DataState.GOOD;
     rebuildStates([ProcessTags.CENSUS_STATE]);
   }
 
-  fetchCensusStateIfNeeded() async {
-    if (this.censusState != CensusState.IN &&
-        this.censusState != CensusState.OUT) await checkCensusState();
+  updateCensus() async {
+    if (this.censusDataState != DataState.GOOD) await checkCensusState();
   }
 
   checkCensusState() async {
-    this.censusState = CensusState.CHECKING;
+    this.censusDataState = DataState.CHECKING;
     rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
@@ -92,7 +99,9 @@ class ProcessModel extends StatesRebuilder {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        this.censusState = CensusState.OUT;
+        this.censusDataState = DataState.ERROR;
+        this.censusIsIn = false;
+
         rebuildStates([ProcessTags.CENSUS_STATE]);
         return;
       }
@@ -100,10 +109,11 @@ class ProcessModel extends StatesRebuilder {
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
       if (emptyProofRegexp.hasMatch(proof)) // 0x0000000000.....
-        this.censusState = CensusState.OUT;
+        this.censusIsIn = false;
       else
-        censusState = CensusState.IN;
+        this.censusIsIn = true;
 
+      this.censusDataState = DataState.GOOD;
       rebuildStates([ProcessTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
@@ -113,22 +123,21 @@ class ProcessModel extends StatesRebuilder {
       //   return;
       // }
     } catch (error) {
-      this.censusState = CensusState.ERROR;
+      this.censusDataState = DataState.ERROR;
       rebuildStates([ProcessTags.CENSUS_STATE]);
     }
   }
 
   censusStateToMeta() async {
     if (processMetadata == null) return null;
-    if (this.censusState == CensusState.IN ||
-        this.censusState == CensusState.OUT) {
-      this.processMetadata.meta[META_PROCESS_CENSUS_STATE] =
-          censusState.toString();
-    }
+
+    this.processMetadata.meta[META_PROCESS_CENSUS_STATE] =
+        censusIsIn.toString();
   }
 
   Future<int> getTotalParticipants() async {
-    if (processMetadata == null) return 0;
+    if (this.processMetadata == null) return 0;
+
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
