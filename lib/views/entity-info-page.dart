@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -24,7 +26,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
-  String _status = ''; // loading, ok, fail
+  //String _status = ''; // loading, ok, fail
   bool _processingSubscription = false;
   EntityMetadata_Action _registerAction;
   List<EntityMetadata_Action> _actionsToDisplay = [];
@@ -48,9 +50,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   @override
   Widget build(context) {
-    return _ent.entityMetadata == null
-        ? buildScaffoldWithoutMetadata(_ent)
-        : buildScaffold(_ent);
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: [EntTags.ENTITY_METADATA, EntTags],
+        builder: (ctx, tagId) {
+          return _ent.entityMetadata == null
+              ? buildScaffoldWithoutMetadata(_ent)
+              : buildScaffold(_ent);
+        });
   }
 
   buildScaffoldWithoutMetadata(Ent ent) {
@@ -67,21 +74,21 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 delegate: SliverChildListDelegate(
               [
                 buildTitleWithoutEntityMeta(ctx, ent),
-                buildStatus(_status),
+                buildStatus(),
               ],
             ));
           },
         ));
   }
 
-  Widget buildStatus(String status) {
-    if (status == "loading")
+  Widget buildStatus() {
+    if (_ent.entityMetadataDataState == DataState.CHECKING)
       return ListItem(
         mainText: "Updating details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (status == "fail")
+    if (_ent.entityMetadataDataState == DataState.ERROR)
       return ListItem(
         mainText: _errorMessage,
         purpose: Purpose.DANGER,
@@ -89,28 +96,37 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
-    if (status == "ok") return Container();
+    else
+      return Container();
   }
 
   buildScaffold(Ent ent) {
-    return ScaffoldWithImage(
-        headerImageUrl: ent.entityMetadata.media.header,
-        headerTag:
-            ent.entityReference.entityId + ent.entityMetadata.media.header,
-        forceHeader: true,
-        appBarTitle: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-        avatarUrl: ent.entityMetadata.media.avatar,
-        avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-        avatarHexSource: ent.entityReference.entityId,
-        leftElement: buildRegisterButton(context, ent),
-        actionsBuilder: actionsBuilder,
-        builder: Builder(
-          builder: (ctx) {
-            return SliverList(
-              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
-            );
-          },
-        ));
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: EntTags.ENTITY_METADATA,
+        builder: (ctx, tagId) {
+          return ScaffoldWithImage(
+              headerImageUrl: ent.entityMetadata.media.header,
+              headerTag: ent.entityReference.entityId +
+                  ent.entityMetadata.media.header,
+              forceHeader: true,
+              appBarTitle:
+                  ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+              avatarUrl: ent.entityMetadata.media.avatar,
+              avatarText:
+                  ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+              avatarHexSource: ent.entityReference.entityId,
+              leftElement: buildRegisterButton(context, ent),
+              actionsBuilder: actionsBuilder,
+              builder: Builder(
+                builder: (ctx) {
+                  return SliverList(
+                    delegate:
+                        SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
+                  );
+                },
+              ));
+        });
   }
 
   List<Widget> actionsBuilder(BuildContext context) {
@@ -126,7 +142,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   getScaffoldChildren(BuildContext context, Ent ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
-    children.add(buildStatus(_status));
+    children.add(buildStatus());
     children.add(buildFeedItem(context, ent));
     children.add(buildParticipationItem(context, ent));
     children.addAll(buildActionList(context, ent));
@@ -487,16 +503,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
-    setState(() {
-      _status = "loading";
-    });
-
-    await _ent.update();
-
+    _ent.update();
+/*
     String errorMessage = "";
     bool fail = false;
 
-    if (_ent.entityMetadataUpdated == false) {
+    if (_ent.entityMetadataDataState == DataState.ERROR) {
       errorMessage = "Unable to retrieve details";
       fail = true;
     } else if (_ent.processessMetadataUpdated == false) {
@@ -513,7 +525,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       _status = fail ? "fail" : "ok";
       _errorMessage = errorMessage;
     });
-
+*/
     if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
     if (account.isSubscribed(_ent.entityReference)) _ent.save();
   }

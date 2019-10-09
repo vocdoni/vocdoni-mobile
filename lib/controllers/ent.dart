@@ -1,15 +1,20 @@
 import 'package:dvote/dvote.dart';
+import 'package:flutter/material.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-class Ent {
+enum EntTags {ENTITY_METADATA, SUBSCRIBED }
+
+class Ent extends StatesRebuilder {
   EntityReference entityReference;
+  DataState entityMetadataDataState = DataState.UNKNOWN;
   EntityMetadata entityMetadata;
   Feed feed;
   List<ProcessModel> processess;
   String lang = "default";
-  bool entityMetadataUpdated = false;
+  //bool entityMetadataUpdated = false;
   bool processessMetadataUpdated = false;
   bool feedUpdated = false;
 
@@ -21,14 +26,18 @@ class Ent {
   update() async {
     try {
       this.entityMetadata = await fetchEntityData(this.entityReference);
-      entityMetadataUpdated = true;
+      entityMetadataDataState = DataState.GOOD;
+      
     } catch (e) {
-      entityMetadataUpdated = false;
+      entityMetadataDataState = DataState.ERROR;
     }
+    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+
     try {
       await updateProcesses();
       processessMetadataUpdated = true;
     } catch (e) {
+      debugPrint(e.toString());
       processessMetadataUpdated = false;
     }
     /*
@@ -130,6 +139,8 @@ class Ent {
     } else {
       this.entityMetadata = entitiesBloc.value[index];
     }
+    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+
   }
 
   syncFeed(EntityReference _entitySummary, EntityMetadata _entityMetadata) {
