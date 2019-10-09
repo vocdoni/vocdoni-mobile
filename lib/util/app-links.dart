@@ -57,11 +57,8 @@ Future fetchAndShowEntity(
   EntityReference entityRef =
       makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
 
-  
-  final ent = new Ent(entityRef);
-  Navigator.pushNamed(context, "/entity", arguments: ent);
+  Navigator.pushNamed(context, "/entity", arguments: entityRef);
 }
-
 
 showSignatureScreen(
     {@required BuildContext context,

@@ -55,6 +55,13 @@ class Account {
     if (index != -1) ents.removeAt(index);
   }
 
+  getEnt(EntityReference entityReference) {
+    for (Ent ent in this.ents) {
+      if (ent.entityReference.entityId == entityReference.entityId) return ent;
+    }
+    return null;
+  }
+
   updateEnts() async {
     for (Ent ent in this.ents) {
       await ent.update();

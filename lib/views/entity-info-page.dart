@@ -30,9 +30,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     super.didChangeDependencies();
 
     try {
-      _ent = ModalRoute.of(super.context).settings.arguments;
+      EntityReference entityReference =
+          ModalRoute.of(super.context).settings.arguments;
+
       analytics.trackPage(
-          pageId: "EntityInfoPage", entityId: _ent.entityReference.entityId);
+          pageId: "EntityInfoPage", entityId: entityReference.entityId);
+      _ent = account.getEnt(entityReference);
+      if (_ent == null) _ent = new Ent(entityReference);
 
       refresh();
     } catch (err) {
@@ -130,11 +134,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   List<Widget> actionsBuilder(BuildContext context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
     return [
-      buildShareButton(context, ent),
+      buildShareButton(context, _ent),
       SizedBox(height: 48, width: paddingPage),
-      buildSubscribeButton(context, ent),
+      buildSubscribeButton(context, _ent),
       SizedBox(height: 48, width: paddingPage)
     ];
   }

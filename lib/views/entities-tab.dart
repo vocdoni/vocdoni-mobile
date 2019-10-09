@@ -95,7 +95,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   onTapEntity(BuildContext ctx, Ent ent) {
-    Navigator.pushNamed(ctx, "/entity", arguments: ent);
+    Navigator.pushNamed(ctx, "/entity", arguments: ent.entityReference);
   }
 
   onTapParticipation(BuildContext ctx, Ent ent) {
