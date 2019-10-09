@@ -4,13 +4,20 @@ import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 enum DataState { UNKNOWN, CHECKING, GOOD, ERROR }
-enum ProcessTags { CENSUS_STATE, PARTICIPATION, VOTE_CONFIRMED }
+enum ProcessTags {
+  PROCESS_METADATA,
+  CENSUS_STATE,
+  PARTICIPATION,
+  VOTE_CONFIRMED
+}
 
 class ProcessModel extends StatesRebuilder {
   String processId;
   EntityReference entityReference;
-  ProcessMetadata processMetadata;
   String lang = "default";
+
+  DataState processMetadataState = DataState.UNKNOWN;
+  ProcessMetadata processMetadata;
 
   DataState censusDataState = DataState.UNKNOWN;
   bool censusIsIn;
@@ -31,7 +38,7 @@ class ProcessModel extends StatesRebuilder {
 
   update() async {
     syncLocal();
-    await fetchProcessMetadataIfNeeded();
+    await updateProcessMetadataIfNeeded();
     updateCensusStateIfNeeded();
     updateParticipation();
 
@@ -47,8 +54,7 @@ class ProcessModel extends StatesRebuilder {
   }
 
   save() async {
-    stageCensusState();
-    stageParticipation();
+    
     await processesBloc.add(this.processMetadata);
   }
 
@@ -56,12 +62,42 @@ class ProcessModel extends StatesRebuilder {
     this.processMetadata = processesBloc.value.firstWhere((process) {
       return process.meta[META_PROCESS_ID] == this.processId;
     }, orElse: () => null);
+
+    if (this.processMetadata == null)
+      this.processMetadataState = DataState.UNKNOWN;
+    else
+      this.processMetadataState = DataState.GOOD;
+
+    if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
   }
 
-  fetchProcessMetadataIfNeeded() async {
-    if (this.processMetadata == null) {
-      this.processMetadata = await fetchProcess(entityReference, processId);
+  updateProcessMetadataIfNeeded() async {
+    if (this.processMetadataState != DataState.GOOD) {
+      await updateProcessMetadata();
     }
+  }
+
+  updateProcessMetadata() async {
+    try {
+      this.processMetadataState = DataState.CHECKING;
+      final gwInfo = selectRandomGatewayInfo();
+
+      final DVoteGateway dvoteGw =
+          DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+      final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
+
+      this.processMetadata =
+          await getProcessMetadata(processId, dvoteGw, web3Gw);
+
+      processMetadata.meta[META_PROCESS_ID] = processId;
+      processMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
+
+      this.processMetadataState = DataState.GOOD;
+
+    } catch (err) {
+      this.processMetadataState = DataState.ERROR;
+    }
+    if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
   }
 
   syncCensusState() {
@@ -117,6 +153,7 @@ class ProcessModel extends StatesRebuilder {
         this.censusIsIn = true;
 
       this.censusDataState = DataState.GOOD;
+      stageCensusState();
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
@@ -129,9 +166,11 @@ class ProcessModel extends StatesRebuilder {
       this.censusDataState = DataState.ERROR;
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
+
+
   }
 
-  stageCensusState() async {
+  stageCensusState() {
     if (processMetadata == null) return null;
 
     this.processMetadata.meta[META_PROCESS_CENSUS_IS_IN] =
@@ -183,6 +222,7 @@ class ProcessModel extends StatesRebuilder {
       this.participationDataState = DataState.UNKNOWN;
     else
       this.censusDataState = DataState.GOOD;
+      stageParticipation();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
@@ -194,11 +234,12 @@ class ProcessModel extends StatesRebuilder {
 
   stageParticipation() {
     if (participationDataState != DataState.GOOD) return;
-    processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] = this.participantsTotal.toString();
-    processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] = this.participantsCurrent.toString();
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] =
+        this.participantsTotal.toString();
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] =
+        this.participantsCurrent.toString();
   }
 
-  
   double get participation {
     if (this.participantsTotal <= 0) return 0.0;
     return this.participantsCurrent * 100 / this.participantsTotal;
