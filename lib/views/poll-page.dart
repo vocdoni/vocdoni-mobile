@@ -21,8 +21,8 @@ import 'package:intl/intl.dart';
 
 class PollPageArgs {
   Ent ent;
-  ProcessModel process;
-  PollPageArgs({this.ent, this.process});
+  String processId;
+  PollPageArgs({this.ent, this.processId});
 }
 
 class PollPage extends StatefulWidget {
@@ -44,9 +44,9 @@ class _PollPageState extends State<PollPage> {
     analytics.trackPage(
         pageId: "PollPage",
         entityId: args.ent.entityReference.entityId,
-        processId: args.process.processId);
+        processId: args.processId);
 
-    processModel = args.process;
+    processModel = args.ent.getProcess(args.processId);
     if (_answers.length == 0)
       processModel.processMetadata.details.questions.forEach((question) {
         _answers.add("");

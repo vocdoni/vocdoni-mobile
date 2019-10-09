@@ -123,6 +123,13 @@ class Ent extends StatesRebuilder {
     }).toList();
   }
 
+  ProcessModel getProcess(processId) {
+    for (var process in this.processess) {
+      if (process.processId == processId) return process;
+    }
+    return null;
+  }
+
   save() async {
     if (this.entityMetadata != null)
       await entitiesBloc.add(this.entityMetadata, this.entityReference);

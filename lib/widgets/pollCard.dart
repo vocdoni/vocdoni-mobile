@@ -47,7 +47,7 @@ class _PollCardState extends State<PollCard> {
             onTap: () {
               Navigator.pushNamed(ctx, "/entity/participation/poll",
                   arguments:
-                      PollPageArgs(ent: widget.ent, process: widget.process));
+                      PollPageArgs(ent: widget.ent, processId: widget.process.processId));
             },
             image: validUriOrNull(
                 widget.process.processMetadata.details.headerImage),
