@@ -34,7 +34,7 @@ class ProcessModel extends StatesRebuilder {
     await fetchProcessMetadataIfNeeded();
     updateCensusStateIfNeeded();
     updateParticipation();
-    
+
     save();
 
     // Sync process times
@@ -47,7 +47,8 @@ class ProcessModel extends StatesRebuilder {
   }
 
   save() async {
-    censusStateToMeta();
+    stageCensusState();
+    stageParticipation();
     await processesBloc.add(this.processMetadata);
   }
 
@@ -130,7 +131,7 @@ class ProcessModel extends StatesRebuilder {
     }
   }
 
-  censusStateToMeta() async {
+  stageCensusState() async {
     if (processMetadata == null) return null;
 
     this.processMetadata.meta[META_PROCESS_CENSUS_IS_IN] =
@@ -191,6 +192,13 @@ class ProcessModel extends StatesRebuilder {
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
+  stageParticipation() {
+    if (participationDataState != DataState.GOOD) return;
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] = this.participantsTotal.toString();
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] = this.participantsCurrent.toString();
+  }
+
+  
   double get participation {
     if (this.participantsTotal <= 0) return 0.0;
     return this.participantsCurrent * 100 / this.participantsTotal;
