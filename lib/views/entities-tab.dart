@@ -1,6 +1,8 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -27,9 +29,15 @@ class _EntitiesTabState extends State<EntitiesTab> {
         itemCount: account.ents.length,
         itemBuilder: (BuildContext ctxt, int index) {
           final ent = account.ents[index];
-          return ent.entityMetadata == null
-              ? buildEmptyMetadataCard(ctx, ent)
-              : buildCard(ctx, ent);
+
+          return StateBuilder(
+              viewModels: [ent],
+              tag: EntTags.ENTITY_METADATA,
+              builder: (ctx, tagId) {
+                return ent.entityMetadataDataState == DataState.GOOD
+                    ? buildCard(ctx, ent)
+                    : buildEmptyMetadataCard(ctx, ent);
+              });
         });
   }
 
@@ -44,18 +52,9 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   Widget buildCard(BuildContext ctx, Ent ent) {
-    final feedPostAmount = getFeedPostAmount(ent);
     return BaseCard(children: [
       buildName(ctx, ent),
-      ListItem(
-          mainText: "Feed",
-          icon: FeatherIcons.rss,
-          rightText: feedPostAmount.toString(),
-          rightTextIsBadge: true,
-          onTap: () {
-            Navigator.pushNamed(ctx, "/entity/feed", arguments: ent);
-          },
-          disabled: feedPostAmount == 0),
+      buildFeedItem(ctx, ent),
       buildParticipationItem(ctx, ent),
     ]);
   }
@@ -85,6 +84,24 @@ class _EntitiesTabState extends State<EntitiesTab> {
         rightTextIsBadge: true,
         onTap: () => onTapParticipation(ctx, ent),
         disabled: ent.processess.length == 0);
+  }
+
+  Widget buildFeedItem(BuildContext ctx, Ent ent) {
+    return StateBuilder(
+        viewModels: [ent],
+        tag: EntTags.FEED,
+        builder: (ctx, tagId) {
+          final feedPostAmount = getFeedPostAmount(ent);
+          return ListItem(
+              mainText: "Feed",
+              icon: FeatherIcons.rss,
+              rightText: feedPostAmount.toString(),
+              rightTextIsBadge: true,
+              onTap: () {
+                Navigator.pushNamed(ctx, "/entity/feed", arguments: ent);
+              },
+              disabled: feedPostAmount == 0);
+        });
   }
 
   Widget buildNoEntities(BuildContext ctx) {
