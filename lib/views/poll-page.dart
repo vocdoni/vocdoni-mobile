@@ -196,7 +196,7 @@ class _PollPageState extends State<PollPage> {
             mainText: text,
             isSpinning: processModel.censusDataState == DataState.CHECKING,
             onTap: () {
-              processModel.checkCensusState();
+              processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,

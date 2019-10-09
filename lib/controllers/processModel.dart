@@ -26,13 +26,15 @@ class ProcessModel extends StatesRebuilder {
   syncLocal() {
     syncProcessMetadata();
     syncCensusState();
+    syncParticipation();
   }
 
   update() async {
-    syncProcessMetadata();
+    syncLocal();
     await fetchProcessMetadataIfNeeded();
-    syncCensusState();
-    await updateCensus();
+    updateCensusStateIfNeeded();
+    updateParticipation();
+    
     save();
 
     // Sync process times
@@ -81,11 +83,11 @@ class ProcessModel extends StatesRebuilder {
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
   }
 
-  updateCensus() async {
-    if (this.censusDataState != DataState.GOOD) await checkCensusState();
+  updateCensusStateIfNeeded() async {
+    if (this.censusDataState != DataState.GOOD) await updateCensusState();
   }
 
-  checkCensusState() async {
+  updateCensusState() async {
     this.censusDataState = DataState.CHECKING;
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
@@ -162,6 +164,25 @@ class ProcessModel extends StatesRebuilder {
           processMetadata.meta[META_PROCESS_ID], dvoteGw);
     } catch (e) {}
     return current;
+  }
+
+  syncParticipation() {
+    if (processMetadata == null) return;
+    try {
+      this.participantsTotal =
+          int.parse(processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL]);
+      this.participantsCurrent =
+          int.parse(processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT]);
+    } catch (e) {
+      this.participantsTotal = null;
+      this.participantsCurrent = null;
+    }
+
+    if (this.participantsTotal == null || this.participantsCurrent == null)
+      this.participationDataState = DataState.UNKNOWN;
+    else
+      this.censusDataState = DataState.GOOD;
+    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   updateParticipation() async {
