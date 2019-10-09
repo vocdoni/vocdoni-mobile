@@ -64,7 +64,7 @@ class ProcessModel extends StatesRebuilder {
   syncCensusState() {
     if (processMetadata == null) return;
     try {
-      String str = this.processMetadata.meta[META_PROCESS_CENSUS_STATE];
+      String str = this.processMetadata.meta[META_PROCESS_CENSUS_IS_IN];
       if (str == 'true')
         this.censusIsIn = true;
       else if (str == 'false')
@@ -78,7 +78,7 @@ class ProcessModel extends StatesRebuilder {
       this.censusDataState = DataState.UNKNOWN;
     else
       this.censusDataState = DataState.GOOD;
-    rebuildStates([ProcessTags.CENSUS_STATE]);
+    if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
   }
 
   updateCensus() async {
@@ -87,7 +87,7 @@ class ProcessModel extends StatesRebuilder {
 
   checkCensusState() async {
     this.censusDataState = DataState.CHECKING;
-    rebuildStates([ProcessTags.CENSUS_STATE]);
+    if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
@@ -102,7 +102,7 @@ class ProcessModel extends StatesRebuilder {
         this.censusDataState = DataState.ERROR;
         this.censusIsIn = false;
 
-        rebuildStates([ProcessTags.CENSUS_STATE]);
+        if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
         return;
       }
       RegExp emptyProofRegexp =
@@ -114,7 +114,7 @@ class ProcessModel extends StatesRebuilder {
         this.censusIsIn = true;
 
       this.censusDataState = DataState.GOOD;
-      rebuildStates([ProcessTags.CENSUS_STATE]);
+      if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
       //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
@@ -124,14 +124,14 @@ class ProcessModel extends StatesRebuilder {
       // }
     } catch (error) {
       this.censusDataState = DataState.ERROR;
-      rebuildStates([ProcessTags.CENSUS_STATE]);
+      if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
   }
 
   censusStateToMeta() async {
     if (processMetadata == null) return null;
 
-    this.processMetadata.meta[META_PROCESS_CENSUS_STATE] =
+    this.processMetadata.meta[META_PROCESS_CENSUS_IS_IN] =
         censusIsIn.toString();
   }
 
@@ -167,7 +167,7 @@ class ProcessModel extends StatesRebuilder {
   updateParticipation() async {
     this.participantsTotal = await getTotalParticipants();
     this.participantsCurrent = await getCurrentParticipants();
-    rebuildStates([ProcessTags.PARTICIPATION]);
+    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   double get participation {

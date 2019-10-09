@@ -59,13 +59,13 @@ Future<ProcessMetadata> fetchProcess(
         //TODO move this logic to the processModel
     process.meta[META_PROCESS_ID] = processId;
     process.meta[META_ENTITY_ID] = entityReference.entityId;
-    process.meta[META_PROCESS_CENSUS_STATE] = CensusState.UNKNOWN.toString();
+    process.meta[META_PROCESS_CENSUS_IS_IN] = null.toString();
     return process;
   } catch (err) {
     throw FetchError("Unable to fetch process " + processId);
   }
 }
-
+/*
 Future<List<ProcessMetadata>> fetchProcessess(
     EntityReference entityReference, EntityMetadata entityMetadata) async {
   try {
@@ -92,7 +92,7 @@ Future<List<ProcessMetadata>> fetchProcessess(
     throw FetchError("Unable to fetch active processess");
   }
 }
-
+*/
 Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     EntityMetadata entityMetadata, String lang) async {
   // Attempt for every node available
