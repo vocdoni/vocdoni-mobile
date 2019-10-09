@@ -88,6 +88,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
+    else if (_ent.feedDataState == DataState.ERROR)
+      return ListItem(
+        mainText: "Unable to load feed",
+        purpose: Purpose.DANGER,
+        rightTextPurpose: Purpose.DANGER,
+        onTap: refresh,
+        rightIcon: FeatherIcons.refreshCw,
+      );
     else
       return Container();
   }
