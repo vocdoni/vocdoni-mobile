@@ -23,12 +23,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
-  //String _status = ''; // loading, ok, fail
   bool _processingSubscription = false;
-  //EntityMetadata_Action _registerAction;
-  //List<EntityMetadata_Action> _actionsToDisplay = [];
-  //bool _isRegistered = false;
-  String _errorMessage;
 
   @override
   void didChangeDependencies() {
@@ -87,7 +82,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       );
     if (_ent.entityMetadataDataState == DataState.ERROR)
       return ListItem(
-        mainText: _errorMessage,
+        mainText: "Unable to load details",
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
@@ -140,7 +135,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
     children.add(buildStatus());
-    children.add(buildFeedItem(context, ent));
+    children.add(buildFeedItem(context));
     children.add(buildParticipationItem(context, ent));
     children.add(buildActionList(context, ent));
     children.add(Section(text: "Details"));
@@ -177,19 +172,24 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildFeedItem(BuildContext context, Ent ent) {
-    int postsNum = 0;
-    if (ent.feed != null) postsNum = ent.feed.items.length;
-    return ListItem(
-      icon: FeatherIcons.rss,
-      mainText: "Feed",
-      rightText: postsNum.toString(),
-      rightTextIsBadge: true,
-      disabled: postsNum == 0,
-      onTap: () {
-        Navigator.pushNamed(context, "/entity/feed", arguments: ent);
-      },
-    );
+  buildFeedItem(BuildContext context) {
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: EntTags.FEED,
+        builder: (ctx, tagId) {
+          int postsNum = 0;
+          if (_ent.feed != null) postsNum = _ent.feed.items.length;
+          return ListItem(
+            icon: FeatherIcons.rss,
+            mainText: "Feed",
+            rightText: postsNum.toString(),
+            rightTextIsBadge: true,
+            disabled: postsNum == 0,
+            onTap: () {
+              Navigator.pushNamed(context, "/entity/feed", arguments: _ent);
+            },
+          );
+        });
   }
 
   buildParticipationItem(BuildContext context, Ent ent) {

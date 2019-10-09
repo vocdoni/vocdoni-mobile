@@ -7,7 +7,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-enum EntTags { ENTITY_METADATA, ACTIONS }
+enum EntTags { ENTITY_METADATA, ACTIONS, FEED }
 
 class Ent extends StatesRebuilder {
   EntityReference entityReference;
@@ -21,11 +21,11 @@ class Ent extends StatesRebuilder {
   DataState visibleActionsDataState = DataState.UNKNOWN;
 
   Feed feed;
+  DataState feedDataState = DataState.UNKNOWN;
+
   List<ProcessModel> processess;
   String lang = "default";
-  //bool entityMetadataUpdated = false;
   bool processessMetadataUpdated = false;
-  bool feedUpdated = false;
 
   Ent(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -42,6 +42,7 @@ class Ent extends StatesRebuilder {
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
 
     updateVisibleActions();
+    updateFeed();
 
     try {
       await updateProcesses();
@@ -66,13 +67,19 @@ class Ent extends StatesRebuilder {
       processessMetadataUpdated = false;
       this.processess = null;
     }*/
+  }
+
+  updateFeed() async {
+    feedDataState = DataState.CHECKING;
+    if (hasState) rebuildStates([EntTags.FEED]);
     try {
       this.feed = await fetchEntityNewsFeed(
           this.entityReference, this.entityMetadata, this.lang);
-      feedUpdated = true;
+      feedDataState = DataState.GOOD;
     } catch (e) {
-      feedUpdated = false;
+      feedDataState = DataState.ERROR;
     }
+    if (hasState) rebuildStates([EntTags.FEED]);
   }
 
   updateProcesses() async {
