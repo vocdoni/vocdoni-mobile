@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
@@ -16,7 +14,6 @@ import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
-import 'package:http/http.dart' as http;
 import 'package:vocdoni/constants/colors.dart';
 
 class EntityInfoPage extends StatefulWidget {
@@ -28,9 +25,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   Ent _ent;
   //String _status = ''; // loading, ok, fail
   bool _processingSubscription = false;
-  EntityMetadata_Action _registerAction;
-  List<EntityMetadata_Action> _actionsToDisplay = [];
-  bool _isRegistered = false;
+  //EntityMetadata_Action _registerAction;
+  //List<EntityMetadata_Action> _actionsToDisplay = [];
+  //bool _isRegistered = false;
   String _errorMessage;
 
   @override
@@ -52,7 +49,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   Widget build(context) {
     return StateBuilder(
         viewModels: [_ent],
-        tag: [EntTags.ENTITY_METADATA, EntTags],
+        tag: [EntTags.ENTITY_METADATA],
         builder: (ctx, tagId) {
           return _ent.entityMetadata == null
               ? buildScaffoldWithoutMetadata(_ent)
@@ -145,7 +142,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildStatus());
     children.add(buildFeedItem(context, ent));
     children.add(buildParticipationItem(context, ent));
-    children.addAll(buildActionList(context, ent));
+    children.add(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
       text: ent.entityMetadata.description[ent.entityMetadata.languages[0]],
@@ -267,86 +264,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         context: context, purpose: Purpose.GUIDE);
   }
 
-  Future<bool> isActionVisible(
-      EntityMetadata_Action action, String entityId) async {
-    if (action.visible == "true") return true;
-    if (action.visible == null || action.visible == "false") return false;
-
-    String publicKey = account.identity.identityId;
-    int timestamp = new DateTime.now().millisecondsSinceEpoch;
-
-    // TODO: Get the private key to sign appropriately
-    final privateKey = "";
-    debugPrint(
-        "TODO: Retrieve the private key to sign the action visibility request");
-
-    try {
-      Map payload = {
-        "type": action.type,
-        'publicKey': publicKey,
-        "entityId": entityId,
-        "timestamp": timestamp,
-        "signature": ""
-      };
-
-      if (privateKey != "") {
-        payload["signature"] = await signString(
-            jsonEncode({"timestamp": timestamp.toString()}), privateKey);
-      } else {
-        payload["signature"] = "0x"; // TODO: TEMP
-      }
-
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-
-      var response = await http.post(action.visible,
-          body: jsonEncode(payload), headers: headers);
-      if (response.statusCode != 200 || !(response.body is String))
-        return false;
-      final body = jsonDecode(response.body);
-      if (body is Map && body["visible"] == true) return true;
-    } catch (err) {
-      return false;
-    }
-
-    return false;
-  }
-
-  Future<void> fetchVisibleActions(Ent ent) async {
-    final List<EntityMetadata_Action> actionsToDisplay = [];
-    EntityMetadata_Action registerAction;
-
-    if (ent.entityMetadata == null) return;
-
-    for (EntityMetadata_Action action in ent.entityMetadata.actions) {
-      if (action.register == true) {
-        if (registerAction != null)
-          continue; //only one registerAction is supported
-        registerAction = action;
-
-        bool isRegistered =
-            await isActionVisible(action, ent.entityReference.entityId);
-
-        if (!mounted) return;
-
-        setState(() {
-          _registerAction = registerAction;
-          _isRegistered = isRegistered;
-        });
-      } else {
-        if (await isActionVisible(action, ent.entityReference.entityId)) {
-          actionsToDisplay.add(action);
-        }
-      }
-    }
-    if (!mounted) return;
-    setState(() {
-      _actionsToDisplay = actionsToDisplay;
-    });
-  }
-
   EntityMetadata_Action getRegisterAction(EntityMetadata entity) {
     for (EntityMetadata_Action action in entity.actions) {
       if (action.register == true) return action;
@@ -355,91 +272,99 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildRegisterButton(BuildContext ctx, Ent ent) {
-    if (_registerAction == null) return Container();
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: [EntTags.ACTIONS],
+        builder: (ctx, tagId) {
+          if (_ent.registerAction == null) return Container();
 
-    if (_isRegistered)
-      return BaseButton(
-        purpose: Purpose.GUIDE,
-        leftIconData: FeatherIcons.check,
-        text: "Registered",
-        isSmall: true,
-        style: BaseButtonStyle.FILLED,
-        isDisabled: true,
-      );
-    else
-      return BaseButton(
-        purpose: Purpose.HIGHLIGHT,
-        leftIconData: FeatherIcons.feather,
-        text: "Register",
-        isSmall: true,
-        onTap: () {
-          if (_registerAction.type == "browser") {
-            onBrowserAction(ctx, _registerAction, ent);
-          }
-        },
-      );
+          if (_ent.isRegistered)
+            return BaseButton(
+              purpose: Purpose.GUIDE,
+              leftIconData: FeatherIcons.check,
+              text: "Registered",
+              isSmall: true,
+              style: BaseButtonStyle.FILLED,
+              isDisabled: true,
+            );
+          else
+            return BaseButton(
+              purpose: Purpose.HIGHLIGHT,
+              leftIconData: FeatherIcons.feather,
+              text: "Register",
+              isSmall: true,
+              onTap: () {
+                if (_ent.registerAction.type == "browser") {
+                  onBrowserAction(ctx, _ent.registerAction, ent);
+                }
+              },
+            );
+        });
   }
 
-  List<Widget> buildActionList(BuildContext ctx, Ent ent) {
-    final List<Widget> actionsToShow = [];
+  Widget buildActionList(BuildContext ctx, Ent ent) {
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: [EntTags.ACTIONS],
+        builder: (ctx, tagId) {
+          final List<Widget> actionsToShow = [];
 
-    actionsToShow.add(Section(text: "Actions"));
+          actionsToShow.add(Section(text: "Actions"));
 
-    if (_actionsToDisplay.length == 0 || _registerAction == null) {
-      return [
-        ListItem(
-          mainText: "No actions defined",
-          disabled: true,
-          rightIcon: null,
-          icon: FeatherIcons.helpCircle,
-        )
-      ];
-    }
+          if (_ent.visibleActions.length == 0 || _ent.registerAction == null) {
+            return ListItem(
+              mainText: "No actions defined",
+              disabled: true,
+              rightIcon: null,
+              icon: FeatherIcons.helpCircle,
+            );
+          }
 
-    bool actionsDisabled = false;
-    if (!_isRegistered) {
-      actionsDisabled = true;
-      final entityName =
-          ent.entityMetadata.name[ent.entityMetadata.languages[0]];
-      ListItem noticeItem = ListItem(
-        mainText: "Regsiter to $entityName first",
-        secondaryText: null,
-        rightIcon: null,
-        disabled: false,
-        purpose: Purpose.HIGHLIGHT,
-      );
-      actionsToShow.add(noticeItem);
-    }
+          bool actionsDisabled = false;
+          if (!_ent.isRegistered) {
+            actionsDisabled = true;
+            final entityName =
+                ent.entityMetadata.name[ent.entityMetadata.languages[0]];
+            ListItem noticeItem = ListItem(
+              mainText: "Regsiter to $entityName first",
+              secondaryText: null,
+              rightIcon: null,
+              disabled: false,
+              purpose: Purpose.HIGHLIGHT,
+            );
+            actionsToShow.add(noticeItem);
+          }
 
-    for (EntityMetadata_Action action in _actionsToDisplay) {
-      ListItem item;
-      if (action.type == "browser") {
-        if (!(action.name is Map) ||
-            !(action.name[ent.entityMetadata.languages[0]] is String))
-          return null;
+          for (EntityMetadata_Action action in _ent.visibleActions) {
+            ListItem item;
+            if (action.type == "browser") {
+              if (!(action.name is Map) ||
+                  !(action.name[ent.entityMetadata.languages[0]] is String))
+                return null;
 
-        item = ListItem(
-          icon: FeatherIcons.arrowRightCircle,
-          mainText: action.name[ent.entityMetadata.languages[0]],
-          secondaryText: action.visible,
-          disabled: actionsDisabled,
-          onTap: () {
-            onBrowserAction(ctx, action, ent);
-          },
-        );
-      } else {
-        item = ListItem(
-          mainText: action.name[ent.entityMetadata.languages[0]],
-          secondaryText: "Action type not supported yet: " + action.type,
-          icon: FeatherIcons.helpCircle,
-          disabled: true,
-        );
-      }
+              item = ListItem(
+                icon: FeatherIcons.arrowRightCircle,
+                mainText: action.name[ent.entityMetadata.languages[0]],
+                secondaryText: action.visible,
+                disabled: actionsDisabled,
+                onTap: () {
+                  onBrowserAction(ctx, action, ent);
+                },
+              );
+            } else {
+              item = ListItem(
+                mainText: action.name[ent.entityMetadata.languages[0]],
+                secondaryText: "Action type not supported yet: " + action.type,
+                icon: FeatherIcons.helpCircle,
+                disabled: true,
+              );
+            }
 
-      actionsToShow.add(item);
-    }
+            actionsToShow.add(item);
+          }
 
-    return actionsToShow;
+          return ListView(children: actionsToShow);
+        });
   }
 
   onBrowserAction(BuildContext ctx, EntityMetadata_Action action, Ent ent) {
@@ -526,7 +451,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       _errorMessage = errorMessage;
     });
 */
-    if (_ent.entityMetadata != null) fetchVisibleActions(_ent);
+
     if (account.isSubscribed(_ent.entityReference)) _ent.save();
   }
 

@@ -4,13 +4,22 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/controllers/processModel.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-enum EntTags {ENTITY_METADATA, SUBSCRIBED }
+enum EntTags { ENTITY_METADATA, ACTIONS }
 
 class Ent extends StatesRebuilder {
   EntityReference entityReference;
   DataState entityMetadataDataState = DataState.UNKNOWN;
   EntityMetadata entityMetadata;
+
+  EntityMetadata_Action registerAction;
+  DataState regiserActionDataState = DataState.UNKNOWN;
+  bool isRegistered;
+  List<EntityMetadata_Action> visibleActions;
+  DataState visibleActionsDataState = DataState.UNKNOWN;
+
   Feed feed;
   List<ProcessModel> processess;
   String lang = "default";
@@ -27,11 +36,12 @@ class Ent extends StatesRebuilder {
     try {
       this.entityMetadata = await fetchEntityData(this.entityReference);
       entityMetadataDataState = DataState.GOOD;
-      
     } catch (e) {
       entityMetadataDataState = DataState.ERROR;
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+
+    updateVisibleActions();
 
     try {
       await updateProcesses();
@@ -140,7 +150,6 @@ class Ent extends StatesRebuilder {
       this.entityMetadata = entitiesBloc.value[index];
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
-
   }
 
   syncFeed(EntityReference _entitySummary, EntityMetadata _entityMetadata) {
@@ -178,4 +187,86 @@ class Ent extends StatesRebuilder {
         return process;
       }).toList();
   }*/
+
+  Future<void> updateVisibleActions() async {
+    final List<EntityMetadata_Action> actionsToDisplay = [];
+    EntityMetadata_Action registerAction;
+
+    if (this.entityMetadata == null) return;
+
+    this.visibleActionsDataState = DataState.CHECKING;
+    if (hasState) rebuildStates([EntTags.ACTIONS]);
+
+    for (EntityMetadata_Action action in this.entityMetadata.actions) {
+      if (action.register == true) {
+        if (registerAction != null)
+          continue; //only one registerAction is supported
+        registerAction = action;
+
+        this.regiserActionDataState = DataState.CHECKING;
+        bool isRegistered =
+            await isActionVisible(action, this.entityReference.entityId);
+
+        this.regiserActionDataState = DataState.GOOD;
+        this.registerAction = registerAction;
+        this.isRegistered = isRegistered;
+        if (hasState) rebuildStates([EntTags.ACTIONS]);
+      } else {
+        if (await isActionVisible(action, this.entityReference.entityId)) {
+          actionsToDisplay.add(action);
+        }
+      }
+    }
+
+    this.visibleActionsDataState = DataState.GOOD;
+    this.visibleActions = actionsToDisplay;
+    if (hasState) rebuildStates([EntTags.ACTIONS]);
+  }
+
+  Future<bool> isActionVisible(
+      EntityMetadata_Action action, String entityId) async {
+    if (action.visible == "true") return true;
+    if (action.visible == null || action.visible == "false") return false;
+
+    String publicKey = account.identity.identityId;
+    int timestamp = new DateTime.now().millisecondsSinceEpoch;
+
+    // TODO: Get the private key to sign appropriately
+    final privateKey = "";
+    debugPrint(
+        "TODO: Retrieve the private key to sign the action visibility request");
+
+    try {
+      Map payload = {
+        "type": action.type,
+        'publicKey': publicKey,
+        "entityId": entityId,
+        "timestamp": timestamp,
+        "signature": ""
+      };
+
+      if (privateKey != "") {
+        payload["signature"] = await signString(
+            jsonEncode({"timestamp": timestamp.toString()}), privateKey);
+      } else {
+        payload["signature"] = "0x"; // TODO: TEMP
+      }
+
+      Map<String, String> headers = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      var response = await http.post(action.visible,
+          body: jsonEncode(payload), headers: headers);
+      if (response.statusCode != 200 || !(response.body is String))
+        return false;
+      final body = jsonDecode(response.body);
+      if (body is Map && body["visible"] == true) return true;
+    } catch (err) {
+      return false;
+    }
+
+    return false;
+  }
 }
