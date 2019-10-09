@@ -53,7 +53,7 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
-    processModel.updateCensus();
+    processModel.updateCensusState();
   }
 
   @override
