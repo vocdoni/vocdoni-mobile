@@ -43,7 +43,7 @@ class _PollCardState extends State<PollCard> {
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (widget.process.participationDataState == DataState.GOOD)
+          if (widget.process.participationDataState.isValid)
             participation =
                 getFriendlyParticipation(widget.process.participation);
           return BaseCard(

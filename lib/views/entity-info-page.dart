@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/modals/web-action.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -78,23 +77,23 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildStatus() {
-    if (_ent.entityMetadataDataState == DataState.CHECKING)
+    if (_ent.entityMetadataDataState.isUpdating)
       return ListItem(
         mainText: "Updating details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (_ent.entityMetadataDataState == DataState.ERROR)
+    if (_ent.entityMetadataDataState.isError)
       return ListItem(
-        mainText: "Unable to load details",
+        mainText: _ent.entityMetadataDataState.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
-    else if (_ent.feedDataState == DataState.ERROR)
+    else if (_ent.feedDataState.isError)
       return ListItem(
-        mainText: "Unable to load feed",
+        mainText: _ent.feedDataState.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,

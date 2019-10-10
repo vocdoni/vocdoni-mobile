@@ -172,7 +172,9 @@ class _PollPageState extends State<PollPage> {
           Purpose purpose;
           IconData icon;
 
-          if (processModel.censusDataState == DataState.GOOD) {
+          if (processModel.censusDataState.isUpdating) {
+            text = "Checking census";
+          } else if (processModel.censusDataState.isValid) {
             if (processModel.censusIsIn) {
               text = "You are in the census";
               purpose = Purpose.GOOD;
@@ -182,25 +184,23 @@ class _PollPageState extends State<PollPage> {
               purpose = Purpose.DANGER;
               icon = FeatherIcons.x;
             }
-          } else if (processModel.censusDataState == DataState.ERROR) {
-            text = "Unable to check census";
+          } else if (processModel.censusDataState.isError) {
+            text = processModel.censusDataState.errorMessage;
             icon = FeatherIcons.alertTriangle;
-          } else if (processModel.censusDataState == DataState.CHECKING) {
-            text = "Checking census";
-          } else if (processModel.censusDataState == DataState.UNKNOWN) {
+          } else {
             text = "Check census state";
           }
 
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.censusDataState == DataState.CHECKING,
+            isSpinning: processModel.censusDataState.isUpdating,
             onTap: () {
               processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.censusDataState == DataState.ERROR
+            purpose: processModel.censusDataState.isNotValid
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -310,7 +310,7 @@ class _PollPageState extends State<PollPage> {
       viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
-        if (processModel.censusDataState == DataState.GOOD) {
+        if (processModel.censusDataState.isValid) {
           if (processModel.censusIsIn) {
             return _responsesAreValid == false
                 ? ListItem(

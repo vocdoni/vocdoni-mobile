@@ -35,7 +35,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
               viewModels: [ent],
               tag: EntTags.ENTITY_METADATA,
               builder: (ctx, tagId) {
-                return ent.entityMetadataDataState == DataState.GOOD
+                return ent.entityMetadataDataState.isValid
                     ? buildCard(ctx, ent)
                     : buildEmptyMetadataCard(ctx, ent.entityReference);
               });
