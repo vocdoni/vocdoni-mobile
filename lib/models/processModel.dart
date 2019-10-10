@@ -245,7 +245,9 @@ class ProcessModel extends StatesRebuilder {
   }
 
   double get participation {
-    if (this.participantsTotal <= 0) return 0.0;
+    if (this.participantsTotal == null || this.participantsCurrent == null)
+      return null;
+    if (this.participantsTotal == 0) return 0;
     return this.participantsCurrent * 100 / this.participantsTotal;
   }
 
