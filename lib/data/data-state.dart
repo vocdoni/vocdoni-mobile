@@ -8,10 +8,14 @@ enum DataStateStates {
 }
 
 class DataState {
-  DataStateStates state = DataStateStates.UNKNOWN;
+  DataStateStates state;
   DateTime lastGoodUpdate;
   DateTime lastErrorUpdate;
   String errorMessage;
+
+  DataState() {
+    state = DataStateStates.UNKNOWN;
+  }
 
   void toUnknown() {
     state = DataStateStates.UNKNOWN;
@@ -47,7 +51,8 @@ class DataState {
 
   bool get isValid {
     return (state == DataStateStates.GOOD ||
-        state == DataStateStates.REFRESHING || state ==DataStateStates.FAULTY);
+        state == DataStateStates.REFRESHING ||
+        state == DataStateStates.FAULTY);
   }
 
   bool get isNotValid {
@@ -62,5 +67,4 @@ class DataState {
   bool get isError {
     return (state == DataStateStates.ERROR);
   }
-
 }

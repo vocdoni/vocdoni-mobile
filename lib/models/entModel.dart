@@ -12,21 +12,21 @@ enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
 class EntModel extends StatesRebuilder {
   EntityReference entityReference;
-  DataState entityMetadataDataState;
+  final DataState entityMetadataDataState = DataState();
   EntityMetadata entityMetadata;
 
   EntityMetadata_Action registerAction;
-  DataState regiserActionDataState;
+  final DataState regiserActionDataState = DataState();
   bool isRegistered;
   List<EntityMetadata_Action> visibleActions;
-  DataState visibleActionsDataState;
+  final DataState visibleActionsDataState = DataState();
 
   Feed feed;
-  DataState feedDataState;
+  final DataState feedDataState = DataState();
 
   List<ProcessModel> processess;
   String lang = "default";
-  DataState processesDataState;
+  final DataState processesDataState = DataState();
 
   EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;

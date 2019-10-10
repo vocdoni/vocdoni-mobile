@@ -14,13 +14,13 @@ class ProcessModel extends StatesRebuilder {
   EntityReference entityReference;
   String lang = "default";
 
-  DataState processMetadataState;
+  final DataState processMetadataState = DataState();
   ProcessMetadata processMetadata;
 
-  DataState censusDataState;
+  final DataState censusDataState = DataState();
   bool censusIsIn;
 
-  DataState participationDataState;
+  final DataState participationDataState = DataState();
   int participantsTotal;
   int participantsCurrent;
 
