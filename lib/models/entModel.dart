@@ -1,6 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:vocdoni/data/data-state.dart';
 import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -11,21 +12,21 @@ enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
 class EntModel extends StatesRebuilder {
   EntityReference entityReference;
-  DataState entityMetadataDataState = DataState.UNKNOWN;
+  DataState entityMetadataDataState;
   EntityMetadata entityMetadata;
 
   EntityMetadata_Action registerAction;
-  DataState regiserActionDataState = DataState.UNKNOWN;
+  DataState regiserActionDataState;
   bool isRegistered;
   List<EntityMetadata_Action> visibleActions;
-  DataState visibleActionsDataState = DataState.UNKNOWN;
+  DataState visibleActionsDataState;
 
   Feed feed;
-  DataState feedDataState = DataState.UNKNOWN;
+  DataState feedDataState;
 
   List<ProcessModel> processess;
   String lang = "default";
-  DataState processesDataState =  DataState.UNKNOWN;
+  DataState processesDataState;
 
   EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -35,9 +36,9 @@ class EntModel extends StatesRebuilder {
   update() async {
     try {
       this.entityMetadata = await fetchEntityData(this.entityReference);
-      entityMetadataDataState = DataState.GOOD;
+      entityMetadataDataState.toGood();
     } catch (e) {
-      entityMetadataDataState = DataState.ERROR;
+      entityMetadataDataState.toError("Unable to update entityMetadata");
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
 
@@ -46,10 +47,10 @@ class EntModel extends StatesRebuilder {
 
     try {
       await updateProcesses();
-      processesDataState = DataState.GOOD;
+      processesDataState.toGood();
     } catch (e) {
       debugPrint(e.toString());
-      processesDataState = DataState.ERROR;
+      processesDataState.toError("Unable to update procesess");
     }
     if (hasState) rebuildStates([EntTags.PROCESSES]);
     /*
@@ -71,14 +72,14 @@ class EntModel extends StatesRebuilder {
   }
 
   updateFeed() async {
-    feedDataState = DataState.CHECKING;
+    feedDataState.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
     try {
       this.feed = await fetchEntityNewsFeed(
           this.entityReference, this.entityMetadata, this.lang);
-      feedDataState = DataState.GOOD;
+      feedDataState.toGood();
     } catch (e) {
-      feedDataState = DataState.ERROR;
+      feedDataState.toError("Unable to load feed");
     }
     if (hasState) rebuildStates([EntTags.FEED]);
   }
@@ -209,7 +210,7 @@ class EntModel extends StatesRebuilder {
 
     if (this.entityMetadata == null) return;
 
-    this.visibleActionsDataState = DataState.CHECKING;
+    this.visibleActionsDataState.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.ACTIONS]);
 
     for (EntityMetadata_Action action in this.entityMetadata.actions) {
@@ -218,13 +219,13 @@ class EntModel extends StatesRebuilder {
           continue; //only one registerAction is supported
         registerAction = action;
 
-        this.regiserActionDataState = DataState.CHECKING;
+        this.regiserActionDataState.toBootingOrRefreshing();
         bool isRegistered =
             await isActionVisible(action, this.entityReference.entityId);
 
-        this.regiserActionDataState = DataState.GOOD;
         this.registerAction = registerAction;
         this.isRegistered = isRegistered;
+        this.regiserActionDataState.toGood();
         if (hasState) rebuildStates([EntTags.ACTIONS]);
       } else {
         if (await isActionVisible(action, this.entityReference.entityId)) {
@@ -233,8 +234,8 @@ class EntModel extends StatesRebuilder {
       }
     }
 
-    this.visibleActionsDataState = DataState.GOOD;
     this.visibleActions = actionsToDisplay;
+    this.visibleActionsDataState.toGood();
     if (hasState) rebuildStates([EntTags.ACTIONS]);
   }
 
