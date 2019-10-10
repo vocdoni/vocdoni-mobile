@@ -25,6 +25,10 @@ class ProcessModel extends StatesRebuilder {
   int participantsTotal;
   int participantsCurrent;
 
+  final DataState datesDataState = DataState();
+  DateTime startDate;
+  DateTime endDate;
+
   ProcessModel({this.processId, this.entityReference}) {
     syncLocal();
   }
@@ -40,7 +44,7 @@ class ProcessModel extends StatesRebuilder {
     await updateProcessMetadataIfNeeded();
     updateCensusStateIfNeeded();
     updateParticipation();
-
+    updateDates();
     save();
 
     // Sync process times
@@ -70,7 +74,7 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateProcessMetadataIfNeeded() async {
-    if (this.processMetadataState != DataStateStates.GOOD) {
+    if (this.processMetadataState.isNotValid) {
       await updateProcessMetadata();
     }
   }
@@ -246,15 +250,17 @@ class ProcessModel extends StatesRebuilder {
     return this.participantsCurrent * 100 / this.participantsTotal;
   }
 
-  DateTime getStartDate() {
-    if (processMetadata == null) return null;
-    return DateTime.now()
-        .add(vochainModel.getDurationUntilBlock(processMetadata.startBlock));
-  }
-
-  DateTime getEndDate() {
-    if (processMetadata == null) return null;
-    return DateTime.now().add(vochainModel.getDurationUntilBlock(
-        processMetadata.startBlock + processMetadata.numberOfBlocks));
+  updateDates() {
+    //TODO subscribe to vochainModel changes
+    if (vochainModel.syncDataState.isValid) {
+      this.startDate = DateTime.now()
+          .add(vochainModel.getDurationUntilBlock(processMetadata.startBlock));
+      this.endDate = DateTime.now().add(vochainModel.getDurationUntilBlock(
+          processMetadata.startBlock + processMetadata.numberOfBlocks));
+      this.datesDataState.toGood();
+    }
+    else{
+       this.datesDataState.toError("Vochain is not in sync");
+    }
   }
 }

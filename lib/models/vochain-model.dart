@@ -2,29 +2,35 @@ import 'package:dvote/api/voting-process.dart';
 import 'package:dvote/net/gateway.dart';
 import 'package:vocdoni/data/data-state.dart';
 import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/singletons.dart';
 
 class VochainModel {
   VochainModel();
 
-  DataState blockReferenceDataState = DataState();
+  DataState syncDataState = DataState();
   int referenceBlock;
   DateTime referenceTimestamp;
+
+  syncBlockHeight(){
+    //TODO
+  }
 
   updateBlockHeight() async {
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-    blockReferenceDataState.toBootingOrRefreshing();
+    syncDataState.toBootingOrRefreshing();
 
     try {
       this.referenceBlock = await getBlockHeight(dvoteGw);
-      blockReferenceDataState.toGood();
+      syncDataState.toGood();
     } catch (e) {
       this.referenceBlock = 0;
-      blockReferenceDataState.toErrorOrFaulty();
+      syncDataState.toErrorOrFaulty();
     }
     this.referenceTimestamp = DateTime.now();
+    //TODO save to storage
   }
 
   Duration getDurationUntilBlock(int blockNumber) {
