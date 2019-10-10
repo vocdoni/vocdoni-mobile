@@ -25,7 +25,6 @@ class PollCard extends StatefulWidget {
 }
 
 class _PollCardState extends State<PollCard> {
-
   @override
   void initState() {
     super.initState();
@@ -43,11 +42,15 @@ class _PollCardState extends State<PollCard> {
         viewModels: [widget.process],
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
+          String participation = "";
+          if (widget.process.participationDataState == DataState.GOOD)
+            participation =
+                getFriendlyParticipation(widget.process.participation);
           return BaseCard(
             onTap: () {
               Navigator.pushNamed(ctx, "/entity/participation/poll",
-                  arguments:
-                      PollPageArgs(ent: widget.ent, processId: widget.process.processId));
+                  arguments: PollPageArgs(
+                      ent: widget.ent, processId: widget.process.processId));
             },
             image: validUriOrNull(
                 widget.process.processMetadata.details.headerImage),
@@ -68,8 +71,8 @@ class _PollCardState extends State<PollCard> {
                   DashboardItem(
                     label: "Participation",
                     item: DashboardText(
-                        mainText: getFriendlyParticipation(widget.process.participation),
-                        secondaryText:'%',
+                        mainText: participation,
+                        secondaryText: '%',
                         purpose: Purpose.WARNING),
                   ),
                   DashboardItem(
@@ -109,7 +112,7 @@ class _PollCardState extends State<PollCard> {
     );
   }
 
-  String getFriendlyParticipation(double participation ){
+  String getFriendlyParticipation(double participation) {
     return participation.round().toString();
   }
 
