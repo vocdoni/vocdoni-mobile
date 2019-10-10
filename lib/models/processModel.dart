@@ -177,32 +177,31 @@ class ProcessModel extends StatesRebuilder {
   }
 
   Future<int> getTotalParticipants() async {
-    if (this.processMetadata == null) return 0;
+    if (this.processMetadata == null) return null;
 
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-    int total = -1;
-
     try {
-      total = await getCensusSize(processMetadata.census.merkleRoot, dvoteGw);
-    } catch (e) {}
-    return total;
+      return await getCensusSize(processMetadata.census.merkleRoot, dvoteGw);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<int> getCurrentParticipants() async {
-    if (processMetadata == null) return 0;
+    if (processMetadata == null) return null;
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-    int current = -1;
     try {
-      current = await getEnvelopeHeight(
+      return await getEnvelopeHeight(
           processMetadata.meta[META_PROCESS_ID], dvoteGw);
-    } catch (e) {}
-    return current;
+    } catch (e) {
+      return null;
+    }
   }
 
   syncParticipation() {
@@ -230,7 +229,7 @@ class ProcessModel extends StatesRebuilder {
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
     this.participantsTotal = await getTotalParticipants();
     this.participantsCurrent = await getCurrentParticipants();
-    if (this.participantsTotal == -1 || this.participantsCurrent == -1)
+    if (this.participantsTotal == null || this.participantsCurrent == null)
       this.participationDataState.toError('Participation data is invalid');
     else
       this.participationDataState.toGood();
@@ -258,9 +257,8 @@ class ProcessModel extends StatesRebuilder {
       this.endDate = DateTime.now().add(vochainModel.getDurationUntilBlock(
           processMetadata.startBlock + processMetadata.numberOfBlocks));
       this.datesDataState.toGood();
-    }
-    else{
-       this.datesDataState.toError("Vochain is not in sync");
+    } else {
+      this.datesDataState.toError("Vochain is not in sync");
     }
   }
 }
