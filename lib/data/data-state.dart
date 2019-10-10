@@ -1,4 +1,10 @@
-enum DataStateStates { UNKNOWN, BOOTING, REFRESHING, GOOD, ERROR }
+enum DataStateStates {
+  UNKNOWN, //Data is invalid, not initialized or not known
+  BOOTING, //Data is invalid, not initialized or not known but updating it
+  GOOD, //Data is valid
+  REFRESHING, //Data is valid but updating it
+  ERROR // Data is invalid, it has been attempted to updated
+}
 
 class DataState {
   DataStateStates state = DataStateStates.UNKNOWN;
@@ -18,6 +24,14 @@ class DataState {
     state = DataStateStates.REFRESHING;
   }
 
+  void toBootingOrRefreshing() {
+    if (this.isValid)
+      state = DataStateStates.BOOTING;
+    else {
+      state = DataStateStates.REFRESHING;
+    }
+  }
+
   void toGood() {
     errorMessage = null;
     lastGoodUpdate = DateTime.now();
@@ -29,5 +43,18 @@ class DataState {
     lastErrorUpdate = DateTime.now();
     state = DataStateStates.ERROR;
   }
-  
+
+  bool get isValid {
+    return (state == DataStateStates.GOOD ||
+        state == DataStateStates.REFRESHING);
+  }
+
+  bool get isNotValid {
+    return !isValid;
+  }
+
+  bool get isUpdating {
+    return (state == DataStateStates.BOOTING ||
+        state == DataStateStates.REFRESHING);
+  }
 }
