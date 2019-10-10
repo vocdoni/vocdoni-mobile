@@ -217,9 +217,11 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    final dat = processModel.getEndDate();
-    String formattedTime =
-        dat != null ? DateFormat("dd/MM, H:m:s").format(dat) : "";
+    String formattedTime = "";
+    if (processModel.datesDataState.isValid) {
+      formattedTime = DateFormat("dd/MM, H:m:s").format(processModel.endDate);
+    }
+
     return ListItem(
       icon: FeatherIcons.clock,
       mainText: "Process ends on " + formattedTime,
