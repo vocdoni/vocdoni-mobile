@@ -49,6 +49,14 @@ class DataState {
     state = DataStateStates.ERROR;
   }
 
+  void toErrorOrFaulty() {
+    if (this.isValid)
+      state = DataStateStates.FAULTY;
+    else {
+      state = DataStateStates.ERROR;
+    }
+  }
+
   bool get isValid {
     return (state == DataStateStates.GOOD ||
         state == DataStateStates.REFRESHING ||
