@@ -15,7 +15,7 @@ EntityReference makeEntityReference(
   return summary;
 }
 
-Widget buildFeedPostCard({BuildContext ctx, Ent ent, FeedPost post}) {
+Widget buildFeedPostCard({BuildContext ctx, EntModel ent, FeedPost post}) {
   return BaseCard(
       onTap: () => onPostCardTap(ctx, post, ent),
       image: post.image,
@@ -42,7 +42,7 @@ makeElementTag({String entityId, String cardId, String elementId}) {
   return entityId + cardId + elementId;
 }
 
-onPostCardTap(BuildContext ctx, FeedPost post, Ent ent) {
+onPostCardTap(BuildContext ctx, FeedPost post, EntModel ent) {
   Navigator.of(ctx).pushNamed("/entity/feed/post",
       arguments: FeedPostArgs(ent: ent, post: post));
 }

@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 enum EntTags { ENTITY_METADATA, ACTIONS, FEED }
 
-class Ent extends StatesRebuilder {
+class EntModel extends StatesRebuilder {
   EntityReference entityReference;
   DataState entityMetadataDataState = DataState.UNKNOWN;
   EntityMetadata entityMetadata;
@@ -27,7 +27,7 @@ class Ent extends StatesRebuilder {
   String lang = "default";
   bool processessMetadataUpdated = false;
 
-  Ent(EntityReference entitySummary) {
+  EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;
     syncLocal();
   }

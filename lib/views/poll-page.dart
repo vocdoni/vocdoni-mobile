@@ -20,7 +20,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
-  Ent ent;
+  EntModel ent;
   String processId;
   PollPageArgs({this.ent, this.processId});
 }
@@ -59,7 +59,7 @@ class _PollPageState extends State<PollPage> {
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    Ent ent = args.ent;
+    EntModel ent = args.ent;
     //Process process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
@@ -88,7 +88,7 @@ class _PollPageState extends State<PollPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    final Ent ent = args.ent;
+    final EntModel ent = args.ent;
     return [
       buildShareButton(context, ent),
     ];
@@ -115,7 +115,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent) {
+  getScaffoldChildren(BuildContext context, EntModel ent) {
     List<Widget> children = [];
     //children.add(buildTest());
     children.add(buildTitle(context, ent));
@@ -134,7 +134,7 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, Ent ent) {
+  buildTitle(BuildContext context, EntModel ent) {
     String title = processModel.processMetadata.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
@@ -346,7 +346,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildShareButton(BuildContext context, Ent ent) {
+  buildShareButton(BuildContext context, EntModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,

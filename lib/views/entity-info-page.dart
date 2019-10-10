@@ -22,7 +22,7 @@ class EntityInfoPage extends StatefulWidget {
 }
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
-  Ent _ent;
+  EntModel _ent;
   bool _processingSubscription = false;
 
   @override
@@ -36,7 +36,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       analytics.trackPage(
           pageId: "EntityInfoPage", entityId: entityReference.entityId);
       _ent = account.getEnt(entityReference);
-      if (_ent == null) _ent = new Ent(entityReference);
+      if (_ent == null) _ent = new EntModel(entityReference);
 
       refresh();
     } catch (err) {
@@ -56,7 +56,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildScaffoldWithoutMetadata(Ent ent) {
+  buildScaffoldWithoutMetadata(EntModel ent) {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
@@ -104,7 +104,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return Container();
   }
 
-  buildScaffold(Ent ent) {
+  buildScaffold(EntModel ent) {
     return StateBuilder(
         viewModels: [_ent],
         tag: EntTags.ENTITY_METADATA,
@@ -142,7 +142,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     ];
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent) {
+  getScaffoldChildren(BuildContext context, EntModel ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
     children.add(buildStatus());
@@ -161,7 +161,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, Ent ent) {
+  buildTitle(BuildContext context, EntModel ent) {
     String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
       mainTextTag: ent.entityReference.entityId + title,
@@ -173,7 +173,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildTitleWithoutEntityMeta(BuildContext context, Ent ent) {
+  buildTitleWithoutEntityMeta(BuildContext context, EntModel ent) {
     return ListItem(
       mainText: "...",
       secondaryText: ent.entityReference.entityId,
@@ -203,7 +203,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildParticipationItem(BuildContext context, Ent ent) {
+  buildParticipationItem(BuildContext context, EntModel ent) {
     int processNum = 0;
     if (ent.processess != null) processNum = ent.processess.length;
     return ListItem(
@@ -218,7 +218,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildSubscribeItem(BuildContext context, Ent ent) {
+  buildSubscribeItem(BuildContext context, EntModel ent) {
     bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return ListItem(
@@ -234,7 +234,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildSubscribeButton(BuildContext context, Ent ent) {
+  buildSubscribeButton(BuildContext context, EntModel ent) {
     bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
@@ -249,7 +249,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildShareItem(BuildContext context, Ent ent) {
+  buildShareItem(BuildContext context, EntModel ent) {
     return ListItem(
         mainText: "Share organization",
         icon: FeatherIcons.share2,
@@ -259,7 +259,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildShareButton(BuildContext context, Ent ent) {
+  buildShareButton(BuildContext context, EntModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
@@ -269,7 +269,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  onShare(Ent ent) {
+  onShare(EntModel ent) {
     Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
     showMessage("Identity ID copied on the clipboard",
         context: context, purpose: Purpose.GUIDE);
@@ -282,7 +282,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return null;
   }
 
-  Widget buildRegisterButton(BuildContext ctx, Ent ent) {
+  Widget buildRegisterButton(BuildContext ctx, EntModel ent) {
     return StateBuilder(
         viewModels: [_ent],
         tag: [EntTags.ACTIONS],
@@ -313,7 +313,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  Widget buildActionList(BuildContext ctx, Ent ent) {
+  Widget buildActionList(BuildContext ctx, EntModel ent) {
     return StateBuilder(
         viewModels: [_ent],
         tag: [EntTags.ACTIONS],
@@ -378,7 +378,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  onBrowserAction(BuildContext ctx, EntityMetadata_Action action, Ent ent) {
+  onBrowserAction(BuildContext ctx, EntityMetadata_Action action, EntModel ent) {
     final String url = action.url;
     final String title = action.name[ent.entityMetadata.languages[0]] ??
         ent.entityMetadata.name[ent.entityMetadata.languages[0]];
@@ -391,7 +391,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     Navigator.push(ctx, route);
   }
 
-  unsubscribeFromEntity(BuildContext ctx, Ent ent) async {
+  unsubscribeFromEntity(BuildContext ctx, EntModel ent) async {
     setState(() {
       _processingSubscription = true;
     });
@@ -407,7 +407,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     });
   }
 
-  subscribeToEntity(BuildContext ctx, Ent ent) async {
+  subscribeToEntity(BuildContext ctx, EntModel ent) async {
     setState(() {
       _processingSubscription = true;
     });

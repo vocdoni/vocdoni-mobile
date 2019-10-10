@@ -7,7 +7,7 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
-  final Ent ent;
+  final EntModel ent;
   final ProcessModel process;
   final FeedPost post;
   final DateTime date;

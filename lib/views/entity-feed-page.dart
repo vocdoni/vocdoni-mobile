@@ -21,7 +21,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     super.didChangeDependencies();
 
     try {
-      Ent ent = ModalRoute.of(super.context).settings.arguments;
+      EntModel ent = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
           pageId: "EntityFeedPage", entityId: ent.entityReference.entityId);
     } catch (err) {
@@ -31,7 +31,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   @override
   Widget build(context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
+    final EntModel ent = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
     else if (ent == null) return buildEmptyEntity(context);

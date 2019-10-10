@@ -16,7 +16,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 
 class PollCard extends StatefulWidget {
   final ProcessModel process;
-  final Ent ent;
+  final EntModel ent;
 
   PollCard({this.process, this.ent});
 
@@ -98,7 +98,7 @@ class _PollCardState extends State<PollCard> {
         });
   }
 
-  Widget buildProcessTitle(Ent ent, ProcessMetadata process) {
+  Widget buildProcessTitle(EntModel ent, ProcessMetadata process) {
     String title = process.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,

@@ -14,7 +14,7 @@ class EntityParticipationPage extends StatefulWidget {
 }
 
 class _EntityParticipationPageState extends State<EntityParticipationPage> {
-  Ent ent;
+  EntModel ent;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

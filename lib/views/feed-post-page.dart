@@ -12,7 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
 class FeedPostArgs {
-  Ent ent;
+  EntModel ent;
   final FeedPost post;
 
   FeedPostArgs({this.ent, this.post});
@@ -44,7 +44,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
 
     FeedPost post = args.post;
-    Ent ent = args.ent;
+    EntModel ent = args.ent;
 
     if (post == null) return buildNoPosts(ctx);
 
@@ -67,14 +67,14 @@ class _FeedPostPageState extends State<FeedPostPage> {
         ));
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, FeedPost post) {
+  getScaffoldChildren(BuildContext context, EntModel ent, FeedPost post) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent, post));
     children.add(html2(post.contentHtml));
     return children;
   }
 
-  buildTitle(BuildContext context, Ent ent, FeedPost post) {
+  buildTitle(BuildContext context, EntModel ent, FeedPost post) {
     return ListItem(
       //mainTextTag: process.meta['processId'] + title,
       mainText: post.title,

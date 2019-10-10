@@ -52,7 +52,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     ]);
   }
 
-  Widget buildCard(BuildContext ctx, Ent ent) {
+  Widget buildCard(BuildContext ctx, EntModel ent) {
     return BaseCard(children: [
       buildName(ctx, ent),
       buildFeedItem(ctx, ent),
@@ -60,11 +60,11 @@ class _EntitiesTabState extends State<EntitiesTab> {
     ]);
   }
 
-  int getFeedPostAmount(Ent ent) {
+  int getFeedPostAmount(EntModel ent) {
     return ent.feed == null ? 0 : ent.feed.items.length;
   }
 
-  Widget buildName(BuildContext ctx, Ent ent) {
+  Widget buildName(BuildContext ctx, EntModel ent) {
     String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
     return ListItem(
         mainTextTag: ent.entityReference.entityId + title,
@@ -76,7 +76,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         onTap: () => onTapEntity(ctx, ent.entityReference));
   }
 
-  buildParticipationItem(BuildContext ctx, Ent ent) {
+  buildParticipationItem(BuildContext ctx, EntModel ent) {
     if (ent.processess == null) return Container();
     return ListItem(
         mainText: "Participation",
@@ -87,7 +87,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         disabled: ent.processess.length == 0);
   }
 
-  Widget buildFeedItem(BuildContext ctx, Ent ent) {
+  Widget buildFeedItem(BuildContext ctx, EntModel ent) {
     return StateBuilder(
         viewModels: [ent],
         tag: EntTags.FEED,
