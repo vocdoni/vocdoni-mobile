@@ -13,6 +13,7 @@ export "../data/identityBloc.dart";
 export "../data/entityMetadataBloc.dart";
 export "../data/processMetadataBloc.dart";
 export "../data/feedBloc.dart";
+export "../data/data-state.dart";
 
 // EXPORTED SINGLETON INSTANCES
 
