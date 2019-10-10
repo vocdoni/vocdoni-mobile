@@ -3,7 +3,8 @@ enum DataStateStates {
   BOOTING, //Data is invalid, not initialized or not known but updating it
   GOOD, //Data is valid
   REFRESHING, //Data is valid but updating it
-  ERROR // Data is invalid, it has been attempted to updated
+  ERROR, // Data is invalid, it has been attempted to updated
+  FAULTY //Data is valid, but it failed to update
 }
 
 class DataState {
@@ -46,7 +47,7 @@ class DataState {
 
   bool get isValid {
     return (state == DataStateStates.GOOD ||
-        state == DataStateStates.REFRESHING);
+        state == DataStateStates.REFRESHING || state ==DataStateStates.FAULTY);
   }
 
   bool get isNotValid {
@@ -57,4 +58,9 @@ class DataState {
     return (state == DataStateStates.BOOTING ||
         state == DataStateStates.REFRESHING);
   }
+
+  bool get isError {
+    return (state == DataStateStates.ERROR);
+  }
+
 }
