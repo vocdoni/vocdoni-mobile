@@ -7,7 +7,7 @@ import 'package:vocdoni/util/singletons.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-enum EntTags { ENTITY_METADATA, ACTIONS, FEED }
+enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
 class EntModel extends StatesRebuilder {
   EntityReference entityReference;
@@ -25,7 +25,7 @@ class EntModel extends StatesRebuilder {
 
   List<ProcessModel> processess;
   String lang = "default";
-  DataState processessDataState =  DataState.UNKNOWN;
+  DataState processesDataState =  DataState.UNKNOWN;
 
   EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -46,11 +46,12 @@ class EntModel extends StatesRebuilder {
 
     try {
       await updateProcesses();
-      processessDataState = DataState.GOOD;
+      processesDataState = DataState.GOOD;
     } catch (e) {
       debugPrint(e.toString());
-      processessDataState = DataState.ERROR;
+      processesDataState = DataState.ERROR;
     }
+    if (hasState) rebuildStates([EntTags.PROCESSES]);
     /*
     //TOOD Should only create procees that does not exist locally
     // - check activeProcess from entity

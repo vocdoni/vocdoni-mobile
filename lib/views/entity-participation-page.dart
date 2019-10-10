@@ -1,6 +1,7 @@
 import 'package:dvote/models/dart/entity.pb.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -14,7 +15,7 @@ class EntityParticipationPage extends StatefulWidget {
 }
 
 class _EntityParticipationPageState extends State<EntityParticipationPage> {
-  EntModel ent;
+  EntModel entModel;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -22,7 +23,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
     try {
       final EntityReference entityReference =
           ModalRoute.of(context).settings.arguments;
-      ent = account.getEnt(entityReference);
+      entModel = account.getEnt(entityReference);
       analytics.trackPage(
           pageId: "EntityParticipationPage",
           entityId: entityReference.entityId);
@@ -33,20 +34,27 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
   @override
   Widget build(context) {
-    if (ent == null || ent.processess == null) return buildNoProcessesess(context);
+    return StateBuilder(
+        viewModels: [entModel],
+        tag: ProcessTags.CENSUS_STATE,
+        builder: (ctx, tagId) {
+          if (entModel == null || entModel.processess == null)
+            return buildNoProcessesess(context);
 
-    return Scaffold(
-      appBar: TopNavigation(
-        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-      ),
-      body: ListView.builder(
-        itemCount: ent.processess.length,
-        itemBuilder: (BuildContext ctx, int index) {
-          final ProcessModel process = ent.processess[index];
-          return PollCard(ent: ent, process: process);
-        },
-      ),
-    );
+          return Scaffold(
+            appBar: TopNavigation(
+              title: entModel
+                  .entityMetadata.name[entModel.entityMetadata.languages[0]],
+            ),
+            body: ListView.builder(
+              itemCount: entModel.processess.length,
+              itemBuilder: (BuildContext ctx, int index) {
+                final ProcessModel process = entModel.processess[index];
+                return PollCard(ent: entModel, process: process);
+              },
+            ),
+          );
+        });
   }
 
   Widget buildNoProcessesess(BuildContext ctx) {
