@@ -1,3 +1,4 @@
+import 'package:dvote/models/dart/entity.pb.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/controllers/ent.dart';
@@ -8,18 +9,23 @@ import 'package:vocdoni/widgets/topNavigation.dart';
 
 class EntityParticipationPage extends StatefulWidget {
   @override
-  _EntityParticipationPageState createState() => _EntityParticipationPageState();
+  _EntityParticipationPageState createState() =>
+      _EntityParticipationPageState();
 }
 
 class _EntityParticipationPageState extends State<EntityParticipationPage> {
+  Ent ent;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     try {
-      Ent ent = ModalRoute.of(super.context).settings.arguments;
+      final EntityReference entityReference =
+          ModalRoute.of(context).settings.arguments;
+      ent = account.getEnt(entityReference);
       analytics.trackPage(
-          pageId: "EntityParticipationPage", entityId: ent.entityReference.entityId);
+          pageId: "EntityParticipationPage",
+          entityId: entityReference.entityId);
     } catch (err) {
       print(err);
     }
@@ -27,8 +33,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
   @override
   Widget build(context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
-    if (ent.processess == null) return buildNoProcessesess(context);
+    if (ent == null || ent.processess == null) return buildNoProcessesess(context);
 
     return Scaffold(
       appBar: TopNavigation(

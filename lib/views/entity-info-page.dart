@@ -213,7 +213,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       rightTextIsBadge: true,
       disabled: processNum == 0,
       onTap: () {
-        Navigator.pushNamed(context, "/entity/participation", arguments: ent);
+        Navigator.pushNamed(context, "/entity/participation", arguments: ent.entityReference);
       },
     );
   }

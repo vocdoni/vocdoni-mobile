@@ -1,3 +1,4 @@
+import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -36,18 +37,18 @@ class _EntitiesTabState extends State<EntitiesTab> {
               builder: (ctx, tagId) {
                 return ent.entityMetadataDataState == DataState.GOOD
                     ? buildCard(ctx, ent)
-                    : buildEmptyMetadataCard(ctx, ent);
+                    : buildEmptyMetadataCard(ctx, ent.entityReference);
               });
         });
   }
 
-  Widget buildEmptyMetadataCard(BuildContext ctx, Ent ent) {
+  Widget buildEmptyMetadataCard(BuildContext ctx, EntityReference entityReference) {
     return BaseCard(children: [
       ListItem(
-          mainText: ent.entityReference.entityId,
-          avatarHexSource: ent.entityReference.entityId,
+          mainText: entityReference.entityId,
+          avatarHexSource: entityReference.entityId,
           isBold: true,
-          onTap: () => onTapEntity(ctx, ent))
+          onTap: () => onTapEntity(ctx, entityReference))
     ]);
   }
 
@@ -72,7 +73,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         avatarText: title,
         avatarHexSource: ent.entityReference.entityId,
         isBold: true,
-        onTap: () => onTapEntity(ctx, ent));
+        onTap: () => onTapEntity(ctx, ent.entityReference));
   }
 
   buildParticipationItem(BuildContext ctx, Ent ent) {
@@ -82,7 +83,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         icon: FeatherIcons.mail,
         rightText: ent.processess.length.toString(),
         rightTextIsBadge: true,
-        onTap: () => onTapParticipation(ctx, ent),
+        onTap: () => onTapParticipation(ctx, ent.entityReference),
         disabled: ent.processess.length == 0);
   }
 
@@ -111,11 +112,11 @@ class _EntitiesTabState extends State<EntitiesTab> {
     );
   }
 
-  onTapEntity(BuildContext ctx, Ent ent) {
-    Navigator.pushNamed(ctx, "/entity", arguments: ent.entityReference);
+  onTapEntity(BuildContext ctx, EntityReference entityReference) {
+    Navigator.pushNamed(ctx, "/entity", arguments: entityReference);
   }
 
-  onTapParticipation(BuildContext ctx, Ent ent) {
-    Navigator.pushNamed(ctx, "/entity/participation", arguments: ent);
+  onTapParticipation(BuildContext ctx, EntityReference entityReference) {
+    Navigator.pushNamed(ctx, "/entity/participation", arguments: entityReference);
   }
 }
