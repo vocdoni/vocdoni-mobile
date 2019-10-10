@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/controllers/account.dart';
-import 'package:vocdoni/controllers/analtyics.dart';
+import 'package:vocdoni/models/account.dart';
+import 'package:vocdoni/models/analtyics.dart';
 import '../data/feedBloc.dart';
 import "../data/app-state.dart";
 import "../data/identityBloc.dart";
