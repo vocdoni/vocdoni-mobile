@@ -54,7 +54,6 @@ class ProcessModel extends StatesRebuilder {
   }
 
   save() async {
-    
     await processesBloc.add(this.processMetadata);
   }
 
@@ -93,7 +92,6 @@ class ProcessModel extends StatesRebuilder {
       processMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
 
       this.processMetadataState = DataState.GOOD;
-
     } catch (err) {
       this.processMetadataState = DataState.ERROR;
     }
@@ -166,8 +164,6 @@ class ProcessModel extends StatesRebuilder {
       this.censusDataState = DataState.ERROR;
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
-
-
   }
 
   stageCensusState() {
@@ -222,13 +218,19 @@ class ProcessModel extends StatesRebuilder {
       this.participationDataState = DataState.UNKNOWN;
     else
       this.censusDataState = DataState.GOOD;
-      stageParticipation();
+    stageParticipation();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   updateParticipation() async {
+    this.participationDataState = DataState.CHECKING;
+    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
     this.participantsTotal = await getTotalParticipants();
     this.participantsCurrent = await getCurrentParticipants();
+    if (this.participantsTotal == -1 || this.participantsCurrent == -1)
+      this.participationDataState = DataState.ERROR;
+    else
+      this.participationDataState = DataState.GOOD;
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
