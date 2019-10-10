@@ -3,26 +3,24 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 
-enum DataState { UNKNOWN, CHECKING, GOOD, ERROR }
 enum ProcessTags {
   PROCESS_METADATA,
   CENSUS_STATE,
   PARTICIPATION,
   VOTE_CONFIRMED
 }
-
 class ProcessModel extends StatesRebuilder {
   String processId;
   EntityReference entityReference;
   String lang = "default";
 
-  DataState processMetadataState = DataState.UNKNOWN;
+  DataState processMetadataState;
   ProcessMetadata processMetadata;
 
-  DataState censusDataState = DataState.UNKNOWN;
+  DataState censusDataState;
   bool censusIsIn;
 
-  DataState participationDataState = DataState.UNKNOWN;
+  DataState participationDataState;
   int participantsTotal;
   int participantsCurrent;
 
@@ -63,22 +61,22 @@ class ProcessModel extends StatesRebuilder {
     }, orElse: () => null);
 
     if (this.processMetadata == null)
-      this.processMetadataState = DataState.UNKNOWN;
+      this.processMetadataState.toUnknown();
     else
-      this.processMetadataState = DataState.GOOD;
+      this.processMetadataState.toGood();
 
     if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
   }
 
   updateProcessMetadataIfNeeded() async {
-    if (this.processMetadataState != DataState.GOOD) {
+    if (this.processMetadataState != DataStateStates.GOOD) {
       await updateProcessMetadata();
     }
   }
 
   updateProcessMetadata() async {
     try {
-      this.processMetadataState = DataState.CHECKING;
+      this.processMetadataState.toBootingOrRefreshing();
       final gwInfo = selectRandomGatewayInfo();
 
       final DVoteGateway dvoteGw =
@@ -91,9 +89,9 @@ class ProcessModel extends StatesRebuilder {
       processMetadata.meta[META_PROCESS_ID] = processId;
       processMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
 
-      this.processMetadataState = DataState.GOOD;
+      this.processMetadataState.toGood();
     } catch (err) {
-      this.processMetadataState = DataState.ERROR;
+      this.processMetadataState.toError("Unable to update processMetadata");
     }
     if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
   }
@@ -112,18 +110,18 @@ class ProcessModel extends StatesRebuilder {
       this.censusIsIn = null;
     }
     if (this.censusIsIn == null)
-      this.censusDataState = DataState.UNKNOWN;
+      this.censusDataState.toUnknown();
     else
-      this.censusDataState = DataState.GOOD;
+      this.censusDataState.toGood();
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
   }
 
   updateCensusStateIfNeeded() async {
-    if (this.censusDataState != DataState.GOOD) await updateCensusState();
+    if (this.censusDataState.isNotValid) await updateCensusState();
   }
 
   updateCensusState() async {
-    this.censusDataState = DataState.CHECKING;
+    this.censusDataState.toRefreshing();
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
     final gwInfo = selectRandomGatewayInfo();
@@ -136,7 +134,7 @@ class ProcessModel extends StatesRebuilder {
       final proof = await generateProof(
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        this.censusDataState = DataState.ERROR;
+        this.censusDataState.toError("Census-proof is not valid");
         this.censusIsIn = false;
 
         if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
@@ -150,7 +148,7 @@ class ProcessModel extends StatesRebuilder {
       else
         this.censusIsIn = true;
 
-      this.censusDataState = DataState.GOOD;
+      this.censusDataState.toGood();
       stageCensusState();
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
@@ -161,7 +159,7 @@ class ProcessModel extends StatesRebuilder {
       //   return;
       // }
     } catch (error) {
-      this.censusDataState = DataState.ERROR;
+      this.censusDataState.toError("Unable to validate census-proof");
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
   }
@@ -215,27 +213,27 @@ class ProcessModel extends StatesRebuilder {
     }
 
     if (this.participantsTotal == null || this.participantsCurrent == null)
-      this.participationDataState = DataState.UNKNOWN;
+      this.participationDataState.toUnknown();
     else
-      this.censusDataState = DataState.GOOD;
+      this.censusDataState.toGood();
     stageParticipation();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   updateParticipation() async {
-    this.participationDataState = DataState.CHECKING;
+    this.participationDataState.toBootingOrRefreshing();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
     this.participantsTotal = await getTotalParticipants();
     this.participantsCurrent = await getCurrentParticipants();
     if (this.participantsTotal == -1 || this.participantsCurrent == -1)
-      this.participationDataState = DataState.ERROR;
+      this.participationDataState.toError('Participation data is invalid');
     else
-      this.participationDataState = DataState.GOOD;
+      this.participationDataState.toGood();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   stageParticipation() {
-    if (participationDataState != DataState.GOOD) return;
+    if (participationDataState.isValid) return;
     processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] =
         this.participantsTotal.toString();
     processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] =
