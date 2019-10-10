@@ -7,8 +7,8 @@ class VochainModel {
   VochainModel();
 
   DataState blockReferenceDataState = DataState();
-  int blockReference;
-  DateTime timeReference;
+  int referenceBlock;
+  DateTime referenceTimestamp;
 
   updateBlockHeight() async {
     final gwInfo = selectRandomGatewayInfo();
@@ -18,12 +18,24 @@ class VochainModel {
     blockReferenceDataState.toBootingOrRefreshing();
 
     try {
-      this.blockReference = await getBlockHeight(dvoteGw);
+      this.referenceBlock = await getBlockHeight(dvoteGw);
       blockReferenceDataState.toGood();
     } catch (e) {
-      this.blockReference = 0;
+      this.referenceBlock = 0;
       blockReferenceDataState.toErrorOrFaulty();
     }
-    this.timeReference = DateTime.now();
+    this.referenceTimestamp = DateTime.now();
+  }
+
+  Duration getDurationUntilBlock(int blockNumber) {
+    int blocksLeftFromReference = blockNumber - referenceBlock;
+    Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
+    Duration nowToReference = DateTime.now().difference(referenceTimestamp);
+    return nowToReference - referenceToBlock;
+  }
+
+  Duration blocksToDuration(int blocks) {
+    int averageBlockTime = 5; //seconds
+    return new Duration(seconds: averageBlockTime * blocks);
   }
 }

@@ -9,6 +9,7 @@ enum ProcessTags {
   PARTICIPATION,
   VOTE_CONFIRMED
 }
+
 class ProcessModel extends StatesRebuilder {
   String processId;
   EntityReference entityReference;
@@ -247,29 +248,13 @@ class ProcessModel extends StatesRebuilder {
 
   DateTime getStartDate() {
     if (processMetadata == null) return null;
-    return DateTime.now().add(getDurationUntilBlock(
-        vochainTimeRef, vochainBlockRef, processMetadata.startBlock));
+    return DateTime.now()
+        .add(vochainModel.getDurationUntilBlock(processMetadata.startBlock));
   }
 
   DateTime getEndDate() {
     if (processMetadata == null) return null;
-    return DateTime.now().add(getDurationUntilBlock(
-        vochainTimeRef,
-        vochainBlockRef,
+    return DateTime.now().add(vochainModel.getDurationUntilBlock(
         processMetadata.startBlock + processMetadata.numberOfBlocks));
-  }
-
-  //TODO use dvote api instead once they removed getEnvelopHeight
-  Duration getDurationUntilBlock(
-      DateTime referenceTimeStamp, int referenceBlock, int blockNumber) {
-    int blocksLeftFromReference = blockNumber - referenceBlock;
-    Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
-    Duration nowToReference = DateTime.now().difference(referenceTimeStamp);
-    return nowToReference - referenceToBlock;
-  }
-
-  Duration blocksToDuration(int blocks) {
-    int averageBlockTime = 5; //seconds
-    return new Duration(seconds: averageBlockTime * blocks);
   }
 }

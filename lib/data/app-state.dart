@@ -2,10 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:math';
 import 'package:vocdoni/models/account.dart';
-import 'package:vocdoni/models/analtyics.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/constants/settings.dart';
 
@@ -51,18 +49,15 @@ class AppStateBloc extends GenericBloc<AppState> {
       ..bootnodes = gwStore;
 
     state.add(newState);
-
-    
   }
 
-   Future<void> load() async {
+  Future<void> load() async {
     await loadBootNodes().catchError((_) {
       print("Error: Unable to load the boot nodes");
     });
 
-    syncBlockHeight();
+    vochainModel.updateBlockHeight();
   }
-
 
   @override
   Future<void> persist() async {
@@ -97,21 +92,6 @@ class AppStateBloc extends GenericBloc<AppState> {
     }
   }
 
-  syncBlockHeight() async {
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-
-    try {
-      int blockHeight = await getBlockHeight(dvoteGw);
-      vochainBlockRef = blockHeight;
-    } catch (e) {
-      vochainBlockRef = 0;
-    }
-    vochainTimeRef = DateTime.now();
-  }
-
- 
   selectIdentity(int identityIdx) {
     AppState newState = AppState()
       ..selectedIdentity = identityIdx
