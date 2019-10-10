@@ -33,10 +33,13 @@ class _PollCardState extends State<PollCard> {
 
   @override
   Widget build(ctx) {
-    final endDate = widget.process.getEndDate();
-    String timeUnits = endDate != null ? getFriendlyTimeLeftUnit(endDate) : "";
-    int timeLeft =
-        endDate != null ? getFriendlyTimeLeftNumber(endDate, timeUnits) : 0;
+    int timeLeft;
+    String timeUnits;
+    if (widget.process.datesDataState.isValid) {
+      final endDate = widget.process.endDate;
+      timeUnits = getFriendlyTimeLeftUnit(endDate);
+      timeLeft = getFriendlyTimeLeftNumber(endDate, timeUnits);
+    }
 
     return StateBuilder(
         viewModels: [widget.process],
