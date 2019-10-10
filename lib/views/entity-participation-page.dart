@@ -1,8 +1,8 @@
 import 'package:dvote/models/dart/entity.pb.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/processModel.dart';
+import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';

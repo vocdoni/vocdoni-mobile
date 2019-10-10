@@ -1,7 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/controllers/processModel.dart';
+import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'dart:convert';

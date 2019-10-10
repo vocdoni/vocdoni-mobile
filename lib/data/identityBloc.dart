@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:vocdoni/util/api.dart';
 import "dart:async";

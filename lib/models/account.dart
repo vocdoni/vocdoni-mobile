@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 class Account {
