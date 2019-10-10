@@ -25,7 +25,7 @@ class EntModel extends StatesRebuilder {
 
   List<ProcessModel> processess;
   String lang = "default";
-  bool processessMetadataUpdated = false;
+  DataState processessDataState =  DataState.UNKNOWN;
 
   EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -46,10 +46,10 @@ class EntModel extends StatesRebuilder {
 
     try {
       await updateProcesses();
-      processessMetadataUpdated = true;
+      processessDataState = DataState.GOOD;
     } catch (e) {
       debugPrint(e.toString());
-      processessMetadataUpdated = false;
+      processessDataState = DataState.ERROR;
     }
     /*
     //TOOD Should only create procees that does not exist locally
