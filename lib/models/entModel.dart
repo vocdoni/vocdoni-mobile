@@ -33,12 +33,25 @@ class EntModel extends StatesRebuilder {
     syncLocal();
   }
 
+  syncLocal() async {
+    syncEntityMetadata(entityReference);
+    if (this.entityMetadata == null) {
+      this.feed = null;
+      this.processess = null;
+    } else {
+      syncFeed(entityReference, this.entityMetadata);
+      //syncProcessess(this.entityMetadata, this.entityReference);
+    }
+  }
+
   update() async {
     try {
+      entityMetadataDataState.toBootingOrRefreshing();
       this.entityMetadata = await fetchEntityData(this.entityReference);
       entityMetadataDataState.toGood();
     } catch (e) {
-      entityMetadataDataState.toError("Unable to update entityMetadata");
+      entityMetadataDataState
+          .toErrorOrFaulty("Unable to update entityMetadata");
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
 
@@ -144,17 +157,6 @@ class EntModel extends StatesRebuilder {
       await newsFeedsBloc.add(this.lang, this.feed, this.entityReference);
   }
 
-  syncLocal() async {
-    syncEntityMetadata(entityReference);
-    if (this.entityMetadata == null) {
-      this.feed = null;
-      this.processess = null;
-    } else {
-      syncFeed(entityReference, this.entityMetadata);
-      //syncProcessess(this.entityMetadata, this.entityReference);
-    }
-  }
-
   syncEntityMetadata(EntityReference entitySummary) {
     int index = entitiesBloc.value.indexWhere((e) {
       return e.meta[META_ENTITY_ID] == entitySummary.entityId;
@@ -162,8 +164,10 @@ class EntModel extends StatesRebuilder {
 
     if (index == -1) {
       this.entityMetadata = null;
+      entityMetadataDataState.toUnknown();
     } else {
       this.entityMetadata = entitiesBloc.value[index];
+      entityMetadataDataState.toGood();
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
   }

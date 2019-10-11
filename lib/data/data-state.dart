@@ -31,9 +31,9 @@ class DataState {
 
   void toBootingOrRefreshing() {
     if (this.isNotValid)
-      state = DataStateStates.BOOTING;
+      toBooting();
     else {
-      state = DataStateStates.REFRESHING;
+      toRefreshing();
     }
   }
 
@@ -49,11 +49,17 @@ class DataState {
     state = DataStateStates.ERROR;
   }
 
-  void toErrorOrFaulty() {
+  void toFaulty(String message) {
+    errorMessage = message;
+    lastErrorUpdate = DateTime.now();
+    state = DataStateStates.ERROR;
+  }
+
+  void toErrorOrFaulty(String message) {
     if (this.isValid)
-      state = DataStateStates.FAULTY;
+      this.toFaulty(message);
     else {
-      state = DataStateStates.ERROR;
+      this.toError(message);
     }
   }
 
