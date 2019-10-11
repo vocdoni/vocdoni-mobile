@@ -30,7 +30,7 @@ class DataState {
   }
 
   void toBootingOrRefreshing() {
-    if (this.isValid)
+    if (this.isNotValid)
       state = DataStateStates.BOOTING;
     else {
       state = DataStateStates.REFRESHING;

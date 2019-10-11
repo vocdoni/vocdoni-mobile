@@ -280,41 +280,36 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         context: context, purpose: Purpose.GUIDE);
   }
 
-  EntityMetadata_Action getRegisterAction(EntityMetadata entity) {
-    for (EntityMetadata_Action action in entity.actions) {
-      if (action.register == true) return action;
-    }
-    return null;
-  }
-
   Widget buildRegisterButton(BuildContext ctx, EntModel ent) {
     return StateBuilder(
         viewModels: [_ent],
         tag: [EntTags.ACTIONS],
         builder: (ctx, tagId) {
-          if (_ent.registerAction == null) return Container();
+          if (_ent.regiserActionDataState.isNotValid) return Container();
 
-          if (_ent.isRegistered)
-            return BaseButton(
-              purpose: Purpose.GUIDE,
-              leftIconData: FeatherIcons.check,
-              text: "Registered",
-              isSmall: true,
-              style: BaseButtonStyle.FILLED,
-              isDisabled: true,
-            );
-          else
-            return BaseButton(
-              purpose: Purpose.HIGHLIGHT,
-              leftIconData: FeatherIcons.feather,
-              text: "Register",
-              isSmall: true,
-              onTap: () {
-                if (_ent.registerAction.type == "browser") {
-                  onBrowserAction(ctx, _ent.registerAction, ent);
-                }
-              },
-            );
+          if (_ent.regiserActionDataState.isValid) {
+            if (_ent.isRegistered)
+              return BaseButton(
+                purpose: Purpose.GUIDE,
+                leftIconData: FeatherIcons.check,
+                text: "Registered",
+                isSmall: true,
+                style: BaseButtonStyle.FILLED,
+                isDisabled: true,
+              );
+            else
+              return BaseButton(
+                purpose: Purpose.HIGHLIGHT,
+                leftIconData: FeatherIcons.feather,
+                text: "Register",
+                isSmall: true,
+                onTap: () {
+                  if (_ent.registerAction.type == "browser") {
+                    onBrowserAction(ctx, _ent.registerAction, ent);
+                  }
+                },
+              );
+          }
         });
   }
 
@@ -327,7 +322,15 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
           actionsToShow.add(Section(text: "Actions"));
 
-          if (_ent.visibleActions.length == 0 || _ent.registerAction == null) {
+          if (_ent.visibleActionsDataState.isNotValid) {
+            return ListItem(
+              mainText: _ent.visibleActionsDataState.errorMessage,
+              purpose: Purpose.DANGER,
+              rightTextPurpose: Purpose.DANGER,
+            );
+          }
+
+          if (_ent.visibleActions.length == 0) {
             return ListItem(
               mainText: "No actions defined",
               disabled: true,
@@ -336,9 +339,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             );
           }
 
-          bool actionsDisabled = false;
-          if (!_ent.isRegistered) {
-            actionsDisabled = true;
+          if (_ent.isRegistered == false) {
             final entityName =
                 ent.entityMetadata.name[ent.entityMetadata.languages[0]];
             ListItem noticeItem = ListItem(
@@ -362,7 +363,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 icon: FeatherIcons.arrowRightCircle,
                 mainText: action.name[ent.entityMetadata.languages[0]],
                 secondaryText: action.visible,
-                disabled: actionsDisabled,
+                disabled: _ent.isRegistered == false,
                 onTap: () {
                   onBrowserAction(ctx, action, ent);
                 },
