@@ -322,12 +322,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
           actionsToShow.add(Section(text: "Actions"));
 
-          if (_ent.visibleActionsDataState.isNotValid) {
+          if (_ent.visibleActionsDataState.isError) {
             return ListItem(
               mainText: _ent.visibleActionsDataState.errorMessage,
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
+          }
+
+          if(_ent.visibleActionsDataState.isNotValid){
+            return Container();
           }
 
           if (_ent.visibleActions.length == 0) {

@@ -217,14 +217,12 @@ class EntModel extends StatesRebuilder {
       if (action.register == true) {
         if (registerAction != null)
           continue; //only one registerAction is supported
-        registerAction = action;
 
         this.regiserActionDataState.toBootingOrRefreshing();
-        bool isRegistered =
+        this.isRegistered =
             await isActionVisible(action, this.entityReference.entityId);
 
-        this.registerAction = registerAction;
-        this.isRegistered = isRegistered;
+        this.registerAction = action;
         this.regiserActionDataState.toGood();
         if (hasState) rebuildStates([EntTags.ACTIONS]);
       } else {
