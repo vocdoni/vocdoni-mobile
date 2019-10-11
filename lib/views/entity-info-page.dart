@@ -146,7 +146,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildTitle(context, ent));
     children.add(buildStatus());
     children.add(buildFeedItem(context));
-    children.add(buildParticipationItem(context, ent));
+    children.add(buildParticipationItem(context));
     children.add(buildActionList(context, ent));
     children.add(Section(text: "Details"));
     children.add(Summary(
@@ -155,7 +155,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     ));
     children.add(Section(text: "Manage"));
     children.add(buildShareItem(context, ent));
-    children.add(buildSubscribeItem(context, ent));
+    children.add(buildSubscribeItem(context));
 
     return children;
   }
@@ -188,7 +188,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         tag: EntTags.FEED,
         builder: (ctx, tagId) {
           int postsNum = 0;
-          if (_ent.feed != null) postsNum = _ent.feed.items.length;
+          if (_ent.feedDataState.isValid) postsNum = _ent.feed.items.length;
           return ListItem(
             icon: FeatherIcons.rss,
             mainText: "Feed",
@@ -202,23 +202,29 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildParticipationItem(BuildContext context, EntModel ent) {
-    int processNum = 0;
-    if (ent.processess != null) processNum = ent.processess.length;
-    return ListItem(
-      icon: FeatherIcons.mail,
-      mainText: "Participation",
-      rightText: processNum.toString(),
-      rightTextIsBadge: true,
-      disabled: processNum == 0,
-      onTap: () {
-        Navigator.pushNamed(context, "/entity/participation", arguments: ent.entityReference);
-      },
-    );
+  buildParticipationItem(BuildContext context) {
+    return StateBuilder(
+        viewModels: [_ent],
+        tag: EntTags.PROCESSES,
+        builder: (ctx, tagId) {
+          int processNum = 0;
+          if (_ent.processesDataState.isValid)
+            processNum = _ent.processess.length;
+          return ListItem(
+              icon: FeatherIcons.mail,
+              mainText: "Participation",
+              rightText: processNum.toString(),
+              rightTextIsBadge: true,
+              disabled: processNum == 0,
+              onTap: () {
+                Navigator.pushNamed(context, "/entity/participation",
+                    arguments: _ent.entityReference);
+              });
+        });
   }
 
-  buildSubscribeItem(BuildContext context, EntModel ent) {
-    bool isSubscribed = account.isSubscribed(ent.entityReference);
+  buildSubscribeItem(BuildContext context) {
+    bool isSubscribed = account.isSubscribed(_ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return ListItem(
       mainText: subscribeText,
@@ -228,8 +234,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, ent)
-          : subscribeToEntity(context, ent),
+          ? unsubscribeFromEntity(context, _ent)
+          : subscribeToEntity(context, _ent),
     );
   }
 
@@ -377,7 +383,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  onBrowserAction(BuildContext ctx, EntityMetadata_Action action, EntModel ent) {
+  onBrowserAction(
+      BuildContext ctx, EntityMetadata_Action action, EntModel ent) {
     final String url = action.url;
     final String title = action.name[ent.entityMetadata.languages[0]] ??
         ent.entityMetadata.name[ent.entityMetadata.languages[0]];
