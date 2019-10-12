@@ -27,7 +27,7 @@ class VochainModel {
       syncDataState.toGood();
     } catch (e) {
       this.referenceBlock = 0;
-      syncDataState.toErrorOrFaulty();
+      syncDataState.toErrorOrFaulty(e);
     }
     this.referenceTimestamp = DateTime.now();
     //TODO save to storage

@@ -32,9 +32,8 @@ class DataState {
   void toBootingOrRefreshing() {
     if (this.isNotValid)
       toBooting();
-    else {
+    else
       toRefreshing();
-    }
   }
 
   void toGood() {

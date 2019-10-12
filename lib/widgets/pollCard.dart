@@ -28,7 +28,7 @@ class _PollCardState extends State<PollCard> {
   @override
   void initState() {
     super.initState();
-    widget.process.updateParticipation();
+    
   }
 
   @override

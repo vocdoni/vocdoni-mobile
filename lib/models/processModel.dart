@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:flutter/foundation.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
@@ -45,7 +46,6 @@ class ProcessModel extends StatesRebuilder {
     updateCensusStateIfNeeded();
     updateParticipation();
     updateDates();
-    save();
 
     // Sync process times
     // Check if active?
@@ -126,12 +126,14 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateCensusState() async {
-    this.censusDataState.toRefreshing();
-    if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     if (processMetadata == null) return;
+
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+    this.censusDataState.toBooting();
+    if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
     String base64Claim =
         await digestHexClaim(account.identity.keys[0].publicKey);
@@ -140,7 +142,6 @@ class ProcessModel extends StatesRebuilder {
           processMetadata.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.censusDataState.toError("Census-proof is not valid");
-        this.censusIsIn = false;
 
         if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
         return;
@@ -155,6 +156,7 @@ class ProcessModel extends StatesRebuilder {
 
       this.censusDataState.toGood();
       stageCensusState();
+      save();
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
@@ -220,7 +222,7 @@ class ProcessModel extends StatesRebuilder {
       this.participationDataState.toUnknown();
     else
       this.censusDataState.toGood();
-    stageParticipation();
+
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
@@ -233,15 +235,17 @@ class ProcessModel extends StatesRebuilder {
       this.participationDataState.toError('Participation data is invalid');
     else
       this.participationDataState.toGood();
+    stageParticipation();
+    save();
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
 
   stageParticipation() {
-    if (participationDataState.isValid) return;
-    processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] =
-        this.participantsTotal.toString();
-    processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] =
-        this.participantsCurrent.toString();
+    if (participationDataState.isNotValid) return;
+    String total = this.participantsTotal.toString();
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_TOTAL] = total;
+    String current = this.participantsCurrent.toString();
+    processMetadata.meta[META_PROCESS_PARTICIPANTS_CURRENT] = current;
   }
 
   double get participation {

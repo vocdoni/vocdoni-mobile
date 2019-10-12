@@ -263,20 +263,22 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.censusIsIn == false) return Container();
-    return Padding(
-      padding: EdgeInsets.all(paddingPage),
-      child: BaseButton(
-          text: "Submit",
-          isSmall: false,
-          style: BaseButtonStyle.FILLED,
-          purpose: Purpose.HIGHLIGHT,
-          isDisabled:
-              _responsesAreValid == false || processModel.censusIsIn == false,
-          onTap: () {
-            onSubmit(ctx, processModel.processMetadata);
-          }),
-    );
+    if (processModel.censusDataState.isNotValid) return Container();
+
+    if (processModel.censusDataState.isValid)
+      return Padding(
+        padding: EdgeInsets.all(paddingPage),
+        child: BaseButton(
+            text: "Submit",
+            isSmall: false,
+            style: BaseButtonStyle.FILLED,
+            purpose: Purpose.HIGHLIGHT,
+            isDisabled:
+                _responsesAreValid == false || processModel.censusIsIn == false,
+            onTap: () {
+              onSubmit(ctx, processModel.processMetadata);
+            }),
+      );
   }
 
   onSubmit(ctx, processMetadata) async {
