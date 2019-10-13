@@ -1,6 +1,6 @@
 import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/modals/sign-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:dvote/dvote.dart';
@@ -57,11 +57,8 @@ Future fetchAndShowEntity(
   EntityReference entityRef =
       makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
 
-  
-  final ent = new Ent(entityRef);
-  Navigator.pushNamed(context, "/entity", arguments: ent);
+  Navigator.pushNamed(context, "/entity", arguments: entityRef);
 }
-
 
 showSignatureScreen(
     {@required BuildContext context,

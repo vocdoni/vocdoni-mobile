@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import "package:vocdoni/util/singletons.dart";
 import "package:dvote/dvote.dart";
@@ -11,12 +11,12 @@ Future populateSampleData() async {
   List<EntityMetadata> entitiesMetadata = new List<EntityMetadata>();
   List<Feed> feeds = new List<Feed>();
   List<ProcessMetadata> processess = new List<ProcessMetadata>();
-  List<Ent> ents = new List<Ent>();
+  List<EntModel> ents = new List<EntModel>();
 
   final entitySummaries = makeEntitySummaries();
 
   entitySummaries.forEach((entitySummary) {
-    Ent ent = Ent(entitySummary);
+    EntModel ent = EntModel(entitySummary);
     ents.add(ent);
     EntityMetadata entityMetadata = makeEntityMetadata(entitySummary);
     entitiesMetadata.add(entityMetadata);

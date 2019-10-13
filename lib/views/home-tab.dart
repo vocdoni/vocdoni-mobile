@@ -1,14 +1,14 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
+import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
-  final Ent ent;
-  final Process process;
+  final EntModel ent;
+  final ProcessModel process;
   final FeedPost post;
   final DateTime date;
 
@@ -33,19 +33,19 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(ctx) {
     List<CardContentWrapper> items = [];
     account.ents.forEach((ent) {
-      if (ent.feed != null) {
-        ent.feed.items.forEach((FeedPost post) {
+      if (ent.feed.isValid) {
+        ent.feed.value.items.forEach((FeedPost post) {
           DateTime date = DateTime.parse(post.datePublished);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: post, process: null);
           items.add(item);
         });
       }
-      if (ent.processess != null) {
-        ent.processess.forEach((Process process) {
+      if (ent.processes.isValid) {
+        ent.processes.value.forEach((ProcessModel process) {
           if (process.processMetadata == null) return;
           DateTime date =
-              getDateFromBlockNumber(process.processMetadata.startBlock);
+              getDateFromBlockNumber(process.processMetadata.value.startBlock);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: null, process: process);
           items.add(item);

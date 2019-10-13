@@ -1,7 +1,7 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -12,7 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/util/net.dart';
 
 class FeedPostArgs {
-  Ent ent;
+  EntModel ent;
   final FeedPost post;
 
   FeedPostArgs({this.ent, this.post});
@@ -44,7 +44,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
 
     FeedPost post = args.post;
-    Ent ent = args.ent;
+    EntModel ent = args.ent;
 
     if (post == null) return buildNoPosts(ctx);
 
@@ -67,18 +67,18 @@ class _FeedPostPageState extends State<FeedPostPage> {
         ));
   }
 
-  getScaffoldChildren(BuildContext context, Ent ent, FeedPost post) {
+  getScaffoldChildren(BuildContext context, EntModel ent, FeedPost post) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent, post));
     children.add(html2(post.contentHtml));
     return children;
   }
 
-  buildTitle(BuildContext context, Ent ent, FeedPost post) {
+  buildTitle(BuildContext context, EntModel ent, FeedPost post) {
     return ListItem(
       //mainTextTag: process.meta['processId'] + title,
       mainText: post.title,
-      secondaryText: ent.entityMetadata.name['default'],
+      secondaryText: ent.entityMetadata.value.name['default'],
       isTitle: true,
       rightIcon: null,
       isBold: true,

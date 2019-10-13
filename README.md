@@ -183,3 +183,25 @@ vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
 ### Dependencies
 
 The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 
+
+### Model lifecycle
+
+recover model
+- By id
+- Make new one
+  
+1. sync()
+2. update()
+   1. fetch()
+   2. stage()
+3. save()
+
+
+
+# Updates
+
+## Shallow update
+- EntityMetadata
+
+## Notifications
+Shallow updates only

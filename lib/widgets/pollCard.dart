@@ -1,11 +1,9 @@
-import 'package:dvote/models/dart/process.pb.dart';
-import 'package:dvote/net/gateway.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/controllers/ent.dart';
-import 'package:vocdoni/controllers/process.dart';
-import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -16,8 +14,8 @@ import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 
 class PollCard extends StatefulWidget {
-  final Process process;
-  final Ent ent;
+  final ProcessModel process;
+  final EntModel ent;
 
   PollCard({this.process, this.ent});
 
@@ -26,92 +24,97 @@ class PollCard extends StatefulWidget {
 }
 
 class _PollCardState extends State<PollCard> {
-  String _participation = "-";
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // _participation = "?";
-    updatePartcipation();
-  }
-
-  updatePartcipation() async {
-    int p = await widget.process.getParticipation();
-    if (!mounted) return;
-    setState(() {
-      _participation = p == -1 ? '-' : p.toString();
-    });
   }
 
   @override
   Widget build(ctx) {
-    final endDate = widget.process.getEndDate();
-    String timeUnits = endDate != null ? getFriendlyTimeLeftUnit(endDate) : "";
-    int timeLeft =
-        endDate != null ? getFriendlyTimeLeftNumber(endDate, timeUnits) : 0;
+    String timeLeft="";
+    String timeUnits="";
+    if (widget.process.endDate.isValid) {
+     
+      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value).toString();
+      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits).toString();
+    }
 
-    return BaseCard(
-      onTap: () {
-        Navigator.pushNamed(ctx, "/entity/participation/poll",
-            arguments: PollPageArgs(ent: widget.ent, process: widget.process));
-      },
-      image: validUriOrNull(widget.process.processMetadata.details.headerImage),
-      imageTag: makeElementTag(
-          entityId: widget.ent.entityReference.entityId,
-          cardId: widget.process.processMetadata.meta[META_PROCESS_ID],
-          elementId: widget.process.processMetadata.details.headerImage),
-      children: <Widget>[
-        DashboardRow(
-          children: <Widget>[
-            DashboardItem(
-              label: "Poll",
-              item: Icon(
-                FeatherIcons.barChart2,
-                size: iconSizeMedium,
+    return StateBuilder(
+        viewModels: [widget.process],
+        tag: ProcessTags.PARTICIPATION,
+        builder: (ctx, tagId) {
+          String participation = "";
+          if (widget.process.participantsTotal.isValid && widget.process.participantsCurrent.isValid)
+            participation =
+                getFriendlyParticipation(widget.process.participation);
+          return BaseCard(
+            onTap: () {
+              Navigator.pushNamed(ctx, "/entity/participation/poll",
+                  arguments: PollPageArgs(
+                      ent: widget.ent, processId: widget.process.processId));
+            },
+            image: validUriOrNull(
+                widget.process.processMetadata.value.details.headerImage),
+            imageTag: makeElementTag(
+                entityId: widget.ent.entityReference.entityId,
+                cardId: widget.process.processMetadata.value.meta[META_PROCESS_ID],
+                elementId: widget.process.processMetadata.value.details.headerImage),
+            children: <Widget>[
+              DashboardRow(
+                children: <Widget>[
+                  DashboardItem(
+                    label: "Poll",
+                    item: Icon(
+                      FeatherIcons.barChart2,
+                      size: iconSizeMedium,
+                    ),
+                  ),
+                  DashboardItem(
+                    label: "Participation",
+                    item: DashboardText(
+                        mainText: participation,
+                        secondaryText: '%',
+                        purpose: Purpose.WARNING),
+                  ),
+                  DashboardItem(
+                    label: "Time left",
+                    item: DashboardText(
+                        mainText: timeLeft,
+                        secondaryText: timeUnits,
+                        purpose: Purpose.GOOD),
+                  ),
+                  DashboardItem(
+                    label: "Vote now!",
+                    item: Icon(
+                      FeatherIcons.arrowRightCircle,
+                      size: iconSizeMedium,
+                      color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            DashboardItem(
-              label: "Participation",
-              item: DashboardText(
-                  mainText: _participation,
-                  secondaryText: _participation == '-' ? '' : '%',
-                  purpose: Purpose.WARNING),
-            ),
-            DashboardItem(
-              label: "Time left",
-              item: DashboardText(
-                  mainText: timeLeft.toString(),
-                  secondaryText: timeUnits,
-                  purpose: Purpose.GOOD),
-            ),
-            DashboardItem(
-              label: "Vote now!",
-              item: Icon(
-                FeatherIcons.arrowRightCircle,
-                size: iconSizeMedium,
-                color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
-              ),
-            ),
-          ],
-        ),
-        buildProcessTitle(widget.ent, widget.process.processMetadata),
-      ],
-    );
+              buildProcessTitle(),
+            ],
+          );
+        });
   }
 
-  Widget buildProcessTitle(Ent ent, ProcessMetadata process) {
-    String title = process.details.title.values.first;
+  Widget buildProcessTitle() {
+    String title = widget.process.processMetadata.value.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextFullWidth: true,
-      secondaryText: ent.entityMetadata.name.values.first,
-      avatarUrl: ent.entityMetadata.media.avatar,
-      avatarHexSource: ent.entityReference.entityId,
-      avatarText: ent.entityMetadata.name.values.first,
+      secondaryText: widget.ent.entityMetadata.value.name.values.first,
+      avatarUrl: widget.ent.entityMetadata.value.media.avatar,
+      avatarHexSource: widget.ent.entityReference.entityId,
+      avatarText: widget.ent.entityMetadata.value.name.values.first,
       rightIcon: null,
     );
+  }
+
+  String getFriendlyParticipation(double participation) {
+    return participation.round().toString();
   }
 
   int getFriendlyTimeLeftNumber(DateTime date, String unit) {

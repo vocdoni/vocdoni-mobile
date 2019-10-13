@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/controllers/ent.dart';
+import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
@@ -21,7 +21,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     super.didChangeDependencies();
 
     try {
-      Ent ent = ModalRoute.of(super.context).settings.arguments;
+      EntModel ent = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
           pageId: "EntityFeedPage", entityId: ent.entityReference.entityId);
     } catch (err) {
@@ -31,19 +31,19 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   @override
   Widget build(context) {
-    final Ent ent = ModalRoute.of(context).settings.arguments;
+    final EntModel ent = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
     else if (ent == null) return buildEmptyEntity(context);
 
     return Scaffold(
       appBar: TopNavigation(
-        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+        title: ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
       ),
       body: ListView.builder(
-        itemCount: ent.feed.items.length,
+        itemCount: ent.feed.value.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final FeedPost post = ent.feed.items[index];
+          final FeedPost post = ent.feed.value.items[index];
           return buildFeedPostCard(ctx: context, ent: ent, post: post);
         },
       ),
