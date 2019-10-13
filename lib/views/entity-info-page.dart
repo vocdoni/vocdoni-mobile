@@ -133,10 +133,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     return [
-      //buildShareButton(context, _ent),
-      //SizedBox(height: 48, width: paddingPage),
-      buildSubscribeButton(context, _ent),
-      SizedBox(height: 48, width: paddingPage)
+      buildShareButton(context, _ent),
+      SizedBox(height: 48, width: paddingPage),
+      //buildSubscribeButton(context, _ent),
+      //SizedBox(height: 48, width: paddingPage)
     ];
   }
 
