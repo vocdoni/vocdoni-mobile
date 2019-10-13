@@ -207,8 +207,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         tag: EntTags.PROCESSES,
         builder: (ctx, tagId) {
           int processNum = 0;
-          if (_ent.processess.isValid)
-            processNum = _ent.processess.value.length;
+          if (_ent.processes.isValid)
+            processNum = _ent.processes.value.length;
           return ListItem(
               icon: FeatherIcons.mail,
               mainText: "Participation",

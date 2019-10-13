@@ -21,7 +21,7 @@ class EntModel extends StatesRebuilder {
 
   final DataState<Feed> feed = DataState();
 
-  final DataState<List<ProcessModel>> processess = DataState();
+  final DataState<List<ProcessModel>> processes = DataState();
   String lang = "default";
   //final DataState processesDataState = DataState();
 
@@ -41,25 +41,23 @@ class EntModel extends StatesRebuilder {
 
   update() async {
     syncLocal();
+
+    updateVisibleActions();
+    updateFeed();
+    updateProcesses();
+  }
+
+  updateEntityMetadata() async {
     try {
       this.entityMetadata.toBootingOrRefreshing();
+      if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
       this.entityMetadata.value = await fetchEntityData(this.entityReference);
     } catch (e) {
       this.entityMetadata.toErrorOrFaulty("Unable to update entityMetadata");
     }
+
+    saveMetadata();
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
-
-    updateVisibleActions();
-    updateFeed();
-
-    try {
-      updateProcesses();
-    } catch (e) {
-      this.processess.toError(e);
-      if (hasState) rebuildStates([EntTags.PROCESSES]);
-    }
-
-    this.save();
   }
 
   updateFeed() async {
@@ -73,11 +71,13 @@ class EntModel extends StatesRebuilder {
     else
       this.feed.value = newFeed;
 
+    await saveFeed();
+
     if (hasState) rebuildStates([EntTags.FEED]);
   }
 
   syncProcesses() {
-    this.processess.value = this
+    this.processes.value = this
         .entityMetadata
         .value
         .votingProcesses
@@ -90,34 +90,41 @@ class EntModel extends StatesRebuilder {
   }
 
   updateProcesses() async {
-    this.processess.toBootingOrRefreshing();
+    this.processes.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.PROCESSES]);
-    if (this.processess.isNotValid) syncProcesses();
-    for (ProcessModel process in this.processess.value) {
+    if (this.processes.isNotValid) syncProcesses();
+    for (ProcessModel process in this.processes.value) {
       await process.update();
     }
 
-    this.processess.value = this.processess.value;
+    this.processes.value = this.processes.value;
+    await saveProcesses();
     if (hasState) rebuildStates([EntTags.PROCESSES]);
   }
 
   ProcessModel getProcess(processId) {
-    for (var process in this.processess.value) {
+    for (var process in this.processes.value) {
       if (process.processId == processId) return process;
     }
     return null;
   }
 
-  save() async {
+  saveMetadata() async {
     if (this.entityMetadata.isValid)
       await entitiesBloc.add(this.entityMetadata.value, this.entityReference);
-    if (this.processess.isValid) {
-      for (ProcessModel process in this.processess.value) {
+  }
+
+  saveFeed() async {
+    if (this.feed.isValid)
+      await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
+  }
+
+  saveProcesses() ancnc {
+    if (this.processes.isValid) {
+      for (ProcessModel process in this.processes.value) {
         process.save();
       }
     }
-    if (this.feed.isValid)
-      await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
   }
 
   syncEntityMetadata(EntityReference entitySummary) {

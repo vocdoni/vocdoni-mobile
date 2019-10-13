@@ -40,7 +40,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         builder: (ctx, tagId) {
           if (entModel == null ||
               entModel.entityMetadata.isNotValid ||
-              entModel.processess.isNotValid)
+              entModel.processes.isNotValid)
             return buildNoProcessesess(context);
 
           return Scaffold(
@@ -49,9 +49,9 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                   .name[entModel.entityMetadata.value.languages[0]],
             ),
             body: ListView.builder(
-              itemCount: entModel.processess.value.length,
+              itemCount: entModel.processes.value.length,
               itemBuilder: (BuildContext ctx, int index) {
-                final ProcessModel process = entModel.processess.value[index];
+                final ProcessModel process = entModel.processes.value[index];
                 return PollCard(ent: entModel, process: process);
               },
             ),

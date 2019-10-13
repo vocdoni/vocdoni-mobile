@@ -81,14 +81,14 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   buildParticipationItem(BuildContext ctx, EntModel ent) {
-    if (ent.processess == null) return Container();
+    if (ent.processes == null) return Container();
     return ListItem(
         mainText: "Participation",
         icon: FeatherIcons.mail,
-        rightText: ent.processess.value.length.toString(),
+        rightText: ent.processes.value.length.toString(),
         rightTextIsBadge: true,
         onTap: () => onTapParticipation(ctx, ent.entityReference),
-        disabled: ent.processess.value.length == 0);
+        disabled: ent.processes.value.length == 0);
   }
 
   Widget buildFeedItem(BuildContext ctx, EntModel ent) {

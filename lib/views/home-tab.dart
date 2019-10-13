@@ -41,8 +41,8 @@ class _HomeTabState extends State<HomeTab> {
           items.add(item);
         });
       }
-      if (ent.processess.isValid) {
-        ent.processess.value.forEach((ProcessModel process) {
+      if (ent.processes.isValid) {
+        ent.processes.value.forEach((ProcessModel process) {
           if (process.processMetadata == null) return;
           DateTime date =
               getDateFromBlockNumber(process.processMetadata.value.startBlock);
