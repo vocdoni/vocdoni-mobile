@@ -40,6 +40,7 @@ class EntModel extends StatesRebuilder {
   }
 
   update() async {
+    syncLocal();
     try {
       this.entityMetadata.toBootingOrRefreshing();
       this.entityMetadata.value = await fetchEntityData(this.entityReference);
@@ -52,11 +53,13 @@ class EntModel extends StatesRebuilder {
     updateFeed();
 
     try {
-      await updateProcesses();
+      updateProcesses();
     } catch (e) {
-      processess.toError(e);
+      this.processess.toError(e);
       if (hasState) rebuildStates([EntTags.PROCESSES]);
     }
+
+    this.save();
   }
 
   updateFeed() async {
@@ -87,12 +90,13 @@ class EntModel extends StatesRebuilder {
   }
 
   updateProcesses() async {
-    this.processess.toRefreshing();
+    this.processess.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.PROCESSES]);
-    if (this.processess.isValid)
-      for (ProcessModel process in this.processess.value) {
-        await process.update();
-      }
+    if (this.processess.isNotValid) syncProcesses();
+    for (ProcessModel process in this.processess.value) {
+      await process.update();
+    }
+
     this.processess.value = this.processess.value;
     if (hasState) rebuildStates([EntTags.PROCESSES]);
   }
@@ -105,14 +109,14 @@ class EntModel extends StatesRebuilder {
   }
 
   save() async {
-    if (this.entityMetadata != null)
+    if (this.entityMetadata.isValid)
       await entitiesBloc.add(this.entityMetadata.value, this.entityReference);
-    if (this.processess != null) {
+    if (this.processess.isValid) {
       for (ProcessModel process in this.processess.value) {
         process.save();
       }
     }
-    if (this.feed != null)
+    if (this.feed.isValid)
       await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
   }
 
