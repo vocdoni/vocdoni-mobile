@@ -195,3 +195,13 @@ recover model
    1. fetch()
    2. stage()
 3. save()
+
+
+
+# Updates
+
+## Shallow update
+- EntityMetadata
+
+## Notifications
+Shallow updates only

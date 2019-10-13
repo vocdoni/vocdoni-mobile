@@ -43,8 +43,6 @@ class Account {
     this.ents.add(ent);
 
     await ent.save();
-
-    sync();
   }
 
   unsubscribe(EntityReference _entitySummary) async {
@@ -59,7 +57,9 @@ class Account {
     for (EntModel ent in this.ents) {
       if (ent.entityReference.entityId == entityReference.entityId) return ent;
     }
-    return null;
+    EntModel ent = new EntModel(entityReference);
+    this.subscribe(ent);
+    return ent;
   }
 
   updateEnts() async {

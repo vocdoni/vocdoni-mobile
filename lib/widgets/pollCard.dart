@@ -1,4 +1,3 @@
-import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -28,17 +27,16 @@ class _PollCardState extends State<PollCard> {
   @override
   void initState() {
     super.initState();
-    
   }
 
   @override
   Widget build(ctx) {
-    int timeLeft;
-    String timeUnits;
-    if (widget.process.datesDataState.isValid) {
-      final endDate = widget.process.endDate;
-      timeUnits = getFriendlyTimeLeftUnit(endDate);
-      timeLeft = getFriendlyTimeLeftNumber(endDate, timeUnits);
+    String timeLeft="";
+    String timeUnits="";
+    if (widget.process.endDate.isValid) {
+     
+      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value).toString();
+      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits).toString();
     }
 
     return StateBuilder(
@@ -46,7 +44,7 @@ class _PollCardState extends State<PollCard> {
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (widget.process.participationDataState.isValid)
+          if (widget.process.participantsTotal.isValid && widget.process.participantsCurrent.isValid)
             participation =
                 getFriendlyParticipation(widget.process.participation);
           return BaseCard(
@@ -56,11 +54,11 @@ class _PollCardState extends State<PollCard> {
                       ent: widget.ent, processId: widget.process.processId));
             },
             image: validUriOrNull(
-                widget.process.processMetadata.details.headerImage),
+                widget.process.processMetadata.value.details.headerImage),
             imageTag: makeElementTag(
                 entityId: widget.ent.entityReference.entityId,
-                cardId: widget.process.processMetadata.meta[META_PROCESS_ID],
-                elementId: widget.process.processMetadata.details.headerImage),
+                cardId: widget.process.processMetadata.value.meta[META_PROCESS_ID],
+                elementId: widget.process.processMetadata.value.details.headerImage),
             children: <Widget>[
               DashboardRow(
                 children: <Widget>[
@@ -81,7 +79,7 @@ class _PollCardState extends State<PollCard> {
                   DashboardItem(
                     label: "Time left",
                     item: DashboardText(
-                        mainText: timeLeft.toString(),
+                        mainText: timeLeft,
                         secondaryText: timeUnits,
                         purpose: Purpose.GOOD),
                   ),
@@ -95,22 +93,22 @@ class _PollCardState extends State<PollCard> {
                   ),
                 ],
               ),
-              buildProcessTitle(widget.ent, widget.process.processMetadata),
+              buildProcessTitle(),
             ],
           );
         });
   }
 
-  Widget buildProcessTitle(EntModel ent, ProcessMetadata process) {
-    String title = process.details.title.values.first;
+  Widget buildProcessTitle() {
+    String title = widget.process.processMetadata.value.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextFullWidth: true,
-      secondaryText: ent.entityMetadata.name.values.first,
-      avatarUrl: ent.entityMetadata.media.avatar,
-      avatarHexSource: ent.entityReference.entityId,
-      avatarText: ent.entityMetadata.name.values.first,
+      secondaryText: widget.ent.entityMetadata.value.name.values.first,
+      avatarUrl: widget.ent.entityMetadata.value.media.avatar,
+      avatarHexSource: widget.ent.entityReference.entityId,
+      avatarText: widget.ent.entityMetadata.value.name.values.first,
       rightIcon: null,
     );
   }

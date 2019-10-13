@@ -38,12 +38,12 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
     return Scaffold(
       appBar: TopNavigation(
-        title: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+        title: ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
       ),
       body: ListView.builder(
-        itemCount: ent.feed.items.length,
+        itemCount: ent.feed.value.items.length,
         itemBuilder: (BuildContext context, int index) {
-          final FeedPost post = ent.feed.items[index];
+          final FeedPost post = ent.feed.value.items[index];
           return buildFeedPostCard(ctx: context, ent: ent, post: post);
         },
       ),

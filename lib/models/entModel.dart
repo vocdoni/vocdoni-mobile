@@ -12,21 +12,18 @@ enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
 class EntModel extends StatesRebuilder {
   EntityReference entityReference;
-  final DataState entityMetadataDataState = DataState();
-  EntityMetadata entityMetadata;
+  //final DataState entityMetadataDataState = DataState();
+  final DataState<EntityMetadata> entityMetadata = DataState();
 
-  EntityMetadata_Action registerAction;
-  final DataState regiserActionDataState = DataState();
-  bool isRegistered;
-  List<EntityMetadata_Action> visibleActions;
-  final DataState visibleActionsDataState = DataState();
+  final DataState<List<EntityMetadata_Action>> visibleActions = DataState();
+  final DataState<EntityMetadata_Action> registerAction = DataState();
+  final DataState<bool> isRegistered = DataState();
 
-  Feed feed;
-  final DataState feedDataState = DataState();
+  final DataState<Feed> feed = DataState();
 
-  List<ProcessModel> processess;
+  final DataState<List<ProcessModel>> processes = DataState();
   String lang = "default";
-  final DataState processesDataState = DataState();
+  //final DataState processesDataState = DataState();
 
   EntModel(EntityReference entitySummary) {
     this.entityReference = entitySummary;
@@ -35,126 +32,99 @@ class EntModel extends StatesRebuilder {
 
   syncLocal() async {
     syncEntityMetadata(entityReference);
-    if (this.entityMetadata == null) {
-      this.feed = null;
-      this.processess = null;
-    } else {
-      syncFeed(entityReference, this.entityMetadata);
-      //syncProcessess(this.entityMetadata, this.entityReference);
+
+    if (this.entityMetadata.isValid) {
+      syncFeed();
+      syncProcesses();
     }
   }
 
   update() async {
-    try {
-      entityMetadataDataState.toBootingOrRefreshing();
-      this.entityMetadata = await fetchEntityData(this.entityReference);
-      entityMetadataDataState.toGood();
-    } catch (e) {
-      entityMetadataDataState
-          .toErrorOrFaulty("Unable to update entityMetadata");
-    }
-    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+    syncLocal();
 
     updateVisibleActions();
     updateFeed();
+    updateProcesses();
+  }
 
+  updateEntityMetadata() async {
     try {
-      await updateProcesses();
-      processesDataState.toGood();
+      this.entityMetadata.toBootingOrRefreshing();
+      if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+      this.entityMetadata.value = await fetchEntityData(this.entityReference);
     } catch (e) {
-      debugPrint(e.toString());
-      processesDataState.toError("Unable to update procesess");
+      this.entityMetadata.toErrorOrFaulty("Unable to update entityMetadata");
     }
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
-    /*
-    //TOOD Should only create procees that does not exist locally
-    // - check activeProcess from entity
-    // - make new Process if they don't exists locally
-    // - call Process.update() on each of them
-    try {
-      final processessMetadata =
-          await fetchProcessess(this.entityReference, this.entityMetadata);
-      this.processess = processessMetadata.map((processMetadata) {
-        return new Process(processMetadata);
-      }).toList();
-      processessMetadataUpdated = true;
-    } catch (e) {
-      processessMetadataUpdated = false;
-      this.processess = null;
-    }*/
+
+    saveMetadata();
+    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
   }
 
   updateFeed() async {
-    feedDataState.toBootingOrRefreshing();
+    this.feed.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
-    try {
-      this.feed = await fetchEntityNewsFeed(
-          this.entityReference, this.entityMetadata, this.lang);
-      feedDataState.toGood();
-    } catch (e) {
-      feedDataState.toError("Unable to load feed");
-    }
+
+    Feed newFeed = await fetchEntityNewsFeed(
+        this.entityReference, this.entityMetadata.value, this.lang);
+    if (newFeed == null)
+      this.feed.toErrorOrFaulty("Unable to fetch feed");
+    else
+      this.feed.value = newFeed;
+
+    await saveFeed();
+
     if (hasState) rebuildStates([EntTags.FEED]);
   }
 
-  updateProcesses() async {
-    // go over active processess
-    // if Process exists, update
-    // If Process does not exits, create new one and update
-
-    final updatedProcessess =
-        this.entityMetadata.votingProcesses.active.map((String processId) {
-      ProcessModel p;
-      //Get  Process if exist
-      if (this.processess != null) {
-        p = this.processess.firstWhere((ProcessModel process) {
-          return process.processId == processId;
-        }, orElse: () {
-          return null;
-        });
-      }
-
-      // Update
-      if (p != null) {
-        p.update();
-        return p;
-      } else {
-        //Make new one and update
-        final newProcess = new ProcessModel(
-            processId: processId, entityReference: this.entityReference);
-        newProcess.update();
-        return newProcess;
-      }
-    }).toList();
-
-    this.processess = updatedProcessess;
-  }
-
-  syncProcessess() {
-    this.processess =
-        this.entityMetadata.votingProcesses.active.map((String processId) {
+  syncProcesses() {
+    this.processes.value = this
+        .entityMetadata
+        .value
+        .votingProcesses
+        .active
+        .map((String processId) {
       return new ProcessModel(
           processId: processId, entityReference: this.entityReference);
     }).toList();
+    if (hasState) rebuildStates([EntTags.PROCESSES]);
+  }
+
+  updateProcesses() async {
+    this.processes.toBootingOrRefreshing();
+    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (this.processes.isNotValid) syncProcesses();
+    for (ProcessModel process in this.processes.value) {
+      await process.update();
+    }
+
+    this.processes.value = this.processes.value;
+    await saveProcesses();
+    if (hasState) rebuildStates([EntTags.PROCESSES]);
   }
 
   ProcessModel getProcess(processId) {
-    for (var process in this.processess) {
+    for (var process in this.processes.value) {
       if (process.processId == processId) return process;
     }
     return null;
   }
 
-  save() async {
-    if (this.entityMetadata != null)
-      await entitiesBloc.add(this.entityMetadata, this.entityReference);
-    if (this.processess != null) {
-      for (ProcessModel process in this.processess) {
+  saveMetadata() async {
+    if (this.entityMetadata.isValid)
+      await entitiesBloc.add(this.entityMetadata.value, this.entityReference);
+  }
+
+  saveFeed() async {
+    if (this.feed.isValid)
+      await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
+  }
+
+  saveProcesses() ancnc {
+    if (this.processes.isValid) {
+      for (ProcessModel process in this.processes.value) {
         process.save();
       }
     }
-    if (this.feed != null)
-      await newsFeedsBloc.add(this.lang, this.feed, this.entityReference);
   }
 
   syncEntityMetadata(EntityReference entitySummary) {
@@ -163,81 +133,53 @@ class EntModel extends StatesRebuilder {
     });
 
     if (index == -1) {
-      this.entityMetadata = null;
-      entityMetadataDataState.toUnknown();
+      this.entityMetadata.toUnknown();
     } else {
-      this.entityMetadata = entitiesBloc.value[index];
-      entityMetadataDataState.toGood();
+      this.entityMetadata.value = entitiesBloc.value[index];
     }
     if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
   }
 
-  syncFeed(EntityReference _entitySummary, EntityMetadata _entityMetadata) {
-    final feeds = newsFeedsBloc.value.where((f) {
-      if (f.meta[META_ENTITY_ID] != _entitySummary.entityId)
-        return false;
-      else if (f.meta[META_LANGUAGE] != _entityMetadata.languages[0])
-        return false;
-      return true;
-    }).toList();
+  syncFeed() {
+    final newFeed = newsFeedsBloc.value.firstWhere((f) {
+      bool isFromEntity =
+          f.meta[META_ENTITY_ID] != this.entityReference.entityId;
+      bool isSameLanguage =
+          f.meta[META_LANGUAGE] != this.entityMetadata.value.languages[0];
+      return isFromEntity && isSameLanguage;
+    }, orElse: () => null);
 
-    this.feed = feeds.length > 0 ? this.feed = feeds[0] : this.feed = null;
-  }
-
-  /*//syncProcessess(EntityMetadata entityMetadata, EntityReference entitySummary) {
-    final processessMetadata = processesBloc.value.where((process) {
-      /*
-      //Process is listed as active
-      bool isActive = entityMetadata.votingProcesses.active
-              .indexOf(process.meta[META_PROCESS_ID]) !=
-          -1;
-
-          */
-      //Process belongs to the org that created it.
-
-      return process.meta[META_ENTITY_ID] == entitySummary.entityId;
-    }).toList();
-
-    if (processessMetadata.length == 0)
-      this.processess = null;
+    if (newFeed == null)
+      this.feed.toUnknown();
     else
-      this.processess = processessMetadata.map((processMetadata) {
-        final process = new Process(processMetadata);
-        process.syncLocal();
-        return process;
-      }).toList();
-  }*/
+      this.feed.value = newFeed;
+    if (hasState) rebuildStates([EntTags.FEED]);
+  }
 
   Future<void> updateVisibleActions() async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
     EntityMetadata_Action registerAction;
 
-    if (this.entityMetadata == null) return;
+    if (this.entityMetadata.isNotValid) return;
 
-    this.visibleActionsDataState.toBootingOrRefreshing();
+    this.visibleActions.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.ACTIONS]);
 
-    for (EntityMetadata_Action action in this.entityMetadata.actions) {
+    for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
       if (action.register == true) {
         if (registerAction != null)
           continue; //only one registerAction is supported
 
-        this.regiserActionDataState.toBootingOrRefreshing();
-        this.isRegistered =
+        this.registerAction.value = registerAction;
+
+        this.isRegistered.value =
             await isActionVisible(action, this.entityReference.entityId);
 
-        this.registerAction = action;
-        this.regiserActionDataState.toGood();
         if (hasState) rebuildStates([EntTags.ACTIONS]);
-      } else {
-        if (await isActionVisible(action, this.entityReference.entityId)) {
-          actionsToDisplay.add(action);
-        }
       }
     }
 
-    this.visibleActions = actionsToDisplay;
-    this.visibleActionsDataState.toGood();
+    this.visibleActions.value = actionsToDisplay;
     if (hasState) rebuildStates([EntTags.ACTIONS]);
   }
 

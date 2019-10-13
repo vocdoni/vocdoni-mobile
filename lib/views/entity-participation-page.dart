@@ -36,20 +36,22 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget build(context) {
     return StateBuilder(
         viewModels: [entModel],
-        tag: ProcessTags.CENSUS_STATE,
+        tag: [EntTags.PROCESSES],
         builder: (ctx, tagId) {
-          if (entModel == null || entModel.processess == null)
+          if (entModel == null ||
+              entModel.entityMetadata.isNotValid ||
+              entModel.processes.isNotValid)
             return buildNoProcessesess(context);
 
           return Scaffold(
             appBar: TopNavigation(
-              title: entModel
-                  .entityMetadata.name[entModel.entityMetadata.languages[0]],
+              title: entModel.entityMetadata.value
+                  .name[entModel.entityMetadata.value.languages[0]],
             ),
             body: ListView.builder(
-              itemCount: entModel.processess.length,
+              itemCount: entModel.processes.value.length,
               itemBuilder: (BuildContext ctx, int index) {
-                final ProcessModel process = entModel.processess[index];
+                final ProcessModel process = entModel.processes.value[index];
                 return PollCard(ent: entModel, process: process);
               },
             ),
