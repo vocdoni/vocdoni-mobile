@@ -7,11 +7,10 @@ import 'package:vocdoni/util/singletons.dart';
 class VochainModel {
   VochainModel();
 
-  DataState syncDataState = DataState();
-  int referenceBlock;
-  DateTime referenceTimestamp;
+  final DataState<int> referenceBlock = new DataState();
+  final DataState<DateTime> referenceTimestamp = new DataState();
 
-  syncBlockHeight(){
+  syncBlockHeight() {
     //TODO
   }
 
@@ -20,27 +19,31 @@ class VochainModel {
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-    syncDataState.toBootingOrRefreshing();
-
-    try {
-      this.referenceBlock = await getBlockHeight(dvoteGw);
-      syncDataState.toGood();
-    } catch (e) {
-      this.referenceBlock = 0;
-      syncDataState.toErrorOrFaulty(e);
+    this.referenceBlock.toBootingOrRefreshing();
+    final newReferenceblock = await getBlockHeight(dvoteGw);
+    if (newReferenceblock == null) {
+      this.referenceBlock.toErrorOrFaulty("Unable to retrieve reference block");
+      this
+          .referenceTimestamp
+          .toErrorOrFaulty("Unable to retrieve reference block");
+    } else {
+      this.referenceBlock.value = newReferenceblock;
+      this.referenceTimestamp.value = DateTime.now();
     }
-    this.referenceTimestamp = DateTime.now();
     //TODO save to storage
   }
 
   Duration getDurationUntilBlock(int blockNumber) {
-    int blocksLeftFromReference = blockNumber - referenceBlock;
+    if (this.referenceBlock.isNotValid) return null;
+    int blocksLeftFromReference = blockNumber - referenceBlock.value;
     Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
-    Duration nowToReference = DateTime.now().difference(referenceTimestamp);
+    Duration nowToReference =
+        DateTime.now().difference(referenceTimestamp.value);
     return nowToReference - referenceToBlock;
   }
 
   Duration blocksToDuration(int blocks) {
+    //TODO fetch average block time
     int averageBlockTime = 5; //seconds
     return new Duration(seconds: averageBlockTime * blocks);
   }

@@ -35,10 +35,10 @@ class _PollCardState extends State<PollCard> {
   Widget build(ctx) {
     int timeLeft;
     String timeUnits;
-    if (widget.process.datesDataState.isValid) {
-      final endDate = widget.process.endDate;
-      timeUnits = getFriendlyTimeLeftUnit(endDate);
-      timeLeft = getFriendlyTimeLeftNumber(endDate, timeUnits);
+    if (widget.process.endDate.isValid) {
+     
+      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value);
+      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits);
     }
 
     return StateBuilder(
@@ -46,7 +46,7 @@ class _PollCardState extends State<PollCard> {
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (widget.process.participationDataState.isValid)
+          if (widget.process.participantsTotal.isValid && widget.process.participantsCurrent.isValid)
             participation =
                 getFriendlyParticipation(widget.process.participation);
           return BaseCard(
@@ -56,11 +56,11 @@ class _PollCardState extends State<PollCard> {
                       ent: widget.ent, processId: widget.process.processId));
             },
             image: validUriOrNull(
-                widget.process.processMetadata.details.headerImage),
+                widget.process.processMetadata.value.details.headerImage),
             imageTag: makeElementTag(
                 entityId: widget.ent.entityReference.entityId,
-                cardId: widget.process.processMetadata.meta[META_PROCESS_ID],
-                elementId: widget.process.processMetadata.details.headerImage),
+                cardId: widget.process.processMetadata.value.meta[META_PROCESS_ID],
+                elementId: widget.process.processMetadata.value.details.headerImage),
             children: <Widget>[
               DashboardRow(
                 children: <Widget>[
@@ -95,22 +95,22 @@ class _PollCardState extends State<PollCard> {
                   ),
                 ],
               ),
-              buildProcessTitle(widget.ent, widget.process.processMetadata),
+              buildProcessTitle(),
             ],
           );
         });
   }
 
-  Widget buildProcessTitle(EntModel ent, ProcessMetadata process) {
-    String title = process.details.title.values.first;
+  Widget buildProcessTitle() {
+    String title = widget.process.processMetadata.value.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextFullWidth: true,
-      secondaryText: ent.entityMetadata.name.values.first,
-      avatarUrl: ent.entityMetadata.media.avatar,
-      avatarHexSource: ent.entityReference.entityId,
-      avatarText: ent.entityMetadata.name.values.first,
+      secondaryText: widget.ent.entityMetadata.value.name.values.first,
+      avatarUrl: widget.ent.entityMetadata.value.media.avatar,
+      avatarHexSource: widget.ent.entityReference.entityId,
+      avatarText: widget.ent.entityMetadata.value.name.values.first,
       rightIcon: null,
     );
   }

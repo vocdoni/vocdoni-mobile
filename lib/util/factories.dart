@@ -28,9 +28,9 @@ Widget buildFeedPostCard({BuildContext ctx, EntModel ent, FeedPost post}) {
           mainText: post.title,
           mainTextFullWidth: true,
           secondaryText:
-              ent.entityMetadata.name[ent.entityMetadata.languages[0]],
-          avatarUrl: ent.entityMetadata.media.avatar,
-          avatarText: ent.entityMetadata.name[ent.entityMetadata.languages[0]],
+              ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
+          avatarUrl: ent.entityMetadata.value.media.avatar,
+          avatarText: ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
           avatarHexSource: ent.entityReference.entityId,
           rightText: DateFormat('MMMM dd')
               .format(DateTime.parse(post.datePublished).toLocal()),

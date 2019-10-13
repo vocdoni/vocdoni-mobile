@@ -44,12 +44,12 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
           return Scaffold(
             appBar: TopNavigation(
               title: entModel
-                  .entityMetadata.name[entModel.entityMetadata.languages[0]],
+                  .entityMetadata.value.name[entModel.entityMetadata..value.languages[0]],
             ),
             body: ListView.builder(
-              itemCount: entModel.processess.length,
+              itemCount: entModel.processess.value.length,
               itemBuilder: (BuildContext ctx, int index) {
-                final ProcessModel process = entModel.processess[index];
+                final ProcessModel process = entModel.processess.value[index];
                 return PollCard(ent: entModel, process: process);
               },
             ),

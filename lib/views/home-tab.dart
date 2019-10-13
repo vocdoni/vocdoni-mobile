@@ -34,7 +34,7 @@ class _HomeTabState extends State<HomeTab> {
     List<CardContentWrapper> items = [];
     account.ents.forEach((ent) {
       if (ent.feed != null) {
-        ent.feed.items.forEach((FeedPost post) {
+        ent.feed.value.items.forEach((FeedPost post) {
           DateTime date = DateTime.parse(post.datePublished);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: post, process: null);
@@ -42,10 +42,10 @@ class _HomeTabState extends State<HomeTab> {
         });
       }
       if (ent.processess != null) {
-        ent.processess.forEach((ProcessModel process) {
+        ent.processess.value.forEach((ProcessModel process) {
           if (process.processMetadata == null) return;
           DateTime date =
-              getDateFromBlockNumber(process.processMetadata.startBlock);
+              getDateFromBlockNumber(process.processMetadata.value.startBlock);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: null, process: process);
           items.add(item);

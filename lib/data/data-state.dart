@@ -7,21 +7,24 @@ enum DataStateStates {
   FAULTY //Data is valid, but it failed to update
 }
 
-class DataState {
+class DataState<T> {
   DataStateStates state;
   DateTime lastGoodUpdate;
   DateTime lastErrorUpdate;
   String errorMessage;
+  T currentValue;
 
   DataState() {
     state = DataStateStates.UNKNOWN;
   }
 
   void toUnknown() {
+    currentValue = null;
     state = DataStateStates.UNKNOWN;
   }
 
   void toBooting() {
+    currentValue = null;
     state = DataStateStates.BOOTING;
   }
 
@@ -36,13 +39,15 @@ class DataState {
       toRefreshing();
   }
 
-  void toGood() {
+  set value (T newValue) {
+    currentValue = newValue;
     errorMessage = null;
     lastGoodUpdate = DateTime.now();
     state = DataStateStates.GOOD;
   }
 
   void toError(String message) {
+    currentValue = null;
     errorMessage = message;
     lastErrorUpdate = DateTime.now();
     state = DataStateStates.ERROR;
@@ -57,9 +62,8 @@ class DataState {
   void toErrorOrFaulty(String message) {
     if (this.isValid)
       this.toFaulty(message);
-    else {
+    else
       this.toError(message);
-    }
   }
 
   bool get isValid {
@@ -79,5 +83,9 @@ class DataState {
 
   bool get isError {
     return (state == DataStateStates.ERROR);
+  }
+
+  T get value {
+    return currentValue;
   }
 }

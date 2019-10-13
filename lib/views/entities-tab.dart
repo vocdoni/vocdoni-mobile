@@ -34,14 +34,15 @@ class _EntitiesTabState extends State<EntitiesTab> {
               viewModels: [ent],
               tag: EntTags.ENTITY_METADATA,
               builder: (ctx, tagId) {
-                return ent.entityMetadataDataState.isValid
+                return ent.entityMetadata.isValid
                     ? buildCard(ctx, ent)
                     : buildEmptyMetadataCard(ctx, ent.entityReference);
               });
         });
   }
 
-  Widget buildEmptyMetadataCard(BuildContext ctx, EntityReference entityReference) {
+  Widget buildEmptyMetadataCard(
+      BuildContext ctx, EntityReference entityReference) {
     return BaseCard(children: [
       ListItem(
           mainText: entityReference.entityId,
@@ -60,15 +61,19 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   int getFeedPostAmount(EntModel ent) {
-    return ent.feed == null ? 0 : ent.feed.items.length;
+    if (ent.feed.isValid)
+      return ent.feed.value.items.length;
+    else
+      return 0;
   }
 
   Widget buildName(BuildContext ctx, EntModel ent) {
-    String title = ent.entityMetadata.name[ent.entityMetadata.languages[0]];
+    String title =
+        ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
         mainTextTag: ent.entityReference.entityId + title,
         mainText: title,
-        avatarUrl: ent.entityMetadata.media.avatar,
+        avatarUrl: ent.entityMetadata.value.media.avatar,
         avatarText: title,
         avatarHexSource: ent.entityReference.entityId,
         isBold: true,
@@ -80,10 +85,10 @@ class _EntitiesTabState extends State<EntitiesTab> {
     return ListItem(
         mainText: "Participation",
         icon: FeatherIcons.mail,
-        rightText: ent.processess.length.toString(),
+        rightText: ent.processess.value.length.toString(),
         rightTextIsBadge: true,
         onTap: () => onTapParticipation(ctx, ent.entityReference),
-        disabled: ent.processess.length == 0);
+        disabled: ent.processess.value.length == 0);
   }
 
   Widget buildFeedItem(BuildContext ctx, EntModel ent) {
@@ -116,6 +121,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   onTapParticipation(BuildContext ctx, EntityReference entityReference) {
-    Navigator.pushNamed(ctx, "/entity/participation", arguments: entityReference);
+    Navigator.pushNamed(ctx, "/entity/participation",
+        arguments: entityReference);
   }
 }

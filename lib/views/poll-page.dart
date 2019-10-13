@@ -48,7 +48,7 @@ class _PollPageState extends State<PollPage> {
 
     processModel = args.ent.getProcess(args.processId);
     if (_answers.length == 0)
-      processModel.processMetadata.details.questions.forEach((question) {
+      processModel.processMetadata.value.details.questions.forEach((question) {
         _answers.add("");
       });
 
@@ -65,16 +65,16 @@ class _PollPageState extends State<PollPage> {
     if (ent == null) return buildEmptyEntity(context);
 
     String headerUrl =
-        validUriOrNull(processModel.processMetadata.details.headerImage);
+        validUriOrNull(processModel.processMetadata.value.details.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
                 entityId: ent.entityReference.entityId,
-                cardId: processModel.processMetadata.meta[META_PROCESS_ID],
+                cardId: processModel.processMetadata.value.meta[META_PROCESS_ID],
                 elementId: headerUrl),
-        avatarHexSource: processModel.processMetadata.meta['processId'],
+        avatarHexSource: processModel.processMetadata.value.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
         builder: Builder(
@@ -120,7 +120,7 @@ class _PollPageState extends State<PollPage> {
     //children.add(buildTest());
     children.add(buildTitle(context, ent));
     children.add(Summary(
-      text: processModel.processMetadata.details.description['default'],
+      text: processModel.processMetadata.value.details.description['default'],
       maxLines: 5,
     ));
     children.add(buildPollItem(context));
@@ -135,16 +135,16 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTitle(BuildContext context, EntModel ent) {
-    String title = processModel.processMetadata.details.title['default'];
+    String title = processModel.processMetadata.value.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
       mainText: title,
-      secondaryText: ent.entityMetadata.name['default'],
+      secondaryText: ent.entityMetadata.value.name['default'],
       isTitle: true,
       rightIcon: null,
       isBold: true,
-      avatarUrl: ent.entityMetadata.media.avatar,
-      avatarText: ent.entityMetadata.name['default'],
+      avatarUrl: ent.entityMetadata.value.media.avatar,
+      avatarText: ent.entityMetadata.value.name['default'],
       avatarHexSource: ent.entityReference.entityId,
       //avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
@@ -172,10 +172,10 @@ class _PollPageState extends State<PollPage> {
           Purpose purpose;
           IconData icon;
 
-          if (processModel.censusDataState.isUpdating) {
+          if (processModel.censusIsIn.isUpdating) {
             text = "Checking census";
-          } else if (processModel.censusDataState.isValid) {
-            if (processModel.censusIsIn) {
+          } else if (processModel.censusIsIn.isValid) {
+            if (processModel.censusIsIn.value) {
               text = "You are in the census";
               purpose = Purpose.GOOD;
               icon = FeatherIcons.check;
@@ -184,8 +184,8 @@ class _PollPageState extends State<PollPage> {
               purpose = Purpose.DANGER;
               icon = FeatherIcons.x;
             }
-          } else if (processModel.censusDataState.isError) {
-            text = processModel.censusDataState.errorMessage;
+          } else if (processModel.censusIsIn.isError) {
+            text = processModel.censusIsIn.errorMessage;
             icon = FeatherIcons.alertTriangle;
           } else {
             text = "Check census state";
@@ -194,13 +194,13 @@ class _PollPageState extends State<PollPage> {
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.censusDataState.isUpdating,
+            isSpinning: processModel.censusIsIn.isUpdating,
             onTap: () {
               processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.censusDataState.isNotValid
+            purpose: processModel.censusIsIn.isNotValid
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -218,8 +218,8 @@ class _PollPageState extends State<PollPage> {
 
   buildTimeItem(BuildContext context) {
     String formattedTime = "";
-    if (processModel.datesDataState.isValid) {
-      formattedTime = DateFormat("dd/MM, H:m:s").format(processModel.endDate);
+    if (processModel.endDate.isValid) {
+      formattedTime = DateFormat("dd/MM, H:m:s").format(processModel.endDate.value);
     }
 
     return ListItem(
@@ -263,9 +263,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.censusDataState.isNotValid) return Container();
+    if (processModel.censusIsIn.isNotValid) return Container();
 
-    if (processModel.censusDataState.isValid)
+    if (processModel.censusIsIn.isValid)
       return Padding(
         padding: EdgeInsets.all(paddingPage),
         child: BaseButton(
@@ -314,8 +314,8 @@ class _PollPageState extends State<PollPage> {
       viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
-        if (processModel.censusDataState.isValid) {
-          if (processModel.censusIsIn) {
+        if (processModel.censusIsIn.isValid) {
+          if (processModel.censusIsIn.value) {
             return _responsesAreValid == false
                 ? ListItem(
                     mainText: _responsesStateMessage,
@@ -373,7 +373,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (processModel.processMetadata.details.questions.length == 0) {
+    if (processModel.processMetadata.value.details.questions.length == 0) {
       return [buildError("No questions defined")];
     }
 
@@ -381,7 +381,7 @@ class _PollPageState extends State<PollPage> {
     int questionIndex = 0;
 
     for (ProcessMetadata_Details_Question question
-        in processModel.processMetadata.details.questions) {
+        in processModel.processMetadata.value.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }
