@@ -33,10 +33,10 @@ class DataState<T> {
   }
 
   void toBootingOrRefreshing() {
-    if (this.isNotValid)
-      toBooting();
-    else
+    if (this.isValid)
       toRefreshing();
+    else
+      toBooting();
   }
 
   set value (T newValue) {
@@ -73,7 +73,7 @@ class DataState<T> {
   }
 
   bool get isNotValid {
-    return !isValid;
+    return isValid == false;
   }
 
   bool get isUpdating {

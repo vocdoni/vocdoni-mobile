@@ -49,9 +49,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         viewModels: [_ent],
         tag: [EntTags.ENTITY_METADATA],
         builder: (ctx, tagId) {
-          return _ent.entityMetadata == null
-              ? buildScaffoldWithoutMetadata(_ent)
-              : buildScaffold(_ent);
+          return _ent.entityMetadata.isValid
+              ? buildScaffold(_ent)
+              :buildScaffoldWithoutMetadata(_ent);
         });
   }
 
@@ -285,9 +285,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         viewModels: [_ent],
         tag: [EntTags.ACTIONS],
         builder: (ctx, tagId) {
-          if (_ent.registerAction.isNotValid) return Container();
+          if (_ent.isRegistered.isNotValid ) return Container();
 
-          if (_ent.registerAction.isValid) {
+          if (_ent.isRegistered.isValid) {
             if (_ent.isRegistered.value)
               return BaseButton(
                 purpose: Purpose.GUIDE,
