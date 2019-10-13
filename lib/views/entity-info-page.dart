@@ -35,7 +35,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       analytics.trackPage(
           pageId: "EntityInfoPage", entityId: entityReference.entityId);
       _ent = account.getEnt(entityReference);
-      if (_ent == null) _ent = new EntModel(entityReference);
 
       refresh();
     } catch (err) {
@@ -134,8 +133,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     return [
-      buildShareButton(context, _ent),
-      SizedBox(height: 48, width: paddingPage),
+      //buildShareButton(context, _ent),
+      //SizedBox(height: 48, width: paddingPage),
       buildSubscribeButton(context, _ent),
       SizedBox(height: 48, width: paddingPage)
     ];

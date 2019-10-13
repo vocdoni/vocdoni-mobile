@@ -33,7 +33,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(ctx) {
     List<CardContentWrapper> items = [];
     account.ents.forEach((ent) {
-      if (ent.feed != null) {
+      if (ent.feed.isValid) {
         ent.feed.value.items.forEach((FeedPost post) {
           DateTime date = DateTime.parse(post.datePublished);
           CardContentWrapper item = new CardContentWrapper(
@@ -41,7 +41,7 @@ class _HomeTabState extends State<HomeTab> {
           items.add(item);
         });
       }
-      if (ent.processess != null) {
+      if (ent.processess.isValid) {
         ent.processess.value.forEach((ProcessModel process) {
           if (process.processMetadata == null) return;
           DateTime date =

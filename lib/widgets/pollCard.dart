@@ -1,4 +1,3 @@
-import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -28,17 +27,16 @@ class _PollCardState extends State<PollCard> {
   @override
   void initState() {
     super.initState();
-    
   }
 
   @override
   Widget build(ctx) {
-    int timeLeft;
-    String timeUnits;
+    String timeLeft="";
+    String timeUnits="";
     if (widget.process.endDate.isValid) {
      
-      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value);
-      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits);
+      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value).toString();
+      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits).toString();
     }
 
     return StateBuilder(
@@ -81,7 +79,7 @@ class _PollCardState extends State<PollCard> {
                   DashboardItem(
                     label: "Time left",
                     item: DashboardText(
-                        mainText: timeLeft.toString(),
+                        mainText: timeLeft,
                         secondaryText: timeUnits,
                         purpose: Purpose.GOOD),
                   ),

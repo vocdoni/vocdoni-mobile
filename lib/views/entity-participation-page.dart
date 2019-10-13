@@ -46,7 +46,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
           return Scaffold(
             appBar: TopNavigation(
               title: entModel.entityMetadata.value
-                  .name[entModel.entityMetadata..value.languages[0]],
+                  .name[entModel.entityMetadata.value.languages[0]],
             ),
             body: ListView.builder(
               itemCount: entModel.processess.value.length,
