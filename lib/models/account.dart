@@ -41,8 +41,6 @@ class Account {
     await identitiesBloc.subscribeEntityToAccount(
         ent.entityReference, account.identity);
     this.ents.add(ent);
-
-    await ent.save();
   }
 
   unsubscribe(EntityReference _entitySummary) async {

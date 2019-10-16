@@ -473,7 +473,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     });
 */
 
-    if (account.isSubscribed(_ent.entityReference)) _ent.save();
+    //if (account.isSubscribed(_ent.entityReference)) _ent.save();
   }
 
   goBack(BuildContext ctx) {

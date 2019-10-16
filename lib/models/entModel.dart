@@ -119,10 +119,10 @@ class EntModel extends StatesRebuilder {
       await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
   }
 
-  saveProcesses() ancnc {
+  saveProcesses() async {
     if (this.processes.isValid) {
       for (ProcessModel process in this.processes.value) {
-        process.save();
+        await process.save();
       }
     }
   }
