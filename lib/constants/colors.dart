@@ -33,6 +33,7 @@ final Color colorLink = colorBlue;
 final double paddingPage = 32;
 final double paddingChip = 4;
 final double paddingButton = 8;
+final double paddingBubble = 12;
 final double paddingBadge = 10;
 final double paddingIcon = 24;
 final double paddingAvatar = 18;
@@ -40,6 +41,7 @@ final double spaceElement = 12;
 final double spaceCard = 24;
 final double spaceMainAndSecondary = 8;
 final double roundedCornerCard = 10;
+final double roundedCornerBubble = 16;
 final double buttonDefaultWidth = 150;
 
 final double iconSizeTinny = 16;
