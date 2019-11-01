@@ -47,15 +47,21 @@ class DevMenu extends StatelessWidget {
               onTap: () {
                 String link =
                     'vocdoni://vocdoni.app/entity?entityId=0x8dfbc9c552338427b13ae755758bb5fd7df4fce0f98ceff56c791e5b74fcffba&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
-                    handleIncomingLink(Uri.parse(link), ctx);
+                handleIncomingLink(Uri.parse(link), ctx);
               },
             ),
-             ListItem(
+            ListItem(
               mainText: "Handle deeplink (VocdoniTest)",
               onTap: () {
                 String link =
                     'vocdoni://vocdoni.app/entity?entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
-                    handleIncomingLink(Uri.parse(link), ctx);
+                handleIncomingLink(Uri.parse(link), ctx);
+              },
+            ),
+            ListItem(
+              mainText: "Pager test",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/pager");
               },
             ),
           ],

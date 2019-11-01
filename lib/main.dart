@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/views/dev-analytics-tests.dart';
+import 'package:vocdoni/views/dev-pager.dart';
 import 'package:vocdoni/views/dev-ui-avatar-color.dart';
 import 'package:vocdoni/views/dev-ui-card.dart';
 import 'package:vocdoni/views/dev-ui-listItem.dart';
@@ -21,7 +22,6 @@ import 'package:vocdoni/modals/sign-modal.dart';
 import "views/home.dart";
 
 void main() async {
-  
   analytics.init();
   // RESTORE DATA
   await appStateBloc.init();
@@ -80,8 +80,9 @@ void main() async {
       "/dev": (context) => DevMenu(),
       "/dev/ui-listItem": (context) => DevUiListItem(),
       "/dev/ui-card": (context) => DevUiCard(),
-      "/dev/ui-avatar-colors":(context)=> DevUiAvatarColor(),
-      "/dev/analytics-tests":(context)=> AnalyticsTests(),
+      "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
+      "/dev/analytics-tests": (context) => AnalyticsTests(),
+      "/dev/pager": (context) => DevPager(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
