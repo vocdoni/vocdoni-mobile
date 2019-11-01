@@ -1,10 +1,25 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/widgets/bubble.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/pager/pager.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
-class DevPager extends StatelessWidget {
+class DevPager extends StatefulWidget {
+  @override
+  _DevPagerState createState() => _DevPagerState();
+}
+
+class _DevPagerState extends State<DevPager> {
+  int _optionSelected1;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _optionSelected1 = null;
+  }
+
   @override
   Widget build(ctx) {
     List<Widget> pages = [
@@ -23,44 +38,62 @@ class DevPager extends StatelessWidget {
             ListItem(
               mainText: "Do you like cheese?",
               secondaryText:
-                  "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.",
+                  "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.Love encompasses a range of strong and positive emotional and mental states, from the most sublime virtue or good habit, the deepest interpersonal affection ...",
               secondaryTextMultiline: 100,
               rightIcon: null,
             ),
-            Padding(
-                padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-                child: ChoiceChip(
-                  selected: true,
-                  backgroundColor: colorLightGuide,
-                  selectedColor: colorBlue,
-                  padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-                  label: Text(
-                    "Option one",
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 5,
-                    style: TextStyle(
-                        fontSize: fontSizeSecondary,
-                        fontWeight: fontWeightRegular,
-                        color: Colors.white),
-                  ),
-                )),
-            Padding(
-                padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-                child: ChoiceChip(
-                  selected: false,
-                  backgroundColor: colorLightGuide,
-                  selectedColor: colorBlue,
-                  padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-                  label: Text(
-                    "Option one",
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 5,
-                    style: TextStyle(
-                        fontSize: fontSizeSecondary,
-                        fontWeight: fontWeightRegular,
-                        color: Colors.white),
-                  ),
-                ))
+            Bubble(
+              selected: _optionSelected1 == 0,
+              onTap: () {
+                setState(() {
+                  _optionSelected1 = 0;
+                });
+              },
+              child: Text(
+                "Option two",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 100,
+                style: TextStyle(
+                    fontSize: fontSizeSecondary,
+                    fontWeight: fontWeightRegular,
+                    color: Colors.white),
+              ),
+            ),
+            Bubble(
+              selected: _optionSelected1 == 1,
+              onTap: () {
+                setState(() {
+                  _optionSelected1 = 1;
+                });
+              },
+              child: Text(
+                "Love encompasses a range of strong and positive emotional and mental states, from the most sublime virtue or good habit, the deepest interpersonal affection ...",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 100,
+                style: TextStyle(
+                    fontSize: fontSizeSecondary,
+                    fontWeight: fontWeightRegular,
+                    color: Colors.white),
+              ),
+            ),
+            Bubble(
+              selected: _optionSelected1 == 2,
+              onTap: () {
+                setState(() {
+                  _optionSelected1 = 2;
+                });
+              },
+              child: Text(
+                "Love encompasses a range of strong and positive emotional and mental states, from the most sublime virtue or good habit, the deepest interpersonal affection ...Love encompasses a range of strong and positive emotional and mental states, from the most sublime virtue or good habit, the deepest interpersonal affection ...",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 5,
+                style: TextStyle(
+                    fontSize: fontSizeSecondary,
+                    fontWeight: fontWeightRegular,
+                    color: Colors.white),
+              ),
+            ),
+            
           ],
         ),
         //color: Colors.red,
