@@ -5,7 +5,7 @@ class Pager extends StatefulWidget {
   final List<Widget> pages;
   final bool swipeEnabled;
   final bool dotTapEnabled;
-  final PageController controller = PageController();
+  final PageController controller = PageController(viewportFraction: 1);
 
   Pager({this.pages, this.swipeEnabled = true, this.dotTapEnabled = true});
 
