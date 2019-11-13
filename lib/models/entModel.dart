@@ -41,7 +41,7 @@ class EntModel extends StatesRebuilder {
 
   update() async {
     syncLocal();
-
+    await updateEntityMetadata();
     updateVisibleActions();
     updateFeed();
     updateProcesses();
@@ -77,22 +77,33 @@ class EntModel extends StatesRebuilder {
   }
 
   syncProcesses() {
-    this.processes.value = this
+    if (this.entityMetadata.isNotValid) {
+      this.processes.toErrorOrFaulty(
+          "EntityMetadata is not valid. Unable to retrieve active procesess");
+      return;
+    }
+    this.processes.value = [];
+
+    this
         .entityMetadata
         .value
         .votingProcesses
         .active
-        .map((String processId) {
-      return new ProcessModel(
+        .forEach((String processId) {
+      ProcessModel process = ProcessModel(
           processId: processId, entityReference: this.entityReference);
-    }).toList();
+          
+      if (process.processMetadata.isValid) this.processes.value.add(process);
+    });
+
     if (hasState) rebuildStates([EntTags.PROCESSES]);
   }
 
   updateProcesses() async {
+    if (this.processes.isNotValid) return;
     this.processes.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.PROCESSES]);
-    if (this.processes.isNotValid) syncProcesses();
+
     for (ProcessModel process in this.processes.value) {
       await process.update();
     }
