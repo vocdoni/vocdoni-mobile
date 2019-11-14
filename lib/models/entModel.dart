@@ -69,7 +69,6 @@ class EntModel extends StatesRebuilder {
   updateFeed() async {
     this.feed.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
-    if (!(this.entityMetadata.value is EntityMetadata)) return;
 
     Feed newFeed = await fetchEntityNewsFeed(
         this.entityReference, this.entityMetadata.value, this.lang);
@@ -121,8 +120,6 @@ class EntModel extends StatesRebuilder {
   }
 
   ProcessModel getProcess(processId) {
-    if (!(this.entityMetadata.value is EntityMetadata)) return null;
-
     for (var process in this.processes.value) {
       if (process.processId == processId) return process;
     }
