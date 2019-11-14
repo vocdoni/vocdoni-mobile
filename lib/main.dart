@@ -54,6 +54,7 @@ void main() async {
     supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
     onGenerateTitle: (BuildContext context) => Lang.of(context).get("Vocdoni"),
     home: home,
+    onGenerateRoute: generateRoute,
     routes: {
       // NO IDENTITIES YET
       "/identity/create": (context) => IdentityCreatePage(),
@@ -66,7 +67,7 @@ void main() async {
 
       // WHEN THERE IS AN IDENTITY
       "/home": (context) => HomeScreen(),
-      "/entity": (context) => EntityInfoPage(),
+      //"/entity": (context) => EntityInfoPage(),
       "/entity/feed": (context) => EntityFeedPage(),
       "/entity/feed/post": (context) => FeedPostPage(),
       "/entity/participation": (context) => EntityParticipationPage(),
@@ -90,4 +91,13 @@ void main() async {
       scaffoldBackgroundColor: colorBaseBackground,
     ),
   ));
+}
+
+Route<dynamic> generateRoute(RouteSettings settings) {
+  return MaterialPageRoute(builder: (_) {
+    switch (settings.name) {
+      case '/entity':
+        return EntityInfoPage(settings.arguments);
+    }
+  });
 }

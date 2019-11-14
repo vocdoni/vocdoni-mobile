@@ -47,6 +47,12 @@ class EntModel extends StatesRebuilder {
     updateProcesses();
   }
 
+  updateWithDelay() async {
+    //This allows to call update() on widget's initState()
+    await new Future.delayed(new Duration(milliseconds: 10), () {});
+    await update();
+  }
+
   updateEntityMetadata() async {
     try {
       this.entityMetadata.toBootingOrRefreshing();
@@ -92,7 +98,7 @@ class EntModel extends StatesRebuilder {
         .forEach((String processId) {
       ProcessModel process = ProcessModel(
           processId: processId, entityReference: this.entityReference);
-          
+
       if (process.processMetadata.isValid) this.processes.value.add(process);
     });
 
@@ -169,7 +175,6 @@ class EntModel extends StatesRebuilder {
 
   Future<void> updateVisibleActions() async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
-    EntityMetadata_Action registerAction;
 
     if (this.entityMetadata.isNotValid) return;
 
@@ -178,15 +183,18 @@ class EntModel extends StatesRebuilder {
 
     for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
       if (action.register == true) {
-        if (registerAction != null)
+        if (this.registerAction.value != null)
           continue; //only one registerAction is supported
 
-        this.registerAction.value = registerAction;
-
+        this.registerAction.value = action;
         this.isRegistered.value =
             await isActionVisible(action, this.entityReference.entityId);
 
         if (hasState) rebuildStates([EntTags.ACTIONS]);
+      } else {
+        bool isVisible =
+            await isActionVisible(action, this.entityReference.entityId);
+        if (isVisible) actionsToDisplay.add(action);
       }
     }
 
