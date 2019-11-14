@@ -41,10 +41,16 @@ class EntModel extends StatesRebuilder {
 
   update() async {
     syncLocal();
-
+    await updateEntityMetadata();
     updateVisibleActions();
     updateFeed();
     updateProcesses();
+  }
+
+  updateWithDelay() async {
+    //This allows to call update() on widget's initState()
+    await new Future.delayed(new Duration(milliseconds: 10), () {});
+    await update();
   }
 
   updateEntityMetadata() async {
@@ -63,7 +69,6 @@ class EntModel extends StatesRebuilder {
   updateFeed() async {
     this.feed.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
-    if (!(this.entityMetadata.value is EntityMetadata)) return;
 
     Feed newFeed = await fetchEntityNewsFeed(
         this.entityReference, this.entityMetadata.value, this.lang);
@@ -78,26 +83,33 @@ class EntModel extends StatesRebuilder {
   }
 
   syncProcesses() {
-    if (!(this.entityMetadata.value is EntityMetadata)) return;
+    if (this.entityMetadata.isNotValid) {
+      this.processes.toErrorOrFaulty(
+          "EntityMetadata is not valid. Unable to retrieve active procesess");
+      return;
+    }
+    this.processes.value = [];
 
-    this.processes.value = this
+    this
         .entityMetadata
         .value
         .votingProcesses
         .active
-        .map((String processId) {
-      return new ProcessModel(
+        .forEach((String processId) {
+      ProcessModel process = ProcessModel(
           processId: processId, entityReference: this.entityReference);
-    }).toList();
+
+      if (process.processMetadata.isValid) this.processes.value.add(process);
+    });
+
     if (hasState) rebuildStates([EntTags.PROCESSES]);
   }
 
   updateProcesses() async {
-    if (!(this.entityMetadata.value is EntityMetadata)) return;
-
+    if (this.processes.isNotValid) return;
     this.processes.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.PROCESSES]);
-    if (this.processes.isNotValid) syncProcesses();
+
     for (ProcessModel process in this.processes.value) {
       await process.update();
     }
@@ -108,8 +120,6 @@ class EntModel extends StatesRebuilder {
   }
 
   ProcessModel getProcess(processId) {
-    if (!(this.entityMetadata.value is EntityMetadata)) return null;
-
     for (var process in this.processes.value) {
       if (process.processId == processId) return process;
     }
@@ -165,7 +175,6 @@ class EntModel extends StatesRebuilder {
 
   Future<void> updateVisibleActions() async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
-    EntityMetadata_Action registerAction;
 
     if (this.entityMetadata.isNotValid) return;
 
@@ -174,15 +183,18 @@ class EntModel extends StatesRebuilder {
 
     for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
       if (action.register == true) {
-        if (registerAction != null)
+        if (this.registerAction.value != null)
           continue; //only one registerAction is supported
 
-        this.registerAction.value = registerAction;
-
+        this.registerAction.value = action;
         this.isRegistered.value =
             await isActionVisible(action, this.entityReference.entityId);
 
         if (hasState) rebuildStates([EntTags.ACTIONS]);
+      } else {
+        bool isVisible =
+            await isActionVisible(action, this.entityReference.entityId);
+        if (isVisible) actionsToDisplay.add(action);
       }
     }
 

@@ -31,6 +31,7 @@ class _PollCardState extends State<PollCard> {
 
   @override
   Widget build(ctx) {
+
     String timeLeft="";
     String timeUnits="";
     if (widget.process.endDate.isValid) {

@@ -56,7 +56,7 @@ class DataState<T> {
   void toFaulty(String message) {
     errorMessage = message;
     lastErrorUpdate = DateTime.now();
-    state = DataStateStates.ERROR;
+    state = DataStateStates.FAULTY;
   }
 
   void toErrorOrFaulty(String message) {

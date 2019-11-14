@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:vocdoni/util/singletons.dart';
 

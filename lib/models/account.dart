@@ -56,7 +56,7 @@ class Account {
       if (ent.entityReference.entityId == entityReference.entityId) return ent;
     }
     EntModel ent = new EntModel(entityReference);
-    this.subscribe(ent);
+    if (isSubscribed(entityReference) == false) this.subscribe(ent);
     return ent;
   }
 

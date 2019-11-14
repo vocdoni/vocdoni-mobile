@@ -122,7 +122,7 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateCensusState() async {
-    if (processMetadata == null) return;
+    if (processMetadata.isNotValid) return;
 
     final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
@@ -202,7 +202,7 @@ class ProcessModel extends StatesRebuilder {
   }
 
   syncParticipation() {
-    if (processMetadata == null) return;
+    if (processMetadata.isNotValid) return;
     int total;
     int current;
     try {
