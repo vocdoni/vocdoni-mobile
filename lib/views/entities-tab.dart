@@ -81,7 +81,8 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   buildParticipationItem(BuildContext ctx, EntModel ent) {
-    if (ent.processes == null) return Container();
+    if (ent.processes.isNotValid) return Container();
+
     return ListItem(
         mainText: "Participation",
         icon: FeatherIcons.mail,

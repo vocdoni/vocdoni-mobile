@@ -59,6 +59,14 @@ class DevMenu extends StatelessWidget {
               },
             ),
             ListItem(
+              mainText: "Handle deeplink (A new world)",
+              onTap: () {
+                String link =
+                    'vocdoni://vocdoni.app/entity?entityId=0xf6a97d2ec8bb9fabde28b9e377edbd31e92bef3b44040f0752e28896f4baed90&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
+                handleIncomingLink(Uri.parse(link), ctx);
+              },
+            ),
+            ListItem(
               mainText: "Pager test",
               onTap: () {
                 Navigator.pushNamed(ctx, "/dev/pager");
@@ -68,3 +76,5 @@ class DevMenu extends StatelessWidget {
         ));
   }
 }
+                                                                                                                                                                                                                                                            
+

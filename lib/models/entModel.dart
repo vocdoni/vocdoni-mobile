@@ -98,8 +98,7 @@ class EntModel extends StatesRebuilder {
         .forEach((String processId) {
       ProcessModel process = ProcessModel(
           processId: processId, entityReference: this.entityReference);
-
-      if (process.processMetadata.isValid) this.processes.value.add(process);
+      this.processes.value.add(process);
     });
 
     if (hasState) rebuildStates([EntTags.PROCESSES]);
