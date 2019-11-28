@@ -60,14 +60,8 @@ void main() async {
       "/identity/create": (context) => IdentityCreatePage(),
       "/identity/select": (context) => IdentitySelectPage(),
 
-      // "/welcome": (context) => WelcomeOnboardingScreen(),  // ?
-      // "/welcome/identity": (context) => WelcomeIdentityScreen(),
-      // "/welcome/identity/create": (context) => WelcomeIdentityCreateScreen(),
-      // "/welcome/identity/recover": (context) => WelcomeIdentityRecoverScreen(),
-
       // WHEN THERE IS AN IDENTITY
       "/home": (context) => HomeScreen(),
-      //"/entity": (context) => EntityInfoPage(),
       "/entity/feed": (context) => EntityFeedPage(),
       "/entity/feed/post": (context) => FeedPostPage(),
       "/entity/participation": (context) => EntityParticipationPage(),
@@ -77,6 +71,7 @@ void main() async {
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
       "/signature": (context) => SignModal(),
+      
       //DEV
       "/dev": (context) => DevMenu(),
       "/dev/ui-listItem": (context) => DevUiListItem(),
@@ -93,6 +88,7 @@ void main() async {
   ));
 }
 
+//generateRoute is called when nothing is found on `routes`
 Route<dynamic> generateRoute(RouteSettings settings) {
   return MaterialPageRoute(builder: (_) {
     switch (settings.name) {

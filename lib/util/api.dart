@@ -115,3 +115,17 @@ GatewayInfo selectRandomGatewayInfo() {
   }
   return gw;
 }
+
+GatewayInfo getDvote1() {
+  GatewayInfo node = new GatewayInfo();
+  node.dvote = 'ws://gwdev1.vocdoni.net/dvote';
+  node.publicKey = '02325f284f50fa52d53579c7873a480b351cc20f7780fa556929f5017283ad2449';
+  return node;
+}
+
+GatewayInfo getDvote2() {
+  GatewayInfo node = new GatewayInfo();
+  node.dvote = 'ws://gwdev2.vocdoni.net/dvote';
+  node.publicKey = '0381290a9b7fabe99c24d8edcf4746859f17ee8e6099288fcf9170c356545fcac0';
+  return node;
+}

@@ -305,7 +305,7 @@ class _PollPageState extends State<PollPage> {
             fullscreenDialog: true,
             builder: (context) => PollPackaging(
                 privateKey: privateKey,
-                processMetadata: processMetadata,
+                processModel: processModel,
                 answers: intAnswers)));
   }
 

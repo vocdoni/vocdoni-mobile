@@ -43,11 +43,14 @@ class _HomeTabState extends State<HomeTab> {
       }
       if (ent.processes.isValid) {
         ent.processes.value.forEach((ProcessModel process) {
-          if (process.processMetadata == null) return;
-          DateTime date =
-              getDateFromBlockNumber(process.processMetadata.value.startBlock);
+          if (process.processMetadata.isNotValid) return;
+          if (process.startDate.isValid) return;
+
           CardContentWrapper item = new CardContentWrapper(
-              ent: ent, date: date, post: null, process: process);
+              ent: ent,
+              date: process.startDate.value,
+              post: null,
+              process: process);
           items.add(item);
         });
       }
@@ -86,10 +89,5 @@ class _HomeTabState extends State<HomeTab> {
       else if (!(b?.date is DateTime)) return 1;
       return b.date.compareTo(a.date);
     });
-  }
-
-  DateTime getDateFromBlockNumber(int blockNumber) {
-    //Todo implement
-    return DateTime.now();
   }
 }

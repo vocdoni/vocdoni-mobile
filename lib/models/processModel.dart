@@ -122,9 +122,15 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateCensusState() async {
+
+    //TODO remove me
+    this.censusIsIn.value = true;
+    return;
+
     if (processMetadata.isNotValid) return;
 
-    final gwInfo = selectRandomGatewayInfo();
+    //final gwInfo = selectRandomGatewayInfo();
+    final gwInfo = getDvote1();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
