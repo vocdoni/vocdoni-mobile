@@ -1,8 +1,8 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote/models/dart/process.pb.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/models/processModel.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -11,10 +11,10 @@ import 'package:vocdoni/util/api.dart';
 
 class PollPackaging extends StatefulWidget {
   final String privateKey;
-  final ProcessMetadata processMetadata;
+  final ProcessModel processModel;
   final List<int> answers;
 
-  PollPackaging({this.privateKey, this.processMetadata, this.answers});
+  PollPackaging({this.privateKey, this.processModel, this.answers});
 
   @override
   _PollPackagingState createState() => _PollPackagingState();
@@ -23,14 +23,16 @@ class PollPackaging extends StatefulWidget {
 class _PollPackagingState extends State<PollPackaging> {
   int _currentStep;
   Map<String, String> _envelope;
+  ProcessModel processModel;
 
   @override
   void initState() {
     super.initState();
+
     analytics.trackPage(
         pageId: "PollPackaging",
-        entityId: widget.processMetadata.meta[META_ENTITY_ID],
-        processId: widget.processMetadata.meta[META_PROCESS_ID]);
+        entityId: widget.processModel.entityReference.entityId,
+        processId: widget.processModel.processId);
 
     _currentStep = 0;
     stepMakeEnvelop();
@@ -39,8 +41,8 @@ class _PollPackagingState extends State<PollPackaging> {
   void stepMakeEnvelop() async {
     Map<String, String> envelope = await packagePollEnvelope(
         widget.answers,
-        widget.processMetadata.census.merkleRoot,
-        widget.processMetadata.meta[META_PROCESS_ID],
+        widget.processModel.processMetadata.value.census.merkleRoot,
+        widget.processModel.processId,
         widget.privateKey);
 
     setState(() {
@@ -52,13 +54,17 @@ class _PollPackagingState extends State<PollPackaging> {
   }
 
   void stepSend() async {
-    final gwInfo = selectRandomGatewayInfo();
+    final gwInfo = getDvote1();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     try {
       bool success = false;
+      DateTime now = new DateTime.now();
+      String nowstr = now.toString();
+      int timestamp = now.millisecondsSinceEpoch;
+
       await submitEnvelope(_envelope, dvoteGw);
 
       if (success) {
@@ -66,11 +72,22 @@ class _PollPackagingState extends State<PollPackaging> {
           _currentStep = _currentStep + 1;
         });
       } else {
-        debugPrint("failed to send the vote");
+        debugPrint("failed to send the vºote");
       }
     } catch (error) {
       //Todo: handle timeut
     }
+  }
+
+  void stepConfirm() async {
+    final gwInfo = getDvote1();
+
+    final DVoteGateway dvoteGw =
+        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+      
+    String pollNullifier = "";
+    await getEnvelopeStatus(widget.processModel.processId, pollNullifier, dvoteGw);
   }
 
   @override
