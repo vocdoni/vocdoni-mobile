@@ -271,6 +271,8 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateDates() {
+    if (!(processMetadata.value is ProcessMetadata)) return;
+    
     //TODO subscribe to vochainModel changes
     if (vochainModel.referenceBlock.isValid) {
       this.startDate.value = DateTime.now().add(
