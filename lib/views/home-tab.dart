@@ -43,7 +43,7 @@ class _HomeTabState extends State<HomeTab> {
       }
       if (ent.processes.isValid) {
         ent.processes.value.forEach((ProcessModel process) {
-          if (process.processMetadata == null) return;
+          if (process.processMetadata?.value == null) return;
           DateTime date =
               getDateFromBlockNumber(process.processMetadata.value.startBlock);
           CardContentWrapper item = new CardContentWrapper(
