@@ -70,15 +70,12 @@ class EntModel extends StatesRebuilder {
     this.feed.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
 
-    Feed newFeed;
     try {
-      newFeed = await fetchEntityNewsFeed(
+      this.feed.value = await fetchEntityNewsFeed(
           this.entityReference, this.entityMetadata.value, this.lang);
     } catch (error) {
       this.feed.toErrorOrFaulty("Unable to fetch feed");
     }
-
-    this.feed.value = newFeed;
 
     await saveFeed();
 
@@ -162,9 +159,9 @@ class EntModel extends StatesRebuilder {
   syncFeed() {
     final newFeed = newsFeedsBloc.value.firstWhere((f) {
       bool isFromEntity =
-          f.meta[META_ENTITY_ID] != this.entityReference.entityId;
+          f.meta[META_ENTITY_ID] == this.entityReference.entityId;
       bool isSameLanguage =
-          f.meta[META_LANGUAGE] != this.entityMetadata.value.languages[0];
+          f.meta[META_LANGUAGE] == this.entityMetadata.value.languages[0];
       return isFromEntity && isSameLanguage;
     }, orElse: () => null);
 
