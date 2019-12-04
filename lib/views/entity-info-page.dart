@@ -1,7 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:http/http.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/modals/web-action.dart';
@@ -195,7 +194,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               postsNum = widget.entModel.feed.value.items.length.toString();
             }
           } else {
-            postsNum = "!";
+            if (widget.entModel.feed.hasError) {
+              postsNum ="!";
+            } else {
+              postsNum = "0";
+            }
           }
 
           return ListItem(
