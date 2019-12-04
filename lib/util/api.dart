@@ -68,7 +68,7 @@ Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     return feed;
   } catch (err) {
     print(err);
-    throw FetchError("The news feed cannot be fetched");
+    throw FetchError(err);
   }
 }
 

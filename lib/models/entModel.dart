@@ -70,12 +70,15 @@ class EntModel extends StatesRebuilder {
     this.feed.toBootingOrRefreshing();
     if (hasState) rebuildStates([EntTags.FEED]);
 
-    Feed newFeed = await fetchEntityNewsFeed(
-        this.entityReference, this.entityMetadata.value, this.lang);
-    if (newFeed == null)
+    Feed newFeed;
+    try {
+      newFeed = await fetchEntityNewsFeed(
+          this.entityReference, this.entityMetadata.value, this.lang);
+    } catch (error) {
       this.feed.toErrorOrFaulty("Unable to fetch feed");
-    else
-      this.feed.value = newFeed;
+    }
+
+    this.feed.value = newFeed;
 
     await saveFeed();
 
