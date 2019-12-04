@@ -81,6 +81,10 @@ class DataState<T> {
         state == DataStateStates.REFRESHING);
   }
 
+  bool get isError {
+    return (state == DataStateStates.ERROR);
+  }
+
   bool get hasError {
     return (state == DataStateStates.ERROR || state == DataStateStates.FAULTY);
   }
