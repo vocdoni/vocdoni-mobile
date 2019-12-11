@@ -96,26 +96,26 @@ class _PollPageState extends State<PollPage> {
     ];
   }
 
-  buildTest() {
-    double avatarHeight = 120;
-    return Container(
-      height: avatarHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            constraints:
-                BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
-            child: CircleAvatar(
-                backgroundColor: Colors.indigo,
-                backgroundImage: NetworkImage(
-                    "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
-          ),
-        ],
-      ),
-    );
-  }
+  // buildTest() {
+  //   double avatarHeight = 120;
+  //   return Container(
+  //     height: avatarHeight,
+  //     child: Row(
+  //       crossAxisAlignment: CrossAxisAlignment.stretch,
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: <Widget>[
+  //         Container(
+  //           constraints:
+  //               BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
+  //           child: CircleAvatar(
+  //               backgroundColor: Colors.indigo,
+  //               backgroundImage: NetworkImage(
+  //                   "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   getScaffoldChildren(BuildContext context, EntModel ent) {
     List<Widget> children = [];

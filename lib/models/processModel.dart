@@ -42,9 +42,9 @@ class ProcessModel extends StatesRebuilder {
   update() async {
     syncLocal();
     await updateProcessMetadataIfNeeded();
-    updateCensusStateIfNeeded();
-    updateParticipation();
-    updateDates();
+    await updateCensusStateIfNeeded();
+    await updateParticipation();
+    await updateDates();
 
     // Sync process times
     // Check if active?
@@ -122,11 +122,6 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateCensusState() async {
-
-    //TODO remove me
-    this.censusIsIn.value = true;
-    return;
-
     if (processMetadata.isNotValid) return;
 
     //final gwInfo = selectRandomGatewayInfo();
@@ -278,7 +273,7 @@ class ProcessModel extends StatesRebuilder {
 
   updateDates() {
     if (!(processMetadata.value is ProcessMetadata)) return;
-    
+
     //TODO subscribe to vochainModel changes
     if (vochainModel.referenceBlock.isValid) {
       this.startDate.value = DateTime.now().add(

@@ -40,11 +40,11 @@ class EntModel extends StatesRebuilder {
   }
 
   update() async {
-    syncLocal();
+    await syncLocal();
     await updateEntityMetadata();
-    updateVisibleActions();
-    updateFeed();
-    updateProcesses();
+    await updateVisibleActions();
+    await updateFeed();
+    await updateProcesses();
   }
 
   updateWithDelay() async {
