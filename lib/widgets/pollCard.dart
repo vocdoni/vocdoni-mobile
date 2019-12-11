@@ -23,13 +23,8 @@ class PollCard extends StatelessWidget {
   @override
   Widget build(ctx) {
     String timeLeft = "";
-    String timeUnits = "";
     if (this.process.endDate.isValid) {
-      timeUnits =
-          getFriendlyTimeLeftUnit(this.process.endDate.value).toString();
-      timeLeft =
-          getFriendlyTimeLeftNumber(this.process.endDate.value, timeUnits)
-              .toString();
+      timeLeft = getFriendlyTimeLeft(this.process.endDate.value);
     }
 
     return StateBuilder(
@@ -76,7 +71,7 @@ class PollCard extends StatelessWidget {
                     label: "Time left",
                     item: DashboardText(
                         mainText: timeLeft,
-                        secondaryText: timeUnits,
+                        secondaryText: "",
                         purpose: Purpose.GOOD),
                   ),
                   DashboardItem(
@@ -114,21 +109,21 @@ class PollCard extends StatelessWidget {
     return participation.round().toString();
   }
 
-  int getFriendlyTimeLeftNumber(DateTime date, String unit) {
+  String getFriendlyTimeLeft(DateTime date) {
     final timeLeft = DateTime.now().difference(date);
-    if (unit == 'd')
-      return timeLeft.inDays;
-    else if (unit == 'h')
-      return timeLeft.inHours;
-    else if (unit == 'm') return timeLeft.inMinutes;
-    return timeLeft.inSeconds;
-  }
-
-  String getFriendlyTimeLeftUnit(DateTime date) {
-    final timeLeft = DateTime.now().difference(date);
-    if (timeLeft.inDays > 2) return 'd';
-    if (timeLeft.inHours > 2) return 'h';
-    if (timeLeft.inMinutes > 2) return 'm';
-    return 's';
+    if (timeLeft.inSeconds <= 0)
+      return "-";
+    else if (timeLeft.inDays >= 365)
+      return "" + (timeLeft.inDays / 365).floor().toString() + "y";
+    else if (timeLeft.inDays >= 30)
+      return "" + (timeLeft.inDays / 28).floor().toString() + "m";
+    else if (timeLeft.inDays >= 1)
+      return timeLeft.inDays.toString() + "d";
+    else if (timeLeft.inHours >= 1)
+      return timeLeft.inHours.toString() + "h";
+    else if (timeLeft.inMinutes >= 1)
+      return timeLeft.inMinutes.toString() + "min";
+    else
+      return timeLeft.inSeconds.toString() + "s";
   }
 }
