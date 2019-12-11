@@ -13,53 +13,48 @@ import 'package:vocdoni/widgets/dashboardRow.dart';
 import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 
-class PollCard extends StatefulWidget {
+class PollCard extends StatelessWidget {
   final ProcessModel process;
   final EntModel ent;
+  final int index;
 
-  PollCard({this.process, this.ent});
-
-  @override
-  _PollCardState createState() => _PollCardState();
-}
-
-class _PollCardState extends State<PollCard> {
-  @override
-  void initState() {
-    super.initState();
-  }
+  PollCard({this.process, this.ent, this.index});
 
   @override
   Widget build(ctx) {
-
-    String timeLeft="";
-    String timeUnits="";
-    if (widget.process.endDate.isValid) {
-     
-      timeUnits = getFriendlyTimeLeftUnit(widget.process.endDate.value).toString();
-      timeLeft = getFriendlyTimeLeftNumber(widget.process.endDate.value, timeUnits).toString();
+    String timeLeft = "";
+    String timeUnits = "";
+    if (this.process.endDate.isValid) {
+      timeUnits =
+          getFriendlyTimeLeftUnit(this.process.endDate.value).toString();
+      timeLeft =
+          getFriendlyTimeLeftNumber(this.process.endDate.value, timeUnits)
+              .toString();
     }
 
     return StateBuilder(
-        viewModels: [widget.process],
+        viewModels: [this.process],
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (widget.process.participantsTotal.isValid && widget.process.participantsCurrent.isValid)
+          if (this.process.participantsTotal.isValid &&
+              this.process.participantsCurrent.isValid)
             participation =
-                getFriendlyParticipation(widget.process.participation);
+                getFriendlyParticipation(this.process.participation);
           return BaseCard(
             onTap: () {
               Navigator.pushNamed(ctx, "/entity/participation/poll",
                   arguments: PollPageArgs(
-                      ent: widget.ent, processId: widget.process.processId));
+                      ent: this.ent,
+                      processId: this.process.processId,
+                      index: this.index));
             },
             image: validUriOrNull(
-                widget.process.processMetadata.value.details.headerImage),
+                this.process.processMetadata.value.details.headerImage),
             imageTag: makeElementTag(
-                entityId: widget.ent.entityReference.entityId,
-                cardId: widget.process.processMetadata.value.meta[META_PROCESS_ID],
-                elementId: widget.process.processMetadata.value.details.headerImage),
+                this.ent.entityReference.entityId,
+                this.process.processMetadata.value.meta[META_PROCESS_ID],
+                this.index),
             children: <Widget>[
               DashboardRow(
                 children: <Widget>[
@@ -71,7 +66,7 @@ class _PollCardState extends State<PollCard> {
                     ),
                   ),
                   DashboardItem(
-                    label: "Participation",
+                    label: "Voted",
                     item: DashboardText(
                         mainText: participation,
                         secondaryText: '%',
@@ -101,15 +96,16 @@ class _PollCardState extends State<PollCard> {
   }
 
   Widget buildProcessTitle() {
-    String title = widget.process.processMetadata.value.details.title.values.first;
+    String title =
+        this.process.processMetadata.value.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextFullWidth: true,
-      secondaryText: widget.ent.entityMetadata.value.name.values.first,
-      avatarUrl: widget.ent.entityMetadata.value.media.avatar,
-      avatarHexSource: widget.ent.entityReference.entityId,
-      avatarText: widget.ent.entityMetadata.value.name.values.first,
+      secondaryText: this.ent.entityMetadata.value.name.values.first,
+      avatarUrl: this.ent.entityMetadata.value.media.avatar,
+      avatarHexSource: this.ent.entityReference.entityId,
+      avatarText: this.ent.entityMetadata.value.name.values.first,
       rightIcon: null,
     );
   }

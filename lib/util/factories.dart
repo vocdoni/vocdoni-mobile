@@ -15,22 +15,21 @@ EntityReference makeEntityReference(
   return summary;
 }
 
-Widget buildFeedPostCard({BuildContext ctx, EntModel ent, FeedPost post}) {
+Widget buildFeedPostCard(
+    {BuildContext ctx, EntModel ent, FeedPost post, int index = 0}) {
   return BaseCard(
-      onTap: () => onPostCardTap(ctx, post, ent),
+      onTap: () => onPostCardTap(ctx, post, ent, index),
       image: post.image,
-      imageTag: makeElementTag(
-          entityId: ent.entityReference.entityId,
-          cardId: post.id,
-          elementId: post.image),
+      imageTag: makeElementTag(ent.entityReference.entityId, post.id, index),
       children: <Widget>[
         ListItem(
           mainText: post.title,
           mainTextFullWidth: true,
-          secondaryText:
-              ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
+          secondaryText: ent
+              .entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
           avatarUrl: ent.entityMetadata.value.media.avatar,
-          avatarText: ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
+          avatarText: ent
+              .entityMetadata.value.name[ent.entityMetadata.value.languages[0]],
           avatarHexSource: ent.entityReference.entityId,
           rightText: DateFormat('MMMM dd')
               .format(DateTime.parse(post.datePublished).toLocal()),
@@ -38,13 +37,13 @@ Widget buildFeedPostCard({BuildContext ctx, EntModel ent, FeedPost post}) {
       ]);
 }
 
-makeElementTag({String entityId, String cardId, String elementId}) {
-  return entityId + cardId + elementId;
+makeElementTag(String entityId, String itemId, int index) {
+  return entityId + "/" + itemId + "/" + (index ?? '').toString();
 }
 
-onPostCardTap(BuildContext ctx, FeedPost post, EntModel ent) {
+onPostCardTap(BuildContext ctx, FeedPost post, EntModel ent, int index) {
   Navigator.of(ctx).pushNamed("/entity/feed/post",
-      arguments: FeedPostArgs(ent: ent, post: post));
+      arguments: FeedPostArgs(ent: ent, post: post, index: index));
 }
 
 String validUriOrNull(String str) {

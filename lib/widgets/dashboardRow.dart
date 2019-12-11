@@ -10,11 +10,12 @@ class DashboardRow extends StatelessWidget {
   @override
   Widget build(context) {
     return Padding(
-      padding:  EdgeInsets.fromLTRB(paddingPage,spaceElement,paddingPage,spaceElement),
+      padding: EdgeInsets.fromLTRB(
+          paddingPage, spaceElement, paddingPage, spaceElement),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children:children),
+          children: children),
     );
   }
 }

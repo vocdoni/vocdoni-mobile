@@ -22,7 +22,8 @@ import 'package:intl/intl.dart';
 class PollPageArgs {
   EntModel ent;
   String processId;
-  PollPageArgs({this.ent, this.processId});
+  final int index;
+  PollPageArgs({this.ent, this.processId, this.index});
 }
 
 class PollPage extends StatefulWidget {
@@ -60,6 +61,7 @@ class _PollPageState extends State<PollPage> {
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
     EntModel ent = args.ent;
+    final int index = args.index ?? 0;
     //Process process = args.process;
 
     if (ent == null) return buildEmptyEntity(context);
@@ -71,9 +73,9 @@ class _PollPageState extends State<PollPage> {
         headerTag: headerUrl == null
             ? null
             : makeElementTag(
-                entityId: ent.entityReference.entityId,
-                cardId: processModel.processMetadata.value.meta[META_PROCESS_ID],
-                elementId: headerUrl),
+                ent.entityReference.entityId,
+                processModel.processMetadata.value.meta[META_PROCESS_ID],
+                index),
         avatarHexSource: processModel.processMetadata.value.meta['processId'],
         appBarTitle: "Poll",
         actionsBuilder: actionsBuilder,
@@ -219,7 +221,8 @@ class _PollPageState extends State<PollPage> {
   buildTimeItem(BuildContext context) {
     String formattedTime = "";
     if (processModel.endDate.isValid) {
-      formattedTime = DateFormat("dd/MM, H:m:s").format(processModel.endDate.value);
+      formattedTime =
+          DateFormat("dd/MM, H:m:s").format(processModel.endDate.value);
     }
 
     return ListItem(

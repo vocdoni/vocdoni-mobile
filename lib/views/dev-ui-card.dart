@@ -64,7 +64,7 @@ class DevUiCard extends StatelessWidget {
               rightTextIsBadge: true,
             ),
             ListItem(
-              mainText: "Participation",
+              mainText: "Voted",
               icon: FeatherIcons.rss,
               rightText: "3",
               rightTextPurpose: Purpose.GUIDE,
@@ -94,7 +94,7 @@ class DevUiCard extends StatelessWidget {
             ),
             ListItem(
               purpose: Purpose.HIGHLIGHT,
-              mainText: "Participation",
+              mainText: "Voted",
               icon: FeatherIcons.rss,
               rightText: "3",
               rightTextPurpose: Purpose.GUIDE,

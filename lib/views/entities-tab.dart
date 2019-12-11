@@ -84,7 +84,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     if (ent.processes.isNotValid) return Container();
 
     return ListItem(
-        mainText: "Participation",
+        mainText: "Voted",
         icon: FeatherIcons.mail,
         rightText: ent.processes.value.length.toString(),
         rightTextIsBadge: true,

@@ -189,13 +189,15 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           if (widget.entModel.feed.isValid) {
             if (widget.entModel.feed.hasError) {
               postsNum =
-                  widget.entModel.feed.value.items.length.toString() + " !";
+                  (widget.entModel.feed.value?.items?.length.toString() ??
+                          "0") +
+                      " !";
             } else {
               postsNum = widget.entModel.feed.value.items.length.toString();
             }
           } else {
             if (widget.entModel.feed.hasError) {
-              postsNum ="!";
+              postsNum = "!";
             } else {
               postsNum = "0";
             }
@@ -227,7 +229,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             processNum = widget.entModel.processes.value.length;
           return ListItem(
               icon: FeatherIcons.mail,
-              mainText: "Participation",
+              mainText: "Voted",
               rightText: processNum.toString(),
               rightTextIsBadge: true,
               disabled: processNum == 0,

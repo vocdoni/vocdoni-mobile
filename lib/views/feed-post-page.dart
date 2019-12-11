@@ -14,8 +14,9 @@ import 'package:vocdoni/util/net.dart';
 class FeedPostArgs {
   EntModel ent;
   final FeedPost post;
+  final int index;
 
-  FeedPostArgs({this.ent, this.post});
+  FeedPostArgs({this.ent, this.post, this.index});
 }
 
 class FeedPostPage extends StatefulWidget {
@@ -45,15 +46,13 @@ class _FeedPostPageState extends State<FeedPostPage> {
 
     FeedPost post = args.post;
     EntModel ent = args.ent;
+    int index = args.index ?? 0;
 
     if (post == null) return buildNoPosts(ctx);
 
     return ScaffoldWithImage(
         headerImageUrl: post.image,
-        headerTag: makeElementTag(
-            entityId: ent.entityReference.entityId,
-            cardId: post.id,
-            elementId: post.image),
+        headerTag: makeElementTag(ent.entityReference.entityId, post.id, index),
         avatarHexSource: post.id,
         appBarTitle: "Post",
         //actionsBuilder: actionsBuilder,
