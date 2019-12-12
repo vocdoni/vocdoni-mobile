@@ -54,16 +54,16 @@ class _PollPackagingState extends State<PollPackaging> {
   }
 
   void stepSend() async {
-    final gwInfo = getDvote1();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     try {
       bool success = false;
-      DateTime now = new DateTime.now();
-      String nowstr = now.toString();
-      int timestamp = now.millisecondsSinceEpoch;
+      // DateTime now = new DateTime.now();
+      // String nowstr = now.toString();
+      // int timestamp = now.millisecondsSinceEpoch;
 
       await submitEnvelope(_envelope, dvoteGw);
 
@@ -72,7 +72,7 @@ class _PollPackagingState extends State<PollPackaging> {
           _currentStep = _currentStep + 1;
         });
       } else {
-        debugPrint("failed to send the vºote");
+        debugPrint("failed to send the vote");
       }
     } catch (error) {
       //Todo: handle timeut
@@ -80,14 +80,14 @@ class _PollPackagingState extends State<PollPackaging> {
   }
 
   void stepConfirm() async {
-    final gwInfo = getDvote1();
+    final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-      
     String pollNullifier = "";
-    await getEnvelopeStatus(widget.processModel.processId, pollNullifier, dvoteGw);
+    await getEnvelopeStatus(
+        widget.processModel.processId, pollNullifier, dvoteGw);
   }
 
   @override

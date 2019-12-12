@@ -87,6 +87,7 @@ class ProcessModel extends StatesRebuilder {
       this.processMetadata.toBootingOrRefreshing();
       final gwInfo = selectRandomGatewayInfo();
 
+      // TODO: Recycle GW connections
       final DVoteGateway dvoteGw =
           DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
       final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
@@ -124,8 +125,7 @@ class ProcessModel extends StatesRebuilder {
   updateCensusState() async {
     if (processMetadata.isNotValid) return;
 
-    //final gwInfo = selectRandomGatewayInfo();
-    final gwInfo = getDvote1();
+    final gwInfo = selectRandomGatewayInfo();
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 

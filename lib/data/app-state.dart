@@ -56,7 +56,7 @@ class AppStateBloc extends GenericBloc<AppState> {
       print("Error: Unable to load the boot nodes");
     });
 
-    vochainModel.updateBlockHeight();
+    await vochainModel.updateBlockHeight();  // TODO: single source of truth
   }
 
   @override
