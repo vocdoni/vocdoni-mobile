@@ -56,7 +56,7 @@ class _PollPageState extends State<PollPage> {
       });
 
     checkResponseState();
-    processModel.updateCensusState();
+    processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
   }
 
   @override

@@ -6,11 +6,9 @@ class Account {
   List<EntModel> ents = new List<EntModel>();
   Identity identity;
   List<String> languages = [];
-  String networkId;
 
   Account() {
     languages = ['default'];
-    networkId = 'goerli';
 
     init();
   }
@@ -27,10 +25,12 @@ class Account {
   }
 
   sync() {
-    this.ents = new List<EntModel>();
-    this.identity.peers.entities.forEach((EntityReference entitySummary) {
-      ents.add(EntModel(entitySummary));
-    });
+    this.ents = this
+        .identity
+        .peers
+        .entities
+        .map((EntityReference entitySummary) => EntModel(entitySummary))
+        .toList();
   }
 
   isSubscribed(EntityReference _entitySummary) {

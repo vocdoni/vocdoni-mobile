@@ -68,11 +68,12 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
   // CUSTOM OPERATIONS
 
   /// Registers a new identity with an empty list of organizations
-  Future create(String alias, String encryptionKey) async {
+  Future create(String alias, String patternEncryptionKey) async {
     if (!(alias is String) || alias.length < 2)
       throw Exception("Invalid alias");
-    else if (!(encryptionKey is String) || encryptionKey.length < 2)
-      throw Exception("Invalid encryptionKey");
+    else if (!(patternEncryptionKey is String) ||
+        patternEncryptionKey.length < 2)
+      throw Exception("Invalid patternEncryptionKey");
 
     alias = alias.trim();
     if (super.value.where((item) => item.alias == alias).length > 0) {
@@ -83,8 +84,10 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
     final privateKey = await privateKeyFromMnemonic(mnemonic);
     final publicKey = await publicKeyFromMnemonic(mnemonic);
     final address = await addressFromMnemonic(mnemonic);
-    final encryptedMenmonic = await encryptString(mnemonic, encryptionKey);
-    final encryptedPrivateKey = await encryptString(privateKey, encryptionKey);
+    final encryptedMenmonic =
+        await encryptString(mnemonic, patternEncryptionKey);
+    final encryptedPrivateKey =
+        await encryptString(privateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;

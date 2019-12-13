@@ -45,7 +45,7 @@ class _PollPackagingState extends State<PollPackaging> {
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
                 account.identity.keys[0].encryptedPrivateKey)));
-    
+
     // TODO: ERROR => THIS IS NOT A SCAFFOLD
     if (patternLockKey == null || patternLockKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
@@ -67,10 +67,10 @@ class _PollPackagingState extends State<PollPackaging> {
       _currentStep = _currentStep + 1;
     });
 
-    stepSend();
+    stepSend(ctx);
   }
 
-  void stepSend() async {
+  void stepSend(BuildContext ctx) async {
     final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
@@ -86,6 +86,8 @@ class _PollPackagingState extends State<PollPackaging> {
 
       if (success) {
         setState(() => _currentStep++);
+
+        return stepConfirm(ctx);
       } else {
         debugPrint("failed to send the vote");
       }
@@ -97,7 +99,7 @@ class _PollPackagingState extends State<PollPackaging> {
     }
   }
 
-  void stepConfirm() async {
+  void stepConfirm(BuildContext ctx) async {
     final gwInfo = selectRandomGatewayInfo();
 
     final DVoteGateway dvoteGw =
@@ -113,56 +115,59 @@ class _PollPackagingState extends State<PollPackaging> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 350),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Spacer(),
-              Section(
-                text:
-                    _currentStep == 0 ? "Vote delivery" : "Delivering the vote",
-                withDectoration: false,
-              ),
-              /*Summary(
+      body: Builder(
+        builder: (BuildContext ctx) => Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 350),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Spacer(),
+                Section(
+                  text: _currentStep == 0
+                      ? "Vote delivery"
+                      : "Delivering the vote",
+                  withDectoration: false,
+                ),
+                /*Summary(
                   maxLines: 10,
                   text:
                       "This may take some time, please do not close this screen"),*/
-              buildStep("Sigining", "Signed", 1),
-              // buildStep("Generating proof", "Proof generated", 2),
-              buildStep("Delivering", "Sent", 2),
-              buildStep("Waiting confirmation", "Confirmed", 3),
-              Spacer(),
-              // Padding(
-              //   padding: EdgeInsets.all(48),
-              //   child: BaseButton(
-              //       text: "Return",
-              //       isSmall: true,
-              //       style: BaseButtonStyle.OUTLINE,
-              //       maxWidth: buttonDefaultWidth,
-              //       //purpose: Purpose.HIGHLIGHT,
-              //       //isDisabled: true,
-              //       onTap: () {
-              //         setState(() {
-              //           _currentStep++;
-              //         });
-              //         if (_currentStep == 5) Navigator.pop(context, false);
-              //       }),
-              // ),
+                buildStep("Sigining", "Signed", 1),
+                // buildStep("Generating proof", "Proof generated", 2),
+                buildStep("Delivering", "Sent", 2),
+                buildStep("Waiting confirmation", "Confirmed", 3),
+                Spacer(),
+                // Padding(
+                //   padding: EdgeInsets.all(48),
+                //   child: BaseButton(
+                //       text: "Return",
+                //       isSmall: true,
+                //       style: BaseButtonStyle.OUTLINE,
+                //       maxWidth: buttonDefaultWidth,
+                //       //purpose: Purpose.HIGHLIGHT,
+                //       //isDisabled: true,
+                //       onTap: () {
+                //         setState(() {
+                //           _currentStep++;
+                //         });
+                //         if (_currentStep == 5) Navigator.pop(ctx, false);
+                //       }),
+                // ),
 
-              _currentStep != 0
-                  ? Container()
-                  : Padding(
-                      padding: EdgeInsets.all(paddingPage),
-                      child: BaseButton(
-                          text: "Confirm",
-                          isSmall: false,
-                          style: BaseButtonStyle.FILLED,
-                          purpose: Purpose.HIGHLIGHT,
-                          onTap: () => stepMakeEnvelope(context)),
-                    )
-            ],
+                _currentStep != 0
+                    ? Container()
+                    : Padding(
+                        padding: EdgeInsets.all(paddingPage),
+                        child: BaseButton(
+                            text: "Confirm",
+                            isSmall: false,
+                            style: BaseButtonStyle.FILLED,
+                            purpose: Purpose.HIGHLIGHT,
+                            onTap: () => stepMakeEnvelope(ctx)),
+                      )
+              ],
+            ),
           ),
         ),
       ),
