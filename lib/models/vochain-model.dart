@@ -20,15 +20,23 @@ class VochainModel {
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     this.referenceBlock.toBootingOrRefreshing();
-    final newReferenceblock = await getBlockHeight(dvoteGw);
-    if (newReferenceblock == null) {
-      this.referenceBlock.toErrorOrFaulty("Unable to retrieve reference block");
-      this
-          .referenceTimestamp
-          .toErrorOrFaulty("Unable to retrieve reference block");
-    } else {
-      this.referenceBlock.value = newReferenceblock;
-      this.referenceTimestamp.value = DateTime.now();
+    try {
+      final newReferenceblock = await getBlockHeight(dvoteGw);
+      dvoteGw.disconnect();
+
+      if (newReferenceblock == null) {
+        this
+            .referenceBlock
+            .toErrorOrFaulty("Unable to retrieve reference block");
+        this
+            .referenceTimestamp
+            .toErrorOrFaulty("Unable to retrieve reference block");
+      } else {
+        this.referenceBlock.value = newReferenceblock;
+        this.referenceTimestamp.value = DateTime.now();
+      }
+    } catch (err) {
+      dvoteGw.disconnect();
     }
     //TODO save to storage
   }

@@ -45,10 +45,10 @@ class PollCard extends StatelessWidget {
                       index: this.index));
             },
             image: validUriOrNull(
-                this.process.processMetadata.value.details.headerImage),
+                this.process.processMetadata.value?.details?.headerImage),
             imageTag: makeElementTag(
                 this.ent.entityReference.entityId,
-                this.process.processMetadata.value.meta[META_PROCESS_ID],
+                this.process.processMetadata.value?.meta[META_PROCESS_ID],
                 this.index),
             children: <Widget>[
               DashboardRow(

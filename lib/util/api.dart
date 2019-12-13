@@ -25,27 +25,31 @@ Future<String> addressFromMnemonic(String mnemonic) {
 
 Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
+  DVoteGateway dvoteGw;
 
   try {
     final gwInfo = selectRandomGatewayInfo();
 
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
     final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
 
     EntityMetadata entityMetadata =
         await fetchEntity(entityReference, dvoteGw, web3Gw);
     entityMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
 
+    dvoteGw.disconnect();
     return entityMetadata;
   } catch (err) {
     if (!kReleaseMode) print(err);
+    dvoteGw.disconnect();
     throw FetchError("The entity's data cannot be fetched");
   }
 }
 
 Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     EntityMetadata entityMetadata, String lang) async {
+  DVoteGateway dvoteGw;
+
   // Attempt for every node available
   if (!(entityMetadata is EntityMetadata))
     return null;
@@ -60,14 +64,18 @@ Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
   // Attempt for every node available
   try {
     ContentURI cUri = ContentURI(contentUri);
-    DVoteGateway gateway = DVoteGateway(gw.dvote);
-    final result = await fetchFileString(cUri, gateway);
+    dvoteGw = DVoteGateway(gw.dvote);
+
+    final result = await fetchFileString(cUri, dvoteGw);
     Feed feed = parseFeed(result);
     feed.meta[META_ENTITY_ID] = entityReference.entityId;
     feed.meta[META_LANGUAGE] = lang;
+
+    dvoteGw.disconnect();
     return feed;
   } catch (err) {
     print(err);
+    dvoteGw?.disconnect();
     throw FetchError(err);
   }
 }

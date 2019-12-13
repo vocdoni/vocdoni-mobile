@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/poll-packaging.dart';
@@ -48,8 +47,11 @@ class _PollPageState extends State<PollPage> {
         processId: args.processId);
 
     processModel = args.ent.getProcess(args.processId);
+    if (!processModel.processMetadata.isValid) return;
+
     if (_answers.length == 0)
-      processModel.processMetadata.value.details.questions.forEach((question) {
+      processModel.processMetadata.value?.details?.questions
+          ?.forEach((question) {
         _answers.add("");
       });
 
@@ -66,8 +68,8 @@ class _PollPageState extends State<PollPage> {
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl =
-        validUriOrNull(processModel.processMetadata.value.details.headerImage);
+    String headerUrl = validUriOrNull(
+        processModel.processMetadata.value?.details?.headerImage);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
@@ -119,6 +121,8 @@ class _PollPageState extends State<PollPage> {
 
   getScaffoldChildren(BuildContext context, EntModel ent) {
     List<Widget> children = [];
+    if (processModel.processMetadata.value == null) return children;
+
     //children.add(buildTest());
     children.add(buildTitle(context, ent));
     children.add(Summary(
@@ -137,6 +141,8 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTitle(BuildContext context, EntModel ent) {
+    if (processModel.processMetadata.value == null) return Container();
+
     String title = processModel.processMetadata.value.details.title['default'];
     return ListItem(
       // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
@@ -285,31 +291,14 @@ class _PollPageState extends State<PollPage> {
   }
 
   onSubmit(ctx, processMetadata) async {
-    var encryptionKey = await Navigator.push(
-        ctx,
-        MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(
-                account.identity.keys[0].encryptedPrivateKey)));
-    if (encryptionKey == null || encryptionKey is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid",
-          context: ctx, purpose: Purpose.DANGER);
-      return;
-    }
-
     var intAnswers = _answers.map(int.parse).toList();
-
-    final privateKey = await decryptString(
-        account.identity.keys[0].encryptedPrivateKey, encryptionKey);
 
     await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PollPackaging(
-                privateKey: privateKey,
-                processModel: processModel,
-                answers: intAnswers)));
+                processModel: processModel, answers: intAnswers)));
   }
 
   buildSubmitInfo() {
@@ -376,8 +365,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (processModel.processMetadata.value.details.questions.length == 0) {
-      return [buildError("No questions defined")];
+    if (!processModel.processMetadata.isValid ||
+        processModel.processMetadata.value.details.questions.length == 0) {
+      return [];
     }
 
     List<Widget> items = new List<Widget>();

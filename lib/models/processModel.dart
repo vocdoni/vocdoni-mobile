@@ -83,13 +83,13 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateProcessMetadata() async {
+    DVoteGateway dvoteGw;
     try {
       this.processMetadata.toBootingOrRefreshing();
       final gwInfo = selectRandomGatewayInfo();
 
       // TODO: Recycle GW connections
-      final DVoteGateway dvoteGw =
-          DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+      dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
       final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
 
       this.processMetadata.value =
@@ -97,7 +97,10 @@ class ProcessModel extends StatesRebuilder {
 
       processMetadata.value.meta[META_PROCESS_ID] = processId;
       processMetadata.value.meta[META_ENTITY_ID] = entityReference.entityId;
+
+      dvoteGw.disconnect();
     } catch (err) {
+      dvoteGw.disconnect();
       this.processMetadata.toError("Unable to fetch the vote details");
     }
     if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
@@ -165,6 +168,7 @@ class ProcessModel extends StatesRebuilder {
       this.isInCensus.toError("Unable to check the census");
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
+    dvoteGw.disconnect();
   }
 
   stageCensusState() {
@@ -182,9 +186,12 @@ class ProcessModel extends StatesRebuilder {
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     try {
-      return await getCensusSize(
-          processMetadata.value.census.merkleRoot, dvoteGw);
+      final size =
+          await getCensusSize(processMetadata.value.census.merkleRoot, dvoteGw);
+      dvoteGw.disconnect();
+      return size;
     } catch (e) {
+      dvoteGw.disconnect();
       return null;
     }
   }
@@ -196,8 +203,11 @@ class ProcessModel extends StatesRebuilder {
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
     try {
-      return await getEnvelopeHeight(this.processId, dvoteGw);
+      final height = await getEnvelopeHeight(this.processId, dvoteGw);
+      dvoteGw.disconnect();
+      return height;
     } catch (e) {
+      dvoteGw.disconnect();
       return null;
     }
   }
@@ -222,7 +232,7 @@ class ProcessModel extends StatesRebuilder {
     if (total == null)
       this.participantsCurrent.toUnknown();
     else
-      this.participantsCurrent.value = total;
+      this.participantsCurrent.value = current;
 
     if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
   }
