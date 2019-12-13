@@ -23,7 +23,6 @@ class EntityInfoPage extends StatefulWidget {
     analytics.trackPage(
         pageId: "EntityInfoPage", entityId: entityReference.entityId);
     entModel = account.getEnt(entityReference);
-    entModel.updateWithDelay();
   }
 
   @override
@@ -36,7 +35,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   @override
   void initState() {
     super.initState();
-    //refresh();
+
+    widget.entModel.updateWithDelay();
   }
 
   @override
@@ -229,7 +229,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             processNum = widget.entModel.processes.value.length;
           return ListItem(
               icon: FeatherIcons.mail,
-              mainText: "Voted",
+              mainText: "Participation",
               rightText: processNum.toString(),
               rightTextIsBadge: true,
               disabled: processNum == 0,

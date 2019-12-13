@@ -19,7 +19,7 @@ class ProcessModel extends StatesRebuilder {
   final DataState<ProcessMetadata> processMetadata = DataState();
 
   //final DataState censusDataState = DataState();
-  final DataState<bool> censusIsIn = DataState();
+  final DataState<bool> isInCensus = DataState();
 
   //final DataState participationDataState = DataState();
   final DataState<int> participantsTotal = DataState();
@@ -98,7 +98,7 @@ class ProcessModel extends StatesRebuilder {
       processMetadata.value.meta[META_PROCESS_ID] = processId;
       processMetadata.value.meta[META_ENTITY_ID] = entityReference.entityId;
     } catch (err) {
-      this.processMetadata.toError("Unable to update processMetadata");
+      this.processMetadata.toError("Unable to fetch the vote details");
     }
     if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
   }
@@ -108,18 +108,18 @@ class ProcessModel extends StatesRebuilder {
     try {
       String str = this.processMetadata.value.meta[META_PROCESS_CENSUS_IS_IN];
       if (str == 'true')
-        this.censusIsIn.value = true;
+        this.isInCensus.value = true;
       else if (str == 'false')
-        this.censusIsIn.value = false;
+        this.isInCensus.value = false;
       else
-        this.censusIsIn.toUnknown();
+        this.isInCensus.toUnknown();
     } catch (e) {
-      this.censusIsIn.toError(e);
+      this.isInCensus.toError(e);
     }
   }
 
   updateCensusStateIfNeeded() async {
-    if (this.censusIsIn.isNotValid) await updateCensusState();
+    if (this.isInCensus.isNotValid) await updateCensusState();
   }
 
   updateCensusState() async {
@@ -129,7 +129,7 @@ class ProcessModel extends StatesRebuilder {
     final DVoteGateway dvoteGw =
         DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
 
-    this.censusIsIn.toBooting();
+    this.isInCensus.toBooting();
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
     String base64Claim =
@@ -138,7 +138,7 @@ class ProcessModel extends StatesRebuilder {
       final proof = await generateProof(
           processMetadata.value.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        this.censusIsIn.toError("Census-proof is not valid");
+        this.isInCensus.toError("You are not part of the census");
 
         if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
         return;
@@ -147,9 +147,9 @@ class ProcessModel extends StatesRebuilder {
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
       if (emptyProofRegexp.hasMatch(proof)) // 0x0000000000.....
-        this.censusIsIn.value = false;
+        this.isInCensus.value = false;
       else
-        this.censusIsIn.value = true;
+        this.isInCensus.value = true;
 
       stageCensusState();
       save();
@@ -162,7 +162,7 @@ class ProcessModel extends StatesRebuilder {
       //   return;
       // }
     } catch (error) {
-      this.censusIsIn.toError("Unable to validate census-proof");
+      this.isInCensus.toError("Unable to check the census");
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
   }
@@ -171,7 +171,7 @@ class ProcessModel extends StatesRebuilder {
     if (processMetadata == null) return null;
 
     this.processMetadata.value.meta[META_PROCESS_CENSUS_IS_IN] =
-        censusIsIn.toString();
+        isInCensus.toString();
   }
 
   Future<int> getTotalParticipants() async {
@@ -238,12 +238,12 @@ class ProcessModel extends StatesRebuilder {
     int current = await getCurrentParticipants();
 
     if (total == null || total <= 0)
-      this.participantsTotal.toError("Invalid total participants");
+      this.participantsTotal.toError("Invalid census size");
     else
       this.participantsTotal.value = total;
 
     if (current == null)
-      this.participantsCurrent.toError("Invalid current participants");
+      this.participantsCurrent.toError("Invalid amount of participants");
     else
       this.participantsCurrent.value = total;
 

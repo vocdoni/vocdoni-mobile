@@ -174,10 +174,10 @@ class _PollPageState extends State<PollPage> {
           Purpose purpose;
           IconData icon;
 
-          if (processModel.censusIsIn.isUpdating) {
+          if (processModel.isInCensus.isUpdating) {
             text = "Checking census";
-          } else if (processModel.censusIsIn.isValid) {
-            if (processModel.censusIsIn.value) {
+          } else if (processModel.isInCensus.isValid) {
+            if (processModel.isInCensus.value) {
               text = "You are in the census";
               purpose = Purpose.GOOD;
               icon = FeatherIcons.check;
@@ -186,8 +186,8 @@ class _PollPageState extends State<PollPage> {
               purpose = Purpose.DANGER;
               icon = FeatherIcons.x;
             }
-          } else if (processModel.censusIsIn.isError) {
-            text = processModel.censusIsIn.errorMessage;
+          } else if (processModel.isInCensus.isError) {
+            text = processModel.isInCensus.errorMessage;
             icon = FeatherIcons.alertTriangle;
           } else {
             text = "Check census state";
@@ -196,13 +196,13 @@ class _PollPageState extends State<PollPage> {
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.censusIsIn.isUpdating,
+            isSpinning: processModel.isInCensus.isUpdating,
             onTap: () {
               processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.censusIsIn.isNotValid
+            purpose: processModel.isInCensus.isNotValid
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -222,12 +222,12 @@ class _PollPageState extends State<PollPage> {
     String formattedTime = "";
     if (processModel.endDate.isValid) {
       formattedTime =
-          DateFormat("dd/MM, H:m:s").format(processModel.endDate.value);
+          DateFormat("dd/MM - H:m").format(processModel.endDate.value);
     }
 
     return ListItem(
       icon: FeatherIcons.clock,
-      mainText: "Process ends on " + formattedTime,
+      mainText: "Ending on " + formattedTime,
       //secondaryText: "18/09/2019 at 19:00",
       rightIcon: null,
       disabled: false,
@@ -250,7 +250,7 @@ class _PollPageState extends State<PollPage> {
         allGood = false;
         setState(() {
           _responsesAreValid = false;
-          _responsesStateMessage = 'Question #$idx needs to be answered';
+          _responsesStateMessage = 'Select your choice for question #$idx';
         });
         break;
       }
@@ -266,9 +266,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.censusIsIn.isNotValid) return Container();
+    if (processModel.isInCensus.isNotValid) return Container();
 
-    if (processModel.censusIsIn.isValid)
+    if (processModel.isInCensus.isValid)
       return Padding(
         padding: EdgeInsets.all(paddingPage),
         child: BaseButton(
@@ -276,8 +276,8 @@ class _PollPageState extends State<PollPage> {
             isSmall: false,
             style: BaseButtonStyle.FILLED,
             purpose: Purpose.HIGHLIGHT,
-            isDisabled:
-                _responsesAreValid == false || processModel.censusIsIn == false,
+            isDisabled: _responsesAreValid == false ||
+                processModel.isInCensus.value == false,
             onTap: () {
               onSubmit(ctx, processModel.processMetadata);
             }),
@@ -317,8 +317,8 @@ class _PollPageState extends State<PollPage> {
       viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
-        if (processModel.censusIsIn.isValid) {
-          if (processModel.censusIsIn.value) {
+        if (processModel.isInCensus.isValid) {
+          if (processModel.isInCensus.value) {
             return _responsesAreValid == false
                 ? ListItem(
                     mainText: _responsesStateMessage,
@@ -341,7 +341,7 @@ class _PollPageState extends State<PollPage> {
           }
         } else {
           return ListItem(
-            mainText: "Unable to check if you are part of the census",
+            mainText: "Your identity cannot be checked against the census",
             mainTextMultiline: 3,
             secondaryText: "Please, try to validate again.",
             secondaryTextMultiline: 5,

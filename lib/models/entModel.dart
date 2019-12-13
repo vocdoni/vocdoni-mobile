@@ -47,10 +47,9 @@ class EntModel extends StatesRebuilder {
     await updateProcesses();
   }
 
-  updateWithDelay() async {
+  updateWithDelay() {
     //This allows to call update() on widget's initState()
-    await new Future.delayed(new Duration(milliseconds: 10), () {});
-    await update();
+    Future.delayed(Duration(milliseconds: 10), () {}).then((_) => update());
   }
 
   updateEntityMetadata() async {
