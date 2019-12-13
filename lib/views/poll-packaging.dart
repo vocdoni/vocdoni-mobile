@@ -25,6 +25,7 @@ class _PollPackagingState extends State<PollPackaging> {
   int _currentStep;
   Map<String, String> _envelope;
   ProcessModel processModel;
+  DVoteGateway dvoteGw;
 
   @override
   void initState() {
@@ -38,85 +39,102 @@ class _PollPackagingState extends State<PollPackaging> {
     _currentStep = 0;
   }
 
-  void stepMakeEnvelope(BuildContext ctx) async {
+  void stepMakeEnvelope(BuildContext context) async {
     var patternLockKey = await Navigator.push(
-        ctx,
+        context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
                 account.identity.keys[0].encryptedPrivateKey)));
 
+    if (!mounted) return;
+
     // TODO: ERROR => THIS IS NOT A SCAFFOLD
     if (patternLockKey == null || patternLockKey is InvalidPatternError) {
+      setState(() => _currentStep = 0);
       showMessage("The pattern you entered is not valid",
-          context: ctx, purpose: Purpose.DANGER);
+          context: context, purpose: Purpose.DANGER);
       return;
     }
+    setState(() => _currentStep = 1);
+
+    if (!(dvoteGw is DVoteGateway)) {
+      final gwInfo = selectRandomGatewayInfo();
+      dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    }
+
+    final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
+    final publicKeyClaim = await digestHexClaim(publicKey);
+    final merkleProof = await generateProof(
+        widget.processModel.processMetadata.value.census.merkleRoot,
+        publicKeyClaim,
+        dvoteGw);
+
+    if (!mounted) return;
 
     final privateKey = await decryptString(
         account.identity.keys[0].encryptedPrivateKey, patternLockKey);
 
+    if (!mounted) return;
+
     Map<String, String> envelope = await packagePollEnvelope(
-        widget.answers,
-        widget.processModel.processMetadata.value.census.merkleRoot,
-        widget.processModel.processId,
-        privateKey);
+        widget.answers, merkleProof, widget.processModel.processId, privateKey);
+
+    if (!mounted) return;
 
     setState(() {
       _envelope = envelope;
-      _currentStep = _currentStep + 1;
     });
 
-    stepSend(ctx);
+    stepSend(context);
   }
 
-  void stepSend(BuildContext ctx) async {
-    final gwInfo = selectRandomGatewayInfo();
-
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-
+  void stepSend(BuildContext context) async {
     try {
-      bool success = false;
-      // DateTime now = new DateTime.now();
-      // String nowstr = now.toString();
-      // int timestamp = now.millisecondsSinceEpoch;
-
+      setState(() => _currentStep = 2);
       await submitEnvelope(_envelope, dvoteGw);
 
-      if (success) {
-        setState(() => _currentStep++);
+      if (!mounted) return;
 
-        return stepConfirm(ctx);
-      } else {
-        debugPrint("failed to send the vote");
-      }
+      setState(() => _currentStep++);
+
+      return stepConfirm(context);
     } catch (error) {
       //Todo: handle timeut
+      setState(() => _currentStep = 0);
       dvoteGw.disconnect();
       showMessage("The vote could not be delivered",
           purpose: Purpose.DANGER, context: context);
     }
   }
 
-  void stepConfirm(BuildContext ctx) async {
-    final gwInfo = selectRandomGatewayInfo();
+  void stepConfirm(BuildContext context) async {
+    setState(() => _currentStep = 3);
+    try {
+      String pollNullifier = getPollNullifier(
+          identitiesBloc.getCurrentIdentity().keys[0].address,
+          widget.processModel.processId);
 
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+      await getEnvelopeStatus(
+          widget.processModel.processId, pollNullifier, dvoteGw);
 
-    String pollNullifier = "";
-    await getEnvelopeStatus(
-        widget.processModel.processId, pollNullifier, dvoteGw);
+      dvoteGw.disconnect();
+      this.dvoteGw = null;
+    } catch (err) {
+      dvoteGw.disconnect();
+      this.dvoteGw = null;
+      showMessage("The vote delivery could not be checked",
+          purpose: Purpose.DANGER, context: context);
 
-    dvoteGw.disconnect();
+      if (mounted) setState(() => _currentStep = 0);
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext c) {
     return Scaffold(
       body: Builder(
-        builder: (BuildContext ctx) => Center(
+        builder: (BuildContext context) => Center(
           child: Container(
             constraints: BoxConstraints(maxWidth: 350),
             child: Column(
@@ -151,7 +169,7 @@ class _PollPackagingState extends State<PollPackaging> {
                 //         setState(() {
                 //           _currentStep++;
                 //         });
-                //         if (_currentStep == 5) Navigator.pop(ctx, false);
+                //         if (_currentStep == 5) Navigator.pop(context, false);
                 //       }),
                 // ),
 
@@ -164,7 +182,7 @@ class _PollPackagingState extends State<PollPackaging> {
                             isSmall: false,
                             style: BaseButtonStyle.FILLED,
                             purpose: Purpose.HIGHLIGHT,
-                            onTap: () => stepMakeEnvelope(ctx)),
+                            onTap: () => stepMakeEnvelope(context)),
                       )
               ],
             ),
