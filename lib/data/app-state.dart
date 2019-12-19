@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:vocdoni/models/account.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
@@ -51,12 +52,10 @@ class AppStateBloc extends GenericBloc<AppState> {
     state.add(newState);
   }
 
-  Future<void> load() async {
-    await loadBootNodes().catchError((_) {
-      print("Error: Unable to load the boot nodes");
+  Future<void> fetchRemoteState() {
+    return loadBootNodes().then((_) {
+      return vochainModel.updateBlockHeight(); // TODO: single source of truth
     });
-
-    await vochainModel.updateBlockHeight();  // TODO: single source of truth
   }
 
   @override
@@ -88,7 +87,7 @@ class AppStateBloc extends GenericBloc<AppState> {
       final bnList = await getDefaultGatewaysInfo(NETWORK_ID);
       await setBootNodes(bnList);
     } catch (err) {
-      print("ERR: $err");
+      if (!kReleaseMode) print("ERR: $err");
     }
   }
 

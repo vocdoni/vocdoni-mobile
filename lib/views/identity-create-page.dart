@@ -9,15 +9,14 @@ class IdentityCreatePage extends StatefulWidget {
   _IdentityCreateScreen createState() => _IdentityCreateScreen();
 }
 
-class _IdentityCreateScreen extends State {
+class _IdentityCreateScreen extends State<IdentityCreatePage> {
   bool generating = false;
 
-    @override
+  @override
   void initState() {
     super.initState();
     analytics.trackPage(pageId: "IdentityCreatePage");
   }
-
 
   @override
   Widget build(context) {

@@ -1,7 +1,7 @@
 import 'package:dvote/api/voting-process.dart';
 import 'package:dvote/net/gateway.dart';
 import 'package:vocdoni/data/data-state.dart';
-import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/net.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 class VochainModel {
@@ -15,14 +15,11 @@ class VochainModel {
   }
 
   updateBlockHeight() async {
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-
     this.referenceBlock.toBootingOrRefreshing();
+    final DVoteGateway dvoteGw = getDVoteGateway();
+
     try {
       final newReferenceblock = await getBlockHeight(dvoteGw);
-      dvoteGw.disconnect();
 
       if (newReferenceblock == null) {
         this
@@ -36,7 +33,9 @@ class VochainModel {
         this.referenceTimestamp.value = DateTime.now();
       }
     } catch (err) {
-      dvoteGw.disconnect();
+      this.referenceBlock.toError("Network error");
+      print(err);
+      throw err;
     }
     //TODO save to storage
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/util/pattern.dart';
 import 'package:vocdoni/util/singletons.dart';

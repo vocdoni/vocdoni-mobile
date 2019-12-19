@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/net.dart';
 import 'package:vocdoni/util/singletons.dart';
 
 enum ProcessTags {
@@ -83,24 +83,18 @@ class ProcessModel extends StatesRebuilder {
   }
 
   updateProcessMetadata() async {
-    DVoteGateway dvoteGw;
     try {
       this.processMetadata.toBootingOrRefreshing();
-      final gwInfo = selectRandomGatewayInfo();
 
-      // TODO: Recycle GW connections
-      dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-      final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
+      final DVoteGateway dvoteGw = getDVoteGateway();
+      final Web3Gateway web3Gw = getWeb3Gateway();
 
       this.processMetadata.value =
           await getProcessMetadata(processId, dvoteGw, web3Gw);
 
       processMetadata.value.meta[META_PROCESS_ID] = processId;
       processMetadata.value.meta[META_ENTITY_ID] = entityReference.entityId;
-
-      dvoteGw.disconnect();
     } catch (err) {
-      dvoteGw.disconnect();
       this.processMetadata.toError("Unable to fetch the vote details");
     }
     if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
@@ -128,15 +122,14 @@ class ProcessModel extends StatesRebuilder {
   updateCensusState() async {
     if (processMetadata.isNotValid) return;
 
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    final DVoteGateway dvoteGw = getDVoteGateway();
 
     this.isInCensus.toBooting();
     if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
 
     String base64Claim =
         await digestHexClaim(account.identity.keys[0].publicKey);
+
     try {
       final proof = await generateProof(
           processMetadata.value.census.merkleRoot, base64Claim, dvoteGw);
@@ -168,7 +161,6 @@ class ProcessModel extends StatesRebuilder {
       this.isInCensus.toError("Unable to check the census");
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
     }
-    dvoteGw.disconnect();
   }
 
   stageCensusState() {
@@ -181,33 +173,26 @@ class ProcessModel extends StatesRebuilder {
   Future<int> getTotalParticipants() async {
     if (this.processMetadata == null) return null;
 
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+    final DVoteGateway dvoteGw = getDVoteGateway();
 
     try {
       final size =
           await getCensusSize(processMetadata.value.census.merkleRoot, dvoteGw);
-      dvoteGw.disconnect();
       return size;
     } catch (e) {
-      dvoteGw.disconnect();
       return null;
     }
   }
 
   Future<int> getCurrentParticipants() async {
     if (processMetadata == null) return null;
-    final gwInfo = selectRandomGatewayInfo();
-    final DVoteGateway dvoteGw =
-        DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
+
+    final DVoteGateway dvoteGw = getDVoteGateway();
 
     try {
       final height = await getEnvelopeHeight(this.processId, dvoteGw);
-      dvoteGw.disconnect();
       return height;
     } catch (e) {
-      dvoteGw.disconnect();
       return null;
     }
   }
