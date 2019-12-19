@@ -57,7 +57,7 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
   /// Sets the given value as the current one and persists the new data
   @override
   Future<void> set(List<ProcessMetadata> data) async {
-    super.set(data);
+    super.set(uniqueProcesses(data));
     await persist();
   }
 
@@ -79,4 +79,17 @@ class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {
 
     // CUSTOM OPERATIONS
   }
+}
+
+List<ProcessMetadata> uniqueProcesses(List<ProcessMetadata> items) {
+  List<String> ids = [];
+
+  return items
+      .where((item) {
+        if (ids.contains(item.meta[META_PROCESS_ID])) return false;
+        ids.add(item.meta[META_PROCESS_ID]);
+        return true;
+      })
+      .cast<ProcessMetadata>()
+      .toList();
 }
