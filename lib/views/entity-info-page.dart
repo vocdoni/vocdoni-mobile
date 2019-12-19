@@ -161,7 +161,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     String title =
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
-      mainTextTag: ent.entityReference.entityId + title,
+      heroTag: ent.entityReference.entityId + title,
       mainText: title,
       secondaryText: ent.entityReference.entityId,
       isTitle: true,

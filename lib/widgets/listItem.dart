@@ -5,7 +5,7 @@ import 'package:vocdoni/widgets/baseAvatar.dart';
 
 class ListItem extends StatelessWidget {
   final String mainText;
-  final String mainTextTag;
+  final String heroTag;
   final bool mainTextFullWidth;
   final String secondaryText;
   final int mainTextMultiline;
@@ -27,8 +27,8 @@ class ListItem extends StatelessWidget {
   final bool isSpinning;
 
   ListItem(
-      {this.mainText,
-      this.mainTextTag,
+      {@required this.mainText,
+      this.heroTag,
       this.mainTextFullWidth = false,
       this.secondaryText,
       this.mainTextMultiline = 1,
@@ -115,10 +115,10 @@ class ListItem extends StatelessWidget {
   }
 
   buildMainTextWithHero() {
-    return mainTextTag == null
+    return heroTag == null
         ? buildMainText()
         : Hero(
-            tag: mainTextTag,
+            tag: heroTag,
             child: buildMainText(),
           );
   }

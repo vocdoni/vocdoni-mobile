@@ -67,7 +67,7 @@ class _HomeTabState extends State<HomeTab> {
           if (item.post != null)
             return buildFeedPostCard(ctx: ctx, ent: item.ent, post: item.post);
           else if (item.process != null)
-            return PollCard(ent: item.ent, process: item.process);
+            return PollCard(ent: item.ent, process: item.process, index: index);
           else
             return Container();
         });

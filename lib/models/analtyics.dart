@@ -50,10 +50,7 @@ class Analytics {
   trackError(Error error) {}
 
   trackPage(
-      {String pageId,
-      String entityId = null,
-      String processId = null,
-      String postTitle = null}) {
+      {String pageId, String entityId, String processId, String postTitle}) {
     Map<String, String> properties = {'pageId': pageId};
     if (entityId != null) properties.putIfAbsent('entityId', () => entityId);
     if (processId != null) properties.putIfAbsent('processId', () => processId);

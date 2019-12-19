@@ -71,7 +71,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     String title =
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
-        mainTextTag: ent.entityReference.entityId + title,
+        heroTag: ent.entityReference.entityId + title,
         mainText: title,
         avatarUrl: ent.entityMetadata.value.media.avatar,
         avatarText: title,

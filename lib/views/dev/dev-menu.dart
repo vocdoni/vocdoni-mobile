@@ -8,7 +8,7 @@ import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/util/api.dart';
 import 'package:vocdoni/util/singletons.dart';
-import 'package:vocdoni/models/account.dart';
+// import 'package:vocdoni/models/account.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
 

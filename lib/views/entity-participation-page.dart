@@ -52,7 +52,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
               itemCount: entModel.processes.value.length,
               itemBuilder: (BuildContext ctx, int index) {
                 final ProcessModel process = entModel.processes.value[index];
-                return PollCard(ent: entModel, process: process);
+                return PollCard(ent: entModel, process: process, index: index);
               },
             ),
           );

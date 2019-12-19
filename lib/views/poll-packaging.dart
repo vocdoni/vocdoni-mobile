@@ -57,8 +57,8 @@ class _PollPackagingState extends State<PollPackaging> {
     }
     setState(() => _currentStep = 1);
 
+    // PREPARE DATA
     final DVoteGateway dvoteGw = getDVoteGateway();
-    // final Web3Gateway web3Gw = getWeb3Gateway();
 
     final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
     final publicKeyClaim = await digestHexClaim(publicKey);
@@ -74,16 +74,38 @@ class _PollPackagingState extends State<PollPackaging> {
 
     if (!mounted) return;
 
-    Map<String, String> envelope = await packagePollEnvelope(
-        widget.answers, merkleProof, widget.processModel.processId, privateKey);
+    try {
+      // CHECK IF THE VOTE IS ALREADY REGISTERED
+      final String pollNullifier = getPollNullifier(
+          identitiesBloc.getCurrentIdentity().keys[0].address,
+          widget.processModel.processId);
 
-    if (!mounted) return;
+      final success = await getEnvelopeStatus(
+              widget.processModel.processId, pollNullifier, dvoteGw)
+          .catchError((_) {});
+      if (success == true) {
+        showMessage("Your vote has already been registered",
+            context: context, purpose: Purpose.GUIDE);
+        return;
+      }
 
-    setState(() {
-      _envelope = envelope;
-    });
+      // PREPARE THE VOTE ENVELOPE
+      Map<String, String> envelope = await packagePollEnvelope(widget.answers,
+          merkleProof, widget.processModel.processId, privateKey);
 
-    stepSend(context);
+      if (!mounted) return;
+
+      setState(() {
+        _envelope = envelope;
+      });
+
+      stepSend(context);
+    } catch (err) {
+      showMessage("The vote data could not be prepared", context: context);
+      setState(() {
+        _currentStep = 0;
+      });
+    }
   }
 
   void stepSend(BuildContext context) async {
@@ -112,7 +134,7 @@ class _PollPackagingState extends State<PollPackaging> {
     try {
       final DVoteGateway dvoteGw = getDVoteGateway();
 
-      String pollNullifier = getPollNullifier(
+      final String pollNullifier = getPollNullifier(
           identitiesBloc.getCurrentIdentity().keys[0].address,
           widget.processModel.processId);
 
@@ -147,7 +169,7 @@ class _PollPackagingState extends State<PollPackaging> {
                 Spacer(),
                 Section(
                   text: _currentStep == 0
-                      ? "Vote delivery"
+                      ? "Ready when you are"
                       : "Delivering the vote",
                   withDectoration: false,
                 ),

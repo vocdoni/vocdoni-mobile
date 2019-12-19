@@ -22,7 +22,8 @@ class PollPageArgs {
   EntModel ent;
   String processId;
   final int index;
-  PollPageArgs({this.ent, this.processId, this.index});
+  PollPageArgs(
+      {@required this.ent, @required this.processId, @required this.index});
 }
 
 class PollPage extends StatefulWidget {

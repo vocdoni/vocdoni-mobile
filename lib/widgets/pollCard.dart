@@ -18,7 +18,7 @@ class PollCard extends StatelessWidget {
   final EntModel ent;
   final int index;
 
-  PollCard({this.process, this.ent, this.index});
+  PollCard({@required this.process, @required this.ent, @required this.index});
 
   @override
   Widget build(ctx) {
