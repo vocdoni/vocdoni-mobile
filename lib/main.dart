@@ -11,8 +11,8 @@ import 'package:vocdoni/views/entity-feed-page.dart';
 import 'package:vocdoni/views/entity-participation-page.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
+import 'package:vocdoni/views/startup-page.dart';
 import 'lang/index.dart';
-import 'util/singletons.dart';
 import 'package:vocdoni/views/identity-select-page.dart';
 import "package:vocdoni/views/identity-create-page.dart";
 import 'package:vocdoni/views/identity-backup-page.dart';
@@ -22,29 +22,12 @@ import 'package:vocdoni/modals/sign-modal.dart';
 import "views/home.dart";
 
 void main() async {
-  analytics.init();
-  // RESTORE DATA
-  await appStateBloc.init();
-  await entitiesBloc.init();
-  await identitiesBloc.init();
-  await newsFeedsBloc.init();
-  await processesBloc.init();
-
-  await appStateBloc.load();
-
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-  // DETERMINE THE FIRST SCREEN
-  Widget home;
-  if (identitiesBloc.value.length > 0 ?? false) {
-    home = IdentitySelectPage();
-  } else {
-    home = IdentityCreatePage();
-  }
-
   // RUN THE APP
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     title: 'Vocdoni',
     localizationsDelegates: [
       LangDelegate(),
@@ -53,7 +36,7 @@ void main() async {
     ],
     supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
     onGenerateTitle: (BuildContext context) => Lang.of(context).get("Vocdoni"),
-    home: home,
+    home: StartupPage(),
     onGenerateRoute: generateRoute,
     routes: {
       // NO IDENTITIES YET
@@ -71,7 +54,7 @@ void main() async {
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
       "/signature": (context) => SignModal(),
-      
+
       //DEV
       "/dev": (context) => DevMenu(),
       "/dev/ui-listItem": (context) => DevUiListItem(),
@@ -94,6 +77,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/entity':
         return EntityInfoPage(settings.arguments);
+      default:
+        return null;
     }
   });
 }

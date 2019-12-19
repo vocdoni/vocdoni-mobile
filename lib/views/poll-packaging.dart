@@ -9,7 +9,7 @@ import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/util/net.dart';
 
 class PollPackaging extends StatefulWidget {
   final ProcessModel processModel;
@@ -25,7 +25,6 @@ class _PollPackagingState extends State<PollPackaging> {
   int _currentStep;
   Map<String, String> _envelope;
   ProcessModel processModel;
-  DVoteGateway dvoteGw;
 
   @override
   void initState() {
@@ -58,10 +57,8 @@ class _PollPackagingState extends State<PollPackaging> {
     }
     setState(() => _currentStep = 1);
 
-    if (!(dvoteGw is DVoteGateway)) {
-      final gwInfo = selectRandomGatewayInfo();
-      dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-    }
+    final DVoteGateway dvoteGw = getDVoteGateway();
+    // final Web3Gateway web3Gw = getWeb3Gateway();
 
     final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
     final publicKeyClaim = await digestHexClaim(publicKey);
@@ -92,6 +89,9 @@ class _PollPackagingState extends State<PollPackaging> {
   void stepSend(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
+      final DVoteGateway dvoteGw = getDVoteGateway();
+      // final Web3Gateway web3Gw = getWeb3Gateway();
+
       await submitEnvelope(_envelope, dvoteGw);
 
       if (!mounted) return;
@@ -102,7 +102,6 @@ class _PollPackagingState extends State<PollPackaging> {
     } catch (error) {
       //Todo: handle timeut
       setState(() => _currentStep = 0);
-      dvoteGw.disconnect();
       showMessage("The vote could not be delivered",
           purpose: Purpose.DANGER, context: context);
     }
@@ -111,18 +110,23 @@ class _PollPackagingState extends State<PollPackaging> {
   void stepConfirm(BuildContext context) async {
     setState(() => _currentStep = 3);
     try {
+      final DVoteGateway dvoteGw = getDVoteGateway();
+
       String pollNullifier = getPollNullifier(
           identitiesBloc.getCurrentIdentity().keys[0].address,
           widget.processModel.processId);
 
-      await getEnvelopeStatus(
+      final success = await getEnvelopeStatus(
           widget.processModel.processId, pollNullifier, dvoteGw);
 
-      dvoteGw.disconnect();
-      this.dvoteGw = null;
+      if (success != true) {
+        showMessage("The status of the envelope could not be validated",
+            context: context, purpose: Purpose.WARNING);
+        return;
+      }
+
+      setState(() => _currentStep = 4);
     } catch (err) {
-      dvoteGw.disconnect();
-      this.dvoteGw = null;
       showMessage("The vote delivery could not be checked",
           purpose: Purpose.DANGER, context: context);
 
@@ -183,6 +187,17 @@ class _PollPackagingState extends State<PollPackaging> {
                             style: BaseButtonStyle.FILLED,
                             purpose: Purpose.HIGHLIGHT,
                             onTap: () => stepMakeEnvelope(context)),
+                      ),
+                _currentStep != 4
+                    ? Container()
+                    : Padding(
+                        padding: EdgeInsets.all(paddingPage),
+                        child: BaseButton(
+                            text: "Close",
+                            isSmall: false,
+                            style: BaseButtonStyle.FILLED,
+                            purpose: Purpose.HIGHLIGHT,
+                            onTap: () => Navigator.of(context).pop()),
                       )
               ],
             ),
@@ -192,20 +207,20 @@ class _PollPackagingState extends State<PollPackaging> {
     );
   }
 
-  Widget buildStep(String presentText, String pastText, int stepValue) {
-    String text = presentText;
+  Widget buildStep(String doingText, String doneText, int stepIndex) {
+    String text = doingText;
 
-    if (_currentStep == stepValue)
-      text = presentText;
-    else if (_currentStep > stepValue) text = pastText;
+    if (_currentStep == stepIndex)
+      text = doingText;
+    else if (_currentStep > stepIndex) text = doneText;
 
     return ListItem(
       mainText: text,
-      rightIcon: _currentStep > stepValue ? FeatherIcons.check : null,
-      isSpinning: _currentStep == stepValue,
+      rightIcon: _currentStep > stepIndex ? FeatherIcons.check : null,
+      isSpinning: _currentStep == stepIndex,
       rightTextPurpose: Purpose.GOOD,
-      isBold: _currentStep == stepValue,
-      disabled: _currentStep < stepValue,
+      isBold: _currentStep == stepIndex,
+      disabled: _currentStep < stepIndex,
     );
   }
 }

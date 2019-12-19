@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/util/net.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/util/app-links.dart';
 import 'package:vocdoni/views/home-tab.dart';
@@ -98,21 +100,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
     switch (state) {
       case AppLifecycleState.inactive:
-        print("Inactive");
+        if (!kReleaseMode) print("Inactive");
         break;
       case AppLifecycleState.paused:
-        print("Paused");
+        if (!kReleaseMode) print("Paused");
         break;
       case AppLifecycleState.resumed:
-        print("Resumed");
+        if (!kReleaseMode) print("Resumed");
+        connectGateways();
         break;
       case AppLifecycleState.suspending:
-        print("Suspending");
+        if (!kReleaseMode) print("Suspending");
         break;
     }
-    super.didChangeAppLifecycleState(state);
   }
 
   /////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,7 @@
 import 'package:dvote/util/parsers.dart';
+import 'package:vocdoni/util/errors.dart';
 import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/util/net.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
@@ -25,31 +27,24 @@ Future<String> addressFromMnemonic(String mnemonic) {
 
 Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
-  DVoteGateway dvoteGw;
 
   try {
-    final gwInfo = selectRandomGatewayInfo();
+    final DVoteGateway dvoteGw = getDVoteGateway();
+    final Web3Gateway web3Gw = getWeb3Gateway();
 
-    dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-    final Web3Gateway web3Gw = Web3Gateway(gwInfo.web3);
-
-    EntityMetadata entityMetadata =
+    final EntityMetadata entityMetadata =
         await fetchEntity(entityReference, dvoteGw, web3Gw);
     entityMetadata.meta[META_ENTITY_ID] = entityReference.entityId;
 
-    dvoteGw.disconnect();
     return entityMetadata;
   } catch (err) {
     if (!kReleaseMode) print(err);
-    dvoteGw.disconnect();
-    throw FetchError("The entity's data cannot be fetched");
+    throw FetchError("The entity's data cannot be fetched", "fetchEntity");
   }
 }
 
 Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     EntityMetadata entityMetadata, String lang) async {
-  DVoteGateway dvoteGw;
-
   // Attempt for every node available
   if (!(entityMetadata is EntityMetadata))
     return null;
@@ -57,73 +52,21 @@ Future<Feed> fetchEntityNewsFeed(EntityReference entityReference,
     return null;
   else if (!(entityMetadata.newsFeed[lang] is String)) return null;
 
-  final gw = selectRandomGatewayInfo();
-
+  final DVoteGateway dvoteGw = getDVoteGateway();
   final String contentUri = entityMetadata.newsFeed[lang];
 
   // Attempt for every node available
   try {
-    ContentURI cUri = ContentURI(contentUri);
-    dvoteGw = DVoteGateway(gw.dvote);
+    final ContentURI cUri = ContentURI(contentUri);
 
     final result = await fetchFileString(cUri, dvoteGw);
-    Feed feed = parseFeed(result);
+    final Feed feed = parseFeed(result);
     feed.meta[META_ENTITY_ID] = entityReference.entityId;
     feed.meta[META_LANGUAGE] = lang;
 
-    dvoteGw.disconnect();
     return feed;
   } catch (err) {
     print(err);
-    dvoteGw?.disconnect();
-    throw FetchError(err);
+    throw FetchError(err, "fetchFileString");
   }
-}
-
-// ////////////////////////////////////////////////////////////////////////////
-// UTILITIES
-// ////////////////////////////////////////////////////////////////////////////
-
-class FetchError implements Exception {
-  final String msg;
-  const FetchError(this.msg);
-  String toString() => 'FetchError: $msg';
-}
-
-GatewayInfo selectRandomGatewayInfo() {
-  if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
-    return null;
-
-  final gw = GatewayInfo();
-
-  if (kReleaseMode) {
-    if (appStateBloc.value.bootnodes.homestead.dvote.length < 1) return null;
-
-    // PROD
-    int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
-    int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
-
-    gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
-    gw.publicKey =
-        appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
-    gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
-  } else {
-    if (appStateBloc.value.bootnodes.goerli.dvote.length < 1) return null;
-
-    int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.dvote.length);
-    int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.web3.length);
-
-    gw.dvote = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].uri;
-    gw.publicKey = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].pubKey;
-    gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.goerli.web3[web3Idx].uri;
-  }
-  return gw;
 }
