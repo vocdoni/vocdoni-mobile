@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/modals/pattern-prompt-modal.dart';
@@ -59,15 +60,29 @@ class _PollPackagingState extends State<PollPackaging> {
 
     // PREPARE DATA
     final DVoteGateway dvoteGw = getDVoteGateway();
+    String merkleProof;
 
-    final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
-    final publicKeyClaim = await digestHexClaim(publicKey);
-    final merkleProof = await generateProof(
-        widget.processModel.processMetadata.value.census.merkleRoot,
-        publicKeyClaim,
-        dvoteGw);
+    try {
+      final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
+      final publicKeyClaim = await digestHexClaim(publicKey);
+      merkleProof = await generateProof(
+          widget.processModel.processMetadata.value.census.merkleRoot,
+          publicKeyClaim,
+          dvoteGw);
 
-    if (!mounted) return;
+      if (!mounted) return;
+    } catch (err) {
+      // continue below
+      if (!kReleaseMode) print(err);
+    }
+
+    if (!(merkleProof is String)) {
+      showMessage("The vote data could not be signed", context: context);
+      setState(() {
+        _currentStep = 0;
+      });
+      return;
+    }
 
     final privateKey = await decryptString(
         account.identity.keys[0].encryptedPrivateKey, patternLockKey);
@@ -122,7 +137,8 @@ class _PollPackagingState extends State<PollPackaging> {
 
       return stepConfirm(context);
     } catch (error) {
-      //Todo: handle timeut
+      if (!mounted) return;
+
       setState(() => _currentStep = 0);
       showMessage("The vote could not be delivered",
           purpose: Purpose.DANGER, context: context);

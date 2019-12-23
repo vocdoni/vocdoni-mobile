@@ -88,6 +88,7 @@ class AppStateBloc extends GenericBloc<AppState> {
       await setBootNodes(bnList);
     } catch (err) {
       if (!kReleaseMode) print("ERR: $err");
+      throw err;
     }
   }
 

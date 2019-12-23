@@ -9,7 +9,7 @@ class ScaffoldWithImage extends StatefulWidget {
   final String avatarHexSource;
   final String headerImageUrl;
   final String headerTag;
-  final bool forceHeader ;
+  final bool forceHeader;
   final String avatarUrl;
   final Builder builder;
   final Widget leftElement;
