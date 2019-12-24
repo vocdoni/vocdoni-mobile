@@ -78,9 +78,8 @@ class _PollPackagingState extends State<PollPackaging> {
 
     if (!(merkleProof is String)) {
       showMessage("The vote data could not be signed", context: context);
-      setState(() {
-        _currentStep = 0;
-      });
+      setState(() => _currentStep = 0);
+
       return;
     }
 
@@ -98,7 +97,10 @@ class _PollPackagingState extends State<PollPackaging> {
       final success = await getEnvelopeStatus(
               widget.processModel.processId, pollNullifier, dvoteGw)
           .catchError((_) {});
+      if (!mounted) return;
+
       if (success == true) {
+        setState(() => _currentStep = 0);
         showMessage("Your vote has already been registered",
             context: context, purpose: Purpose.GUIDE);
         return;
@@ -156,8 +158,10 @@ class _PollPackagingState extends State<PollPackaging> {
 
       final success = await getEnvelopeStatus(
           widget.processModel.processId, pollNullifier, dvoteGw);
+      if (!mounted) return;
 
       if (success != true) {
+        setState(() => _currentStep = 0);
         showMessage("The status of the envelope could not be validated",
             context: context, purpose: Purpose.WARNING);
         return;
