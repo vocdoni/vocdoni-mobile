@@ -32,9 +32,7 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
-  List<String> _answers = [];
-  String _responsesStateMessage = '';
-  bool _responsesAreValid = false;
+  List<String> _choices = [];
   ProcessModel processModel;
 
   @override
@@ -50,13 +48,12 @@ class _PollPageState extends State<PollPage> {
     processModel = args.ent.getProcess(args.processId);
     if (!processModel.processMetadata.isValid) return;
 
-    if (_answers.length == 0)
-      processModel.processMetadata.value?.details?.questions
-          ?.forEach((question) {
-        _answers.add("");
-      });
-
-    checkResponseState();
+    if (_choices.length == 0) {
+      _choices = processModel.processMetadata.value?.details?.questions
+          ?.map((question) => null)
+          .cast<String>()
+          .toList();
+    }
     processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
   }
 
@@ -229,7 +226,7 @@ class _PollPageState extends State<PollPage> {
     String formattedTime = "";
     if (processModel.endDate.isValid) {
       formattedTime =
-          DateFormat("dd/MM - H:m").format(processModel.endDate.value);
+          DateFormat("dd/MM - H:mm").format(processModel.endDate.value);
     }
 
     return ListItem(
@@ -243,39 +240,30 @@ class _PollPageState extends State<PollPage> {
 
   setResponse(int questionIndex, String value) {
     setState(() {
-      _answers[questionIndex] = value;
+      _choices[questionIndex] = value;
     });
-
-    checkResponseState();
   }
 
-  checkResponseState() {
-    bool allGood = true;
-    int idx = 1;
-    for (final response in _answers) {
-      if (response == '') {
-        allGood = false;
-        setState(() {
-          _responsesAreValid = false;
-          _responsesStateMessage = 'Select your choice for question #$idx';
-        });
-        break;
+  /// Returns the 0-based index of the next unanswered question.
+  /// Returns -1 if all questions have a valid choice
+  int getNextPendingChoice() {
+    int idx = 0;
+    for (final response in _choices) {
+      if (response is String && response.length > 0) {
+        idx++;
+        continue; // GOOD
       }
-      idx++;
+      return idx; // PENDING
     }
-
-    if (allGood) {
-      setState(() {
-        _responsesAreValid = true;
-        _responsesStateMessage = '';
-      });
-    }
+    return -1; // ALL GOOD
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
     if (processModel.isInCensus.isNotValid) return Container();
 
-    if (processModel.isInCensus.isValid)
+    if (processModel.isInCensus.isValid) {
+      final nextPendingChoice = getNextPendingChoice();
+
       return Padding(
         padding: EdgeInsets.all(paddingPage),
         child: BaseButton(
@@ -283,16 +271,17 @@ class _PollPageState extends State<PollPage> {
             isSmall: false,
             style: BaseButtonStyle.FILLED,
             purpose: Purpose.HIGHLIGHT,
-            isDisabled: _responsesAreValid == false ||
+            isDisabled: nextPendingChoice >= 0 ||
                 processModel.isInCensus.value == false,
             onTap: () {
               onSubmit(ctx, processModel.processMetadata);
             }),
       );
+    }
   }
 
   onSubmit(ctx, processMetadata) async {
-    var intAnswers = _answers.map(int.parse).toList();
+    var intAnswers = _choices.map(int.parse).toList();
 
     await Navigator.push(
         ctx,
@@ -307,21 +296,21 @@ class _PollPageState extends State<PollPage> {
       viewModels: [processModel],
       tag: ProcessTags.CENSUS_STATE,
       builder: (ctx, tagId) {
+        final nextPendingChoice = getNextPendingChoice();
+
         if (processModel.isInCensus.isValid) {
           if (processModel.isInCensus.value) {
-            return _responsesAreValid == false
+            return nextPendingChoice >= 0 // still pending
                 ? ListItem(
-                    mainText: _responsesStateMessage,
+                    mainText:
+                        'Select your choice for question #${nextPendingChoice + 1}',
                     purpose: Purpose.WARNING,
                     rightIcon: null,
                   )
-                : ListItem(
-                    mainText: _responsesStateMessage,
-                    rightIcon: null,
-                  );
+                : Container();
           } else {
             return ListItem(
-              mainText: "You are not part of this census",
+              mainText: "You are not in the census",
               secondaryText:
                   "Register to this organization to participate in the future",
               secondaryTextMultiline: 5,
@@ -333,7 +322,7 @@ class _PollPageState extends State<PollPage> {
           return ListItem(
             mainText: "Your identity cannot be checked against the census",
             mainTextMultiline: 3,
-            secondaryText: "Please, try to validate again.",
+            secondaryText: "Please, try to check again",
             secondaryTextMultiline: 5,
             purpose: Purpose.WARNING,
             rightIcon: null,
@@ -350,7 +339,7 @@ class _PollPageState extends State<PollPage> {
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
           Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
-          showMessage("Identity ID copied on the clipboard",
+          showMessage("Entity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });
   }
@@ -406,11 +395,11 @@ class _PollPageState extends State<PollPage> {
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
-                  color: _answers[questionIndex] == voteOption.value
+                  color: _choices[questionIndex] == voteOption.value
                       ? Colors.white
                       : colorDescription),
             ),
-            selected: _answers[questionIndex] == voteOption.value,
+            selected: _choices[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
                 setResponse(questionIndex, voteOption.value);
