@@ -35,6 +35,7 @@ class _HomeTabState extends State<HomeTab> {
     account.ents.forEach((ent) {
       if (ent.feed.isValid) {
         ent.feed.value.items.forEach((FeedPost post) {
+          if (!(post is FeedPost)) return;
           DateTime date = DateTime.parse(post.datePublished);
           CardContentWrapper item = new CardContentWrapper(
               ent: ent, date: date, post: post, process: null);
@@ -43,10 +44,13 @@ class _HomeTabState extends State<HomeTab> {
       }
       if (ent.processes.isValid) {
         ent.processes.value.forEach((ProcessModel process) {
-          if (process.processMetadata.isNotValid) return;
-          if (process.startDate.isValid) return;
+          if (!(process is ProcessModel))
+            return;
+          else if (process.processMetadata.isNotValid)
+            return;
+          else if (process.startDate.isValid) return;
 
-          CardContentWrapper item = new CardContentWrapper(
+          CardContentWrapper item = CardContentWrapper(
               ent: ent,
               date: process.startDate.value,
               post: null,
@@ -58,7 +62,14 @@ class _HomeTabState extends State<HomeTab> {
 
     if (items.length == 0) return buildNoEntries(ctx);
 
-    sort(items);
+    items.sort((a, b) {
+      if (!(a?.date is DateTime) && !(b?.date is DateTime))
+        return 0;
+      else if (!(a?.date is DateTime))
+        return -1;
+      else if (!(b?.date is DateTime)) return 1;
+      return b.date.compareTo(a.date);
+    });
 
     return ListView.builder(
         itemCount: items.length,
@@ -78,16 +89,5 @@ class _HomeTabState extends State<HomeTab> {
     return Center(
       child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
     );
-  }
-
-  sort(List<CardContentWrapper> items) {
-    items.sort((a, b) {
-      if (!(a?.date is DateTime) && !(b?.date is DateTime))
-        return 0;
-      else if (!(a?.date is DateTime))
-        return -1;
-      else if (!(b?.date is DateTime)) return 1;
-      return b.date.compareTo(a.date);
-    });
   }
 }
