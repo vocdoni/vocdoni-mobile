@@ -49,9 +49,17 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                   .name[entModel.entityMetadata.value.languages[0]],
             ),
             body: ListView.builder(
-              itemCount: entModel.processes.value.length,
+              itemCount: entModel.processes.value is List
+                  ? entModel.processes.value.length
+                  : 0,
               itemBuilder: (BuildContext ctx, int index) {
+                if (!(entModel.processes.value is List))
+                  return buildLoading(ctx);
+                else if (entModel.processes.value.length == 0)
+                  return buildNoProcessesess(ctx);
+
                 final ProcessModel process = entModel.processes.value[index];
+
                 return PollCard(ent: entModel, process: process, index: index);
               },
             ),
@@ -62,7 +70,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget buildNoProcessesess(BuildContext ctx) {
     return Scaffold(
         body: Center(
-      child: Text("(No processess)"),
+      child: Text("No participation processess"),
     ));
   }
 
