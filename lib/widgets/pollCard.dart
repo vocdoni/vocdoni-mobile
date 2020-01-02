@@ -23,7 +23,7 @@ class PollCard extends StatelessWidget {
   @override
   Widget build(ctx) {
     String timeLeft = "";
-    if (this.process.endDate.isValid) {
+    if (this.process.endDate.hasValue) {
       timeLeft = getFriendlyTimeLeft(this.process.endDate.value);
     }
 
@@ -32,8 +32,8 @@ class PollCard extends StatelessWidget {
         tag: ProcessTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (this.process.participantsTotal.isValid &&
-              this.process.participantsCurrent.isValid)
+          if (this.process.participantsTotal.hasValue &&
+              this.process.participantsCurrent.hasValue)
             participation =
                 getFriendlyParticipation(this.process.participation);
           return BaseCard(

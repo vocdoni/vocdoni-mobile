@@ -42,7 +42,7 @@ class _PollPageState extends State<PollPage> {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
     processModel = args.ent.getProcess(args.processId);
-    if (!processModel.processMetadata.isValid) return;
+    if (!processModel.processMetadata.hasValue) return;
 
     if (_choices.length == 0) {
       _choices = processModel.processMetadata.value.details.questions
@@ -56,12 +56,10 @@ class _PollPageState extends State<PollPage> {
         entityId: args.ent.entityReference.entityId,
         processId: args.processId);
 
-    if (processModel.isInCensus.hasError ||
-        processModel.isInCensus.isNotValid ||
-        !(processModel.isInCensus.currentValue is bool)) {
+    if (processModel.isInCensus.hasError || !processModel.isInCensus.hasValue) {
       processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
     }
-    if (!processModel.startDate.isValid || !processModel.endDate.isValid) {
+    if (!processModel.startDate.hasValue || !processModel.endDate.hasValue) {
       processModel.updateDates();
     }
     processModel.updateHasVoted();
@@ -188,9 +186,9 @@ class _PollPageState extends State<PollPage> {
           Purpose purpose;
           IconData icon;
 
-          if (processModel.isInCensus.isUpdating) {
+          if (processModel.isInCensus.isLoading) {
             text = "Checking census";
-          } else if (processModel.isInCensus.isValid) {
+          } else if (processModel.isInCensus.hasValue) {
             if (processModel.isInCensus.value) {
               text = "You are in the census";
               purpose = Purpose.GOOD;
@@ -200,7 +198,7 @@ class _PollPageState extends State<PollPage> {
               purpose = Purpose.DANGER;
               icon = FeatherIcons.x;
             }
-          } else if (processModel.isInCensus.isError) {
+          } else if (processModel.isInCensus.hasError) {
             text = processModel.isInCensus.errorMessage;
             icon = FeatherIcons.alertTriangle;
           } else {
@@ -210,13 +208,13 @@ class _PollPageState extends State<PollPage> {
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.isInCensus.isUpdating,
+            isSpinning: processModel.isInCensus.isLoading,
             onTap: () {
               processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.isInCensus.isNotValid
+            purpose: processModel.isInCensus.hasError
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -233,7 +231,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    if (!processModel.endDate.isValid) return Container();
+    if (!processModel.endDate.hasValue) return Container();
 
     String formattedTime =
         DateFormat("dd/MM H:mm").format(processModel.endDate.value) + "h";
@@ -268,10 +266,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.isInCensus.isNotValid) return Container();
+    if (processModel.isInCensus.hasError) return Container();
 
-    if (processModel.isInCensus.isValid != true ||
-        processModel.hasVoted.value == true) {
+    if (!processModel.isInCensus.hasValue || processModel.hasVoted.value) {
       return Container();
     }
     final nextPendingChoice = getNextPendingChoice();
@@ -315,7 +312,7 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.GOOD,
             rightIcon: null,
           );
-        } else if (processModel.isInCensus.isValid) {
+        } else if (processModel.isInCensus.hasValue) {
           if (processModel.isInCensus.value) {
             return nextPendingChoice >= 0 // still pending
                 ? ListItem(
@@ -372,7 +369,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (!processModel.processMetadata.isValid ||
+    if (!processModel.processMetadata.hasValue ||
         processModel.processMetadata.value.details.questions.length == 0) {
       return [];
     }

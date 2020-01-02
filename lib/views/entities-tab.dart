@@ -34,7 +34,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
               viewModels: [ent],
               tag: EntTags.ENTITY_METADATA,
               builder: (ctx, tagId) {
-                return ent.entityMetadata.isValid
+                return ent.entityMetadata.hasValue
                     ? buildCard(ctx, ent)
                     : buildEmptyMetadataCard(ctx, ent.entityReference);
               });
@@ -61,7 +61,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   int getFeedPostAmount(EntModel ent) {
-    if (ent.feed.isValid)
+    if (ent.feed.hasValue)
       return ent.feed.value.items.length;
     else
       return 0;
@@ -81,7 +81,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   }
 
   buildParticipationItem(BuildContext ctx, EntModel ent) {
-    if (ent.processes.isNotValid) return Container();
+    if (!ent.processes.hasValue) return Container();
 
     return ListItem(
         mainText: "Participation",

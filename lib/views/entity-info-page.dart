@@ -45,7 +45,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         viewModels: [widget.entModel],
         tag: [EntTags.ENTITY_METADATA],
         builder: (ctx, tagId) {
-          return widget.entModel.entityMetadata.isValid
+          return widget.entModel.entityMetadata.hasValue
               ? buildScaffold(widget.entModel)
               : buildScaffoldWithoutMetadata(widget.entModel);
         });
@@ -73,13 +73,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildStatus() {
-    if (widget.entModel.entityMetadata.isUpdating)
+    if (widget.entModel.entityMetadata.isLoading)
       return ListItem(
-        mainText: "Updating details...",
+        mainText: "Fetching details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (widget.entModel.entityMetadata.isError)
+    if (widget.entModel.entityMetadata.hasError)
       return ListItem(
         mainText: widget.entModel.entityMetadata.errorMessage,
         purpose: Purpose.DANGER,
@@ -87,7 +87,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
-    else if (widget.entModel.feed.isError)
+    else if (widget.entModel.feed.hasError)
       return ListItem(
         mainText: widget.entModel.feed.errorMessage,
         purpose: Purpose.DANGER,
@@ -186,7 +186,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         tag: EntTags.FEED,
         builder: (ctx, tagId) {
           String postsNum = "0";
-          if (widget.entModel.feed.isValid) {
+          if (widget.entModel.feed.hasValue) {
             if (widget.entModel.feed.hasError) {
               postsNum =
                   (widget.entModel.feed.value?.items?.length.toString() ??
@@ -225,7 +225,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         tag: EntTags.PROCESSES,
         builder: (ctx, tagId) {
           int processNum = 0;
-          if (widget.entModel.processes.isValid)
+          if (widget.entModel.processes.hasValue)
             processNum = widget.entModel.processes.value.length;
           return ListItem(
               icon: FeatherIcons.mail,
@@ -302,10 +302,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         viewModels: [widget.entModel],
         tag: [EntTags.ACTIONS],
         builder: (ctx, tagId) {
-          if (widget.entModel.isRegistered.isNotValid ||
-              widget.entModel.registerAction.isNotValid) return Container();
+          if (widget.entModel.isRegistered.hasError ||
+              widget.entModel.registerAction.hasError) return Container();
 
-          if (widget.entModel.isRegistered.isValid) {
+          if (widget.entModel.isRegistered.hasValue) {
             if (widget.entModel.isRegistered.value)
               return BaseButton(
                 purpose: Purpose.GUIDE,
@@ -341,7 +341,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
           actionsToShow.add(Section(text: "Actions"));
 
-          if (widget.entModel.visibleActions.isError) {
+          if (widget.entModel.visibleActions.hasError) {
             return ListItem(
               mainText: widget.entModel.visibleActions.errorMessage,
               purpose: Purpose.DANGER,
@@ -349,7 +349,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             );
           }
 
-          if (widget.entModel.visibleActions.isNotValid) {
+          if (widget.entModel.visibleActions.hasError) {
             return Container();
           }
 

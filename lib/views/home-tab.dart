@@ -33,7 +33,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(ctx) {
     List<CardContentWrapper> items = [];
     account.ents.forEach((ent) {
-      if (ent.feed.isValid) {
+      if (ent.feed.hasValue) {
         ent.feed.value.items.forEach((FeedPost post) {
           if (!(post is FeedPost)) return;
           DateTime date = DateTime.parse(post.datePublished);
@@ -42,13 +42,13 @@ class _HomeTabState extends State<HomeTab> {
           items.add(item);
         });
       }
-      if (ent.processes.isValid) {
+      if (ent.processes.hasValue) {
         ent.processes.value.forEach((ProcessModel process) {
           if (!(process is ProcessModel))
             return;
-          else if (process.processMetadata.isNotValid)
+          else if (process.processMetadata.hasError)
             return;
-          else if (process.startDate.isValid) return;
+          else if (process.startDate.hasValue) return;
 
           CardContentWrapper item = CardContentWrapper(
               ent: ent,

@@ -39,9 +39,8 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         tag: [EntTags.PROCESSES],
         builder: (ctx, tagId) {
           if (entModel == null ||
-              entModel.entityMetadata.isNotValid ||
-              entModel.processes.isNotValid)
-            return buildNoProcessesess(context);
+              !entModel.entityMetadata.hasValue ||
+              !entModel.processes.hasValue) return buildNoProcessesess(context);
 
           return Scaffold(
             appBar: TopNavigation(
