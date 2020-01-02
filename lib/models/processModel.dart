@@ -20,6 +20,7 @@ class ProcessModel extends StatesRebuilder {
 
   //final DataState censusDataState = DataState();
   final DataState<bool> isInCensus = DataState();
+  final DataState<bool> hasVoted = DataState();
 
   //final DataState participationDataState = DataState();
   final DataState<int> participantsTotal = DataState();
@@ -160,6 +161,24 @@ class ProcessModel extends StatesRebuilder {
     } catch (error) {
       this.isInCensus.toError("Unable to check the census");
       if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
+    }
+  }
+
+  updateHasVoted() async {
+    if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+
+    final String pollNullifier = getPollNullifier(
+        identitiesBloc.getCurrentIdentity().keys[0].address, this.processId);
+
+    final DVoteGateway dvoteGw = getDVoteGateway();
+    final success =
+        await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
+            .catchError((_) {});
+
+    if (success is bool) {
+      this.hasVoted.value = success;
+    } else {
+      this.hasVoted.toErrorOrFaulty("Unable to check the process status");
     }
   }
 

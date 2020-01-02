@@ -37,24 +37,34 @@ class _PollPageState extends State<PollPage> {
 
   @override
   void didChangeDependencies() {
+    // TODO: Really needed?
     super.didChangeDependencies();
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
+
+    processModel = args.ent.getProcess(args.processId);
+    if (!processModel.processMetadata.isValid) return;
+
+    if (_choices.length == 0) {
+      _choices = processModel.processMetadata.value.details.questions
+          .map((question) => null)
+          .cast<String>()
+          .toList();
+    }
 
     analytics.trackPage(
         pageId: "PollPage",
         entityId: args.ent.entityReference.entityId,
         processId: args.processId);
 
-    processModel = args.ent.getProcess(args.processId);
-    if (!processModel.processMetadata.isValid) return;
-
-    if (_choices.length == 0) {
-      _choices = processModel.processMetadata.value?.details?.questions
-          ?.map((question) => null)
-          .cast<String>()
-          .toList();
+    if (processModel.isInCensus.hasError ||
+        processModel.isInCensus.isNotValid ||
+        !(processModel.isInCensus.currentValue is bool)) {
+      processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
     }
-    processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
+    if (!processModel.startDate.isValid || !processModel.endDate.isValid) {
+      processModel.updateDates();
+    }
+    processModel.updateHasVoted();
   }
 
   @override
@@ -223,11 +233,10 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    String formattedTime = "";
-    if (processModel.endDate.isValid) {
-      formattedTime =
-          DateFormat("dd/MM - H:mm").format(processModel.endDate.value);
-    }
+    if (!processModel.endDate.isValid) return Container();
+
+    String formattedTime =
+        DateFormat("dd/MM H:mm").format(processModel.endDate.value) + "h";
 
     return ListItem(
       icon: FeatherIcons.clock,
@@ -238,7 +247,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  setResponse(int questionIndex, String value) {
+  setChoice(int questionIndex, String value) {
     setState(() {
       _choices[questionIndex] = value;
     });
@@ -261,26 +270,28 @@ class _PollPageState extends State<PollPage> {
   buildSubmitVoteButton(BuildContext ctx) {
     if (processModel.isInCensus.isNotValid) return Container();
 
-    if (processModel.isInCensus.isValid) {
-      final nextPendingChoice = getNextPendingChoice();
-
-      return Padding(
-        padding: EdgeInsets.all(paddingPage),
-        child: BaseButton(
-            text: "Submit",
-            isSmall: false,
-            style: BaseButtonStyle.FILLED,
-            purpose: Purpose.HIGHLIGHT,
-            isDisabled: nextPendingChoice >= 0 ||
-                processModel.isInCensus.value == false,
-            onTap: () {
-              onSubmit(ctx, processModel.processMetadata);
-            }),
-      );
+    if (processModel.isInCensus.isValid != true ||
+        processModel.hasVoted.value == true) {
+      return Container();
     }
+    final nextPendingChoice = getNextPendingChoice();
+
+    return Padding(
+      padding: EdgeInsets.all(paddingPage),
+      child: BaseButton(
+          text: "Submit",
+          isSmall: false,
+          style: BaseButtonStyle.FILLED,
+          purpose: Purpose.HIGHLIGHT,
+          isDisabled:
+              nextPendingChoice >= 0 || processModel.isInCensus.value == false,
+          onTap: () {
+            onSubmit(ctx, processModel.processMetadata);
+          }),
+    );
   }
 
-  onSubmit(ctx, processMetadata) async {
+  onSubmit(BuildContext ctx, processMetadata) async {
     var intAnswers = _choices.map(int.parse).toList();
 
     await Navigator.push(
@@ -298,7 +309,13 @@ class _PollPageState extends State<PollPage> {
       builder: (ctx, tagId) {
         final nextPendingChoice = getNextPendingChoice();
 
-        if (processModel.isInCensus.isValid) {
+        if (processModel.hasVoted.value == true) {
+          return ListItem(
+            mainText: 'Your vote is already registered',
+            purpose: Purpose.GOOD,
+            rightIcon: null,
+          );
+        } else if (processModel.isInCensus.isValid) {
           if (processModel.isInCensus.value) {
             return nextPendingChoice >= 0 // still pending
                 ? ListItem(
@@ -402,7 +419,7 @@ class _PollPageState extends State<PollPage> {
             selected: _choices[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
-                setResponse(questionIndex, voteOption.value);
+                setChoice(questionIndex, voteOption.value);
               }
             },
           ),
