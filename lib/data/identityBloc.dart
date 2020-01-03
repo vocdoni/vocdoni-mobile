@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/data/genericBloc.dart';
-import 'package:vocdoni/lib/api.dart';
 import "dart:async";
 
 import 'package:vocdoni/lib/singletons.dart';
@@ -80,10 +79,10 @@ class IdentityBloc extends GenericBloc<List<Identity>> {
       throw Exception("The account already exists");
     }
 
-    final mnemonic = await makeMnemonic();
-    final privateKey = await privateKeyFromMnemonic(mnemonic);
-    final publicKey = await publicKeyFromMnemonic(mnemonic);
-    final address = await addressFromMnemonic(mnemonic);
+    final mnemonic = await generateMnemonic(size: 192);
+    final privateKey = await mnemonicToPrivateKey(mnemonic);
+    final publicKey = await mnemonicToPublicKey(mnemonic);
+    final address = await mnemonicToAddress(mnemonic);
     final encryptedMenmonic =
         await encryptString(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =

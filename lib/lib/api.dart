@@ -9,22 +9,6 @@ import 'package:flutter/foundation.dart'; // for kReleaseMode
 // METHODS
 // ////////////////////////////////////////////////////////////////////////////
 
-Future<String> makeMnemonic() {
-  return generateMnemonic(size: 192);
-}
-
-Future<String> privateKeyFromMnemonic(String mnemonic) {
-  return mnemonicToPrivateKey(mnemonic);
-}
-
-Future<String> publicKeyFromMnemonic(String mnemonic) {
-  return mnemonicToPublicKey(mnemonic);
-}
-
-Future<String> addressFromMnemonic(String mnemonic) {
-  return mnemonicToAddress(mnemonic);
-}
-
 Future<EntityMetadata> fetchEntityData(EntityReference entityReference) async {
   if (!(entityReference is EntityReference)) return null;
 

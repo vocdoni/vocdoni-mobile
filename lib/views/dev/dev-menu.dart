@@ -6,9 +6,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:vocdoni/lib/api.dart';
 import 'package:vocdoni/lib/singletons.dart';
-// import 'package:vocdoni/models/account.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
 
@@ -113,9 +111,9 @@ class DevMenu extends StatelessWidget {
 
     final currentIdentity = identitiesBloc.getCurrentIdentity();
 
-    final privateKey = await privateKeyFromMnemonic(NEW_MNEMONIC);
-    final publicKey = await publicKeyFromMnemonic(NEW_MNEMONIC);
-    final address = await addressFromMnemonic(NEW_MNEMONIC);
+    final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
+    final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
+    final address = await mnemonicToAddress(NEW_MNEMONIC);
 
     final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
     final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
