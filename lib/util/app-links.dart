@@ -1,7 +1,7 @@
 import 'package:dvote/models/dart/entity.pbserver.dart';
 import 'package:flutter/material.dart';
 // import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/modals/sign-modal.dart';
+import 'package:vocdoni/view-modals/sign-modal.dart';
 import 'package:vocdoni/util/factories.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode

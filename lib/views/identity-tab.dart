@@ -2,7 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/widgets/listItem.dart';

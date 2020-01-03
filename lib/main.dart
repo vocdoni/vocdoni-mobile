@@ -18,7 +18,7 @@ import "package:vocdoni/views/identity-create-page.dart";
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/views/dev/dev-menu.dart';
-import 'package:vocdoni/modals/sign-modal.dart';
+import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
 void main() async {

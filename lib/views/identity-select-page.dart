@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../util/singletons.dart';
 import 'package:dvote/dvote.dart';

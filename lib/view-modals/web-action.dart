@@ -6,7 +6,7 @@ import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/util/net.dart';
 

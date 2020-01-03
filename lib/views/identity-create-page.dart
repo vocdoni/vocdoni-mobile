@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/pattern-create-modal.dart';
+import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/util/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import '../lang/index.dart';
