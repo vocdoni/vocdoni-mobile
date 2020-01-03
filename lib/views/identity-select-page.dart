@@ -4,7 +4,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import '../util/singletons.dart';
+import '../lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 
 class IdentitySelectPage extends StatefulWidget {

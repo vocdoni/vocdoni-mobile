@@ -1,8 +1,8 @@
 import 'package:dvote/api/voting-process.dart';
 import 'package:dvote/net/gateway.dart';
 import 'package:vocdoni/lib/value-state.dart';
-import 'package:vocdoni/util/net.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class VochainModel {
   VochainModel();

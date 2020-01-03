@@ -1,7 +1,8 @@
 // import 'dart:math';
 import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import "package:vocdoni/util/singletons.dart";
+import 'package:vocdoni/lib/factories.dart';
+import "package:vocdoni/lib/singletons.dart";
+import "package:vocdoni/constants/meta.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
 

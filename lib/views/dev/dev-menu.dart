@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/app-links.dart';
+import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/util/dev/populate.dart';
+import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/api.dart';
+import 'package:vocdoni/lib/singletons.dart';
 // import 'package:vocdoni/models/account.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';

@@ -3,12 +3,12 @@ import 'dart:io' show Platform;
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:vocdoni/util/net.dart';
+import 'package:vocdoni/lib/net.dart';
 
 /// ACTUAL STATE
 

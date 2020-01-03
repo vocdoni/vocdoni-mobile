@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 

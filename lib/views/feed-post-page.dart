@@ -2,14 +2,14 @@ import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
-import 'package:vocdoni/util/net.dart';
+import 'package:vocdoni/lib/net.dart';
 
 class FeedPostArgs {
   EntModel ent;

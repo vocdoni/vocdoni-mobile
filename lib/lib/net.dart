@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 
 DVoteGateway _dvoteGw;

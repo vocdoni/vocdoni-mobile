@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class Analytics {
   final _user$ = StreamController<String>.broadcast();

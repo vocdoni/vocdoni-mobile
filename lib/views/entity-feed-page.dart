@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';

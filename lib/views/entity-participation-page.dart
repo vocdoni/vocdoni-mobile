@@ -4,7 +4,7 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 

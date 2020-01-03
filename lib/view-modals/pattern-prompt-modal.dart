@@ -2,11 +2,11 @@ import 'package:dvote/dvote.dart' as dvote;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
-import 'package:vocdoni/util/pattern.dart';
+import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/constants/settings.dart';
 
 /// This component prompts for a visual lock patten, which is transformed into a passphrase.

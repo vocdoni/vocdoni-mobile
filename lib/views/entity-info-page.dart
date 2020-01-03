@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';

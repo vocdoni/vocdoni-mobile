@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vocdoni/models/account.dart';
 import 'package:vocdoni/data/genericBloc.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/constants/settings.dart';
 
 class AppStateBloc extends GenericBloc<AppState> {

@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 

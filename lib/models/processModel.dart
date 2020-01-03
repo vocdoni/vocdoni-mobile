@@ -1,7 +1,8 @@
 import 'package:dvote/dvote.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/util/net.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import "package:vocdoni/constants/meta.dart";
 import 'package:vocdoni/lib/value-state.dart';
 
 enum ProcessTags {

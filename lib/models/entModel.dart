@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/lib/value-state.dart';
 import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/api.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import "package:vocdoni/constants/meta.dart";
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 

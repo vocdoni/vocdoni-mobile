@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/data/genericBloc.dart';
-import 'package:vocdoni/util/api.dart';
+import 'package:vocdoni/lib/api.dart';
 import "dart:async";
 
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class IdentityBloc extends GenericBloc<List<Identity>> {
   final String _storageFile = IDENTITIES_STORE_FILE;

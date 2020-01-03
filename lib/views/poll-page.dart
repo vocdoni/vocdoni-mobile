@@ -4,8 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/models/entModel.dart';
 import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import "package:vocdoni/constants/meta.dart";
+import 'package:dvote/dvote.dart';
+
 import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
@@ -14,7 +17,6 @@ import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:intl/intl.dart';
 

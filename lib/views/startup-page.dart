@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../util/singletons.dart';
+import '../lib/singletons.dart';
 
 class StartupPage extends StatefulWidget {
   @override

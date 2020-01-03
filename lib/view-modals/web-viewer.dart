@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:vocdoni/util/net.dart';
+import 'package:vocdoni/lib/net.dart';
 
 class WebViewer extends StatefulWidget {
   @override

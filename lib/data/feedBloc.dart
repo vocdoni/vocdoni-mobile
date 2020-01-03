@@ -2,7 +2,7 @@ import "dart:io";
 import "dart:async";
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/data/genericBloc.dart';
-import 'package:vocdoni/util/singletons.dart';
+import "package:vocdoni/constants/meta.dart";
 
 /// Provides a Business Logic Component to store and consume data related to the news feeds
 /// of the subscribed entities

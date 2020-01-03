@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class Account {
   List<EntModel> ents = new List<EntModel>();
