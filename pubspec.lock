@@ -296,6 +296,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.13.15"
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.2.0"
   pub_semver:
     dependency: transitive
     description:
@@ -319,13 +326,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.5"
-  rxdart:
-    dependency: "direct main"
-    description:
-      name: rxdart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.22.0"
   shared_preferences:
     dependency: transitive
     description:
@@ -352,13 +352,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
-  states_rebuilder:
-    dependency: "direct main"
-    description:
-      name: states_rebuilder
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.5.1"
   stream_channel:
     dependency: transitive
     description:

@@ -21,7 +21,7 @@ dependencies:
     sdk: flutter
   dvote: ^0.6.0
   webview_flutter: ^0.3.10+3
-  rxdart: ^0.22.0
+  provider: ^3.2.0
   protobuf: ^0.13.15
   flutter_localizations:
     sdk: flutter
@@ -33,7 +33,6 @@ dependencies:
   url_launcher: ^5.1.0
   path_provider: ^1.2.0
   mixpanel_analytics: ^1.1.0
-  states_rebuilder: ^1.5.1
   qrcode_reader:
     git:
       url: https://github.com/bcko/flutter_qrcode_reader.git

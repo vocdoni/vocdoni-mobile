@@ -5,14 +5,14 @@ class FetchError implements Exception {
   String toString() => 'FetchError: [${method ?? "request"}] $msg';
 }
 
-class BlocRestoreError implements Exception {
+class RestoreError implements Exception {
   final String msg;
-  const BlocRestoreError(this.msg);
-  String toString() => 'BlocRestoreError: $msg';
+  const RestoreError(this.msg);
+  String toString() => 'RestoreError: $msg';
 }
 
-class BlocPersistError implements Exception {
+class PersistError implements Exception {
   final String msg;
-  const BlocPersistError(this.msg);
-  String toString() => 'BlocPersistError: $msg';
+  const PersistError(this.msg);
+  String toString() => 'PersistError: $msg';
 }
