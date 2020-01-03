@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/data/genericBloc.dart';
+import 'package:vocdoni/data-storage/genericBloc.dart';
 import "package:vocdoni/constants/meta.dart";
 
 class ProccessMetadataBloc extends GenericBloc<List<ProcessMetadata>> {

@@ -1,19 +1,19 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/models/account.dart';
-import 'package:vocdoni/models/analtyics.dart';
-import 'package:vocdoni/models/vochain-model.dart';
-import '../data/feedBloc.dart';
-import "../data/app-state.dart";
-import "../data/identityBloc.dart";
-import "../data/entityMetadataBloc.dart";
-import "../data/processMetadataBloc.dart";
+import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/data-models/analtyics.dart';
+import 'package:vocdoni/data-models/vochain-model.dart';
+import '../data-storage/feedBloc.dart';
+import "../data-storage/app-state.dart";
+import "../data-storage/identityBloc.dart";
+import "../data-storage/entityMetadataBloc.dart";
+import "../data-storage/processMetadataBloc.dart";
 
 // Export classes
-export "../data/app-state.dart";
-export "../data/identityBloc.dart";
-export "../data/entityMetadataBloc.dart";
-export "../data/processMetadataBloc.dart";
-export "../data/feedBloc.dart";
+export "../data-storage/app-state.dart";
+export "../data-storage/identityBloc.dart";
+export "../data-storage/entityMetadataBloc.dart";
+export "../data-storage/processMetadataBloc.dart";
+export "../data-storage/feedBloc.dart";
 
 // EXPORTED SINGLETON INSTANCES
 

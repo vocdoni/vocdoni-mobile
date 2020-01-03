@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';

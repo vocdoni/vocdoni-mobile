@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:vocdoni/data/genericBloc.dart';
+import 'package:vocdoni/data-storage/genericBloc.dart';
 import "dart:async";
 
 import 'package:vocdoni/lib/singletons.dart';

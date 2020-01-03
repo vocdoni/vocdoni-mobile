@@ -1,7 +1,7 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';

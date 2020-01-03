@@ -1,8 +1,8 @@
-import 'package:dvote/models/dart/entity.pbserver.dart';
+import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';

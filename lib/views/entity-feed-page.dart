@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';

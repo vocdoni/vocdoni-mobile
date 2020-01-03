@@ -1,5 +1,5 @@
 // import 'dart:math';
-import 'package:vocdoni/models/entModel.dart';
+import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/lib/factories.dart';
 import "package:vocdoni/lib/singletons.dart";
 import "package:vocdoni/constants/meta.dart";

@@ -1,15 +1,13 @@
-import "dart:io";
+import 'dart:io';
+import 'package:vocdoni/data-storage/genericBloc.dart';
 import "dart:async";
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/data/genericBloc.dart';
 import "package:vocdoni/constants/meta.dart";
 
-/// Provides a Business Logic Component to store and consume data related to the news feeds
-/// of the subscribed entities
-class FeedBloc extends GenericBloc<List<Feed>> {
-  final String _storageFile = NEWSFEED_STORE_FILE;
+class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
+  final String _storageFile = ENTITIES_STORE_FILE;
 
-  FeedBloc() {
+  EntityMetadataBloc() {
     state.add([]);
   }
 
@@ -19,7 +17,7 @@ class FeedBloc extends GenericBloc<List<Feed>> {
   @override
   Future<void> restore() async {
     File fd;
-    FeedStore store;
+    EntityMetadataStore store;
 
     try {
       fd = File("${storageDir.path}/$_storageFile");
@@ -34,7 +32,7 @@ class FeedBloc extends GenericBloc<List<Feed>> {
 
     try {
       final bytes = await fd.readAsBytes();
-      store = FeedStore.fromBuffer(bytes);
+      store = EntityMetadataStore.fromBuffer(bytes);
       state.add(store.items);
     } catch (err) {
       print(err);
@@ -45,10 +43,9 @@ class FeedBloc extends GenericBloc<List<Feed>> {
 
   @override
   Future<void> persist() async {
-    // Gateway boot nodes
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      FeedStore store = FeedStore();
+      EntityMetadataStore store = EntityMetadataStore();
       store.items.addAll(state.value);
       await fd.writeAsBytes(store.writeToBuffer());
     } catch (err) {
@@ -59,26 +56,40 @@ class FeedBloc extends GenericBloc<List<Feed>> {
 
   /// Sets the given value as the current one and persists the new data
   @override
-  Future<void> set(List<Feed> data) async {
+  Future<void> set(List<EntityMetadata> data) async {
     super.set(data);
     await persist();
   }
 
-  Future<void> add(
-      String language, Feed feed, EntityReference entitySummary) async {
-    
-    final currentIndex = value.indexWhere((f) =>
-        f.meta[META_ENTITY_ID] == entitySummary.entityId &&
-        f.meta[META_LANGUAGE] == language);
+  // CUSTOM OPERATIONS
 
+  Future<void> add(
+      EntityMetadata entityMetadata, EntityReference entitySummary) async {
+    final currentIndex = value
+        .indexWhere((e) => e.meta[META_ENTITY_ID] == entitySummary.entityId);
     // Already exists
     if (currentIndex >= 0) {
-      final currentFeeds = value;
-      currentFeeds[currentIndex] = feed;
-      await set(currentFeeds);
+      final currentEntities = value;
+      currentEntities[currentIndex] = entityMetadata;
+      await set(currentEntities);
     } else {
-      value.add(feed);
+      value.add(entityMetadata);
       await set(value);
     }
   }
+
+  Future<void> remove(String entityIdToRemove) async {
+    final entities = value;
+    entities.removeWhere((existingEntity) =>
+        existingEntity.meta[META_ENTITY_ID] == entityIdToRemove);
+
+    await set(entities);
+
+    //TODO remove feed from newsFeedBloc
+  }
+
+  /*Future<void> refreshFrom(List<EntityReference> entities) async {
+    // TODO:
+    print("Unimplemented: entities > refreshFrom");
+  }*/
 }
