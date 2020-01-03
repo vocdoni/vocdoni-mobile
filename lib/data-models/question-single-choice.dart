@@ -6,8 +6,6 @@ class QuestionSingleChoice extends StatesRebuilder {
   String selectedAnswer;
   String error;
 
-  //List<String> test = ['a', 'b', 'c', 'a'];
-
   QuestionSingleChoice({this.questionDetails}) {
     if (optionsAreNotUnique()) this.error = "Options are not unique";
   }
