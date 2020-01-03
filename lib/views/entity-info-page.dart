@@ -2,7 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/data-models/entModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -28,7 +28,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   bool _processingSubscription = false;
-  EntModel entityModel;
+  EntityModel entityModel;
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   Widget build(context) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: [EntTags.ENTITY_METADATA],
+        tag: [EntityStateTags.ENTITY_METADATA],
         builder: (ctx, tagId) {
           return entityModel.entityMetadata.hasValue
               ? buildScaffold(entityModel)
@@ -54,7 +54,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildScaffoldWithoutMetadata(EntModel ent) {
+  buildScaffoldWithoutMetadata(EntityModel ent) {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
@@ -102,10 +102,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return Container();
   }
 
-  buildScaffold(EntModel ent) {
+  buildScaffold(EntityModel ent) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: EntTags.ENTITY_METADATA,
+        tag: EntityStateTags.ENTITY_METADATA,
         builder: (ctx, tagId) {
           return ScaffoldWithImage(
               headerImageUrl: ent.entityMetadata.value.media.header,
@@ -140,7 +140,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     ];
   }
 
-  getScaffoldChildren(BuildContext context, EntModel ent) {
+  getScaffoldChildren(BuildContext context, EntityModel ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
     children.add(buildStatus());
@@ -160,7 +160,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, EntModel ent) {
+  buildTitle(BuildContext context, EntityModel ent) {
     String title =
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
@@ -173,7 +173,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildTitleWithoutEntityMeta(BuildContext context, EntModel ent) {
+  buildTitleWithoutEntityMeta(BuildContext context, EntityModel ent) {
     return ListItem(
       mainText: "...",
       secondaryText: ent.entityReference.entityId,
@@ -186,7 +186,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildFeedItem(BuildContext context) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: EntTags.FEED,
+        tag: EntityStateTags.FEED,
         builder: (ctx, tagId) {
           String postsNum = "0";
           if (entityModel.feed.hasValue) {
@@ -223,7 +223,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildParticipationItem(BuildContext context) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: EntTags.PROCESSES,
+        tag: EntityStateTags.PROCESSES,
         builder: (ctx, tagId) {
           int processNum = 0;
           if (entityModel.processes.hasValue)
@@ -257,7 +257,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildSubscribeButton(BuildContext context, EntModel ent) {
+  buildSubscribeButton(BuildContext context, EntityModel ent) {
     bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
@@ -272,7 +272,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildShareItem(BuildContext context, EntModel ent) {
+  buildShareItem(BuildContext context, EntityModel ent) {
     return ListItem(
         mainText: "Share organization",
         icon: FeatherIcons.share2,
@@ -282,7 +282,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildShareButton(BuildContext context, EntModel ent) {
+  buildShareButton(BuildContext context, EntityModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
@@ -292,16 +292,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  onShare(EntModel ent) {
+  onShare(EntityModel ent) {
     Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
     showMessage("Identity ID copied on the clipboard",
         context: context, purpose: Purpose.GUIDE);
   }
 
-  Widget buildRegisterButton(BuildContext ctx, EntModel ent) {
+  Widget buildRegisterButton(BuildContext ctx, EntityModel ent) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: [EntTags.ACTIONS],
+        tag: [EntityStateTags.ACTIONS],
         builder: (ctx, tagId) {
           if (entityModel.isRegistered.hasError ||
               entityModel.registerAction.hasError) return Container();
@@ -332,10 +332,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  Widget buildActionList(BuildContext ctx, EntModel ent) {
+  Widget buildActionList(BuildContext ctx, EntityModel ent) {
     return StateBuilder(
         viewModels: [entityModel],
-        tag: [EntTags.ACTIONS],
+        tag: [EntityStateTags.ACTIONS],
         builder: (ctx, tagId) {
           final List<Widget> actionsToShow = [];
 
@@ -409,7 +409,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onBrowserAction(
-      BuildContext ctx, EntityMetadata_Action action, EntModel ent) {
+      BuildContext ctx, EntityMetadata_Action action, EntityModel ent) {
     final String url = action.url;
     final String title = action.name[ent.entityMetadata.value.languages[0]] ??
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
@@ -422,7 +422,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     Navigator.push(ctx, route);
   }
 
-  unsubscribeFromEntity(BuildContext ctx, EntModel ent) async {
+  unsubscribeFromEntity(BuildContext ctx, EntityModel ent) async {
     setState(() {
       _processingSubscription = true;
     });
@@ -438,7 +438,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     });
   }
 
-  subscribeToEntity(BuildContext ctx, EntModel ent) async {
+  subscribeToEntity(BuildContext ctx, EntityModel ent) async {
     setState(() {
       _processingSubscription = true;
     });

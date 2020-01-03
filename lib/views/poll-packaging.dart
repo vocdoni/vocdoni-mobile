@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/data-models/processModel.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';

@@ -2,8 +2,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/data-models/entModel.dart';
-import 'package:vocdoni/data-models/processModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import "package:vocdoni/constants/meta-keys.dart";
@@ -21,7 +21,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
-  EntModel ent;
+  EntityModel ent;
   String processId;
   final int index;
   PollPageArgs(
@@ -53,10 +53,8 @@ class _PollPageState extends State<PollPage> {
           .toList();
     }
 
-    analytics.trackPage(
-        "PollPage",
-        entityId: args.ent.entityReference.entityId,
-        processId: args.processId);
+    analytics.trackPage("PollPage",
+        entityId: args.ent.entityReference.entityId, processId: args.processId);
 
     if (processModel.isInCensus.hasError || !processModel.isInCensus.hasValue) {
       processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
@@ -70,7 +68,7 @@ class _PollPageState extends State<PollPage> {
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    EntModel ent = args.ent;
+    EntityModel ent = args.ent;
     final int index = args.index ?? 0;
     //Process process = args.process;
 
@@ -100,7 +98,7 @@ class _PollPageState extends State<PollPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    final EntModel ent = args.ent;
+    final EntityModel ent = args.ent;
     return [
       buildShareButton(context, ent),
     ];
@@ -127,7 +125,7 @@ class _PollPageState extends State<PollPage> {
   //   );
   // }
 
-  getScaffoldChildren(BuildContext context, EntModel ent) {
+  getScaffoldChildren(BuildContext context, EntityModel ent) {
     List<Widget> children = [];
     if (processModel.processMetadata.value == null) return children;
 
@@ -148,7 +146,7 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, EntModel ent) {
+  buildTitle(BuildContext context, EntityModel ent) {
     if (processModel.processMetadata.value == null) return Container();
 
     String title = processModel.processMetadata.value.details.title['default'];
@@ -182,7 +180,7 @@ class _PollPageState extends State<PollPage> {
   buildCensusItem(BuildContext context) {
     return StateBuilder(
         viewModels: [processModel],
-        tag: ProcessTags.CENSUS_STATE,
+        tag: ProcessStateTags.CENSUS_STATE,
         builder: (ctx, tagId) {
           String text;
           Purpose purpose;
@@ -304,7 +302,7 @@ class _PollPageState extends State<PollPage> {
   buildSubmitInfo() {
     return StateBuilder(
       viewModels: [processModel],
-      tag: ProcessTags.CENSUS_STATE,
+      tag: ProcessStateTags.CENSUS_STATE,
       builder: (ctx, tagId) {
         final nextPendingChoice = getNextPendingChoice();
 
@@ -348,7 +346,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildShareButton(BuildContext context, EntModel ent) {
+  buildShareButton(BuildContext context, EntityModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,

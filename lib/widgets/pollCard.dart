@@ -2,8 +2,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data-models/entModel.dart';
-import 'package:vocdoni/data-models/processModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/factories.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/views/poll-page.dart';
@@ -15,7 +15,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 
 class PollCard extends StatelessWidget {
   final ProcessModel process;
-  final EntModel ent;
+  final EntityModel ent;
   final int index;
 
   PollCard({@required this.process, @required this.ent, @required this.index});
@@ -29,7 +29,7 @@ class PollCard extends StatelessWidget {
 
     return StateBuilder(
         viewModels: [this.process],
-        tag: ProcessTags.PARTICIPATION,
+        tag: ProcessStateTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
           if (this.process.participantsTotal.hasValue &&

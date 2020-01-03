@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/data-models/entModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -16,7 +16,7 @@ EntityReference makeEntityReference(
 }
 
 Widget buildFeedPostCard(
-    {BuildContext ctx, EntModel ent, FeedPost post, int index = 0}) {
+    {BuildContext ctx, EntityModel ent, FeedPost post, int index = 0}) {
   return BaseCard(
       onTap: () => onPostCardTap(ctx, post, ent, index),
       image: post.image,
@@ -41,7 +41,7 @@ makeElementTag(String entityId, String itemId, int index) {
   return entityId + "/" + itemId + "/" + (index ?? '').toString();
 }
 
-onPostCardTap(BuildContext ctx, FeedPost post, EntModel ent, int index) {
+onPostCardTap(BuildContext ctx, FeedPost post, EntityModel ent, int index) {
   Navigator.of(ctx).pushNamed("/entity/feed/post",
       arguments: FeedPostArgs(ent: ent, post: post, index: index));
 }

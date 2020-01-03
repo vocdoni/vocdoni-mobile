@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/data-models/entModel.dart';
-import 'package:vocdoni/data-models/processModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
-  final EntModel ent;
+  final EntityModel ent;
   final ProcessModel process;
   final FeedPost post;
   final DateTime date;

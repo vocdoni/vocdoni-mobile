@@ -2,7 +2,7 @@ import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/data-models/entModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -32,7 +32,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
 
           return StateBuilder(
               viewModels: [ent],
-              tag: EntTags.ENTITY_METADATA,
+              tag: EntityStateTags.ENTITY_METADATA,
               builder: (ctx, tagId) {
                 return ent.entityMetadata.hasValue
                     ? buildCard(ctx, ent)
@@ -52,7 +52,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     ]);
   }
 
-  Widget buildCard(BuildContext ctx, EntModel ent) {
+  Widget buildCard(BuildContext ctx, EntityModel ent) {
     return BaseCard(children: [
       buildName(ctx, ent),
       buildFeedItem(ctx, ent),
@@ -60,14 +60,14 @@ class _EntitiesTabState extends State<EntitiesTab> {
     ]);
   }
 
-  int getFeedPostAmount(EntModel ent) {
+  int getFeedPostAmount(EntityModel ent) {
     if (ent.feed.hasValue)
       return ent.feed.value.items.length;
     else
       return 0;
   }
 
-  Widget buildName(BuildContext ctx, EntModel ent) {
+  Widget buildName(BuildContext ctx, EntityModel ent) {
     String title =
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
@@ -80,7 +80,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         onTap: () => onTapEntity(ctx, ent.entityReference));
   }
 
-  buildParticipationItem(BuildContext ctx, EntModel ent) {
+  buildParticipationItem(BuildContext ctx, EntityModel ent) {
     if (!ent.processes.hasValue) return Container();
 
     return ListItem(
@@ -92,10 +92,10 @@ class _EntitiesTabState extends State<EntitiesTab> {
         disabled: ent.processes.value.length == 0);
   }
 
-  Widget buildFeedItem(BuildContext ctx, EntModel ent) {
+  Widget buildFeedItem(BuildContext ctx, EntityModel ent) {
     return StateBuilder(
         viewModels: [ent],
-        tag: EntTags.FEED,
+        tag: EntityStateTags.FEED,
         builder: (ctx, tagId) {
           final feedPostAmount = getFeedPostAmount(ent);
           return ListItem(

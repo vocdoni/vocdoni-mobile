@@ -1,9 +1,9 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/data-models/entModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 class Account {
-  List<EntModel> entities = new List<EntModel>();
+  List<EntityModel> entities = new List<EntityModel>();
   Identity identity;
   List<String> languages = [];
 
@@ -17,7 +17,7 @@ class Account {
     this.identity.peers.entities.forEach((entitySummary) {
       for (EntityMetadata entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {
-          EntModel ent = new EntModel(entitySummary);
+          EntityModel ent = new EntityModel(entitySummary);
           this.entities.add(ent);
         }
     });
@@ -28,7 +28,7 @@ class Account {
         .identity
         .peers
         .entities
-        .map((EntityReference entitySummary) => EntModel(entitySummary))
+        .map((EntityReference entitySummary) => EntityModel(entitySummary))
         .toList();
   }
 
@@ -36,7 +36,7 @@ class Account {
     return identitiesBloc.isSubscribed(this.identity, _entitySummary);
   }
 
-  subscribe(EntModel ent) async {
+  subscribe(EntityModel ent) async {
     await identitiesBloc.subscribeEntityToAccount(
         ent.entityReference, account.identity);
     this.entities.add(ent);
@@ -51,15 +51,15 @@ class Account {
   }
 
   findEntity(EntityReference entityReference) {
-    for (EntModel ent in this.entities) {
+    for (EntityModel ent in this.entities) {
       if (ent.entityReference.entityId == entityReference.entityId) return ent;
     }
-    EntModel ent = new EntModel(entityReference);
+    EntityModel ent = new EntityModel(entityReference);
     return ent;
   }
 
   updateEntities() async {
-    for (EntModel ent in this.entities) {
+    for (EntityModel ent in this.entities) {
       await ent.update();
     }
   }

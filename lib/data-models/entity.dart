@@ -2,17 +2,17 @@ import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/lib/value-state.dart';
-import 'package:vocdoni/data-models/processModel.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/api.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
+enum EntityStateTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
-class EntModel extends StatesRebuilder {
-  EntityReference entityReference;
+class EntityModel extends StatesRebuilder {
+  final EntityReference entityReference;
   final ValueState<EntityMetadata> entityMetadata = ValueState();
 
   final ValueState<List<EntityMetadata_Action>> visibleActions = ValueState();
@@ -24,8 +24,7 @@ class EntModel extends StatesRebuilder {
   final ValueState<List<ProcessModel>> processes = ValueState();
   String lang = "default";
 
-  EntModel(EntityReference entitySummary) {
-    this.entityReference = entitySummary;
+  EntityModel(this.entityReference) {
     syncLocal();
   }
 
@@ -54,7 +53,7 @@ class EntModel extends StatesRebuilder {
   updateEntityMetadata() async {
     try {
       this.entityMetadata.setToLoading();
-      if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+      if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
       this.entityMetadata.setValue(await fetchEntityData(this.entityReference));
     } catch (e) {
       this
@@ -63,12 +62,12 @@ class EntModel extends StatesRebuilder {
     }
 
     saveMetadata();
-    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+    if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
   }
 
   updateFeed() async {
     this.feed.setToLoading();
-    if (hasState) rebuildStates([EntTags.FEED]);
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
 
     try {
       this.feed.setValue(await fetchEntityNewsFeed(
@@ -79,7 +78,7 @@ class EntModel extends StatesRebuilder {
 
     await saveFeed();
 
-    if (hasState) rebuildStates([EntTags.FEED]);
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
   }
 
   syncProcesses() {
@@ -100,14 +99,14 @@ class EntModel extends StatesRebuilder {
       this.processes.value.add(process);
     });
 
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
   }
 
   updateProcesses() async {
     if (!this.processes.hasValue) return;
 
     this.processes.setToLoading();
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
 
     final procs = this.processes.value;
     for (ProcessModel process in procs) {
@@ -116,7 +115,7 @@ class EntModel extends StatesRebuilder {
 
     this.processes.setValue(procs);
     await saveProcesses();
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
   }
 
   ProcessModel getProcess(processId) {
@@ -156,7 +155,7 @@ class EntModel extends StatesRebuilder {
     } else {
       this.entityMetadata.setValue(entitiesBloc.value[index]);
     }
-    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+    if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
   }
 
   syncFeed() {
@@ -172,7 +171,7 @@ class EntModel extends StatesRebuilder {
       this.feed.setError("News feed not found");
     else
       this.feed.setValue(newFeed);
-    if (hasState) rebuildStates([EntTags.FEED]);
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
   }
 
   Future<void> updateVisibleActions() async {
@@ -181,7 +180,7 @@ class EntModel extends StatesRebuilder {
     if (!this.entityMetadata.hasValue) return;
 
     this.visibleActions.setToLoading();
-    if (hasState) rebuildStates([EntTags.ACTIONS]);
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
 
     for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
       if (action.register == true) {
@@ -192,7 +191,7 @@ class EntModel extends StatesRebuilder {
         this.isRegistered.setValue(
             await isActionVisible(action, this.entityReference.entityId));
 
-        if (hasState) rebuildStates([EntTags.ACTIONS]);
+        if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
       } else {
         bool isVisible =
             await isActionVisible(action, this.entityReference.entityId);
@@ -201,7 +200,7 @@ class EntModel extends StatesRebuilder {
     }
 
     this.visibleActions.setValue(actionsToDisplay);
-    if (hasState) rebuildStates([EntTags.ACTIONS]);
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
   }
 
   Future<bool> isActionVisible(

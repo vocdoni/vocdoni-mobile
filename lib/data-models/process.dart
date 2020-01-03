@@ -5,7 +5,7 @@ import 'package:vocdoni/lib/singletons.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/lib/value-state.dart';
 
-enum ProcessTags {
+enum ProcessStateTags {
   PROCESS_METADATA,
   CENSUS_STATE,
   PARTICIPATION,
@@ -17,18 +17,14 @@ class ProcessModel extends StatesRebuilder {
   EntityReference entityReference;
   String lang = "default";
 
-  //final ValueState processMetaValueState = ValueState();
   final ValueState<ProcessMetadata> processMetadata = ValueState();
 
-  //final ValueState censusValueState = ValueState();
   final ValueState<bool> isInCensus = ValueState();
   final ValueState<bool> hasVoted = ValueState();
 
-  //final ValueState participationValueState = ValueState();
   final ValueState<int> participantsTotal = ValueState();
   final ValueState<int> participantsCurrent = ValueState();
 
-  //final ValueState datesValueState = ValueState();
   final ValueState<DateTime> startDate = ValueState();
   final ValueState<DateTime> endDate = ValueState();
 
@@ -76,7 +72,7 @@ class ProcessModel extends StatesRebuilder {
     else
       this.processMetadata.setValue(value);
 
-    if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
+    if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
   }
 
   updateProcessMetadataIfNeeded() async {
@@ -101,7 +97,7 @@ class ProcessModel extends StatesRebuilder {
     } catch (err) {
       this.processMetadata.setError("Unable to fetch the vote details");
     }
-    if (hasState) rebuildStates([ProcessTags.PROCESS_METADATA]);
+    if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
   }
 
   syncCensusState() {
@@ -129,7 +125,7 @@ class ProcessModel extends StatesRebuilder {
     final DVoteGateway dvoteGw = getDVoteGateway();
 
     this.isInCensus.setToLoading();
-    if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
+    if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
 
     String base64Claim =
         await digestHexClaim(account.identity.keys[0].publicKey);
@@ -140,7 +136,7 @@ class ProcessModel extends StatesRebuilder {
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.isInCensus.setError("You are not part of the census");
 
-        if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
+        if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
         return;
       }
       RegExp emptyProofRegexp =
@@ -153,7 +149,7 @@ class ProcessModel extends StatesRebuilder {
 
       stageCensusState();
       save();
-      if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
+      if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
 
       // final valid = await checkProof(
       //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
@@ -163,7 +159,7 @@ class ProcessModel extends StatesRebuilder {
       // }
     } catch (error) {
       this.isInCensus.setError("Unable to check the census");
-      if (hasState) rebuildStates([ProcessTags.CENSUS_STATE]);
+      if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
     }
   }
 
@@ -241,16 +237,16 @@ class ProcessModel extends StatesRebuilder {
     else
       this.participantsCurrent.setValue(current);
 
-    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
+    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
   }
 
   updateParticipation() async {
     this.participantsTotal.setToLoading();
     this.participantsCurrent.setToLoading();
-    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
+    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
 
     int total = await getTotalParticipants();
-    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
+    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
 
     int current = await getCurrentParticipants();
 
@@ -266,7 +262,7 @@ class ProcessModel extends StatesRebuilder {
 
     stageParticipation();
     save();
-    if (hasState) rebuildStates([ProcessTags.PARTICIPATION]);
+    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
   }
 
   stageParticipation() {

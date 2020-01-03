@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:vocdoni/data-models/entModel.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -22,7 +22,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     super.didChangeDependencies();
 
     try {
-      EntModel ent = ModalRoute.of(super.context).settings.arguments;
+      EntityModel ent = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
           "EntityFeedPage", entityId: ent.entityReference.entityId);
     } catch (err) {
@@ -32,14 +32,14 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   @override
   Widget build(context) {
-    final EntModel entModel = ModalRoute.of(context).settings.arguments;
+    final EntityModel entModel = ModalRoute.of(context).settings.arguments;
     if (loading)
       return buildLoading(context);
     else if (entModel == null) return buildEmptyEntity(context);
 
     return StateBuilder(
         viewModels: [entModel],
-        tag: [EntTags.FEED],
+        tag: [EntityStateTags.FEED],
         builder: (ctx, tagId) {
           return Scaffold(
             appBar: TopNavigation(
