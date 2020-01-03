@@ -22,7 +22,7 @@ class _IdentityTabState extends State<IdentityTab> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "IdentityTab");
+    analytics.trackPage("IdentityTab");
   }
 
   @override

@@ -16,7 +16,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "IdentitySelectPage");
+    analytics.trackPage("IdentitySelectPage");
   }
 
   @override

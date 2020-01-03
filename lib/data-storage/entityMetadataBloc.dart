@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:vocdoni/data-storage/genericBloc.dart';
 import "dart:async";
 import 'package:dvote/dvote.dart';
-import "package:vocdoni/constants/meta.dart";
+import "package:vocdoni/constants/meta-keys.dart";
 
 class EntityMetadataBloc extends GenericBloc<List<EntityMetadata>> {
   final String _storageFile = ENTITIES_STORE_FILE;

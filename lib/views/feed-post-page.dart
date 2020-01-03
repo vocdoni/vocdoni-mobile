@@ -32,7 +32,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     try {
       FeedPostArgs args = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
-          pageId: "FeedPostPage",
+          "FeedPostPage",
           entityId: args.ent.entityReference.entityId,
           postTitle: args.post.title);
     } catch (err) {

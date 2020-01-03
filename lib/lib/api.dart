@@ -1,6 +1,6 @@
 import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/lib/errors.dart';
-import "package:vocdoni/constants/meta.dart";
+import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/lib/net.dart';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode

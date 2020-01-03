@@ -5,7 +5,7 @@ import 'package:vocdoni/lib/value-state.dart';
 import 'package:vocdoni/data-models/processModel.dart';
 import 'package:vocdoni/lib/api.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import "package:vocdoni/constants/meta.dart";
+import "package:vocdoni/constants/meta-keys.dart";
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 

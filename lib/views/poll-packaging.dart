@@ -32,7 +32,7 @@ class _PollPackagingState extends State<PollPackaging> {
     super.initState();
 
     analytics.trackPage(
-        pageId: "PollPackaging",
+        "PollPackaging",
         entityId: widget.processModel.entityReference.entityId,
         processId: widget.processModel.processId);
 

@@ -5,7 +5,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/data-models/processModel.dart';
 import 'package:vocdoni/lib/factories.dart';
-import "package:vocdoni/constants/meta.dart";
+import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';

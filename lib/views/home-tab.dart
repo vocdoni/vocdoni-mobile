@@ -26,13 +26,13 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "HomeTab");
+    analytics.trackPage("HomeTab");
   }
 
   @override
   Widget build(ctx) {
     List<CardContentWrapper> items = [];
-    account.ents.forEach((ent) {
+    account.entities.forEach((ent) {
       if (ent.feed.hasValue) {
         ent.feed.value.items.forEach((FeedPost post) {
           if (!(post is FeedPost)) return;

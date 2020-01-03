@@ -34,7 +34,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "PatternPrompModal");
+    analytics.trackPage("PatternPrompModal");
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:vocdoni/data-models/entModel.dart';
 import 'package:vocdoni/data-models/processModel.dart';
 import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import "package:vocdoni/constants/meta.dart";
+import "package:vocdoni/constants/meta-keys.dart";
 import 'package:dvote/dvote.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
@@ -54,7 +54,7 @@ class _PollPageState extends State<PollPage> {
     }
 
     analytics.trackPage(
-        pageId: "PollPage",
+        "PollPage",
         entityId: args.ent.entityReference.entityId,
         processId: args.processId);
 

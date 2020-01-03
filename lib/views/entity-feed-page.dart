@@ -24,7 +24,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     try {
       EntModel ent = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
-          pageId: "EntityFeedPage", entityId: ent.entityReference.entityId);
+          "EntityFeedPage", entityId: ent.entityReference.entityId);
     } catch (err) {
       print(err);
     }

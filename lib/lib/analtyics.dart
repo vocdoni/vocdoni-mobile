@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
@@ -34,27 +33,26 @@ class Analytics {
   }
 
   getUserId() {
-    //Todo: Do not use public key
-    return account.identity.keys[0].publicKey;
+    return account.identity.keys[0].address;
   }
 
-  //OS, OS version, screen size...
+  // OS, OS version, screen size...
   getSystem() {}
 
-  //lang, preferences...
+  // lang, preferences...
   getProfile() {}
 
-  //version, enviroment...
+  // version, enviroment...
   getAppDetails() {}
 
   trackError(Error error) {}
 
-  trackPage(
-      {String pageId, String entityId, String processId, String postTitle}) {
-    Map<String, String> properties = {'pageId': pageId};
-    if (entityId != null) properties.putIfAbsent('entityId', () => entityId);
-    if (processId != null) properties.putIfAbsent('processId', () => processId);
-    if (postTitle != null) properties.putIfAbsent('postTitle', () => postTitle);
+  trackPage(String pageId,
+      {String entityId, String processId, String postTitle}) {
+    Map<String, String> properties = {"pageId": pageId};
+    if (entityId is String) properties['entityId'] = entityId;
+    if (processId is String) properties['processId'] = processId;
+    if (postTitle is String) properties['postTitle'] = postTitle;
 
     _mixpanel.track(event: pageId, properties: properties);
   }

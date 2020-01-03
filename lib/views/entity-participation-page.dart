@@ -23,9 +23,8 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
     try {
       final EntityReference entityReference =
           ModalRoute.of(context).settings.arguments;
-      entModel = account.getEnt(entityReference);
-      analytics.trackPage(
-          pageId: "EntityParticipationPage",
+      entModel = account.findEntity(entityReference);
+      analytics.trackPage("EntityParticipationPage",
           entityId: entityReference.entityId);
     } catch (err) {
       print(err);

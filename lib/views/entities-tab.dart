@@ -18,17 +18,17 @@ class _EntitiesTabState extends State<EntitiesTab> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "EntitiesTab");
+    analytics.trackPage("EntitiesTab");
   }
 
   @override
   Widget build(ctx) {
-    if (account.ents.length == 0) return buildNoEntities(ctx);
+    if (account.entities.length == 0) return buildNoEntities(ctx);
 
     return ListView.builder(
-        itemCount: account.ents.length,
+        itemCount: account.entities.length,
         itemBuilder: (BuildContext ctxt, int index) {
-          final ent = account.ents[index];
+          final ent = account.entities[index];
 
           return StateBuilder(
               viewModels: [ent],

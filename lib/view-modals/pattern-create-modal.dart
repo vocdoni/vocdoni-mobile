@@ -42,7 +42,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "PatternCreateModal");
+    analytics.trackPage("PatternCreateModal");
   }
 
 
