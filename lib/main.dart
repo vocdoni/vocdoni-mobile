@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/data-models/app-state.dart';
+import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/data-models/news-feed.dart';
+import 'package:vocdoni/data-models/vochain.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -26,52 +34,68 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   // RUN THE APP
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Vocdoni',
-    localizationsDelegates: [
-      LangDelegate(),
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate
-    ],
-    supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
-    onGenerateTitle: (BuildContext context) => Lang.of(context).get("Vocdoni"),
-    home: StartupPage(),
-    onGenerateRoute: generateRoute,
-    routes: {
-      // NO IDENTITIES YET
-      "/identity/create": (context) => IdentityCreatePage(),
-      "/identity/select": (context) => IdentitySelectPage(),
+  runApp(MultiProvider(
+      providers: [
+        Provider<AppStateModel>(create: (_) => globalAppStateModel), // single object
+        Provider<VochainModel>(create: (_) => globalVochainModel),
 
-      // WHEN THERE IS AN IDENTITY
-      "/home": (context) => HomeScreen(),
-      "/entity/feed": (context) => EntityFeedPage(),
-      "/entity/feed/post": (context) => FeedPostPage(),
-      "/entity/participation": (context) => EntityParticipationPage(),
-      "/entity/participation/poll": (context) => PollPage(),
-      "/identity/backup": (context) => IdentityBackupPage(),
+        Provider<AccountPoolModel>(create: (_) => globalAccountPoolModel), // object pool
+        Provider<EntityPoolModel>(create: (_) => globalEntityPoolModel),
+        Provider<ProcessPoolModel>(create: (_) => globalProcessPoolModel),
+        Provider<NewsFeedPoolModel>(create: (_) => globalNewsFeedPoolModel),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Vocdoni',
+        localizationsDelegates: [
+          LangDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate
+        ],
+        supportedLocales: [
+          Locale("en"),
+          Locale("fr"),
+          Locale("ca"),
+          Locale("es")
+        ],
+        onGenerateTitle: (BuildContext context) =>
+            Lang.of(context).get("Vocdoni"),
+        home: StartupPage(),
+        onGenerateRoute: generateRoute,
+        routes: {
+          // NO IDENTITIES YET
+          "/identity/create": (context) => IdentityCreatePage(),
+          "/identity/select": (context) => IdentitySelectPage(),
 
-      // GLOBAL
-      // "/web/viewer": (context) => WebViewer(),
-      "/signature": (context) => SignModal(),
+          // WHEN THERE IS AN IDENTITY
+          "/home": (context) => HomeScreen(),
+          "/entity/feed": (context) => EntityFeedPage(),
+          "/entity/feed/post": (context) => FeedPostPage(),
+          "/entity/participation": (context) => EntityParticipationPage(),
+          "/entity/participation/poll": (context) => PollPage(),
+          "/identity/backup": (context) => IdentityBackupPage(),
 
-      //DEV
-      "/dev": (context) => DevMenu(),
-      "/dev/ui-listItem": (context) => DevUiListItem(),
-      "/dev/ui-card": (context) => DevUiCard(),
-      "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
-      "/dev/analytics-tests": (context) => AnalyticsTests(),
-      "/dev/pager": (context) => DevPager(),
-    },
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-      fontFamily: "Open Sans",
-      scaffoldBackgroundColor: colorBaseBackground,
-    ),
-  ));
+          // GLOBAL
+          // "/web/viewer": (context) => WebViewer(),
+          "/signature": (context) => SignModal(),
+
+          // DEV
+          "/dev": (context) => DevMenu(),
+          "/dev/ui-listItem": (context) => DevUiListItem(),
+          "/dev/ui-card": (context) => DevUiCard(),
+          "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
+          "/dev/analytics-tests": (context) => AnalyticsTests(),
+          "/dev/pager": (context) => DevPager(),
+        },
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: "Open Sans",
+          scaffoldBackgroundColor: colorBaseBackground,
+        ),
+      )));
 }
 
-//generateRoute is called when nothing is found on `routes`
+// generateRoute is called when nothing is found on `routes`
 Route<dynamic> generateRoute(RouteSettings settings) {
   return MaterialPageRoute(builder: (_) {
     switch (settings.name) {

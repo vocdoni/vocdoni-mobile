@@ -1,11 +1,14 @@
-class ValueState<T> {
+/// Base class that wraps and manages **eventual data** that can involve
+/// remote fetching, eventual exceptions and delayed completion.
+///
+class StateValue<T> {
   bool _loading = false;
   String _loadingMessage; // optional
 
-  String _errorMessage; // If not null, then _value is not valid
+  String _errorMessage; // If not null, then _currentValue is not valid
   DateTime _lastError;
 
-  T _value;
+  T _currentValue;
   DateTime _lastUpdated;
 
   /// Sets the loading flag to true and an optional loading text
@@ -20,15 +23,15 @@ class ValueState<T> {
 
   /// Sets the error message to the given value and toggles loading to false.
   /// Optionally, allows to keep the current value, even if there is an error.
-  setError(String error, {bool keepPrevousValue = false}) {
+  setError(String error, {bool keepPreviousValue = false}) {
     _errorMessage = error;
     _lastError = DateTime.now();
 
     _loading = false;
     _loadingMessage = null;
 
-    if (keepPrevousValue != true) {
-      _value = null;
+    if (keepPreviousValue != true) {
+      _currentValue = null;
       _lastUpdated = null;
     }
   }
@@ -36,7 +39,7 @@ class ValueState<T> {
   /// Sets the underlying value, clears any previous error and
   /// sets loading to false
   setValue(T value) {
-    _value = value;
+    _currentValue = value;
     _lastUpdated = DateTime.now();
 
     _loading = false;
@@ -70,12 +73,12 @@ class ValueState<T> {
   /// cleared it
   bool get hasValue {
     if (_errorMessage != null) return true;
-    return _lastUpdated != null && _value is T;
+    return _lastUpdated != null && _currentValue is T;
   }
 
   /// Provides the current value, if there is any
   T get value {
-    return _value;
+    return _currentValue;
   }
 
   /// Returns the last successful update

@@ -67,7 +67,7 @@ class EntityModel extends StatesRebuilder {
     } catch (e) {
       this
           .entityMetadata
-          .setError("Unable to update entityMetadata", keepPrevousValue: true);
+          .setError("Unable to update entityMetadata", keepPreviousValue: true);
     }
 
     saveMetadata();

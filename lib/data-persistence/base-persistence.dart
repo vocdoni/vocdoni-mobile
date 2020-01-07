@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-export 'package:vocdoni/constants/storage-names.dart';
 
 /// Abstract class to persist collections of objects
 abstract class BasePersistence<T> {

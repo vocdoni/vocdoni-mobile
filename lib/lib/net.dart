@@ -31,46 +31,48 @@ Web3Gateway getWeb3Gateway() {
 }
 
 GatewayInfo _selectRandomGatewayInfo() {
-  if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
+  if (!globalAppState.hasValue || !globalAppState.value.bootnodes.hasValue)
     return null;
 
   final gw = GatewayInfo();
 
   if (NETWORK_ID == "homestead") {
-    if (appStateBloc.value.bootnodes.homestead.dvote.length < 1) {
+    if (globalAppState.value.bootnodes.value.homestead.dvote.length < 1) {
       print("The DVote gateway list is empty for Homestead");
       return null;
     }
 
     // PROD
-    int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
-    int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
+    int dvoteIdx = random
+        .nextInt(globalAppState.value.bootnodes.value.homestead.dvote.length);
+    int web3Idx = random
+        .nextInt(globalAppState.value.bootnodes.value.homestead.web3.length);
 
-    gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
+    gw.dvote =
+        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].uri;
     gw.publicKey =
-        appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
-    gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
+        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].pubKey;
+    gw.supportedApis.addAll(
+        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.value.bootnodes.value.homestead.web3[web3Idx].uri;
   } else {
-    if (appStateBloc.value.bootnodes.goerli.dvote.length < 1) {
+    if (globalAppState.value.bootnodes.value.goerli.dvote.length < 1) {
       print("The DVote gateway list is empty for Goerli");
       return null;
     }
 
     // DEV
-    int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.dvote.length);
+    int dvoteIdx = random
+        .nextInt(globalAppState.value.bootnodes.value.goerli.dvote.length);
     int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.web3.length);
+        random.nextInt(globalAppState.value.bootnodes.value.goerli.web3.length);
 
-    gw.dvote = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].uri;
-    gw.publicKey = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].pubKey;
-    gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.goerli.web3[web3Idx].uri;
+    gw.dvote = globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].uri;
+    gw.publicKey =
+        globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].pubKey;
+    gw.supportedApis.addAll(
+        globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.value.bootnodes.value.goerli.web3[web3Idx].uri;
   }
   return gw;
 }

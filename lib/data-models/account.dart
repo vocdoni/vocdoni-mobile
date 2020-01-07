@@ -1,28 +1,17 @@
+import 'dart:math';
+
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:vocdoni/data-models/base-model.dart';
+import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-value.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
-class AccountPoolModel extends DataModel {
-  List<AccountModel> accounts = [];
-  int _selectedAccount;
-
-  // CONSTRUCTORS
-
-  AccountPoolModel() {
-    throw Exception("Please, use AccountPoolModel.fromStorage()");
-  }
-
-  AccountPoolModel.fromStorage() {
-    // TODO: READ IDENTITIES
-
-    readFromStorage();
-  }
-
+///
+class AccountPoolModel extends StateModel<List<AccountModel>> {
   // OVERRIDES
 
   @override
@@ -33,13 +22,16 @@ class AccountPoolModel extends DataModel {
 
   @override
   writeToStorage() {
+    // TODO: Store failedAuthAttempts and authThresholdDate
+    print("TO DO: Store failedAuthAttempts and authThresholdDate");
+
     // TODO: implement writeToStorage
     return null;
   }
 
   // CUSTOM METHODS
 
-  add(AccountModel newAccount) {
+  addAccount(AccountModel newAccount) {
     // TODO: prevent duplicates
 
     // TODO: ADD identity to global identities persistence
@@ -50,42 +42,21 @@ class AccountPoolModel extends DataModel {
 
     notifyListeners();
   }
-
-  AccountModel getSelectedAccount(int accountIdx) {
-    if (accountIdx >= accounts.length || accountIdx < 0)
-      throw Exception("Index out of bounds");
-
-    return this.accounts[accountIdx];
-  }
-
-  selectAccount(int accountIdx) {
-    if (accountIdx == _selectedAccount)
-      return;
-    else if (accountIdx >= accounts.length || accountIdx < 0)
-      throw Exception("Index out of bounds");
-
-    _selectedAccount = accountIdx;
-    notifyListeners();
-  }
 }
 
 /// AccountModel encapsulates the relevant information of a Vocdoni account.
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
-class AccountModel extends DataModel {
-  Identity identity;
-  List<EntityModel> entities = [];
-
-  int failedAuthAttempts = 0;
-  DateTime authThresholdDate = DateTime.now();
-  // final List<String> languages = ["default"];
-
+///
+/// IMPORTANT: All **updates** on the state must call `notifyListeners()`
+///
+class AccountModel extends StateModel<AccountState> {
   // CONSTRUCTORS
 
   AccountModel.fromIdentity(Identity idt) {
-    this.identity = idt;
+    this.value.identity = idt;
 
-    this.entities = this
+    this.value.entities = this
         .identity
         .peers
         .entities
@@ -101,7 +72,7 @@ class AccountModel extends DataModel {
 
   // OVERRIDES
   @override
-  readFromStorage() {
+  readFromStorage() async {
     // TODO:
   }
 
@@ -159,13 +130,13 @@ class AccountModel extends DataModel {
     k.address = address;
 
     newIdentity.keys.add(k);
-    this.identity = newIdentity;
+    this.value.identity = newIdentity;
   }
 
   /// Trigger a refresh of the related entities metadata
   @override
   Future<void> refresh() {
-    return Future.wait(this.entities.map((e) => e.refresh()));
+    return Future.wait(this.value.entities.map((e) => e.refresh()));
   }
 
   Future<void> trackSuccessfulAuth() {
@@ -177,7 +148,7 @@ class AccountModel extends DataModel {
   }
 
   bool isSubscribed(EntityReference _entitySummary) {
-    return this.identity.peers.entities.any((existingEntitiy) {
+    return this.value.identity.peers.entities.any((existingEntitiy) {
       return _entitySummary.entityId == existingEntitiy.entityId;
     });
   }
@@ -193,7 +164,7 @@ class AccountModel extends DataModel {
     peers.entities.add(entity.entityReference); // new entity
     identity.peers = peers;
 
-    this.entities.add(entity);
+    this.value.entities.add(entity);
 
     notifyListeners();
     await writeToStorage();
@@ -202,11 +173,11 @@ class AccountModel extends DataModel {
   /// Remove the given entity from the currently selected identity's subscriptions
   unsubscribe(EntityReference _entitySummary) async {
     Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(this.identity.peers.entities);
+    peers.entities.addAll(this.value.identity.peers.entities);
     peers.entities.removeWhere(
         (existingEntity) => existingEntity.entityId == _entitySummary.entityId);
-    peers.identities.addAll(this.identity.peers.identities);
-    this.identity.peers = peers;
+    peers.identities.addAll(this.value.identity.peers.identities);
+    this.value.identity.peers = peers;
 
     // TODO: Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
@@ -224,9 +195,38 @@ class AccountModel extends DataModel {
     }
 
     // await identitiesBloc.unsubscribeEntityFromAccount(
-    //     _entitySummary, this.identity.identity);
+    //     _entitySummary, this.value.identity.identity);
     // int index = entities.indexWhere(
     //     (ent) => _entitySummary.entityId == ent.entityReference.entityId);
     // if (index != -1) entities.removeAt(index);
   }
+
+  Future trackAuthAttemp(bool successful) async {
+    final newState = value;
+    var newThreshold = DateTime.now();
+    if (successful) {
+      newState.failedAuthAttempts = 0;
+    } else {
+      newState.failedAuthAttempts++;
+      final seconds = pow(2, newState.failedAuthAttempts);
+      newThreshold.add(Duration(seconds: seconds));
+    }
+    newState.authThresholdDate = newThreshold;
+    notifyListeners();
+    await writeToStorage();
+  }
+}
+
+// Use this class as a data container only. Any logic that updates the state
+// should be defined above in the model class
+class AccountState {
+  final Identity identity;
+  final StateValue<List<EntityModel>> entities;
+
+  int failedAuthAttempts = 0;
+  DateTime authThresholdDate = DateTime.now();
+  // final List<String> languages = ["default"];
+
+  AccountState(this.identity, this.entities, this.failedAuthAttempts,
+      this.authThresholdDate);
 }
