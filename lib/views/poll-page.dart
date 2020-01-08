@@ -281,14 +281,14 @@ class _PollPageState extends State<PollPage> {
   }
 
   onSubmit(ctx, processMetadata) async {
-    var intAnswers = _choices.map(int.parse).toList();
+    var intChoices = _choices.map(int.parse).toList();
 
     await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PollPackaging(
-                processModel: processModel, answers: intAnswers)));
+                processModel: processModel, choices: intChoices)));
   }
 
   buildSubmitInfo() {

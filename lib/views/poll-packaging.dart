@@ -14,9 +14,9 @@ import 'package:vocdoni/util/net.dart';
 
 class PollPackaging extends StatefulWidget {
   final ProcessModel processModel;
-  final List<int> answers;
+  final List<int> choices;
 
-  PollPackaging({this.processModel, this.answers});
+  PollPackaging({this.processModel, this.choices});
 
   @override
   _PollPackagingState createState() => _PollPackagingState();
@@ -107,7 +107,7 @@ class _PollPackagingState extends State<PollPackaging> {
       }
 
       // PREPARE THE VOTE ENVELOPE
-      Map<String, String> envelope = await packagePollEnvelope(widget.answers,
+      Map<String, String> envelope = await packagePollEnvelope(widget.choices,
           merkleProof, widget.processModel.processId, privateKey);
 
       if (!mounted) return;
@@ -116,7 +116,7 @@ class _PollPackagingState extends State<PollPackaging> {
         _envelope = envelope;
       });
 
-      stepSend(context);
+      stepSendVote(context);
     } catch (err) {
       showMessage("The vote data could not be prepared", context: context);
       setState(() {
@@ -125,7 +125,7 @@ class _PollPackagingState extends State<PollPackaging> {
     }
   }
 
-  void stepSend(BuildContext context) async {
+  void stepSendVote(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
       final DVoteGateway dvoteGw = getDVoteGateway();
