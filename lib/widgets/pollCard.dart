@@ -2,10 +2,10 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/factories.dart';
+import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
@@ -15,7 +15,7 @@ import 'package:vocdoni/widgets/listItem.dart';
 
 class PollCard extends StatelessWidget {
   final ProcessModel process;
-  final EntModel ent;
+  final EntityModel ent;
   final int index;
 
   PollCard({@required this.process, @required this.ent, @required this.index});
@@ -23,17 +23,17 @@ class PollCard extends StatelessWidget {
   @override
   Widget build(ctx) {
     String timeLeft = "";
-    if (this.process.endDate.isValid) {
+    if (this.process.endDate.hasValue) {
       timeLeft = getFriendlyTimeLeft(this.process.endDate.value);
     }
 
     return StateBuilder(
         viewModels: [this.process],
-        tag: ProcessTags.PARTICIPATION,
+        tag: ProcessStateTags.PARTICIPATION,
         builder: (ctx, tagId) {
           String participation = "";
-          if (this.process.participantsTotal.isValid &&
-              this.process.participantsCurrent.isValid)
+          if (this.process.participantsTotal.hasValue &&
+              this.process.participantsCurrent.hasValue)
             participation =
                 getFriendlyParticipation(this.process.participation);
           return BaseCard(

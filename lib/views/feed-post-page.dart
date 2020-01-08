@@ -1,18 +1,18 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
-import 'package:vocdoni/util/net.dart';
+import 'package:vocdoni/lib/net.dart';
 
 class FeedPostArgs {
-  EntModel ent;
+  EntityModel ent;
   final FeedPost post;
   final int index;
 
@@ -32,7 +32,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     try {
       FeedPostArgs args = ModalRoute.of(super.context).settings.arguments;
       analytics.trackPage(
-          pageId: "FeedPostPage",
+          "FeedPostPage",
           entityId: args.ent.entityReference.entityId,
           postTitle: args.post.title);
     } catch (err) {
@@ -45,7 +45,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
 
     FeedPost post = args.post;
-    EntModel ent = args.ent;
+    EntityModel ent = args.ent;
     int index = args.index ?? 0;
 
     if (post == null) return buildNoPosts(ctx);
@@ -66,14 +66,14 @@ class _FeedPostPageState extends State<FeedPostPage> {
         ));
   }
 
-  getScaffoldChildren(BuildContext context, EntModel ent, FeedPost post) {
+  getScaffoldChildren(BuildContext context, EntityModel ent, FeedPost post) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent, post));
     children.add(html2(post.contentHtml));
     return children;
   }
 
-  buildTitle(BuildContext context, EntModel ent, FeedPost post) {
+  buildTitle(BuildContext context, EntityModel ent, FeedPost post) {
     return ListItem(
       //mainTextTag: process.meta['processId'] + title,
       mainText: post.title,

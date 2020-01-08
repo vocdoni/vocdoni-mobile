@@ -3,14 +3,14 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/util/net.dart';
+import 'package:vocdoni/lib/net.dart';
 
 class PollPackaging extends StatefulWidget {
   final ProcessModel processModel;
@@ -32,7 +32,7 @@ class _PollPackagingState extends State<PollPackaging> {
     super.initState();
 
     analytics.trackPage(
-        pageId: "PollPackaging",
+        "PollPackaging",
         entityId: widget.processModel.entityReference.entityId,
         processId: widget.processModel.processId);
 

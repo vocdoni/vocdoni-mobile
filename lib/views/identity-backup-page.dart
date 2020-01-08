@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class IdentityBackupArguments {
   final String alias;
@@ -80,7 +80,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "IdentityBackupPage");
+    analytics.trackPage("IdentityBackupPage");
   }
 
   @override

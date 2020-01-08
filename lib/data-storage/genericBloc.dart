@@ -2,12 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:path_provider/path_provider.dart';
-
-const IDENTITIES_STORE_FILE = "identities.dat";
-const ENTITIES_STORE_FILE = "entities.dat";
-const BOOTNODES_STORE_FILE = "bootnodes.dat";
-const PROCESSES_STORE_FILE = "processes.dat";
-const NEWSFEED_STORE_FILE = "feed.dat";
+export 'package:vocdoni/constants/storage-names.dart';
+export 'package:vocdoni/lib/errors.dart';
 
 abstract class GenericBloc<T> {
   // Data stream
@@ -42,16 +38,4 @@ abstract class GenericBloc<T> {
   set(T data) {
     state.add(data);
   }
-}
-
-class BlocRestoreError implements Exception {
-  final String msg;
-  const BlocRestoreError(this.msg);
-  String toString() => 'BlocRestoreError: $msg';
-}
-
-class BlocPersistError implements Exception {
-  final String msg;
-  const BlocPersistError(this.msg);
-  String toString() => 'BlocPersistError: $msg';
 }

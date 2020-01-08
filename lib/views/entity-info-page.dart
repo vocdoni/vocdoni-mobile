@@ -2,9 +2,9 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/modals/web-action.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/view-modals/web-action.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -17,12 +17,9 @@ import 'package:vocdoni/constants/colors.dart';
 
 class EntityInfoPage extends StatefulWidget {
   final EntityReference entityReference;
-  EntModel entModel;
 
   EntityInfoPage(this.entityReference) {
-    analytics.trackPage(
-        pageId: "EntityInfoPage", entityId: entityReference.entityId);
-    entModel = account.getEnt(entityReference);
+    analytics.trackPage("EntityInfoPage", entityId: entityReference.entityId);
   }
 
   @override
@@ -31,27 +28,33 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   bool _processingSubscription = false;
+  EntityModel entityModel;
 
   @override
   void initState() {
     super.initState();
 
-    widget.entModel.updateWithDelay();
+    entityModel = account.findEntity(widget.entityReference);
+    // Ensure subscribtion as we visit it
+    if (!account.isSubscribed(widget.entityReference))
+      account.subscribe(entityModel);
+      
+    entityModel.updateWithDelay();
   }
 
   @override
   Widget build(context) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: [EntTags.ENTITY_METADATA],
+        viewModels: [entityModel],
+        tag: [EntityStateTags.ENTITY_METADATA],
         builder: (ctx, tagId) {
-          return widget.entModel.entityMetadata.isValid
-              ? buildScaffold(widget.entModel)
-              : buildScaffoldWithoutMetadata(widget.entModel);
+          return entityModel.entityMetadata.hasValue
+              ? buildScaffold(entityModel)
+              : buildScaffoldWithoutMetadata(entityModel);
         });
   }
 
-  buildScaffoldWithoutMetadata(EntModel ent) {
+  buildScaffoldWithoutMetadata(EntityModel ent) {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
@@ -73,23 +76,23 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildStatus() {
-    if (widget.entModel.entityMetadata.isUpdating)
+    if (entityModel.entityMetadata.isLoading)
       return ListItem(
-        mainText: "Updating details...",
+        mainText: "Fetching details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (widget.entModel.entityMetadata.isError)
+    if (entityModel.entityMetadata.hasError)
       return ListItem(
-        mainText: widget.entModel.entityMetadata.errorMessage,
+        mainText: entityModel.entityMetadata.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
-    else if (widget.entModel.feed.isError)
+    else if (entityModel.feed.hasError)
       return ListItem(
-        mainText: widget.entModel.feed.errorMessage,
+        mainText: entityModel.feed.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
@@ -99,10 +102,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return Container();
   }
 
-  buildScaffold(EntModel ent) {
+  buildScaffold(EntityModel ent) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: EntTags.ENTITY_METADATA,
+        viewModels: [entityModel],
+        tag: EntityStateTags.ENTITY_METADATA,
         builder: (ctx, tagId) {
           return ScaffoldWithImage(
               headerImageUrl: ent.entityMetadata.value.media.header,
@@ -130,14 +133,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     return [
-      buildShareButton(context, widget.entModel),
+      buildShareButton(context, entityModel),
       SizedBox(height: 48, width: paddingPage),
-      //buildSubscribeButton(context, widget.entModel),
+      //buildSubscribeButton(context, entityModel),
       //SizedBox(height: 48, width: paddingPage)
     ];
   }
 
-  getScaffoldChildren(BuildContext context, EntModel ent) {
+  getScaffoldChildren(BuildContext context, EntityModel ent) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent));
     children.add(buildStatus());
@@ -157,7 +160,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, EntModel ent) {
+  buildTitle(BuildContext context, EntityModel ent) {
     String title =
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
     return ListItem(
@@ -170,7 +173,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildTitleWithoutEntityMeta(BuildContext context, EntModel ent) {
+  buildTitleWithoutEntityMeta(BuildContext context, EntityModel ent) {
     return ListItem(
       mainText: "...",
       secondaryText: ent.entityReference.entityId,
@@ -182,21 +185,20 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildFeedItem(BuildContext context) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: EntTags.FEED,
+        viewModels: [entityModel],
+        tag: EntityStateTags.FEED,
         builder: (ctx, tagId) {
           String postsNum = "0";
-          if (widget.entModel.feed.isValid) {
-            if (widget.entModel.feed.hasError) {
+          if (entityModel.feed.hasValue) {
+            if (entityModel.feed.hasError) {
               postsNum =
-                  (widget.entModel.feed.value?.items?.length.toString() ??
-                          "0") +
+                  (entityModel.feed.value?.items?.length.toString() ?? "0") +
                       " !";
             } else {
-              postsNum = widget.entModel.feed.value.items.length.toString();
+              postsNum = entityModel.feed.value.items.length.toString();
             }
           } else {
-            if (widget.entModel.feed.hasError) {
+            if (entityModel.feed.hasError) {
               postsNum = "!";
             } else {
               postsNum = "0";
@@ -208,12 +210,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             mainText: "Feed",
             rightText: postsNum,
             rightTextIsBadge: true,
-            rightTextPurpose:
-                widget.entModel.feed.hasError ? Purpose.DANGER : null,
+            rightTextPurpose: entityModel.feed.hasError ? Purpose.DANGER : null,
             disabled: postsNum == "0",
             onTap: () {
               Navigator.pushNamed(context, "/entity/feed",
-                  arguments: widget.entModel);
+                  arguments: entityModel);
             },
           );
         });
@@ -221,12 +222,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildParticipationItem(BuildContext context) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: EntTags.PROCESSES,
+        viewModels: [entityModel],
+        tag: EntityStateTags.PROCESSES,
         builder: (ctx, tagId) {
           int processNum = 0;
-          if (widget.entModel.processes.isValid)
-            processNum = widget.entModel.processes.value.length;
+          if (entityModel.processes.hasValue)
+            processNum = entityModel.processes.value.length;
           return ListItem(
               icon: FeatherIcons.mail,
               mainText: "Participation",
@@ -235,13 +236,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               disabled: processNum == 0,
               onTap: () {
                 Navigator.pushNamed(context, "/entity/participation",
-                    arguments: widget.entModel.entityReference);
+                    arguments: entityModel.entityReference);
               });
         });
   }
 
   buildSubscribeItem(BuildContext context) {
-    bool isSubscribed = account.isSubscribed(widget.entModel.entityReference);
+    bool isSubscribed = account.isSubscribed(entityModel.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return ListItem(
       mainText: subscribeText,
@@ -251,12 +252,12 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       rightIcon: isSubscribed ? FeatherIcons.check : null,
       rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
       onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, widget.entModel)
-          : subscribeToEntity(context, widget.entModel),
+          ? unsubscribeFromEntity(context, entityModel)
+          : subscribeToEntity(context, entityModel),
     );
   }
 
-  buildSubscribeButton(BuildContext context, EntModel ent) {
+  buildSubscribeButton(BuildContext context, EntityModel ent) {
     bool isSubscribed = account.isSubscribed(ent.entityReference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
     return BaseButton(
@@ -271,7 +272,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  buildShareItem(BuildContext context, EntModel ent) {
+  buildShareItem(BuildContext context, EntityModel ent) {
     return ListItem(
         mainText: "Share organization",
         icon: FeatherIcons.share2,
@@ -281,7 +282,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  buildShareButton(BuildContext context, EntModel ent) {
+  buildShareButton(BuildContext context, EntityModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
@@ -291,22 +292,22 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  onShare(EntModel ent) {
+  onShare(EntityModel ent) {
     Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
     showMessage("Identity ID copied on the clipboard",
         context: context, purpose: Purpose.GUIDE);
   }
 
-  Widget buildRegisterButton(BuildContext ctx, EntModel ent) {
+  Widget buildRegisterButton(BuildContext ctx, EntityModel ent) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: [EntTags.ACTIONS],
+        viewModels: [entityModel],
+        tag: [EntityStateTags.ACTIONS],
         builder: (ctx, tagId) {
-          if (widget.entModel.isRegistered.isNotValid ||
-              widget.entModel.registerAction.isNotValid) return Container();
+          if (entityModel.isRegistered.hasError ||
+              entityModel.registerAction.hasError) return Container();
 
-          if (widget.entModel.isRegistered.isValid) {
-            if (widget.entModel.isRegistered.value)
+          if (entityModel.isRegistered.hasValue) {
+            if (entityModel.isRegistered.value)
               return BaseButton(
                 purpose: Purpose.GUIDE,
                 leftIconData: FeatherIcons.check,
@@ -322,9 +323,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 text: "Register",
                 isSmall: true,
                 onTap: () {
-                  if (widget.entModel.registerAction.value.type == "browser") {
-                    onBrowserAction(
-                        ctx, widget.entModel.registerAction.value, ent);
+                  if (entityModel.registerAction.value.type == "browser") {
+                    onBrowserAction(ctx, entityModel.registerAction.value, ent);
                   }
                 },
               );
@@ -332,28 +332,28 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         });
   }
 
-  Widget buildActionList(BuildContext ctx, EntModel ent) {
+  Widget buildActionList(BuildContext ctx, EntityModel ent) {
     return StateBuilder(
-        viewModels: [widget.entModel],
-        tag: [EntTags.ACTIONS],
+        viewModels: [entityModel],
+        tag: [EntityStateTags.ACTIONS],
         builder: (ctx, tagId) {
           final List<Widget> actionsToShow = [];
 
           actionsToShow.add(Section(text: "Actions"));
 
-          if (widget.entModel.visibleActions.isError) {
+          if (entityModel.visibleActions.hasError) {
             return ListItem(
-              mainText: widget.entModel.visibleActions.errorMessage,
+              mainText: entityModel.visibleActions.errorMessage,
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
           }
 
-          if (widget.entModel.visibleActions.isNotValid) {
+          if (entityModel.visibleActions.hasError) {
             return Container();
           }
 
-          if (widget.entModel.visibleActions.value.length == 0) {
+          if (entityModel.visibleActions.value.length == 0) {
             return ListItem(
               mainText: "No actions defined",
               disabled: true,
@@ -362,7 +362,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             );
           }
 
-          if (widget.entModel.isRegistered == false) {
+          if (entityModel.isRegistered == false) {
             final entityName = ent.entityMetadata.value
                 .name[ent.entityMetadata.value.languages[0]];
             ListItem noticeItem = ListItem(
@@ -376,7 +376,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           }
 
           for (EntityMetadata_Action action
-              in widget.entModel.visibleActions.value) {
+              in entityModel.visibleActions.value) {
             ListItem item;
             if (action.type == "browser") {
               if (!(action.name is Map) ||
@@ -387,7 +387,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 icon: FeatherIcons.arrowRightCircle,
                 mainText: action.name[ent.entityMetadata.value.languages[0]],
                 secondaryText: action.visible,
-                disabled: widget.entModel.isRegistered.value == false,
+                disabled: entityModel.isRegistered.value == false,
                 onTap: () {
                   onBrowserAction(ctx, action, ent);
                 },
@@ -409,7 +409,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onBrowserAction(
-      BuildContext ctx, EntityMetadata_Action action, EntModel ent) {
+      BuildContext ctx, EntityMetadata_Action action, EntityModel ent) {
     final String url = action.url;
     final String title = action.name[ent.entityMetadata.value.languages[0]] ??
         ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
@@ -422,7 +422,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     Navigator.push(ctx, route);
   }
 
-  unsubscribeFromEntity(BuildContext ctx, EntModel ent) async {
+  unsubscribeFromEntity(BuildContext ctx, EntityModel ent) async {
     setState(() {
       _processingSubscription = true;
     });
@@ -438,7 +438,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     });
   }
 
-  subscribeToEntity(BuildContext ctx, EntModel ent) async {
+  subscribeToEntity(BuildContext ctx, EntityModel ent) async {
     setState(() {
       _processingSubscription = true;
     });
@@ -470,31 +470,31 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
-    await widget.entModel.update();
+    await entityModel.update();
 /*
     String errorMessage = "";
     bool fail = false;
 
-    if (widget.entModel.entityMetadata == DataState.ERROR) {
+    if (entityModel.entityMetadata == DataState.ERROR) {
       errorMessage = "Unable to retrieve details";
       fail = true;
-    } else if (widget.entModel.processessMetadataUpdated == false) {
+    } else if (entityModel.processessMetadataUpdated == false) {
       errorMessage = "Unable to retrieve processess";
       fail = true;
-    } else if (widget.entModel.feedUpdated == false) {
+    } else if (entityModel.feedUpdated == false) {
       errorMessage = "Unable to retrieve news feed";
       fail = true;
     }
 
     if (!mounted) return;
     setState(() {
-      widget.entModel = widget.entModel;
+      entityModel = entityModel;
       _status = fail ? "fail" : "ok";
       _errorMessage = errorMessage;
     });
 */
 
-    //if (account.isSubscribed(widget.entModel.entityReference)) widget.entModel.save();
+    //if (account.isSubscribed(entityModel.entityReference)) entityModel.save();
   }
 
   goBack(BuildContext ctx) {

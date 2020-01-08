@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/util/singletons.dart';
-import 'package:flutter/foundation.dart'; // for kReleaseMode
+import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/constants/settings.dart';
 
 DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
@@ -36,28 +36,25 @@ GatewayInfo _selectRandomGatewayInfo() {
 
   final gw = GatewayInfo();
 
-  // TODO: THIS IS A WORKAROUND
-  // TODO: THE CODE BELOW NEEDS TO BE UNCOMMENTED FOR PRODUCTION USE
+  if (NETWORK_ID == "homestead") {
+    if (appStateBloc.value.bootnodes.homestead.dvote.length < 1) {
+      print("The DVote gateway list is empty for Homestead");
+      return null;
+    }
 
-  // if (kReleaseMode) {
-  //   if (appStateBloc.value.bootnodes.homestead.dvote.length < 1) {
-  //     print("The DVote gateway list is empty for Homestead");
-  //     return null;
-  //   }
+    // PROD
+    int dvoteIdx =
+        random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
+    int web3Idx =
+        random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
 
-  //   // PROD
-  //   int dvoteIdx =
-  //       random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
-  //   int web3Idx =
-  //       random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
-
-  //   gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
-  //   gw.publicKey =
-  //       appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
-  //   gw.supportedApis
-  //       .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
-  //   gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
-  // } else {
+    gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
+    gw.publicKey =
+        appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
+    gw.supportedApis
+        .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
+    gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
+  } else {
     if (appStateBloc.value.bootnodes.goerli.dvote.length < 1) {
       print("The DVote gateway list is empty for Goerli");
       return null;
@@ -74,7 +71,7 @@ GatewayInfo _selectRandomGatewayInfo() {
     gw.supportedApis
         .addAll(appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].apis);
     gw.web3 = appStateBloc.value.bootnodes.goerli.web3[web3Idx].uri;
-  // }
+  }
   return gw;
 }
 

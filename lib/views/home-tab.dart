@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
 
 class CardContentWrapper {
-  final EntModel ent;
+  final EntityModel ent;
   final ProcessModel process;
   final FeedPost post;
   final DateTime date;
@@ -26,14 +26,14 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "HomeTab");
+    analytics.trackPage("HomeTab");
   }
 
   @override
   Widget build(ctx) {
     List<CardContentWrapper> items = [];
-    account.ents.forEach((ent) {
-      if (ent.feed.isValid) {
+    account.entities.forEach((ent) {
+      if (ent.feed.hasValue) {
         ent.feed.value.items.forEach((FeedPost post) {
           if (!(post is FeedPost)) return;
           DateTime date = DateTime.parse(post.datePublished);
@@ -42,13 +42,13 @@ class _HomeTabState extends State<HomeTab> {
           items.add(item);
         });
       }
-      if (ent.processes.isValid) {
+      if (ent.processes.hasValue) {
         ent.processes.value.forEach((ProcessModel process) {
           if (!(process is ProcessModel))
             return;
-          else if (process.processMetadata.isNotValid)
+          else if (process.processMetadata.hasError)
             return;
-          else if (process.startDate.isValid) return;
+          else if (process.startDate.hasValue) return;
 
           CardContentWrapper item = CardContentWrapper(
               ent: ent,

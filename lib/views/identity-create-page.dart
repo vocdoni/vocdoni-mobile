@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/modals/pattern-create-modal.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/view-modals/pattern-create-modal.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import '../lang/index.dart';
 
@@ -15,7 +15,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage(pageId: "IdentityCreatePage");
+    analytics.trackPage("IdentityCreatePage");
   }
 
   @override

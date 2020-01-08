@@ -2,10 +2,13 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/factories.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import "package:vocdoni/constants/meta-keys.dart";
+import 'package:dvote/dvote.dart';
+
 import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
@@ -14,12 +17,11 @@ import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/summary.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
-  EntModel ent;
+  EntityModel ent;
   String processId;
   final int index;
   PollPageArgs(
@@ -37,30 +39,36 @@ class _PollPageState extends State<PollPage> {
 
   @override
   void didChangeDependencies() {
+    // TODO: Really needed?
     super.didChangeDependencies();
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
 
-    analytics.trackPage(
-        pageId: "PollPage",
-        entityId: args.ent.entityReference.entityId,
-        processId: args.processId);
-
     processModel = args.ent.getProcess(args.processId);
-    if (!processModel.processMetadata.isValid) return;
+    if (!processModel.processMetadata.hasValue) return;
 
     if (_choices.length == 0) {
-      _choices = processModel.processMetadata.value?.details?.questions
-          ?.map((question) => null)
+      _choices = processModel.processMetadata.value.details.questions
+          .map((question) => null)
           .cast<String>()
           .toList();
     }
-    processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
+
+    analytics.trackPage("PollPage",
+        entityId: args.ent.entityReference.entityId, processId: args.processId);
+
+    if (processModel.isInCensus.hasError || !processModel.isInCensus.hasValue) {
+      processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
+    }
+    if (!processModel.startDate.hasValue || !processModel.endDate.hasValue) {
+      processModel.updateDates();
+    }
+    processModel.updateHasVoted();
   }
 
   @override
   Widget build(context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    EntModel ent = args.ent;
+    EntityModel ent = args.ent;
     final int index = args.index ?? 0;
     //Process process = args.process;
 
@@ -90,7 +98,7 @@ class _PollPageState extends State<PollPage> {
 
   List<Widget> actionsBuilder(BuildContext context) {
     PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    final EntModel ent = args.ent;
+    final EntityModel ent = args.ent;
     return [
       buildShareButton(context, ent),
     ];
@@ -117,7 +125,7 @@ class _PollPageState extends State<PollPage> {
   //   );
   // }
 
-  getScaffoldChildren(BuildContext context, EntModel ent) {
+  getScaffoldChildren(BuildContext context, EntityModel ent) {
     List<Widget> children = [];
     if (processModel.processMetadata.value == null) return children;
 
@@ -138,7 +146,7 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, EntModel ent) {
+  buildTitle(BuildContext context, EntityModel ent) {
     if (processModel.processMetadata.value == null) return Container();
 
     String title = processModel.processMetadata.value.details.title['default'];
@@ -172,15 +180,15 @@ class _PollPageState extends State<PollPage> {
   buildCensusItem(BuildContext context) {
     return StateBuilder(
         viewModels: [processModel],
-        tag: ProcessTags.CENSUS_STATE,
+        tag: ProcessStateTags.CENSUS_STATE,
         builder: (ctx, tagId) {
           String text;
           Purpose purpose;
           IconData icon;
 
-          if (processModel.isInCensus.isUpdating) {
+          if (processModel.isInCensus.isLoading) {
             text = "Checking census";
-          } else if (processModel.isInCensus.isValid) {
+          } else if (processModel.isInCensus.hasValue) {
             if (processModel.isInCensus.value) {
               text = "You are in the census";
               purpose = Purpose.GOOD;
@@ -190,7 +198,7 @@ class _PollPageState extends State<PollPage> {
               purpose = Purpose.DANGER;
               icon = FeatherIcons.x;
             }
-          } else if (processModel.isInCensus.isError) {
+          } else if (processModel.isInCensus.hasError) {
             text = processModel.isInCensus.errorMessage;
             icon = FeatherIcons.alertTriangle;
           } else {
@@ -200,13 +208,13 @@ class _PollPageState extends State<PollPage> {
           return ListItem(
             icon: FeatherIcons.users,
             mainText: text,
-            isSpinning: processModel.isInCensus.isUpdating,
+            isSpinning: processModel.isInCensus.isLoading,
             onTap: () {
               processModel.updateCensusState();
             },
             rightTextPurpose: purpose,
             rightIcon: icon,
-            purpose: processModel.isInCensus.isNotValid
+            purpose: processModel.isInCensus.hasError
                 ? Purpose.DANGER
                 : Purpose.NONE,
           );
@@ -223,11 +231,10 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    String formattedTime = "";
-    if (processModel.endDate.isValid) {
-      formattedTime =
-          DateFormat("dd/MM - H:mm").format(processModel.endDate.value);
-    }
+    if (!processModel.endDate.hasValue) return Container();
+
+    String formattedTime =
+        DateFormat("dd/MM H:mm").format(processModel.endDate.value) + "h";
 
     return ListItem(
       icon: FeatherIcons.clock,
@@ -238,7 +245,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  setResponse(int questionIndex, String value) {
+  setChoice(int questionIndex, String value) {
     setState(() {
       _choices[questionIndex] = value;
     });
@@ -259,28 +266,29 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.isInCensus.isNotValid) return Container();
+    if (processModel.isInCensus.hasError) return Container();
 
-    if (processModel.isInCensus.isValid) {
-      final nextPendingChoice = getNextPendingChoice();
-
-      return Padding(
-        padding: EdgeInsets.all(paddingPage),
-        child: BaseButton(
-            text: "Submit",
-            isSmall: false,
-            style: BaseButtonStyle.FILLED,
-            purpose: Purpose.HIGHLIGHT,
-            isDisabled: nextPendingChoice >= 0 ||
-                processModel.isInCensus.value == false,
-            onTap: () {
-              onSubmit(ctx, processModel.processMetadata);
-            }),
-      );
+    if (!processModel.isInCensus.hasValue || processModel.hasVoted.value) {
+      return Container();
     }
+    final nextPendingChoice = getNextPendingChoice();
+
+    return Padding(
+      padding: EdgeInsets.all(paddingPage),
+      child: BaseButton(
+          text: "Submit",
+          isSmall: false,
+          style: BaseButtonStyle.FILLED,
+          purpose: Purpose.HIGHLIGHT,
+          isDisabled:
+              nextPendingChoice >= 0 || processModel.isInCensus.value == false,
+          onTap: () {
+            onSubmit(ctx, processModel.processMetadata);
+          }),
+    );
   }
 
-  onSubmit(ctx, processMetadata) async {
+  onSubmit(BuildContext ctx, processMetadata) async {
     var intChoices = _choices.map(int.parse).toList();
 
     await Navigator.push(
@@ -294,11 +302,17 @@ class _PollPageState extends State<PollPage> {
   buildSubmitInfo() {
     return StateBuilder(
       viewModels: [processModel],
-      tag: ProcessTags.CENSUS_STATE,
+      tag: ProcessStateTags.CENSUS_STATE,
       builder: (ctx, tagId) {
         final nextPendingChoice = getNextPendingChoice();
 
-        if (processModel.isInCensus.isValid) {
+        if (processModel.hasVoted.value == true) {
+          return ListItem(
+            mainText: 'Your vote is already registered',
+            purpose: Purpose.GOOD,
+            rightIcon: null,
+          );
+        } else if (processModel.isInCensus.hasValue) {
           if (processModel.isInCensus.value) {
             return nextPendingChoice >= 0 // still pending
                 ? ListItem(
@@ -332,7 +346,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildShareButton(BuildContext context, EntModel ent) {
+  buildShareButton(BuildContext context, EntityModel ent) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
@@ -355,7 +369,7 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (!processModel.processMetadata.isValid ||
+    if (!processModel.processMetadata.hasValue ||
         processModel.processMetadata.value.details.questions.length == 0) {
       return [];
     }
@@ -402,7 +416,7 @@ class _PollPageState extends State<PollPage> {
             selected: _choices[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
-                setResponse(questionIndex, voteOption.value);
+                setChoice(questionIndex, voteOption.value);
               }
             },
           ),

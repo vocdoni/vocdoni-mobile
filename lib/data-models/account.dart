@@ -1,15 +1,14 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/models/entModel.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 class Account {
-  List<EntModel> ents = new List<EntModel>();
+  List<EntityModel> entities = new List<EntityModel>();
   Identity identity;
   List<String> languages = [];
 
   Account() {
     languages = ['default'];
-
     init();
   }
 
@@ -18,50 +17,49 @@ class Account {
     this.identity.peers.entities.forEach((entitySummary) {
       for (EntityMetadata entity in entitiesBloc.value)
         if (entity.meta['entityId'] == entitySummary.entityId) {
-          EntModel ent = new EntModel(entitySummary);
-          this.ents.add(ent);
+          EntityModel ent = new EntityModel(entitySummary);
+          this.entities.add(ent);
         }
     });
   }
 
   sync() {
-    this.ents = this
+    this.entities = this
         .identity
         .peers
         .entities
-        .map((EntityReference entitySummary) => EntModel(entitySummary))
+        .map((EntityReference entitySummary) => EntityModel(entitySummary))
         .toList();
   }
 
-  isSubscribed(EntityReference _entitySummary) {
+  bool isSubscribed(EntityReference _entitySummary) {
     return identitiesBloc.isSubscribed(this.identity, _entitySummary);
   }
 
-  subscribe(EntModel ent) async {
+  subscribe(EntityModel ent) async {
     await identitiesBloc.subscribeEntityToAccount(
         ent.entityReference, account.identity);
-    this.ents.add(ent);
+    this.entities.add(ent);
   }
 
   unsubscribe(EntityReference _entitySummary) async {
     await identitiesBloc.unsubscribeEntityFromAccount(
         _entitySummary, account.identity);
-    int index = ents.indexWhere(
+    int index = entities.indexWhere(
         (ent) => _entitySummary.entityId == ent.entityReference.entityId);
-    if (index != -1) ents.removeAt(index);
+    if (index != -1) entities.removeAt(index);
   }
 
-  getEnt(EntityReference entityReference) {
-    for (EntModel ent in this.ents) {
+  findEntity(EntityReference entityReference) {
+    for (EntityModel ent in this.entities) {
       if (ent.entityReference.entityId == entityReference.entityId) return ent;
     }
-    EntModel ent = new EntModel(entityReference);
-    if (isSubscribed(entityReference) == false) this.subscribe(ent);
+    EntityModel ent = new EntityModel(entityReference);
     return ent;
   }
 
-  updateEnts() async {
-    for (EntModel ent in this.ents) {
+  updateEntities() async {
+    for (EntityModel ent in this.entities) {
       await ent.update();
     }
   }

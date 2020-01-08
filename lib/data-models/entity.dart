@@ -1,39 +1,37 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-import 'package:vocdoni/data/data-state.dart';
-import 'package:vocdoni/models/processModel.dart';
-import 'package:vocdoni/util/api.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/value-state.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/api.dart';
+import 'package:vocdoni/lib/singletons.dart';
+import "package:vocdoni/constants/meta-keys.dart";
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-enum EntTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
+enum EntityStateTags { ENTITY_METADATA, ACTIONS, FEED, PROCESSES }
 
-class EntModel extends StatesRebuilder {
-  EntityReference entityReference;
-  //final DataState entityMetadataDataState = DataState();
-  final DataState<EntityMetadata> entityMetadata = DataState();
+class EntityModel extends StatesRebuilder {
+  final EntityReference entityReference;
+  final ValueState<EntityMetadata> entityMetadata = ValueState();
 
-  final DataState<List<EntityMetadata_Action>> visibleActions = DataState();
-  final DataState<EntityMetadata_Action> registerAction = DataState();
-  final DataState<bool> isRegistered = DataState();
+  final ValueState<List<EntityMetadata_Action>> visibleActions = ValueState();
+  final ValueState<EntityMetadata_Action> registerAction = ValueState();
+  final ValueState<bool> isRegistered = ValueState();
 
-  final DataState<Feed> feed = DataState();
+  final ValueState<Feed> feed = ValueState();
 
-  final DataState<List<ProcessModel>> processes = DataState();
+  final ValueState<List<ProcessModel>> processes = ValueState();
   String lang = "default";
-  //final DataState processesDataState = DataState();
 
-  EntModel(EntityReference entitySummary) {
-    this.entityReference = entitySummary;
+  EntityModel(this.entityReference) {
     syncLocal();
   }
 
   syncLocal() async {
     syncEntityMetadata(entityReference);
 
-    if (this.entityMetadata.isValid) {
+    if (this.entityMetadata.hasValue) {
       syncFeed();
       syncProcesses();
     }
@@ -54,40 +52,41 @@ class EntModel extends StatesRebuilder {
 
   updateEntityMetadata() async {
     try {
-      this.entityMetadata.toBootingOrRefreshing();
-      if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
-      this.entityMetadata.value = await fetchEntityData(this.entityReference);
+      this.entityMetadata.setToLoading();
+      if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
+      this.entityMetadata.setValue(await fetchEntityData(this.entityReference));
     } catch (e) {
-      this.entityMetadata.toErrorOrFaulty("Unable to update entityMetadata");
+      this
+          .entityMetadata
+          .setError("Unable to update entityMetadata", keepPrevousValue: true);
     }
 
     saveMetadata();
-    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+    if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
   }
 
   updateFeed() async {
-    this.feed.toBootingOrRefreshing();
-    if (hasState) rebuildStates([EntTags.FEED]);
+    this.feed.setToLoading();
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
 
     try {
-      this.feed.value = await fetchEntityNewsFeed(
-          this.entityReference, this.entityMetadata.value, this.lang);
+      this.feed.setValue(await fetchEntityNewsFeed(
+          this.entityReference, this.entityMetadata.value, this.lang));
     } catch (error) {
-      this.feed.toErrorOrFaulty("Unable to fetch feed");
+      this.feed.setError("Unable to fetch the news feed");
     }
 
     await saveFeed();
 
-    if (hasState) rebuildStates([EntTags.FEED]);
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
   }
 
   syncProcesses() {
-    if (this.entityMetadata.isNotValid) {
-      this.processes.toErrorOrFaulty(
-          "EntityMetadata is not valid. Unable to retrieve active procesess");
+    if (!this.entityMetadata.hasValue) {
+      this.processes.setError("The entity metadata is not available.");
       return;
     }
-    this.processes.value = [];
+    this.processes.setValue([]);
 
     this
         .entityMetadata
@@ -100,24 +99,28 @@ class EntModel extends StatesRebuilder {
       this.processes.value.add(process);
     });
 
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
   }
 
   updateProcesses() async {
-    if (this.processes.isNotValid) return;
-    this.processes.toBootingOrRefreshing();
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (!this.processes.hasValue) return;
 
-    for (ProcessModel process in this.processes.value) {
+    this.processes.setToLoading();
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
+
+    final procs = this.processes.value;
+    for (ProcessModel process in procs) {
       await process.update();
     }
 
-    this.processes.value = this.processes.value;
+    this.processes.setValue(procs);
     await saveProcesses();
-    if (hasState) rebuildStates([EntTags.PROCESSES]);
+    if (hasState) rebuildStates([EntityStateTags.PROCESSES]);
   }
 
   ProcessModel getProcess(processId) {
+    if (!this.processes.hasValue) return null;
+
     for (var process in this.processes.value) {
       if (process.processId == processId) return process;
     }
@@ -125,17 +128,17 @@ class EntModel extends StatesRebuilder {
   }
 
   saveMetadata() async {
-    if (this.entityMetadata.isValid)
+    if (this.entityMetadata.hasValue)
       await entitiesBloc.add(this.entityMetadata.value, this.entityReference);
   }
 
   saveFeed() async {
-    if (this.feed.isValid)
+    if (this.feed.hasValue)
       await newsFeedsBloc.add(this.lang, this.feed.value, this.entityReference);
   }
 
   saveProcesses() async {
-    if (this.processes.isValid) {
+    if (this.processes.hasValue) {
       for (ProcessModel process in this.processes.value) {
         await process.save();
       }
@@ -148,11 +151,11 @@ class EntModel extends StatesRebuilder {
     });
 
     if (index == -1) {
-      this.entityMetadata.toUnknown();
+      this.entityMetadata.setError("Entity not found");
     } else {
-      this.entityMetadata.value = entitiesBloc.value[index];
+      this.entityMetadata.setValue(entitiesBloc.value[index]);
     }
-    if (hasState) rebuildStates([EntTags.ENTITY_METADATA]);
+    if (hasState) rebuildStates([EntityStateTags.ENTITY_METADATA]);
   }
 
   syncFeed() {
@@ -165,30 +168,30 @@ class EntModel extends StatesRebuilder {
     }, orElse: () => null);
 
     if (newFeed == null)
-      this.feed.toUnknown();
+      this.feed.setError("News feed not found");
     else
-      this.feed.value = newFeed;
-    if (hasState) rebuildStates([EntTags.FEED]);
+      this.feed.setValue(newFeed);
+    if (hasState) rebuildStates([EntityStateTags.FEED]);
   }
 
   Future<void> updateVisibleActions() async {
     final List<EntityMetadata_Action> actionsToDisplay = [];
 
-    if (this.entityMetadata.isNotValid) return;
+    if (!this.entityMetadata.hasValue) return;
 
-    this.visibleActions.toBootingOrRefreshing();
-    if (hasState) rebuildStates([EntTags.ACTIONS]);
+    this.visibleActions.setToLoading();
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
 
     for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
       if (action.register == true) {
         if (this.registerAction.value != null)
           continue; //only one registerAction is supported
 
-        this.registerAction.value = action;
-        this.isRegistered.value =
-            await isActionVisible(action, this.entityReference.entityId);
+        this.registerAction.setValue(action);
+        this.isRegistered.setValue(
+            await isActionVisible(action, this.entityReference.entityId));
 
-        if (hasState) rebuildStates([EntTags.ACTIONS]);
+        if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
       } else {
         bool isVisible =
             await isActionVisible(action, this.entityReference.entityId);
@@ -196,14 +199,17 @@ class EntModel extends StatesRebuilder {
       }
     }
 
-    this.visibleActions.value = actionsToDisplay;
-    if (hasState) rebuildStates([EntTags.ACTIONS]);
+    this.visibleActions.setValue(actionsToDisplay);
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
   }
 
   Future<bool> isActionVisible(
       EntityMetadata_Action action, String entityId) async {
-    if (action.visible == "true") return true;
-    if (action.visible == null || action.visible == "false") return false;
+    if (action.visible == "true")
+      return true;
+    else if (action.visible == null || action.visible == "false") return false;
+
+    // ELSE => the `visible` field is a URL
 
     String publicKey = account.identity.identityId;
     int timestamp = new DateTime.now().millisecondsSinceEpoch;

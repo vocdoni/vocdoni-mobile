@@ -1,39 +1,34 @@
 import 'package:dvote/api/voting-process.dart';
 import 'package:dvote/net/gateway.dart';
-import 'package:vocdoni/data/data-state.dart';
-import 'package:vocdoni/util/net.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/value-state.dart';
+import 'package:vocdoni/lib/net.dart';
 
 class VochainModel {
   VochainModel();
 
-  final DataState<int> referenceBlock = new DataState();
-  final DataState<DateTime> referenceTimestamp = new DataState();
+  final ValueState<int> referenceBlock = new ValueState();
+  final ValueState<DateTime> referenceTimestamp = new ValueState();
 
   syncBlockHeight() {
     //TODO
   }
 
   updateBlockHeight() async {
-    this.referenceBlock.toBootingOrRefreshing();
+    this.referenceBlock.setToLoading();
     final DVoteGateway dvoteGw = getDVoteGateway();
 
     try {
       final newReferenceblock = await getBlockHeight(dvoteGw);
 
       if (newReferenceblock == null) {
-        this
-            .referenceBlock
-            .toErrorOrFaulty("Unable to retrieve reference block");
-        this
-            .referenceTimestamp
-            .toErrorOrFaulty("Unable to retrieve reference block");
+        this.referenceBlock.setError("Unable to retrieve reference block");
+        this.referenceTimestamp.setError("Unable to retrieve reference block");
       } else {
-        this.referenceBlock.value = newReferenceblock;
-        this.referenceTimestamp.value = DateTime.now();
+        this.referenceBlock.setValue(newReferenceblock);
+        this.referenceTimestamp.setValue(DateTime.now());
       }
     } catch (err) {
-      this.referenceBlock.toError("Network error");
+      this.referenceBlock.setError("Network error");
       print(err);
       throw err;
     }
@@ -41,7 +36,7 @@ class VochainModel {
   }
 
   Duration getDurationUntilBlock(int blockNumber) {
-    if (this.referenceBlock.isNotValid) return null;
+    if (!this.referenceBlock.hasValue) return null;
     int blocksLeftFromReference = blockNumber - referenceBlock.value;
     Duration referenceToBlock = blocksToDuration(blocksLeftFromReference);
     Duration nowToReference =

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/util/singletons.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:native_widgets/native_widgets.dart';
 
 final toasterTextStyle =
