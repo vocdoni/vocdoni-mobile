@@ -3,10 +3,11 @@ import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
+import "package:vocdoni/constants/storage-names.dart";
 
 final String _storageFile = PROCESSES_STORE_FILE;
 
-class ProcessesPersistence extends BasePersistence<ProcessMetadata> {
+class ProcessesPersistence extends BasePersistenceList<ProcessMetadata> {
   @override
   Future<List<ProcessMetadata>> readAll() async {
     await super.init();

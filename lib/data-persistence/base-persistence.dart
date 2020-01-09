@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Abstract class to persist collections of objects
-abstract class BasePersistence<T> {
+abstract class BasePersistenceList<T> {
   @protected
   Directory storageDir;
 

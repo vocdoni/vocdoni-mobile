@@ -9,7 +9,6 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/data-models/news-feed.dart';
-import 'package:vocdoni/data-models/vochain.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -36,13 +35,13 @@ void main() async {
   // RUN THE APP
   runApp(MultiProvider(
       providers: [
-        Provider<AppStateModel>(create: (_) => globalAppStateModel), // single object
-        Provider<VochainModel>(create: (_) => globalVochainModel),
+        Provider<AppStateModel>(create: (_) => globalAppState), // single object
 
-        Provider<AccountPoolModel>(create: (_) => globalAccountPoolModel), // object pool
-        Provider<EntityPoolModel>(create: (_) => globalEntityPoolModel),
-        Provider<ProcessPoolModel>(create: (_) => globalProcessPoolModel),
-        Provider<NewsFeedPoolModel>(create: (_) => globalNewsFeedPoolModel),
+        Provider<AccountPoolModel>(
+            create: (_) => globalAccountPool), // object pool
+        Provider<EntityPoolModel>(create: (_) => globalEntityPool),
+        Provider<ProcessPoolModel>(create: (_) => globalProcessPool),
+        Provider<NewsFeedPoolModel>(create: (_) => globalNewsFeedPool),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

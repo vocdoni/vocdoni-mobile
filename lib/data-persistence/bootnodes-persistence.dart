@@ -5,26 +5,29 @@ import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
 import "package:vocdoni/constants/storage-names.dart";
 
-final String _storageFile = IDENTITIES_STORE_FILE;
+final String _storageFile = BOOTNODES_STORE_FILE;
 
-class IdentitiesPersistence extends BasePersistenceList<Identity> {
+class BootnodesPersistence
+    extends BasePersistenceSingle<BootNodeGateways> {
   @override
-  Future<List<Identity>> readAll() async {
+  Future<BootNodeGateways> read() async {
     await super.init();
 
     try {
       final File fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        return [];
+        final emptyValue = BootNodeGateways();
+        set(emptyValue);
+        return emptyValue;
       }
 
       final bytes = await fd.readAsBytes();
-      final IdentitiesStore store = IdentitiesStore.fromBuffer(bytes);
+      final BootNodeGateways gwList = BootNodeGateways.fromBuffer(bytes);
 
       // Update the in-memory current value
-      set(store.items);
+      set(gwList);
 
-      return store.items;
+      return gwList;
     } catch (err) {
       if (!kReleaseMode) print(err);
       throw RestoreError("There was an error while reading the local data");
@@ -32,14 +35,12 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
   }
 
   @override
-  Future<void> writeAll(List<Identity> value) async {
+  Future<void> write(BootNodeGateways value) async {
     await super.init();
 
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      IdentitiesStore store = IdentitiesStore();
-      store.items.addAll(value);
-      await fd.writeAsBytes(store.writeToBuffer());
+      await fd.writeAsBytes(value.writeToBuffer());
 
       // Update the in-memory current value
       set(value);

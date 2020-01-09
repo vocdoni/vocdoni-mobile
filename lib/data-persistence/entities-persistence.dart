@@ -3,10 +3,11 @@ import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
+import "package:vocdoni/constants/storage-names.dart";
 
 final String _storageFile = ENTITIES_STORE_FILE;
 
-class EntitiesPersistence extends BasePersistence<EntityMetadata> {
+class EntitiesPersistence extends BasePersistenceList<EntityMetadata> {
   @override
   Future<List<EntityMetadata>> readAll() async {
     await super.init();

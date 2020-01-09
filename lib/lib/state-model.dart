@@ -7,6 +7,8 @@ import 'package:vocdoni/lib/state-value.dart';
 /// It also provides notification capabilities, so that `provider` listeners
 /// can rebuild upon any updates on it.
 ///
+/// **Use this class if you need to track remote data loading, manage persistence and notify UI widgets.**
+/// 
 /// STATE MODEL USAGE:
 ///
 /// - Create a class to store your state
@@ -32,7 +34,7 @@ import 'package:vocdoni/lib/state-value.dart';
 /// - https://pub.dev/packages/provider
 /// - https://www.youtube.com/watch?v=d_m5csmrf7I
 ///
-class StateModel<T> with ChangeNotifier, StateValue<T> {
+abstract class StateModel<T> with ChangeNotifier, StateValue<T> {
   /*
   --------------------------------------------------------------------------
   INTERNAL STATE MANAGEMENT (inherited from StateValue)
@@ -44,21 +46,21 @@ class StateModel<T> with ChangeNotifier, StateValue<T> {
   */
 
   @override
-  setToLoading([String loadingMessage]) {
+  void setToLoading([String loadingMessage]) {
     super.setToLoading(loadingMessage);
 
     notifyListeners(); // Add provider notifications after the state is changed
   }
 
   @override
-  setError(String error, {bool keepPreviousValue = false}) {
+  void setError(String error, {bool keepPreviousValue = false}) {
     super.setError(error, keepPreviousValue: keepPreviousValue);
 
     notifyListeners(); // Add provider notifications after the state is changed
   }
 
   @override
-  setValue(T newValue) {
+  void setValue(T newValue) {
     super.setValue(newValue);
 
     notifyListeners(); // Add provider notifications after the state is changed

@@ -8,7 +8,7 @@ class Analytics {
   MixpanelAnalytics _mixpanelBatch;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  init() {
+  void init() {
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
       userId$: _user$.stream,
@@ -28,12 +28,13 @@ class Analytics {
         onError: (e) => () {});
   }
 
-  setUser() {
+  void setUser() {
     _user$.add(getUserId());
   }
 
   getUserId() {
-    return account.identity.keys[0].address;
+    final currentAccount = globalAppState.getSelectedAccount();
+    return currentAccount?.value?.identity?.keys[0]?.address;
   }
 
   // OS, OS version, screen size...

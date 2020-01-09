@@ -1,6 +1,8 @@
 /// Base class that wraps and manages **eventual data** that can involve
 /// remote fetching, eventual exceptions and delayed completion.
 ///
+/// **Use this class if you simply need to track remote data loading.**
+/// 
 class StateValue<T> {
   bool _loading = false;
   String _loadingMessage; // optional

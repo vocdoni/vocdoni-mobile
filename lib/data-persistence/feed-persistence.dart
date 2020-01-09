@@ -5,11 +5,11 @@ import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
 import "package:vocdoni/constants/storage-names.dart";
 
-final String _storageFile = IDENTITIES_STORE_FILE;
+final String _storageFile = PROCESSES_STORE_FILE;
 
-class IdentitiesPersistence extends BasePersistenceList<Identity> {
+class NewsFeedPersistence extends BasePersistenceList<Feed> {
   @override
-  Future<List<Identity>> readAll() async {
+  Future<List<Feed>> readAll() async {
     await super.init();
 
     try {
@@ -19,7 +19,7 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
       }
 
       final bytes = await fd.readAsBytes();
-      final IdentitiesStore store = IdentitiesStore.fromBuffer(bytes);
+      final FeedStore store = FeedStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -32,12 +32,12 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
   }
 
   @override
-  Future<void> writeAll(List<Identity> value) async {
+  Future<void> writeAll(List<Feed> value) async {
     await super.init();
 
     try {
       File fd = File("${storageDir.path}/$_storageFile");
-      IdentitiesStore store = IdentitiesStore();
+      FeedStore store = FeedStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 

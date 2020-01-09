@@ -18,40 +18,40 @@ class _StartupPageState extends State<StartupPage> {
   }
 
   Future<void> initApplication() {
-    analytics.init();
+    globalAnalytics.init();
 
     // RESTORE PERSISTED DATA
-    return appStateBloc
-        .init()
-        .then((_) => entitiesBloc.init())
-        .then((_) => identitiesBloc.init())
-        .then((_) => newsFeedsBloc.init())
-        .then((_) => processesBloc.init())
+    return Future.wait([
+      globalAppState.readFromStorage(),
+      globalAccountPool.readFromStorage(),
+      globalEntityPool.readFromStorage(),
+      globalNewsFeedPool.readFromStorage(),
+      globalProcessPool.readFromStorage()
+    ])
         // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-        .then((_) => appStateBloc.fetchRemoteState())
-        // DETERMINE THE NEXT SCREEN AND GO THERE
+        .then((_) => Future.wait([
+              globalAppState.refresh(),
+            ]))
         .then((_) {
-      if (identitiesBloc.value.length > 0 ?? false) {
-        // Replace all routes with /identity/select on top
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/identity/select", (Route _) => false);
+      // DETERMINE THE NEXT SCREEN AND GO THERE
+      String nextRoutePath;
+      if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
+        nextRoutePath = "/identity/select";
       } else {
-        // Replace all routes with /identity/create on top
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/identity/create", (Route _) => false);
+        nextRoutePath = "/identity/create";
       }
+
+      // Replace all routes with /identity/select on top
+      Navigator.pushNamedAndRemoveUntil(
+          context, nextRoutePath, (Route _) => false);
     }).catchError((err) {
       setState(() {
         loading = false;
-        // if (err is String) error = err;
-        // else
         error = "Could not load the status of the app";
       });
 
-      // RETRY
-      Future.delayed(Duration(seconds: 5))
-          .then((_) => initApplication())
-          .catchError((_) {});
+      // RETRY ITSELF
+      Future.delayed(Duration(seconds: 5)).then((_) => initApplication());
     });
   }
 
