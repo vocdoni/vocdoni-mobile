@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/state-value.dart';
 
-/// Base class that wraps and manages **eventual data** that can involve
-/// remote access, eventual exceptions and delayed completion.
+/// Base class that wraps and manages **eventual data**, which can be still unresolved,
+/// have an error, or have a non-null valid value.
 ///
 /// It also provides notification capabilities, so that `provider` listeners
 /// can rebuild upon any updates on it.
 ///
 /// **Use this class if you need to track remote data loading, manage persistence and notify UI widgets.**
-/// 
+///
 /// STATE MODEL USAGE:
 ///
 /// - Create a class to store your state
@@ -34,7 +34,7 @@ import 'package:vocdoni/lib/state-value.dart';
 /// - https://pub.dev/packages/provider
 /// - https://www.youtube.com/watch?v=d_m5csmrf7I
 ///
-class StateModel<T> with ChangeNotifier, StateValue<T> {
+class StateModel<T> with ChangeNotifier, StateValueMixin<T> {
   /*
   --------------------------------------------------------------------------
   INTERNAL STATE MANAGEMENT (inherited from StateValue)

@@ -26,38 +26,6 @@ class EntityModel extends StatesRebuilder {
 
   DateTime lastUpdated;
 
-  getByReference(EntityReference entityReference) {
-    for (EntityModel ent in this.entities) {
-      if (ent.entityReference.entityId == entityReference.entityId) return ent;
-    }
-    EntityModel ent = new EntityModel(entityReference);
-    return ent;
-  }
-  EntityModel(this.entityReference) {
-    syncLocal();
-  }
-
-  syncLocal() async {
-    syncEntityMetadata(entityReference);
-
-    if (this.entityMetadata.hasValue) {
-      syncFeed();
-      syncProcesses();
-    }
-  }
-
-  update() async {
-    await syncLocal();
-    await updateEntityMetadata();
-    await updateVisibleActions();
-    await updateFeed();
-    await updateProcesses();
-  }
-
-  updateWithDelay() {
-    //This allows to call update() on widget's initState()
-    Future.delayed(Duration(milliseconds: 10), () {}).then((_) => update());
-  }
 
   updateEntityMetadata() async {
     try {

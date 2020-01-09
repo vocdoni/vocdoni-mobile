@@ -1,9 +1,19 @@
-/// Base class that wraps and manages **eventual data** that can involve
-/// remote fetching, eventual exceptions and delayed completion.
+/// Base class that wraps and manages **eventual data**, which can be still unresolved,
+/// have an error, or have a non-null valid value.
 ///
 /// **Use this class if you simply need to track remote data loading.**
-/// 
-class StateValue<T> {
+///
+class StateValue<T> with StateValueMixin<T> {
+  /// Initializes the state with no value by default. If an argument is passed,
+  /// the argument is set as the initial value.
+  StateValue([T initialValue]) {
+    if (initialValue is T) this.setValue(initialValue);
+  }
+}
+
+/// State manager that wraps a value and allows to track whether data is being awaited,
+/// whether an error occurred or whether a non-null value is present.
+mixin StateValueMixin<T> {
   bool _loading = false;
   String _loadingMessage; // optional
 

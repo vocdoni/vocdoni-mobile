@@ -8,7 +8,7 @@ import 'package:vocdoni/data-models/app-state.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/data-models/news-feed.dart';
+import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -41,7 +41,7 @@ void main() async {
             create: (_) => globalAccountPool), // object pool
         Provider<EntityPoolModel>(create: (_) => globalEntityPool),
         Provider<ProcessPoolModel>(create: (_) => globalProcessPool),
-        Provider<NewsFeedPoolModel>(create: (_) => globalNewsFeedPool),
+        Provider<FeedPoolModel>(create: (_) => globalFeedPool),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
