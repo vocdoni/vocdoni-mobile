@@ -9,7 +9,7 @@ import 'package:vocdoni/data-persistence/feed-persistence.dart';
 import 'package:vocdoni/data-models/app-state.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/news-feed.dart';
+import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 
 import 'package:vocdoni/lib/analtyics.dart';
@@ -32,7 +32,7 @@ final globalAppState = AppStateModel();
 final globalAccountPool = AccountPoolModel();
 final globalEntityPool = EntityPoolModel();
 final globalProcessPool = ProcessPoolModel();
-final globalNewsFeedPool = NewsFeedPoolModel();
+final globalFeedPool = FeedPoolModel();
 
 final globalAnalytics = Analytics();
 

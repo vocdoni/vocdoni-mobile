@@ -34,7 +34,7 @@ import 'package:vocdoni/lib/state-value.dart';
 /// - https://pub.dev/packages/provider
 /// - https://www.youtube.com/watch?v=d_m5csmrf7I
 ///
-abstract class StateModel<T> with ChangeNotifier, StateValue<T> {
+class StateModel<T> with ChangeNotifier, StateValue<T> {
   /*
   --------------------------------------------------------------------------
   INTERNAL STATE MANAGEMENT (inherited from StateValue)

@@ -11,7 +11,17 @@ import 'package:vocdoni/lib/state-value.dart';
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
+/// This class provides an abstraction layer to encapsulate everything related to a personal account.
+/// This is, the underlying identity and all the relevant metadata.
+/// 
+/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
+/// Updates on the children models will be handled by the object itself.
+///
 class AccountPoolModel extends StateModel<List<AccountModel>> {
+  AccountPoolModel() {
+    this.setValue(List<AccountModel>());
+  }
+
   // OVERRIDES
 
   @override
@@ -48,27 +58,29 @@ class AccountPoolModel extends StateModel<List<AccountModel>> {
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
-/// IMPORTANT: All **updates** on the state must call `notifyListeners()`
+/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
+/// Updates on the children models will be handled by the object itself.
 ///
 class AccountModel extends StateModel<AccountState> {
   // CONSTRUCTORS
 
-  AccountModel.fromIdentity(Identity idt) {
-    this.value.identity = idt;
+  // AccountModel.fromIdentity(Identity idt) {
+  //   final newValue = AccountState(idt, );
+  //   this.value.identity = idt;
 
-    this.value.entities = this
-        .identity
-        .peers
-        .entities
-        .map((EntityReference entitySummary) => EntityModel(entitySummary))
-        .toList();
-  }
+  //   this.value.entities = this
+  //       .identity
+  //       .peers
+  //       .entities
+  //       .map((EntityReference entitySummary) => EntityModel(entitySummary))
+  //       .toList();
+  // }
 
-  AccountModel.fromExisting(String alias, String mnemonic) {
-    // TODO: implement
+  // AccountModel.fromExisting(String alias, String mnemonic) {
+  //   // TODO: implement
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
   // OVERRIDES
   @override

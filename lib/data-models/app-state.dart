@@ -10,7 +10,8 @@ import 'package:vocdoni/constants/settings.dart';
 
 /// AppStateModel handles the global state of the application.
 ///
-/// IMPORTANT: All **updates** on the state must call `notifyListeners()`
+/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
+/// Updates on the children models will be handled by the object itself.
 ///
 class AppStateModel extends StateModel<AppState> {
   AppStateModel() {

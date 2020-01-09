@@ -20,19 +20,28 @@ class _StartupPageState extends State<StartupPage> {
   Future<void> initApplication() {
     globalAnalytics.init();
 
-    // RESTORE PERSISTED DATA
+    // READ PERSISTED DATA
     return Future.wait([
-      globalAppState.readFromStorage(),
-      globalAccountPool.readFromStorage(),
-      globalEntityPool.readFromStorage(),
-      globalNewsFeedPool.readFromStorage(),
-      globalProcessPool.readFromStorage()
-    ])
-        // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-        .then((_) => Future.wait([
-              globalAppState.refresh(),
-            ]))
-        .then((_) {
+      globalBootnodesPersistence.read(),
+      globalIdentitiesPersistence.readAll(),
+      globalEntitiesPersistence.readAll(),
+      globalProcessesPersistence.readAll(),
+      globalFeedPersistence.readAll(),
+    ]).then((_) {
+      // POPULATE THE MODEL POOLS
+      return Future.wait([
+        globalAppState.readFromStorage(),
+        globalAccountPool.readFromStorage(),
+        globalEntityPool.readFromStorage(),
+        globalFeedPool.readFromStorage(),
+        globalProcessPool.readFromStorage()
+      ]);
+    }).then((_) {
+      // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
+      return Future.wait([
+        globalAppState.refresh(),
+      ]);
+    }).then((_) {
       // DETERMINE THE NEXT SCREEN AND GO THERE
       String nextRoutePath;
       if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
