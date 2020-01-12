@@ -1,105 +1,62 @@
+import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/state-tracker-base.dart';
+
 /// Base class that wraps and manages **eventual data**, which can be still unresolved,
 /// have an error, or have a non-null valid value.
 ///
-/// **Use this class if you simply need to track remote data loading.**
+/// It also provides notification capabilities, so that `provider` listeners
+/// can rebuild upon any updates on it.
 ///
-class StateValue<T> with StateValueMixin<T> {
+/// **Use this class if you need to track eventual data and notify consumers about any changes**
+///
+class StateValue<T> extends StateTrackerBase<T> with ChangeNotifier {
   /// Initializes the state with no value by default. If an argument is passed,
   /// the argument is set as the initial value.
   StateValue([T initialValue]) {
     if (initialValue is T) this.setValue(initialValue);
   }
-}
 
-/// State manager that wraps a value and allows to track whether data is being awaited,
-/// whether an error occurred or whether a non-null value is present.
-mixin StateValueMixin<T> {
-  bool _loading = false;
-  String _loadingMessage; // optional
+  /*
+  --------------------------------------------------------------------------
+  INTERNAL STATE MANAGEMENT (overriden from StateTrackerBase)
+  
+  Notify the changes of the internal value, so any subscriber can
+  rebuild upon changes on the current value, error events or loading status
+  ---------------------------------------------------------------------------
+  */
 
-  String _errorMessage; // If not null, then _currentValue is not valid
-  DateTime _lastError;
+  /// Sets the loading flag to true and an optional loading text.
+  /// Notifies any change subscribers.
+  /// Returns itself so further methods can be chained right after.
+  @override
+  StateValue setToLoading([String loadingMessage]) {
+    super.setToLoading(loadingMessage);
 
-  T _currentValue;
-  DateTime _lastUpdated;
-
-  /// Sets the loading flag to true and an optional loading text
-  setToLoading([String loadingMessage]) {
-    _loading = true;
-    if (loadingMessage is String && loadingMessage.length > 0) {
-      _loadingMessage = loadingMessage;
-    }
-
-    _errorMessage = null;
+    notifyListeners(); // Notify after the state is changed
+    return this;
   }
 
   /// Sets the error message to the given value and toggles loading to false.
+  /// Notifies any change subscribers.
   /// Optionally, allows to keep the current value, even if there is an error.
-  setError(String error, {bool keepPreviousValue = false}) {
-    _errorMessage = error;
-    _lastError = DateTime.now();
+  /// Returns itself so further methods can be chained right after.
+  @override
+  StateValue setError(String error, {bool keepPreviousValue = false}) {
+    super.setError(error, keepPreviousValue: keepPreviousValue);
 
-    _loading = false;
-    _loadingMessage = null;
-
-    if (keepPreviousValue != true) {
-      _currentValue = null;
-      _lastUpdated = null;
-    }
+    notifyListeners(); // Notify after the state is changed
+    return this;
   }
 
   /// Sets the underlying value, clears any previous error and
-  /// sets loading to false
-  setValue(T value) {
-    _currentValue = value;
-    _lastUpdated = DateTime.now();
+  /// sets loading to false.
+  /// Notifies any change subscribers.
+  /// Returns itself so further methods can be chained right after.
+  @override
+  StateValue setValue(T newValue) {
+    super.setValue(newValue);
 
-    _loading = false;
-    _loadingMessage = null;
-
-    _errorMessage = null;
-    _lastError = null;
-  }
-
-  /// Returns true if the loading flag is currently active
-  bool get isLoading {
-    return _loading;
-  }
-
-  /// Returns the optional loading message string
-  String get loadingMessage {
-    return _loadingMessage;
-  }
-
-  /// Returns true if an error message is currently set
-  bool get hasError {
-    return _errorMessage != null;
-  }
-
-  /// Returns the last error message defined
-  String get errorMessage {
-    return _errorMessage;
-  }
-
-  /// Returns true if a valid value is registered and no error has
-  /// cleared it
-  bool get hasValue {
-    if (_errorMessage != null) return true;
-    return _lastUpdated != null && _currentValue is T;
-  }
-
-  /// Provides the current value, if there is any
-  T get value {
-    return _currentValue;
-  }
-
-  /// Returns the last successful update
-  DateTime get lastUpdated {
-    return _lastUpdated;
-  }
-
-  /// Returns the timestamp of the last error encountered
-  DateTime get lastError {
-    return _lastError;
+    notifyListeners(); // Notify after the state is changed
+    return this;
   }
 }

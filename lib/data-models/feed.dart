@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -22,10 +23,9 @@ class FeedPoolModel extends StateModel<List<FeedModel>> {
   Future<void> readFromStorage() async {
     if (!hasValue) this.setValue(List<FeedModel>());
 
-    // Gateway boot nodes
     try {
       this.setToLoading();
-      final feedList = await globalFeedPersistence.readAll();
+      final feedList = globalFeedPersistence.get();
       final feedModelList = feedList
           .map((feed) => FeedModel(feed))
           .cast<FeedModel>()
@@ -63,6 +63,28 @@ class FeedPoolModel extends StateModel<List<FeedModel>> {
     throw Exception(
         "Call refresh() on the individual models instead of the global list");
   }
+
+  // HELPERS
+
+  /// Returns the news feed from a given entity. If no language is provided
+  /// then the first matching feed by the entity Id is returned.
+  FeedModel getFromEntityId(String entityId, [String language]) {
+    return this.value.firstWhere((feed) {
+      if(!feed.hasValue) return false;
+
+      bool isFromEntity =
+          feed.value.meta[META_ENTITY_ID] == entityId;
+      
+      if(language is String) {
+        bool isSameLanguage =
+            feed.value.meta[META_LANGUAGE] == language;
+        return isFromEntity && isSameLanguage;
+      }
+      else {
+        return isFromEntity;
+      }
+    }, orElse: () => null);
+  }
 }
 
 /// FeedModel encapsulates the relevant information of a Vocdoni Feed.
@@ -83,7 +105,6 @@ class FeedModel extends StateModel<Feed> {
     // TODO: Don't refetch if the IPFS hash is the same
 
     this.setToLoading();
-
     try {
       await fetchEntityFeed(
           this.entityReference, this.entityMetadata.value, this.lang)

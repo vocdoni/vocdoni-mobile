@@ -7,6 +7,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-value.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
+// import 'package:vocdoni/lib/api.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
 /// EntityPoolModel tracks all the registered accounts and provides individual models that
@@ -35,6 +36,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>> {
       final entityModelList = entityMetadataList
           .map((entityMeta) {
             // READ INDIRECT MODELS
+            // TODO FROM POOL
             final procsModels =
                 EntityModel.getPersistedProcessesForEntity(entityMeta);
             final feedModel = EntityModel.getPersistedFeedForEntity(entityMeta);
@@ -133,7 +135,7 @@ class EntityModel extends StateModel<EntityState> {
     final newValue = EntityState(entityRef);
     newValue.metadata.setValue(entityMeta);
     newValue.processes.setValue(procs);
-    newValue.newsFeed.setValue(feed);
+    newValue.feed.setValue(feed);
     this.setValue(newValue);
   }
 
@@ -142,9 +144,12 @@ class EntityModel extends StateModel<EntityState> {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
     // TODO: Implement refetch of the metadata
+    await fetchEntityData(this.entityReference)
     // TODO: Check the last time that data was fetched
     // TODO: `refresh` the voting processes
     // TODO: Get the news feed and `refresh` it
+    await fetchEntityNewsFeed(
+          this.entityReference, this.entityMetadata.value, this.lang)
     // TODO: Force a write() to persistence if changed
     // TODO: Update the visible actions
     // TODO: Determine whether the user is already registered
@@ -165,6 +170,7 @@ class EntityModel extends StateModel<EntityState> {
 
   static List<ProcessModel> getPersistedProcessesForEntity(
       EntityMetadata entityMeta) {
+    // TODO: GET FROM THE POOL INSTEAD
     return globalProcessesPersistence
         .get()
         .where((procMeta) =>
@@ -175,11 +181,93 @@ class EntityModel extends StateModel<EntityState> {
   }
 
   static FeedModel getPersistedFeedForEntity(EntityMetadata entityMeta) {
+    // TODO: GET FROM THE POOL INSTEAD
     final feedData = globalFeedPersistence.get().firstWhere(
         (feed) => feed.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID],
         orElse: () => null);
     return FeedModel(feedData);
   }
+
+  // TODO: ADAPT
+
+  /*Future<void> updateVisibleActions() async {
+    final List<EntityMetadata_Action> actionsToDisplay = [];
+
+    if (!this.entityMetadata.hasValue) return;
+
+    this.visibleActions.setToLoading();
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
+
+    for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
+      if (action.register == true) {
+        if (this.registerAction.value != null)
+          continue; //only one registerAction is supported
+
+        this.registerAction.setValue(action);
+        this.isRegistered.setValue(
+            await isActionVisible(action, this.entityReference.entityId));
+
+        if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
+      } else {
+        bool isVisible =
+            await isActionVisible(action, this.entityReference.entityId);
+        if (isVisible) actionsToDisplay.add(action);
+      }
+    }
+
+    this.visibleActions.setValue(actionsToDisplay);
+    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
+  }
+
+  Future<bool> isActionVisible(
+      EntityMetadata_Action action, String entityId) async {
+    if (action.visible == "true")
+      return true;
+    else if (action.visible == null || action.visible == "false") return false;
+
+    // ELSE => the `visible` field is a URL
+
+    String publicKey = account.identity.identityId;
+    int timestamp = new DateTime.now().millisecondsSinceEpoch;
+
+    // TODO: Get the private key to sign appropriately
+    final privateKey = "";
+    debugPrint(
+        "TODO: Retrieve the private key to sign the action visibility request");
+
+    try {
+      Map payload = {
+        "type": action.type,
+        'publicKey': publicKey,
+        "entityId": entityId,
+        "timestamp": timestamp,
+        "signature": ""
+      };
+
+      if (privateKey != "") {
+        payload["signature"] = await signString(
+            jsonEncode({"timestamp": timestamp.toString()}), privateKey);
+      } else {
+        payload["signature"] = "0x"; // TODO: TEMP
+      }
+
+      Map<String, String> headers = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      var response = await http.post(action.visible,
+          body: jsonEncode(payload), headers: headers);
+      if (response.statusCode != 200 || !(response.body is String))
+        return false;
+      final body = jsonDecode(response.body);
+      if (body is Map && body["visible"] == true) return true;
+    } catch (err) {
+      return false;
+    }
+
+    return false;
+  }*/
 }
 
 // Use this class as a data container only. Any logic that updates the state
@@ -189,7 +277,7 @@ class EntityState {
   final StateValue<EntityMetadata> metadata = StateValue<EntityMetadata>();
   final StateValue<List<ProcessModel>> processes =
       StateValue<List<ProcessModel>>();
-  final StateValue<FeedModel> newsFeed = StateValue<FeedModel>();
+  final StateValue<FeedModel> feed = StateValue<FeedModel>();
 
   // TODO: Use the missing variables
   // final StateValue<List<EntityMetadata_Action>> visibleActions = StateValue();

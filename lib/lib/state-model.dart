@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/state-value.dart';
 
 /// Base class that wraps and manages **eventual data**, which can be still unresolved,
@@ -34,38 +33,7 @@ import 'package:vocdoni/lib/state-value.dart';
 /// - https://pub.dev/packages/provider
 /// - https://www.youtube.com/watch?v=d_m5csmrf7I
 ///
-class StateModel<T> with ChangeNotifier, StateValueMixin<T> {
-  /*
-  --------------------------------------------------------------------------
-  INTERNAL STATE MANAGEMENT (inherited from StateValue)
-  
-  Track the evolution of the internal value, so any subscriber can
-  retrieve the current status, display error messages, loading
-  indicators or the value itself
-  ---------------------------------------------------------------------------
-  */
-
-  @override
-  void setToLoading([String loadingMessage]) {
-    super.setToLoading(loadingMessage);
-
-    notifyListeners(); // Add provider notifications after the state is changed
-  }
-
-  @override
-  void setError(String error, {bool keepPreviousValue = false}) {
-    super.setError(error, keepPreviousValue: keepPreviousValue);
-
-    notifyListeners(); // Add provider notifications after the state is changed
-  }
-
-  @override
-  void setValue(T newValue) {
-    super.setValue(newValue);
-
-    notifyListeners(); // Add provider notifications after the state is changed
-  }
-
+class StateModel<T> extends StateValue<T> {
   /*
   --------------------------------------------------------------------------
   EXTERNAL DATA MANAGEMENT
@@ -76,14 +44,23 @@ class StateModel<T> with ChangeNotifier, StateValueMixin<T> {
 
   /// Read from the internal storage, update its own contents and notify the listeners.
   /// Tell all submodels to do the same.
-  Future<void> readFromStorage() async {}
+  /// Override it to suit your needs.
+  Future<void> readFromStorage() {
+    throw Exception("readFromStorage is not available on this class");
+  }
 
   /// Write the serializable model's data to the internal storage.
   /// Tell all submodels to do the same.
-  Future<void> writeToStorage() async {}
+  /// Override it to suit your needs.
+  Future<void> writeToStorage() {
+    throw Exception("writeToStorage is not available on this class");
+  }
 
   /// Fetch any relevent items that might have become outdated and notify
   /// the listeners. Care should be taken to avoid refetching when not really
   /// necessary.
-  Future<void> refresh() async {}
+  /// Override it to suit your needs.
+  Future<void> refresh() {
+    throw Exception("refresh is not available on this class");
+  }
 }

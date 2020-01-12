@@ -54,48 +54,10 @@ class ProcessModel extends StatesRebuilder {
     // Fetch private key
   }
 
-  save() async {
-    await processesBloc.add(this.processMetadata.value);
-  }
-
-  syncProcessMetadata() {
-    ProcessMetadata value = processesBloc.value.firstWhere((process) {
-      bool isProcessId = process.meta[META_PROCESS_ID] == this.processId;
-      bool isFromEntity =
-          process.meta[META_ENTITY_ID] == this.entityReference.entityId;
-      bool isFromUser = true;
-      return isProcessId && isFromEntity && isFromUser;
-    }, orElse: () => null);
-
-    if (value == null)
-      this.processMetadata.setError("Not found");
-    else
-      this.processMetadata.setValue(value);
-
-    if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
-  }
-
-  updateProcessMetadataIfNeeded() async {
-    if (!this.processMetadata.hasValue) {
-      await updateProcessMetadata();
-    }
-  }
-
   updateProcessMetadata() async {
     try {
       this.processMetadata.setToLoading();
 
-      final DVoteGateway dvoteGw = getDVoteGateway();
-      final Web3Gateway web3Gw = getWeb3Gateway();
-
-      this
-          .processMetadata
-          .setValue(await getProcessMetadata(processId, dvoteGw, web3Gw));
-
-      processMetadata.value.meta[META_PROCESS_ID] = processId;
-      processMetadata.value.meta[META_ENTITY_ID] = entityReference.entityId;
-    } catch (err) {
-      this.processMetadata.setError("Unable to fetch the vote details");
     }
     if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
   }
