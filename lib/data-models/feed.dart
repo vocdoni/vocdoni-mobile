@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-model.dart';
@@ -8,8 +9,8 @@ import 'package:vocdoni/lib/singletons.dart';
 /// FeedPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class FeedPoolModel extends StateModel<List<FeedModel>> {
   FeedPoolModel() {
@@ -59,9 +60,23 @@ class FeedPoolModel extends StateModel<List<FeedModel>> {
   }
 
   @override
-  Future<void> refresh() {
-    throw Exception(
-        "Call refresh() on the individual models instead of the global list");
+  Future<void> refresh() async {
+    if (!hasValue) return;
+
+    try {
+      // TODO: Get a filtered FeedModel list of the Entities of the current user
+
+      // This will call `setValue` on the individual models already within the pool.
+      // No need to rebuild an updated pool list.
+      await Future.wait(
+          this.value.map((feedModel) => feedModel.refresh()).toList());
+
+      await this.writeToStorage();
+      // notifyListeners(); // Not needed => `setValue` already does it on every model
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      throw err;
+    }
   }
 
   // HELPERS
@@ -90,8 +105,8 @@ class FeedPoolModel extends StateModel<List<FeedModel>> {
 /// FeedModel encapsulates the relevant information of a Vocdoni Feed.
 /// This includes its metadata and the participation processes.
 ///
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class FeedModel extends StateModel<Feed> {
   FeedModel(Feed value) {

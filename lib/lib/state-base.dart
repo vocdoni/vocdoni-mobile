@@ -1,8 +1,6 @@
-// BASE STATE CLASS
-
 /// State manager that wraps a value, allows to track whether data is being awaited,
 /// whether an error occurred or whether a non-null value is present.
-abstract class StateTrackerBase<T> {
+class StateBase<T> {
   bool _loading = false;
   String _loadingMessage; // optional
 
@@ -14,7 +12,7 @@ abstract class StateTrackerBase<T> {
 
   /// Sets the loading flag to true and an optional loading text.
   /// Returns itself so further methods can be chained right after.
-  StateTrackerBase setToLoading([String loadingMessage]) {
+  StateBase setToLoading([String loadingMessage]) {
     _loading = true;
     if (loadingMessage is String && loadingMessage.length > 0) {
       _loadingMessage = loadingMessage;
@@ -27,7 +25,7 @@ abstract class StateTrackerBase<T> {
   /// Sets the error message to the given value and toggles loading to false.
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
-  StateTrackerBase setError(String error, {bool keepPreviousValue = false}) {
+  StateBase setError(String error, {bool keepPreviousValue = false}) {
     _errorMessage = error;
     _lastError = DateTime.now();
 
@@ -44,7 +42,7 @@ abstract class StateTrackerBase<T> {
   /// Sets the underlying value, clears any previous error and
   /// sets loading to false.
   /// Returns itself so further methods can be chained right after.
-  StateTrackerBase setValue(T value) {
+  StateBase setValue(T value) {
     _currentValue = value;
     _lastUpdated = DateTime.now();
 

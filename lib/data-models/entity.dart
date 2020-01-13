@@ -13,8 +13,8 @@ import 'package:vocdoni/lib/singletons.dart';
 /// EntityPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class EntityPoolModel extends StateModel<List<EntityModel>> {
   EntityPoolModel() {
@@ -100,8 +100,8 @@ class EntityPoolModel extends StateModel<List<EntityModel>> {
 /// EntityModel encapsulates the relevant information of a Vocdoni Entity.
 /// This includes its metadata and the participation processes.
 ///
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class EntityModel extends StateModel<EntityState> {
   /// Builds an EntityModel with the given components.

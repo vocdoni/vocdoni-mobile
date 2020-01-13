@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:vocdoni/lib/state-tracker-base.dart';
+import 'package:vocdoni/lib/state-base.dart';
 
 /// Base class that wraps and manages **eventual data**, which can be still unresolved,
 /// have an error, or have a non-null valid value.
@@ -9,7 +9,7 @@ import 'package:vocdoni/lib/state-tracker-base.dart';
 ///
 /// **Use this class if you need to track eventual data and notify consumers about any changes**
 ///
-class StateValue<T> extends StateTrackerBase<T> with ChangeNotifier {
+class StateValue<T> extends StateBase<T> with ChangeNotifier {
   /// Initializes the state with no value by default. If an argument is passed,
   /// the argument is set as the initial value.
   StateValue([T initialValue]) {
@@ -18,7 +18,7 @@ class StateValue<T> extends StateTrackerBase<T> with ChangeNotifier {
 
   /*
   --------------------------------------------------------------------------
-  INTERNAL STATE MANAGEMENT (overriden from StateTrackerBase)
+  INTERNAL STATE MANAGEMENT (overriden from StateBase)
   
   Notify the changes of the internal value, so any subscriber can
   rebuild upon changes on the current value, error events or loading status

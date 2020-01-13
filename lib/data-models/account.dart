@@ -14,8 +14,8 @@ import 'package:vocdoni/lib/state-value.dart';
 /// This class provides an abstraction layer to encapsulate everything related to a personal account.
 /// This is, the underlying identity and all the relevant metadata.
 /// 
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class AccountPoolModel extends StateModel<List<AccountModel>> {
   AccountPoolModel() {
@@ -58,8 +58,8 @@ class AccountPoolModel extends StateModel<List<AccountModel>> {
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
-/// IMPORTANT: Any **updates** on the own state must call `notifyListeners()` or use `setValue()`.
-/// Updates on the children models will be handled by the object itself.
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
 class AccountModel extends StateModel<AccountState> {
   // CONSTRUCTORS
