@@ -1,6 +1,34 @@
+// --------------------------------------------------------------------------
+// EXTERNAL DATA MANAGEMENT
+// ---------------------------------------------------------------------------
+
+/// Classes implementing this interface allow to refetch the current data from remote sources
+abstract class StateRefreshable {
+  /// Fetch any internal items that might have become outdated and notify
+  /// the listeners. Care should be taken to avoid refetching when not really
+  /// necessary.
+  Future<void> refresh();
+}
+
+/// Classes implementing this interface allow to read and write its internal data to
+/// the global persistence objects
+abstract class StatePersistable {
+  /// Read from the internal storage, update its own contents and notify the listeners.
+  /// Tell all submodels to do the same.
+  Future<void> readFromStorage();
+
+  /// Write the serializable model's data to the internal storage.
+  /// Tell all submodels to do the same.
+  Future<void> writeToStorage();
+}
+
+// --------------------------------------------------------------------------
+// INTERNAL DATA TRACKING
+// ---------------------------------------------------------------------------
+
 /// State manager that wraps a value, allows to track whether data is being awaited,
 /// whether an error occurred or whether a non-null value is present.
-class StateBase<T> {
+class StateTracker<T> {
   bool _loading = false;
   String _loadingMessage; // optional
 
@@ -12,7 +40,7 @@ class StateBase<T> {
 
   /// Sets the loading flag to true and an optional loading text.
   /// Returns itself so further methods can be chained right after.
-  StateBase setToLoading([String loadingMessage]) {
+  StateTracker setToLoading([String loadingMessage]) {
     _loading = true;
     if (loadingMessage is String && loadingMessage.length > 0) {
       _loadingMessage = loadingMessage;
@@ -25,7 +53,7 @@ class StateBase<T> {
   /// Sets the error message to the given value and toggles loading to false.
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
-  StateBase setError(String error, {bool keepPreviousValue = false}) {
+  StateTracker setError(String error, {bool keepPreviousValue = false}) {
     _errorMessage = error;
     _lastError = DateTime.now();
 
@@ -42,7 +70,7 @@ class StateBase<T> {
   /// Sets the underlying value, clears any previous error and
   /// sets loading to false.
   /// Returns itself so further methods can be chained right after.
-  StateBase setValue(T value) {
+  StateTracker setValue(T value) {
     _currentValue = value;
     _lastUpdated = DateTime.now();
 

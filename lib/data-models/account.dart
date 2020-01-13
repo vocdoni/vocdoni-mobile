@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
+import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -13,11 +14,12 @@ import 'package:vocdoni/lib/state-value.dart';
 ///
 /// This class provides an abstraction layer to encapsulate everything related to a personal account.
 /// This is, the underlying identity and all the relevant metadata.
-/// 
+///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class AccountPoolModel extends StateModel<List<AccountModel>> {
+class AccountPoolModel extends StateModel<List<AccountModel>>
+    implements StatePersistable {
   AccountPoolModel() {
     this.setValue(List<AccountModel>());
   }
@@ -61,7 +63,8 @@ class AccountPoolModel extends StateModel<List<AccountModel>> {
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class AccountModel extends StateModel<AccountState> {
+class AccountModel extends StateModel<AccountState>
+    implements StateRefreshable {
   // CONSTRUCTORS
 
   // AccountModel.fromIdentity(Identity idt) {
@@ -82,23 +85,23 @@ class AccountModel extends StateModel<AccountState> {
   //   notifyListeners();
   // }
 
-  // OVERRIDES
-  @override
-  readFromStorage() async {
-    // TODO:
-  }
+  // // OVERRIDES
+  // @override
+  // readFromStorage() async {
+  //   // TODO:
+  // }
 
-  @override
-  writeToStorage() async {
-    final allIdentities = await globalIdentitiesPersistence.readAll();
+  // @override
+  // writeToStorage() async {
+  //   final allIdentities = await globalIdentitiesPersistence.readAll();
 
-    // TODO: find our identity on the list
-    // TODO: UPDATE with the current identity value
+  //   // TODO: find our identity on the list
+  //   // TODO: UPDATE with the current identity value
 
-    await globalIdentitiesPersistence.writeAll(allIdentities);
+  //   await globalIdentitiesPersistence.writeAll(allIdentities);
 
-    // TODO: Same with entities
-  }
+  //   // TODO: Same with entities
+  // }
 
   // CUSTOM METHODS
 
@@ -179,7 +182,7 @@ class AccountModel extends StateModel<AccountState> {
     this.value.entities.add(entity);
 
     notifyListeners();
-    await writeToStorage();
+    await globalAccountPool.writeToStorage();
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
@@ -225,7 +228,7 @@ class AccountModel extends StateModel<AccountState> {
     }
     newState.authThresholdDate = newThreshold;
     notifyListeners();
-    await writeToStorage();
+    await globalAccountPool.writeToStorage();
   }
 }
 

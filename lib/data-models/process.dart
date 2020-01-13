@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-value.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -14,7 +15,8 @@ import 'package:vocdoni/lib/singletons.dart';
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class ProcessPoolModel extends StateModel<List<ProcessModel>> {
+class ProcessPoolModel extends StateModel<List<ProcessModel>>
+    implements StatePersistable, StateRefreshable {
   ProcessPoolModel() {
     this.setValue(List<ProcessModel>());
   }
@@ -104,7 +106,8 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>> {
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class ProcessModel extends StateModel<ProcessState> {
+class ProcessModel extends StateModel<ProcessState>
+    implements StateRefreshable {
   ProcessModel(String processId, String entityId) {
     final newValue = ProcessState(processId, entityId);
     this.setValue(newValue);

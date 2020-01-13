@@ -4,6 +4,7 @@ import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-value.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -16,7 +17,7 @@ import 'package:vocdoni/lib/singletons.dart';
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class EntityPoolModel extends StateModel<List<EntityModel>> {
+class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePersistable, StateRefreshable {
   EntityPoolModel() {
     this.setValue(List<EntityModel>());
   }
@@ -103,7 +104,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>> {
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class EntityModel extends StateModel<EntityState> {
+class EntityModel extends StateModel<EntityState> implements StateRefreshable {
   /// Builds an EntityModel with the given components.
   /// IMPORTANT: The `entityId` and `entryPoints` are mandatory. They can be contained in the
   /// own `EntityMetadata` > `meta` or in the optional poitional parameters.

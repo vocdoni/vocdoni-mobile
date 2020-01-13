@@ -2,6 +2,7 @@ import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
@@ -12,7 +13,7 @@ import 'package:vocdoni/lib/singletons.dart';
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class FeedPoolModel extends StateModel<List<FeedModel>> {
+class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersistable, StateRefreshable{
   FeedPoolModel() {
     this.setValue(List<FeedModel>());
   }
@@ -108,7 +109,7 @@ class FeedPoolModel extends StateModel<List<FeedModel>> {
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class FeedModel extends StateModel<Feed> {
+class FeedModel extends StateModel<Feed> implements StateRefreshable {
   FeedModel(Feed value) {
     this.setValue(value);
   }
