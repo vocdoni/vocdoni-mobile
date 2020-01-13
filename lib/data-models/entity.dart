@@ -5,21 +5,22 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-value.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
 // import 'package:vocdoni/lib/api.dart';
+
+// POOL
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
 /// EntityPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateModel or StateModel.
 ///
 class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePersistable, StateRefreshable {
   EntityPoolModel() {
-    this.setValue(List<EntityModel>());
+    this.load(List<EntityModel>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -28,7 +29,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
   /// and populate related models
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.setValue(List<EntityModel>());
+    if (!hasValue) this.load(List<EntityModel>());
 
     try {
       this.setToLoading();
@@ -37,17 +38,21 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
       final entityModelList = entityMetadataList
           .map((entityMeta) {
             // READ INDIRECT MODELS
+            final entityRef = EntityReference();
+            entityRef.entityId = entityMeta.meta[META_ENTITY_ID];
+            entityRef.entryPoints.addAll(entityMeta.meta[META_ENTITY_ID].split(","));
+            
             // TODO FROM POOL
+
             final procsModels =
                 EntityModel.getPersistedProcessesForEntity(entityMeta);
             final feedModel = EntityModel.getPersistedFeedForEntity(entityMeta);
 
-            return EntityModel(entityMeta, procsModels, feedModel);
+            return EntityModel(entityRef, entityMeta, procsModels, feedModel);
           })
           .cast<EntityModel>()
           .toList();
       this.setValue(entityModelList);
-      // notifyListeners(); // Not needed => `setValue` already does it
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
@@ -58,13 +63,13 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.setValue(List<EntityModel>());
+    if (!hasValue) this.load(List<EntityModel>());
 
     try {
       // WRITE THE DIRECT DATA THAT WE MANAGE
       final entitiesMeta = this
           .value
-          .map((entityModel) => entityModel.value.metadata)
+          .map((entityModel) => entityModel.metadata)
           .cast<EntityMetadata>()
           .toList();
       await globalEntitiesPersistence.writeAll(entitiesMeta);
@@ -98,46 +103,42 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
   }
 }
 
+// MODEL
+
 /// EntityModel encapsulates the relevant information of a Vocdoni Entity.
 /// This includes its metadata and the participation processes.
 ///
-/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
-///
-class EntityModel extends StateModel<EntityState> implements StateRefreshable {
-  /// Builds an EntityModel with the given components.
-  /// IMPORTANT: The `entityId` and `entryPoints` are mandatory. They can be contained in the
-  /// own `EntityMetadata` > `meta` or in the optional poitional parameters.
-  EntityModel(
-      EntityMetadata entityMeta, List<ProcessModel> procs, FeedModel feed,
-      [String entityId, List<String> entryPoints]) {
-    final entityRef = EntityReference();
-    if (entityMeta.meta[META_ENTITY_ID] is String)
-      entityRef.entityId = entityMeta.meta[META_ENTITY_ID];
-    else if (entityId is String) {
-      entityRef.entityId = entityId;
-      entityMeta.meta[META_ENTITY_ID] =
-          entityId; // Ensure we can read it back later on
-    } else
-      throw Exception(
-          "Either entityMeta.meta[META_ENTITY_ID] or entityId must be set");
+class EntityModel implements StateRefreshable {
+  final EntityReference reference; // This is never fetched
+  final StateModel<EntityMetadata> metadata = StateModel<EntityMetadata>();
+  final StateModel<List<ProcessModel>> processes =
+      StateModel<List<ProcessModel>>();
+  final StateModel<FeedModel> feed = StateModel<FeedModel>();
 
-    if (entityMeta.meta[META_ENTITY_ENTRY_POINTS] is String) {
-      final urls = entityMeta.meta[META_ENTITY_ENTRY_POINTS].split(",");
-      entityRef.entryPoints.addAll(urls);
-    } else if (entryPoints is List && entryPoints.length > 0) {
-      entityRef.entryPoints.addAll(entryPoints);
-      entityMeta.meta[META_ENTITY_ENTRY_POINTS] =
-          entryPoints.join(","); // Ensure we can read it back later on
-    } else
-      throw Exception(
-          "Either entityMeta.meta[META_ENTITY_ENTRY_POINTS] or entryPoints must be set");
+  // TODO: Use the missing variables
+  // final StateModel<List<EntityMetadata_Action>> visibleActions = StateModel();
+  // final StateModel<EntityMetadata_Action> registerAction = StateModel();
+  // final StateModel<bool> isRegistered = StateModel(false);
 
-    final newValue = EntityState(entityRef);
-    newValue.metadata.setValue(entityMeta);
-    newValue.processes.setValue(procs);
-    newValue.feed.setValue(feed);
-    this.setValue(newValue);
+  /// Builds an EntityModel with the given reference and optional data.
+  /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
+  EntityModel(this.reference,
+      [EntityMetadata entityMeta, List<ProcessModel> procs, FeedModel feed]) {
+
+    if(entityMeta is EntityMetadata) {
+      entityMeta.meta[META_ENTITY_ID] = this.reference.entityId; // Ensure we can read it back later on
+      entityMeta.meta[META_ENTITY_ENTRY_POINTS] = this.reference.entryPoints.join(","); // Ensure we can read it back later on
+      this.metadata.load(entityMeta);
+    }
+    else {
+      final newMetadata = EntityMetadata();
+      newMetadata.meta[META_ENTITY_ID] = this.reference.entityId;
+      newMetadata.meta[META_ENTITY_ENTRY_POINTS] = this.reference.entryPoints.join(",");
+      this.metadata.load(entityMeta);
+    }
+
+    if(procs is List)this.processes.load(procs);
+    if(feed is FeedModel) this.feed.load(feed);
   }
 
   @override
@@ -163,30 +164,31 @@ class EntityModel extends StateModel<EntityState> implements StateRefreshable {
   static getByReference(EntityReference entityRef) {
     if (!globalEntityPool.hasValue) return null;
     return globalEntityPool.value.firstWhere((entityModel) {
-      if (!entityModel.hasValue ||
-          !(entityModel.value.reference is EntityReference)) return false;
-      return entityModel.value.reference.entityId == entityRef.entityId;
+      return entityModel.reference.entityId == entityRef.entityId;
     }, orElse: () => null);
   }
 
   static List<ProcessModel> getPersistedProcessesForEntity(
       EntityMetadata entityMeta) {
     // TODO: GET FROM THE POOL INSTEAD
+
     return globalProcessesPersistence
         .get()
         .where((procMeta) =>
             procMeta.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID])
-        .map((procMeta) => ProcessModel(procMeta))
+        .map((procMeta) => ProcessModel(procMeta.meta[META_PROCESS_ID], procMeta.meta[META_ENTITY_ID]))
         .cast<ProcessModel>()
         .toList();
   }
 
   static FeedModel getPersistedFeedForEntity(EntityMetadata entityMeta) {
     // TODO: GET FROM THE POOL INSTEAD
+
     final feedData = globalFeedPersistence.get().firstWhere(
         (feed) => feed.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID],
         orElse: () => null);
-    return FeedModel(feedData);
+        
+    return FeedModel.fromFeed(feedData);
   }
 
   // TODO: ADAPT
@@ -269,21 +271,4 @@ class EntityModel extends StateModel<EntityState> implements StateRefreshable {
 
     return false;
   }*/
-}
-
-// Use this class as a data container only. Any logic that updates the state
-// should be defined above in the model class
-class EntityState {
-  final EntityReference reference; // This is never fetched
-  final StateValue<EntityMetadata> metadata = StateValue<EntityMetadata>();
-  final StateValue<List<ProcessModel>> processes =
-      StateValue<List<ProcessModel>>();
-  final StateValue<FeedModel> feed = StateValue<FeedModel>();
-
-  // TODO: Use the missing variables
-  // final StateValue<List<EntityMetadata_Action>> visibleActions = StateValue();
-  // final StateValue<EntityMetadata_Action> registerAction = StateValue();
-  // final StateValue<bool> isRegistered = StateValue(false);
-
-  EntityState(this.reference);
 }

@@ -6,7 +6,6 @@ import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-value.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
@@ -60,11 +59,16 @@ class AccountPoolModel extends StateModel<List<AccountModel>>
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
-/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
-///
-class AccountModel extends StateModel<AccountState>
-    implements StateRefreshable {
+class AccountModel implements StateRefreshable {
+  final StateModel<Identity> identity = StateModel<Identity>();
+  final StateModel<List<EntityModel>> entities =
+      StateModel<List<EntityModel>>();
+
+  final StateModel<int> failedAuthAttempts = StateModel<int>(0);
+  final StateModel<DateTime> authThresholdDate =
+      StateModel<DateTime>(DateTime.now());
+  // final List<String> languages = ["default"];
+
   // CONSTRUCTORS
 
   // AccountModel.fromIdentity(Identity idt) {
@@ -145,54 +149,66 @@ class AccountModel extends StateModel<AccountState>
     k.address = address;
 
     newIdentity.keys.add(k);
-    this.value.identity = newIdentity;
+    this.identity.setValue(newIdentity);
   }
 
   /// Trigger a refresh of the related entities metadata
   @override
   Future<void> refresh() {
-    return Future.wait(this.value.entities.map((e) => e.refresh()));
+    if (!this.entities.hasValue) return Future.value();
+    return Future.wait(this.entities.value.map((e) => e.refresh()));
   }
 
   Future<void> trackSuccessfulAuth() {
-    // TODO: Implement
+    var newThreshold = DateTime.now();
+    this.failedAuthAttempts.setValue(0);
+    this.authThresholdDate.setValue(newThreshold);
+    return globalAccountPool.writeToStorage();
   }
 
   Future<void> trackFailedAuth() {
-    // TODO: Implement
+    this.failedAuthAttempts.setValue(this.failedAuthAttempts.value + 1);
+    final seconds = pow(2, this.failedAuthAttempts.value);
+    var newThreshold = DateTime.now().add(Duration(seconds: seconds));
+    this.authThresholdDate.setValue(newThreshold);
+    return globalAccountPool.writeToStorage();
   }
 
   bool isSubscribed(EntityReference _entitySummary) {
-    return this.value.identity.peers.entities.any((existingEntitiy) {
+    if (!this.identity.hasValue) return false;
+    return this.identity.value.peers.entities.any((existingEntitiy) {
       return _entitySummary.entityId == existingEntitiy.entityId;
     });
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity
   subscribe(EntityModel entity) async {
-    if (isSubscribed(entity.entityReference)) return;
+    if (!entity.hasValue)
+      throw Exception("The entity model has no value");
+    else if (isSubscribed(entity.value.reference)) return;
 
     Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(identity.peers.entities); // clone
-    peers.identities.addAll(identity.peers.identities); // clone
+    peers.entities.addAll(identity.value.peers.entities); // clone
+    peers.identities.addAll(identity.value.peers.identities); // clone
 
-    peers.entities.add(entity.entityReference); // new entity
-    identity.peers = peers;
+    peers.entities.add(entity.value.reference); // new entity
+    identity.value.peers = peers;
 
-    this.value.entities.add(entity);
+    final newEntitiesList = this.entities.value;
+    newEntitiesList.add(entity);
+    this.entities.setValue(newEntitiesList);
 
-    notifyListeners();
     await globalAccountPool.writeToStorage();
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
   unsubscribe(EntityReference _entitySummary) async {
     Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(this.value.identity.peers.entities);
+    peers.entities.addAll(this.identity.value.peers.entities);
     peers.entities.removeWhere(
         (existingEntity) => existingEntity.entityId == _entitySummary.entityId);
-    peers.identities.addAll(this.value.identity.peers.identities);
-    this.value.identity.peers = peers;
+    peers.identities.addAll(this.identity.value.peers.identities);
+    this.identity.value.peers = peers;
 
     // TODO: Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
@@ -210,38 +226,9 @@ class AccountModel extends StateModel<AccountState>
     }
 
     // await identitiesBloc.unsubscribeEntityFromAccount(
-    //     _entitySummary, this.value.identity.identity);
+    //     _entitySummary, this.identity.identity);
     // int index = entities.indexWhere(
     //     (ent) => _entitySummary.entityId == ent.entityReference.entityId);
     // if (index != -1) entities.removeAt(index);
   }
-
-  Future trackAuthAttemp(bool successful) async {
-    final newState = value;
-    var newThreshold = DateTime.now();
-    if (successful) {
-      newState.failedAuthAttempts = 0;
-    } else {
-      newState.failedAuthAttempts++;
-      final seconds = pow(2, newState.failedAuthAttempts);
-      newThreshold.add(Duration(seconds: seconds));
-    }
-    newState.authThresholdDate = newThreshold;
-    notifyListeners();
-    await globalAccountPool.writeToStorage();
-  }
-}
-
-// Use this class as a data container only. Any logic that updates the state
-// should be defined above in the model class
-class AccountState {
-  final Identity identity;
-  final StateValue<List<EntityModel>> entities;
-
-  int failedAuthAttempts = 0;
-  DateTime authThresholdDate = DateTime.now();
-  // final List<String> languages = ["default"];
-
-  AccountState(this.identity, this.entities, this.failedAuthAttempts,
-      this.authThresholdDate);
 }

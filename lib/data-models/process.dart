@@ -1,10 +1,10 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-value.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
@@ -18,7 +18,7 @@ import 'package:vocdoni/lib/singletons.dart';
 class ProcessPoolModel extends StateModel<List<ProcessModel>>
     implements StatePersistable, StateRefreshable {
   ProcessPoolModel() {
-    this.setValue(List<ProcessModel>());
+    this.load(List<ProcessModel>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -26,13 +26,19 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.setValue(List<ProcessModel>());
+    if (!hasValue) this.load(List<ProcessModel>());
 
     try {
       this.setToLoading();
       final processList = globalProcessesPersistence.get();
       final processModelList = processList
-          .map((feed) => ProcessModel.fromMetadata(feed))
+          .where((processMeta) =>
+              processMeta.meta[META_PROCESS_ID] is String &&
+              processMeta.meta[META_ENTITY_ID] is String)
+          .map((processMeta) => ProcessModel.fromMetadata(
+              processMeta,
+              processMeta.meta[META_PROCESS_ID],
+              processMeta.meta[META_ENTITY_ID]))
           .cast<ProcessModel>()
           .toList();
       this.setValue(processModelList);
@@ -46,13 +52,14 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.setValue(List<ProcessModel>());
+    if (!hasValue) this.load(List<ProcessModel>());
 
     try {
       final processList = this
           .value
-          .where((processModel) => processModel.hasValue)
-          .map((processModel) => processModel.value.metadata)
+          .where((processModel) =>
+              processModel is ProcessModel && processModel.metadata.hasValue)
+          .map((processModel) => processModel.metadata)
           .cast<ProcessMetadata>()
           .toList();
       await globalProcessesPersistence.writeAll(processList);
@@ -90,10 +97,10 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
     return this
         .value
         .where((process) {
-          if (!process.hasValue || !process.value.metadata.hasValue)
+          if (!(process is ProcessModel) || !process.metadata.hasValue)
             return false;
 
-          return process.value.metadata.value.meta[META_ENTITY_ID] == entityId;
+          return process.metadata.value.meta[META_ENTITY_ID] == entityId;
         })
         .cast<ProcessModel>()
         .toList();
@@ -103,43 +110,48 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
 /// ProcessModel encapsulates the relevant information of a Vocdoni Process.
 /// This includes its metadata and the participation processes.
 ///
-/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
-///
-class ProcessModel extends StateModel<ProcessState>
-    implements StateRefreshable {
-  ProcessModel(String processId, String entityId) {
-    final newValue = ProcessState(processId, entityId);
-    this.setValue(newValue);
+class ProcessModel implements StateRefreshable {
+  final String processId;
+  final String entityId;
+  final StateModel<ProcessMetadata> metadata = StateModel<ProcessMetadata>();
+  final StateModel<bool> isInCensus = StateModel<bool>();
+  final StateModel<bool> hasVoted = StateModel<bool>();
+  final StateModel<int> currentParticipants = StateModel<int>();
+
+  List<dynamic> choices = [];
+
+  ProcessModel(this.processId, this.entityId,
+      [ProcessMetadata metadata,
+      bool isInCensus,
+      bool hasVoted,
+      int currentParticipants]) {
+    if (metadata is ProcessMetadata) this.metadata.load(metadata);
+    if (isInCensus is bool) this.isInCensus.load(isInCensus);
+    if (hasVoted is bool) this.hasVoted.load(hasVoted);
+    if (currentParticipants is int)
+      this.currentParticipants.load(currentParticipants);
   }
 
-  ProcessModel.fromMetadata(ProcessMetadata processMeta) {
-    if (!(processMeta.meta[META_PROCESS_ID] is String))
-      throw Exception(
-          "The given metadata needs to contain the process ID on meta['processId']");
-    else if (!(processMeta.meta[META_ENTITY_ID] is String))
-      throw Exception(
-          "The given metadata needs to contain the entity ID on meta['entityId']");
+  ProcessModel.fromMetadata(
+      ProcessMetadata metadata, this.processId, this.entityId) {
+    metadata.meta[META_PROCESS_ID] =
+        this.processId; // Ensure we can read it back
+    metadata.meta[META_ENTITY_ID] = this.entityId;
 
-    final newValue = ProcessState(
-        processMeta.meta[META_PROCESS_ID], processMeta.meta[META_ENTITY_ID]);
-    newValue.metadata.setValue(processMeta);
-    newValue.isInCensus.setValue(false);
+    this.metadata.load(metadata);
 
-    switch (this.value.metadata.value.meta[META_PROCESS_CENSUS_BELONGS]) {
+    switch (this.metadata.value.meta[META_PROCESS_CENSUS_BELONGS]) {
       case "true":
-        this.value.isInCensus.setValue(true);
+        this.isInCensus.load(true);
         break;
       case "false":
-        this.value.isInCensus.setValue(false);
+        this.isInCensus.load(false);
         break;
     }
-    this.setValue(newValue);
   }
 
   @override
   Future<void> refresh() {
-    this.setToLoading();
     return Future.wait([
       refreshMetadata(),
       refreshCensusState(),
@@ -147,9 +159,6 @@ class ProcessModel extends StateModel<ProcessState>
   }
 
   Future<void> refreshMetadata() async {
-    if (!this.hasValue)
-      throw Exception("Cannot refresh while since no value is loaded");
-
     // TODO: Check the last time that data was fetched
     // TODO: Don't refetch if the IPFS hash is the same
 
@@ -157,37 +166,35 @@ class ProcessModel extends StateModel<ProcessState>
       final DVoteGateway dvoteGw = getDVoteGateway();
       final Web3Gateway web3Gw = getWeb3Gateway();
 
-      this.value.metadata.setToLoading();
+      this.metadata.setToLoading();
       final newMetadata =
-          await getProcessMetadata(value.processId, dvoteGw, web3Gw);
-      newMetadata.meta[META_PROCESS_ID] = value.processId;
-      newMetadata.meta[META_ENTITY_ID] = value.entityId;
+          await getProcessMetadata(this.processId, dvoteGw, web3Gw);
+      newMetadata.meta[META_PROCESS_ID] =
+          this.processId; // Ensure we can read it back
+      newMetadata.meta[META_ENTITY_ID] = this.entityId;
 
-      this.value.metadata.setValue(newMetadata);
+      this.metadata.setValue(newMetadata);
     } catch (err) {
-      this.setError("Unable to fetch the process details");
+      this.metadata.setError("Unable to fetch the process details");
     }
   }
 
   Future<void> refreshCensusState() async {
-    if (!this.hasValue)
-      throw Exception("Cannot refresh while since no value is loaded");
-
     final DVoteGateway dvoteGw = getDVoteGateway();
 
-    value.isInCensus.setToLoading();
+    this.isInCensus.setToLoading();
 
     final currentAccount = globalAppState.getSelectedAccount();
-    if (!currentAccount.hasValue) return;
-
-    final base64Claim =
-        await digestHexClaim(currentAccount.value.identity.keys[0].publicKey);
+    if (!(currentAccount is AccountModel)) return;
 
     try {
+      final base64Claim =
+          await digestHexClaim(currentAccount.identity.value.keys[0].publicKey);
+
       final proof = await generateProof(
-          this.value.metadata.value.census.merkleRoot, base64Claim, dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        value.isInCensus.setError("You are not part of the census");
+        this.isInCensus.setError("You are not part of the census");
         return;
       }
 
@@ -195,35 +202,17 @@ class ProcessModel extends StateModel<ProcessState>
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
       if (emptyProofRegexp.hasMatch(proof)) {
-        value.isInCensus.setValue(false); // 0x0000000000.....
+        this.isInCensus.setValue(false); // 0x0000000000.....
         return;
       }
-      value.isInCensus.setValue(true);
+      this.isInCensus.setValue(true);
 
       final valid = await checkProof(
-          this.value.metadata.value.census.merkleRoot,
-          base64Claim,
-          proof,
-          dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, proof, dvoteGw);
 
-      this.value.isInCensus.setValue(valid);
+      this.isInCensus.setValue(valid);
     } catch (error) {
-      value.isInCensus.setError("Unable to check the census");
+      this.isInCensus.setError("Unable to check the census");
     }
   }
-}
-
-// Use this class as a data container only. Any logic that updates the state
-// should be defined above in the model class
-class ProcessState {
-  final String processId;
-  final String entityId;
-  final StateValue<ProcessMetadata> metadata = StateValue<ProcessMetadata>();
-  final StateValue<bool> isInCensus = StateValue<bool>();
-  final StateValue<bool> hasVoted = StateValue<bool>();
-  final StateValue<int> currentParticipants = StateValue<int>();
-
-  List<dynamic> choices = [];
-
-  ProcessState(this.processId, this.entityId);
 }

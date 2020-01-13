@@ -82,6 +82,17 @@ class StateTracker<T> {
     return this;
   }
 
+  /// Unlike `setValue`, silently updates the current value. `lastUpdated` and error tracking are untouched.
+  /// Use `load()` if you want `model.isRecent` to return `false` right after.
+  StateTracker load(T value) {
+    _currentValue = value;
+
+    _loading = false;
+    _loadingMessage = null;
+
+    return this;
+  }
+
   /// Returns true if the loading flag is currently active
   bool get isLoading {
     return _loading;
@@ -122,5 +133,12 @@ class StateTracker<T> {
   /// Returns the timestamp of the last error encountered
   DateTime get lastError {
     return _lastError;
+  }
+
+  /// Returns true if a valid value was set less than 10 seconds ago
+  bool get isRecent {
+    return hasValue &&
+        _lastUpdated is DateTime &&
+        DateTime.now().difference(_lastUpdated) < Duration(seconds: 10);
   }
 }

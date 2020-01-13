@@ -1,7 +1,9 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote/util/parsers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -13,9 +15,10 @@ import 'package:vocdoni/lib/singletons.dart';
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersistable, StateRefreshable{
+class FeedPoolModel extends StateModel<List<FeedModel>>
+    implements StatePersistable, StateRefreshable {
   FeedPoolModel() {
-    this.setValue(List<FeedModel>());
+    this.load(List<FeedModel>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -23,19 +26,23 @@ class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersista
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.setValue(List<FeedModel>());
+    if (!hasValue) this.load(List<FeedModel>());
 
     try {
       this.setToLoading();
       final feedList = globalFeedPersistence.get();
       final feedModelList = feedList
-          .map((feed) => FeedModel(feed))
+          .where((feedMeta) =>
+              feedMeta.meta[META_ENTITY_ID] is String &&
+              feedMeta.meta[META_FEED_CONTENT_URI] is String)
+          .map((feedMeta) => FeedModel(feedMeta.meta[META_FEED_CONTENT_URI],
+              feedMeta.meta[META_ENTITY_ID], feedMeta))
           .cast<FeedModel>()
           .toList();
       this.setValue(feedModelList);
       // notifyListeners(); // Not needed => `setValue` already does it
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -44,18 +51,18 @@ class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersista
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.setValue(List<FeedModel>());
+    if (!hasValue) this.load(List<FeedModel>());
 
     try {
       final feedList = this
           .value
-          .where((feedModel) => feedModel.hasValue)
-          .map((feedModel) => feedModel.value)
+          .where((feedModel) => feedModel.feed.hasValue)
+          .map((feedModel) => feedModel.feed.value)
           .cast<Feed>()
           .toList();
       await globalFeedPersistence.writeAll(feedList);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -85,18 +92,16 @@ class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersista
   /// Returns the news feed from a given entity. If no language is provided
   /// then the first matching feed by the entity Id is returned.
   FeedModel getFromEntityId(String entityId, [String language]) {
-    return this.value.firstWhere((feed) {
-      if(!feed.hasValue) return false;
+    return this.value.firstWhere((feedModel) {
+      if (!feedModel.feed.hasValue) return false;
 
-      bool isFromEntity =
-          feed.value.meta[META_ENTITY_ID] == entityId;
-      
-      if(language is String) {
+      bool isFromEntity = feedModel.feed.value.meta[META_ENTITY_ID] == entityId;
+
+      if (language is String) {
         bool isSameLanguage =
-            feed.value.meta[META_LANGUAGE] == language;
+            feedModel.feed.value.meta[META_LANGUAGE] == language;
         return isFromEntity && isSameLanguage;
-      }
-      else {
+      } else {
         return isFromEntity;
       }
     }, orElse: () => null);
@@ -109,24 +114,42 @@ class FeedPoolModel extends StateModel<List<FeedModel>> implements StatePersista
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
 ///
-class FeedModel extends StateModel<Feed> implements StateRefreshable {
-  FeedModel(Feed value) {
-    this.setValue(value);
+class FeedModel implements StateRefreshable {
+  final String contentUri;
+  final String entityId;
+  final String lang = "default";
+  final StateModel<Feed> feed = StateModel<Feed>();
+
+  FeedModel(this.contentUri, this.entityId, [Feed feed]) {
+    if (feed is Feed) this.feed.load(feed);
+  }
+
+  static FeedModel fromFeed(Feed feed) {
+    if (!(feed is Feed)) return null;
+    return FeedModel(
+        feed.meta[META_FEED_CONTENT_URI], feed.meta[META_ENTITY_ID], feed);
   }
 
   @override
   Future<void> refresh() async {
-    // TODO: Implement refetch of the metadata
-    // TODO: Check the last time that data was fetched
+    if (this.feed.isRecent) return;
+
     // TODO: Don't refetch if the IPFS hash is the same
 
-    this.setToLoading();
     try {
-      await fetchEntityFeed(
-          this.entityReference, this.entityMetadata.value, this.lang)
-      this.setValue(newValue);
-    } catch (error) {
-      this.setError("Unable to fetch the news feed");
+      final DVoteGateway dvoteGw = getDVoteGateway();
+      final ContentURI cUri = ContentURI(contentUri);
+
+      final result = await fetchFileString(cUri, dvoteGw);
+      final Feed feed = parseFeed(result);
+      feed.meta[META_FEED_CONTENT_URI] = contentUri;
+      feed.meta[META_ENTITY_ID] = entityId;
+      feed.meta[META_LANGUAGE] = lang;
+
+      this.feed.setValue(feed);
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      this.feed.setError("Unable to fetch the news feed");
     }
   }
 }
