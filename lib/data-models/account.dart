@@ -3,6 +3,9 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
+import 'package:flutter/foundation.dart';
+import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -26,33 +29,111 @@ class AccountPoolModel extends StateModel<List<AccountModel>>
 
   // OVERRIDES
 
+  /// Read the global collection of all objects from the persistent storage
   @override
-  readFromStorage() {
-    // TODO: implement readFromStorage
-    return null;
+  Future<void> readFromStorage() async {
+    if (!hasValue) this.load(List<AccountModel>());
+
+    try {
+      this.setToLoading();
+      final identitiesList = globalIdentitiesPersistence.get();
+      final identityModelList = identitiesList
+          .where((identity) => identity.meta[META_ACCOUNT_ID] is String)
+          .map((identity) {
+            final result = AccountModel.fromIdentity(identity);
+
+            // Decode extra fields
+            final failedAttempts = int.tryParse(
+                    identity.meta[META_ACCOUNT_FAILED_ATTEMPTS] ?? "0") ??
+                0;
+            final authThresholdDate = DateTime.tryParse(
+                    identity.meta[META_ACCOUNT_AUTH_THRESHOLD_DATE]) ??
+                DateTime.now();
+            result.failedAuthAttempts.load(failedAttempts);
+            result.authThresholdDate.load(authThresholdDate);
+
+            return result;
+          })
+          .cast<AccountModel>()
+          .toList();
+      this.setValue(identityModelList);
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
+      throw RestoreError("There was an error while accessing the local data");
+    }
   }
 
+  /// Write the given collection of all objects to the persistent storage
   @override
-  writeToStorage() {
-    // TODO: Store failedAuthAttempts and authThresholdDate
-    print("TO DO: Store failedAuthAttempts and authThresholdDate");
+  Future<void> writeToStorage() async {
+    if (!hasValue) this.load(List<AccountModel>());
 
-    // TODO: implement writeToStorage
-    return null;
+    try {
+      final identitiesList = this
+          .value
+          .where((accountModel) => accountModel.identity.hasValue)
+          .map((accountModel) {
+            final identity = accountModel.identity.value;
+
+            // Failed attempts
+            if (accountModel.failedAuthAttempts.hasValue)
+              identity.meta[META_ACCOUNT_FAILED_ATTEMPTS] =
+                  accountModel.failedAuthAttempts.value.toString();
+            else
+              identity.meta[META_ACCOUNT_FAILED_ATTEMPTS] = "0";
+
+            // When will the user be able to try again
+            if (accountModel.authThresholdDate.hasValue)
+              identity.meta[META_ACCOUNT_AUTH_THRESHOLD_DATE] =
+                  accountModel.authThresholdDate.value.toIso8601String();
+            else
+              identity.meta[META_ACCOUNT_AUTH_THRESHOLD_DATE] =
+                  DateTime.now().toIso8601String();
+
+            return identity;
+          })
+          .cast<Identity>()
+          .toList();
+      await globalIdentitiesPersistence.writeAll(identitiesList);
+
+      // Caschade the write request for the peer entities
+      await globalEntityPool.writeToStorage();
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      throw PersistError("Cannot store the current state");
+    }
   }
 
   // CUSTOM METHODS
 
-  addAccount(AccountModel newAccount) {
-    // TODO: prevent duplicates
+  /// Adds the new account to the collection and adds the peer entities to the entities poll
+  /// Persists the new account pool.
+  addNewAccount(AccountModel newAccount) async {
+    if (!this.hasValue)
+      throw Exception("The pool has no accounts loaded yet");
+    else if (!newAccount.identity.hasValue ||
+        newAccount.identity.value.keys.length == 0)
+      throw Exception("The account needs to have an identity set");
 
-    // TODO: ADD identity to global identities persistence
-    // TODO: ADD entities to global entities persistence
-    // TODO: ADD account to array
+    // Prevent duplicates
+    final duplicate = this.value.any((account) =>
+        account.identity.value.keys.length > 0 &&
+        account.identity.value.keys[0].publicKey ==
+            newAccount.identity.value.keys[0].publicKey);
 
-    // TODO: PERSIST
+    if (duplicate) {
+      if (!kReleaseMode)
+        print("WARNING: Attempting to add a duplicate identity. Skipping.");
+      return;
+    }
 
-    notifyListeners();
+    // Add identity to global identities persistence
+    final newAccountList = this.value;
+    newAccountList.add(newAccount);
+    this.setValue(newAccountList);
+
+    await this.writeToStorage();
   }
 }
 
@@ -68,7 +149,6 @@ class AccountModel implements StateRefreshable {
   final StateModel<int> failedAuthAttempts = StateModel<int>(0);
   final StateModel<DateTime> authThresholdDate =
       StateModel<DateTime>(DateTime.now());
-  // final List<String> languages = ["default"];
 
   final StateModel<String> timestampUsedToSign = StateModel<String>()
       .withFreshness(21600); // The timestamp string used to sign
@@ -77,87 +157,22 @@ class AccountModel implements StateRefreshable {
 
   // CONSTRUCTORS
 
-  // AccountModel.fromIdentity(Identity idt) {
-  //   final newValue = AccountState(idt, );
-  //   this.value.identity = idt;
+  /// Create a model with the given identity and the peer entities found on the Entity Pool
+  AccountModel.fromIdentity(Identity idt) {
+    this.identity.load(idt);
 
-  //   this.value.entities = this
-  //       .identity
-  //       .peers
-  //       .entities
-  //       .map((EntityReference entitySummary) => EntityModel(entitySummary))
-  //       .toList();
-  // }
+    if (globalEntityPool.hasValue) {
+      final entityList = this
+          .identity
+          .value
+          .peers
+          .entities
+          .map((EntityReference entitySummary) =>
+              EntityModel.getFromPool(entitySummary))
+          .toList();
 
-  // AccountModel.fromExisting(String alias, String mnemonic) {
-  //   // TODO: implement
-
-  //   notifyListeners();
-  // }
-
-  // // OVERRIDES
-  // @override
-  // readFromStorage() async {
-  //   // TODO:
-  // }
-
-  // @override
-  // writeToStorage() async {
-  //   final allIdentities = await globalIdentitiesPersistence.readAll();
-
-  //   // TODO: find our identity on the list
-  //   // TODO: UPDATE with the current identity value
-
-  //   await globalIdentitiesPersistence.writeAll(allIdentities);
-
-  //   // TODO: Same with entities
-  // }
-
-  // CUSTOM METHODS
-
-  /// Populates the object with a new identity and an empty list of organizations
-  makeNew(String alias, String patternEncryptionKey) async {
-    if (!(alias is String) || alias.length < 2)
-      throw Exception("Invalid alias");
-    else if (!(patternEncryptionKey is String) ||
-        patternEncryptionKey.length < 2)
-      throw Exception("Invalid patternEncryptionKey");
-
-    final currentIdentities = await globalIdentitiesPersistence.readAll();
-    alias = alias.trim();
-    final reducedAlias = alias.toLowerCase().trim();
-    if (currentIdentities
-            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
-            .length >
-        0) {
-      throw Exception("An account with this name already exists");
+      this.entities.load(entityList);
     }
-
-    final mnemonic = await generateMnemonic(size: 192);
-    final privateKey = await mnemonicToPrivateKey(mnemonic);
-    final publicKey = await mnemonicToPublicKey(mnemonic);
-    final address = await mnemonicToAddress(mnemonic);
-    final encryptedMenmonic =
-        await encryptString(mnemonic, patternEncryptionKey);
-    final encryptedPrivateKey =
-        await encryptString(privateKey, patternEncryptionKey);
-
-    Identity newIdentity = Identity();
-    newIdentity.alias = alias;
-    newIdentity.identityId = publicKey;
-    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
-
-    dvote.Key k = dvote.Key();
-    k.type = Key_Type.SECP256K1;
-    k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedPrivateKey = encryptedPrivateKey;
-    k.publicKey = publicKey;
-    k.address = address;
-
-    newIdentity.keys.add(k);
-    this.identity.setValue(newIdentity);
-
-    await this.refreshSignedTimestamp(patternEncryptionKey);
   }
 
   /// Trigger a refresh of the related entities metadata.
@@ -202,61 +217,183 @@ class AccountModel implements StateRefreshable {
     return globalAccountPool.writeToStorage();
   }
 
-  bool isSubscribed(EntityReference _entitySummary) {
+  bool isSubscribed(EntityReference entityReference) {
     if (!this.identity.hasValue) return false;
     return this.identity.value.peers.entities.any((existingEntitiy) {
-      return _entitySummary.entityId == existingEntitiy.entityId;
+      return entityReference.entityId == existingEntitiy.entityId;
     });
   }
 
-  /// Register the given organization as a subscribtion of the currently selected identity
-  subscribe(EntityModel entity) async {
-    if (!entity.hasValue)
-      throw Exception("The entity model has no value");
-    else if (isSubscribed(entity.reference)) return;
+  /// Register the given organization as a subscribtion of the currently selected identity.
+  subscribe(EntityModel entityReference) async {
+    if (entityReference.reference == null)
+      throw Exception("The entity has no reference");
+    else if (isSubscribed(entityReference.reference)) return;
 
     Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(identity.value.peers.entities); // clone
-    peers.identities.addAll(identity.value.peers.identities); // clone
+    peers.entities.addAll(identity.value.peers.entities); // clone existing
+    peers.identities.addAll(identity.value.peers.identities); // clone existing
 
-    peers.entities.add(entity.value.reference); // new entity
-    identity.value.peers = peers;
+    peers.entities.add(entityReference.reference); // new entity
 
-    final newEntitiesList = this.entities.value;
-    newEntitiesList.add(entity);
-    this.entities.setValue(newEntitiesList);
+    final updatedIdentity = this.identity.value;
+    updatedIdentity.peers = peers;
+    this.identity.setValue(updatedIdentity);
 
-    await globalAccountPool.writeToStorage();
+    final newPeerEntities = this.entities.value;
+    newPeerEntities.add(entityReference);
+    this.entities.setValue(newPeerEntities);
+
+    // await globalAccountPool.writeToStorage();
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribe(EntityReference _entitySummary) async {
+  unsubscribe(EntityReference entityReference) async {
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(this.identity.value.peers.entities);
-    peers.entities.removeWhere(
-        (existingEntity) => existingEntity.entityId == _entitySummary.entityId);
+    peers.entities.removeWhere((existingEntity) =>
+        existingEntity.entityId == entityReference.entityId);
     peers.identities.addAll(this.identity.value.peers.identities);
-    this.identity.value.peers = peers;
 
-    // TODO: Check if other identities are also subscribed
+    final updatedIdentity = this.identity.value;
+    updatedIdentity.peers = peers;
+    this.identity.setValue(updatedIdentity);
+
+    // Get ourselves
+    final currentAccount = globalAppState.getSelectedAccount();
+    if (!(currentAccount is AccountModel))
+      throw Exception("No account is currently selected");
+    else if (!currentAccount.identity.hasValue ||
+        !currentAccount.entities.hasValue)
+      throw Exception("The current identity is not properly initialized");
+
+    // Check if other identities are also subscribed
     bool subcribedInOtherAccounts = false;
-    for (final existingAccount in identitiesBloc.value) {
-      if (isSubscribed(existingAccount, entitySummary)) {
+    for (final existingAccount in globalAccountPool.value) {
+      if (!existingAccount.identity.hasValue ||
+          !existingAccount.entities.hasValue)
+        continue;
+      else if (existingAccount.identity.value.keys.length == 0)
+        continue;
+      // skip ourselves
+      else if (existingAccount.identity.value.keys[0].publicKey ==
+          currentAccount.identity.value.keys[0].publicKey) continue;
+
+      if (isSubscribed(entityReference)) {
         subcribedInOtherAccounts = true;
         break;
       }
     }
 
-    // TODO: Remove the full entity if not used elsewhere
-    // TODO: Remove the entity feeds if not used elsewhere
     if (!subcribedInOtherAccounts) {
-      await entitiesBloc.remove(entitySummary.entityId);
+      await globalEntityPool.remove(entityReference);
     }
 
     // await identitiesBloc.unsubscribeEntityFromAccount(
-    //     _entitySummary, this.identity.identity);
+    //     entityReference, this.identity.identity);
     // int index = entities.indexWhere(
-    //     (ent) => _entitySummary.entityId == ent.entityReference.entityId);
+    //     (ent) => entityReference.entityId == ent.entityReference.entityId);
     // if (index != -1) entities.removeAt(index);
+  }
+
+  // STATIC METHODS
+
+  /// Returns a Model with the identity restored from the given mnemonic and an empty list of entities.
+  /// NOTE: The returned model is not added to the global pool.
+  static Future<AccountModel> restoreFromMnemonic(
+      String alias, String mnemonic, String patternEncryptionKey) async {
+    if (!(alias is String) || alias.length < 1)
+      throw Exception("Invalid alias");
+    else if (!(mnemonic is String) || mnemonic.length < 2)
+      throw Exception("Invalid patternEncryptionKey");
+    else if (!(patternEncryptionKey is String) ||
+        patternEncryptionKey.length < 2)
+      throw Exception("Invalid patternEncryptionKey");
+
+    final currentIdentities = globalIdentitiesPersistence.get();
+    alias = alias.trim();
+    final reducedAlias = alias.toLowerCase().trim();
+    if (currentIdentities
+            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
+            .length >
+        0) {
+      throw Exception("An account with this name already exists");
+    }
+
+    final privateKey = await mnemonicToPrivateKey(mnemonic);
+    final publicKey = await mnemonicToPublicKey(mnemonic);
+    final address = await mnemonicToAddress(mnemonic);
+    final encryptedMenmonic =
+        await encryptString(mnemonic, patternEncryptionKey);
+    final encryptedPrivateKey =
+        await encryptString(privateKey, patternEncryptionKey);
+
+    Identity newIdentity = Identity();
+    newIdentity.alias = alias;
+    newIdentity.identityId = publicKey;
+    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
+
+    dvote.Key k = dvote.Key();
+    k.type = Key_Type.SECP256K1;
+    k.encryptedMnemonic = encryptedMenmonic;
+    k.encryptedPrivateKey = encryptedPrivateKey;
+    k.publicKey = publicKey;
+    k.address = address;
+
+    newIdentity.keys.add(k);
+
+    AccountModel result = AccountModel.fromIdentity(newIdentity);
+    await result.refreshSignedTimestamp(patternEncryptionKey);
+
+    return result;
+  }
+
+  /// Populates the object with a new identity and an empty list of organizations.
+  /// NOTE: The returned model is not added to the global pool.
+  static Future<AccountModel> makeNew(
+      String alias, String patternEncryptionKey) async {
+    if (!(alias is String) || alias.length < 1)
+      throw Exception("Invalid alias");
+    else if (!(patternEncryptionKey is String) ||
+        patternEncryptionKey.length < 2)
+      throw Exception("Invalid patternEncryptionKey");
+
+    final currentIdentities = globalIdentitiesPersistence.get();
+    alias = alias.trim();
+    final reducedAlias = alias.toLowerCase().trim();
+    if (currentIdentities
+            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
+            .length >
+        0) {
+      throw Exception("An account with this name already exists");
+    }
+
+    final mnemonic = await generateMnemonic(size: 192);
+    final privateKey = await mnemonicToPrivateKey(mnemonic);
+    final publicKey = await mnemonicToPublicKey(mnemonic);
+    final address = await mnemonicToAddress(mnemonic);
+    final encryptedMenmonic =
+        await encryptString(mnemonic, patternEncryptionKey);
+    final encryptedPrivateKey =
+        await encryptString(privateKey, patternEncryptionKey);
+
+    Identity newIdentity = Identity();
+    newIdentity.alias = alias;
+    newIdentity.identityId = publicKey;
+    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
+
+    dvote.Key k = dvote.Key();
+    k.type = Key_Type.SECP256K1;
+    k.encryptedMnemonic = encryptedMenmonic;
+    k.encryptedPrivateKey = encryptedPrivateKey;
+    k.publicKey = publicKey;
+    k.address = address;
+
+    newIdentity.keys.add(k);
+
+    AccountModel result = AccountModel.fromIdentity(newIdentity);
+    await result.refreshSignedTimestamp(patternEncryptionKey);
+
+    return result;
   }
 }

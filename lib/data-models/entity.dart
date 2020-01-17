@@ -92,7 +92,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
 
   @override
   Future<void> refresh() async {
-    if (!hasValue) return;
+    if (!this.hasValue) return;
 
     try {
       // TODO: Get a filtered EntityModel list of the Entities of the current user
@@ -103,10 +103,39 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
           this.value.map((entityModel) => entityModel.refresh()).toList());
 
       await this.writeToStorage();
-      // notifyListeners(); // Not needed => `setValue` already does it on every model
     } catch (err) {
       if (!kReleaseMode) print(err);
       throw err;
+    }
+  }
+
+  /// Removes the given entity from the pool and persists the new pool.
+  /// Also updates the Feed pool if needed
+  Future<void> remove(EntityReference entityRef) async {
+    if (!this.hasValue) throw Exception("The pool has no value yet");
+
+    final modelToRemove = this.value.firstWhere(
+        (entity) => entity.reference.entityId == entityRef.entityId,
+        orElse: () => null);
+    if (modelToRemove == null) return;
+
+    final updatedValue = this
+        .value
+        .where((entity) => entity.reference.entityId != entityRef.entityId)
+        .cast<EntityModel>()
+        .toList();
+    this.setValue(updatedValue);
+
+    await this.writeToStorage();
+
+    // Remove the entity voting processes
+    if (modelToRemove.processes.hasValue) {
+      await globalProcessPool.remove(modelToRemove.processes.value);
+    }
+
+    // Remove the entity feed if not used elsewhere
+    if (modelToRemove.feed.hasValue) {
+      await globalFeedPool.remove(modelToRemove.feed.value);
     }
   }
 }
@@ -339,34 +368,28 @@ class EntityModel implements StateRefreshable {
 
   /// Returns the EntityModel instance corresponding to the given reference
   /// only if it already belongs to the pool. You need to fetch it otherwise.
-  static getByReference(EntityReference entityRef) {
+  static getFromPool(EntityReference entityRef) {
     if (!globalEntityPool.hasValue) return null;
     return globalEntityPool.value.firstWhere((entityModel) {
       return entityModel.reference.entityId == entityRef.entityId;
     }, orElse: () => null);
   }
 
-  static List<ProcessModel> getPersistedProcessesForEntity(
-      EntityMetadata entityMeta) {
-    // TODO: GET FROM THE POOL INSTEAD
-
-    return globalProcessesPersistence
-        .get()
-        .where((procMeta) =>
-            procMeta.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID])
-        .map((procMeta) => ProcessModel(
-            procMeta.meta[META_PROCESS_ID], procMeta.meta[META_ENTITY_ID]))
+  static List<ProcessModel> getProcessesForEntity(String entityId) {
+    return globalProcessPool.value
+        .where((processModel) =>
+            processModel.metadata.hasValue &&
+            processModel.metadata.value.meta[META_ENTITY_ID] == entityId)
+        .map((processModel) => ProcessModel(
+            processModel.metadata.value.meta[META_PROCESS_ID],
+            processModel.metadata.value.meta[META_ENTITY_ID]))
         .cast<ProcessModel>()
         .toList();
   }
 
-  static FeedModel getPersistedFeedForEntity(EntityMetadata entityMeta) {
-    // TODO: GET FROM THE POOL INSTEAD
-
-    final feedData = globalFeedPersistence.get().firstWhere(
-        (feed) => feed.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID],
+  static FeedModel getFeedForEntity(String entityId) {
+    return globalFeedPool.value.firstWhere(
+        (feedModel) => feedModel.entityId == entityId,
         orElse: () => null);
-
-    return FeedModel.fromFeed(feedData);
   }
 }

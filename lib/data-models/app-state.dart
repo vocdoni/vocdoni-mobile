@@ -18,9 +18,11 @@ class AppStateModel implements StatePersistable, StateRefreshable {
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
-  final StateModel<BootNodeGateways> bootnodes = StateModel<BootNodeGateways>();
+  final StateModel<BootNodeGateways> bootnodes =
+      StateModel<BootNodeGateways>().withFreshness(60 * 10);
 
-  final StateModel<int> averageBlockTime = StateModel<int>(5); // seconds
+  final StateModel<int> averageBlockTime =
+      StateModel<int>(5); // 5 seconds by default
   final StateModel<int> referenceBlock = StateModel<int>();
   final StateModel<DateTime> referenceBlockTimestamp = StateModel<DateTime>();
 
@@ -59,7 +61,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
       final gwList = await globalBootnodesPersistence.read();
       this.bootnodes.setValue(gwList);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       this
           .bootnodes
           .setError("Cannot read the boot nodes list", keepPreviousValue: true);
@@ -78,7 +80,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
         await globalBootnodesPersistence
             .write(BootNodeGateways()); // empty data
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -86,21 +88,59 @@ class AppStateModel implements StatePersistable, StateRefreshable {
   /// Fetch the list of bootnodes and store it locally
   @override
   Future<void> refresh() async {
-    // TODO: Check the last time that data was fetched
-
     try {
       // Refresh bootnodes
-      await this._fetchBootnodes();
-      await writeToStorage();
+      await this.refreshBootNodes();
 
       // Refresh vochain state
-      return this._fetchCurrentBlockInfo();
+      await this.refreshBlockInfo();
+
+      await this.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print("ERR: $err");
       throw err;
     }
   }
 
+  Future<void> refreshBootNodes() async {
+    if (this.bootnodes.isFresh) return;
+
+    this.bootnodes.setToLoading();
+    try {
+      final gwList = await getDefaultGatewaysInfo(NETWORK_ID);
+      this.bootnodes.setValue(gwList);
+    } catch (err) {
+      this.bootnodes.setError("Cannot fetch the boot nodes list",
+          keepPreviousValue: true);
+      throw err;
+    }
+  }
+
+  Future<void> refreshBlockInfo() async {
+    if (this.referenceBlock.isFresh) return;
+
+    this.referenceBlock.setToLoading();
+
+    try {
+      final DVoteGateway dvoteGw = getDVoteGateway();
+      final newReferenceblock = await getBlockHeight(dvoteGw);
+
+      if (newReferenceblock == null) {
+        this.referenceBlock.setError("Unable to retrieve reference block");
+        this
+            .referenceBlockTimestamp
+            .setError("Unable to retrieve reference block");
+      } else {
+        this.referenceBlock.setValue(newReferenceblock);
+        this.referenceBlockTimestamp.setValue(DateTime.now());
+      }
+    } catch (err) {
+      this.referenceBlock.setError("Network error");
+      this.referenceBlockTimestamp.setError("Network error");
+      if (!kReleaseMode) print(err);
+      throw err;
+    }
+  }
   // CUSTOM METHODS
 
   /// Returns a duration if the block times are defined or `null` otherwise
@@ -118,51 +158,11 @@ class AppStateModel implements StatePersistable, StateRefreshable {
 
   /// Returns a duration if the block times are defined or `null` otherwise
   Duration getDurationForBlocks(int blockCount) {
-    //TODO fetch average block time
+    // TODO: fetch average block time from the GW at some point
     if (!this.referenceBlock.hasValue) return null;
 
     return new Duration(seconds: this.averageBlockTime.value * blockCount);
   }
 
   get currentLanguage => "default";
-
-  // INTERNAL HANDLERS
-
-  Future<void> _fetchBootnodes() async {
-    try {
-      this.bootnodes.setToLoading();
-      final gwList = await getDefaultGatewaysInfo(NETWORK_ID);
-      this.bootnodes.setValue(gwList);
-      // notifyListeners(); // Not needed => UI doesn't depend on bootnodes
-    } catch (err) {
-      this.bootnodes.setError("Cannot fetch the boot nodes list",
-          keepPreviousValue: true);
-      throw err;
-    }
-  }
-
-  Future<void> _fetchCurrentBlockInfo() async {
-    this.referenceBlock.setToLoading();
-
-    try {
-      final DVoteGateway dvoteGw = getDVoteGateway();
-      final newReferenceblock = await getBlockHeight(dvoteGw);
-
-      if (newReferenceblock == null) {
-        this.referenceBlock.setError("Unable to retrieve reference block");
-        this
-            .referenceBlockTimestamp
-            .setError("Unable to retrieve reference block");
-      } else {
-        this.referenceBlock.setValue(newReferenceblock);
-        this.referenceBlockTimestamp.setValue(DateTime.now());
-      }
-      // notifyListeners(); // Not needed => UI doesn't depend on referenceBlock
-    } catch (err) {
-      this.referenceBlock.setError("Network error");
-      this.referenceBlockTimestamp.setError("Network error");
-      print(err);
-      throw err;
-    }
-  }
 }

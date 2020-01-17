@@ -325,17 +325,17 @@ class ProcessModel implements StateRefreshable {
   }
 
   DateTime get startTime {
-    if (!vochainModel.referenceBlock.hasValue) return null;
+    if (!globalAppState.referenceBlock.hasValue) return null;
 
     final remainingDuration =
-        vochainModel.getDurationUntilBlock(this.metadata.value.startBlock);
+        globalAppState.getDurationUntilBlock(this.metadata.value.startBlock);
     return DateTime.now().add(remainingDuration);
   }
 
   DateTime get endTime {
-    if (!vochainModel.referenceBlock.hasValue) return null;
+    if (!globalAppState.referenceBlock.hasValue) return null;
 
-    final remainingDuration = vochainModel.getDurationUntilBlock(
+    final remainingDuration = globalAppState.getDurationUntilBlock(
         this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
     return DateTime.now().add(remainingDuration);
   }

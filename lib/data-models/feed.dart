@@ -80,7 +80,6 @@ class FeedPoolModel extends StateModel<List<FeedModel>>
           this.value.map((feedModel) => feedModel.refresh()).toList());
 
       await this.writeToStorage();
-      // notifyListeners(); // Not needed => `setValue` already does it on every model
     } catch (err) {
       if (!kReleaseMode) print(err);
       throw err;
