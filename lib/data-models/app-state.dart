@@ -124,6 +124,10 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     return new Duration(seconds: this.averageBlockTime.value * blockCount);
   }
 
+  get currentLanguage => "default";
+
+  // INTERNAL HANDLERS
+
   Future<void> _fetchBootnodes() async {
     try {
       this.bootnodes.setToLoading();

@@ -38,6 +38,9 @@ class StateTracker<T> {
   T _currentValue;
   DateTime _lastUpdated;
 
+  int _recentSecondsThreshold =
+      10; // Amount of seconds before `isFresh` returns false
+
   /// Sets the loading flag to true and an optional loading text.
   /// Returns itself so further methods can be chained right after.
   StateTracker setToLoading([String loadingMessage]) {
@@ -82,14 +85,25 @@ class StateTracker<T> {
     return this;
   }
 
-  /// Unlike `setValue`, silently updates the current value. `lastUpdated` and error tracking are untouched.
-  /// Use `load()` if you want `model.isRecent` to return `false` right after.
+  /// Immediately sets the given value and unlike `setValue`, does not update the modification date or any error message.
+  /// Use `load()` if you want `model.isFresh` to return `false` right after.
+  /// Returns itself so further methods can be chained right after.
   StateTracker load(T value) {
     _currentValue = value;
 
     _loading = false;
     _loadingMessage = null;
 
+    return this;
+  }
+
+  /// By default `isFresh` returns `false` 10 seconds after the value is set.
+  /// Alter the recency threshold with a new value.
+  /// Returns itself so further methods can be chained right after.
+  withFreshness(int seconds) {
+    if (seconds < 0) throw Exception("The amount of seconds must be positive");
+
+    this._recentSecondsThreshold = seconds;
     return this;
   }
 
@@ -136,9 +150,10 @@ class StateTracker<T> {
   }
 
   /// Returns true if a valid value was set less than 10 seconds ago
-  bool get isRecent {
+  bool get isFresh {
     return hasValue &&
         _lastUpdated is DateTime &&
-        DateTime.now().difference(_lastUpdated) < Duration(seconds: 10);
+        DateTime.now().difference(_lastUpdated) <
+            Duration(seconds: this._recentSecondsThreshold);
   }
 }

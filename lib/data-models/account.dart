@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:dvote/dvote.dart';
@@ -68,6 +69,11 @@ class AccountModel implements StateRefreshable {
   final StateModel<DateTime> authThresholdDate =
       StateModel<DateTime>(DateTime.now());
   // final List<String> languages = ["default"];
+
+  final StateModel<String> timestampUsedToSign = StateModel<String>()
+      .withFreshness(21600); // The timestamp string used to sign
+  final StateModel<String> signedTimestamp = StateModel<String>()
+      .withFreshness(21600); // The signature. Used for action visibility checks
 
   // CONSTRUCTORS
 
@@ -150,14 +156,36 @@ class AccountModel implements StateRefreshable {
 
     newIdentity.keys.add(k);
     this.identity.setValue(newIdentity);
+
+    await this.refreshSignedTimestamp(patternEncryptionKey);
   }
 
-  /// Trigger a refresh of the related entities metadata
+  /// Trigger a refresh of the related entities metadata.
+  /// Also recompute the signed timestamp so that entity actions can be checked
+  /// for visibility.
   @override
-  Future<void> refresh() {
-    if (!this.entities.hasValue) return Future.value();
-    return Future.wait(this.entities.value.map((e) => e.refresh()));
+  Future<void> refresh([String patternEncryptionKey]) async {
+    if (this.entities.hasValue) {
+      await Future.wait(this.entities.value.map((e) => e.refresh()));
+    }
+    if (patternEncryptionKey is String)
+      await refreshSignedTimestamp(patternEncryptionKey);
   }
+
+  Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
+    final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
+    final privateKey =
+        await decryptString(encryptedPrivateKey, patternEncryptionKey);
+
+    final ts = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final payload = jsonEncode({"timestamp": ts});
+    final signature = await signString(payload, privateKey);
+    this.signedTimestamp.setValue(signature);
+    this.timestampUsedToSign.setValue(ts);
+  }
+
+  // PUBLIC METHODS
 
   Future<void> trackSuccessfulAuth() {
     var newThreshold = DateTime.now();
@@ -185,7 +213,7 @@ class AccountModel implements StateRefreshable {
   subscribe(EntityModel entity) async {
     if (!entity.hasValue)
       throw Exception("The entity model has no value");
-    else if (isSubscribed(entity.value.reference)) return;
+    else if (isSubscribed(entity.reference)) return;
 
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(identity.value.peers.entities); // clone

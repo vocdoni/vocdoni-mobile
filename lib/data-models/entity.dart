@@ -1,9 +1,15 @@
+import 'dart:convert';
+import 'package:dvote/util/parsers.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:dvote/dvote.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -18,7 +24,8 @@ import 'package:vocdoni/lib/singletons.dart';
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 /// Updates on the children models will be notified by the objects themselves if using StateModel or StateModel.
 ///
-class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePersistable, StateRefreshable {
+class EntityPoolModel extends StateModel<List<EntityModel>>
+    implements StatePersistable, StateRefreshable {
   EntityPoolModel() {
     this.load(List<EntityModel>());
   }
@@ -40,8 +47,9 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
             // READ INDIRECT MODELS
             final entityRef = EntityReference();
             entityRef.entityId = entityMeta.meta[META_ENTITY_ID];
-            entityRef.entryPoints.addAll(entityMeta.meta[META_ENTITY_ID].split(","));
-            
+            entityRef.entryPoints
+                .addAll(entityMeta.meta[META_ENTITY_ID].split(","));
+
             // TODO FROM POOL
 
             final procsModels =
@@ -110,51 +118,221 @@ class EntityPoolModel extends StateModel<List<EntityModel>> implements StatePers
 ///
 class EntityModel implements StateRefreshable {
   final EntityReference reference; // This is never fetched
-  final StateModel<EntityMetadata> metadata = StateModel<EntityMetadata>();
+  final StateModel<EntityMetadata> metadata =
+      StateModel<EntityMetadata>().withFreshness(20);
   final StateModel<List<ProcessModel>> processes =
       StateModel<List<ProcessModel>>();
-  final StateModel<FeedModel> feed = StateModel<FeedModel>();
+  final StateModel<FeedModel> feed = StateModel<FeedModel>().withFreshness(45);
 
-  // TODO: Use the missing variables
-  // final StateModel<List<EntityMetadata_Action>> visibleActions = StateModel();
-  // final StateModel<EntityMetadata_Action> registerAction = StateModel();
-  // final StateModel<bool> isRegistered = StateModel(false);
+  final StateModel<List<EntityMetadata_Action>> visibleActions = StateModel();
+  final StateModel<EntityMetadata_Action> registerAction = StateModel();
+  final StateModel<bool> isRegistered = StateModel(false);
 
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
   EntityModel(this.reference,
       [EntityMetadata entityMeta, List<ProcessModel> procs, FeedModel feed]) {
-
-    if(entityMeta is EntityMetadata) {
-      entityMeta.meta[META_ENTITY_ID] = this.reference.entityId; // Ensure we can read it back later on
-      entityMeta.meta[META_ENTITY_ENTRY_POINTS] = this.reference.entryPoints.join(","); // Ensure we can read it back later on
+    if (entityMeta is EntityMetadata) {
+      entityMeta.meta[META_ENTITY_ID] =
+          this.reference.entityId; // Ensure we can read it back later on
+      entityMeta.meta[META_ENTITY_ENTRY_POINTS] = this
+          .reference
+          .entryPoints
+          .join(","); // Ensure we can read it back later on
       this.metadata.load(entityMeta);
-    }
-    else {
+    } else {
       final newMetadata = EntityMetadata();
       newMetadata.meta[META_ENTITY_ID] = this.reference.entityId;
-      newMetadata.meta[META_ENTITY_ENTRY_POINTS] = this.reference.entryPoints.join(",");
+      newMetadata.meta[META_ENTITY_ENTRY_POINTS] =
+          this.reference.entryPoints.join(",");
       this.metadata.load(entityMeta);
     }
 
-    if(procs is List)this.processes.load(procs);
-    if(feed is FeedModel) this.feed.load(feed);
+    if (procs is List) this.processes.load(procs);
+    if (feed is FeedModel) this.feed.load(feed);
   }
 
+  /// Fetch any internal items that might have become outdated and notify
+  /// the listeners. Care should be taken to avoid refetching when not really
+  /// necessary.
+  /// IMPORTANT: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
   @override
-  Future<void> refresh() async {
+  Future<void> refresh() {
+    return Future.wait(<Future>[
+      refreshMetadata(),
+      refreshVisibleActions(),
+      refreshProcesses(),
+      refreshFeed()
+    ]);
+  }
+
+  Future<void> refreshMetadata() async {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
-    // TODO: Implement refetch of the metadata
-    await fetchEntityData(this.entityReference)
+    if (!(reference is EntityReference))
+      return;
+    else if (this.metadata.isFresh) return;
+
+    final dvoteGw = getDVoteGateway();
+    final web3Gw = getWeb3Gateway();
+
+    this.metadata.setToLoading();
+
+    try {
+      final EntityMetadata entityMetadata =
+          await fetchEntity(reference, dvoteGw, web3Gw);
+      entityMetadata.meta[META_ENTITY_ID] = reference.entityId;
+
+      this.metadata.setValue(entityMetadata);
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      this.metadata.setError("The entity's data cannot be fetched");
+    }
+  }
+
+  Future<void> refreshProcesses() async {
     // TODO: Check the last time that data was fetched
     // TODO: `refresh` the voting processes
-    // TODO: Get the news feed and `refresh` it
-    await fetchEntityNewsFeed(
-          this.entityReference, this.entityMetadata.value, this.lang)
-    // TODO: Force a write() to persistence if changed
-    // TODO: Update the visible actions
-    // TODO: Determine whether the user is already registered
+    ;
+  }
+
+  Future<void> refreshFeed() async {
+    if (this.metadata.hasValue)
+      return;
+    else if (this.feed.isFresh) return;
+
+    this.feed.setToLoading();
+
+    if (!(this.metadata is EntityMetadata))
+      return;
+    else if (!(this.metadata.value.newsFeed is Map<String, String>))
+      return;
+    else if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
+        is String)) return;
+
+    final dvoteGw = getDVoteGateway();
+    this.feed.setToLoading();
+
+    try {
+      final cUri = ContentURI(
+          this.metadata.value.newsFeed[globalAppState.currentLanguage]);
+
+      final result = await fetchFileString(cUri, dvoteGw);
+      final feed = parseFeed(result);
+      feed.meta[META_ENTITY_ID] = this.reference.entityId;
+      feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
+
+      this.feed.setValue(FeedModel.fromFeed(feed));
+    } catch (err) {
+      if (!kReleaseMode) print(err);
+      this.feed.setError("Could not fetch the News Feed");
+    }
+  }
+
+  Future<void> refreshVisibleActions() async {
+    final List<EntityMetadata_Action> visibleStandardActions = [];
+
+    if (!this.metadata.hasValue)
+      return;
+    else if (this.visibleActions.isFresh) return;
+
+    this.registerAction.setToLoading();
+    this.isRegistered.setToLoading();
+    this.visibleActions.setToLoading();
+
+    try {
+      await Future.wait(this
+          .metadata
+          .value
+          .actions
+          .map((action) async {
+            if (action.register) {
+              return _isActionVisible(action, this.reference.entityId)
+                  .then((visible) {
+                if (!(visible is bool)) throw Exception();
+                this.registerAction.setValue(action);
+                this.isRegistered.setValue(!visible);
+              }).catchError((err) {
+                // capture the error locally
+                this
+                    .registerAction
+                    .setError("Could not load the register status");
+                this
+                    .isRegistered
+                    .setError("Could not load the register status");
+              });
+            } else {
+              // standard action
+              // in case of error: propagate to the global catcher
+              bool isVisible =
+                  await _isActionVisible(action, this.reference.entityId);
+              if (isVisible) visibleStandardActions.add(action);
+            }
+          })
+          .cast<Future>()
+          .toList());
+
+      this.visibleActions.setValue(visibleStandardActions);
+    } catch (err) {
+      this.visibleActions.setError("Could not fetch the entity details");
+
+      // The request fails entirely. Keep values if already present
+      if (this.registerAction.isLoading) {
+        this.registerAction.setError("Could not load the register status");
+      }
+      if (this.isRegistered.isLoading) {
+        this.isRegistered.setError("Could not load the register status");
+      }
+    }
+  }
+
+  // PRIVATE METHODS
+
+  /// Returns true/false if the value is defined or the request succeeds. Returns null if the request
+  /// can't be signed or the response is otherwise undefined.
+  ///
+  Future<bool> _isActionVisible(
+      EntityMetadata_Action action, String entityId) async {
+    // Hardcoded value
+    if (action.visible == "true")
+      return true;
+    else if (!(action.visible is String) || action.visible == "false")
+      return false;
+
+    // OTHERWISE => the `visible` field is expected to be a URL
+
+    final currentAccount = globalAppState.getSelectedAccount();
+    if (!(currentAccount is AccountModel))
+      return null;
+    else if (!currentAccount.signedTimestamp.hasValue) return null;
+
+    final publicKey = currentAccount.identity.value.identityId;
+
+    try {
+      Map payload = {
+        "type": action.type,
+        'publicKey': publicKey,
+        "entityId": entityId,
+        "timestamp": currentAccount.timestampUsedToSign.value,
+        "signature": currentAccount.signedTimestamp.value
+      };
+
+      Map<String, String> headers = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      var response = await http.post(action.visible,
+          body: jsonEncode(payload), headers: headers);
+      if (response.statusCode != 200 || !(response.body is String))
+        return false;
+      final body = jsonDecode(response.body);
+      if (body is Map && body["visible"] == true) return true;
+    } catch (err) {
+      return null;
+    }
+
+    return false;
   }
 
   // STATIC HELPERS
@@ -176,7 +354,8 @@ class EntityModel implements StateRefreshable {
         .get()
         .where((procMeta) =>
             procMeta.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID])
-        .map((procMeta) => ProcessModel(procMeta.meta[META_PROCESS_ID], procMeta.meta[META_ENTITY_ID]))
+        .map((procMeta) => ProcessModel(
+            procMeta.meta[META_PROCESS_ID], procMeta.meta[META_ENTITY_ID]))
         .cast<ProcessModel>()
         .toList();
   }
@@ -187,88 +366,7 @@ class EntityModel implements StateRefreshable {
     final feedData = globalFeedPersistence.get().firstWhere(
         (feed) => feed.meta[META_ENTITY_ID] == entityMeta.meta[META_ENTITY_ID],
         orElse: () => null);
-        
+
     return FeedModel.fromFeed(feedData);
   }
-
-  // TODO: ADAPT
-
-  /*Future<void> updateVisibleActions() async {
-    final List<EntityMetadata_Action> actionsToDisplay = [];
-
-    if (!this.entityMetadata.hasValue) return;
-
-    this.visibleActions.setToLoading();
-    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
-
-    for (EntityMetadata_Action action in this.entityMetadata.value.actions) {
-      if (action.register == true) {
-        if (this.registerAction.value != null)
-          continue; //only one registerAction is supported
-
-        this.registerAction.setValue(action);
-        this.isRegistered.setValue(
-            await isActionVisible(action, this.entityReference.entityId));
-
-        if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
-      } else {
-        bool isVisible =
-            await isActionVisible(action, this.entityReference.entityId);
-        if (isVisible) actionsToDisplay.add(action);
-      }
-    }
-
-    this.visibleActions.setValue(actionsToDisplay);
-    if (hasState) rebuildStates([EntityStateTags.ACTIONS]);
-  }
-
-  Future<bool> isActionVisible(
-      EntityMetadata_Action action, String entityId) async {
-    if (action.visible == "true")
-      return true;
-    else if (action.visible == null || action.visible == "false") return false;
-
-    // ELSE => the `visible` field is a URL
-
-    String publicKey = account.identity.identityId;
-    int timestamp = new DateTime.now().millisecondsSinceEpoch;
-
-    // TODO: Get the private key to sign appropriately
-    final privateKey = "";
-    debugPrint(
-        "TODO: Retrieve the private key to sign the action visibility request");
-
-    try {
-      Map payload = {
-        "type": action.type,
-        'publicKey': publicKey,
-        "entityId": entityId,
-        "timestamp": timestamp,
-        "signature": ""
-      };
-
-      if (privateKey != "") {
-        payload["signature"] = await signString(
-            jsonEncode({"timestamp": timestamp.toString()}), privateKey);
-      } else {
-        payload["signature"] = "0x"; // TODO: TEMP
-      }
-
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-
-      var response = await http.post(action.visible,
-          body: jsonEncode(payload), headers: headers);
-      if (response.statusCode != 200 || !(response.body is String))
-        return false;
-      final body = jsonDecode(response.body);
-      if (body is Map && body["visible"] == true) return true;
-    } catch (err) {
-      return false;
-    }
-
-    return false;
-  }*/
 }

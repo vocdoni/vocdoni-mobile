@@ -59,7 +59,27 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
           .value
           .where((processModel) =>
               processModel is ProcessModel && processModel.metadata.hasValue)
-          .map((processModel) => processModel.metadata)
+          .map((processModel) {
+            // COPY STATE FIELDS INTO META
+            processModel.metadata.value.meta[META_PROCESS_ID] =
+                processModel.processId;
+            processModel.metadata.value.meta[META_ENTITY_ID] =
+                processModel.entityId;
+
+            if (processModel.isInCensus.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_CENSUS_BELONGS] =
+                  processModel.isInCensus.value ? "true" : "false";
+
+            if (processModel.hasVoted.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_HAS_VOTED] =
+                  processModel.hasVoted.value ? "true" : "false";
+
+            if (processModel.censusSize.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_CENSUS_SIZE] =
+                  processModel.censusSize.value.toString();
+
+            return processModel.metadata;
+          })
           .cast<ProcessMetadata>()
           .toList();
       await globalProcessesPersistence.writeAll(processList);
@@ -113,10 +133,12 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
 class ProcessModel implements StateRefreshable {
   final String processId;
   final String entityId;
+  final String lang = "default";
   final StateModel<ProcessMetadata> metadata = StateModel<ProcessMetadata>();
   final StateModel<bool> isInCensus = StateModel<bool>();
   final StateModel<bool> hasVoted = StateModel<bool>();
   final StateModel<int> currentParticipants = StateModel<int>();
+  final StateModel<int> censusSize = StateModel<int>();
 
   List<dynamic> choices = [];
 
@@ -148,13 +170,34 @@ class ProcessModel implements StateRefreshable {
         this.isInCensus.load(false);
         break;
     }
+
+    switch (this.metadata.value.meta[META_PROCESS_HAS_VOTED]) {
+      case "true":
+        this.isInCensus.load(true);
+        break;
+      case "false":
+        this.isInCensus.load(false);
+        break;
+    }
+
+    if (this.metadata.value.meta[META_PROCESS_CENSUS_SIZE] is String) {
+      final strValue =
+          this.metadata.value.meta[META_PROCESS_CENSUS_SIZE] ?? "0";
+      final newSize = int.tryParse(strValue) ?? 0;
+      this.censusSize.load(newSize);
+    }
+
+    // TODO: SET THE START/END DATE
   }
 
   @override
   Future<void> refresh() {
     return Future.wait([
       refreshMetadata(),
-      refreshCensusState(),
+      refreshIsInCensus(),
+      refreshHasVoted(),
+      refreshCurrentParticipants(),
+      refreshCensusSize(),
     ]);
   }
 
@@ -162,10 +205,10 @@ class ProcessModel implements StateRefreshable {
     // TODO: Check the last time that data was fetched
     // TODO: Don't refetch if the IPFS hash is the same
 
-    try {
-      final DVoteGateway dvoteGw = getDVoteGateway();
-      final Web3Gateway web3Gw = getWeb3Gateway();
+    final DVoteGateway dvoteGw = getDVoteGateway();
+    final Web3Gateway web3Gw = getWeb3Gateway();
 
+    try {
       this.metadata.setToLoading();
       final newMetadata =
           await getProcessMetadata(this.processId, dvoteGw, web3Gw);
@@ -175,19 +218,19 @@ class ProcessModel implements StateRefreshable {
 
       this.metadata.setValue(newMetadata);
     } catch (err) {
-      this.metadata.setError("Unable to fetch the process details");
+      this.metadata.setError("Could not fetch the process details");
     }
   }
 
-  Future<void> refreshCensusState() async {
+  Future<void> refreshIsInCensus() async {
     final DVoteGateway dvoteGw = getDVoteGateway();
-
-    this.isInCensus.setToLoading();
 
     final currentAccount = globalAppState.getSelectedAccount();
     if (!(currentAccount is AccountModel)) return;
 
     try {
+      this.isInCensus.setToLoading();
+
       final base64Claim =
           await digestHexClaim(currentAccount.identity.value.keys[0].publicKey);
 
@@ -212,7 +255,88 @@ class ProcessModel implements StateRefreshable {
 
       this.isInCensus.setValue(valid);
     } catch (error) {
-      this.isInCensus.setError("Unable to check the census");
+      this.isInCensus.setError("Could not check the census");
     }
+  }
+
+  Future<void> refreshHasVoted() async {
+    if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+
+    final currentAccount = globalAppState.getSelectedAccount();
+    if (!(currentAccount is AccountModel)) return;
+
+    try {
+      this.hasVoted.setToLoading();
+      final String pollNullifier = getPollNullifier(
+          globalAppState.getSelectedAccount().identity.value.keys[0].address,
+          this.processId);
+
+      final DVoteGateway dvoteGw = getDVoteGateway();
+      final success =
+          await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
+              .catchError((_) {});
+
+      if (success is bool) {
+        this.hasVoted.setValue(success);
+      } else {
+        this.hasVoted.setError("Could not check the process status");
+      }
+    } catch (err) {
+      this.hasVoted.setError("Could not check the vote status");
+    }
+  }
+
+  Future<void> refreshCensusSize() {
+    if (!this.metadata.hasValue) return null;
+
+    final DVoteGateway dvoteGw = getDVoteGateway();
+
+    this.censusSize.setToLoading();
+    return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
+        .then((size) => this.censusSize.setValue(size))
+        .catchError((err) {
+      this.censusSize.setError("Could not check the census size");
+      throw err;
+    });
+  }
+
+  Future<void> refreshCurrentParticipants() {
+    if (!this.metadata.hasValue) return null;
+
+    final DVoteGateway dvoteGw = getDVoteGateway();
+
+    this.currentParticipants.setToLoading();
+    return getEnvelopeHeight(this.processId, dvoteGw)
+        .then((numVotes) => this.currentParticipants.setValue(numVotes))
+        .catchError((err) {
+      this.currentParticipants.setError("Could not check the census size");
+      throw err;
+    });
+  }
+
+  // GETTERS
+
+  double get currentParticipation {
+    if (!this.censusSize.hasValue || !this.currentParticipants.hasValue)
+      return 0.0;
+    else if (this.censusSize.value <= 0) return 0.0;
+
+    return this.currentParticipants.value * 100 / this.censusSize.value;
+  }
+
+  DateTime get startTime {
+    if (!vochainModel.referenceBlock.hasValue) return null;
+
+    final remainingDuration =
+        vochainModel.getDurationUntilBlock(this.metadata.value.startBlock);
+    return DateTime.now().add(remainingDuration);
+  }
+
+  DateTime get endTime {
+    if (!vochainModel.referenceBlock.hasValue) return null;
+
+    final remainingDuration = vochainModel.getDurationUntilBlock(
+        this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
+    return DateTime.now().add(remainingDuration);
   }
 }

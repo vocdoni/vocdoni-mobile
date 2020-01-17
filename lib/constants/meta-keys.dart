@@ -10,6 +10,7 @@ const META_ENTITY_ENTRY_POINTS =
 const META_PROCESS_ID = "processId";
 const META_PROCESS_CENSUS_BELONGS = "processCensusBelongs";
 const META_PROCESS_CENSUS_SIZE = "processCensusSize";
+const META_PROCESS_HAS_VOTED = "processUserHasVoted";
 
 const META_FEED_CONTENT_URI = "feedContentUri";
 

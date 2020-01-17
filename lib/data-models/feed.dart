@@ -132,7 +132,7 @@ class FeedModel implements StateRefreshable {
 
   @override
   Future<void> refresh() async {
-    if (this.feed.isRecent) return;
+    if (this.feed.isFresh) return;
 
     // TODO: Don't refetch if the IPFS hash is the same
 

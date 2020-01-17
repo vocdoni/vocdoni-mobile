@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -156,14 +157,16 @@ class _WebActionState extends State<WebAction> {
 
         if (hasPublicReadPermission != true) // may be null as well
           return respondError(id, "Permission declined");
-        else if (identitiesBloc
-                .value[appStateBloc.value.selectedIdentity].keys.length <
-            1)
+
+        final selectedAccount = globalAppState.getSelectedAccount();
+        if (!(selectedAccount is AccountModel))
+          return respondError(id, "The current account cannot be accessed");
+        else if (!selectedAccount.identity.hasValue ||
+            selectedAccount.identity.value.keys.length < 1)
           return respondError(
               id, "The current identity doesn't have a public key");
 
-        final identity =
-            identitiesBloc.value[appStateBloc.value.selectedIdentity];
+        final identity = selectedAccount.identity.value;
         final publicKey = identity.keys[0].publicKey;
 
         return respond(id, '''
@@ -171,20 +174,28 @@ class _WebActionState extends State<WebAction> {
         ''');
 
       case "signPayload":
-        final identity =
-            identitiesBloc.value[appStateBloc.value.selectedIdentity];
+        final selectedAccount = globalAppState.getSelectedAccount();
+        if (!(selectedAccount is AccountModel))
+          return respondError(id, "The current account cannot be accessed");
+        else if (!selectedAccount.identity.hasValue ||
+            selectedAccount.identity.value.keys.length < 1)
+          return respondError(
+              id, "The current identity doesn't have a key to sign");
+
+        final identity = selectedAccount.identity.value;
         final encryptedPrivateKey = identity.keys[0].encryptedPrivateKey;
 
-        var result = await Navigator.push(
+        var patternStr = await Navigator.push(
             context,
             MaterialPageRoute(
                 fullscreenDialog: true,
                 builder: (context) => PaternPromptModal(encryptedPrivateKey)));
-        if (result == null || result is InvalidPatternError) {
+        if (patternStr == null || patternStr is InvalidPatternError) {
           return respondError(id, "The pattern you entered is not valid");
         }
 
-        String privateKey = await decryptString(encryptedPrivateKey, result);
+        String privateKey =
+            await decryptString(encryptedPrivateKey, patternStr);
         final signature = await signString(payload["payload"], privateKey);
         privateKey = "";
 
