@@ -109,7 +109,7 @@ class AccountPoolModel extends StateModel<List<AccountModel>>
 
   /// Adds the new account to the collection and adds the peer entities to the entities poll
   /// Persists the new account pool.
-  addNewAccount(AccountModel newAccount) async {
+  addAccount(AccountModel newAccount) async {
     if (!this.hasValue)
       throw Exception("The pool has no accounts loaded yet");
     else if (!newAccount.identity.hasValue ||
@@ -225,6 +225,7 @@ class AccountModel implements StateRefreshable {
   }
 
   /// Register the given organization as a subscribtion of the currently selected identity.
+  /// Persists the updated pool.
   subscribe(EntityModel entityReference) async {
     if (entityReference.reference == null)
       throw Exception("The entity has no reference");
@@ -244,7 +245,7 @@ class AccountModel implements StateRefreshable {
     newPeerEntities.add(entityReference);
     this.entities.setValue(newPeerEntities);
 
-    // await globalAccountPool.writeToStorage();
+    await globalAccountPool.writeToStorage();
   }
 
   /// Remove the given entity from the currently selected identity's subscriptions
@@ -268,7 +269,7 @@ class AccountModel implements StateRefreshable {
       throw Exception("The current identity is not properly initialized");
 
     // Check if other identities are also subscribed
-    bool subcribedInOtherAccounts = false;
+    bool subscribedFromOtherAccounts = false;
     for (final existingAccount in globalAccountPool.value) {
       if (!existingAccount.identity.hasValue ||
           !existingAccount.entities.hasValue)
@@ -280,27 +281,41 @@ class AccountModel implements StateRefreshable {
           currentAccount.identity.value.keys[0].publicKey) continue;
 
       if (isSubscribed(entityReference)) {
-        subcribedInOtherAccounts = true;
+        subscribedFromOtherAccounts = true;
         break;
       }
     }
 
-    if (!subcribedInOtherAccounts) {
+    // Clean the entity otherwise
+    if (!subscribedFromOtherAccounts) {
       await globalEntityPool.remove(entityReference);
     }
 
-    // await identitiesBloc.unsubscribeEntityFromAccount(
-    //     entityReference, this.identity.identity);
-    // int index = entities.indexWhere(
-    //     (ent) => entityReference.entityId == ent.entityReference.entityId);
-    // if (index != -1) entities.removeAt(index);
+    await globalAccountPool.writeToStorage();
   }
+
+  // addEntityPeerToAccount(EntityReference entitySummary, Identity account) {
+  //   Identity_Peers peers = Identity_Peers();
+  //   peers.entities.addAll(account.peers.entities);
+  //   peers.entities.add(entitySummary);
+  //   peers.identities.addAll(account.peers.identities);
+  //   account.peers = peers;
+  // }
+
+  // removeEntityPeerFromAccount(String entityIdToRemove, Identity account) {
+  //   Identity_Peers peers = Identity_Peers();
+  //   peers.entities.addAll(account.peers.entities);
+  //   peers.entities.removeWhere(
+  //       (existingEntity) => existingEntity.entityId == entityIdToRemove);
+  //   peers.identities.addAll(account.peers.identities);
+  //   account.peers = peers;
+  // }
 
   // STATIC METHODS
 
   /// Returns a Model with the identity restored from the given mnemonic and an empty list of entities.
   /// NOTE: The returned model is not added to the global pool.
-  static Future<AccountModel> restoreFromMnemonic(
+  static Future<AccountModel> restoredFromMnemonic(
       String alias, String mnemonic, String patternEncryptionKey) async {
     if (!(alias is String) || alias.length < 1)
       throw Exception("Invalid alias");

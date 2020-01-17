@@ -105,6 +105,21 @@ class FeedPoolModel extends StateModel<List<FeedModel>>
       }
     }, orElse: () => null);
   }
+
+  /// Removes the given feed from the pool and persists the new pool.
+  Future<void> remove(FeedModel feedModel) async {
+    if (!this.hasValue) throw Exception("The pool has no value yet");
+
+    final updatedValue = this
+        .value
+        .where(
+            (existingFeed) => existingFeed.contentUri != feedModel.contentUri)
+        .cast<FeedModel>()
+        .toList();
+    this.setValue(updatedValue);
+
+    await this.writeToStorage();
+  }
 }
 
 /// FeedModel encapsulates the relevant information of a Vocdoni Feed.

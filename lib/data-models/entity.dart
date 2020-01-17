@@ -13,7 +13,6 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/lib/singletons.dart';
-// import 'package:vocdoni/lib/api.dart';
 
 // POOL
 
@@ -50,11 +49,10 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
             entityRef.entryPoints
                 .addAll(entityMeta.meta[META_ENTITY_ID].split(","));
 
-            // TODO FROM POOL
-
-            final procsModels =
-                EntityModel.getPersistedProcessesForEntity(entityMeta);
-            final feedModel = EntityModel.getPersistedFeedForEntity(entityMeta);
+            final procsModels = EntityModel.getProcessesForEntity(
+                entityMeta.meta[META_ENTITY_ID]);
+            final feedModel =
+                EntityModel.getFeedForEntity(entityMeta.meta[META_ENTITY_ID]);
 
             return EntityModel(entityRef, entityMeta, procsModels, feedModel);
           })
@@ -110,7 +108,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
   }
 
   /// Removes the given entity from the pool and persists the new pool.
-  /// Also updates the Feed pool if needed
+  /// Also updates the Feed and Process pools if needed
   Future<void> remove(EntityReference entityRef) async {
     if (!this.hasValue) throw Exception("The pool has no value yet");
 

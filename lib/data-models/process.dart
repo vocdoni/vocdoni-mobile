@@ -108,6 +108,27 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
     }
   }
 
+  /// Removes the given feed from the pool and persists the new pool.
+  Future<void> remove(List<ProcessModel> processModelsToRemove) async {
+    if (!this.hasValue) throw Exception("The pool has no value yet");
+
+    final updatedValue = this
+        .value
+        .where((poolProcess) {
+          for (var rmModel in processModelsToRemove) {
+            if (poolProcess.processId == rmModel.processId)
+              return false; // get it out
+          }
+
+          return true; // keep it
+        })
+        .cast<ProcessModel>()
+        .toList();
+    this.setValue(updatedValue);
+
+    await this.writeToStorage();
+  }
+
   // HELPERS
 
   /// Returns the voting processes from the given entity
