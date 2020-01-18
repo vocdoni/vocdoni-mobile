@@ -31,48 +31,45 @@ Web3Gateway getWeb3Gateway() {
 }
 
 GatewayInfo _selectRandomGatewayInfo() {
-  if (!globalAppState.hasValue || !globalAppState.value.bootnodes.hasValue)
-    return null;
+  if (!globalAppState.bootnodes.hasValue) return null;
 
   final gw = GatewayInfo();
 
   if (NETWORK_ID == "homestead") {
-    if (globalAppState.value.bootnodes.value.homestead.dvote.length < 1) {
+    if (globalAppState.bootnodes.value.homestead.dvote.length < 1) {
       print("The DVote gateway list is empty for Homestead");
       return null;
     }
 
     // PROD
-    int dvoteIdx = random
-        .nextInt(globalAppState.value.bootnodes.value.homestead.dvote.length);
-    int web3Idx = random
-        .nextInt(globalAppState.value.bootnodes.value.homestead.web3.length);
+    int dvoteIdx =
+        random.nextInt(globalAppState.bootnodes.value.homestead.dvote.length);
+    int web3Idx =
+        random.nextInt(globalAppState.bootnodes.value.homestead.web3.length);
 
-    gw.dvote =
-        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].uri;
+    gw.dvote = globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].uri;
     gw.publicKey =
-        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].pubKey;
-    gw.supportedApis.addAll(
-        globalAppState.value.bootnodes.value.homestead.dvote[dvoteIdx].apis);
-    gw.web3 = globalAppState.value.bootnodes.value.homestead.web3[web3Idx].uri;
+        globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].pubKey;
+    gw.supportedApis
+        .addAll(globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.bootnodes.value.homestead.web3[web3Idx].uri;
   } else {
-    if (globalAppState.value.bootnodes.value.goerli.dvote.length < 1) {
+    if (globalAppState.bootnodes.value.goerli.dvote.length < 1) {
       print("The DVote gateway list is empty for Goerli");
       return null;
     }
 
     // DEV
-    int dvoteIdx = random
-        .nextInt(globalAppState.value.bootnodes.value.goerli.dvote.length);
+    int dvoteIdx =
+        random.nextInt(globalAppState.bootnodes.value.goerli.dvote.length);
     int web3Idx =
-        random.nextInt(globalAppState.value.bootnodes.value.goerli.web3.length);
+        random.nextInt(globalAppState.bootnodes.value.goerli.web3.length);
 
-    gw.dvote = globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].uri;
-    gw.publicKey =
-        globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].pubKey;
-    gw.supportedApis.addAll(
-        globalAppState.value.bootnodes.value.goerli.dvote[dvoteIdx].apis);
-    gw.web3 = globalAppState.value.bootnodes.value.goerli.web3[web3Idx].uri;
+    gw.dvote = globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].uri;
+    gw.publicKey = globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].pubKey;
+    gw.supportedApis
+        .addAll(globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.bootnodes.value.goerli.web3[web3Idx].uri;
   }
   return gw;
 }

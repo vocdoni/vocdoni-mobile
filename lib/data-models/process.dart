@@ -345,7 +345,7 @@ class ProcessModel implements StateRefreshable {
     return this.currentParticipants.value * 100 / this.censusSize.value;
   }
 
-  DateTime get startTime {
+  DateTime get startDate {
     if (!globalAppState.referenceBlock.hasValue) return null;
 
     final remainingDuration =
@@ -353,7 +353,7 @@ class ProcessModel implements StateRefreshable {
     return DateTime.now().add(remainingDuration);
   }
 
-  DateTime get endTime {
+  DateTime get endDate {
     if (!globalAppState.referenceBlock.hasValue) return null;
 
     final remainingDuration = globalAppState.getDurationUntilBlock(

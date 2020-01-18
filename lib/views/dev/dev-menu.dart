@@ -90,15 +90,18 @@ class DevMenu extends StatelessWidget {
   }
 
   setCustomIdentityKeys(context) async {
+    // CHANGEME: Set the new Mnemonic key here
     const NEW_MNEMONIC =
         "wealth matrix piano veteran disease digital hard arrow blossom eight simple solid";
+
+    final currentAccount = globalAppState.getSelectedAccount();
 
     var patternLockKey = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
-                account.identity.keys[0].encryptedPrivateKey)));
+                currentAccount.identity.value.keys[0].encryptedPrivateKey)));
 
     if (patternLockKey == null || patternLockKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
@@ -109,8 +112,6 @@ class DevMenu extends StatelessWidget {
     // final privateKey = await decryptString(
     //     account.identity.keys[0].encryptedPrivateKey, patternLockKey);
 
-    final currentIdentity = identitiesBloc.getCurrentIdentity();
-
     final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
     final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
     final address = await mnemonicToAddress(NEW_MNEMONIC);
@@ -118,7 +119,7 @@ class DevMenu extends StatelessWidget {
     final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
     final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
 
-    currentIdentity.identityId = publicKey;
+    currentAccount.identityId = publicKey;
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;

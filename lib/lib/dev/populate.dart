@@ -1,6 +1,8 @@
 // import 'dart:math';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/makers.dart';
+import 'package:vocdoni/data-models/feed.dart';
+import 'package:vocdoni/data-models/process.dart';
 import "package:vocdoni/lib/singletons.dart";
 import "package:vocdoni/constants/meta-keys.dart";
 import "package:dvote/dvote.dart";
@@ -9,33 +11,44 @@ import 'package:dvote/util/parsers.dart';
 /// INTENDED FOR INTERNAL TESTING PURPOSES
 
 Future populateSampleData() async {
-  List<EntityMetadata> entitiesMetadata = new List<EntityMetadata>();
-  List<Feed> feeds = new List<Feed>();
-  List<ProcessMetadata> processess = new List<ProcessMetadata>();
-  List<EntityModel> ents = new List<EntityModel>();
+  List<EntityModel> entityModels = new List<EntityModel>();
+  List<FeedModel> feeds = new List<FeedModel>();
+  List<ProcessModel> processess = new List<ProcessModel>();
 
   final entitySummaries = makeEntitySummaries();
 
-  entitySummaries.forEach((entitySummary) {
-    EntityModel ent = EntityModel(entitySummary);
-    ents.add(ent);
-    EntityMetadata entityMetadata = makeEntityMetadata(entitySummary);
-    entitiesMetadata.add(entityMetadata);
-    feeds.addAll(makeFeeds(entityMetadata));
+  entitySummaries.forEach((entityReference) {
+    final entityMetadata = makeEntityMetadata(entityReference);
+    final entityModel = EntityModel(entityReference, entityMetadata);
+    entityModels.add(entityModel);
+
+    final newFeeds = makeFeeds(entityMetadata);
+    entityModel.feed.setValue(newFeeds[0]);
+    feeds.addAll(newFeeds);
+
     entityMetadata.votingProcesses.active.forEach((processId) {
-      processess.add(makeFakeProcess(entitySummary, processId));
+      final fakeProcess = makeFakeProcess(entityReference, processId);
+      entityModel.processes.value.add(fakeProcess);
+      processess.add(fakeProcess);
     });
   });
 
-  await entitiesBloc.set(entitiesMetadata);
-  await newsFeedsBloc.set(feeds);
-  await processesBloc.set(processess);
+  globalEntityPool.setValue(entityModels);
+  globalFeedPool.setValue(feeds);
+  globalProcessPool.setValue(processess);
 
-  ents.forEach((ent) {
-    if (account.isSubscribed(ent.entityReference) == false)
-      account.subscribe(ent);
+  final currentAccount = globalAppState.getSelectedAccount();
+  if (!(currentAccount is AccountModel))
+    throw Exception("No account is currently selected");
+
+  entityModels.forEach((entityModel) {
+    if (!currentAccount.isSubscribed(entityModel.reference))
+      currentAccount.subscribe(entityModel);
   });
-  account.sync();
+
+  await globalEntityPool.writeToStorage();
+  await globalFeedPool.writeToStorage();
+  await globalProcessPool.writeToStorage();
 }
 
 List<EntityReference> makeEntitySummaries() {
@@ -55,21 +68,25 @@ EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
   return entityMetadata;
 }
 
-List<Feed> makeFeeds(EntityMetadata entityMetadata) {
+List<FeedModel> makeFeeds(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
-    Feed f = parseFeed(getFeedString(entityMetadata));
+    final f = parseFeed(getFeedString(entityMetadata));
     f.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];
     f.meta[META_LANGUAGE] = lang;
-    return f;
+
+    final result = FeedModel("", entityMetadata.meta[META_ENTITY_ID], f);
+    return result;
   }).toList();
 }
 
-ProcessMetadata makeFakeProcess(
-    EntityReference entitySummary, String processId) {
+ProcessModel makeFakeProcess(EntityReference entitySummary, String processId) {
   ProcessMetadata process = parseProcessMetadata(getProcessString());
   process.meta[META_PROCESS_ID] = processId;
   process.meta[META_ENTITY_ID] = entitySummary.entityId;
-  return process;
+
+  final processModel =
+      ProcessModel.fromMetadata(process, processId, entitySummary.entityId);
+  return processModel;
 }
 
 String getEntityMetadataString(String name) {
