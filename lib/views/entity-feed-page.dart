@@ -1,9 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:vocdoni/widgets/postCard.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
@@ -23,8 +22,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
     try {
       EntityModel ent = ModalRoute.of(super.context).settings.arguments;
-      analytics.trackPage(
-          "EntityFeedPage", entityId: ent.entityReference.entityId);
+      globalAnalytics.trackPage("EntityFeedPage",
+          entityId: ent.reference.entityId);
     } catch (err) {
       print(err);
     }
@@ -50,8 +49,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
               itemCount: entModel.feed.value?.items?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
                 final FeedPost post = entModel.feed.value.items[index];
-                return buildFeedPostCard(
-                    ctx: context, ent: entModel, post: post, index: index);
+
+                return PostCard(entModel, post, index);
               },
             ),
           );

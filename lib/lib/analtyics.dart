@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 class Analytics {
@@ -34,7 +35,13 @@ class Analytics {
 
   getUserId() {
     final currentAccount = globalAppState.getSelectedAccount();
-    return currentAccount?.value?.identity?.keys[0]?.address;
+    if (!(currentAccount is AccountModel))
+      return null;
+    else if (!currentAccount.identity.hasValue)
+      return null;
+    else if (currentAccount.identity.value.keys.length == 0) return null;
+    
+    return currentAccount.identity.value.keys[0].address;
   }
 
   // OS, OS version, screen size...

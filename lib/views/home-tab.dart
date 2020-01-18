@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/lib/factories.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/widgets/pollCard.dart';
+import 'package:vocdoni/widgets/postCard.dart';
 
 class CardContentWrapper {
   final EntityModel ent;
@@ -76,7 +76,7 @@ class _HomeTabState extends State<HomeTab> {
         itemBuilder: (BuildContext ctx, int index) {
           final item = items[index];
           if (item.post != null)
-            return buildFeedPostCard(ctx: ctx, ent: item.ent, post: item.post);
+            return PostCard(item.ent, item.post, index);
           else if (item.process != null)
             return PollCard(ent: item.ent, process: item.process, index: index);
           else

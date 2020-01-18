@@ -1,6 +1,6 @@
 // import 'dart:math';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/makers.dart';
 import "package:vocdoni/lib/singletons.dart";
 import "package:vocdoni/constants/meta-keys.dart";
 import "package:dvote/dvote.dart";
@@ -41,9 +41,9 @@ Future populateSampleData() async {
 List<EntityReference> makeEntitySummaries() {
   final ids = ["0x123459", "0x543210", "0x9312341"];
   return ids.map((id) {
-    EntityReference entitySummary = makeEntityReference(
-        entityId: id, resolverAddress: "0xfff ");
-    return entitySummary;
+    EntityReference entityRef = EntityReference();
+    entityRef.entityId = id;
+    return entityRef;
   }).toList();
 }
 
@@ -64,7 +64,8 @@ List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   }).toList();
 }
 
-ProcessMetadata makeFakeProcess(EntityReference entitySummary, String processId) {
+ProcessMetadata makeFakeProcess(
+    EntityReference entitySummary, String processId) {
   ProcessMetadata process = parseProcessMetadata(getProcessString());
   process.meta[META_PROCESS_ID] = processId;
   process.meta[META_ENTITY_ID] = entitySummary.entityId;

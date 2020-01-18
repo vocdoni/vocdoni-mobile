@@ -52,8 +52,9 @@ Future fetchAndShowEntity(
       .where((uri) => uri != null)
       .toList();
 
-  EntityReference entityRef =
-      makeEntityReference(entityId: entityId, entryPoints: validEntryPoints);
+  EntityReference entityRef = EntityReference();
+  entityRef.entityId = entityId;
+  entityRef.entryPoints.addAll(validEntryPoints);
 
   Navigator.pushNamed(context, "/entity", arguments: entityRef);
 }

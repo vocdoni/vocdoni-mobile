@@ -1,10 +1,9 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/makers.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
@@ -44,8 +43,9 @@ class PollCard extends StatelessWidget {
                       processId: this.process.processId,
                       index: this.index));
             },
-            image: validUriOrNull(
-                this.process.processMetadata.value?.details?.headerImage),
+            image: Uri.tryParse(
+                    this.process.processMetadata.value?.details?.headerImage)
+                ?.toString(),
             imageTag: makeElementTag(
                 this.ent.entityReference.entityId,
                 this.process.processMetadata.value?.meta[META_PROCESS_ID],

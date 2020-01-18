@@ -1,10 +1,9 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/lib/factories.dart';
+import 'package:vocdoni/lib/makers.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:dvote/dvote.dart';
@@ -21,11 +20,11 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
-  EntityModel ent;
+  EntityModel entity;
   String processId;
   final int index;
   PollPageArgs(
-      {@required this.ent, @required this.processId, @required this.index});
+      {@required this.entity, @required this.processId, @required this.index});
 }
 
 class PollPage extends StatefulWidget {
@@ -74,8 +73,9 @@ class _PollPageState extends State<PollPage> {
 
     if (ent == null) return buildEmptyEntity(context);
 
-    String headerUrl = validUriOrNull(
-        processModel.processMetadata.value?.details?.headerImage);
+    String headerUrl =
+        Uri.tryParse(processModel.processMetadata.value?.details?.headerImage)
+            ?.toString();
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: headerUrl == null
