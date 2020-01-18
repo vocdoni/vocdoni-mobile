@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -95,6 +97,11 @@ class DevMenu extends StatelessWidget {
         "wealth matrix piano veteran disease digital hard arrow blossom eight simple solid";
 
     final currentAccount = globalAppState.getSelectedAccount();
+    if (!(currentAccount is AccountModel))
+      throw Exception("No account is currently selected");
+    else if (!currentAccount.identity.hasValue ||
+        currentAccount.identity.value.keys.length == 0)
+      throw Exception("No account is currently selected");
 
     var patternLockKey = await Navigator.push(
         context,
@@ -109,9 +116,6 @@ class DevMenu extends StatelessWidget {
       return;
     }
 
-    // final privateKey = await decryptString(
-    //     account.identity.keys[0].encryptedPrivateKey, patternLockKey);
-
     final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
     final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
     final address = await mnemonicToAddress(NEW_MNEMONIC);
@@ -119,7 +123,8 @@ class DevMenu extends StatelessWidget {
     final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
     final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
 
-    currentAccount.identityId = publicKey;
+    final updatedIdentity = currentAccount.identity.value;
+    updatedIdentity.meta[META_ACCOUNT_ID] = publicKey;
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;
@@ -128,10 +133,9 @@ class DevMenu extends StatelessWidget {
     k.publicKey = publicKey;
     k.address = address;
 
-    currentIdentity.keys[0] = k;
-    identitiesBloc.value[appStateBloc.value.selectedIdentity] = currentIdentity;
+    updatedIdentity.keys[0] = k;
+    currentAccount.identity.setValue(updatedIdentity);
 
-    identitiesBloc.set(identitiesBloc.value);
-    identitiesBloc.persist();
+    globalAccountPool.writeToStorage();
   }
 }

@@ -20,7 +20,7 @@ class _StartupPageState extends State<StartupPage> {
   Future<void> initApplication() {
     globalAnalytics.init();
 
-    // READ PERSISTED DATA
+    // READ PERSISTED DATA (protobuf)
     return Future.wait([
       globalBootnodesPersistence.read(),
       globalIdentitiesPersistence.readAll(),
@@ -28,7 +28,7 @@ class _StartupPageState extends State<StartupPage> {
       globalProcessesPersistence.readAll(),
       globalFeedPersistence.readAll(),
     ]).then((_) {
-      // POPULATE THE MODEL POOLS
+      // POPULATE THE MODEL POOLS (Read into memory)
       return Future.wait([
         globalAppState.readFromStorage(),
         globalAccountPool.readFromStorage(),

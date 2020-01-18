@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -15,7 +16,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("IdentityCreatePage");
+    globalAnalytics.trackPage("IdentityCreatePage");
   }
 
   @override
@@ -67,14 +68,14 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
           context: context);
       return;
     }
-    String newPattern = await Navigator.push(
+    String patternEncryptionKey = await Navigator.push(
       context,
       MaterialPageRoute(
           fullscreenDialog: true,
           builder: (context) => PatternCreateModal(canGoBack: true)),
     );
 
-    if (newPattern == null) {
+    if (patternEncryptionKey == null) {
       return; // showMessage("Pattern was cancelled", context: context);
     }
     // showSuccessMessage("Pattern has been set!", context: context);
@@ -84,10 +85,19 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         generating = true;
       });
 
-      await identitiesBloc.create(alias, newPattern);
+      final newAccount =
+          await AccountModel.makeNew(alias, patternEncryptionKey);
+      await globalAccountPool.addAccount(newAccount);
 
-      int currentIndex = identitiesBloc.value.length - 1;
-      appStateBloc.selectIdentity(currentIndex);
+      final newIndex = globalAccountPool.value.indexWhere((account) =>
+          account.identity.hasValue &&
+          account.identity.value.identityId ==
+              newAccount.identity.value.identityId);
+      if (newIndex < 0)
+        throw Exception("The new account can't be found on the pool");
+
+      globalAppState.selectAccount(newIndex);
+      // globalAccountPool.writeToStorage();   not needed => addAccount() does it
 
       showHomePage(context);
     } catch (err) {
@@ -96,9 +106,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         generating = false;
       });
 
-      if (err == "The account already exists") {
-        text = Lang.of(context)
-            .get("An account with the same name already exists");
+      if (err == "An account with this name already exists") {
+        text = Lang.of(context).get("An account with this name already exists");
       } else {
         text = Lang.of(context)
             .get("An error occurred while generating the identity");

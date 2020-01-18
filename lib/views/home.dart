@@ -2,9 +2,15 @@ import 'dart:async';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/data-models/app-state.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/feed.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/views/home-tab.dart';
@@ -14,7 +20,6 @@ import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:dvote/dvote.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -54,17 +59,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // DETERMINE INITIAL TAB
+    final currentAccount =
+        globalAppState.getSelectedAccount(); // It is expected to be defined
+
     // No organizations => identity
-    if (identitiesBloc.value == null || identitiesBloc.value == null) {
-      selectedTab = 2;
-    } else if (appStateBloc != null &&
-        appStateBloc.value != null &&
-        identitiesBloc
-                .value[appStateBloc.value.selectedIdentity].peers.entities !=
-            null &&
-        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers.entities
-                .length ==
-            0) {
+    if (!currentAccount.entities.hasValue ||
+        currentAccount.entities.value.length == 0) {
       selectedTab = 2;
     }
 
@@ -140,78 +140,68 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(context) {
-    return StreamBuilder(
-        stream: identitiesBloc.stream,
-        builder: (BuildContext _, AsyncSnapshot<List<Identity>> identities) {
-          return StreamBuilder(
-              stream: appStateBloc.stream,
-              builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return WillPopScope(
-                    onWillPop: handleWillPop,
-                    child: Scaffold(
-                      floatingActionButtonLocation:
-                          FloatingActionButtonLocation.endFloat,
-                      floatingActionButtonAnimator:
-                          FloatingActionButtonAnimator.scaling,
-                      floatingActionButton: selectedTab == 1
-                          ? FloatingActionButton(
-                              onPressed: () async {
-                                String string = await new QRCodeReader()
-                                    .setAutoFocusIntervalInMs(
-                                        400) // default 5000
-                                    .setForceAutoFocus(true) // default false
-                                    .setTorchEnabled(true) // default false
-                                    .setHandlePermissions(true) // default true
-                                    .setExecuteAfterPermissionGranted(
-                                        true) // default true
-                                    .scan();
-                                Uri link;
-                                try {
-                                  link = Uri.parse(string);
-                                } catch (e) {}
-                                handleIncomingLink(link, context);
-                              },
-                              backgroundColor: colorDescription,
-                              child: Icon(
-                                FeatherIcons.plus,
-                              ),
-                              elevation: 5.0)
-                          : null,
-                      appBar: TopNavigation(
-                        title: getTabName(selectedTab),
-                        showBackButton: false,
+    // We use Consumer() since the appState might change and we may need to redraw
+    return Consumer<AppStateModel>(
+      builder: (BuildContext context, AppStateModel appState, _) {
+        return WillPopScope(
+            onWillPop: handleWillPop,
+            child: Scaffold(
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endFloat,
+              floatingActionButtonAnimator:
+                  FloatingActionButtonAnimator.scaling,
+              floatingActionButton: selectedTab == 1
+                  ? FloatingActionButton(
+                      onPressed: () => onScanQrCode(context),
+                      backgroundColor: colorDescription,
+                      child: Icon(
+                        FeatherIcons.plus,
                       ),
-                      key: homePageScaffoldKey,
-                      body: buildBody(ctx, appState?.data, identities?.data),
-                      bottomNavigationBar: BottomNavigation(
-                        onTabSelect: (index) => onTabSelect(index),
-                        selectedTab: selectedTab,
-                      ),
-                    ));
-              });
-        });
+                      elevation: 5.0)
+                  : null,
+              appBar: TopNavigation(
+                title: getTabName(selectedTab),
+                showBackButton: false,
+              ),
+              key: homePageScaffoldKey,
+              body: buildBody(context, appState),
+              bottomNavigationBar: BottomNavigation(
+                onTabSelect: (index) => onTabSelect(index),
+                selectedTab: selectedTab,
+              ),
+            ));
+      },
+    );
   }
 
-  buildBody(BuildContext ctx, AppState appState, List<Identity> identities) {
+  buildBody(BuildContext ctx, AppStateModel appState) {
     Widget body;
 
     // RENDER THE CURRENT TAB BODY
     switch (selectedTab) {
       // VOTES FEED
       case 0:
-        body = StreamBuilder(
-            stream: newsFeedsBloc.stream,
-            builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
-              return HomeTab();
-            });
+        body = Consumer<FeedPoolModel>(
+          builder: (BuildContext ctx, FeedPoolModel feeds, _) =>
+              Consumer<ProcessPoolModel>(
+            builder: (BuildContext ctx, ProcessPoolModel processes, _) =>
+                HomeTab(),
+          ),
+        );
         break;
       // SUBSCRIBED ENTITIES
       case 1:
-        body = EntitiesTab();
+        body = Consumer<EntityPoolModel>(
+          builder: (BuildContext ctx, EntityPoolModel processes, _) =>
+              EntitiesTab(),
+        );
         break;
       // IDENTITY INFO
       case 2:
-        body = IdentityTab();
+        body = Consumer<AccountPoolModel>(
+          builder: (BuildContext ctx, AccountPoolModel accounts, _) =>
+              IdentityTab(),
+        );
         break;
       default:
         body = Container(
@@ -229,9 +219,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  getTabName(int idx) {
-    if (idx == 0) return "Home";
-    if (idx == 1) return "Your entities";
-    if (idx == 2) return "Your identity";
+  onScanQrCode(BuildContext context) async {
+    String string = await new QRCodeReader()
+        .setAutoFocusIntervalInMs(400) // default 5000
+        .setForceAutoFocus(true) // default false
+        .setTorchEnabled(true) // default false
+        .setHandlePermissions(true) // default true
+        .setExecuteAfterPermissionGranted(true) // default true
+        .scan();
+
+    final link = Uri.tryParse(string);
+    if (link is Uri) handleIncomingLink(link, context);
+    // TODO: else show error
+  }
+
+  String getTabName(int idx) {
+    if (idx == 0)
+      return "Home";
+    else if (idx == 1)
+      return "Your entities";
+    else if (idx == 2)
+      return "Your identity";
+    else
+      return "";
   }
 }
