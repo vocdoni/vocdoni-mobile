@@ -12,12 +12,12 @@ import 'package:vocdoni/widgets/dashboardRow.dart';
 import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 
-class PollCard extends StatelessWidget {
+class CardPoll extends StatelessWidget {
   final ProcessModel process;
   final EntityModel ent;
   final int index;
 
-  PollCard({@required this.process, @required this.ent, @required this.index});
+  CardPoll({@required this.process, @required this.ent, @required this.index});
 
   @override
   Widget build(ctx) {

@@ -3,16 +3,19 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/widgets/pollCard.dart';
-import 'package:vocdoni/widgets/postCard.dart';
+import 'package:vocdoni/widgets/card-loading.dart';
+import 'package:vocdoni/widgets/card-poll.dart';
+import 'package:vocdoni/widgets/card-post.dart';
 
-class CardContentWrapper {
-  final EntityModel ent;
+class CardItem {
+  final bool loading;
+  final EntityModel entity;
   final ProcessModel process;
   final FeedPost post;
   final DateTime date;
 
-  CardContentWrapper({this.ent, this.date, this.process, this.post});
+  CardItem(
+      {this.entity, this.date, this.process, this.post, this.loading = false});
 }
 
 class HomeTab extends StatefulWidget {
@@ -31,56 +34,22 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(ctx) {
-    List<CardContentWrapper> items = [];
-    account.entities.forEach((ent) {
-      if (ent.feed.hasValue) {
-        ent.feed.value.items.forEach((FeedPost post) {
-          if (!(post is FeedPost)) return;
-          DateTime date = DateTime.parse(post.datePublished);
-          CardContentWrapper item = new CardContentWrapper(
-              ent: ent, date: date, post: post, process: null);
-          items.add(item);
-        });
-      }
-      if (ent.processes.hasValue) {
-        ent.processes.value.forEach((ProcessModel process) {
-          if (!(process is ProcessModel))
-            return;
-          else if (process.processMetadata.hasError)
-            return;
-          else if (process.startDate.hasValue) return;
-
-          CardContentWrapper item = CardContentWrapper(
-              ent: ent,
-              date: process.startDate.value,
-              post: null,
-              process: process);
-          items.add(item);
-        });
-      }
-    });
+    final items = _digestItemsList();
 
     if (items.length == 0) return buildNoEntries(ctx);
-
-    items.sort((a, b) {
-      if (!(a?.date is DateTime) && !(b?.date is DateTime))
-        return 0;
-      else if (!(a?.date is DateTime))
-        return -1;
-      else if (!(b?.date is DateTime)) return 1;
-      return b.date.compareTo(a.date);
-    });
 
     return ListView.builder(
         itemCount: items.length,
         itemBuilder: (BuildContext ctx, int index) {
           final item = items[index];
-          if (item.post != null)
-            return PostCard(item.ent, item.post, index);
+          if (item.loading)
+            return CardLoading();
+          else if (item.post != null)
+            return CardPost(item.entity, item.post, index);
           else if (item.process != null)
-            return PollCard(ent: item.ent, process: item.process, index: index);
-          else
-            return Container();
+            return CardPoll(
+                ent: item.entity, process: item.process, index: index);
+          return Container();
         });
   }
 
@@ -89,5 +58,54 @@ class _HomeTabState extends State<HomeTab> {
     return Center(
       child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
     );
+  }
+
+  // INERNAL
+
+  List<CardItem> _digestItemsList() {
+    if (!globalAccountPool.hasValue || globalAccountPool.value.length == 0)
+      return [];
+
+    final currentAccount = globalAppState.getSelectedAccount();
+    if (currentAccount == null ||
+        currentAccount.entities.hasValue ||
+        currentAccount.entities.value.length == 0) return [];
+
+    final result = List<CardItem>();
+    for (final entity in currentAccount.entities.value) {
+      if (entity.feed.isLoading || entity.feed.value.feed.isLoading)
+        result.add(CardItem(loading: true));
+      else if (entity.feed.hasValue && entity.feed.value.feed.hasValue) {
+        entity.feed.value.feed.value.items.forEach((post) {
+          if (!(post is FeedPost)) return;
+          final date = DateTime.tryParse(post.datePublished);
+          final item = CardItem(entity: entity, date: date, post: post);
+          result.add(item);
+        });
+      }
+      if (entity.processes.hasValue) {
+        entity.processes.value.forEach((process) {
+          if (!(process is ProcessModel))
+            return;
+          else if (process.metadata.isLoading) {
+            result.add(CardItem(loading: true));
+          } else if (process.metadata.hasError) return;
+
+          result.add(CardItem(
+              entity: entity, date: process.startDate, process: process));
+        });
+      }
+    }
+
+    result.sort((a, b) {
+      if (!(a?.date is DateTime) && !(b?.date is DateTime))
+        return 0;
+      else if (!(a?.date is DateTime))
+        return -1;
+      else if (!(b?.date is DateTime)) return 1;
+      return b.date.compareTo(a.date);
+    });
+
+    return result;
   }
 }

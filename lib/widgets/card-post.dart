@@ -8,12 +8,12 @@ import 'package:vocdoni/widgets/listItem.dart';
 import 'package:native_widgets/native_widgets.dart';
 import 'package:intl/intl.dart';
 
-class PostCard extends StatelessWidget {
+class CardPost extends StatelessWidget {
   final EntityModel entityModel;
   final FeedPost post;
   final int index;
 
-  PostCard(this.entityModel, this.post, [this.index = 0]);
+  CardPost(this.entityModel, this.post, [this.index = 0]);
 
   @override
   Widget build(BuildContext context) {
