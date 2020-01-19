@@ -219,7 +219,7 @@ class EntityModel implements StateRefreshable {
 
   Future<void> refreshProcesses() async {
     // TODO: Check the last time that data was fetched
-    // TODO: `refresh` the voting processes
+    // TODO: `refresh` the voting process list
     ;
   }
 

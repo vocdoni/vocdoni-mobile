@@ -6,10 +6,10 @@ import 'package:vocdoni/lib/state-base.dart';
 /// **Use this class if you simply need to track eventual data within a stateful Widget
 /// where you use `setState`**
 ///
-class StateValue<T> extends StateTracker<T> {
+class StateContainer<T> extends StateTracker<T> {
   /// Initializes the state with no value by default. If an argument is passed,
   /// the argument is set as the initial value.
-  StateValue([T initialValue]) {
+  StateContainer([T initialValue]) {
     if (initialValue is T) this.setValue(initialValue);
   }
 }

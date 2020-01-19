@@ -13,7 +13,7 @@ import 'package:vocdoni/lib/singletons.dart';
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
 ///
 class ProcessPoolModel extends StateModel<List<ProcessModel>>
     implements StatePersistable, StateRefreshable {

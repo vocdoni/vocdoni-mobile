@@ -19,7 +19,7 @@ import 'package:vocdoni/lib/singletons.dart';
 /// This is, the underlying identity and all the relevant metadata.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateValue or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
 ///
 class AccountPoolModel extends StateModel<List<AccountModel>>
     implements StatePersistable {

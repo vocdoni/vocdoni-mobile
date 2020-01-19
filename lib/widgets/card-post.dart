@@ -1,7 +1,9 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
+import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -9,33 +11,43 @@ import 'package:native_widgets/native_widgets.dart';
 import 'package:intl/intl.dart';
 
 class CardPost extends StatelessWidget {
-  final EntityModel entityModel;
+  final EntityModel entity;
   final FeedPost post;
   final int index;
 
-  CardPost(this.entityModel, this.post, [this.index = 0]);
+  CardPost(this.entity, this.post, [this.index = 0]);
 
   @override
   Widget build(BuildContext context) {
-    return BaseCard(
-        onTap: () => onPostCardTap(context, post, entityModel, index),
-        image: post.image,
-        imageTag:
-            makeElementTag(entityModel.reference.entityId, post.id, index),
-        children: <Widget>[
-          ListItem(
-            mainText: post.title,
-            mainTextFullWidth: true,
-            secondaryText: entityModel
-                .metadata.value.name[entityModel.metadata.value.languages[0]],
-            avatarUrl: entityModel.metadata.value.media.avatar,
-            avatarText: entityModel
-                .metadata.value.name[entityModel.metadata.value.languages[0]],
-            avatarHexSource: entityModel.reference.entityId,
-            rightText: DateFormat('MMMM dd')
-                .format(DateTime.parse(post.datePublished).toLocal()),
-          )
-        ]);
+    // TODO:
+
+    // TODO: DEPEND ON THE APP STATE AS WELL
+
+    // Consume individual items that may rebuild only themselves
+    return ChangeNotifierProvider<StateModel<EntityMetadata>>.value(
+      value: entity.metadata,
+      child: ChangeNotifierProvider<StateModel<Feed>>.value(
+        value: entity.feed.value.feed,
+        child: BaseCard(
+            onTap: () => onPostCardTap(context, post, entity, index),
+            image: post.image,
+            imageTag: makeElementTag(entity.reference.entityId, post.id, index),
+            children: <Widget>[
+              ListItem(
+                mainText: post.title,
+                mainTextFullWidth: true,
+                secondaryText: entity
+                    .metadata.value.name[entity.metadata.value.languages[0]],
+                avatarUrl: entity.metadata.value.media.avatar,
+                avatarText: entity
+                    .metadata.value.name[entity.metadata.value.languages[0]],
+                avatarHexSource: entity.reference.entityId,
+                rightText: DateFormat('MMMM dd')
+                    .format(DateTime.parse(post.datePublished).toLocal()),
+              )
+            ]),
+      ),
+    );
   }
 
   onPostCardTap(

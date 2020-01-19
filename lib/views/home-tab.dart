@@ -1,21 +1,22 @@
 import "package:flutter/material.dart";
+import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 
+// Used to merge and sort feed items
 class CardItem {
-  final bool loading;
   final EntityModel entity;
   final ProcessModel process;
   final FeedPost post;
   final DateTime date;
 
   CardItem(
-      {this.entity, this.date, this.process, this.post, this.loading = false});
+      {@required this.entity, @required this.date, this.process, this.post});
 }
 
 class HomeTab extends StatefulWidget {
@@ -34,23 +35,19 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(ctx) {
-    final items = _digestItemsList();
+    return Consumer<ProcessPoolModel>(
+        builder: (BuildContext context, processModels, _) =>
+            Consumer<FeedPoolModel>(
+                builder: (BuildContext context, feedModels, _) {
+              // Rebuild on pool data updates
+              final items = _digestCardList();
+              if (items.length == 0) return buildNoEntries(ctx);
 
-    if (items.length == 0) return buildNoEntries(ctx);
-
-    return ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (BuildContext ctx, int index) {
-          final item = items[index];
-          if (item.loading)
-            return CardLoading();
-          else if (item.post != null)
-            return CardPost(item.entity, item.post, index);
-          else if (item.process != null)
-            return CardPoll(
-                ent: item.entity, process: item.process, index: index);
-          return Container();
-        });
+              return ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (BuildContext ctx, int index) =>
+                      items[index] ?? Container());
+            }));
   }
 
   Widget buildNoEntries(BuildContext ctx) {
@@ -62,7 +59,7 @@ class _HomeTabState extends State<HomeTab> {
 
   // INERNAL
 
-  List<CardItem> _digestItemsList() {
+  List<Widget> _digestCardList() {
     if (!globalAccountPool.hasValue || globalAccountPool.value.length == 0)
       return [];
 
@@ -71,33 +68,33 @@ class _HomeTabState extends State<HomeTab> {
         currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) return [];
 
-    final result = List<CardItem>();
+    final availableItems = List<CardItem>();
+
     for (final entity in currentAccount.entities.value) {
       if (entity.feed.isLoading || entity.feed.value.feed.isLoading)
-        result.add(CardItem(loading: true));
+        continue;
       else if (entity.feed.hasValue && entity.feed.value.feed.hasValue) {
         entity.feed.value.feed.value.items.forEach((post) {
           if (!(post is FeedPost)) return;
           final date = DateTime.tryParse(post.datePublished);
           final item = CardItem(entity: entity, date: date, post: post);
-          result.add(item);
+          availableItems.add(item);
         });
       }
+
       if (entity.processes.hasValue) {
         entity.processes.value.forEach((process) {
-          if (!(process is ProcessModel))
+          if (!(process is ProcessModel) || process.metadata.isLoading)
             return;
-          else if (process.metadata.isLoading) {
-            result.add(CardItem(loading: true));
-          } else if (process.metadata.hasError) return;
+          else if (process.metadata.hasError) return;
 
-          result.add(CardItem(
+          availableItems.add(CardItem(
               entity: entity, date: process.startDate, process: process));
         });
       }
     }
 
-    result.sort((a, b) {
+    availableItems.sort((a, b) {
       if (!(a?.date is DateTime) && !(b?.date is DateTime))
         return 0;
       else if (!(a?.date is DateTime))
@@ -105,6 +102,19 @@ class _HomeTabState extends State<HomeTab> {
       else if (!(b?.date is DateTime)) return 1;
       return b.date.compareTo(a.date);
     });
+
+    int idx = 0;
+    final result = availableItems
+        .map((item) {
+          if (item.post != null)
+            return CardPoll(
+                entity: item.entity, process: item.process, index: idx++);
+          else if (item.process != null)
+            return CardPost(item.entity, item.post, idx++);
+          return Container();
+        })
+        .cast<Widget>()
+        .toList();
 
     return result;
   }
