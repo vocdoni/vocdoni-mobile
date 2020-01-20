@@ -149,9 +149,11 @@ class EntityModel implements StateRefreshable {
       StateNotifier<EntityMetadata>().withFreshness(20);
   final StateNotifier<List<ProcessModel>> processes =
       StateNotifier<List<ProcessModel>>();
-  final StateNotifier<FeedModel> feed = StateNotifier<FeedModel>().withFreshness(45);
+  final StateNotifier<FeedModel> feed =
+      StateNotifier<FeedModel>().withFreshness(45);
 
-  final StateNotifier<List<EntityMetadata_Action>> visibleActions = StateNotifier();
+  final StateNotifier<List<EntityMetadata_Action>> visibleActions =
+      StateNotifier();
   final StateNotifier<EntityMetadata_Action> registerAction = StateNotifier();
   final StateNotifier<bool> isRegistered = StateNotifier(false);
 
@@ -220,9 +222,46 @@ class EntityModel implements StateRefreshable {
   }
 
   Future<void> refreshProcesses([bool force = false]) async {
-    // TODO: Check the last time that data was fetched
-    // TODO: `refresh` the voting process list
-    ;
+    if (!this.metadata.hasValue)
+      return;
+    else if (!(this.metadata.value.votingProcesses.active is List) ||
+        this.metadata.value.votingProcesses.active.length == 0)
+      return;
+    else if (this.processes.isFresh) return;
+
+    this.processes.setToLoading();
+
+    try {
+      final updatedProcessPoolList = List<ProcessModel>();
+      updatedProcessPoolList.addAll(globalProcessPool.value);
+      updatedProcessPoolList.removeWhere((item) {
+        if (item.entityId == this.reference.entityId) return false;
+        return true;
+      });
+
+      // make new processes list
+      final dvoteGw = getDVoteGateway();
+      final web3Gw = getWeb3Gateway();
+      final procMetaList = await getProcessesMetadata(
+          this.metadata.value.votingProcesses.active, dvoteGw, web3Gw);
+
+      // add new
+      final newProcessModels = await Future.wait(procMetaList
+          .map((meta) {
+            final result = ProcessModel(
+                meta.meta[META_PROCESS_ID], this.reference.entityId, meta);
+            result
+                .refresh(); // detached: refresh census status, has voted, etc.
+            return result;
+          })
+          .cast<Future<ProcessModel>>()
+          .toList());
+
+      updatedProcessPoolList.addAll(newProcessModels);
+      this.processes.setValue(updatedProcessPoolList);
+    } catch (err) {
+      this.processes.setError("Could not update the process list");
+    }
   }
 
   Future<void> refreshFeed([bool force = false]) async {
