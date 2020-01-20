@@ -1,9 +1,10 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
@@ -22,43 +23,55 @@ class _IdentityTabState extends State<IdentityTab> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("IdentityTab");
+    globalAnalytics.trackPage("IdentityTab");
   }
 
   @override
   Widget build(ctx) {
-    return ListView(
-      children: <Widget>[
-        ListItem(
-            mainText: account.identity.alias,
-            secondaryText: account.identity.identityId,
-            isTitle: true,
-            isBold: true,
-            rightIcon: FeatherIcons.copy,
-            onTap: () {
-              Clipboard.setData(
-                  ClipboardData(text: account.identity.identityId));
-              showMessage("Identity ID copied on the clipboard",
-                  context: ctx, purpose: Purpose.GOOD);
-            }),
-        Section(text: "Your identity"),
-        ListItem(
-          mainText: "Back up my identity",
-          onTap: () => showIdentityBackup(ctx),
-        ),
-        ListItem(
-            mainText: "Log out",
-            onTap: () {
-              onLogOut(ctx);
-            }),
-        kReleaseMode // TODO: DEV BUTTON OUT
-            ? Container()
-            : ListItem(
-                mainText: "Development testing",
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) return buildEmpty(ctx);
+
+    // Rebuild whenever the identity is updated
+    return ChangeNotifierProvider.value(
+      value: currentAccount.identity,
+      child: Builder(builder: (ctx) {
+        if (currentAccount.identity.hasError ||
+            !currentAccount.identity.hasValue) return buildEmpty(ctx);
+
+        return ListView(
+          children: <Widget>[
+            ListItem(
+                mainText: currentAccount.identity.value.alias,
+                secondaryText: currentAccount.identity.value.identityId,
+                isTitle: true,
+                isBold: true,
+                rightIcon: FeatherIcons.copy,
                 onTap: () {
-                  onDevelopmentTesting(ctx);
-                })
-      ],
+                  Clipboard.setData(ClipboardData(
+                      text: currentAccount.identity.value.identityId));
+                  showMessage("Identity ID copied on the clipboard",
+                      context: ctx, purpose: Purpose.GOOD);
+                }),
+            Section(text: "Your identity"),
+            ListItem(
+              mainText: "Back up my identity",
+              onTap: () => showIdentityBackup(ctx),
+            ),
+            ListItem(
+                mainText: "Log out",
+                onTap: () {
+                  onLogOut(ctx);
+                }),
+            kReleaseMode // TODO: DEV BUTTON OUT
+                ? Container()
+                : ListItem(
+                    mainText: "Development testing",
+                    onTap: () {
+                      onDevelopmentTesting(ctx);
+                    })
+          ],
+        );
+      }),
     );
   }
 
@@ -69,14 +82,14 @@ class _IdentityTabState extends State<IdentityTab> {
   }
 
   showIdentityBackup(BuildContext ctx) async {
-    final identity = identitiesBloc.value[appStateBloc.value.selectedIdentity];
+    final encryptedMnemonic =
+        globalAppState.currentAccount.identity.value.keys[0].encryptedMnemonic;
 
     var result = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) =>
-                PaternPromptModal(identity.keys[0].encryptedMnemonic)));
+            builder: (context) => PaternPromptModal(encryptedMnemonic)));
 
     if (result == null)
       return;
@@ -85,11 +98,12 @@ class _IdentityTabState extends State<IdentityTab> {
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
-    final mnemonic =
-        await decryptString(identity.keys[0].encryptedMnemonic, result);
+
+    final mnemonic = await decryptString(encryptedMnemonic, result);
 
     Navigator.pushNamed(ctx, "/identity/backup",
-        arguments: IdentityBackupArguments(identity.alias, mnemonic));
+        arguments: IdentityBackupArguments(
+            globalAppState.currentAccount.identity.value.alias, mnemonic));
   }
 
   onLogOut(BuildContext ctx) async {

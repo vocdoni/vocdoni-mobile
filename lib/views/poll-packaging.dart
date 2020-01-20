@@ -3,9 +3,9 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
@@ -13,10 +13,10 @@ import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
 
 class PollPackaging extends StatefulWidget {
-  final ProcessModel processModel;
+  final ProcessModel process;
   final List<int> answers;
 
-  PollPackaging({this.processModel, this.answers});
+  PollPackaging({@required this.process, @required this.answers});
 
   @override
   _PollPackagingState createState() => _PollPackagingState();
@@ -31,25 +31,27 @@ class _PollPackagingState extends State<PollPackaging> {
   void initState() {
     super.initState();
 
-    analytics.trackPage(
-        "PollPackaging",
-        entityId: widget.processModel.entityReference.entityId,
-        processId: widget.processModel.processId);
+    globalAnalytics.trackPage("PollPackaging",
+        entityId: widget.process.entityId, processId: widget.process.processId);
 
     _currentStep = 0;
   }
 
   void stepMakeEnvelope(BuildContext context) async {
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
     var patternLockKey = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(
-                account.identity.keys[0].encryptedPrivateKey)));
+                currentAccount.identity.value.keys[0].encryptedPrivateKey)));
 
     if (!mounted) return;
 
     // TODO: ERROR => THIS IS NOT A SCAFFOLD
+
     if (patternLockKey == null || patternLockKey is InvalidPatternError) {
       setState(() => _currentStep = 0);
       showMessage("The pattern you entered is not valid",
@@ -63,10 +65,10 @@ class _PollPackagingState extends State<PollPackaging> {
     String merkleProof;
 
     try {
-      final publicKey = identitiesBloc.getCurrentIdentity().keys[0].publicKey;
+      final publicKey = currentAccount.identity.value.keys[0].publicKey;
       final publicKeyClaim = await digestHexClaim(publicKey);
       merkleProof = await generateProof(
-          widget.processModel.processMetadata.value.census.merkleRoot,
+          widget.process.metadata.value.census.merkleRoot,
           publicKeyClaim,
           dvoteGw);
 
@@ -83,23 +85,12 @@ class _PollPackagingState extends State<PollPackaging> {
       return;
     }
 
-    final privateKey = await decryptString(
-        account.identity.keys[0].encryptedPrivateKey, patternLockKey);
-
-    if (!mounted) return;
-
     try {
       // CHECK IF THE VOTE IS ALREADY REGISTERED
-      final String pollNullifier = getPollNullifier(
-          identitiesBloc.getCurrentIdentity().keys[0].address,
-          widget.processModel.processId);
-
-      final success = await getEnvelopeStatus(
-              widget.processModel.processId, pollNullifier, dvoteGw)
-          .catchError((_) {});
+      await widget.process.refreshHasVoted(true);
       if (!mounted) return;
 
-      if (success == true) {
+      if (widget.process.hasVoted.hasValue && widget.process.hasVoted.value) {
         setState(() => _currentStep = 0);
         showMessage("Your vote has already been registered",
             context: context, purpose: Purpose.GUIDE);
@@ -107,8 +98,14 @@ class _PollPackagingState extends State<PollPackaging> {
       }
 
       // PREPARE THE VOTE ENVELOPE
-      Map<String, String> envelope = await packagePollEnvelope(widget.answers,
-          merkleProof, widget.processModel.processId, privateKey);
+      final privateKey = await decryptString(
+          currentAccount.identity.value.keys[0].encryptedPrivateKey,
+          patternLockKey);
+
+      if (!mounted) return;
+
+      Map<String, String> envelope = await packagePollEnvelope(
+          widget.answers, merkleProof, widget.process.processId, privateKey);
 
       if (!mounted) return;
 
@@ -150,23 +147,27 @@ class _PollPackagingState extends State<PollPackaging> {
   void stepConfirm(BuildContext context) async {
     setState(() => _currentStep = 3);
     try {
-      final DVoteGateway dvoteGw = getDVoteGateway();
+      const RETRIES = 4;
+      for (int i = 0; i < RETRIES; i++) {
+        await widget.process.refreshHasVoted(true);
+        if (!mounted) return;
 
-      final String pollNullifier = getPollNullifier(
-          identitiesBloc.getCurrentIdentity().keys[0].address,
-          widget.processModel.processId);
+        if (widget.process.hasVoted.hasValue && widget.process.hasVoted.value)
+          break; // done!
 
-      final success = await getEnvelopeStatus(
-          widget.processModel.processId, pollNullifier, dvoteGw);
-      if (!mounted) return;
+        if (i < (RETRIES - 1))
+          await Future.delayed(Duration(seconds: 5)); // wait and try again
+      }
 
-      if (success != true) {
+      if (widget.process.hasVoted.hasError ||
+          widget.process.hasVoted.value == false) {
         setState(() => _currentStep = 0);
         showMessage("The status of the envelope could not be validated",
             context: context, purpose: Purpose.WARNING);
         return;
       }
 
+      // DONE!
       setState(() => _currentStep = 4);
     } catch (err) {
       showMessage("The vote delivery could not be checked",

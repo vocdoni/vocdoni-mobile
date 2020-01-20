@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -12,7 +13,7 @@ import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
 import 'package:vocdoni/lib/net.dart';
 
 class FeedPostArgs {
-  EntityModel entity;
+  final EntityModel entity;
   final FeedPost post;
   final int index;
 
@@ -26,32 +27,36 @@ class FeedPostPage extends StatefulWidget {
 }
 
 class _FeedPostPageState extends State<FeedPostPage> {
+  FeedPostArgs args;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     try {
-      FeedPostArgs args = ModalRoute.of(super.context).settings.arguments;
-      globalAnalytics.trackPage("FeedPostPage",
-          entityId: args.entity.reference.entityId, postTitle: args.post.title);
+      this.args = ModalRoute.of(super.context).settings.arguments;
+
+      if (args != null) {
+        globalAnalytics.trackPage("FeedPostPage",
+            entityId: args.entity.reference.entityId,
+            postTitle: args.post.title);
+      }
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
     }
   }
 
   @override
   Widget build(ctx) {
-    final FeedPostArgs args = ModalRoute.of(ctx).settings.arguments;
-
     FeedPost post = args.post;
-    EntityModel ent = args.entity;
+    EntityModel entity = args.entity;
     int index = args.index ?? 0;
 
-    if (post == null) return buildNoPosts(ctx);
+    if (post == null) return buildNoPost(ctx);
 
     return ScaffoldWithImage(
         headerImageUrl: post.image,
-        headerTag: makeElementTag(ent.entityReference.entityId, post.id, index),
+        headerTag: makeElementTag(entity.reference.entityId, post.id, index),
         avatarHexSource: post.id,
         appBarTitle: "Post",
         //actionsBuilder: actionsBuilder,
@@ -59,7 +64,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
           builder: (ctx) {
             return SliverList(
               delegate:
-                  SliverChildListDelegate(getScaffoldChildren(ctx, ent, post)),
+                  SliverChildListDelegate(getScaffoldChildren(ctx, entity, post)),
             );
           },
         ));
@@ -76,11 +81,11 @@ class _FeedPostPageState extends State<FeedPostPage> {
     return ListItem(
       //mainTextTag: process.meta['processId'] + title,
       mainText: post.title,
-      secondaryText: ent.entityMetadata.value.name['default'],
+      secondaryText: ent.metadata.value.name['default'],
       isTitle: true,
       rightIcon: null,
       isBold: true,
-      //avatarUrl: ent.entityMetadata.media.avatar,
+      //avatarUrl: ent.metadata.media.avatar,
       //avatarText: process.details.title['default'],
       //avatarHexSource: ent.entitySummary.entityId,
       mainTextFullWidth: true,
@@ -129,7 +134,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     }
   }
 
-  Widget buildNoPosts(BuildContext ctx) {
+  Widget buildNoPost(BuildContext ctx) {
     // TODO: UI
     return Center(
       child: Text("(No posts)"),

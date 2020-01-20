@@ -1,12 +1,12 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/singletons.dart';
-import "package:vocdoni/constants/meta-keys.dart";
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/singletons.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -21,10 +21,10 @@ import 'package:intl/intl.dart';
 
 class PollPageArgs {
   EntityModel entity;
-  String processId;
+  ProcessModel process;
   final int index;
   PollPageArgs(
-      {@required this.entity, @required this.processId, @required this.index});
+      {@required this.entity, @required this.process, @required this.index});
 }
 
 class PollPage extends StatefulWidget {
@@ -33,108 +33,80 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
-  List<String> _choices = [];
-  ProcessModel processModel;
+  EntityModel entity;
+  ProcessModel process;
+  int index;
+  List<String> choices = [];
 
   @override
-  void didChangeDependencies() {
-    // TODO: Really needed?
-    super.didChangeDependencies();
-    PollPageArgs args = ModalRoute.of(context).settings.arguments;
-
-    processModel = args.ent.getProcess(args.processId);
-    if (!processModel.processMetadata.hasValue) return;
-
-    if (_choices.length == 0) {
-      _choices = processModel.processMetadata.value.details.questions
-          .map((question) => null)
-          .cast<String>()
-          .toList();
+  void initState() async {
+    super.initState();
+    final PollPageArgs args = ModalRoute.of(context).settings.arguments;
+    if (args == null) {
+      Navigator.of(context).pop();
+      print("Invalid parameters");
+      return;
+    } else if (!args.process.metadata.hasValue) {
+      Navigator.of(context).pop();
+      print("Empty process metadata");
+      return;
     }
 
-    analytics.trackPage("PollPage",
-        entityId: args.ent.entityReference.entityId, processId: args.processId);
+    entity = args.entity;
+    process = args.process;
+    index = args.index;
 
-    if (processModel.isInCensus.hasError || !processModel.isInCensus.hasValue) {
-      processModel.updateCensusState(); // TODO: DEBOUNCE THIS CALL
-    }
-    if (!processModel.startDate.hasValue || !processModel.endDate.hasValue) {
-      processModel.updateDates();
-    }
-    processModel.updateHasVoted();
+    choices = process.metadata.value.details.questions
+        .map((question) => null)
+        .cast<String>()
+        .toList();
+
+    globalAnalytics.trackPage("PollPage",
+        entityId: entity.reference.entityId, processId: process.processId);
+
+    await process.refresh(); // Values will refresh if not fresh
   }
 
   @override
   Widget build(context) {
-    PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    EntityModel ent = args.ent;
-    final int index = args.index ?? 0;
-    //Process process = args.process;
+    if (entity == null) return buildEmptyEntity(context);
 
-    if (ent == null) return buildEmptyEntity(context);
+    return ChangeNotifierProvider.value(
+        value: process.metadata,
+        child: Builder(builder: (context) {
+          if (process.metadata.isLoading)
+            return buildLoading();
+          else if (process.metadata.hasError)
+            return buildError(process.metadata.errorMessage);
 
-    String headerUrl =
-        Uri.tryParse(processModel.processMetadata.value?.details?.headerImage)
-            ?.toString();
-    return ScaffoldWithImage(
-        headerImageUrl: headerUrl,
-        headerTag: headerUrl == null
-            ? null
-            : makeElementTag(
-                ent.entityReference.entityId,
-                processModel.processMetadata.value.meta[META_PROCESS_ID],
-                index),
-        avatarHexSource: processModel.processMetadata.value.meta['processId'],
-        appBarTitle: "Poll",
-        actionsBuilder: actionsBuilder,
-        builder: Builder(
-          builder: (ctx) {
-            return SliverList(
-              delegate: SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
-            );
-          },
-        ));
+          final headerUrl =
+              Uri.tryParse(process.metadata.value.details?.headerImage)
+                  ?.toString();
+
+          return ScaffoldWithImage(
+              headerImageUrl: headerUrl ?? "",
+              headerTag: headerUrl == null
+                  ? null
+                  : makeElementTag(
+                      entity.reference.entityId, process.processId, index),
+              avatarHexSource: process.processId,
+              appBarTitle: "Poll",
+              actionsBuilder: (context) => [
+                    buildShareButton(context, entity),
+                  ],
+              builder: Builder(
+                  builder: (ctx) => SliverList(
+                      delegate: SliverChildListDelegate(
+                          getScaffoldChildren(ctx, entity)))));
+        }));
   }
 
-  List<Widget> actionsBuilder(BuildContext context) {
-    PollPageArgs args = ModalRoute.of(context).settings.arguments;
-    final EntityModel ent = args.ent;
-    return [
-      buildShareButton(context, ent),
-    ];
-  }
-
-  // buildTest() {
-  //   double avatarHeight = 120;
-  //   return Container(
-  //     height: avatarHeight,
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.stretch,
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: <Widget>[
-  //         Container(
-  //           constraints:
-  //               BoxConstraints(minWidth: avatarHeight, minHeight: avatarHeight),
-  //           child: CircleAvatar(
-  //               backgroundColor: Colors.indigo,
-  //               backgroundImage: NetworkImage(
-  //                   "https://instagram.fmad5-1.fna.fbcdn.net/vp/564db12bde06a8cb360e31007fd049a6/5DDF1906/t51.2885-19/s150x150/13167299_1084444071617255_680456677_a.jpg?_nc_ht=instagram.fmad5-1.fna.fbcdn.net")),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  getScaffoldChildren(BuildContext context, EntityModel ent) {
+  List<Widget> getScaffoldChildren(BuildContext context, EntityModel entity) {
     List<Widget> children = [];
-    if (processModel.processMetadata.value == null) return children;
+    if (process.metadata.value == null) return children;
 
-    //children.add(buildTest());
-    children.add(buildTitle(context, ent));
-    children.add(Summary(
-      text: processModel.processMetadata.value.details.description['default'],
-      maxLines: 5,
-    ));
+    children.add(buildTitle(context, entity));
+    children.add(buildSummary());
     children.add(buildPollItem(context));
     children.add(buildCensusItem(context));
     children.add(buildTimeItem(context));
@@ -146,79 +118,81 @@ class _PollPageState extends State<PollPage> {
     return children;
   }
 
-  buildTitle(BuildContext context, EntityModel ent) {
-    if (processModel.processMetadata.value == null) return Container();
+  Widget buildTitle(BuildContext context, EntityModel entity) {
+    if (process.metadata.value == null) return Container();
 
-    String title = processModel.processMetadata.value.details.title['default'];
-    return ListItem(
-      // mainTextTag: makeElementTag(entityId: ent.entityReference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
-      mainText: title,
-      secondaryText: ent.entityMetadata.value.name['default'],
-      isTitle: true,
-      rightIcon: null,
-      isBold: true,
-      avatarUrl: ent.entityMetadata.value.media.avatar,
-      avatarText: ent.entityMetadata.value.name['default'],
-      avatarHexSource: ent.entityReference.entityId,
-      //avatarHexSource: ent.entitySummary.entityId,
-      mainTextFullWidth: true,
-    );
+    final title =
+        process.metadata.value.details.title[globalAppState.currentLanguage];
+
+    return ChangeNotifierProvider.value(
+        value: entity.metadata,
+        child: ListItem(
+          // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
+          mainText: title,
+          secondaryText: entity.metadata.hasValue
+              ? entity.metadata.value.name[globalAppState.currentLanguage]
+              : "",
+          isTitle: true,
+          rightIcon: null,
+          isBold: true,
+          avatarUrl: entity.metadata.hasValue
+              ? entity.metadata.value.media.avatar
+              : "",
+          avatarText: entity.metadata.hasValue
+              ? entity.metadata.value.name[globalAppState.currentLanguage]
+              : "",
+          avatarHexSource: entity.reference.entityId,
+          //avatarHexSource: entity.entitySummary.entityId,
+          mainTextFullWidth: true,
+        ));
   }
 
-  buildRawItem(BuildContext context, ProcessMetadata process) {
-    return ListItem(
-      icon: FeatherIcons.code,
-      mainText: "Raw details",
-      onTap: () {
-        Navigator.pushNamed(context, "/entity/participation/process/raw",
-            arguments: process);
-      },
-      disabled: true,
+  Widget buildSummary() {
+    return Summary(
+      text: process
+          .metadata.value.details.description[globalAppState.currentLanguage],
+      maxLines: 5,
     );
   }
 
   buildCensusItem(BuildContext context) {
-    return StateBuilder(
-        viewModels: [processModel],
-        tag: ProcessStateTags.CENSUS_STATE,
-        builder: (ctx, tagId) {
-          String text;
-          Purpose purpose;
-          IconData icon;
+    return ChangeNotifierProvider.value(
+      value: process.isInCensus,
+      child: Builder(builder: (ctx) {
+        String text;
+        Purpose purpose;
+        IconData icon;
 
-          if (processModel.isInCensus.isLoading) {
-            text = "Checking census";
-          } else if (processModel.isInCensus.hasValue) {
-            if (processModel.isInCensus.value) {
-              text = "You are in the census";
-              purpose = Purpose.GOOD;
-              icon = FeatherIcons.check;
-            } else {
-              text = "You are not in this census";
-              purpose = Purpose.DANGER;
-              icon = FeatherIcons.x;
-            }
-          } else if (processModel.isInCensus.hasError) {
-            text = processModel.isInCensus.errorMessage;
-            icon = FeatherIcons.alertTriangle;
+        if (process.isInCensus.isLoading) {
+          text = "Checking census";
+        } else if (process.isInCensus.hasValue) {
+          if (process.isInCensus.value) {
+            text = "You are in the census";
+            purpose = Purpose.GOOD;
+            icon = FeatherIcons.check;
           } else {
-            text = "Check census state";
+            text = "You are not in this census";
+            purpose = Purpose.DANGER;
+            icon = FeatherIcons.x;
           }
+        } else if (process.isInCensus.hasError) {
+          text = process.isInCensus.errorMessage;
+          icon = FeatherIcons.alertTriangle;
+        } else {
+          text = "Check census state";
+        }
 
-          return ListItem(
-            icon: FeatherIcons.users,
-            mainText: text,
-            isSpinning: processModel.isInCensus.isLoading,
-            onTap: () {
-              processModel.updateCensusState();
-            },
-            rightTextPurpose: purpose,
-            rightIcon: icon,
-            purpose: processModel.isInCensus.hasError
-                ? Purpose.DANGER
-                : Purpose.NONE,
-          );
-        });
+        return ListItem(
+          icon: FeatherIcons.users,
+          mainText: text,
+          isSpinning: process.isInCensus.isLoading,
+          onTap: () => process.refreshIsInCensus(),
+          rightTextPurpose: purpose,
+          rightIcon: icon,
+          purpose: process.isInCensus.hasError ? Purpose.DANGER : Purpose.NONE,
+        );
+      }),
+    );
   }
 
   buildPollItem(BuildContext context) {
@@ -231,23 +205,42 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    if (!processModel.endDate.hasValue) return Container();
+    if (process.startDate is DateTime &&
+        process.startDate.isBefore(DateTime.now())) {
+      // display time until start date
+      final formattedTime =
+          DateFormat("dd/MM H:mm").format(process.startDate) + "h";
 
-    String formattedTime =
-        DateFormat("dd/MM H:mm").format(processModel.endDate.value) + "h";
+      return ListItem(
+        icon: FeatherIcons.clock,
+        mainText: "Starting on " + formattedTime,
+        //secondaryText: "18/09/2019 at 19:00",
+        rightIcon: null,
+        disabled: false,
+      );
+    } else if (process.endDate is DateTime) {
+      String rowText;
+      final formattedTime =
+          DateFormat("dd/MM H:mm").format(process.endDate) + "h";
+      if (process.endDate.isBefore(DateTime.now()))
+        rowText = "Ending on " + formattedTime;
+      else
+        rowText = "Ended on " + formattedTime;
 
-    return ListItem(
-      icon: FeatherIcons.clock,
-      mainText: "Ending on " + formattedTime,
-      //secondaryText: "18/09/2019 at 19:00",
-      rightIcon: null,
-      disabled: false,
-    );
+      return ListItem(
+        icon: FeatherIcons.clock,
+        mainText: rowText,
+        // secondaryText: "18/09/2019 at 19:00",
+        rightIcon: null,
+        disabled: false,
+      );
+    }
+    return Container();
   }
 
   setChoice(int questionIndex, String value) {
     setState(() {
-      _choices[questionIndex] = value;
+      choices[questionIndex] = value;
     });
   }
 
@@ -255,7 +248,7 @@ class _PollPageState extends State<PollPage> {
   /// Returns -1 if all questions have a valid choice
   int getNextPendingChoice() {
     int idx = 0;
-    for (final response in _choices) {
+    for (final response in choices) {
       if (response is String && response.length > 0) {
         idx++;
         continue; // GOOD
@@ -266,84 +259,119 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildSubmitVoteButton(BuildContext ctx) {
-    if (processModel.isInCensus.hasError) return Container();
+    // rebuild when isInCensus or hasVoted change
+    return ChangeNotifierProvider.value(
+      value: process.hasVoted,
+      child: ChangeNotifierProvider.value(
+        value: process.isInCensus,
+        child: Builder(builder: (ctx) {
+          if (process.isInCensus.hasError) {
+            return Padding(
+                padding: EdgeInsets.all(paddingPage),
+                child: BaseButton(
+                    text: process.isInCensus.errorMessage,
+                    purpose: Purpose.DANGER,
+                    isDisabled: true));
+          } else if (process.hasVoted.hasValue && process.hasVoted.value) {
+            return Container();
+          }
 
-    if (!processModel.isInCensus.hasValue || processModel.hasVoted.value) {
-      return Container();
-    }
-    final nextPendingChoice = getNextPendingChoice();
+          final nextPendingChoice = getNextPendingChoice();
+          final cannotVote = nextPendingChoice >= 0 ||
+              !process.isInCensus.hasValue ||
+              !process.isInCensus.value;
 
-    return Padding(
-      padding: EdgeInsets.all(paddingPage),
-      child: BaseButton(
-          text: "Submit",
-          isSmall: false,
-          style: BaseButtonStyle.FILLED,
-          purpose: Purpose.HIGHLIGHT,
-          isDisabled:
-              nextPendingChoice >= 0 || processModel.isInCensus.value == false,
-          onTap: () {
-            onSubmit(ctx, processModel.processMetadata);
-          }),
+          return Padding(
+            padding: EdgeInsets.all(paddingPage),
+            child: BaseButton(
+                text: "Submit",
+                purpose: Purpose.HIGHLIGHT,
+                isDisabled: cannotVote,
+                onTap: () => onSubmit(ctx, process.metadata)),
+          );
+        }),
+      ),
     );
   }
 
-  onSubmit(BuildContext ctx, processMetadata) async {
-    var intAnswers = _choices.map(int.parse).toList();
+  onSubmit(BuildContext ctx, metadata) async {
+    var intAnswers = choices.map(int.parse).toList();
 
-    await Navigator.push(
-        ctx,
-        MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (context) => PollPackaging(
-                processModel: processModel, answers: intAnswers)));
+    final newRoute = MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) =>
+            PollPackaging(process: process, answers: intAnswers));
+    await Navigator.push(ctx, newRoute);
   }
 
   buildSubmitInfo() {
-    return StateBuilder(
-      viewModels: [processModel],
-      tag: ProcessStateTags.CENSUS_STATE,
-      builder: (ctx, tagId) {
-        final nextPendingChoice = getNextPendingChoice();
+    // rebuild when isInCensus or hasVoted change
+    return ChangeNotifierProvider.value(
+        value: process.hasVoted,
+        child: ChangeNotifierProvider.value(
+            value: process.isInCensus,
+            child: Builder(builder: (ctx) {
+              final nextPendingChoice = getNextPendingChoice();
 
-        if (processModel.hasVoted.value == true) {
-          return ListItem(
-            mainText: 'Your vote is already registered',
-            purpose: Purpose.GOOD,
-            rightIcon: null,
-          );
-        } else if (processModel.isInCensus.hasValue) {
-          if (processModel.isInCensus.value) {
-            return nextPendingChoice >= 0 // still pending
-                ? ListItem(
+              if (process.hasVoted.hasValue && process.hasVoted.value) {
+                return ListItem(
+                  mainText: 'Your vote is already registered',
+                  purpose: Purpose.GOOD,
+                  rightIcon: null,
+                );
+              } else if (process.isInCensus.hasValue) {
+                if (process.isInCensus.hasValue && process.isInCensus.value) {
+                  if (nextPendingChoice < 0)
+                    return Container(); // all good to go
+
+                  return ListItem(
                     mainText:
                         'Select your choice for question #${nextPendingChoice + 1}',
                     purpose: Purpose.WARNING,
                     rightIcon: null,
-                  )
-                : Container();
-          } else {
-            return ListItem(
-              mainText: "You are not in the census",
-              secondaryText:
-                  "Register to this organization to participate in the future",
-              secondaryTextMultiline: 5,
-              purpose: Purpose.HIGHLIGHT,
-              rightIcon: null,
-            );
-          }
-        } else {
-          return ListItem(
-            mainText: "Your identity cannot be checked against the census",
-            mainTextMultiline: 3,
-            secondaryText: "Please, try to check again",
-            secondaryTextMultiline: 5,
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        }
-      },
-    );
+                  );
+                }
+
+                return ListItem(
+                  mainText: "You are not in the census",
+                  secondaryText:
+                      "Register to this organization to participate in the future",
+                  secondaryTextMultiline: 5,
+                  purpose: Purpose.HIGHLIGHT,
+                  rightIcon: null,
+                );
+              } else if (process.isInCensus.hasError) {
+                return ListItem(
+                  mainText: "Your identity cannot be checked within the census",
+                  mainTextMultiline: 3,
+                  secondaryText: process.isInCensus.errorMessage,
+                  purpose: Purpose.WARNING,
+                  rightIcon: null,
+                );
+              } else if (process.hasVoted.hasError) {
+                return ListItem(
+                  mainText: "Your vote status cannot be checked",
+                  mainTextMultiline: 3,
+                  secondaryText: process.hasVoted.errorMessage,
+                  purpose: Purpose.WARNING,
+                  rightIcon: null,
+                );
+              } else if (process.isInCensus.isLoading) {
+                return ListItem(
+                  mainText: "Checking the census",
+                  purpose: Purpose.GUIDE,
+                  rightIcon: null,
+                );
+              } else if (process.hasVoted.isLoading) {
+                return ListItem(
+                  mainText: "Checking your vote",
+                  purpose: Purpose.GUIDE,
+                  rightIcon: null,
+                );
+              } else {
+                return Container(); // unknown error
+              }
+            })));
   }
 
   buildShareButton(BuildContext context, EntityModel ent) {
@@ -352,7 +380,7 @@ class _PollPageState extends State<PollPage> {
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
+          Clipboard.setData(ClipboardData(text: ent.reference.entityId));
           showMessage("Entity ID copied on the clipboard",
               context: context, purpose: Purpose.GUIDE);
         });
@@ -369,8 +397,8 @@ class _PollPageState extends State<PollPage> {
   }
 
   List<Widget> buildQuestions(BuildContext ctx) {
-    if (!processModel.processMetadata.hasValue ||
-        processModel.processMetadata.value.details.questions.length == 0) {
+    if (!process.metadata.hasValue ||
+        process.metadata.value.details.questions.length == 0) {
       return [];
     }
 
@@ -378,7 +406,7 @@ class _PollPageState extends State<PollPage> {
     int questionIndex = 0;
 
     for (ProcessMetadata_Details_Question question
-        in processModel.processMetadata.value.details.questions) {
+        in process.metadata.value.details.questions) {
       items.addAll(buildQuestion(question, questionIndex));
       questionIndex++;
     }
@@ -409,11 +437,11 @@ class _PollPageState extends State<PollPage> {
               style: TextStyle(
                   fontSize: fontSizeSecondary,
                   fontWeight: fontWeightRegular,
-                  color: _choices[questionIndex] == voteOption.value
+                  color: choices[questionIndex] == voteOption.value
                       ? Colors.white
                       : colorDescription),
             ),
-            selected: _choices[questionIndex] == voteOption.value,
+            selected: choices[questionIndex] == voteOption.value,
             onSelected: (bool selected) {
               if (selected) {
                 setChoice(questionIndex, voteOption.value);
@@ -437,11 +465,20 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildError(String error) {
-    ListItem(
+    return ListItem(
       mainText: "Error: $error",
       rightIcon: null,
       icon: FeatherIcons.alertCircle,
       purpose: Purpose.DANGER,
+    );
+  }
+
+  buildLoading() {
+    return ListItem(
+      mainText: "Loading...",
+      rightIcon: null,
+      icon: FeatherIcons.activity,
+      purpose: Purpose.NONE,
     );
   }
 

@@ -91,7 +91,7 @@ class BaseButton extends StatelessWidget {
                     side: BorderSide(width: 1.0, color: outlineColor)),
                 child: InkWell(
                   splashColor: isDisabled ? Colors.transparent : null,
-                  onTap: () => isDisabled ? null : onTap(),
+                  onTap: () => isDisabled && onTap is Function ? null : onTap(),
                   child: SizedBox(
                     child: Center(
                         child: Padding(

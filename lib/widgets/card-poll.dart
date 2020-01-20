@@ -1,4 +1,3 @@
-import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
@@ -127,8 +126,6 @@ class CardPoll extends StatelessWidget {
   onCardTapped(BuildContext context) {
     Navigator.pushNamed(context, "/entity/participation/poll",
         arguments: PollPageArgs(
-            entity: this.entity,
-            processId: this.process.processId,
-            index: this.index));
+            entity: this.entity, process: this.process, index: this.index));
   }
 }
