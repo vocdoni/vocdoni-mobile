@@ -7,7 +7,6 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import "package:vocdoni/constants/meta-keys.dart";
-import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
@@ -26,9 +25,9 @@ class CardPoll extends StatelessWidget {
   @override
   Widget build(context) {
     // Consume individual items that may rebuild only themselves
-    return ChangeNotifierProvider<StateModel<EntityMetadata>>.value(
+    return ChangeNotifierProvider.value(
         value: entity.metadata,
-        child: ChangeNotifierProvider<StateModel<ProcessMetadata>>.value(
+        child: ChangeNotifierProvider.value(
           value: process.metadata,
           child: this.buildCard(context),
         ));

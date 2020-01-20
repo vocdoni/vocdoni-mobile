@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/state-model.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -24,9 +23,9 @@ class CardPost extends StatelessWidget {
     // TODO: DEPEND ON THE APP STATE AS WELL
 
     // Consume individual items that may rebuild only themselves
-    return ChangeNotifierProvider<StateModel<EntityMetadata>>.value(
+    return ChangeNotifierProvider.value(
       value: entity.metadata,
-      child: ChangeNotifierProvider<StateModel<Feed>>.value(
+      child: ChangeNotifierProvider.value(
         value: entity.feed.value.feed,
         child: BaseCard(
             onTap: () => onPostCardTap(context, post, entity, index),

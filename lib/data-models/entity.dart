@@ -11,7 +11,7 @@ import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 // POOL
@@ -21,9 +21,9 @@ import 'package:vocdoni/lib/singletons.dart';
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateModel or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateNotifier or StateNotifier.
 ///
-class EntityPoolModel extends StateModel<List<EntityModel>>
+class EntityPoolModel extends StateNotifier<List<EntityModel>>
     implements StatePersistable, StateRefreshable {
   EntityPoolModel() {
     this.load(List<EntityModel>());
@@ -145,15 +145,15 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
 ///
 class EntityModel implements StateRefreshable {
   final EntityReference reference; // This is never fetched
-  final StateModel<EntityMetadata> metadata =
-      StateModel<EntityMetadata>().withFreshness(20);
-  final StateModel<List<ProcessModel>> processes =
-      StateModel<List<ProcessModel>>();
-  final StateModel<FeedModel> feed = StateModel<FeedModel>().withFreshness(45);
+  final StateNotifier<EntityMetadata> metadata =
+      StateNotifier<EntityMetadata>().withFreshness(20);
+  final StateNotifier<List<ProcessModel>> processes =
+      StateNotifier<List<ProcessModel>>();
+  final StateNotifier<FeedModel> feed = StateNotifier<FeedModel>().withFreshness(45);
 
-  final StateModel<List<EntityMetadata_Action>> visibleActions = StateModel();
-  final StateModel<EntityMetadata_Action> registerAction = StateModel();
-  final StateModel<bool> isRegistered = StateModel(false);
+  final StateNotifier<List<EntityMetadata_Action>> visibleActions = StateNotifier();
+  final StateNotifier<EntityMetadata_Action> registerAction = StateNotifier();
+  final StateNotifier<bool> isRegistered = StateNotifier(false);
 
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field

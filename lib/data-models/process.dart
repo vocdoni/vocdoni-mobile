@@ -5,7 +5,7 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
@@ -13,9 +13,9 @@ import 'package:vocdoni/lib/singletons.dart';
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
 ///
-class ProcessPoolModel extends StateModel<List<ProcessModel>>
+class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
     implements StatePersistable, StateRefreshable {
   ProcessPoolModel() {
     this.load(List<ProcessModel>());
@@ -157,11 +157,11 @@ class ProcessModel implements StateRefreshable {
   final String processId;
   final String entityId;
   final String lang = "default";
-  final StateModel<ProcessMetadata> metadata = StateModel<ProcessMetadata>();
-  final StateModel<bool> isInCensus = StateModel<bool>();
-  final StateModel<bool> hasVoted = StateModel<bool>();
-  final StateModel<int> currentParticipants = StateModel<int>();
-  final StateModel<int> censusSize = StateModel<int>();
+  final StateNotifier<ProcessMetadata> metadata = StateNotifier<ProcessMetadata>();
+  final StateNotifier<bool> isInCensus = StateNotifier<bool>();
+  final StateNotifier<bool> hasVoted = StateNotifier<bool>();
+  final StateNotifier<int> currentParticipants = StateNotifier<int>();
+  final StateNotifier<int> censusSize = StateNotifier<int>();
 
   List<dynamic> choices = [];
 

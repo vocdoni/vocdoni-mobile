@@ -5,7 +5,7 @@ import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
@@ -13,9 +13,9 @@ import 'package:vocdoni/lib/singletons.dart';
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
 ///
-class FeedPoolModel extends StateModel<List<FeedModel>>
+class FeedPoolModel extends StateNotifier<List<FeedModel>>
     implements StatePersistable, StateRefreshable {
   FeedPoolModel() {
     this.load(List<FeedModel>());
@@ -126,13 +126,13 @@ class FeedPoolModel extends StateModel<List<FeedModel>>
 /// This includes its metadata and the participation processes.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
 ///
 class FeedModel implements StateRefreshable {
   final String contentUri;
   final String entityId;
   final String lang = "default";
-  final StateModel<Feed> feed = StateModel<Feed>();
+  final StateNotifier<Feed> feed = StateNotifier<Feed>();
 
   FeedModel(this.contentUri, this.entityId, [Feed feed]) {
     if (feed is Feed) this.feed.load(feed);

@@ -7,7 +7,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';

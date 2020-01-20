@@ -6,7 +6,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/card-loading.dart';
@@ -94,7 +94,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   Widget buildParticipationRow(BuildContext ctx, EntityModel entity) {
     // Consume intermediate values, not present from the root context and rebuild if
     // the entity's process list changes
-    return ChangeNotifierProvider<StateModel<List<ProcessModel>>>.value(
+    return ChangeNotifierProvider.value(
       value: entity.processes,
       child: ListItem(
           mainText: "Participation",
@@ -112,7 +112,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   Widget buildFeedRow(BuildContext ctx, EntityModel entity) {
     // Consume intermediate values, not present from the root context and rebuild if
     // the entity's news feed changes
-    return ChangeNotifierProvider<StateModel<FeedModel>>.value(
+    return ChangeNotifierProvider.value(
       value: entity.feed,
       child: Builder(builder: (ctx) {
         final feedPostAmount = getFeedPostCount(entity);

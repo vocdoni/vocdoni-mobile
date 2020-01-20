@@ -4,7 +4,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/constants/settings.dart';
 
@@ -14,17 +14,17 @@ import 'package:vocdoni/constants/settings.dart';
 ///
 class AppStateModel implements StatePersistable, StateRefreshable {
   /// Index of the currently active identity
-  final StateModel<int> selectedAccount = StateModel<int>(-1);
+  final StateNotifier<int> selectedAccount = StateNotifier<int>(-1);
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
-  final StateModel<BootNodeGateways> bootnodes =
-      StateModel<BootNodeGateways>().withFreshness(60 * 10);
+  final StateNotifier<BootNodeGateways> bootnodes =
+      StateNotifier<BootNodeGateways>().withFreshness(60 * 10);
 
-  final StateModel<int> averageBlockTime =
-      StateModel<int>(5); // 5 seconds by default
-  final StateModel<int> referenceBlock = StateModel<int>();
-  final StateModel<DateTime> referenceBlockTimestamp = StateModel<DateTime>();
+  final StateNotifier<int> averageBlockTime =
+      StateNotifier<int>(5); // 5 seconds by default
+  final StateNotifier<int> referenceBlock = StateNotifier<int>();
+  final StateNotifier<DateTime> referenceBlockTimestamp = StateNotifier<DateTime>();
 
   // INTERNAL DATA HANDLERS
 

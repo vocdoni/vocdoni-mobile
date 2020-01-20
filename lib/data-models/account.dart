@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
@@ -19,9 +19,9 @@ import 'package:vocdoni/lib/singletons.dart';
 /// This is, the underlying identity and all the relevant metadata.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateModel.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
 ///
-class AccountPoolModel extends StateModel<List<AccountModel>>
+class AccountPoolModel extends StateNotifier<List<AccountModel>>
     implements StatePersistable {
   AccountPoolModel() {
     this.setValue(List<AccountModel>());
@@ -142,17 +142,17 @@ class AccountPoolModel extends StateModel<List<AccountModel>>
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
 class AccountModel implements StateRefreshable {
-  final StateModel<Identity> identity = StateModel<Identity>();
-  final StateModel<List<EntityModel>> entities =
-      StateModel<List<EntityModel>>(); // generated from `identity.peers.entities`
+  final StateNotifier<Identity> identity = StateNotifier<Identity>();
+  final StateNotifier<List<EntityModel>> entities = StateNotifier<
+      List<EntityModel>>(); // generated from `identity.peers.entities`
 
-  final StateModel<int> failedAuthAttempts = StateModel<int>(0);
-  final StateModel<DateTime> authThresholdDate =
-      StateModel<DateTime>(DateTime.now());
+  final StateNotifier<int> failedAuthAttempts = StateNotifier<int>(0);
+  final StateNotifier<DateTime> authThresholdDate =
+      StateNotifier<DateTime>(DateTime.now());
 
-  final StateModel<String> timestampUsedToSign = StateModel<String>()
+  final StateNotifier<String> timestampUsedToSign = StateNotifier<String>()
       .withFreshness(21600); // The timestamp string used to sign
-  final StateModel<String> signedTimestamp = StateModel<String>()
+  final StateNotifier<String> signedTimestamp = StateNotifier<String>()
       .withFreshness(21600); // The signature. Used for action visibility checks
 
   // CONSTRUCTORS
@@ -274,7 +274,7 @@ class AccountModel implements StateRefreshable {
         continue;
       // skip ourselves
       else if (existingAccount.identity.value.keys[0].publicKey ==
-          currentAccount.identity.value.keys[0].publicKey) continue;
+          this.identity.value.keys[0].publicKey) continue;
 
       if (isSubscribed(entityReference)) {
         subscribedFromOtherAccounts = true;
