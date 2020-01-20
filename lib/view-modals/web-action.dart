@@ -158,7 +158,7 @@ class _WebActionState extends State<WebAction> {
         if (hasPublicReadPermission != true) // may be null as well
           return respondError(id, "Permission declined");
 
-        final selectedAccount = globalAppState.getSelectedAccount();
+        final selectedAccount = globalAppState.currentAccount;
         if (!(selectedAccount is AccountModel))
           return respondError(id, "The current account cannot be accessed");
         else if (!selectedAccount.identity.hasValue ||
@@ -174,7 +174,7 @@ class _WebActionState extends State<WebAction> {
         ''');
 
       case "signPayload":
-        final selectedAccount = globalAppState.getSelectedAccount();
+        final selectedAccount = globalAppState.currentAccount;
         if (!(selectedAccount is AccountModel))
           return respondError(id, "The current account cannot be accessed");
         else if (!selectedAccount.identity.hasValue ||

@@ -1,10 +1,14 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/view-modals/web-action.dart';
+import 'package:vocdoni/data-models/feed.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-model.dart';
+import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -19,7 +23,8 @@ class EntityInfoPage extends StatefulWidget {
   final EntityReference entityReference;
 
   EntityInfoPage(this.entityReference) {
-    analytics.trackPage("EntityInfoPage", entityId: entityReference.entityId);
+    globalAnalytics.trackPage("EntityInfoPage",
+        entityId: entityReference.entityId);
   }
 
   @override
@@ -31,60 +36,73 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   EntityModel entityModel;
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
 
-    entityModel = account.findEntity(widget.entityReference);
-    // Ensure subscribtion as we visit it
-    if (!account.isSubscribed(widget.entityReference))
-      account.subscribe(entityModel);
-      
-    entityModel.updateWithDelay();
+    entityModel = EntityModel(widget.entityReference);
+
+    try {
+      // fetch data from reference
+      await entityModel.refresh(true);
+
+      final currentAccount = globalAppState.currentAccount;
+      if (currentAccount == null) throw Exception("Internal error");
+
+      // subscribe if not already
+      if (!currentAccount.isSubscribed(widget.entityReference)) {
+        await currentAccount.subscribe(entityModel);
+      }
+    } catch (err) {
+      entityModel.metadata.setError("Could not fetch");
+    }
   }
 
   @override
   Widget build(context) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: [EntityStateTags.ENTITY_METADATA],
-        builder: (ctx, tagId) {
-          return entityModel.entityMetadata.hasValue
-              ? buildScaffold(entityModel)
-              : buildScaffoldWithoutMetadata(entityModel);
-        });
+    // Rebuild when the metadata updates
+    return ChangeNotifierProvider.value(
+      value: entityModel.metadata,
+      child: Builder(
+        builder: (BuildContext context) {
+          return entityModel.metadata.hasValue
+              ? buildScaffold(context)
+              : buildScaffoldWithoutMetadata(context);
+        },
+      ),
+    );
   }
 
-  buildScaffoldWithoutMetadata(EntityModel ent) {
+  Widget buildScaffoldWithoutMetadata(BuildContext context) {
     return ScaffoldWithImage(
         headerImageUrl: null,
         headerTag: null,
         forceHeader: true,
         appBarTitle: "Loading",
         avatarText: "",
-        avatarHexSource: ent.entityReference.entityId,
+        avatarHexSource: entityModel.reference.entityId,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
                 delegate: SliverChildListDelegate(
               [
-                buildTitleWithoutEntityMeta(ctx, ent),
-                buildStatus(),
+                buildTitleWithoutMetadata(ctx),
+                buildLoadingStatus(),
               ],
             ));
           },
         ));
   }
 
-  Widget buildStatus() {
-    if (entityModel.entityMetadata.isLoading)
+  Widget buildLoadingStatus() {
+    if (entityModel.metadata.isLoading)
       return ListItem(
         mainText: "Fetching details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (entityModel.entityMetadata.hasError)
+    if (entityModel.metadata.hasError)
       return ListItem(
-        mainText: entityModel.entityMetadata.errorMessage,
+        mainText: entityModel.metadata.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
@@ -102,241 +120,245 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       return Container();
   }
 
-  buildScaffold(EntityModel ent) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: EntityStateTags.ENTITY_METADATA,
-        builder: (ctx, tagId) {
-          return ScaffoldWithImage(
-              headerImageUrl: ent.entityMetadata.value.media.header,
-              headerTag: ent.entityReference.entityId +
-                  ent.entityMetadata.value.media.header,
-              forceHeader: true,
-              appBarTitle: ent.entityMetadata.value
-                  .name[ent.entityMetadata.value.languages[0]],
-              avatarUrl: ent.entityMetadata.value.media.avatar,
-              avatarText: ent.entityMetadata.value
-                  .name[ent.entityMetadata.value.languages[0]],
-              avatarHexSource: ent.entityReference.entityId,
-              leftElement: buildRegisterButton(context, ent),
-              actionsBuilder: actionsBuilder,
-              builder: Builder(
-                builder: (ctx) {
-                  return SliverList(
-                    delegate:
-                        SliverChildListDelegate(getScaffoldChildren(ctx, ent)),
-                  );
-                },
-              ));
-        });
+  Widget buildScaffold(BuildContext context) {
+    return ScaffoldWithImage(
+        headerImageUrl: entityModel.metadata.value.media.header,
+        headerTag: entityModel.reference.entityId +
+            entityModel.metadata.value.media.header,
+        forceHeader: true,
+        appBarTitle:
+            entityModel.metadata.value.name[globalAppState.currentLanguage],
+        avatarUrl: entityModel.metadata.value.media.avatar,
+        avatarText:
+            entityModel.metadata.value.name[globalAppState.currentLanguage],
+        avatarHexSource: entityModel.reference.entityId,
+        leftElement: buildRegisterButton(context),
+        actionsBuilder: actionsBuilder,
+        builder: Builder(
+          builder: (ctx) {
+            return SliverList(
+              delegate: SliverChildListDelegate(getScaffoldChildren(ctx)),
+            );
+          },
+        ));
   }
 
   List<Widget> actionsBuilder(BuildContext context) {
     return [
-      buildShareButton(context, entityModel),
+      buildShareButton(context),
       SizedBox(height: 48, width: paddingPage),
-      //buildSubscribeButton(context, entityModel),
+      //buildSubscribeButton(context),
       //SizedBox(height: 48, width: paddingPage)
     ];
   }
 
-  getScaffoldChildren(BuildContext context, EntityModel ent) {
+  getScaffoldChildren(BuildContext context) {
     List<Widget> children = [];
-    children.add(buildTitle(context, ent));
-    children.add(buildStatus());
-    children.add(buildFeedItem(context));
-    children.add(buildParticipationItem(context));
-    children.add(buildActionList(context, ent));
+
+    children.add(buildTitle(context));
+    children.add(buildLoadingStatus());
+    children.add(buildFeedRow(context));
+    children.add(buildParticipationRow(context));
+    children.add(buildActionList(context));
     children.add(Section(text: "Details"));
     children.add(Summary(
-      text: ent.entityMetadata.value
-          .description[ent.entityMetadata.value.languages[0]],
+      text: entityModel
+          .metadata.value.description[globalAppState.currentLanguage],
       maxLines: 5,
     ));
     children.add(Section(text: "Manage"));
-    children.add(buildShareItem(context, ent));
+    children.add(buildShareItem(context));
     children.add(buildSubscribeItem(context));
 
     return children;
   }
 
-  buildTitle(BuildContext context, EntityModel ent) {
+  buildTitle(BuildContext context) {
     String title =
-        ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
+        entityModel.metadata.value.name[globalAppState.currentLanguage];
     return ListItem(
-      heroTag: ent.entityReference.entityId + title,
+      heroTag: entityModel.reference.entityId + title,
       mainText: title,
-      secondaryText: ent.entityReference.entityId,
+      secondaryText: entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
     );
   }
 
-  buildTitleWithoutEntityMeta(BuildContext context, EntityModel ent) {
+  buildTitleWithoutMetadata(BuildContext context) {
     return ListItem(
       mainText: "...",
-      secondaryText: ent.entityReference.entityId,
+      secondaryText: entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
     );
   }
 
-  buildFeedItem(BuildContext context) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: EntityStateTags.FEED,
-        builder: (ctx, tagId) {
-          String postsNum = "0";
-          if (entityModel.feed.hasValue) {
-            if (entityModel.feed.hasError) {
-              postsNum =
-                  (entityModel.feed.value?.items?.length.toString() ?? "0") +
-                      " !";
-            } else {
-              postsNum = entityModel.feed.value.items.length.toString();
-            }
-          } else {
-            if (entityModel.feed.hasError) {
-              postsNum = "!";
-            } else {
-              postsNum = "0";
-            }
-          }
+  buildFeedRow(BuildContext context) {
+    // Rebuild when the feed updates
+    return ChangeNotifierProvider.value(
+        value: entityModel.feed,
+        child: Builder(builder: (context) {
+          String postCount = "0";
+          if (entityModel.feed.isLoading ||
+              (entityModel.feed.hasValue &&
+                  entityModel.feed.value.feed.isLoading))
+            postCount = "-";
+          else if (entityModel.feed.hasError ||
+              (entityModel.feed.hasValue &&
+                  entityModel.feed.value.feed.hasError))
+            postCount = "!";
+          else if (entityModel.feed.hasValue &&
+              (entityModel.feed.hasValue &&
+                  entityModel.feed.value.feed.hasValue))
+            postCount =
+                entityModel.feed.value.feed.value.items.length.toString();
+          else
+            throw Exception("Internal error");
 
           return ListItem(
             icon: FeatherIcons.rss,
             mainText: "Feed",
-            rightText: postsNum,
+            rightText: postCount,
             rightTextIsBadge: true,
             rightTextPurpose: entityModel.feed.hasError ? Purpose.DANGER : null,
-            disabled: postsNum == "0",
-            onTap: () {
-              Navigator.pushNamed(context, "/entity/feed",
-                  arguments: entityModel);
-            },
+            disabled: postCount == "0",
+            onTap: () => onShowFeed(context),
           );
-        });
+        }));
   }
 
-  buildParticipationItem(BuildContext context) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: EntityStateTags.PROCESSES,
-        builder: (ctx, tagId) {
-          int processNum = 0;
+  buildParticipationRow(BuildContext context) {
+    // Rebuild when the process list updates (not the items)
+    ChangeNotifierProvider.value(
+      value: entityModel.processes,
+      child: Builder(
+        builder: (context) {
+          int processCount = 0;
           if (entityModel.processes.hasValue)
-            processNum = entityModel.processes.value.length;
+            processCount = entityModel.processes.value.length;
+
           return ListItem(
               icon: FeatherIcons.mail,
               mainText: "Participation",
-              rightText: processNum.toString(),
+              rightText: processCount.toString(),
               rightTextIsBadge: true,
-              disabled: processNum == 0,
-              onTap: () {
-                Navigator.pushNamed(context, "/entity/participation",
-                    arguments: entityModel.entityReference);
-              });
-        });
+              disabled: processCount == 0,
+              onTap: () => onShowParticipation(context));
+        },
+      ),
+    );
   }
 
   buildSubscribeItem(BuildContext context) {
-    bool isSubscribed = account.isSubscribed(entityModel.entityReference);
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    bool isSubscribed = currentAccount.isSubscribed(entityModel.reference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
-    return ListItem(
-      mainText: subscribeText,
-      icon: FeatherIcons.heart,
-      disabled: _processingSubscription,
-      isSpinning: _processingSubscription,
-      rightIcon: isSubscribed ? FeatherIcons.check : null,
-      rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
-      onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, entityModel)
-          : subscribeToEntity(context, entityModel),
-    );
+
+    // Rebuild when the selected account's identity updates
+    return ChangeNotifierProvider.value(
+        value: currentAccount
+            .identity, // when peers > entities are updated, identity emits an event
+        child: ListItem(
+          mainText: subscribeText,
+          icon: FeatherIcons.heart,
+          disabled: _processingSubscription,
+          isSpinning: _processingSubscription,
+          rightIcon: isSubscribed ? FeatherIcons.check : null,
+          rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
+          onTap: () => isSubscribed
+              ? unsubscribeFromEntity(context)
+              : subscribeToEntity(context),
+        ));
   }
 
-  buildSubscribeButton(BuildContext context, EntityModel ent) {
-    bool isSubscribed = account.isSubscribed(ent.entityReference);
+  buildSubscribeButton(BuildContext context) {
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    // No need to use ChangeNotifierProvider here, since the only place that can change the subscription status is here.
+    // Hence, we don't need to worry about rebuilding on external updates
+
+    bool isSubscribed = currentAccount.isSubscribed(entityModel.reference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
+
     return BaseButton(
-      text: subscribeText,
-      leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
-      isDisabled: _processingSubscription,
-      isSmall: true,
-      style: BaseButtonStyle.OUTLINE_WHITE,
-      onTap: () => isSubscribed
-          ? unsubscribeFromEntity(context, ent)
-          : subscribeToEntity(context, ent),
-    );
+        text: subscribeText,
+        leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
+        isDisabled: _processingSubscription,
+        isSmall: true,
+        style: BaseButtonStyle.OUTLINE_WHITE,
+        onTap: () {
+          if (isSubscribed)
+            unsubscribeFromEntity(context);
+          else
+            subscribeToEntity(context);
+        });
   }
 
-  buildShareItem(BuildContext context, EntityModel ent) {
+  buildShareItem(BuildContext context) {
     return ListItem(
         mainText: "Share organization",
         icon: FeatherIcons.share2,
         rightIcon: null,
-        onTap: () {
-          onShare(ent);
-        });
+        onTap: () => onShare());
   }
 
-  buildShareButton(BuildContext context, EntityModel ent) {
+  buildShareButton(BuildContext context) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
-        onTap: () {
-          onShare(ent);
-        });
+        onTap: () => onShare());
   }
 
-  onShare(EntityModel ent) {
-    Clipboard.setData(ClipboardData(text: ent.entityReference.entityId));
-    showMessage("Identity ID copied on the clipboard",
-        context: context, purpose: Purpose.GUIDE);
-  }
-
-  Widget buildRegisterButton(BuildContext ctx, EntityModel ent) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: [EntityStateTags.ACTIONS],
-        builder: (ctx, tagId) {
+  buildRegisterButton(BuildContext ctx) {
+    // Rebuild if `isRegistered` changes
+    return ChangeNotifierProvider.value(
+      value: entityModel.isRegistered,
+      child: Builder(
+        builder: (context) {
           if (entityModel.isRegistered.hasError ||
-              entityModel.registerAction.hasError) return Container();
-
-          if (entityModel.isRegistered.hasValue) {
-            if (entityModel.isRegistered.value)
-              return BaseButton(
-                purpose: Purpose.GUIDE,
-                leftIconData: FeatherIcons.check,
-                text: "Registered",
-                isSmall: true,
-                style: BaseButtonStyle.FILLED,
-                isDisabled: true,
-              );
-            else
-              return BaseButton(
-                purpose: Purpose.HIGHLIGHT,
-                leftIconData: FeatherIcons.feather,
-                text: "Register",
-                isSmall: true,
-                onTap: () {
-                  if (entityModel.registerAction.value.type == "browser") {
-                    onBrowserAction(ctx, entityModel.registerAction.value, ent);
-                  }
-                },
-              );
+              entityModel.registerAction.hasError)
+            return Container();
+          else if (!entityModel.isRegistered.hasValue ||
+              !entityModel.registerAction.hasValue)
+            return Container();
+          else if (!entityModel.isRegistered.value) {
+            // Not yet
+            return BaseButton(
+              purpose: Purpose.HIGHLIGHT,
+              leftIconData: FeatherIcons.feather,
+              text: "Register",
+              isSmall: true,
+              onTap: () => onTapRegister(context),
+            );
           }
-        });
+
+          // Already registered
+          return BaseButton(
+            purpose: Purpose.GUIDE,
+            leftIconData: FeatherIcons.check,
+            text: "Registered",
+            isSmall: true,
+            style: BaseButtonStyle.FILLED,
+            isDisabled: true,
+          );
+        },
+      ),
+    );
   }
 
-  Widget buildActionList(BuildContext ctx, EntityModel ent) {
-    return StateBuilder(
-        viewModels: [entityModel],
-        tag: [EntityStateTags.ACTIONS],
-        builder: (ctx, tagId) {
+  Widget buildActionList(BuildContext ctx) {
+    // Rebuild if `isRegistered` changes
+    return ChangeNotifierProvider.value(
+      value: entityModel.visibleActions,
+      child: Builder(
+        builder: (context) {
           final List<Widget> actionsToShow = [];
 
           actionsToShow.add(Section(text: "Actions"));
@@ -347,13 +369,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
-          }
-
-          if (entityModel.visibleActions.hasError) {
-            return Container();
-          }
-
-          if (entityModel.visibleActions.value.length == 0) {
+          } else if (entityModel.visibleActions.value.length == 0) {
             return ListItem(
               mainText: "No actions defined",
               disabled: true,
@@ -362,40 +378,40 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             );
           }
 
-          if (entityModel.isRegistered == false) {
-            final entityName = ent.entityMetadata.value
-                .name[ent.entityMetadata.value.languages[0]];
+          // Unregistered warning
+          if (!entityModel.isRegistered.value) {
+            final entityName =
+                entityModel.metadata.value.name[globalAppState.currentLanguage];
             ListItem noticeItem = ListItem(
               mainText: "Regsiter to $entityName first",
-              secondaryText: null,
-              rightIcon: null,
+              // secondaryText: null,
+              // rightIcon: null,
               disabled: false,
               purpose: Purpose.HIGHLIGHT,
             );
             actionsToShow.add(noticeItem);
           }
 
+          // disabled if not registered
           for (EntityMetadata_Action action
               in entityModel.visibleActions.value) {
             ListItem item;
             if (action.type == "browser") {
               if (!(action.name is Map) ||
-                  !(action.name[ent.entityMetadata.value.languages[0]]
-                      is String)) return null;
+                  !(action.name[globalAppState.currentLanguage] is String))
+                return null;
 
               item = ListItem(
                 icon: FeatherIcons.arrowRightCircle,
-                mainText: action.name[ent.entityMetadata.value.languages[0]],
+                mainText: action.name[globalAppState.currentLanguage],
                 secondaryText: action.visible,
-                disabled: entityModel.isRegistered.value == false,
-                onTap: () {
-                  onBrowserAction(ctx, action, ent);
-                },
+                disabled: !entityModel.isRegistered.value,
+                onTap: () => onBrowserAction(ctx, action),
               );
             } else {
               item = ListItem(
-                mainText: action.name[ent.entityMetadata.value.languages[0]],
-                secondaryText: "Action type not supported yet: " + action.type,
+                mainText: action.name[globalAppState.currentLanguage],
+                secondaryText: "Action not yet supported: " + action.type,
                 icon: FeatherIcons.helpCircle,
                 disabled: true,
               );
@@ -405,14 +421,44 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           }
 
           return ListView(children: actionsToShow);
-        });
+        },
+      ),
+    );
   }
 
-  onBrowserAction(
-      BuildContext ctx, EntityMetadata_Action action, EntityModel ent) {
-    final String url = action.url;
-    final String title = action.name[ent.entityMetadata.value.languages[0]] ??
-        ent.entityMetadata.value.name[ent.entityMetadata.value.languages[0]];
+  // EVENTS
+
+  onShare() {
+    Clipboard.setData(ClipboardData(text: entityModel.reference.entityId))
+        .then((_) => showMessage("Identity ID copied on the clipboard",
+            context: context, purpose: Purpose.GUIDE))
+        .catchError((err) {
+      if (!foundation.kReleaseMode) print(err);
+
+      showMessage("Could not copy the Entity ID",
+          context: context, purpose: Purpose.DANGER);
+    });
+  }
+
+  onShowFeed(BuildContext context) {
+    Navigator.pushNamed(context, "/entity/feed", arguments: entityModel);
+  }
+
+  onShowParticipation(BuildContext context) {
+    Navigator.pushNamed(context, "/entity/participation",
+        arguments: entityModel);
+  }
+
+  onTapRegister(BuildContext context) {
+    if (entityModel.registerAction.value.type == "browser") {
+      onBrowserAction(context, entityModel.registerAction.value);
+    }
+  }
+
+  onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
+    final url = action.url;
+    final title = action.name[globalAppState.currentAccount] ??
+        entityModel.metadata.value.name[globalAppState.currentAccount];
 
     final route = MaterialPageRoute(
         builder: (context) => WebAction(
@@ -422,29 +468,17 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     Navigator.push(ctx, route);
   }
 
-  unsubscribeFromEntity(BuildContext ctx, EntityModel ent) async {
-    setState(() {
-      _processingSubscription = true;
-    });
-    await account.unsubscribe(ent.entityReference);
-    showMessage(
-        Lang.of(ctx)
-            .get("You will no longer see this organization in your feed"),
-        context: ctx,
-        purpose: Purpose.NONE);
-    if (!mounted) return;
-    setState(() {
-      _processingSubscription = false;
-    });
-  }
-
-  subscribeToEntity(BuildContext ctx, EntityModel ent) async {
+  subscribeToEntity(BuildContext ctx) async {
     setState(() {
       _processingSubscription = true;
     });
 
     try {
-      await account.subscribe(ent);
+      final currentAccount = globalAppState.currentAccount;
+      if (currentAccount == null)
+        throw Exception("Internal error: null account");
+
+      await currentAccount.subscribe(entityModel);
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
@@ -469,13 +503,39 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     });
   }
 
+  unsubscribeFromEntity(BuildContext ctx) async {
+    setState(() {
+      _processingSubscription = true;
+    });
+    try {
+      final currentAccount = globalAppState.currentAccount;
+      if (currentAccount == null)
+        throw Exception("Internal error: null account");
+
+      await currentAccount.unsubscribe(entityModel.reference);
+      showMessage(
+          Lang.of(ctx)
+              .get("You will no longer see this organization in your feed"),
+          context: ctx,
+          purpose: Purpose.NONE);
+      if (!mounted) return;
+      setState(() {
+        _processingSubscription = false;
+      });
+    } catch (err) {
+      showMessage(Lang.of(ctx).get("The subscription could not be canceled"),
+          context: ctx, purpose: Purpose.DANGER);
+    }
+  }
+
   refresh() async {
-    await entityModel.update();
+    await entityModel.refresh();
+
 /*
     String errorMessage = "";
     bool fail = false;
 
-    if (entityModel.entityMetadata == DataState.ERROR) {
+    if (entityModel.metadata == DataState.ERROR) {
       errorMessage = "Unable to retrieve details";
       fail = true;
     } else if (entityModel.processessMetadataUpdated == false) {
@@ -493,8 +553,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       _errorMessage = errorMessage;
     });
 */
-
-    //if (account.isSubscribed(entityModel.entityReference)) entityModel.save();
   }
 
   goBack(BuildContext ctx) {

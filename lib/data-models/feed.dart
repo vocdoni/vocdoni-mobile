@@ -68,7 +68,7 @@ class FeedPoolModel extends StateModel<List<FeedModel>>
   }
 
   @override
-  Future<void> refresh() async {
+  Future<void> refresh([bool force = false]) async {
     if (!hasValue) return;
 
     try {
@@ -77,7 +77,7 @@ class FeedPoolModel extends StateModel<List<FeedModel>>
       // This will call `setValue` on the individual models already within the pool.
       // No need to rebuild an updated pool list.
       await Future.wait(
-          this.value.map((feedModel) => feedModel.refresh()).toList());
+          this.value.map((feedModel) => feedModel.refresh(force)).toList());
 
       await this.writeToStorage();
     } catch (err) {
@@ -145,8 +145,10 @@ class FeedModel implements StateRefreshable {
   }
 
   @override
-  Future<void> refresh() async {
-    if (this.feed.isFresh) return;
+  Future<void> refresh([bool force = false]) async {
+    if (!force && this.feed.isFresh)
+      return;
+    else if (!force && this.feed.isLoading) return;
 
     // TODO: Don't refetch if the IPFS hash is the same
 

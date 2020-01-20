@@ -37,7 +37,7 @@ Future populateSampleData() async {
   globalFeedPool.setValue(feeds);
   globalProcessPool.setValue(processess);
 
-  final currentAccount = globalAppState.getSelectedAccount();
+  final currentAccount = globalAppState.currentAccount;
   if (!(currentAccount is AccountModel))
     throw Exception("No account is currently selected");
 

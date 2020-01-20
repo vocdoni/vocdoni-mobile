@@ -63,7 +63,7 @@ class _HomeTabState extends State<HomeTab> {
     if (!globalAccountPool.hasValue || globalAccountPool.value.length == 0)
       return [];
 
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null ||
         currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) return [];

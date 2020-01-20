@@ -1,11 +1,10 @@
 import 'package:dvote/dvote.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/pollCard.dart';
+import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
 class EntityParticipationPage extends StatefulWidget {
@@ -15,17 +14,16 @@ class EntityParticipationPage extends StatefulWidget {
 }
 
 class _EntityParticipationPageState extends State<EntityParticipationPage> {
-  EntityModel entModel;
+  EntityModel entityModel;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     try {
-      final EntityReference entityReference =
-          ModalRoute.of(context).settings.arguments;
-      entModel = account.findEntity(entityReference);
       analytics.trackPage("EntityParticipationPage",
           entityId: entityReference.entityId);
+
+      entityModel = ModalRoute.of(context).settings.arguments;
     } catch (err) {
       print(err);
     }

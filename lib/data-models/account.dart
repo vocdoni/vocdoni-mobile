@@ -144,7 +144,7 @@ class AccountPoolModel extends StateModel<List<AccountModel>>
 class AccountModel implements StateRefreshable {
   final StateModel<Identity> identity = StateModel<Identity>();
   final StateModel<List<EntityModel>> entities =
-      StateModel<List<EntityModel>>();
+      StateModel<List<EntityModel>>(); // generated from `identity.peers.entities`
 
   final StateModel<int> failedAuthAttempts = StateModel<int>(0);
   final StateModel<DateTime> authThresholdDate =
@@ -179,9 +179,10 @@ class AccountModel implements StateRefreshable {
   /// Also recompute the signed timestamp so that entity actions can be checked
   /// for visibility.
   @override
-  Future<void> refresh([String patternEncryptionKey]) async {
+  Future<void> refresh(
+      [bool force = false, String patternEncryptionKey]) async {
     if (this.entities.hasValue) {
-      await Future.wait(this.entities.value.map((e) => e.refresh()));
+      await Future.wait(this.entities.value.map((e) => e.refresh(force)));
     }
     if (patternEncryptionKey is String)
       await refreshSignedTimestamp(patternEncryptionKey);
@@ -224,32 +225,35 @@ class AccountModel implements StateRefreshable {
     });
   }
 
-  /// Register the given organization as a subscribtion of the currently selected identity.
+  /// Register the given organization as a subscribtion of the currently selected account's identity.
   /// Persists the updated pool.
-  subscribe(EntityModel entityReference) async {
-    if (entityReference.reference == null)
+  Future<void> subscribe(EntityModel entityModel) async {
+    if (entityModel.reference == null)
       throw Exception("The entity has no reference");
-    else if (isSubscribed(entityReference.reference)) return;
+    else if (isSubscribed(entityModel.reference)) return;
 
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(identity.value.peers.entities); // clone existing
     peers.identities.addAll(identity.value.peers.identities); // clone existing
 
-    peers.entities.add(entityReference.reference); // new entity
+    peers.entities.add(entityModel.reference); // new entity
 
     final updatedIdentity = this.identity.value;
     updatedIdentity.peers = peers;
     this.identity.setValue(updatedIdentity);
 
     final newPeerEntities = this.entities.value;
-    newPeerEntities.add(entityReference);
+    newPeerEntities.add(entityModel);
     this.entities.setValue(newPeerEntities);
 
     await globalAccountPool.writeToStorage();
   }
 
-  /// Remove the given entity from the currently selected identity's subscriptions
-  unsubscribe(EntityReference entityReference) async {
+  /// Remove the given entity from the currently selected account's identity subscriptions
+  Future<void> unsubscribe(EntityReference entityReference) async {
+    if (!this.identity.hasValue || !this.entities.hasValue)
+      throw Exception("The current identity is not properly initialized");
+
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(this.identity.value.peers.entities);
     peers.entities.removeWhere((existingEntity) =>
@@ -259,14 +263,6 @@ class AccountModel implements StateRefreshable {
     final updatedIdentity = this.identity.value;
     updatedIdentity.peers = peers;
     this.identity.setValue(updatedIdentity);
-
-    // Get ourselves
-    final currentAccount = globalAppState.getSelectedAccount();
-    if (!(currentAccount is AccountModel))
-      throw Exception("No account is currently selected");
-    else if (!currentAccount.identity.hasValue ||
-        !currentAccount.entities.hasValue)
-      throw Exception("The current identity is not properly initialized");
 
     // Check if other identities are also subscribed
     bool subscribedFromOtherAccounts = false;

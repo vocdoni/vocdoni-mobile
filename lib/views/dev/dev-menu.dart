@@ -96,7 +96,7 @@ class DevMenu extends StatelessWidget {
     const NEW_MNEMONIC =
         "wealth matrix piano veteran disease digital hard arrow blossom eight simple solid";
 
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel))
       throw Exception("No account is currently selected");
     else if (!currentAccount.identity.hasValue ||

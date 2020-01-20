@@ -41,15 +41,6 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     this.selectedAccount.setValue(accountIdx);
   }
 
-  AccountModel getSelectedAccount() {
-    if (!globalAccountPool.hasValue)
-      return null;
-    else if (globalAccountPool.value.length <= selectedAccount.value ||
-        selectedAccount.value < 0) return null;
-
-    return globalAccountPool.value[selectedAccount.value];
-  }
-
   // EXTERNAL DATA HANDLERS
 
   /// Read the list of bootnodes from the persistent storage
@@ -87,13 +78,13 @@ class AppStateModel implements StatePersistable, StateRefreshable {
 
   /// Fetch the list of bootnodes and store it locally
   @override
-  Future<void> refresh() async {
+  Future<void> refresh([bool force = false]) async {
     try {
       // Refresh bootnodes
-      await this.refreshBootNodes();
+      await this.refreshBootNodes(force);
 
       // Refresh vochain state
-      await this.refreshBlockInfo();
+      await this.refreshBlockInfo(force);
 
       await this.writeToStorage();
     } catch (err) {
@@ -102,8 +93,10 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     }
   }
 
-  Future<void> refreshBootNodes() async {
-    if (this.bootnodes.isFresh) return;
+  Future<void> refreshBootNodes([bool force = false]) async {
+    if (!force && this.bootnodes.isFresh)
+      return;
+    else if (!force && this.bootnodes.isLoading) return;
 
     this.bootnodes.setToLoading();
     try {
@@ -116,8 +109,10 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     }
   }
 
-  Future<void> refreshBlockInfo() async {
-    if (this.referenceBlock.isFresh) return;
+  Future<void> refreshBlockInfo([bool force = false]) async {
+    if (!force && this.referenceBlock.isFresh)
+      return;
+    else if (!force && this.referenceBlock.isLoading) return;
 
     this.referenceBlock.setToLoading();
 
@@ -165,4 +160,13 @@ class AppStateModel implements StatePersistable, StateRefreshable {
   }
 
   get currentLanguage => "default";
+
+  AccountModel get currentAccount {
+    if (!globalAccountPool.hasValue)
+      return null;
+    else if (globalAccountPool.value.length <= selectedAccount.value ||
+        selectedAccount.value < 0) return null;
+
+    return globalAccountPool.value[selectedAccount.value];
+  }
 }

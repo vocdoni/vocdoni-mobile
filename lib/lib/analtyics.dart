@@ -34,7 +34,7 @@ class Analytics {
   }
 
   getUserId() {
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel))
       return null;
     else if (!currentAccount.identity.hasValue)

@@ -60,12 +60,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // DETERMINE INITIAL TAB
     final currentAccount =
-        globalAppState.getSelectedAccount(); // It is expected to be defined
+        globalAppState.currentAccount; // It is expected to be non-null
 
     // No organizations => identity
     if (!currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) {
       selectedTab = 2;
+    } else {
+      // internally, this will only refresh outdated individual elements
+      currentAccount.refresh(); // detached from async
     }
 
     super.initState();

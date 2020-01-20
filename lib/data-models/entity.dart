@@ -89,7 +89,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
   }
 
   @override
-  Future<void> refresh() async {
+  Future<void> refresh([bool force = false]) async {
     if (!this.hasValue) return;
 
     try {
@@ -98,7 +98,7 @@ class EntityPoolModel extends StateModel<List<EntityModel>>
       // This will call `setValue` on the individual models already within the pool.
       // No need to rebuild an updated pool list.
       await Future.wait(
-          this.value.map((entityModel) => entityModel.refresh()).toList());
+          this.value.map((entityModel) => entityModel.refresh(force)).toList());
 
       await this.writeToStorage();
     } catch (err) {
@@ -184,21 +184,23 @@ class EntityModel implements StateRefreshable {
   /// necessary.
   /// IMPORTANT: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
   @override
-  Future<void> refresh() {
+  Future<void> refresh([bool force = false]) {
     return Future.wait(<Future>[
-      refreshMetadata(),
-      refreshVisibleActions(),
-      refreshProcesses(),
-      refreshFeed()
+      refreshMetadata(force),
+      refreshVisibleActions(force),
+      refreshProcesses(force),
+      refreshFeed(force)
     ]);
   }
 
-  Future<void> refreshMetadata() async {
+  Future<void> refreshMetadata([bool force = false]) async {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
     if (!(reference is EntityReference))
       return;
-    else if (this.metadata.isFresh) return;
+    else if (!force && this.metadata.isFresh)
+      return;
+    else if (!force && this.metadata.isLoading) return;
 
     final dvoteGw = getDVoteGateway();
     final web3Gw = getWeb3Gateway();
@@ -217,16 +219,18 @@ class EntityModel implements StateRefreshable {
     }
   }
 
-  Future<void> refreshProcesses() async {
+  Future<void> refreshProcesses([bool force = false]) async {
     // TODO: Check the last time that data was fetched
     // TODO: `refresh` the voting process list
     ;
   }
 
-  Future<void> refreshFeed() async {
+  Future<void> refreshFeed([bool force = false]) async {
     if (this.metadata.hasValue)
       return;
-    else if (this.feed.isFresh) return;
+    else if (!force && this.feed.isFresh)
+      return;
+    else if (!force && this.feed.isLoading) return;
 
     this.feed.setToLoading();
 
@@ -256,12 +260,14 @@ class EntityModel implements StateRefreshable {
     }
   }
 
-  Future<void> refreshVisibleActions() async {
+  Future<void> refreshVisibleActions([bool force = false]) async {
     final List<EntityMetadata_Action> visibleStandardActions = [];
 
     if (!this.metadata.hasValue)
       return;
-    else if (this.visibleActions.isFresh) return;
+    else if (!force && this.visibleActions.isFresh)
+      return;
+    else if (!force && this.visibleActions.isLoading) return;
 
     this.registerAction.setToLoading();
     this.isRegistered.setToLoading();
@@ -328,7 +334,7 @@ class EntityModel implements StateRefreshable {
 
     // OTHERWISE => the `visible` field is expected to be a URL
 
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel))
       return null;
     else if (!currentAccount.signedTimestamp.hasValue) return null;

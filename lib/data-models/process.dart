@@ -90,7 +90,7 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
   }
 
   @override
-  Future<void> refresh() async {
+  Future<void> refresh([bool force = false]) async {
     if (!hasValue) return;
 
     try {
@@ -98,8 +98,10 @@ class ProcessPoolModel extends StateModel<List<ProcessModel>>
 
       // This will call `setValue` on the individual models already within the pool.
       // No need to rebuild an updated pool list.
-      await Future.wait(
-          this.value.map((processModel) => processModel.refresh()).toList());
+      await Future.wait(this
+          .value
+          .map((processModel) => processModel.refresh(force))
+          .toList());
 
       await this.writeToStorage();
     } catch (err) {
@@ -212,17 +214,21 @@ class ProcessModel implements StateRefreshable {
   }
 
   @override
-  Future<void> refresh() {
+  Future<void> refresh([bool force = false]) {
     return Future.wait([
-      refreshMetadata(),
-      refreshIsInCensus(),
-      refreshHasVoted(),
-      refreshCurrentParticipants(),
-      refreshCensusSize(),
+      refreshMetadata(force),
+      refreshIsInCensus(force),
+      refreshHasVoted(force),
+      refreshCurrentParticipants(force),
+      refreshCensusSize(force),
     ]);
   }
 
-  Future<void> refreshMetadata() async {
+  Future<void> refreshMetadata([bool force = false]) async {
+    if (!force && this.metadata.isFresh)
+      return;
+    else if (!force && this.metadata.isLoading) return;
+
     // TODO: Check the last time that data was fetched
     // TODO: Don't refetch if the IPFS hash is the same
 
@@ -243,10 +249,14 @@ class ProcessModel implements StateRefreshable {
     }
   }
 
-  Future<void> refreshIsInCensus() async {
+  Future<void> refreshIsInCensus([bool force = false]) async {
+    if (!force && this.isInCensus.isFresh)
+      return;
+    else if (!force && this.isInCensus.isLoading) return;
+
     final DVoteGateway dvoteGw = getDVoteGateway();
 
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
 
     try {
@@ -280,16 +290,20 @@ class ProcessModel implements StateRefreshable {
     }
   }
 
-  Future<void> refreshHasVoted() async {
-    if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+  Future<void> refreshHasVoted([bool force = false]) async {
+    if (!force && this.hasVoted.isFresh)
+      return;
+    else if (!force && this.hasVoted.isLoading)
+      return;
+    else if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
 
-    final currentAccount = globalAppState.getSelectedAccount();
+    final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
 
     try {
       this.hasVoted.setToLoading();
       final String pollNullifier = getPollNullifier(
-          globalAppState.getSelectedAccount().identity.value.keys[0].address,
+          globalAppState.currentAccount.identity.value.keys[0].address,
           this.processId);
 
       final DVoteGateway dvoteGw = getDVoteGateway();
@@ -307,7 +321,7 @@ class ProcessModel implements StateRefreshable {
     }
   }
 
-  Future<void> refreshCensusSize() {
+  Future<void> refreshCensusSize([bool force = false]) {
     if (!this.metadata.hasValue) return null;
 
     final DVoteGateway dvoteGw = getDVoteGateway();
@@ -321,8 +335,13 @@ class ProcessModel implements StateRefreshable {
     });
   }
 
-  Future<void> refreshCurrentParticipants() {
-    if (!this.metadata.hasValue) return null;
+  Future<void> refreshCurrentParticipants([bool force = false]) {
+    if (!this.metadata.hasValue)
+      return Future.value();
+    else if (!force && this.currentParticipants.isFresh)
+      return Future.value();
+    else if (!force && this.currentParticipants.isLoading)
+      return Future.value();
 
     final DVoteGateway dvoteGw = getDVoteGateway();
 
