@@ -209,8 +209,8 @@ Additional features:
 
 ```dart
 // Initial value of 0
-// Data will be obsolete after 10 seconds
-final myInteger = StateContainer<int>(0).withFreshness(10);
+// Data will be considered "not fresh" after 5 seconds
+final myInteger = StateContainer<int>(0).withFreshness(5);
 myInteger.isFresh // false   (we have not called setValue yet)
 myInteger.lastUpdated // null
 myInteger.lastError // null
@@ -232,6 +232,13 @@ myInteger.isFresh // false
 The `StateNotifier` class extends the functionality of `StateContainer` by implementing the `ChangeNotifier` interface of `Provider`. The method `notifyListeners` is called whenever the internal state changes (`setValue()`, `setError()`, `setToLoading()`). 
 
 State Notifiers are mainly used to build and compose data models used in the global state of the app. 
+
+```dart
+final myBool = StateNotifier<int>();
+myBool.setToLoading();  // calls notifyListeners()
+myBool.setError("Network error");  // calls notifyListeners()
+myBool.setValue(true);  // calls notifyListeners()
+```
 
 #### Model classes
 
