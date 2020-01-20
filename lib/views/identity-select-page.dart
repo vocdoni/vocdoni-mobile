@@ -78,8 +78,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(
-                account.identity.value.keys[0].encryptedPrivateKey)));
+            builder: (context) => PaternPromptModal(account)));
 
     if (result == null || result is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",

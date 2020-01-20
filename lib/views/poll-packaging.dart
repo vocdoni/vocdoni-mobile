@@ -45,8 +45,7 @@ class _PollPackagingState extends State<PollPackaging> {
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(
-                currentAccount.identity.value.keys[0].encryptedPrivateKey)));
+            builder: (context) => PaternPromptModal(currentAccount)));
 
     if (!mounted) return;
 

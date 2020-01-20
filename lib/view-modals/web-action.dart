@@ -189,7 +189,7 @@ class _WebActionState extends State<WebAction> {
             context,
             MaterialPageRoute(
                 fullscreenDialog: true,
-                builder: (context) => PaternPromptModal(encryptedPrivateKey)));
+                builder: (context) => PaternPromptModal(selectedAccount)));
         if (patternStr == null || patternStr is InvalidPatternError) {
           return respondError(id, "The pattern you entered is not valid");
         }

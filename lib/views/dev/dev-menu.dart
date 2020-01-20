@@ -107,8 +107,7 @@ class DevMenu extends StatelessWidget {
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(
-                currentAccount.identity.value.keys[0].encryptedPrivateKey)));
+            builder: (context) => PaternPromptModal(currentAccount)));
 
     if (patternLockKey == null || patternLockKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
