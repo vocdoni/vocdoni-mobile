@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import '../lang/index.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 
 class TopNavigation extends StatelessWidget with PreferredSizeWidget {

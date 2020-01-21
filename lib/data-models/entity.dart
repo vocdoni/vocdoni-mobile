@@ -90,15 +90,24 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
 
   @override
   Future<void> refresh([bool force = false]) async {
-    if (!this.hasValue) return;
+    if (!hasValue ||
+        globalAppState.currentAccount == null ||
+        !globalAppState.currentAccount.entities.hasValue) return;
 
     try {
-      // TODO: Get a filtered EntityModel list of the Entities of the current user
+      // Get a filtered list of the Entities of the current user
+      final entityIds = globalAppState.currentAccount.entities.value
+          .map((entity) => entity.reference.entityId)
+          .toList();
 
       // This will call `setValue` on the individual models already within the pool.
-      // No need to rebuild an updated pool list.
-      await Future.wait(
-          this.value.map((entityModel) => entityModel.refresh(force)).toList());
+      // No need to update the pool list itself.
+      await Future.wait(this
+          .value
+          .where((entityModel) =>
+              entityIds.contains(entityModel.reference.entityId))
+          .map((entityModel) => entityModel.refresh(force))
+          .toList());
 
       await this.writeToStorage();
     } catch (err) {
@@ -210,8 +219,7 @@ class EntityModel implements StateRefreshable {
     this.metadata.setToLoading();
 
     try {
-      final EntityMetadata entityMetadata =
-          await fetchEntity(reference, dvoteGw, web3Gw);
+      final entityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
       entityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
       this.metadata.setValue(entityMetadata);

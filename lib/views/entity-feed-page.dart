@@ -76,7 +76,6 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   }
 
   Widget buildEmptyEntity(BuildContext ctx) {
-    // TODO: UI
     return Scaffold(
         body: Center(
       child: Text("(No entity)"),
@@ -84,7 +83,6 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   }
 
   Widget buildEmptyPosts(BuildContext ctx) {
-    // TODO: UI
     return Scaffold(
         body: Center(
       child: Text("(No posts)"),
@@ -92,7 +90,6 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   }
 
   Widget buildLoading(BuildContext ctx) {
-    // TODO: UI
     return Scaffold(
         body: Center(
       child: Text("Loading..."),

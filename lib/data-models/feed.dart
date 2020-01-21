@@ -69,15 +69,23 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
 
   @override
   Future<void> refresh([bool force = false]) async {
-    if (!hasValue) return;
+    if (!hasValue ||
+        globalAppState.currentAccount == null ||
+        !globalAppState.currentAccount.entities.hasValue) return;
 
     try {
-      // TODO: Get a filtered FeedModel list of the Entities of the current user
+      // Get a filtered list of the Entities of the current user
+      final entityIds = globalAppState.currentAccount.entities.value
+          .map((entity) => entity.reference.entityId)
+          .toList();
 
-      // This will call `setValue` on the individual models already within the pool.
-      // No need to rebuild an updated pool list.
-      await Future.wait(
-          this.value.map((feedModel) => feedModel.refresh(force)).toList());
+      // This will call `setValue` on the individual models that are already within the pool.
+      // No need to update the pool list itself.
+      await Future.wait(this
+          .value
+          .where((feedModel) => entityIds.contains(feedModel.entityId))
+          .map((feedModel) => feedModel.refresh(force))
+          .toList());
 
       await this.writeToStorage();
     } catch (err) {

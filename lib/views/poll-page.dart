@@ -205,37 +205,43 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildTimeItem(BuildContext context) {
-    if (process.startDate is DateTime &&
-        process.startDate.isBefore(DateTime.now())) {
-      // display time until start date
-      final formattedTime =
-          DateFormat("dd/MM H:mm").format(process.startDate) + "h";
+    // Rebuild when the reference block changes
+    return ChangeNotifierProvider.value(
+      value: globalAppState.referenceBlockTimestamp,
+      child: Builder(builder: (context) {
+        if (process.startDate is DateTime &&
+            process.startDate.isBefore(DateTime.now())) {
+          // display time until start date
+          final formattedTime =
+              DateFormat("dd/MM H:mm").format(process.startDate) + "h";
 
-      return ListItem(
-        icon: FeatherIcons.clock,
-        mainText: "Starting on " + formattedTime,
-        //secondaryText: "18/09/2019 at 19:00",
-        rightIcon: null,
-        disabled: false,
-      );
-    } else if (process.endDate is DateTime) {
-      String rowText;
-      final formattedTime =
-          DateFormat("dd/MM H:mm").format(process.endDate) + "h";
-      if (process.endDate.isBefore(DateTime.now()))
-        rowText = "Ending on " + formattedTime;
-      else
-        rowText = "Ended on " + formattedTime;
+          return ListItem(
+            icon: FeatherIcons.clock,
+            mainText: "Starting on " + formattedTime,
+            //secondaryText: "18/09/2019 at 19:00",
+            rightIcon: null,
+            disabled: false,
+          );
+        } else if (process.endDate is DateTime) {
+          String rowText;
+          final formattedTime =
+              DateFormat("dd/MM H:mm").format(process.endDate) + "h";
+          if (process.endDate.isBefore(DateTime.now()))
+            rowText = "Ending on " + formattedTime;
+          else
+            rowText = "Ended on " + formattedTime;
 
-      return ListItem(
-        icon: FeatherIcons.clock,
-        mainText: rowText,
-        // secondaryText: "18/09/2019 at 19:00",
-        rightIcon: null,
-        disabled: false,
-      );
-    }
-    return Container();
+          return ListItem(
+            icon: FeatherIcons.clock,
+            mainText: rowText,
+            // secondaryText: "18/09/2019 at 19:00",
+            rightIcon: null,
+            disabled: false,
+          );
+        }
+        return Container();
+      }),
+    );
   }
 
   setChoice(int questionIndex, String value) {

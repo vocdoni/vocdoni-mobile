@@ -51,7 +51,6 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Widget buildNoEntries(BuildContext ctx) {
-    // TODO: UI
     return Center(
       child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
     );

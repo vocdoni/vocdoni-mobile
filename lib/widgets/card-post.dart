@@ -18,10 +18,6 @@ class CardPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO:
-
-    // TODO: DEPEND ON THE APP STATE AS WELL
-
     // Consume individual items that may rebuild only themselves
     return ChangeNotifierProvider.value(
       value: entity.metadata,

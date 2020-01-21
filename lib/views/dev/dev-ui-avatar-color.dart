@@ -1,10 +1,6 @@
-import 'package:dvote/net/gateway.dart';
 import "package:flutter/material.dart";
-import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/baseAvatar.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'dart:math' as math;
 

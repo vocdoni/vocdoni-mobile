@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';

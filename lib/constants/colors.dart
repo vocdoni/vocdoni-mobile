@@ -3,63 +3,66 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
 
-final double opacitySecondaryElement = 0.7;
-final double opacityDecorationLines = 0.1;
-final double opacityBackgroundColor = 0.1;
-final double opacityDisabled = 0.6;
+const double opacitySecondaryElement = 0.7;
+const double opacityDecorationLines = 0.1;
+const double opacityBackgroundColor = 0.1;
+const double opacityDisabled = 0.6;
 
-final Color colorRed = Color(0xFFFF7C7C);
-final Color colorOrange = Color(0xFFEEAA00);
-final Color colorGreen = Color(0xFF91CD45);
-final Color colorBlue = Color(0xFF66BBEF);
+const Color colorRed = Color(0xFFFF7C7C);
+const Color colorOrange = Color(0xFFEEAA00);
+const Color colorGreen = Color(0xFF91CD45);
+const Color colorBlue = Color(0xFF66BBEF);
 
-final Color colorRedPale = Color(0xFFFF8282);
-final Color colorOrangePale = Color(0xFFFFBE3F);
-final Color colorGreenPale = Color(0xFFAADD77);
-final Color colorBluePale = Color(0xFF99CCEE);
-final Color colorDescriptionPale = Color(0xFFB4B0AD);
+const Color colorRedPale = Color(0xFFFF8282);
+const Color colorOrangePale = Color(0xFFFFBE3F);
+const Color colorGreenPale = Color(0xFFAADD77);
+const Color colorBluePale = Color(0xFF99CCEE);
+const Color colorDescriptionPale = Color(0xFFB4B0AD);
 
-final Color colorBaseBackground = Color(0xFFF3F0ED);
-final Color colorCardBackround = Colors.white;
-final Color colorDescription = Color(0xFF444444);
-final Color colorGuide = colorDescription.withOpacity(opacitySecondaryElement);
-final Color colorLightGuide =
-    colorDescription.withOpacity(opacityDecorationLines);
+const Color colorBaseBackground = Color(0xFFF3F0ED);
+const Color colorCardBackround = Colors.white;
+const Color colorDescription = Color(0xFF444444);
+// final Color colorGuide = colorDescription.withOpacity(opacitySecondaryElement);
+const Color colorGuide =
+    Color(0xB3444444); // opacitySecondaryElement + colorDescription
+// final Color colorLightGuide = colorDescription.withOpacity(opacityDecorationLines);
+const Color colorLightGuide =
+    Color(0x20444444); // opacityDecorationLines + colorDescription
 
-final Color colorTitle = Color(0xFF000000);
-final Color colorChip = Color(0xFFFFEEBF);
-final Color colorLink = colorBlue;
+const Color colorTitle = Color(0xFF000000);
+const Color colorChip = Color(0xFFFFEEBF);
+const Color colorLink = colorBlue;
 
-final double paddingPage = 32;
-final double paddingChip = 4;
-final double paddingButton = 8;
-final double paddingBubble = 12;
-final double paddingBadge = 10;
-final double paddingIcon = 24;
-final double paddingAvatar = 18;
-final double spaceElement = 12;
-final double spaceCard = 24;
-final double spaceMainAndSecondary = 8;
-final double roundedCornerCard = 10;
-final double roundedCornerBubble = 16;
-final double buttonDefaultWidth = 150;
+const double paddingPage = 32;
+const double paddingChip = 4;
+const double paddingButton = 8;
+const double paddingBubble = 12;
+const double paddingBadge = 10;
+const double paddingIcon = 24;
+const double paddingAvatar = 18;
+const double spaceElement = 12;
+const double spaceCard = 24;
+const double spaceMainAndSecondary = 8;
+const double roundedCornerCard = 10;
+const double roundedCornerBubble = 16;
+const double buttonDefaultWidth = 150;
 
-final double iconSizeTinny = 16;
-final double iconSizeSmall = 24;
-final double iconSizeMedium = 32;
-final double iconSizeLarge = 48;
-final double iconSizeHuge = 128;
+const double iconSizeTinny = 16;
+const double iconSizeSmall = 24;
+const double iconSizeMedium = 32;
+const double iconSizeLarge = 48;
+const double iconSizeHuge = 128;
 
-final double fontSizeTitle = 24;
-final double fontSizeBase = 18;
-final double fontSizeSecondary = 16;
+const double fontSizeTitle = 24;
+const double fontSizeBase = 18;
+const double fontSizeSecondary = 16;
 
-final FontWeight fontWeightLight = FontWeight.w300;
-final FontWeight fontWeightRegular = FontWeight.w400;
-final FontWeight fontWeightSemiBold = FontWeight.w600;
-final FontWeight fontWeightBold = FontWeight.w700;
+const FontWeight fontWeightLight = FontWeight.w300;
+const FontWeight fontWeightRegular = FontWeight.w400;
+const FontWeight fontWeightSemiBold = FontWeight.w600;
+const FontWeight fontWeightBold = FontWeight.w700;
 
-final String fallbackImageUrlPoll =
+const String fallbackImageUrlPoll =
     "https://images.unsplash.com/photo-1444664361762-afba083a4d77?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80";
 enum Purpose { NONE, GUIDE, DANGER, WARNING, GOOD, HIGHLIGHT }
 

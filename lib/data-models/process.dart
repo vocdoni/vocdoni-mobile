@@ -91,15 +91,21 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
 
   @override
   Future<void> refresh([bool force = false]) async {
-    if (!hasValue) return;
+    if (!hasValue ||
+        globalAppState.currentAccount == null ||
+        !globalAppState.currentAccount.entities.hasValue) return;
 
     try {
-      // TODO: Get a filtered ProcessModel list of the Entities of the current user
+      // Get a filtered list of the Entities of the current user
+      final entityIds = globalAppState.currentAccount.entities.value
+          .map((entity) => entity.reference.entityId)
+          .toList();
 
-      // This will call `setValue` on the individual models already within the pool.
-      // No need to rebuild an updated pool list.
+      // This will call `setValue` on the individual models that are already within the pool.
+      // No need to update the pool list itself.
       await Future.wait(this
           .value
+          .where((processModel) => entityIds.contains(processModel.entityId))
           .map((processModel) => processModel.refresh(force))
           .toList());
 
@@ -157,7 +163,8 @@ class ProcessModel implements StateRefreshable {
   final String processId;
   final String entityId;
   final String lang = "default";
-  final StateNotifier<ProcessMetadata> metadata = StateNotifier<ProcessMetadata>();
+  final StateNotifier<ProcessMetadata> metadata =
+      StateNotifier<ProcessMetadata>();
   final StateNotifier<bool> isInCensus = StateNotifier<bool>();
   final StateNotifier<bool> hasVoted = StateNotifier<bool>();
   final StateNotifier<int> currentParticipants = StateNotifier<int>();
@@ -209,8 +216,6 @@ class ProcessModel implements StateRefreshable {
       final newSize = int.tryParse(strValue) ?? 0;
       this.censusSize.load(newSize);
     }
-
-    // TODO: SET THE START/END DATE
   }
 
   @override
@@ -229,7 +234,6 @@ class ProcessModel implements StateRefreshable {
       return;
     else if (!force && this.metadata.isLoading) return;
 
-    // TODO: Check the last time that data was fetched
     // TODO: Don't refetch if the IPFS hash is the same
 
     final DVoteGateway dvoteGw = getDVoteGateway();

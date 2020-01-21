@@ -5,7 +5,7 @@ class Section extends StatelessWidget {
   final String text;
   final bool withDectoration;
 
-  Section({String this.text, this.withDectoration = true});
+  Section({this.text, this.withDectoration = true});
 
   @override
   Widget build(context) {
