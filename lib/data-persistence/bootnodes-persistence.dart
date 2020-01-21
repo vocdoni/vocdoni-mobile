@@ -7,14 +7,13 @@ import "package:vocdoni/constants/storage-names.dart";
 
 final String _storageFile = BOOTNODES_STORE_FILE;
 
-class BootnodesPersistence
-    extends BasePersistenceSingle<BootNodeGateways> {
+class BootnodesPersistence extends BasePersistenceSingle<BootNodeGateways> {
   @override
   Future<BootNodeGateways> read() async {
     await super.init();
 
     try {
-      final File fd = File("${storageDir.path}/$_storageFile");
+      final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
         final emptyValue = BootNodeGateways();
         set(emptyValue);
@@ -22,7 +21,7 @@ class BootnodesPersistence
       }
 
       final bytes = await fd.readAsBytes();
-      final BootNodeGateways gwList = BootNodeGateways.fromBuffer(bytes);
+      final gwList = BootNodeGateways.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(gwList);
@@ -39,13 +38,13 @@ class BootnodesPersistence
     await super.init();
 
     try {
-      File fd = File("${storageDir.path}/$_storageFile");
+      final fd = File("${storageDir.path}/$_storageFile");
       await fd.writeAsBytes(value.writeToBuffer());
 
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("There was an error while storing the changes");
     }
   }

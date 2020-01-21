@@ -19,7 +19,7 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
       }
 
       final bytes = await fd.readAsBytes();
-      final IdentitiesStore store = IdentitiesStore.fromBuffer(bytes);
+      final store = IdentitiesStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -36,15 +36,15 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
     await super.init();
 
     try {
-      File fd = File("${storageDir.path}/$_storageFile");
-      IdentitiesStore store = IdentitiesStore();
+      final fd = File("${storageDir.path}/$_storageFile");
+      final store = IdentitiesStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("There was an error while storing the changes");
     }
   }

@@ -13,13 +13,13 @@ class EntitiesPersistence extends BasePersistenceList<EntityMetadata> {
     await super.init();
 
     try {
-      final File fd = File("${storageDir.path}/$_storageFile");
+      final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
         return [];
       }
 
       final bytes = await fd.readAsBytes();
-      final EntityMetadataStore store = EntityMetadataStore.fromBuffer(bytes);
+      final store = EntityMetadataStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -36,15 +36,15 @@ class EntitiesPersistence extends BasePersistenceList<EntityMetadata> {
     await super.init();
 
     try {
-      File fd = File("${storageDir.path}/$_storageFile");
-      EntityMetadataStore store = EntityMetadataStore();
+      final fd = File("${storageDir.path}/$_storageFile");
+      final store = EntityMetadataStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("There was an error while storing the changes");
     }
   }

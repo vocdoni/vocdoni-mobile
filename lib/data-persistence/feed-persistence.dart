@@ -5,7 +5,7 @@ import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
 import "package:vocdoni/constants/storage-names.dart";
 
-final String _storageFile = PROCESSES_STORE_FILE;
+final String _storageFile = NEWSFEED_STORE_FILE;
 
 class NewsFeedPersistence extends BasePersistenceList<Feed> {
   @override
@@ -13,13 +13,13 @@ class NewsFeedPersistence extends BasePersistenceList<Feed> {
     await super.init();
 
     try {
-      final File fd = File("${storageDir.path}/$_storageFile");
+      final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
         return [];
       }
 
       final bytes = await fd.readAsBytes();
-      final FeedStore store = FeedStore.fromBuffer(bytes);
+      final store = FeedStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -36,15 +36,15 @@ class NewsFeedPersistence extends BasePersistenceList<Feed> {
     await super.init();
 
     try {
-      File fd = File("${storageDir.path}/$_storageFile");
-      FeedStore store = FeedStore();
+      final fd = File("${storageDir.path}/$_storageFile");
+      final store = FeedStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("There was an error while storing the changes");
     }
   }

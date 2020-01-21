@@ -13,13 +13,13 @@ class ProcessesPersistence extends BasePersistenceList<ProcessMetadata> {
     await super.init();
 
     try {
-      final File fd = File("${storageDir.path}/$_storageFile");
+      final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
         return [];
       }
 
       final bytes = await fd.readAsBytes();
-      final ProcessMetadataStore store = ProcessMetadataStore.fromBuffer(bytes);
+      final store = ProcessMetadataStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -36,15 +36,15 @@ class ProcessesPersistence extends BasePersistenceList<ProcessMetadata> {
     await super.init();
 
     try {
-      File fd = File("${storageDir.path}/$_storageFile");
-      ProcessMetadataStore store = ProcessMetadataStore();
+      final fd = File("${storageDir.path}/$_storageFile");
+      final store = ProcessMetadataStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("There was an error while storing the changes");
     }
   }
