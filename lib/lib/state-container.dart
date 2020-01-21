@@ -116,8 +116,8 @@ class StateContainer<T> {
   /// Returns true if a valid value is registered and no error has
   /// cleared it
   bool get hasValue {
-    if (_errorMessage != null) return true;
-    return _lastUpdated != null && _currentValue is T;
+    if (hasError) return false;
+    return _currentValue is T;
   }
 
   /// Provides the current value, if there is any

@@ -24,7 +24,8 @@ class AppStateModel implements StatePersistable, StateRefreshable {
   final StateNotifier<int> averageBlockTime =
       StateNotifier<int>(5); // 5 seconds by default
   final StateNotifier<int> referenceBlock = StateNotifier<int>();
-  final StateNotifier<DateTime> referenceBlockTimestamp = StateNotifier<DateTime>();
+  final StateNotifier<DateTime> referenceBlockTimestamp =
+      StateNotifier<DateTime>();
 
   // INTERNAL DATA HANDLERS
 
@@ -49,8 +50,8 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     // Gateway boot nodes
     try {
       this.bootnodes.setToLoading();
-      final gwList = await globalBootnodesPersistence.read();
-      this.bootnodes.setValue(gwList);
+      final gwList = globalBootnodesPersistence.get();
+      this.bootnodes.load(gwList);
     } catch (err) {
       if (!kReleaseMode) print(err);
       this
@@ -117,7 +118,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     this.referenceBlock.setToLoading();
 
     try {
-      final DVoteGateway dvoteGw = getDVoteGateway();
+      final dvoteGw = getDVoteGateway();
       final newReferenceblock = await getBlockHeight(dvoteGw);
 
       if (newReferenceblock == null) {

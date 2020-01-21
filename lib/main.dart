@@ -1,4 +1,3 @@
-import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,7 +8,6 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/data-models/feed.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';

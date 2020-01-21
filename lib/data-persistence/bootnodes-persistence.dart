@@ -15,9 +15,8 @@ class BootnodesPersistence extends BasePersistenceSingle<BootNodeGateways> {
     try {
       final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        final emptyValue = BootNodeGateways();
-        set(emptyValue);
-        return emptyValue;
+        set(BootNodeGateways());
+        return value;
       }
 
       final bytes = await fd.readAsBytes();

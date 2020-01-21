@@ -236,7 +236,7 @@ class ProcessModel implements StateRefreshable {
 
     // TODO: Don't refetch if the IPFS hash is the same
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final dvoteGw = getDVoteGateway();
     final Web3Gateway web3Gw = getWeb3Gateway();
 
     try {
@@ -258,7 +258,7 @@ class ProcessModel implements StateRefreshable {
       return;
     else if (!force && this.isInCensus.isLoading) return;
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final dvoteGw = getDVoteGateway();
 
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
@@ -310,7 +310,7 @@ class ProcessModel implements StateRefreshable {
           globalAppState.currentAccount.identity.value.keys[0].address,
           this.processId);
 
-      final DVoteGateway dvoteGw = getDVoteGateway();
+      final dvoteGw = getDVoteGateway();
       final success =
           await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
               .catchError((_) {});
@@ -328,7 +328,7 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshCensusSize([bool force = false]) {
     if (!this.metadata.hasValue) return null;
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final dvoteGw = getDVoteGateway();
 
     this.censusSize.setToLoading();
     return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
@@ -347,7 +347,7 @@ class ProcessModel implements StateRefreshable {
     else if (!force && this.currentParticipants.isLoading)
       return Future.value();
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final dvoteGw = getDVoteGateway();
 
     this.currentParticipants.setToLoading();
     return getEnvelopeHeight(this.processId, dvoteGw)

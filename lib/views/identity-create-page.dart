@@ -31,7 +31,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
                 color: Color(0x00ff0000),
                 child: generating
-                    ? Text("Generating identity keys...",
+                    ? Text("Generating an identity...",
                         style: TextStyle(fontSize: 18))
                     : buildWelcome(context),
               ),
@@ -50,6 +50,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         SizedBox(height: 100),
         Center(
           child: TextField(
+              textCapitalization: TextCapitalization.words,
               style: TextStyle(fontSize: 20),
               decoration: InputDecoration(hintText: "What's your name?"),
               onSubmitted: (alias) => createIdentity(context, alias)),

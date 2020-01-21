@@ -161,7 +161,7 @@ class FeedModel implements StateRefreshable {
     // TODO: Don't refetch if the IPFS hash is the same
 
     try {
-      final DVoteGateway dvoteGw = getDVoteGateway();
+      final dvoteGw = getDVoteGateway();
       final ContentURI cUri = ContentURI(contentUri);
 
       final result = await fetchFileString(cUri, dvoteGw);

@@ -15,7 +15,8 @@ class EntitiesPersistence extends BasePersistenceList<EntityMetadata> {
     try {
       final fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        return [];
+        set([]);
+        return value;
       }
 
       final bytes = await fd.readAsBytes();

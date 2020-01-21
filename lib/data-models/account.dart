@@ -97,7 +97,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
           .toList();
       await globalIdentitiesPersistence.writeAll(identitiesList);
 
-      // Caschade the write request for the peer entities
+      // Cascade the write request for the peer entities
       await globalEntityPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
@@ -150,10 +150,13 @@ class AccountModel implements StateRefreshable {
   final StateNotifier<DateTime> authThresholdDate =
       StateNotifier<DateTime>(DateTime.now());
 
-  final StateNotifier<String> timestampUsedToSign = StateNotifier<String>()
-      .withFreshness(21600); // The timestamp string used to sign
-  final StateNotifier<String> signedTimestamp = StateNotifier<String>()
-      .withFreshness(21600); // The signature. Used for action visibility checks
+  /// The original json string with the timestamp, used to make the signature
+  final StateNotifier<String> timestampSigned =
+      StateNotifier<String>().withFreshness(21600);
+
+  /// The signature of `timestampSigned`. Used for action visibility checks
+  final StateNotifier<String> timestampSignature =
+      StateNotifier<String>().withFreshness(21600);
 
   // CONSTRUCTORS
 
@@ -169,6 +172,7 @@ class AccountModel implements StateRefreshable {
           .entities
           .map((EntityReference entitySummary) =>
               EntityModel.getFromPool(entitySummary))
+          .cast<EntityModel>()
           .toList();
 
       this.entities.load(entityList);
@@ -197,8 +201,8 @@ class AccountModel implements StateRefreshable {
 
     final payload = jsonEncode({"timestamp": ts});
     final signature = await signString(payload, privateKey);
-    this.signedTimestamp.setValue(signature);
-    this.timestampUsedToSign.setValue(ts);
+    this.timestampSignature.setValue(signature);
+    this.timestampSigned.setValue(ts);
   }
 
   // PUBLIC METHODS

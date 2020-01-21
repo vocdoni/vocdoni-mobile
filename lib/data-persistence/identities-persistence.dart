@@ -15,7 +15,8 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
     try {
       final File fd = File("${storageDir.path}/$_storageFile");
       if (!(await fd.exists())) {
-        return [];
+        set([]);
+        return value;
       }
 
       final bytes = await fd.readAsBytes();

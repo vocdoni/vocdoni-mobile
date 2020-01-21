@@ -384,7 +384,7 @@ class EntityModel implements StateRefreshable {
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel))
       return null;
-    else if (!currentAccount.signedTimestamp.hasValue) return null;
+    else if (!currentAccount.timestampSignature.hasValue) return null;
 
     final publicKey = currentAccount.identity.value.identityId;
 
@@ -393,8 +393,8 @@ class EntityModel implements StateRefreshable {
         "type": action.type,
         'publicKey': publicKey,
         "entityId": entityId,
-        "timestamp": currentAccount.timestampUsedToSign.value,
-        "signature": currentAccount.signedTimestamp.value
+        "timestamp": currentAccount.timestampSigned.value,
+        "signature": currentAccount.timestampSignature.value
       };
 
       Map<String, String> headers = {
