@@ -75,6 +75,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
       // WRITE THE DIRECT DATA THAT WE MANAGE
       final entitiesMeta = this
           .value
+          .where((item) => item.metadata.hasValue)
           .map((entityModel) {
             final val = entityModel.metadata.value;
             val.meta[META_ENTITY_ID] = entityModel.reference.entityId;
@@ -209,59 +210,62 @@ class EntityModel implements StateRefreshable {
     // The metadata needs to be refreshed first
   }
 
+  /// Fetch the Entity metadata (if needed) and optionally fetch the models that depend on it (processes, feed and visible actions)
   Future<void> refreshMetadata(
       {bool force = false, bool skipChildren = true}) async {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
     if (!(reference is EntityReference))
       return;
-    else if (!force && this.metadata.isFresh)
-      return;
-    else if (!force && this.metadata.isLoading) return;
+    else if (this.metadata.isLoading) return;
 
-    final dvoteGw = getDVoteGateway();
-    final web3Gw = getWeb3Gateway();
-
-    this.metadata.setToLoading();
+    EntityMetadata freshEntityMetadata;
+    bool needsProcessListReload = false;
+    bool needsFeedReload = false;
 
     try {
-      final freshEntityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
-      freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
+      if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
+        final dvoteGw = getDVoteGateway();
+        final web3Gw = getWeb3Gateway();
 
-      this.metadata.setValue(freshEntityMetadata);
+        this.metadata.setToLoading();
 
-      // ID's changed?
-      bool needsProcessListReload = false;
-      if (!this.metadata.hasValue)
-        needsProcessListReload = true;
-      else if (this.metadata.value.votingProcesses.active.length !=
-          freshEntityMetadata.votingProcesses.active.length)
-        needsProcessListReload = true;
-      else {
-        // deep equal?
-        for (int i = 0;
-            i < freshEntityMetadata.votingProcesses.active.length;
-            i++) {
-          if (freshEntityMetadata.votingProcesses.active[i] !=
-              this.metadata.value.votingProcesses.active[i]) {
-            needsProcessListReload = true;
-            break;
-          }
-        }
+        freshEntityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
+        freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
+
+        this.metadata.setValue(freshEntityMetadata);
       }
-
-      // URI changed?
-      bool needsFeedReload = false;
-      if (!this.metadata.hasValue)
-        needsFeedReload = true;
-      else if (this.metadata.value.newsFeed[globalAppState.currentLanguage]
-              is String ||
-          this.metadata.value.newsFeed[globalAppState.currentLanguage] !=
-              freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
-        needsFeedReload = true;
 
       // Trigger updates on child models
       if (!skipChildren) {
+        // Process ID's changed?
+        if (!this.metadata.hasValue)
+          needsProcessListReload = true;
+        else if (this.metadata.value.votingProcesses.active.length !=
+            freshEntityMetadata.votingProcesses.active.length)
+          needsProcessListReload = true;
+        else {
+          // deep equal?
+          for (int i = 0;
+              i < freshEntityMetadata.votingProcesses.active.length;
+              i++) {
+            if (freshEntityMetadata.votingProcesses.active[i] !=
+                this.metadata.value.votingProcesses.active[i]) {
+              needsProcessListReload = true;
+              break;
+            }
+          }
+        }
+
+        // URI changed?
+        if (!this.metadata.hasValue)
+          needsFeedReload = true;
+        else if (this.metadata.value.newsFeed[globalAppState.currentLanguage]
+                is String ||
+            this.metadata.value.newsFeed[globalAppState.currentLanguage] !=
+                freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
+          needsFeedReload = true;
+
         await Future.wait([
           needsProcessListReload
               ? this.refreshProcesses(true)

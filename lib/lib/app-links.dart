@@ -80,9 +80,7 @@ Future fetchAndShowEntity(
     if (currentAccount == null) throw Exception("Internal error");
 
     // subscribe if not already
-    if (!currentAccount.isSubscribed(entityRef)) {
-      await currentAccount.subscribe(entityModel);
-    }
+    await currentAccount.subscribe(entityModel);
     Navigator.pushNamed(context, "/entity", arguments: entityModel);
   } catch (err) {
     // showMessage("Could not fetch the entity details",
