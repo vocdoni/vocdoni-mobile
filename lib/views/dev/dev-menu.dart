@@ -126,7 +126,7 @@ class DevMenu extends StatelessWidget {
     loadingIndicator.close();
 
     final updatedIdentity = currentAccount.identity.value;
-    updatedIdentity.meta[META_ACCOUNT_ID] = publicKey;
+    updatedIdentity.meta[META_ACCOUNT_ID] = address;
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;

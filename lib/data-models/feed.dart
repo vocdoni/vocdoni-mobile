@@ -57,7 +57,13 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
       final feedList = this
           .value
           .where((feedModel) => feedModel.feed.hasValue)
-          .map((feedModel) => feedModel.feed.value)
+          .map((feedModel) {
+            // COPY STATE FIELDS INTO META
+            final val = feedModel.feed.value;
+            val.meta[META_ENTITY_ID] = feedModel.entityId ?? "";
+            val.meta[META_FEED_CONTENT_URI] = feedModel.contentUri ?? "";
+            return val;
+          })
           .cast<Feed>()
           .toList();
       await globalFeedPersistence.writeAll(feedList);

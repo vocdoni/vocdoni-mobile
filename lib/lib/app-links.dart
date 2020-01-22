@@ -85,9 +85,9 @@ Future fetchAndShowEntity(
     }
     Navigator.pushNamed(context, "/entity", arguments: entityModel);
   } catch (err) {
-    showMessage("Could not fetch the entity details",
-        context: context, purpose: Purpose.DANGER);
-    throw err;
+    // showMessage("Could not fetch the entity details",
+    //     context: context, purpose: Purpose.DANGER);
+    throw Exception("Could not fetch the entity details");
   }
 }
 

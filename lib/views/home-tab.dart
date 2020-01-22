@@ -92,7 +92,7 @@ class _HomeTabState extends State<HomeTab> {
         entity.processes.value.forEach((process) {
           if (!(process is ProcessModel) || process.metadata.isLoading)
             return;
-          else if (process.metadata.hasError) return;
+          else if (!process.metadata.hasValue) return;
 
           availableItems.add(CardItem(
               entity: entity, date: process.startDate, process: process));

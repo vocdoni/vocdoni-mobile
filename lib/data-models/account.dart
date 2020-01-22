@@ -81,9 +81,14 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
     try {
       final identitiesList = this
           .value
-          .where((accountModel) => accountModel.identity.hasValue)
+          .where((accountModel) =>
+              accountModel.identity.hasValue &&
+              accountModel.identity.value.keys.length > 0)
           .map((accountModel) {
             final identity = accountModel.identity.value;
+
+            identity.meta[META_ACCOUNT_ID] =
+                accountModel.identity.value.keys[0].address;
 
             // Failed attempts
             if (accountModel.failedAuthAttempts.hasValue)
@@ -137,7 +142,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
       return;
     }
 
-    // Add identity to global identities persistence
+    // Add identity to global identities and persist
     final newAccountList = this.value;
     newAccountList.add(newAccount);
     this.setValue(newAccountList);
@@ -424,6 +429,7 @@ class AccountModel implements StateRefreshable {
     k.address = address;
 
     newIdentity.keys.add(k);
+    newIdentity.meta[META_ACCOUNT_ID] = address;
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
     await result.refreshSignedTimestamp(patternEncryptionKey);

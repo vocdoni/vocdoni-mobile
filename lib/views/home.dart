@@ -244,8 +244,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       await Future.delayed(Duration(milliseconds: 10));
 
-      showMessage("The QR code does not contain a valid link",
-          context: context, purpose: Purpose.DANGER);
+      showMessage(
+          "The QR code does not contain a valid link or the details cannot be retrieved",
+          context: context,
+          purpose: Purpose.DANGER);
     }
   }
 

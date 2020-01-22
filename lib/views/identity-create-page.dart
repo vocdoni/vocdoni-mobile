@@ -100,6 +100,10 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       globalAppState.selectAccount(newIndex);
       // globalAccountPool.writeToStorage();   not needed => addAccount() does it
 
+      setState(() {
+        generating = false;
+      });
+
       showHomePage(context);
     } catch (err) {
       String text;
@@ -107,7 +111,9 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         generating = false;
       });
 
-      if (err == "An account with this name already exists") {
+      if (err is Exception &&
+          err.toString() ==
+              "Exception: An account with this name already exists") {
         text = Lang.of(context).get("An account with this name already exists");
       } else {
         text = Lang.of(context)

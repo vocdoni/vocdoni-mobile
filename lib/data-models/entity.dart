@@ -162,11 +162,11 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
 class EntityModel implements StateRefreshable {
   final EntityReference reference; // This is never fetched
   final StateNotifier<EntityMetadata> metadata =
-      StateNotifier<EntityMetadata>().withFreshness(20);
+      StateNotifier<EntityMetadata>().withFreshness(60 * 5);
   final StateNotifier<List<ProcessModel>> processes =
-      StateNotifier<List<ProcessModel>>();
+      StateNotifier<List<ProcessModel>>().withFreshness(60);
   final StateNotifier<FeedModel> feed =
-      StateNotifier<FeedModel>().withFreshness(45);
+      StateNotifier<FeedModel>().withFreshness(60 * 2);
 
   final StateNotifier<List<EntityMetadata_Action>> visibleActions =
       StateNotifier();
@@ -203,14 +203,14 @@ class EntityModel implements StateRefreshable {
   /// IMPORTANT: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
   @override
   Future<void> refresh([bool force = false]) {
-    return refreshMetadata(force).then((_) => Future.wait(<Future>[
-          refreshVisibleActions(force),
-          refreshProcesses(force),
-          refreshFeed(force)
-        ]));
+    return refreshMetadata(force: force, skipChildren: false);
+
+    // refreshMetadata will call the dependent models if needed
+    // The metadata needs to be refreshed first
   }
 
-  Future<void> refreshMetadata([bool force = false]) async {
+  Future<void> refreshMetadata(
+      {bool force = false, bool skipChildren = true}) async {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
     if (!(reference is EntityReference))
@@ -225,10 +225,51 @@ class EntityModel implements StateRefreshable {
     this.metadata.setToLoading();
 
     try {
-      final entityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
-      entityMetadata.meta[META_ENTITY_ID] = reference.entityId;
+      final freshEntityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
+      freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
-      this.metadata.setValue(entityMetadata);
+      this.metadata.setValue(freshEntityMetadata);
+
+      // ID's changed?
+      bool needsProcessListReload = false;
+      if (!this.metadata.hasValue)
+        needsProcessListReload = true;
+      else if (this.metadata.value.votingProcesses.active.length !=
+          freshEntityMetadata.votingProcesses.active.length)
+        needsProcessListReload = true;
+      else {
+        // deep equal?
+        for (int i = 0;
+            i < freshEntityMetadata.votingProcesses.active.length;
+            i++) {
+          if (freshEntityMetadata.votingProcesses.active[i] !=
+              this.metadata.value.votingProcesses.active[i]) {
+            needsProcessListReload = true;
+            break;
+          }
+        }
+      }
+
+      // URI changed?
+      bool needsFeedReload = false;
+      if (!this.metadata.hasValue)
+        needsFeedReload = true;
+      else if (this.metadata.value.newsFeed[globalAppState.currentLanguage]
+              is String ||
+          this.metadata.value.newsFeed[globalAppState.currentLanguage] !=
+              freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
+        needsFeedReload = true;
+
+      // Trigger updates on child models
+      if (!skipChildren) {
+        await Future.wait([
+          needsProcessListReload
+              ? this.refreshProcesses(true)
+              : this.refreshProcesses(),
+          needsFeedReload ? this.refreshFeed(true) : this.refreshFeed(),
+          refreshVisibleActions(force)
+        ]);
+      }
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.metadata.setError("The entity's data cannot be fetched");
@@ -302,10 +343,10 @@ class EntityModel implements StateRefreshable {
 
       final result = await fetchFileString(cUri, dvoteGw);
       final feed = parseFeed(result);
-      feed.meta[META_ENTITY_ID] = this.reference.entityId;
-      feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
+      // feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
 
-      this.feed.setValue(FeedModel.fromFeed(feed));
+      this.feed.setValue(FeedModel(
+          feed.meta[META_FEED_CONTENT_URI], feed.meta[META_ENTITY_ID], feed));
 
       final idx = globalFeedPool.value
           .indexWhere((feed) => feed.entityId == this.reference.entityId);
