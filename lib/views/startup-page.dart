@@ -30,12 +30,14 @@ class _StartupPageState extends State<StartupPage> {
     ]).then((_) {
       // POPULATE THE MODEL POOLS (Read into memory)
       return Future.wait([
-        globalAppState.readFromStorage(),
-        globalAccountPool.readFromStorage(),
-        globalEntityPool.readFromStorage(),
+        // NOTE: Read's should be done first on the models that
+        // don't depend on others to be restored
+        globalProcessPool.readFromStorage(),
         globalFeedPool.readFromStorage(),
-        globalProcessPool.readFromStorage()
-      ]);
+        globalAppState.readFromStorage(),
+      ])
+          .then((_) => globalEntityPool.readFromStorage())
+          .then((_) => globalAccountPool.readFromStorage());
     }).then((_) {
       // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
       return Future.wait([

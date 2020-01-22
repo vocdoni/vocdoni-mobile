@@ -112,10 +112,10 @@ class _HomeTabState extends State<HomeTab> {
     int idx = 0;
     final result = availableItems
         .map((item) {
-          if (item.post != null)
+          if (item.process != null)
             return CardPoll(
                 entity: item.entity, process: item.process, index: idx++);
-          else if (item.process != null)
+          else if (item.post != null)
             return CardPost(item.entity, item.post, idx++);
           return Container();
         })

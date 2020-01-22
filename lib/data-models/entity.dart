@@ -47,7 +47,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
             final entityRef = EntityReference();
             entityRef.entityId = entityMeta.meta[META_ENTITY_ID];
             entityRef.entryPoints
-                .addAll(entityMeta.meta[META_ENTITY_ID].split(","));
+                .addAll(entityMeta.meta[META_ENTITY_ENTRY_POINTS].split(","));
 
             final procsModels = EntityModel.getProcessesForEntity(
                 entityMeta.meta[META_ENTITY_ID]);
@@ -75,7 +75,13 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
       // WRITE THE DIRECT DATA THAT WE MANAGE
       final entitiesMeta = this
           .value
-          .map((entityModel) => entityModel.metadata)
+          .map((entityModel) {
+            final val = entityModel.metadata.value;
+            val.meta[META_ENTITY_ID] = entityModel.reference.entityId;
+            val.meta[META_ENTITY_ENTRY_POINTS] =
+                entityModel.reference.entryPoints.join(",");
+            return val;
+          })
           .cast<EntityMetadata>()
           .toList();
       await globalEntitiesPersistence.writeAll(entitiesMeta);
@@ -233,10 +239,10 @@ class EntityModel implements StateRefreshable {
   Future<void> refreshProcesses([bool force = false]) async {
     if (!this.metadata.hasValue)
       return;
-    else if (!(this.metadata.value.votingProcesses.active is List) ||
+    else if (!force && !(this.metadata.value.votingProcesses.active is List) ||
         this.metadata.value.votingProcesses.active.length == 0)
       return;
-    else if (this.processes.isFresh) return;
+    else if (!force && this.processes.isFresh) return;
 
     this.processes.setToLoading();
 
@@ -255,20 +261,19 @@ class EntityModel implements StateRefreshable {
           this.metadata.value.votingProcesses.active, dvoteGw, web3Gw);
 
       // add new
-      final newProcessModels = procMetaList
+      final newProcessModels = await Future.wait(procMetaList
           .map((meta) {
             final result = ProcessModel(
                 meta.meta[META_PROCESS_ID], this.reference.entityId, meta);
 
-            // detached: refresh census status, has voted, etc.
-            result.refresh();
-            return result;
+            return result.refreshMetadata().then((_) => result);
           })
-          .cast<ProcessModel>()
-          .toList();
+          .cast<Future<ProcessModel>>()
+          .toList());
 
       updatedProcessPoolList.addAll(newProcessModels);
       this.processes.setValue(updatedProcessPoolList);
+      await globalProcessPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.processes.setError("Could not update the process list");
@@ -277,7 +282,7 @@ class EntityModel implements StateRefreshable {
   }
 
   Future<void> refreshFeed([bool force = false]) async {
-    if (this.metadata.hasValue)
+    if (!this.metadata.hasValue)
       return;
     else if (!force && this.feed.isFresh)
       return;
@@ -301,6 +306,18 @@ class EntityModel implements StateRefreshable {
       feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
 
       this.feed.setValue(FeedModel.fromFeed(feed));
+
+      final idx = globalFeedPool.value
+          .indexWhere((feed) => feed.entityId == this.reference.entityId);
+      if (idx < 0) {
+        globalFeedPool.value.add(this.feed.value);
+        globalFeedPool.setValue(globalFeedPool.value); // force to notify
+      } else {
+        globalFeedPool.value[idx] = this.feed.value;
+        globalFeedPool.setValue(globalFeedPool.value); // force to notify
+      }
+
+      await globalFeedPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.feed.setError("Could not fetch the News Feed");

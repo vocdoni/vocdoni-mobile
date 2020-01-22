@@ -82,7 +82,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         rightIcon: null,
         isSpinning: true,
       );
-    if (widget.entityModel.metadata.hasError)
+    else if (widget.entityModel.processes.isLoading)
+      return ListItem(
+        mainText: "Fetching participation...",
+        rightIcon: null,
+        isSpinning: true,
+      );
+    else if (widget.entityModel.feed.isLoading)
+      return ListItem(
+        mainText: "Fetching content...",
+        rightIcon: null,
+        isSpinning: true,
+      );
+    else if (widget.entityModel.metadata.hasError)
       return ListItem(
         mainText: widget.entityModel.metadata.errorMessage,
         purpose: Purpose.DANGER,
@@ -353,7 +365,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
-          } else if (widget.entityModel.visibleActions.value.length == 0) {
+          } else if (widget.entityModel.visibleActions.hasValue &&
+              widget.entityModel.visibleActions.value.length == 0) {
             return ListItem(
               mainText: "No actions defined",
               disabled: true,

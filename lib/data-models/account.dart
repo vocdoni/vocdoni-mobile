@@ -37,10 +37,19 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
     try {
       this.setToLoading();
       final identitiesList = globalIdentitiesPersistence.get();
-      final identityModelList = identitiesList
+      final accountModelList = identitiesList
           .where((identity) => identity.meta[META_ACCOUNT_ID] is String)
           .map((identity) {
             final result = AccountModel.fromIdentity(identity);
+
+            final entities = identity.peers.entities
+                .map((entityRef) => globalEntityPool.value.firstWhere(
+                    (entity) => entity.reference.entityId == entityRef.entityId,
+                    orElse: () => null))
+                .where((item) => item != null)
+                .cast<EntityModel>()
+                .toList();
+            result.entities.setValue(entities);
 
             // Decode extra fields
             final failedAttempts = int.tryParse(
@@ -56,7 +65,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
           })
           .cast<AccountModel>()
           .toList();
-      this.setValue(identityModelList);
+      this.setValue(accountModelList);
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
@@ -234,21 +243,31 @@ class AccountModel implements StateRefreshable {
   Future<void> subscribe(EntityModel entityModel) async {
     if (entityModel.reference == null)
       throw Exception("The entity has no reference");
-    else if (isSubscribed(entityModel.reference)) return;
 
-    Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(identity.value.peers.entities); // clone existing
-    peers.identities.addAll(identity.value.peers.identities); // clone existing
+    if (!isSubscribed(entityModel.reference)) {
+      Identity_Peers peers = Identity_Peers();
+      peers.entities.addAll(identity.value.peers.entities); // clone existing
+      peers.identities
+          .addAll(identity.value.peers.identities); // clone existing
 
-    peers.entities.add(entityModel.reference); // new entity
+      peers.entities.add(entityModel.reference); // new entity
 
-    final updatedIdentity = this.identity.value;
-    updatedIdentity.peers = peers;
-    this.identity.setValue(updatedIdentity);
+      final updatedIdentity = this.identity.value;
+      updatedIdentity.peers = peers;
+      this.identity.setValue(updatedIdentity);
 
-    final newPeerEntities = this.entities.value;
-    newPeerEntities.add(entityModel);
-    this.entities.setValue(newPeerEntities);
+      final newPeerEntities = this.entities.value;
+      newPeerEntities.add(entityModel);
+      this.entities.setValue(newPeerEntities);
+    }
+
+    // Add also the new model to the entities pool
+    if (!globalEntityPool.value.any(
+        (item) => item.reference.entityId == entityModel.reference.entityId)) {
+      final newEntityPool = globalEntityPool.value;
+      newEntityPool.add(entityModel);
+      globalEntityPool.setValue(newEntityPool);
+    }
 
     await globalAccountPool.writeToStorage();
   }
@@ -280,7 +299,7 @@ class AccountModel implements StateRefreshable {
       else if (existingAccount.identity.value.keys[0].publicKey ==
           this.identity.value.keys[0].publicKey) continue;
 
-      if (isSubscribed(entityReference)) {
+      if (existingAccount.isSubscribed(entityReference)) {
         subscribedFromOtherAccounts = true;
         break;
       }
