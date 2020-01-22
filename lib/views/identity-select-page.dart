@@ -29,16 +29,18 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
     return WillPopScope(
         onWillPop: handleWillPop,
         child: Scaffold(
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Section(text: "Select an identity"),
-              buildExistingIdentities(context, accountPool.value),
-              ListItem(
-                  mainText: "Create a new one",
-                  onTap: () => createNew(context)),
-            ],
-          ),
+          body: Builder(
+              builder: (context) => Column(
+                    // use this context within Scaffold for Toast's to work
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Section(text: "Select an identity"),
+                      buildExistingIdentities(context, accountPool.value),
+                      ListItem(
+                          mainText: "Create a new one",
+                          onTap: () => createNew(context)),
+                    ],
+                  )),
         ));
   }
 
@@ -74,18 +76,21 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
   onAccountSelected(
       BuildContext ctx, AccountModel account, int accountIdx) async {
-    var result = await Navigator.push(
+    var patternEncryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(account)));
 
-    if (result == null || result is InvalidPatternError) {
+    if (patternEncryptionKey == null ||
+        patternEncryptionKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
     globalAppState.selectAccount(accountIdx);
+
+    account.refresh(false, patternEncryptionKey); // detached async
 
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);

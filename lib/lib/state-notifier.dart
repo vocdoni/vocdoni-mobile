@@ -30,7 +30,7 @@ import 'package:vocdoni/lib/state-container.dart';
 /// - Provider
 ///   - Provide a global instance of your StateNotifier's to the root of the widget tree
 ///   - Use MultiProvider if you have more than one
-///   - Use global (pool) models using `Consume` or `Provider.of` within a widget
+///   - Use global (pool) models using `Consume` or `Provider.of` within a widget or directly use the global pools from `singletons.dart`
 ///   - Use standard models using `ChangeNotifierProvider.value()` within a widget
 ///
 /// More info:

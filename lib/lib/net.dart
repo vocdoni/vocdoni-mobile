@@ -5,28 +5,45 @@ import 'package:vocdoni/constants/settings.dart';
 
 DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
+bool connecting = false;
 
-connectGateways() {
-  if (_dvoteGw is DVoteGateway) _dvoteGw.disconnect();
-  if (_web3Gw is Web3Gateway) _web3Gw.disconnect();
+ensureConnectedGateways() {
+  if (connecting) return;
 
   final gwInfo = _selectRandomGatewayInfo();
   if (gwInfo == null) throw "There is no gateway available";
 
-  _dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-  _web3Gw = Web3Gateway(gwInfo.web3);
+  connecting = true;
+  if (_dvoteGw is DVoteGateway) {
+    if (!_dvoteGw.isConnected) {
+      if (_dvoteGw.publicKey == gwInfo.publicKey)
+        _dvoteGw.connect(gwInfo.dvote);
+      else {
+        _dvoteGw = DVoteGateway(gwInfo.dvote,
+            publicKey: gwInfo.publicKey); // calls `connect()` internally
+      }
+    }
+  } else {
+    _dvoteGw = DVoteGateway(gwInfo.dvote,
+        publicKey: gwInfo.publicKey); // calls `connect()` internally
+  }
+
+  if (!(_web3Gw is Web3Gateway)) {
+    _web3Gw = Web3Gateway(gwInfo.web3);
+  }
+  connecting = false;
 }
 
-bool hasGatewaysConnected() =>
-    _dvoteGw is DVoteGateway && _web3Gw is Web3Gateway;
+bool areGatewaysConnected() =>
+    _dvoteGw is DVoteGateway && _dvoteGw.isConnected && _web3Gw is Web3Gateway;
 
 DVoteGateway getDVoteGateway() {
-  if (!hasGatewaysConnected()) connectGateways();
+  if (!areGatewaysConnected()) ensureConnectedGateways();
   return _dvoteGw;
 }
 
 Web3Gateway getWeb3Gateway() {
-  if (!hasGatewaysConnected()) connectGateways();
+  if (!areGatewaysConnected()) ensureConnectedGateways();
   return _web3Gw;
 }
 

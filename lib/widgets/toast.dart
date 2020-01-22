@@ -6,6 +6,8 @@ import 'package:native_widgets/native_widgets.dart';
 final toasterTextStyle =
     TextStyle(fontSize: fontSizeBase, fontWeight: fontWeightRegular);
 
+/// Displays a snackbar on the screen.
+/// `IMPORTANT`: If the `context` does not descend from a `Scaffold` the call will fail
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
     {bool global,
@@ -20,13 +22,15 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
       padding: const EdgeInsets.all(20),
       child: Text(text, style: toasterTextStyle),
     ),
-    backgroundColor: getColorByPurpose(purpose: purpose, isPale: true ),
+    backgroundColor: getColorByPurpose(purpose: purpose, isPale: true),
     duration: Duration(seconds: duration),
   );
 
   return _displaySnackBar(snackBar, global: global, context: context);
 }
 
+/// Displays a snackbar on the screen.
+/// `IMPORTANT`: If the `context` does not descend from a `Scaffold` the call will fail
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
     String text,
     {BuildContext context,
@@ -34,7 +38,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
   if (text == null) throw FlutterError("No text");
 
   final loadingSnackBar = SnackBar(
-    duration: Duration(seconds: 30),
+    duration: Duration(hours: 1),
     content: Row(
       children: <Widget>[
         NativeLoadingIndicator(),
@@ -46,6 +50,8 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
   return _displaySnackBar(loadingSnackBar, global: global, context: context);
 }
 
+/// Displays a snackbar on the screen.
+/// `IMPORTANT`: If the `context` does not descend from a `Scaffold` the call will fail
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _displaySnackBar(
     SnackBar snackBar,
     {bool global,
@@ -57,7 +63,6 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _displaySnackBar(
     homePageScaffoldKey.currentState.hideCurrentSnackBar();
     return homePageScaffoldKey.currentState.showSnackBar(snackBar);
   } else if (context is BuildContext) {
-    // TODO: FAILS WHEN DISPLAYED FROM THE PATTERN LOCK SCREEN
     Scaffold.of(context).hideCurrentSnackBar();
     return Scaffold.of(context).showSnackBar(snackBar);
   }

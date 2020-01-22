@@ -257,7 +257,7 @@ This separation allows for efficient and granular widget tree rebuilds whenever 
 
 #### Usage
 
-**Global model pools need to be initialized and read their data from the Persistence helpers**
+**Initialize and read Global Model's data from the Persistence helpers**
 
 ```dart
 final globalEntitiesPersistence = EntitiesPersistence();
@@ -267,7 +267,7 @@ await globalEntitiesPersistence.readAll();
 await globalEntityPool.readFromStorage();  // will import and arrange the persisted data
 ```
 
-**Global models need to be provided at the root context**
+**Provide the Global Models at the root context**
 
 ```dart
 final globalEntityPool = EntityPoolModel();
@@ -302,7 +302,7 @@ Widget build(BuildContext context) {
 // Widget 2
 @override
 Widget build(BuildContext context) {
-	// Retrieve the value at the time of building (may become outdated later on)
+	// Retrieve the provided value at the time of building (may become outdated later on)
 
 	final entityModels = Provider.of<EntityPoolModel>(context);
 	if (entityModels == null) throw Exception("Internal error");
@@ -312,7 +312,10 @@ Widget build(BuildContext context) {
 }
 ```
 
-**Local models (not provided on the root context) are consumed locally**
+**Consume Local Models in specific places**
+Unike the global modes (data pools), any other StateModel instance will not be provided on the root context. You will typically have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. This single instance can't simply use `Consumer` because `EntityModel` is no longer a global and unique value provided on the context.
+
+This means, that any `StateModel<T>` values within `EntityModel` need to be consumed locally.
 
 ```dart
 final globalEntityPool = EntityPoolModel();
@@ -326,7 +329,7 @@ Widget build(BuildContext context) {
 
 	// Consume feed dynamically
 	return ChangeNotifierProvider.value(
-      value: myEntity.feed,
+      value: myEntity.feed,  // StateModel<T> value that may change over time
       child: Builder(
 		  builder: (context) {
 			  // Use myEntity.feed.hasValue, myEntity.feed.isLoading, etc.
@@ -341,7 +344,7 @@ Widget build(BuildContext context) {
 }
 ```
 
-In the example above, if the global Feed pool changes, the component is not going to be rebuilt. Even if the entity is updated, this widget will stay the same. But as soon as we call `myEntity.feed.refresh()` the Builder will be rebuilding upon changes in `isLoading`, `hasError` and `hasValue`.
+In the example above, updates on the global Feed pool, or any unrelated Feed items, will not affect the current widget. But as soon as we call `myEntity.feed.refresh()` on this particular instance, the Builder will be triggered because of the changes in `isLoading`, `hasError` and `hasValue`.
 
 #### Extra methods
 

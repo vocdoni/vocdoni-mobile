@@ -115,12 +115,15 @@ class DevMenu extends StatelessWidget {
       return;
     }
 
+    final loadingIndicator = showLoading("Updating...", context: context);
+
     final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
     final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
     final address = await mnemonicToAddress(NEW_MNEMONIC);
 
     final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
     final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
+    loadingIndicator.close();
 
     final updatedIdentity = currentAccount.identity.value;
     updatedIdentity.meta[META_ACCOUNT_ID] = publicKey;
@@ -135,6 +138,9 @@ class DevMenu extends StatelessWidget {
     updatedIdentity.keys[0] = k;
     currentAccount.identity.setValue(updatedIdentity);
 
-    globalAccountPool.writeToStorage();
+    await globalAccountPool.writeToStorage();
+
+    showMessage("The identity keys have been replaced",
+        context: context, purpose: Purpose.GOOD);
   }
 }

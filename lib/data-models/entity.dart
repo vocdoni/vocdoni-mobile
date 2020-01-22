@@ -80,8 +80,9 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
           .toList();
       await globalEntitiesPersistence.writeAll(entitiesMeta);
 
-      // INDIRECT MODELS SHOULD HAVE UPDATED THEMSELVES AS SOON AS
-      // ITS VALUE CHANGED IN THE PAST. WE DON'T HANDLE IT FROM AN EXTERNAL MODEL.
+      // Cascade the write request for the process ad feed pools
+      await globalProcessPool.writeToStorage();
+      await globalFeedPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
       throw PersistError("Cannot store the current state");
@@ -196,12 +197,11 @@ class EntityModel implements StateRefreshable {
   /// IMPORTANT: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
   @override
   Future<void> refresh([bool force = false]) {
-    return Future.wait(<Future>[
-      refreshMetadata(force),
-      refreshVisibleActions(force),
-      refreshProcesses(force),
-      refreshFeed(force)
-    ]);
+    return refreshMetadata(force).then((_) => Future.wait(<Future>[
+          refreshVisibleActions(force),
+          refreshProcesses(force),
+          refreshFeed(force)
+        ]));
   }
 
   Future<void> refreshMetadata([bool force = false]) async {
@@ -226,6 +226,7 @@ class EntityModel implements StateRefreshable {
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.metadata.setError("The entity's data cannot be fetched");
+      throw err;
     }
   }
 
@@ -254,21 +255,24 @@ class EntityModel implements StateRefreshable {
           this.metadata.value.votingProcesses.active, dvoteGw, web3Gw);
 
       // add new
-      final newProcessModels = await Future.wait(procMetaList
+      final newProcessModels = procMetaList
           .map((meta) {
             final result = ProcessModel(
                 meta.meta[META_PROCESS_ID], this.reference.entityId, meta);
-            result
-                .refresh(); // detached: refresh census status, has voted, etc.
+
+            // detached: refresh census status, has voted, etc.
+            result.refresh();
             return result;
           })
-          .cast<Future<ProcessModel>>()
-          .toList());
+          .cast<ProcessModel>()
+          .toList();
 
       updatedProcessPoolList.addAll(newProcessModels);
       this.processes.setValue(updatedProcessPoolList);
     } catch (err) {
+      if (!kReleaseMode) print(err);
       this.processes.setError("Could not update the process list");
+      throw err;
     }
   }
 
@@ -281,11 +285,7 @@ class EntityModel implements StateRefreshable {
 
     this.feed.setToLoading();
 
-    if (!(this.metadata is EntityMetadata))
-      return;
-    else if (!(this.metadata.value.newsFeed is Map<String, String>))
-      return;
-    else if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
+    if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
         is String)) return;
 
     final dvoteGw = getDVoteGateway();
@@ -304,6 +304,7 @@ class EntityModel implements StateRefreshable {
     } catch (err) {
       if (!kReleaseMode) print(err);
       this.feed.setError("Could not fetch the News Feed");
+      throw err;
     }
   }
 
@@ -363,6 +364,7 @@ class EntityModel implements StateRefreshable {
       if (this.isRegistered.isLoading) {
         this.isRegistered.setError("Could not load the register status");
       }
+      throw err;
     }
   }
 

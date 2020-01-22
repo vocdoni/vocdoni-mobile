@@ -41,19 +41,18 @@ class _EntitiesTabState extends State<EntitiesTab> {
             if (entity.metadata.hasValue)
               return buildCard(ctx, entity);
             else if (entity.metadata.isLoading) return CardLoading();
-            return buildEmptyMetadataCard(ctx, entity.reference);
+            return buildEmptyMetadataCard(ctx, entity);
           }),
     );
   }
 
-  Widget buildEmptyMetadataCard(
-      BuildContext ctx, EntityReference entityReference) {
+  Widget buildEmptyMetadataCard(BuildContext ctx, EntityModel entityModel) {
     return BaseCard(children: [
       ListItem(
-          mainText: entityReference.entityId,
-          avatarHexSource: entityReference.entityId,
+          mainText: entityModel.reference.entityId,
+          avatarHexSource: entityModel.reference.entityId,
           isBold: true,
-          onTap: () => onTapEntity(ctx, entityReference))
+          onTap: () => onTapEntity(ctx, entityModel))
     ]);
   }
 
@@ -85,7 +84,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         avatarText: title,
         avatarHexSource: entity.reference.entityId,
         isBold: true,
-        onTap: () => onTapEntity(ctx, entity.reference));
+        onTap: () => onTapEntity(ctx, entity));
   }
 
   Widget buildParticipationRow(BuildContext ctx, EntityModel entity) {
@@ -131,9 +130,9 @@ class _EntitiesTabState extends State<EntitiesTab> {
     );
   }
 
-  onTapEntity(BuildContext ctx, EntityReference entityRef) {
+  onTapEntity(BuildContext ctx, EntityModel entity) {
     final route =
-        MaterialPageRoute(builder: (context) => EntityInfoPage(entityRef));
+        MaterialPageRoute(builder: (context) => EntityInfoPage(entity));
     Navigator.push(ctx, route);
   }
 

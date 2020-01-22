@@ -35,9 +35,14 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(ctx) {
-    return Consumer<ProcessPoolModel>(
-        builder: (BuildContext context, processModels, _) =>
-            Consumer<FeedPoolModel>(
+    return ChangeNotifierProvider.value(
+      value: globalAppState.currentAccount.entities,
+      child: ChangeNotifierProvider.value(
+        value: globalProcessPool,
+        child: ChangeNotifierProvider.value(
+          value: globalFeedPool,
+          child: Builder(
+            builder: (BuildContext context) => Consumer<FeedPoolModel>(
                 builder: (BuildContext context, feedModels, _) {
               // Rebuild on pool data updates
               final items = _digestCardList();
@@ -47,7 +52,11 @@ class _HomeTabState extends State<HomeTab> {
                   itemCount: items.length,
                   itemBuilder: (BuildContext ctx, int index) =>
                       items[index] ?? Container());
-            }));
+            }),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildNoEntries(BuildContext ctx) {
@@ -64,15 +73,13 @@ class _HomeTabState extends State<HomeTab> {
 
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null ||
-        currentAccount.entities.hasValue ||
+        !currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) return [];
 
     final availableItems = List<CardItem>();
 
     for (final entity in currentAccount.entities.value) {
-      if (entity.feed.isLoading || entity.feed.value.feed.isLoading)
-        continue;
-      else if (entity.feed.hasValue && entity.feed.value.feed.hasValue) {
+      if (entity.feed.hasValue && entity.feed.value.feed.hasValue) {
         entity.feed.value.feed.value.items.forEach((post) {
           if (!(post is FeedPost)) return;
           final date = DateTime.tryParse(post.datePublished);

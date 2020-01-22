@@ -1,30 +1,45 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/sign-modal.dart';
-import 'package:flutter/foundation.dart'; // for kReleaseMode
+import 'package:flutter/foundation.dart';
+import 'package:vocdoni/widgets/toast.dart'; // for kReleaseMode
 
 // /////////////////////////////////////////////////////////////////////////////
 // MAIN
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext context) async {
-  if (!(newLink is Uri)) return null;
+  if (!(newLink is Uri)) throw Exception();
 
-  switch (newLink.path) {
-    case "/entity":
-      return fetchAndShowEntity(
-          entityId: newLink.queryParameters["entityId"],
-          entryPoints: newLink.queryParametersAll["entryPoints[]"],
-          context: context);
-      break;
-    case "/signature":
-      return showSignatureScreen(
-          payload: newLink.queryParameters["payload"],
-          returnUri: newLink.queryParameters["returnUri"],
-          context: context);
-    default:
-      if (!kReleaseMode)
-        throw LinkingError("Invalid path"); // Throw on debug, ignore on release
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
+
+  try {
+    switch (newLink.path) {
+      case "/entity":
+        indicator = showLoading("Please, wait...", context: context);
+        await fetchAndShowEntity(
+            entityId: newLink.queryParameters["entityId"],
+            entryPoints: newLink.queryParametersAll["entryPoints[]"],
+            context: context);
+        indicator.close();
+        break;
+      case "/signature":
+        await showSignatureScreen(
+            payload: newLink.queryParameters["payload"],
+            returnUri: newLink.queryParameters["returnUri"],
+            context: context);
+        break;
+      default:
+        if (!kReleaseMode)
+          throw LinkingError(
+              "Invalid path"); // Throw on debug, ignore on release
+    }
+  } catch (err) {
+    if (indicator != null) indicator.close();
+    throw err;
   }
 }
 
@@ -55,7 +70,25 @@ Future fetchAndShowEntity(
   entityRef.entityId = entityId;
   entityRef.entryPoints.addAll(validEntryPoints);
 
-  Navigator.pushNamed(context, "/entity", arguments: entityRef);
+  final entityModel = EntityModel(entityRef);
+
+  try {
+    // fetch metadata from the reference. The view will fetch the rest.
+    await entityModel.refreshMetadata();
+
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    // subscribe if not already
+    if (!currentAccount.isSubscribed(entityRef)) {
+      await currentAccount.subscribe(entityModel);
+    }
+    Navigator.pushNamed(context, "/entity", arguments: entityModel);
+  } catch (err) {
+    showMessage("Could not fetch the entity details",
+        context: context, purpose: Purpose.DANGER);
+    throw err;
+  }
 }
 
 showSignatureScreen(

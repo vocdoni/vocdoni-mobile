@@ -18,7 +18,7 @@ class StateContainer<T> {
   T _currentValue;
   DateTime _lastUpdated;
 
-  int _recentSecondsThreshold =
+  int _freshnessSecondsThreshold =
       10; // Amount of seconds before `isFresh` returns false
 
   /// Initializes the state with no value by default. If an argument is passed,
@@ -89,7 +89,7 @@ class StateContainer<T> {
   withFreshness(int seconds) {
     if (seconds < 0) throw Exception("The amount of seconds must be positive");
 
-    this._recentSecondsThreshold = seconds;
+    this._freshnessSecondsThreshold = seconds;
     return this;
   }
 
@@ -140,6 +140,6 @@ class StateContainer<T> {
     return hasValue &&
         _lastUpdated is DateTime &&
         DateTime.now().difference(_lastUpdated) <
-            Duration(seconds: this._recentSecondsThreshold);
+            Duration(seconds: this._freshnessSecondsThreshold);
   }
 }

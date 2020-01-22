@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data-models/app-state.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
@@ -19,6 +18,7 @@ import 'package:vocdoni/views/identity-tab.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
 
@@ -29,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int selectedTab = 0;
+  bool scanning = false;
 
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         if (!kReleaseMode) print("Resumed");
-        connectGateways();
+        ensureConnectedGateways();
         break;
       case AppLifecycleState.suspending:
         if (!kReleaseMode) print("Suspending");
@@ -143,41 +144,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(context) {
-    // We use Consumer() since the appState might change and we may need to redraw
-    return Consumer<AppStateModel>(
-      builder: (BuildContext context, AppStateModel appState, _) {
-        return WillPopScope(
-            onWillPop: handleWillPop,
-            child: Scaffold(
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.endFloat,
-              floatingActionButtonAnimator:
-                  FloatingActionButtonAnimator.scaling,
-              floatingActionButton: selectedTab == 1
-                  ? FloatingActionButton(
+    return WillPopScope(
+        onWillPop: handleWillPop,
+        child: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+          floatingActionButton: selectedTab == 1
+              ? Builder(
+                  // Toast context descending from Scaffold
+                  builder: (context) => FloatingActionButton(
                       onPressed: () => onScanQrCode(context),
                       backgroundColor: colorDescription,
                       child: Icon(
                         FeatherIcons.plus,
                       ),
-                      elevation: 5.0)
-                  : null,
-              appBar: TopNavigation(
-                title: getTabName(selectedTab),
-                showBackButton: false,
-              ),
-              key: homePageScaffoldKey,
-              body: buildBody(context, appState),
-              bottomNavigationBar: BottomNavigation(
-                onTabSelect: (index) => onTabSelect(index),
-                selectedTab: selectedTab,
-              ),
-            ));
-      },
-    );
+                      elevation: 5.0))
+              : null,
+          appBar: TopNavigation(
+            title: getTabName(selectedTab),
+            showBackButton: false,
+          ),
+          key: homePageScaffoldKey,
+          body: buildBody(context),
+          bottomNavigationBar: BottomNavigation(
+            onTabSelect: (index) => onTabSelect(index),
+            selectedTab: selectedTab,
+          ),
+        ));
   }
 
-  buildBody(BuildContext ctx, AppStateModel appState) {
+  buildBody(BuildContext ctx) {
     Widget body;
 
     // RENDER THE CURRENT TAB BODY
@@ -223,17 +219,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   onScanQrCode(BuildContext context) async {
-    String string = await new QRCodeReader()
-        .setAutoFocusIntervalInMs(400) // default 5000
-        .setForceAutoFocus(true) // default false
-        .setTorchEnabled(true) // default false
-        .setHandlePermissions(true) // default true
-        .setExecuteAfterPermissionGranted(true) // default true
-        .scan();
+    if (scanning) return;
+    scanning = true;
 
-    final link = Uri.tryParse(string);
-    if (link is Uri) handleIncomingLink(link, context);
-    // TODO: else show error
+    try {
+      final result = await QRCodeReader()
+          .setAutoFocusIntervalInMs(400) // default 5000
+          .setForceAutoFocus(true) // default false
+          .setTorchEnabled(true) // default false
+          .setHandlePermissions(true) // default true
+          .setExecuteAfterPermissionGranted(true) // default true
+          .scan();
+
+      if (!(result is String)) throw Exception();
+
+      final link = Uri.tryParse(result);
+      if (!(link is Uri) || !link.hasScheme || link.hasEmptyPath)
+        throw Exception();
+
+      await handleIncomingLink(link, context);
+      scanning = false;
+    } catch (err) {
+      scanning = false;
+
+      await Future.delayed(Duration(milliseconds: 10));
+
+      showMessage("The QR code does not contain a valid link",
+          context: context, purpose: Purpose.DANGER);
+    }
   }
 
   String getTabName(int idx) {

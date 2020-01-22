@@ -17,11 +17,11 @@ import '../lang/index.dart';
 import 'package:vocdoni/constants/colors.dart';
 
 class EntityInfoPage extends StatefulWidget {
-  final EntityReference entityReference;
+  final EntityModel entityModel;
 
-  EntityInfoPage(this.entityReference) {
+  EntityInfoPage(this.entityModel) {
     globalAnalytics.trackPage("EntityInfoPage",
-        entityId: entityReference.entityId);
+        entityId: entityModel.reference.entityId);
   }
 
   @override
@@ -30,38 +30,23 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   bool _processingSubscription = false;
-  EntityModel entityModel;
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
 
-    entityModel = EntityModel(widget.entityReference);
-
-    try {
-      // fetch data from reference
-      await entityModel.refresh(true);
-
-      final currentAccount = globalAppState.currentAccount;
-      if (currentAccount == null) throw Exception("Internal error");
-
-      // subscribe if not already
-      if (!currentAccount.isSubscribed(widget.entityReference)) {
-        await currentAccount.subscribe(entityModel);
-      }
-    } catch (err) {
-      entityModel.metadata.setError("Could not fetch");
-    }
+    // detached async
+    widget.entityModel.refresh().catchError((_) {});
   }
 
   @override
   Widget build(context) {
     // Rebuild when the metadata updates
     return ChangeNotifierProvider.value(
-      value: entityModel.metadata,
+      value: widget.entityModel.metadata,
       child: Builder(
         builder: (BuildContext context) {
-          return entityModel.metadata.hasValue
+          return widget.entityModel.metadata.hasValue
               ? buildScaffold(context)
               : buildScaffoldWithoutMetadata(context);
         },
@@ -76,7 +61,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         forceHeader: true,
         appBarTitle: "Loading",
         avatarText: "",
-        avatarHexSource: entityModel.reference.entityId,
+        avatarHexSource: widget.entityModel.reference.entityId,
         builder: Builder(
           builder: (ctx) {
             return SliverList(
@@ -91,23 +76,23 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildLoadingStatus() {
-    if (entityModel.metadata.isLoading)
+    if (widget.entityModel.metadata.isLoading)
       return ListItem(
         mainText: "Fetching details...",
         rightIcon: null,
         isSpinning: true,
       );
-    if (entityModel.metadata.hasError)
+    if (widget.entityModel.metadata.hasError)
       return ListItem(
-        mainText: entityModel.metadata.errorMessage,
+        mainText: widget.entityModel.metadata.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
         rightIcon: FeatherIcons.refreshCw,
       );
-    else if (entityModel.feed.hasError)
+    else if (widget.entityModel.feed.hasError)
       return ListItem(
-        mainText: entityModel.feed.errorMessage,
+        mainText: widget.entityModel.feed.errorMessage,
         purpose: Purpose.DANGER,
         rightTextPurpose: Purpose.DANGER,
         onTap: refresh,
@@ -119,22 +104,23 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   Widget buildScaffold(BuildContext context) {
     return ScaffoldWithImage(
-        headerImageUrl: entityModel.metadata.value.media.header,
-        headerTag: entityModel.reference.entityId +
-            entityModel.metadata.value.media.header,
+        headerImageUrl: widget.entityModel.metadata.value.media.header,
+        headerTag: widget.entityModel.reference.entityId +
+            widget.entityModel.metadata.value.media.header,
         forceHeader: true,
-        appBarTitle:
-            entityModel.metadata.value.name[globalAppState.currentLanguage],
-        avatarUrl: entityModel.metadata.value.media.avatar,
-        avatarText:
-            entityModel.metadata.value.name[globalAppState.currentLanguage],
-        avatarHexSource: entityModel.reference.entityId,
+        appBarTitle: widget
+            .entityModel.metadata.value.name[globalAppState.currentLanguage],
+        avatarUrl: widget.entityModel.metadata.value.media.avatar,
+        avatarText: widget
+            .entityModel.metadata.value.name[globalAppState.currentLanguage],
+        avatarHexSource: widget.entityModel.reference.entityId,
         leftElement: buildRegisterButton(context),
         actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
+            final children = getScaffoldChildren(ctx);
             return SliverList(
-              delegate: SliverChildListDelegate(getScaffoldChildren(ctx)),
+              delegate: SliverChildListDelegate(children),
             );
           },
         ));
@@ -159,8 +145,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildActionList(context));
     children.add(Section(text: "Details"));
     children.add(Summary(
-      text: entityModel
-          .metadata.value.description[globalAppState.currentLanguage],
+      text: widget.entityModel.metadata.value
+          .description[globalAppState.currentLanguage],
       maxLines: 5,
     ));
     children.add(Section(text: "Manage"));
@@ -172,11 +158,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildTitle(BuildContext context) {
     String title =
-        entityModel.metadata.value.name[globalAppState.currentLanguage];
+        widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
     return ListItem(
-      heroTag: entityModel.reference.entityId + title,
+      heroTag: widget.entityModel.reference.entityId + title,
       mainText: title,
-      secondaryText: entityModel.reference.entityId,
+      secondaryText: widget.entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -186,7 +172,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitleWithoutMetadata(BuildContext context) {
     return ListItem(
       mainText: "...",
-      secondaryText: entityModel.reference.entityId,
+      secondaryText: widget.entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -196,31 +182,30 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildFeedRow(BuildContext context) {
     // Rebuild when the feed updates
     return ChangeNotifierProvider.value(
-        value: entityModel.feed,
+        value: widget.entityModel.feed,
         child: Builder(builder: (context) {
           String postCount = "0";
-          if (entityModel.feed.isLoading ||
-              (entityModel.feed.hasValue &&
-                  entityModel.feed.value.feed.isLoading))
+          if (widget.entityModel.feed.isLoading ||
+              (widget.entityModel.feed.hasValue &&
+                  widget.entityModel.feed.value.feed.isLoading))
             postCount = "-";
-          else if (entityModel.feed.hasError ||
-              (entityModel.feed.hasValue &&
-                  entityModel.feed.value.feed.hasError))
+          else if (widget.entityModel.feed.hasError ||
+              (widget.entityModel.feed.hasValue &&
+                  widget.entityModel.feed.value.feed.hasError))
             postCount = "!";
-          else if (entityModel.feed.hasValue &&
-              (entityModel.feed.hasValue &&
-                  entityModel.feed.value.feed.hasValue))
-            postCount =
-                entityModel.feed.value.feed.value.items.length.toString();
-          else
-            throw Exception("Internal error");
+          else if (widget.entityModel.feed.hasValue &&
+              (widget.entityModel.feed.hasValue &&
+                  widget.entityModel.feed.value.feed.hasValue))
+            postCount = widget.entityModel.feed.value.feed.value.items.length
+                .toString();
 
           return ListItem(
             icon: FeatherIcons.rss,
             mainText: "Feed",
             rightText: postCount,
             rightTextIsBadge: true,
-            rightTextPurpose: entityModel.feed.hasError ? Purpose.DANGER : null,
+            rightTextPurpose:
+                widget.entityModel.feed.hasError ? Purpose.DANGER : null,
             disabled: postCount == "0",
             onTap: () => onShowFeed(context),
           );
@@ -229,13 +214,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildParticipationRow(BuildContext context) {
     // Rebuild when the process list updates (not the items)
-    ChangeNotifierProvider.value(
-      value: entityModel.processes,
+    return ChangeNotifierProvider.value(
+      value: widget.entityModel.processes,
       child: Builder(
         builder: (context) {
           int processCount = 0;
-          if (entityModel.processes.hasValue)
-            processCount = entityModel.processes.value.length;
+          if (widget.entityModel.processes.hasValue)
+            processCount = widget.entityModel.processes.value.length;
 
           return ListItem(
               icon: FeatherIcons.mail,
@@ -253,7 +238,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
-    bool isSubscribed = currentAccount.isSubscribed(entityModel.reference);
+    bool isSubscribed =
+        currentAccount.isSubscribed(widget.entityModel.reference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
 
     // Rebuild when the selected account's identity updates
@@ -280,7 +266,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // No need to use ChangeNotifierProvider here, since the only place that can change the subscription status is here.
     // Hence, we don't need to worry about rebuilding on external updates
 
-    bool isSubscribed = currentAccount.isSubscribed(entityModel.reference);
+    bool isSubscribed =
+        currentAccount.isSubscribed(widget.entityModel.reference);
     String subscribeText = isSubscribed ? "Following" : "Follow";
 
     return BaseButton(
@@ -302,7 +289,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         mainText: "Share organization",
         icon: FeatherIcons.share2,
         rightIcon: null,
-        onTap: () => onShare());
+        onTap: () => onShare(context));
   }
 
   buildShareButton(BuildContext context) {
@@ -310,22 +297,22 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
-        onTap: () => onShare());
+        onTap: () => onShare(context));
   }
 
   buildRegisterButton(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
     return ChangeNotifierProvider.value(
-      value: entityModel.isRegistered,
+      value: widget.entityModel.isRegistered,
       child: Builder(
         builder: (context) {
-          if (entityModel.isRegistered.hasError ||
-              entityModel.registerAction.hasError)
+          if (widget.entityModel.isRegistered.hasError ||
+              widget.entityModel.registerAction.hasError)
             return Container();
-          else if (!entityModel.isRegistered.hasValue ||
-              !entityModel.registerAction.hasValue)
+          else if (!widget.entityModel.isRegistered.hasValue ||
+              !widget.entityModel.registerAction.hasValue)
             return Container();
-          else if (!entityModel.isRegistered.value) {
+          else if (!widget.entityModel.isRegistered.value) {
             // Not yet
             return BaseButton(
               purpose: Purpose.HIGHLIGHT,
@@ -353,20 +340,20 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   Widget buildActionList(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
     return ChangeNotifierProvider.value(
-      value: entityModel.visibleActions,
+      value: widget.entityModel.visibleActions,
       child: Builder(
         builder: (context) {
           final List<Widget> actionsToShow = [];
 
           actionsToShow.add(Section(text: "Actions"));
 
-          if (entityModel.visibleActions.hasError) {
+          if (widget.entityModel.visibleActions.hasError) {
             return ListItem(
-              mainText: entityModel.visibleActions.errorMessage,
+              mainText: widget.entityModel.visibleActions.errorMessage,
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
-          } else if (entityModel.visibleActions.value.length == 0) {
+          } else if (widget.entityModel.visibleActions.value.length == 0) {
             return ListItem(
               mainText: "No actions defined",
               disabled: true,
@@ -376,9 +363,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           }
 
           // Unregistered warning
-          if (!entityModel.isRegistered.value) {
-            final entityName =
-                entityModel.metadata.value.name[globalAppState.currentLanguage];
+          if (!widget.entityModel.isRegistered.value) {
+            final entityName = widget.entityModel.metadata.value
+                .name[globalAppState.currentLanguage];
             ListItem noticeItem = ListItem(
               mainText: "Regsiter to $entityName first",
               // secondaryText: null,
@@ -391,18 +378,18 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
           // disabled if not registered
           for (EntityMetadata_Action action
-              in entityModel.visibleActions.value) {
+              in widget.entityModel.visibleActions.value) {
             ListItem item;
             if (action.type == "browser") {
-              if (!(action.name is Map) ||
+              if (action.name == null ||
                   !(action.name[globalAppState.currentLanguage] is String))
-                return null;
+                return Container();
 
               item = ListItem(
                 icon: FeatherIcons.arrowRightCircle,
                 mainText: action.name[globalAppState.currentLanguage],
                 secondaryText: action.visible,
-                disabled: !entityModel.isRegistered.value,
+                disabled: !widget.entityModel.isRegistered.value,
                 onTap: () => onBrowserAction(ctx, action),
               );
             } else {
@@ -425,10 +412,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   // EVENTS
 
-  onShare() {
-    Clipboard.setData(ClipboardData(text: entityModel.reference.entityId))
+  onShare(BuildContext context) {
+    Clipboard.setData(
+            ClipboardData(text: widget.entityModel.reference.entityId))
         .then((_) => showMessage("Identity ID copied on the clipboard",
-            context: context, purpose: Purpose.GUIDE))
+            context: context, purpose: Purpose.GOOD))
         .catchError((err) {
       if (!foundation.kReleaseMode) print(err);
 
@@ -438,24 +426,24 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onShowFeed(BuildContext context) {
-    Navigator.pushNamed(context, "/entity/feed", arguments: entityModel);
+    Navigator.pushNamed(context, "/entity/feed", arguments: widget.entityModel);
   }
 
   onShowParticipation(BuildContext context) {
     Navigator.pushNamed(context, "/entity/participation",
-        arguments: entityModel);
+        arguments: widget.entityModel);
   }
 
   onTapRegister(BuildContext context) {
-    if (entityModel.registerAction.value.type == "browser") {
-      onBrowserAction(context, entityModel.registerAction.value);
+    if (widget.entityModel.registerAction.value.type == "browser") {
+      onBrowserAction(context, widget.entityModel.registerAction.value);
     }
   }
 
   onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
     final url = action.url;
     final title = action.name[globalAppState.currentAccount] ??
-        entityModel.metadata.value.name[globalAppState.currentAccount];
+        widget.entityModel.metadata.value.name[globalAppState.currentAccount];
 
     final route = MaterialPageRoute(
         builder: (context) => WebAction(
@@ -475,7 +463,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       if (currentAccount == null)
         throw Exception("Internal error: null account");
 
-      await currentAccount.subscribe(entityModel);
+      await currentAccount.subscribe(widget.entityModel);
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
@@ -509,7 +497,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       if (currentAccount == null)
         throw Exception("Internal error: null account");
 
-      await currentAccount.unsubscribe(entityModel.reference);
+      await currentAccount.unsubscribe(widget.entityModel.reference);
       showMessage(
           Lang.of(ctx)
               .get("You will no longer see this organization in your feed"),
@@ -526,19 +514,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   refresh() async {
-    await entityModel.refresh();
+    await widget.entityModel.refresh();
 
 /*
     String errorMessage = "";
     bool fail = false;
 
-    if (entityModel.metadata == DataState.ERROR) {
+    if (widget.entityModel.metadata == DataState.ERROR) {
       errorMessage = "Unable to retrieve details";
       fail = true;
-    } else if (entityModel.processessMetadataUpdated == false) {
+    } else if (widget.entityModel.processessMetadataUpdated == false) {
       errorMessage = "Unable to retrieve processess";
       fail = true;
-    } else if (entityModel.feedUpdated == false) {
+    } else if (widget.entityModel.feedUpdated == false) {
       errorMessage = "Unable to retrieve news feed";
       fail = true;
     }
