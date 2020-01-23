@@ -78,8 +78,8 @@ class _HomeTabState extends State<HomeTab> {
     final availableItems = List<CardItem>();
 
     for (final entity in currentAccount.entities.value) {
-      if (entity.feed.hasValue && entity.feed.value.feed.hasValue) {
-        entity.feed.value.feed.value.items.forEach((post) {
+      if (entity.feed.hasValue && entity.feed.value.content.hasValue) {
+        entity.feed.value.content.value.items.forEach((post) {
           if (!(post is FeedPost)) return;
           final date = DateTime.tryParse(post.datePublished);
           final item = CardItem(entity: entity, date: date, post: post);

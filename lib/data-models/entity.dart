@@ -220,6 +220,8 @@ class EntityModel implements StateRefreshable {
       return;
     else if (this.metadata.isLoading) return;
 
+    devPrint("Refreshing entity metadata [${reference.entityId}]");
+
     final oldEntityModel = this.metadata;
     EntityMetadata freshEntityMetadata;
     bool needsProcessListReload = false;
@@ -235,10 +237,14 @@ class EntityModel implements StateRefreshable {
         freshEntityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
+        devPrint("- Refreshing entity metadata [DONE] [${reference.entityId}]");
+
         this.metadata.setValue(freshEntityMetadata);
       }
     } catch (err) {
-      devPrint(err);
+      devPrint(
+          "- Refreshing entity metadata [ERROR: $err] [${reference.entityId}]");
+
       this.metadata.setError("The entity's data cannot be fetched",
           keepPreviousValue: true);
       throw err;
@@ -272,6 +278,8 @@ class EntityModel implements StateRefreshable {
           needsFeedReload = true;
       }
 
+      devPrint("- Refreshing entity dependent data [${reference.entityId}]");
+
       await Future.wait([
         needsProcessListReload
             ? this.refreshProcesses(true)
@@ -280,7 +288,9 @@ class EntityModel implements StateRefreshable {
         refreshVisibleActions(force)
       ]);
     } catch (err) {
-      devPrint(err);
+      devPrint(
+          "- Refreshing entity dependent data [ERROR: $err] [${reference.entityId}]");
+
       throw err;
     }
   }
@@ -297,28 +307,33 @@ class EntityModel implements StateRefreshable {
 
     try {
       final newGlobalProcessPoolList = List<ProcessModel>();
-      newGlobalProcessPoolList.addAll(globalProcessPool.value); // clone
-      newGlobalProcessPoolList.removeWhere((item) {
-        if (item.entityId == this.reference.entityId) return false;
-        return true;
-      });
+      newGlobalProcessPoolList.addAll(globalProcessPool.value.where((item) =>
+          item.entityId != this.reference.entityId)); // clone without ours
 
       // make new processes list
-      final dvoteGw = getDVoteGateway();
-      final web3Gw = getWeb3Gateway();
-      final pids = this.metadata.value.votingProcesses.active;
+      final oldEntityProcessModels = this.processes.value ?? [];
+      final newProcessIds = this.metadata.value.votingProcesses.active;
+
+      devPrint(
+          "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length}]");
 
       // add new
-      final myFreshProcessModels = await Future.wait(pids
-          .map((processId) =>
-              getProcessMetadata(processId, dvoteGw, web3Gw).then((procMeta) {
-                final result =
-                    ProcessModel(processId, this.reference.entityId, procMeta);
-
-                return result.refreshMetadata().then((_) => result);
-              }))
-          .cast<Future<ProcessModel>>()
-          .toList());
+      final myFreshProcessModels = newProcessIds
+          .map((processId) {
+            final prevModel = oldEntityProcessModels.firstWhere(
+                (model) => model.entityId == this.reference.entityId,
+                orElse: () => null);
+            if (prevModel is ProcessModel) {
+              prevModel.refreshMetadata(); // detached async
+              return prevModel;
+            } else {
+              final newModel = ProcessModel(processId, this.reference.entityId);
+              newModel.refreshMetadata(); // detached async
+              return newModel;
+            }
+          })
+          .cast<ProcessModel>()
+          .toList();
 
       // local update
       this.processes.setValue(myFreshProcessModels);
@@ -328,7 +343,9 @@ class EntityModel implements StateRefreshable {
       globalProcessPool.setValue(newGlobalProcessPoolList);
       await globalProcessPool.writeToStorage();
     } catch (err) {
-      devPrint(err);
+      devPrint(
+          "- Refreshing entity dependent processes [ERROR: $err] [${reference.entityId}]");
+
       this.processes.setError("Could not update the process list",
           keepPreviousValue: true);
       throw err;
@@ -338,28 +355,35 @@ class EntityModel implements StateRefreshable {
   Future<void> refreshFeed([bool force = false]) async {
     if (!this.metadata.hasValue)
       return;
-    else if (!force && this.feed.isFresh) return;
+    else if (!force && this.feed.hasValue && this.feed.value.content.isFresh)
+      return;
     // else if (!force && this.feed.isLoading) return;
-
-    this.feed.setToLoading();
 
     if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
         is String)) return;
 
-    final dvoteGw = getDVoteGateway();
-    this.feed.setToLoading();
+    devPrint("- Refreshing entity's feed [${this.reference.entityId}]");
+
+    final cUri = ContentURI(
+        this.metadata.value.newsFeed[globalAppState.currentLanguage]);
 
     try {
-      final cUri = ContentURI(
-          this.metadata.value.newsFeed[globalAppState.currentLanguage]);
+      // Recycle the existing instance
+      if (this.feed.hasValue && this.feed.value.contentUri == cUri.toString()) {
+        if (!this.feed.value.content.hasValue) await this.feed.value.refresh();
+        devPrint(
+            "- Refreshing entity's feed [DONE] [${this.reference.entityId}]");
 
-      final result = await fetchFileString(cUri, dvoteGw);
-      final feed = parseFeed(result);
-      // feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
+        return; // nothing to do
+      }
 
-      final newFeedModel =
-          FeedModel(cUri.toString(), this.reference.entityId, feed);
+      // Fetch from a new URI
+      final newFeedModel = FeedModel(cUri.toString(), this.reference.entityId);
       this.feed.setValue(newFeedModel);
+      await newFeedModel.refresh();
+
+      devPrint(
+          "- Refreshing entity's feed [DONE] [${this.reference.entityId}]");
 
       final idx = globalFeedPool.value
           .indexWhere((feed) => feed.entityId == this.reference.entityId);
@@ -372,7 +396,9 @@ class EntityModel implements StateRefreshable {
 
       await globalFeedPool.writeToStorage();
     } catch (err) {
-      devPrint(err);
+      devPrint(
+          "- Refreshing entity dependent feed [ERROR: $err] [${reference.entityId}]");
+
       this
           .feed
           .setError("Could not fetch the News Feed", keepPreviousValue: true);
@@ -388,6 +414,9 @@ class EntityModel implements StateRefreshable {
     else if (!force && this.visibleActions.isFresh)
       return;
     else if (!force && this.visibleActions.isLoading) return;
+
+    devPrint(
+        "- Refreshing entity dependent visible actions [${reference.entityId}]");
 
     this.registerAction.setToLoading();
     this.isRegistered.setToLoading();
@@ -425,8 +454,14 @@ class EntityModel implements StateRefreshable {
           .cast<Future>()
           .toList());
 
+      devPrint(
+          "- Refreshing entity dependent visible actions [DONE] [${reference.entityId}]");
+
       this.visibleActions.setValue(visibleStandardActions);
     } catch (err) {
+      devPrint(
+          "- Refreshing entity dependent visible actions [ERROR: $err] [${reference.entityId}]");
+
       this.visibleActions.setError("Could not fetch the entity details");
 
       // The request fails entirely. Keep values if already present

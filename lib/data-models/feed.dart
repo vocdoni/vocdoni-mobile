@@ -56,10 +56,10 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
     try {
       final feedList = this
           .value
-          .where((feedModel) => feedModel.feed.hasValue)
+          .where((feedModel) => feedModel.content.hasValue)
           .map((feedModel) {
             // COPY STATE FIELDS INTO META
-            final val = feedModel.feed.value;
+            final val = feedModel.content.value;
             val.meta[META_ENTITY_ID] = feedModel.entityId ?? "";
             val.meta[META_FEED_CONTENT_URI] = feedModel.contentUri ?? "";
             return val;
@@ -79,6 +79,8 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
         globalAppState.currentAccount == null ||
         !globalAppState.currentAccount.entities.hasValue) return;
 
+    devPrint("Refreshing current user's feeds");
+
     try {
       // Get a filtered list of the Entities of the current user
       final entityIds = globalAppState.currentAccount.entities.value
@@ -96,7 +98,6 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
       await this.writeToStorage();
     } catch (err) {
       devPrint(err);
-      throw err;
     }
   }
 
@@ -106,13 +107,14 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
   /// then the first matching feed by the entity Id is returned.
   FeedModel getFromEntityId(String entityId, [String language]) {
     return this.value.firstWhere((feedModel) {
-      if (!feedModel.feed.hasValue) return false;
+      if (!feedModel.content.hasValue) return false;
 
-      bool isFromEntity = feedModel.feed.value.meta[META_ENTITY_ID] == entityId;
+      bool isFromEntity =
+          feedModel.content.value.meta[META_ENTITY_ID] == entityId;
 
       if (language is String) {
         bool isSameLanguage =
-            feedModel.feed.value.meta[META_LANGUAGE] == language;
+            feedModel.content.value.meta[META_LANGUAGE] == language;
         return isFromEntity && isSameLanguage;
       } else {
         return isFromEntity;
@@ -146,10 +148,10 @@ class FeedModel implements StateRefreshable {
   final String contentUri;
   final String entityId;
   final String lang = "default";
-  final StateNotifier<Feed> feed = StateNotifier<Feed>();
+  final StateNotifier<Feed> content = StateNotifier<Feed>();
 
   FeedModel(this.contentUri, this.entityId, [Feed feed]) {
-    if (feed is Feed) this.feed.load(feed);
+    if (feed is Feed) this.content.load(feed);
   }
 
   static FeedModel fromFeed(Feed feed) {
@@ -160,9 +162,11 @@ class FeedModel implements StateRefreshable {
 
   @override
   Future<void> refresh([bool force = false]) async {
-    if (!force && this.feed.isFresh)
+    if (!force && this.content.isFresh)
       return;
-    else if (!force && this.feed.isLoading) return;
+    else if (!force && this.content.isLoading) return;
+
+    devPrint("Refreshing feed [$contentUri]");
 
     // TODO: Don't refetch if the IPFS hash is the same
 
@@ -176,10 +180,13 @@ class FeedModel implements StateRefreshable {
       feed.meta[META_ENTITY_ID] = entityId;
       feed.meta[META_LANGUAGE] = lang;
 
-      this.feed.setValue(feed);
+      devPrint("- Refreshing feed [DONE] [$contentUri]");
+
+      this.content.setValue(feed);
     } catch (err) {
-      devPrint(err);
-      this.feed.setError("Unable to fetch the news feed");
+      devPrint("- Refreshing feed [ERROR: $err] [$contentUri]");
+
+      this.content.setError("Unable to fetch the news feed");
     }
   }
 }

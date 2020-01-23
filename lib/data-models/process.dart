@@ -95,6 +95,8 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
         globalAppState.currentAccount == null ||
         !globalAppState.currentAccount.entities.hasValue) return;
 
+    devPrint("Refreshing related user's processes");
+
     try {
       // Get a filtered list of the Entities of the current user
       final entityIds = globalAppState.currentAccount.entities.value
@@ -112,7 +114,6 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
       await this.writeToStorage();
     } catch (err) {
       devPrint(err);
-      throw err;
     }
   }
 
@@ -165,10 +166,13 @@ class ProcessModel implements StateRefreshable {
   final String lang = "default";
   final StateNotifier<ProcessMetadata> metadata =
       StateNotifier<ProcessMetadata>();
-  final StateNotifier<bool> isInCensus = StateNotifier<bool>();
-  final StateNotifier<bool> hasVoted = StateNotifier<bool>();
-  final StateNotifier<int> currentParticipants = StateNotifier<int>();
-  final StateNotifier<int> censusSize = StateNotifier<int>();
+  final StateNotifier<bool> isInCensus =
+      StateNotifier<bool>().withFreshness(30);
+  final StateNotifier<bool> hasVoted = StateNotifier<bool>().withFreshness(60);
+  final StateNotifier<int> currentParticipants =
+      StateNotifier<int>().withFreshness(60 * 5);
+  final StateNotifier<int> censusSize =
+      StateNotifier<int>().withFreshness(60 * 30);
 
   List<dynamic> choices = [];
 
@@ -220,6 +224,8 @@ class ProcessModel implements StateRefreshable {
 
   @override
   Future<void> refresh([bool force = false]) {
+    devPrint("Refreshing process ${this.processId}");
+
     return Future.wait([
       refreshMetadata(force),
       refreshIsInCensus(force),
@@ -232,6 +238,8 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshMetadata([bool force = false]) async {
     if (!force && this.metadata.isFresh) return;
     // else if (!force && this.metadata.isLoading) return;
+
+    devPrint("- Refreshing process metadata [${this.processId}]");
 
     // TODO: Don't refetch if the IPFS hash is the same
 
@@ -246,8 +254,13 @@ class ProcessModel implements StateRefreshable {
           this.processId; // Ensure we can read it back
       newMetadata.meta[META_ENTITY_ID] = this.entityId;
 
+      devPrint("- Refreshing process metadata [DONE] [${this.processId}]");
+
       this.metadata.setValue(newMetadata);
     } catch (err) {
+      devPrint(
+          "- Refreshing process metadata [ERROR: $err] [${this.processId}]");
+
       this.metadata.setError("Could not fetch the process details");
     }
   }
@@ -255,7 +268,12 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshIsInCensus([bool force = false]) async {
     if (!force && this.isInCensus.isFresh)
       return;
-    else if (!force && this.isInCensus.isLoading) return;
+    else if (!force && this.isInCensus.isLoading)
+      return;
+    else if (this.isInCensus.value == true)
+      return; // we should never be excluded from a census once within
+
+    devPrint("- Refreshing process isInCensus [${this.processId}]");
 
     final dvoteGw = getDVoteGateway();
 
@@ -282,13 +300,17 @@ class ProcessModel implements StateRefreshable {
         this.isInCensus.setValue(false); // 0x0000000000.....
         return;
       }
-      this.isInCensus.setValue(true);
 
       final valid = await checkProof(
           this.metadata.value.census.merkleRoot, base64Claim, proof, dvoteGw);
 
+      devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
+
       this.isInCensus.setValue(valid);
-    } catch (error) {
+    } catch (err) {
+      devPrint(
+          "- Refreshing process isInCensus [ERROR: $err] [${this.processId}]");
+
       this.isInCensus.setError("Could not check the census");
     }
   }
@@ -299,6 +321,8 @@ class ProcessModel implements StateRefreshable {
     else if (!force && this.hasVoted.isLoading)
       return;
     else if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+
+    devPrint("- Refreshing process hasVoted [${this.processId}]");
 
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
@@ -315,11 +339,18 @@ class ProcessModel implements StateRefreshable {
               .catchError((_) {});
 
       if (success is bool) {
+        devPrint("- Refreshing process hasVoted [DONE] [${this.processId}]");
+
         this.hasVoted.setValue(success);
       } else {
+        devPrint("- Refreshing process hasVoted [NO BOOL] [${this.processId}]");
+
         this.hasVoted.setError("Could not check the process status");
       }
     } catch (err) {
+      devPrint(
+          "- Refreshing process hasVoted [ERROR: $err] [${this.processId}]");
+
       this.hasVoted.setError("Could not check the vote status");
     }
   }
@@ -327,14 +358,21 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshCensusSize([bool force = false]) {
     if (!this.metadata.hasValue) return null;
 
+    devPrint("- Refreshing process censusSize [${this.processId}]");
+
     final dvoteGw = getDVoteGateway();
 
     this.censusSize.setToLoading();
     return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
-        .then((size) => this.censusSize.setValue(size))
-        .catchError((err) {
+        .then((size) {
+      devPrint("- Refreshing process censusSize [DONE] [${this.processId}]");
+
+      return this.censusSize.setValue(size);
+    }).catchError((err) {
+      devPrint(
+          "- Refreshing process censusSize [ERROR: $err] [${this.processId}]");
+
       this.censusSize.setError("Could not check the census size");
-      throw err;
     });
   }
 
@@ -346,14 +384,21 @@ class ProcessModel implements StateRefreshable {
     else if (!force && this.currentParticipants.isLoading)
       return Future.value();
 
+    devPrint("- Refreshing process currentParticipants [${this.processId}]");
+
     final dvoteGw = getDVoteGateway();
 
     this.currentParticipants.setToLoading();
-    return getEnvelopeHeight(this.processId, dvoteGw)
-        .then((numVotes) => this.currentParticipants.setValue(numVotes))
-        .catchError((err) {
+    return getEnvelopeHeight(this.processId, dvoteGw).then((numVotes) {
+      devPrint(
+          "- Refreshing process currentParticipants [DONE] [${this.processId}]");
+
+      return this.currentParticipants.setValue(numVotes);
+    }).catchError((err) {
+      devPrint(
+          "- Refreshing process currentParticipants [ERROR: $err] [${this.processId}]");
+
       this.currentParticipants.setError("Could not check the census size");
-      throw err;
     });
   }
 

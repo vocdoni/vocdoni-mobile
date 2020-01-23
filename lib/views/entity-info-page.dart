@@ -211,16 +211,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           String postCount = "0";
           if (widget.entityModel.feed.isLoading ||
               (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.feed.isLoading))
+                  widget.entityModel.feed.value.content.isLoading))
             postCount = "-";
           else if (widget.entityModel.feed.hasError ||
               (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.feed.hasError))
+                  widget.entityModel.feed.value.content.hasError))
             postCount = "!";
           else if (widget.entityModel.feed.hasValue &&
               (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.feed.hasValue))
-            postCount = widget.entityModel.feed.value.feed.value.items.length
+                  widget.entityModel.feed.value.content.hasValue))
+            postCount = widget.entityModel.feed.value.content.value.items.length
                 .toString();
 
           return ListItem(

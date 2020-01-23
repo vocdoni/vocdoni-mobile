@@ -43,11 +43,11 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         child: Builder(builder: (context) {
           if (!entityModel.metadata.hasValue) return buildEmptyEntity(context);
           if (!entityModel.feed.hasValue ||
-              !entityModel.feed.value.feed.hasValue)
+              !entityModel.feed.value.content.hasValue)
             return buildEmptyPosts(context);
           else if (entityModel.metadata.isLoading ||
               entityModel.feed.isLoading ||
-              entityModel.feed.value.feed.isLoading)
+              entityModel.feed.value.content.isLoading)
             return buildLoading(context);
           else if (entityModel.metadata.hasError ||
               entityModel.feed.hasError ||
@@ -56,7 +56,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 context,
                 entityModel.metadata.errorMessage ??
                     entityModel.feed.errorMessage ??
-                    entityModel.feed.value.feed.errorMessage);
+                    entityModel.feed.value.content.errorMessage);
 
           final lang = entityModel.metadata.value.languages[0] ??
               globalAppState.currentLanguage;
@@ -64,9 +64,9 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
             body: ListView.builder(
-              itemCount: entityModel.feed.value.feed.value.items.length ?? 0,
+              itemCount: entityModel.feed.value.content.value.items.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
-                final post = entityModel.feed.value.feed.value.items[index];
+                final post = entityModel.feed.value.content.value.items[index];
 
                 return CardPost(entityModel, post, index);
               },

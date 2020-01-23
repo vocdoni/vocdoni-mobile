@@ -67,10 +67,10 @@ class _EntitiesTabState extends State<EntitiesTab> {
   int getFeedPostCount(EntityModel ent) {
     if (!ent.feed.hasValue)
       return 0;
-    else if (!ent.feed.value.feed.hasValue)
+    else if (!ent.feed.value.content.hasValue)
       return 0;
-    else if (ent.feed.value.feed.value.items is List)
-      return ent.feed.value.feed.value.items.length;
+    else if (ent.feed.value.content.value.items is List)
+      return ent.feed.value.content.value.items.length;
     return 0;
   }
 
