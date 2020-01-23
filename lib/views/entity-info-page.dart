@@ -1,5 +1,5 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/foundation.dart' as foundation;
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +10,7 @@ import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/summary.dart';
+import 'package:vocdoni/widgets/summary.dart' as summary;
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
@@ -36,7 +36,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     super.initState();
 
     // detached async
-    widget.entityModel.refresh().catchError((_) {});
+    widget.entityModel.refresh().catchError((err) {
+      if (!kReleaseMode) print(err);
+    });
   }
 
   @override
@@ -76,42 +78,53 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildLoadingStatus() {
-    if (widget.entityModel.metadata.isLoading)
-      return ListItem(
-        mainText: "Fetching details...",
-        rightIcon: null,
-        isSpinning: true,
-      );
-    else if (widget.entityModel.processes.isLoading)
-      return ListItem(
-        mainText: "Fetching participation...",
-        rightIcon: null,
-        isSpinning: true,
-      );
-    else if (widget.entityModel.feed.isLoading)
-      return ListItem(
-        mainText: "Fetching content...",
-        rightIcon: null,
-        isSpinning: true,
-      );
-    else if (widget.entityModel.metadata.hasError)
-      return ListItem(
-        mainText: widget.entityModel.metadata.errorMessage,
-        purpose: Purpose.DANGER,
-        rightTextPurpose: Purpose.DANGER,
-        onTap: refresh,
-        rightIcon: FeatherIcons.refreshCw,
-      );
-    else if (widget.entityModel.feed.hasError)
-      return ListItem(
-        mainText: widget.entityModel.feed.errorMessage,
-        purpose: Purpose.DANGER,
-        rightTextPurpose: Purpose.DANGER,
-        onTap: refresh,
-        rightIcon: FeatherIcons.refreshCw,
-      );
-    else
-      return Container();
+    return ChangeNotifierProvider.value(
+      value: widget.entityModel.metadata,
+      child: ChangeNotifierProvider.value(
+        value: widget.entityModel.processes,
+        child: ChangeNotifierProvider.value(
+          value: widget.entityModel.feed,
+          child: Builder(builder: (context) {
+            if (widget.entityModel.metadata.isLoading)
+              return ListItem(
+                mainText: "Fetching details...",
+                rightIcon: null,
+                isSpinning: true,
+              );
+            else if (widget.entityModel.processes.isLoading)
+              return ListItem(
+                mainText: "Fetching participation...",
+                rightIcon: null,
+                isSpinning: true,
+              );
+            else if (widget.entityModel.feed.isLoading)
+              return ListItem(
+                mainText: "Fetching news...",
+                rightIcon: null,
+                isSpinning: true,
+              );
+            else if (widget.entityModel.metadata.hasError)
+              return ListItem(
+                mainText: widget.entityModel.metadata.errorMessage,
+                purpose: Purpose.DANGER,
+                rightTextPurpose: Purpose.DANGER,
+                onTap: refresh,
+                rightIcon: FeatherIcons.refreshCw,
+              );
+            else if (widget.entityModel.feed.hasError)
+              return ListItem(
+                mainText: widget.entityModel.feed.errorMessage,
+                purpose: Purpose.DANGER,
+                rightTextPurpose: Purpose.DANGER,
+                onTap: refresh,
+                rightIcon: FeatherIcons.refreshCw,
+              );
+            else
+              return Container();
+          }),
+        ),
+      ),
+    );
   }
 
   Widget buildScaffold(BuildContext context) {
@@ -156,7 +169,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildParticipationRow(context));
     children.add(buildActionList(context));
     children.add(Section(text: "Details"));
-    children.add(Summary(
+    children.add(summary.Summary(
       text: widget.entityModel.metadata.value
           .description[globalAppState.currentLanguage],
       maxLines: 5,
@@ -431,7 +444,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         .then((_) => showMessage("Identity ID copied on the clipboard",
             context: context, purpose: Purpose.GOOD))
         .catchError((err) {
-      if (!foundation.kReleaseMode) print(err);
+      if (!kReleaseMode) print(err);
 
       showMessage("Could not copy the Entity ID",
           context: context, purpose: Purpose.DANGER);

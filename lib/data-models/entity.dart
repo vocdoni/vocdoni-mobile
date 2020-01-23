@@ -219,6 +219,7 @@ class EntityModel implements StateRefreshable {
       return;
     else if (this.metadata.isLoading) return;
 
+    final oldEntityModel = this.metadata;
     EntityMetadata freshEntityMetadata;
     bool needsProcessListReload = false;
     bool needsFeedReload = false;
@@ -235,48 +236,61 @@ class EntityModel implements StateRefreshable {
 
         this.metadata.setValue(freshEntityMetadata);
       }
-
-      // Trigger updates on child models
-      if (!skipChildren) {
-        // Process ID's changed?
-        if (!this.metadata.hasValue)
-          needsProcessListReload = true;
-        else if (this.metadata.value.votingProcesses.active.length !=
-            freshEntityMetadata.votingProcesses.active.length)
-          needsProcessListReload = true;
-        else {
-          // deep equal?
-          for (int i = 0;
-              i < freshEntityMetadata.votingProcesses.active.length;
-              i++) {
-            if (freshEntityMetadata.votingProcesses.active[i] !=
-                this.metadata.value.votingProcesses.active[i]) {
-              needsProcessListReload = true;
-              break;
-            }
-          }
-        }
-
-        // URI changed?
-        if (!this.metadata.hasValue)
-          needsFeedReload = true;
-        else if (this.metadata.value.newsFeed[globalAppState.currentLanguage]
-                is String ||
-            this.metadata.value.newsFeed[globalAppState.currentLanguage] !=
-                freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
-          needsFeedReload = true;
-
-        await Future.wait([
-          needsProcessListReload
-              ? this.refreshProcesses(true)
-              : this.refreshProcesses(),
-          needsFeedReload ? this.refreshFeed(true) : this.refreshFeed(),
-          refreshVisibleActions(force)
-        ]);
-      }
     } catch (err) {
       if (!kReleaseMode) print(err);
-      this.metadata.setError("The entity's data cannot be fetched");
+      this.metadata.setError("The entity's data cannot be fetched",
+          keepPreviousValue: true);
+      throw err;
+    }
+    // if at this point there is no metadata, skip
+    if (this.metadata.hasError || !this.metadata.hasValue)
+      return;
+    else if (skipChildren) return;
+
+    // If the metadata didn't update, ensure we have a value
+    if (freshEntityMetadata == null) freshEntityMetadata = this.metadata.value;
+
+    // Trigger updates on child models
+
+    try {
+      // Process ID's changed?
+      if (oldEntityModel.hasValue &&
+          oldEntityModel.value.votingProcesses.active.length !=
+              freshEntityMetadata.votingProcesses.active.length)
+        needsProcessListReload = true;
+      else {
+        // deep equal?
+        for (int i = 0;
+            i < freshEntityMetadata.votingProcesses.active.length;
+            i++) {
+          if (freshEntityMetadata.votingProcesses.active[i] !=
+              oldEntityModel.value.votingProcesses.active[i]) {
+            needsProcessListReload = true;
+            break;
+          }
+        }
+      }
+
+      // URI changed?
+      if (!oldEntityModel.hasValue)
+        needsFeedReload = true;
+      else if (oldEntityModel.hasValue) {
+        if (!(oldEntityModel.value.newsFeed[globalAppState.currentLanguage]
+                is String) ||
+            oldEntityModel.value.newsFeed[globalAppState.currentLanguage] !=
+                freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
+          needsFeedReload = true;
+      }
+
+      await Future.wait([
+        needsProcessListReload
+            ? this.refreshProcesses(true)
+            : this.refreshProcesses(),
+        needsFeedReload ? this.refreshFeed(true) : this.refreshFeed(),
+        refreshVisibleActions(force)
+      ]);
+    } catch (err) {
+      if (!kReleaseMode) print(err);
       throw err;
     }
   }
@@ -292,9 +306,9 @@ class EntityModel implements StateRefreshable {
     this.processes.setToLoading();
 
     try {
-      final updatedProcessPoolList = List<ProcessModel>();
-      updatedProcessPoolList.addAll(globalProcessPool.value);
-      updatedProcessPoolList.removeWhere((item) {
+      final newGlobalProcessPoolList = List<ProcessModel>();
+      newGlobalProcessPoolList.addAll(globalProcessPool.value); // clone
+      newGlobalProcessPoolList.removeWhere((item) {
         if (item.entityId == this.reference.entityId) return false;
         return true;
       });
@@ -302,26 +316,31 @@ class EntityModel implements StateRefreshable {
       // make new processes list
       final dvoteGw = getDVoteGateway();
       final web3Gw = getWeb3Gateway();
-      final procMetaList = await getProcessesMetadata(
-          this.metadata.value.votingProcesses.active, dvoteGw, web3Gw);
+      final pids = this.metadata.value.votingProcesses.active;
 
       // add new
-      final newProcessModels = await Future.wait(procMetaList
-          .map((meta) {
-            final result = ProcessModel(
-                meta.meta[META_PROCESS_ID], this.reference.entityId, meta);
+      final myFreshProcessModels = await Future.wait(pids
+          .map((processId) =>
+              getProcessMetadata(processId, dvoteGw, web3Gw).then((procMeta) {
+                final result =
+                    ProcessModel(processId, this.reference.entityId, procMeta);
 
-            return result.refreshMetadata().then((_) => result);
-          })
+                return result.refreshMetadata().then((_) => result);
+              }))
           .cast<Future<ProcessModel>>()
           .toList());
 
-      updatedProcessPoolList.addAll(newProcessModels);
-      this.processes.setValue(updatedProcessPoolList);
+      // local update
+      this.processes.setValue(myFreshProcessModels);
+
+      // global update
+      newGlobalProcessPoolList.addAll(myFreshProcessModels); // merge
+      globalProcessPool.setValue(newGlobalProcessPoolList);
       await globalProcessPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
-      this.processes.setError("Could not update the process list");
+      this.processes.setError("Could not update the process list",
+          keepPreviousValue: true);
       throw err;
     }
   }
@@ -349,23 +368,25 @@ class EntityModel implements StateRefreshable {
       final feed = parseFeed(result);
       // feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
 
-      this.feed.setValue(FeedModel(
-          feed.meta[META_FEED_CONTENT_URI], feed.meta[META_ENTITY_ID], feed));
+      final newFeedModel =
+          FeedModel(cUri.toString(), this.reference.entityId, feed);
+      this.feed.setValue(newFeedModel);
 
       final idx = globalFeedPool.value
           .indexWhere((feed) => feed.entityId == this.reference.entityId);
       if (idx < 0) {
         globalFeedPool.value.add(this.feed.value);
-        globalFeedPool.setValue(globalFeedPool.value); // force to notify
       } else {
         globalFeedPool.value[idx] = this.feed.value;
-        globalFeedPool.setValue(globalFeedPool.value); // force to notify
       }
+      globalFeedPool.notify();
 
       await globalFeedPool.writeToStorage();
     } catch (err) {
       if (!kReleaseMode) print(err);
-      this.feed.setError("Could not fetch the News Feed");
+      this
+          .feed
+          .setError("Could not fetch the News Feed", keepPreviousValue: true);
       throw err;
     }
   }

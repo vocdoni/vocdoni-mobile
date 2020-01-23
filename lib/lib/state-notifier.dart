@@ -87,4 +87,10 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
     notifyListeners(); // Notify after the state is changed
     return this;
   }
+
+  /// Explicitly emits a change notification event to the listeners
+  StateNotifier notify() {
+    notifyListeners();
+    return this;
+  }
 }

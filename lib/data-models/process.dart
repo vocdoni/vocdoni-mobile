@@ -78,13 +78,13 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
               processModel.metadata.value.meta[META_PROCESS_CENSUS_SIZE] =
                   processModel.censusSize.value.toString();
 
-            return processModel.metadata;
+            return processModel.metadata.value;
           })
           .cast<ProcessMetadata>()
           .toList();
       await globalProcessesPersistence.writeAll(processList);
     } catch (err) {
-      print(err);
+      if (!kReleaseMode) print(err);
       throw PersistError("Cannot store the current state");
     }
   }
