@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/state-container.dart';
 
@@ -60,7 +61,8 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   StateNotifier setToLoading([String loadingMessage]) {
     super.setToLoading(loadingMessage);
 
-    notifyListeners(); // Notify after the state is changed
+    // Notify after the state is changed
+    this.notify();
     return this;
   }
 
@@ -72,7 +74,8 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   StateNotifier setError(String error, {bool keepPreviousValue = false}) {
     super.setError(error, keepPreviousValue: keepPreviousValue);
 
-    notifyListeners(); // Notify after the state is changed
+    // Notify after the state is changed
+    this.notify();
     return this;
   }
 
@@ -84,13 +87,14 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   StateNotifier setValue(T newValue) {
     super.setValue(newValue);
 
-    notifyListeners(); // Notify after the state is changed
+    // Notify after the state is changed
+    this.notify();
     return this;
   }
 
   /// Explicitly emits a change notification event to the listeners
   StateNotifier notify() {
-    notifyListeners();
+    Timer(Duration(milliseconds: 1), () => this.notifyListeners());
     return this;
   }
 }
