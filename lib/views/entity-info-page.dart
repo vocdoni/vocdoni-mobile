@@ -209,19 +209,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         value: widget.entityModel.feed,
         child: Builder(builder: (context) {
           String postCount = "0";
-          if (widget.entityModel.feed.isLoading ||
-              (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.content.isLoading))
-            postCount = "-";
-          else if (widget.entityModel.feed.hasError ||
-              (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.content.hasError))
-            postCount = "!";
-          else if (widget.entityModel.feed.hasValue &&
-              (widget.entityModel.feed.hasValue &&
-                  widget.entityModel.feed.value.content.hasValue))
-            postCount = widget.entityModel.feed.value.content.value.items.length
-                .toString();
+          if (widget.entityModel.feed.hasValue)
+            postCount = widget.entityModel.feed.value.items.length.toString();
+          else if (widget.entityModel.feed.hasError) postCount = "!";
 
           return ListItem(
             icon: FeatherIcons.rss,
@@ -230,7 +220,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             rightTextIsBadge: true,
             rightTextPurpose:
                 widget.entityModel.feed.hasError ? Purpose.DANGER : null,
-            disabled: postCount == "0",
+            disabled: widget.entityModel.feed.hasError ||
+                widget.entityModel.feed.isLoading,
+            isSpinning: widget.entityModel.feed.isLoading,
             onTap: () => onShowFeed(context),
           );
         }));
@@ -251,7 +243,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               mainText: "Participation",
               rightText: processCount.toString(),
               rightTextIsBadge: true,
-              disabled: processCount == 0,
+              rightTextPurpose:
+                  widget.entityModel.processes.hasError ? Purpose.DANGER : null,
+              disabled: widget.entityModel.processes.hasError ||
+                  widget.entityModel.processes.isLoading,
+              isSpinning: widget.entityModel.processes.isLoading,
               onTap: () => onShowParticipation(context));
         },
       ),

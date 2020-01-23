@@ -1,9 +1,9 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -32,8 +32,8 @@ class _IdentityTabState extends State<IdentityTab> {
     if (currentAccount == null) return buildEmpty(ctx);
 
     // Rebuild whenever the identity is updated
-    return ChangeNotifierProvider.value(
-      value: currentAccount.identity,
+    return StateNotifierListener(
+      values: [currentAccount.identity],
       child: Builder(builder: (ctx) {
         if (currentAccount.identity.hasError ||
             !currentAccount.identity.hasValue) return buildEmpty(ctx);

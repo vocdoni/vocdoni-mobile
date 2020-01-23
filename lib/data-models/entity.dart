@@ -167,8 +167,7 @@ class EntityModel implements StateRefreshable {
       StateNotifier<EntityMetadata>().withFreshness(60 * 5);
   final StateNotifier<List<ProcessModel>> processes =
       StateNotifier<List<ProcessModel>>().withFreshness(60);
-  final StateNotifier<FeedModel> feed =
-      StateNotifier<FeedModel>().withFreshness(60 * 2);
+  final StateNotifier<Feed> feed = StateNotifier<Feed>().withFreshness(60 * 2);
 
   final StateNotifier<List<EntityMetadata_Action>> visibleActions =
       StateNotifier();
@@ -178,7 +177,7 @@ class EntityModel implements StateRefreshable {
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
   EntityModel(this.reference,
-      [EntityMetadata entityMeta, List<ProcessModel> procs, FeedModel feed]) {
+      [EntityMetadata entityMeta, List<ProcessModel> procs, Feed feed]) {
     if (entityMeta is EntityMetadata) {
       entityMeta.meta[META_ENTITY_ID] =
           this.reference.entityId; // Ensure we can read it back later on
@@ -196,7 +195,7 @@ class EntityModel implements StateRefreshable {
     }
 
     if (procs is List) this.processes.load(procs);
-    if (feed is FeedModel) this.feed.load(feed);
+    if (feed is Feed) this.feed.load(feed);
   }
 
   /// Fetch any internal items that might have become outdated and notify
@@ -353,40 +352,45 @@ class EntityModel implements StateRefreshable {
   }
 
   Future<void> refreshFeed([bool force = false]) async {
-    if (!this.metadata.hasValue)
-      return;
-    else if (!force && this.feed.hasValue && this.feed.value.content.isFresh)
-      return;
+    if (!this.metadata.hasValue) return;
     // else if (!force && this.feed.isLoading) return;
 
     if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
         is String)) return;
 
-    devPrint("- Refreshing entity's feed [${this.reference.entityId}]");
-
-    final cUri = ContentURI(
-        this.metadata.value.newsFeed[globalAppState.currentLanguage]);
-
     try {
-      // Recycle the existing instance
-      if (this.feed.hasValue && this.feed.value.contentUri == cUri.toString()) {
-        if (!this.feed.value.content.hasValue) await this.feed.value.refresh();
-        devPrint(
-            "- Refreshing entity's feed [DONE] [${this.reference.entityId}]");
+      final currentContentUri =
+          this.metadata.value.newsFeed[globalAppState.currentLanguage];
 
-        return; // nothing to do
+      if (this.feed.hasValue &&
+          this.feed.value.meta[META_FEED_CONTENT_URI] == currentContentUri) {
+        // URI not changed
+        if (!force && this.feed.isFresh) return;
       }
 
+      // TODO: Don't refetch if the CURI is an IPFS hash and it didn't change
+
+      this.feed.setToLoading();
+
+      devPrint("- Refreshing entity's feed [${this.reference.entityId}]");
+
       // Fetch from a new URI
-      final newFeedModel = FeedModel(cUri.toString(), this.reference.entityId);
-      this.feed.setValue(newFeedModel);
-      await newFeedModel.refresh();
+      final cUri = ContentURI(currentContentUri);
+      final dvoteGw = getDVoteGateway();
+
+      final result = await fetchFileString(cUri, dvoteGw);
+      final Feed feed = parseFeed(result);
+      feed.meta[META_FEED_CONTENT_URI] = currentContentUri;
+      feed.meta[META_ENTITY_ID] = this.reference.entityId;
+      feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
+
+      this.feed.setValue(feed);
 
       devPrint(
           "- Refreshing entity's feed [DONE] [${this.reference.entityId}]");
 
-      final idx = globalFeedPool.value
-          .indexWhere((feed) => feed.entityId == this.reference.entityId);
+      final idx = globalFeedPool.value.indexWhere(
+          (feed) => feed.meta[META_ENTITY_ID] == this.reference.entityId);
       if (idx < 0) {
         globalFeedPool.value.add(this.feed.value);
       } else {
@@ -547,9 +551,9 @@ class EntityModel implements StateRefreshable {
         .toList();
   }
 
-  static FeedModel getFeedForEntity(String entityId) {
+  static Feed getFeedForEntity(String entityId) {
     return globalFeedPool.value.firstWhere(
-        (feedModel) => feedModel.entityId == entityId,
+        (feed) => feed.meta[META_ENTITY_ID] == entityId,
         orElse: () => null);
   }
 }

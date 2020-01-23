@@ -32,7 +32,7 @@ final globalAppState = AppStateModel();
 final globalAccountPool = AccountPoolModel();
 final globalEntityPool = EntityPoolModel();
 final globalProcessPool = ProcessPoolModel();
-final globalFeedPool = FeedPoolModel();
+final globalFeedPool = FeedPool();
 
 final globalAnalytics = Analytics();
 

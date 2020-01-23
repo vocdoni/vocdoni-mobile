@@ -1,24 +1,19 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote/util/parsers.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
-import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
-/// FeedPoolModel tracks all the registered accounts and provides individual models that
-/// can be listened to as well.
+/// FeedPool tracks all the registered account's feeds and provides individual instances.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
 ///
-class FeedPoolModel extends StateNotifier<List<FeedModel>>
-    implements StatePersistable, StateRefreshable {
-  FeedPoolModel() {
-    this.load(List<FeedModel>());
+class FeedPool extends StateNotifier<List<Feed>> implements StatePersistable {
+  FeedPool() {
+    this.load(List<Feed>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -26,20 +21,18 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.load(List<FeedModel>());
+    if (!hasValue) this.load(List<Feed>());
 
     try {
       this.setToLoading();
-      final feedList = globalFeedPersistence.get();
-      final feedModelList = feedList
-          .where((feedMeta) =>
-              feedMeta.meta[META_ENTITY_ID] is String &&
-              feedMeta.meta[META_FEED_CONTENT_URI] is String)
-          .map((feedMeta) => FeedModel(feedMeta.meta[META_FEED_CONTENT_URI],
-              feedMeta.meta[META_ENTITY_ID], feedMeta))
-          .cast<FeedModel>()
+      final feedList = globalFeedPersistence
+          .get()
+          .where((feed) =>
+              feed.meta[META_ENTITY_ID] is String &&
+              feed.meta[META_FEED_CONTENT_URI] is String)
+          .cast<Feed>()
           .toList();
-      this.setValue(feedModelList);
+      this.setValue(feedList);
       // notifyListeners(); // Not needed => `setValue` already does it
     } catch (err) {
       devPrint(err);
@@ -51,18 +44,17 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.load(List<FeedModel>());
+    if (!hasValue) this.load(List<Feed>());
 
     try {
       final feedList = this
           .value
-          .where((feedModel) => feedModel.content.hasValue)
-          .map((feedModel) {
-            // COPY STATE FIELDS INTO META
-            final val = feedModel.content.value;
-            val.meta[META_ENTITY_ID] = feedModel.entityId ?? "";
-            val.meta[META_FEED_CONTENT_URI] = feedModel.contentUri ?? "";
-            return val;
+          .where((feed) {
+            if (!(feed is Feed))
+              return false;
+            else if (!(feed.meta[META_ENTITY_ID] is String) ||
+                !(feed.meta[META_FEED_CONTENT_URI] is String)) return false;
+            return true;
           })
           .cast<Feed>()
           .toList();
@@ -73,120 +65,39 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
     }
   }
 
-  @override
-  Future<void> refresh([bool force = false]) async {
-    if (!hasValue ||
-        globalAppState.currentAccount == null ||
-        !globalAppState.currentAccount.entities.hasValue) return;
-
-    devPrint("Refreshing current user's feeds");
-
-    try {
-      // Get a filtered list of the Entities of the current user
-      final entityIds = globalAppState.currentAccount.entities.value
-          .map((entity) => entity.reference.entityId)
-          .toList();
-
-      // This will call `setValue` on the individual models that are already within the pool.
-      // No need to update the pool list itself.
-      await Future.wait(this
-          .value
-          .where((feedModel) => entityIds.contains(feedModel.entityId))
-          .map((feedModel) => feedModel.refresh(force))
-          .toList());
-
-      await this.writeToStorage();
-    } catch (err) {
-      devPrint(err);
-    }
-  }
-
   // HELPERS
 
   /// Returns the news feed from a given entity. If no language is provided
   /// then the first matching feed by the entity Id is returned.
-  FeedModel getFromEntityId(String entityId, [String language]) {
-    return this.value.firstWhere((feedModel) {
-      if (!feedModel.content.hasValue) return false;
+  Feed getFromEntityId(String entityId, [String language]) {
+    if (!this.hasValue) return null;
 
-      bool isFromEntity =
-          feedModel.content.value.meta[META_ENTITY_ID] == entityId;
+    return this.value.firstWhere((feed) {
+      if (!(feed is Feed)) return false;
+
+      bool matching = feed.meta[META_ENTITY_ID] == entityId;
 
       if (language is String) {
-        bool isSameLanguage =
-            feedModel.content.value.meta[META_LANGUAGE] == language;
-        return isFromEntity && isSameLanguage;
-      } else {
-        return isFromEntity;
+        bool isSameLanguage = feed.meta[META_LANGUAGE] == language;
+        return matching && isSameLanguage;
       }
+      return matching;
     }, orElse: () => null);
   }
 
   /// Removes the given feed from the pool and persists the new pool.
-  Future<void> remove(FeedModel feedModel) async {
+  Future<void> remove(Feed feed) async {
     if (!this.hasValue) throw Exception("The pool has no value yet");
 
-    final updatedValue = this
+    final updatedList = this
         .value
-        .where(
-            (existingFeed) => existingFeed.contentUri != feedModel.contentUri)
-        .cast<FeedModel>()
+        .where((existingFeed) =>
+            existingFeed.meta[META_FEED_CONTENT_URI] !=
+            feed.meta[META_FEED_CONTENT_URI])
+        .cast<Feed>()
         .toList();
-    this.setValue(updatedValue);
+    this.setValue(updatedList);
 
     await this.writeToStorage();
-  }
-}
-
-/// FeedModel encapsulates the relevant information of a Vocdoni Feed.
-/// This includes its metadata and the participation processes.
-///
-/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
-///
-class FeedModel implements StateRefreshable {
-  final String contentUri;
-  final String entityId;
-  final String lang = "default";
-  final StateNotifier<Feed> content = StateNotifier<Feed>();
-
-  FeedModel(this.contentUri, this.entityId, [Feed feed]) {
-    if (feed is Feed) this.content.load(feed);
-  }
-
-  static FeedModel fromFeed(Feed feed) {
-    if (!(feed is Feed)) return null;
-    return FeedModel(
-        feed.meta[META_FEED_CONTENT_URI], feed.meta[META_ENTITY_ID], feed);
-  }
-
-  @override
-  Future<void> refresh([bool force = false]) async {
-    if (!force && this.content.isFresh)
-      return;
-    else if (!force && this.content.isLoading) return;
-
-    devPrint("Refreshing feed [$contentUri]");
-
-    // TODO: Don't refetch if the IPFS hash is the same
-
-    try {
-      final dvoteGw = getDVoteGateway();
-      final ContentURI cUri = ContentURI(contentUri);
-
-      final result = await fetchFileString(cUri, dvoteGw);
-      final Feed feed = parseFeed(result);
-      feed.meta[META_FEED_CONTENT_URI] = contentUri;
-      feed.meta[META_ENTITY_ID] = entityId;
-      feed.meta[META_LANGUAGE] = lang;
-
-      devPrint("- Refreshing feed [DONE] [$contentUri]");
-
-      this.content.setValue(feed);
-    } catch (err) {
-      devPrint("- Refreshing feed [ERROR: $err] [$contentUri]");
-
-      this.content.setError("Unable to fetch the news feed");
-    }
   }
 }

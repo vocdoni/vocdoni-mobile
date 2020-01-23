@@ -20,7 +20,7 @@ class CardPost extends StatelessWidget {
   Widget build(BuildContext context) {
     // Consume individual items that may rebuild only themselves
     return StateNotifierListener(
-      values: [entity.metadata, entity.feed.value.content],
+      values: [entity.metadata, entity.feed],
       child: BaseCard(
           onTap: () => onPostCardTap(context, post, entity, index),
           image: post.image,

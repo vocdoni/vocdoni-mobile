@@ -1,9 +1,8 @@
-import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/card-loading.dart';
@@ -32,18 +31,20 @@ class _EntitiesTabState extends State<EntitiesTab> {
         currentAccount.entities.value.length == 0) return buildNoEntities(ctx);
 
     // Rebuild if the pool changes (not the items)
-    return Consumer<EntityPoolModel>(
-      builder: (ctx, entityPool, _) => ListView.builder(
-          itemCount: currentAccount.entities.value.length,
-          itemBuilder: (BuildContext ctxt, int index) {
-            final entity = currentAccount.entities.value[index];
+    return StateNotifierListener(
+        values: [currentAccount.entities, currentAccount.identity],
+        child: Builder(
+          builder: (context) => ListView.builder(
+              itemCount: currentAccount.entities.value.length,
+              itemBuilder: (BuildContext ctxt, int index) {
+                final entity = currentAccount.entities.value[index];
 
-            if (entity.metadata.hasValue)
-              return buildCard(ctx, entity);
-            else if (entity.metadata.isLoading) return CardLoading();
-            return buildEmptyMetadataCard(ctx, entity);
-          }),
-    );
+                if (entity.metadata.hasValue)
+                  return buildCard(ctx, entity);
+                else if (entity.metadata.isLoading) return CardLoading();
+                return buildEmptyMetadataCard(ctx, entity);
+              }),
+        ));
   }
 
   Widget buildEmptyMetadataCard(BuildContext ctx, EntityModel entityModel) {
@@ -64,13 +65,11 @@ class _EntitiesTabState extends State<EntitiesTab> {
     ]);
   }
 
-  int getFeedPostCount(EntityModel ent) {
-    if (!ent.feed.hasValue)
+  int getFeedPostCount(EntityModel entity) {
+    if (!entity.feed.hasValue)
       return 0;
-    else if (!ent.feed.value.content.hasValue)
-      return 0;
-    else if (ent.feed.value.content.value.items is List)
-      return ent.feed.value.content.value.items.length;
+    else if (entity.feed.value.items is List)
+      return entity.feed.value.items.length;
     return 0;
   }
 
@@ -90,8 +89,8 @@ class _EntitiesTabState extends State<EntitiesTab> {
   Widget buildParticipationRow(BuildContext ctx, EntityModel entity) {
     // Consume intermediate values, not present from the root context and rebuild if
     // the entity's process list changes
-    return ChangeNotifierProvider.value(
-      value: entity.processes,
+    return StateNotifierListener(
+      values: [entity.processes],
       child: ListItem(
           mainText: "Participation",
           icon: FeatherIcons.mail,
@@ -108,8 +107,8 @@ class _EntitiesTabState extends State<EntitiesTab> {
   Widget buildFeedRow(BuildContext ctx, EntityModel entity) {
     // Consume intermediate values, not present from the root context and rebuild if
     // the entity's news feed changes
-    return ChangeNotifierProvider.value(
-      value: entity.feed,
+    return StateNotifierListener(
+      values: [entity.feed],
       child: Builder(builder: (ctx) {
         final feedPostAmount = getFeedPostCount(entity);
         return ListItem(

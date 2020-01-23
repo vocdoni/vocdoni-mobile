@@ -40,7 +40,7 @@ void main() async {
             create: (_) => globalEntityPool),
         ChangeNotifierProvider<ProcessPoolModel>(
             create: (_) => globalProcessPool),
-        ChangeNotifierProvider<FeedPoolModel>(create: (_) => globalFeedPool),
+        ChangeNotifierProvider<FeedPool>(create: (_) => globalFeedPool),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

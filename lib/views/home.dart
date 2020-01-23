@@ -2,14 +2,9 @@ import 'dart:async';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
-import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/feed.dart';
-import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/views/home-tab.dart';
@@ -180,27 +175,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     switch (selectedTab) {
       // VOTES FEED
       case 0:
-        body = Consumer<FeedPoolModel>(
-          builder: (BuildContext ctx, FeedPoolModel feeds, _) =>
-              Consumer<ProcessPoolModel>(
-            builder: (BuildContext ctx, ProcessPoolModel processes, _) =>
-                HomeTab(),
-          ),
-        );
+        body = HomeTab();
         break;
       // SUBSCRIBED ENTITIES
       case 1:
-        body = Consumer<EntityPoolModel>(
-          builder: (BuildContext ctx, EntityPoolModel processes, _) =>
-              EntitiesTab(),
-        );
+        body = EntitiesTab();
         break;
       // IDENTITY INFO
       case 2:
-        body = Consumer<AccountPoolModel>(
-          builder: (BuildContext ctx, AccountPoolModel accounts, _) =>
-              IdentityTab(),
-        );
+        body = IdentityTab();
         break;
       default:
         body = Container(

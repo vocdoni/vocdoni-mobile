@@ -12,7 +12,7 @@ import 'package:dvote/util/parsers.dart';
 
 Future populateSampleData() async {
   List<EntityModel> entityModels = new List<EntityModel>();
-  List<FeedModel> feeds = new List<FeedModel>();
+  List<Feed> feeds = new List<Feed>();
   List<ProcessModel> processess = new List<ProcessModel>();
 
   final entitySummaries = makeEntitySummaries();
@@ -68,13 +68,11 @@ EntityMetadata makeEntityMetadata(EntityReference entitySummary) {
   return entityMetadata;
 }
 
-List<FeedModel> makeFeeds(EntityMetadata entityMetadata) {
+List<Feed> makeFeeds(EntityMetadata entityMetadata) {
   return entityMetadata.languages.map((lang) {
-    final f = parseFeed(getFeedString(entityMetadata));
-    f.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];
-    f.meta[META_LANGUAGE] = lang;
-
-    final result = FeedModel("", entityMetadata.meta[META_ENTITY_ID], f);
+    final result = parseFeed(getFeedString(entityMetadata));
+    result.meta[META_ENTITY_ID] = entityMetadata.meta[META_ENTITY_ID];
+    result.meta[META_LANGUAGE] = lang;
     return result;
   }).toList();
 }
