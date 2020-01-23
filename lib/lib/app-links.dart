@@ -1,6 +1,5 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/sign-modal.dart';

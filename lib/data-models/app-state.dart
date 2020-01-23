@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
@@ -7,6 +6,7 @@ import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/constants/settings.dart';
+import 'package:vocdoni/lib/util.dart';
 
 /// AppStateModel handles the global state of the application.
 ///
@@ -53,7 +53,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
       final gwList = globalBootnodesPersistence.get();
       this.bootnodes.load(gwList);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this
           .bootnodes
           .setError("Cannot read the boot nodes list", keepPreviousValue: true);
@@ -72,7 +72,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
         await globalBootnodesPersistence
             .write(BootNodeGateways()); // empty data
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -89,7 +89,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
 
       await this.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print("ERR: $err");
+      devPrint("ERR: $err");
       throw err;
     }
   }
@@ -133,7 +133,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     } catch (err) {
       this.referenceBlock.setError("Network error");
       this.referenceBlockTimestamp.setError("Network error");
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw err;
     }
   }

@@ -1,5 +1,4 @@
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';

@@ -1,5 +1,4 @@
 import 'package:dvote/dvote.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -7,6 +6,7 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
 import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/util.dart';
 
 /// This class should be used exclusively as a global singleton via MultiProvider.
 /// ProcessPoolModel tracks all the registered accounts and provides individual models that
@@ -43,7 +43,7 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
           .toList();
       this.setValue(processModelList);
     } catch (err) {
-      print(err);
+      devPrint(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -84,7 +84,7 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
           .toList();
       await globalProcessesPersistence.writeAll(processList);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -111,7 +111,7 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
 
       await this.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw err;
     }
   }
@@ -230,8 +230,7 @@ class ProcessModel implements StateRefreshable {
   }
 
   Future<void> refreshMetadata([bool force = false]) async {
-    if (!force && this.metadata.isFresh)
-      return;
+    if (!force && this.metadata.isFresh) return;
     // else if (!force && this.metadata.isLoading) return;
 
     // TODO: Don't refetch if the IPFS hash is the same

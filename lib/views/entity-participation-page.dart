@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +28,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
             entityId: entityModel.reference.entityId);
       }
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
     }
   }
 

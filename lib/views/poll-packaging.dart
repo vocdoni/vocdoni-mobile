@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -74,7 +74,7 @@ class _PollPackagingState extends State<PollPackaging> {
       if (!mounted) return;
     } catch (err) {
       // continue below
-      if (!kReleaseMode) print(err);
+      devPrint(err);
     }
 
     if (!(merkleProof is String)) {

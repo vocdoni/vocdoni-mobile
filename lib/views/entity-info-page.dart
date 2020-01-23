@@ -1,5 +1,5 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +38,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     // detached async
     widget.entityModel.refresh().catchError((err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
     });
   }
 
@@ -443,7 +443,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         .then((_) => showMessage("Identity ID copied on the clipboard",
             context: context, purpose: Purpose.GOOD))
         .catchError((err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
 
       showMessage("Could not copy the Entity ID",
           context: context, purpose: Purpose.DANGER);
@@ -492,8 +492,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
-    } catch (err) {
-      if (err == "Already subscribed") {
+    } on Exception catch (err) {
+      if (err.toString() == "Exception: Already subscribed") {
         showMessage(
             Lang.of(ctx).get(
               "You are already subscribed to this entity",

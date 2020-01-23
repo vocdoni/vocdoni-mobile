@@ -105,15 +105,14 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       });
 
       showHomePage(context);
-    } catch (err) {
+    } on Exception catch (err) {
       String text;
       setState(() {
         generating = false;
       });
 
-      if (err is Exception &&
-          err.toString() ==
-              "Exception: An account with this name already exists") {
+      if (err.toString() ==
+          "Exception: An account with this name already exists") {
         text = Lang.of(context).get("An account with this name already exists");
       } else {
         text = Lang.of(context)

@@ -11,7 +11,7 @@ ensureConnectedGateways() {
   if (connecting) return;
 
   final gwInfo = _selectRandomGatewayInfo();
-  if (gwInfo == null) throw "There is no gateway available";
+  if (gwInfo == null) throw Exception("There is no gateway available");
 
   connecting = true;
   if (_dvoteGw is DVoteGateway) {

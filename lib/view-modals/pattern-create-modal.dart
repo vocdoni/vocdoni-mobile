@@ -187,7 +187,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onConfirmingPatternStop(BuildContext context, List<int> pattern) {
-    // debugPrint(pattern.toString() + "==" + setPattern.toString());
+    // devPrint(pattern.toString() + "==" + setPattern.toString());
 
     if (!listEquals(setPattern, pattern)) {
       setState(() {

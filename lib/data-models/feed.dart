@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/parsers.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
@@ -42,7 +42,7 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
       this.setValue(feedModelList);
       // notifyListeners(); // Not needed => `setValue` already does it
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -68,7 +68,7 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
           .toList();
       await globalFeedPersistence.writeAll(feedList);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -95,7 +95,7 @@ class FeedPoolModel extends StateNotifier<List<FeedModel>>
 
       await this.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw err;
     }
   }
@@ -178,7 +178,7 @@ class FeedModel implements StateRefreshable {
 
       this.feed.setValue(feed);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.feed.setError("Unable to fetch the news feed");
     }
   }

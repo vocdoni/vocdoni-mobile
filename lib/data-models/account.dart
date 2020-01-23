@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/state-base.dart';
@@ -67,7 +67,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
           .toList();
       this.setValue(accountModelList);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -114,7 +114,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
       // Cascade the write request for the peer entities
       await globalEntityPool.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -137,8 +137,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
             newAccount.identity.value.keys[0].publicKey);
 
     if (duplicate) {
-      if (!kReleaseMode)
-        print("WARNING: Attempting to add a duplicate identity. Skipping.");
+      devPrint("WARNING: Attempting to add a duplicate identity. Skipping.");
       return;
     }
 

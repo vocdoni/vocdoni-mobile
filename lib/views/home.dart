@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    print(err);
+    devPrint(err);
     showAlert(
         title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
         text: Lang.of(homePageScaffoldKey.currentContext)
@@ -108,17 +108,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        if (!kReleaseMode) print("Inactive");
+        devPrint("Inactive");
         break;
       case AppLifecycleState.paused:
-        if (!kReleaseMode) print("Paused");
+        devPrint("Paused");
         break;
       case AppLifecycleState.resumed:
-        if (!kReleaseMode) print("Resumed");
+        devPrint("Resumed");
         ensureConnectedGateways();
         break;
       case AppLifecycleState.suspending:
-        if (!kReleaseMode) print("Suspending");
+        devPrint("Suspending");
         break;
     }
   }

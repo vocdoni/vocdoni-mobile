@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:dvote/util/parsers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:dvote/dvote.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/process.dart';
@@ -60,7 +61,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
           .toList();
       this.setValue(entityModelList);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -91,7 +92,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
       await globalProcessPool.writeToStorage();
       await globalFeedPool.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -119,7 +120,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
 
       await this.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw err;
     }
   }
@@ -237,7 +238,7 @@ class EntityModel implements StateRefreshable {
         this.metadata.setValue(freshEntityMetadata);
       }
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.metadata.setError("The entity's data cannot be fetched",
           keepPreviousValue: true);
       throw err;
@@ -255,20 +256,9 @@ class EntityModel implements StateRefreshable {
     try {
       // Process ID's changed?
       if (oldEntityModel.hasValue &&
-          oldEntityModel.value.votingProcesses.active.length !=
-              freshEntityMetadata.votingProcesses.active.length)
+          !listEquals(oldEntityModel.value.votingProcesses.active,
+              freshEntityMetadata.votingProcesses.active)) {
         needsProcessListReload = true;
-      else {
-        // deep equal?
-        for (int i = 0;
-            i < freshEntityMetadata.votingProcesses.active.length;
-            i++) {
-          if (freshEntityMetadata.votingProcesses.active[i] !=
-              oldEntityModel.value.votingProcesses.active[i]) {
-            needsProcessListReload = true;
-            break;
-          }
-        }
       }
 
       // URI changed?
@@ -290,7 +280,7 @@ class EntityModel implements StateRefreshable {
         refreshVisibleActions(force)
       ]);
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       throw err;
     }
   }
@@ -338,7 +328,7 @@ class EntityModel implements StateRefreshable {
       globalProcessPool.setValue(newGlobalProcessPoolList);
       await globalProcessPool.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this.processes.setError("Could not update the process list",
           keepPreviousValue: true);
       throw err;
@@ -348,8 +338,7 @@ class EntityModel implements StateRefreshable {
   Future<void> refreshFeed([bool force = false]) async {
     if (!this.metadata.hasValue)
       return;
-    else if (!force && this.feed.isFresh)
-      return;
+    else if (!force && this.feed.isFresh) return;
     // else if (!force && this.feed.isLoading) return;
 
     this.feed.setToLoading();
@@ -383,7 +372,7 @@ class EntityModel implements StateRefreshable {
 
       await globalFeedPool.writeToStorage();
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
       this
           .feed
           .setError("Could not fetch the News Feed", keepPreviousValue: true);

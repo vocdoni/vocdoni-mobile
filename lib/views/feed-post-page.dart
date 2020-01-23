@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -42,7 +42,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
             postTitle: args.post.title);
       }
     } catch (err) {
-      if (!kReleaseMode) print(err);
+      devPrint(err);
     }
   }
 
@@ -63,8 +63,8 @@ class _FeedPostPageState extends State<FeedPostPage> {
         builder: Builder(
           builder: (ctx) {
             return SliverList(
-              delegate:
-                  SliverChildListDelegate(getScaffoldChildren(ctx, entity, post)),
+              delegate: SliverChildListDelegate(
+                  getScaffoldChildren(ctx, entity, post)),
             );
           },
         ));
@@ -130,7 +130,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      throw Exception('Could not launch $url');
     }
   }
 
