@@ -232,7 +232,7 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshMetadata([bool force = false]) async {
     if (!force && this.metadata.isFresh)
       return;
-    else if (!force && this.metadata.isLoading) return;
+    // else if (!force && this.metadata.isLoading) return;
 
     // TODO: Don't refetch if the IPFS hash is the same
 

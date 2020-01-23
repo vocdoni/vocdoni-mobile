@@ -350,7 +350,7 @@ class EntityModel implements StateRefreshable {
       return;
     else if (!force && this.feed.isFresh)
       return;
-    else if (!force && this.feed.isLoading) return;
+    // else if (!force && this.feed.isLoading) return;
 
     this.feed.setToLoading();
 

@@ -1,11 +1,11 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import "package:vocdoni/constants/meta-keys.dart";
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
@@ -24,12 +24,10 @@ class CardPoll extends StatelessWidget {
   @override
   Widget build(context) {
     // Consume individual items that may rebuild only themselves
-    return ChangeNotifierProvider.value(
-        value: entity.metadata,
-        child: ChangeNotifierProvider.value(
-          value: process.metadata,
-          child: this.buildCard(context),
-        ));
+    return StateNotifierListener(
+      values: [entity.metadata, process.metadata],
+      child: this.buildCard(context),
+    );
   }
 
   Widget buildCard(BuildContext context) {

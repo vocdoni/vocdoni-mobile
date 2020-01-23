@@ -1,8 +1,8 @@
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -19,29 +19,26 @@ class CardPost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Consume individual items that may rebuild only themselves
-    return ChangeNotifierProvider.value(
-      value: entity.metadata,
-      child: ChangeNotifierProvider.value(
-        value: entity.feed.value.feed,
-        child: BaseCard(
-            onTap: () => onPostCardTap(context, post, entity, index),
-            image: post.image,
-            imageTag: makeElementTag(entity.reference.entityId, post.id, index),
-            children: <Widget>[
-              ListItem(
-                mainText: post.title,
-                mainTextFullWidth: true,
-                secondaryText: entity
-                    .metadata.value.name[entity.metadata.value.languages[0]],
-                avatarUrl: entity.metadata.value.media.avatar,
-                avatarText: entity
-                    .metadata.value.name[entity.metadata.value.languages[0]],
-                avatarHexSource: entity.reference.entityId,
-                rightText: DateFormat('MMMM dd')
-                    .format(DateTime.parse(post.datePublished).toLocal()),
-              )
-            ]),
-      ),
+    return StateNotifierListener(
+      values: [entity.metadata, entity.feed.value.feed],
+      child: BaseCard(
+          onTap: () => onPostCardTap(context, post, entity, index),
+          image: post.image,
+          imageTag: makeElementTag(entity.reference.entityId, post.id, index),
+          children: <Widget>[
+            ListItem(
+              mainText: post.title,
+              mainTextFullWidth: true,
+              secondaryText: entity
+                  .metadata.value.name[entity.metadata.value.languages[0]],
+              avatarUrl: entity.metadata.value.media.avatar,
+              avatarText: entity
+                  .metadata.value.name[entity.metadata.value.languages[0]],
+              avatarHexSource: entity.reference.entityId,
+              rightText: DateFormat('MMMM dd')
+                  .format(DateTime.parse(post.datePublished).toLocal()),
+            )
+          ]),
     );
   }
 

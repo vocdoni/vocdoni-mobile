@@ -105,7 +105,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   onApprovePattern() {
     setState(() {
       patternStep = PatternStep.PATTERN_CONFIRMING;
-      debugPrint("confirmed");
     });
   }
 
@@ -141,7 +140,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onSettingPatternStop(BuildContext context, List<int> pattern) {
-    debugPrint(pattern.length.toString());
     if (pattern.length < minPatternDots) {
       showMessage("The pattern must have at least $minPatternDots points",
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
@@ -156,7 +154,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
-    debugPrint(pattern.toString());
 
     setState(() {
       patternColor = colorGreen;
@@ -190,7 +187,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onConfirmingPatternStop(BuildContext context, List<int> pattern) {
-    debugPrint(pattern.toString() + "==" + setPattern.toString());
+    // debugPrint(pattern.toString() + "==" + setPattern.toString());
 
     if (!listEquals(setPattern, pattern)) {
       setState(() {

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
@@ -78,52 +79,50 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildLoadingStatus() {
-    return ChangeNotifierProvider.value(
-      value: widget.entityModel.metadata,
-      child: ChangeNotifierProvider.value(
-        value: widget.entityModel.processes,
-        child: ChangeNotifierProvider.value(
-          value: widget.entityModel.feed,
-          child: Builder(builder: (context) {
-            if (widget.entityModel.metadata.isLoading)
-              return ListItem(
-                mainText: "Fetching details...",
-                rightIcon: null,
-                isSpinning: true,
-              );
-            else if (widget.entityModel.processes.isLoading)
-              return ListItem(
-                mainText: "Fetching participation...",
-                rightIcon: null,
-                isSpinning: true,
-              );
-            else if (widget.entityModel.feed.isLoading)
-              return ListItem(
-                mainText: "Fetching news...",
-                rightIcon: null,
-                isSpinning: true,
-              );
-            else if (widget.entityModel.metadata.hasError)
-              return ListItem(
-                mainText: widget.entityModel.metadata.errorMessage,
-                purpose: Purpose.DANGER,
-                rightTextPurpose: Purpose.DANGER,
-                onTap: refresh,
-                rightIcon: FeatherIcons.refreshCw,
-              );
-            else if (widget.entityModel.feed.hasError)
-              return ListItem(
-                mainText: widget.entityModel.feed.errorMessage,
-                purpose: Purpose.DANGER,
-                rightTextPurpose: Purpose.DANGER,
-                onTap: refresh,
-                rightIcon: FeatherIcons.refreshCw,
-              );
-            else
-              return Container();
-          }),
-        ),
-      ),
+    return StateNotifierListener(
+      values: [
+        widget.entityModel.metadata,
+        widget.entityModel.processes,
+        widget.entityModel.feed
+      ],
+      child: Builder(builder: (context) {
+        if (widget.entityModel.metadata.isLoading)
+          return ListItem(
+            mainText: "Fetching details...",
+            rightIcon: null,
+            isSpinning: true,
+          );
+        else if (widget.entityModel.processes.isLoading)
+          return ListItem(
+            mainText: "Fetching participation...",
+            rightIcon: null,
+            isSpinning: true,
+          );
+        else if (widget.entityModel.feed.isLoading)
+          return ListItem(
+            mainText: "Fetching news...",
+            rightIcon: null,
+            isSpinning: true,
+          );
+        else if (widget.entityModel.metadata.hasError)
+          return ListItem(
+            mainText: widget.entityModel.metadata.errorMessage,
+            purpose: Purpose.DANGER,
+            rightTextPurpose: Purpose.DANGER,
+            onTap: refresh,
+            rightIcon: FeatherIcons.refreshCw,
+          );
+        else if (widget.entityModel.feed.hasError)
+          return ListItem(
+            mainText: widget.entityModel.feed.errorMessage,
+            purpose: Purpose.DANGER,
+            rightTextPurpose: Purpose.DANGER,
+            onTap: refresh,
+            rightIcon: FeatherIcons.refreshCw,
+          );
+        else
+          return Container();
+      }),
     );
   }
 
@@ -378,7 +377,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               purpose: Purpose.DANGER,
               rightTextPurpose: Purpose.DANGER,
             );
-          } else if (widget.entityModel.visibleActions.hasValue &&
+          } else if (!widget.entityModel.visibleActions.hasValue ||
               widget.entityModel.visibleActions.value.length == 0) {
             return ListItem(
               mainText: "No actions defined",

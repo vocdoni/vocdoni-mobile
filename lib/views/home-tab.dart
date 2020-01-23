@@ -5,6 +5,7 @@ import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 
@@ -35,26 +36,24 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(ctx) {
-    return ChangeNotifierProvider.value(
-      value: globalAppState.currentAccount.entities,
-      child: ChangeNotifierProvider.value(
-        value: globalProcessPool,
-        child: ChangeNotifierProvider.value(
-          value: globalFeedPool,
-          child: Builder(
-            builder: (BuildContext context) => Consumer<FeedPoolModel>(
-                builder: (BuildContext context, feedModels, _) {
-              // Rebuild on pool data updates
-              final items = _digestCardList();
-              if (items.length == 0) return buildNoEntries(ctx);
+    return StateNotifierListener(
+      values: [
+        globalAppState.currentAccount.entities,
+        globalProcessPool,
+        globalFeedPool
+      ],
+      child: Builder(
+        builder: (BuildContext context) => Consumer<FeedPoolModel>(
+            builder: (BuildContext context, feedModels, _) {
+          // Rebuild on pool data updates
+          final items = _digestCardList();
+          if (items.length == 0) return buildNoEntries(ctx);
 
-              return ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (BuildContext ctx, int index) =>
-                      items[index] ?? Container());
-            }),
-          ),
-        ),
+          return ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (BuildContext ctx, int index) =>
+                  items[index] ?? Container());
+        }),
       ),
     );
   }

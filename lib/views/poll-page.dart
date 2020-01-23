@@ -7,6 +7,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -266,37 +267,34 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitVoteButton(BuildContext ctx) {
     // rebuild when isInCensus or hasVoted change
-    return ChangeNotifierProvider.value(
-      value: process.hasVoted,
-      child: ChangeNotifierProvider.value(
-        value: process.isInCensus,
-        child: Builder(builder: (ctx) {
-          if (process.isInCensus.hasError) {
-            return Padding(
-                padding: EdgeInsets.all(paddingPage),
-                child: BaseButton(
-                    text: process.isInCensus.errorMessage,
-                    purpose: Purpose.DANGER,
-                    isDisabled: true));
-          } else if (process.hasVoted.hasValue && process.hasVoted.value) {
-            return Container();
-          }
-
-          final nextPendingChoice = getNextPendingChoice();
-          final cannotVote = nextPendingChoice >= 0 ||
-              !process.isInCensus.hasValue ||
-              !process.isInCensus.value;
-
+    return StateNotifierListener(
+      values: [process.hasVoted, process.isInCensus],
+      child: Builder(builder: (ctx) {
+        if (process.isInCensus.hasError) {
           return Padding(
-            padding: EdgeInsets.all(paddingPage),
-            child: BaseButton(
-                text: "Submit",
-                purpose: Purpose.HIGHLIGHT,
-                isDisabled: cannotVote,
-                onTap: () => onSubmit(ctx, process.metadata)),
-          );
-        }),
-      ),
+              padding: EdgeInsets.all(paddingPage),
+              child: BaseButton(
+                  text: process.isInCensus.errorMessage,
+                  purpose: Purpose.DANGER,
+                  isDisabled: true));
+        } else if (process.hasVoted.hasValue && process.hasVoted.value) {
+          return Container();
+        }
+
+        final nextPendingChoice = getNextPendingChoice();
+        final cannotVote = nextPendingChoice >= 0 ||
+            !process.isInCensus.hasValue ||
+            !process.isInCensus.value;
+
+        return Padding(
+          padding: EdgeInsets.all(paddingPage),
+          child: BaseButton(
+              text: "Submit",
+              purpose: Purpose.HIGHLIGHT,
+              isDisabled: cannotVote,
+              onTap: () => onSubmit(ctx, process.metadata)),
+        );
+      }),
     );
   }
 
@@ -312,72 +310,70 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitInfo() {
     // rebuild when isInCensus or hasVoted change
-    return ChangeNotifierProvider.value(
-        value: process.hasVoted,
-        child: ChangeNotifierProvider.value(
-            value: process.isInCensus,
-            child: Builder(builder: (ctx) {
-              final nextPendingChoice = getNextPendingChoice();
+    return StateNotifierListener(
+      values: [process.hasVoted, process.isInCensus],
+      child: Builder(builder: (ctx) {
+        final nextPendingChoice = getNextPendingChoice();
 
-              if (process.hasVoted.hasValue && process.hasVoted.value) {
-                return ListItem(
-                  mainText: 'Your vote is already registered',
-                  purpose: Purpose.GOOD,
-                  rightIcon: null,
-                );
-              } else if (process.isInCensus.hasValue) {
-                if (process.isInCensus.hasValue && process.isInCensus.value) {
-                  if (nextPendingChoice < 0)
-                    return Container(); // all good to go
+        if (process.hasVoted.hasValue && process.hasVoted.value) {
+          return ListItem(
+            mainText: 'Your vote is already registered',
+            purpose: Purpose.GOOD,
+            rightIcon: null,
+          );
+        } else if (process.isInCensus.hasValue) {
+          if (process.isInCensus.hasValue && process.isInCensus.value) {
+            if (nextPendingChoice < 0) return Container(); // all good to go
 
-                  return ListItem(
-                    mainText:
-                        'Select your choice for question #${nextPendingChoice + 1}',
-                    purpose: Purpose.WARNING,
-                    rightIcon: null,
-                  );
-                }
+            return ListItem(
+              mainText:
+                  'Select your choice for question #${nextPendingChoice + 1}',
+              purpose: Purpose.WARNING,
+              rightIcon: null,
+            );
+          }
 
-                return ListItem(
-                  mainText: "You are not in the census",
-                  secondaryText:
-                      "Register to this organization to participate in the future",
-                  secondaryTextMultiline: 5,
-                  purpose: Purpose.HIGHLIGHT,
-                  rightIcon: null,
-                );
-              } else if (process.isInCensus.hasError) {
-                return ListItem(
-                  mainText: "Your identity cannot be checked within the census",
-                  mainTextMultiline: 3,
-                  secondaryText: process.isInCensus.errorMessage,
-                  purpose: Purpose.WARNING,
-                  rightIcon: null,
-                );
-              } else if (process.hasVoted.hasError) {
-                return ListItem(
-                  mainText: "Your vote status cannot be checked",
-                  mainTextMultiline: 3,
-                  secondaryText: process.hasVoted.errorMessage,
-                  purpose: Purpose.WARNING,
-                  rightIcon: null,
-                );
-              } else if (process.isInCensus.isLoading) {
-                return ListItem(
-                  mainText: "Checking the census",
-                  purpose: Purpose.GUIDE,
-                  rightIcon: null,
-                );
-              } else if (process.hasVoted.isLoading) {
-                return ListItem(
-                  mainText: "Checking your vote",
-                  purpose: Purpose.GUIDE,
-                  rightIcon: null,
-                );
-              } else {
-                return Container(); // unknown error
-              }
-            })));
+          return ListItem(
+            mainText: "You are not in the census",
+            secondaryText:
+                "Register to this organization to participate in the future",
+            secondaryTextMultiline: 5,
+            purpose: Purpose.HIGHLIGHT,
+            rightIcon: null,
+          );
+        } else if (process.isInCensus.hasError) {
+          return ListItem(
+            mainText: "Your identity cannot be checked within the census",
+            mainTextMultiline: 3,
+            secondaryText: process.isInCensus.errorMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.hasVoted.hasError) {
+          return ListItem(
+            mainText: "Your vote status cannot be checked",
+            mainTextMultiline: 3,
+            secondaryText: process.hasVoted.errorMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.isInCensus.isLoading) {
+          return ListItem(
+            mainText: "Checking the census",
+            purpose: Purpose.GUIDE,
+            rightIcon: null,
+          );
+        } else if (process.hasVoted.isLoading) {
+          return ListItem(
+            mainText: "Checking your vote",
+            purpose: Purpose.GUIDE,
+            rightIcon: null,
+          );
+        } else {
+          return Container(); // unknown error
+        }
+      }),
+    );
   }
 
   buildShareButton(BuildContext context, EntityModel ent) {

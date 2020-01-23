@@ -238,6 +238,7 @@ final myBool = StateNotifier<int>();
 myBool.setToLoading();  // calls notifyListeners()
 myBool.setError("Network error");  // calls notifyListeners()
 myBool.setValue(true);  // calls notifyListeners()
+myBool.notify();  // forces a call to notifyListeners() with the current value
 ```
 
 #### Model classes
