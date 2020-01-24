@@ -281,6 +281,7 @@ class AccountModel implements StateRefreshable {
     if (!this.identity.hasValue || !this.entities.hasValue)
       throw Exception("The current identity is not properly initialized");
 
+    // Update identity subscriptions
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(this.identity.value.peers.entities);
     peers.entities.removeWhere((existingEntity) =>
@@ -290,6 +291,15 @@ class AccountModel implements StateRefreshable {
     final updatedIdentity = this.identity.value;
     updatedIdentity.peers = peers;
     this.identity.setValue(updatedIdentity);
+
+    // Update in-memory models
+    final newEntityList = this
+        .entities
+        .value
+        .where((item) => item.reference.entityId != entityReference.entityId)
+        .cast<EntityModel>()
+        .toList();
+    this.entities.setValue(newEntityList);
 
     // Check if other identities are also subscribed
     bool subscribedFromOtherAccounts = false;

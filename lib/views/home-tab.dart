@@ -36,13 +36,16 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(ctx) {
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) return buildNoEntries(ctx);
+
     return StateNotifierListener(
-      values: [
-        globalAppState.currentAccount.entities,
-        globalProcessPool,
-        globalFeedPool
-      ],
+      values: [currentAccount.entities, globalProcessPool, globalFeedPool],
       child: Builder(builder: (BuildContext context) {
+        if (!currentAccount.entities.hasValue ||
+            currentAccount.entities.value.length == 0)
+          return buildNoEntries(ctx);
+
         final items = _digestCardList();
         if (items.length == 0) return buildNoEntries(ctx);
 

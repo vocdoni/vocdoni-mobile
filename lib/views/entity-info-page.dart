@@ -109,7 +109,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             mainText: widget.entityModel.metadata.errorMessage,
             purpose: Purpose.DANGER,
             rightTextPurpose: Purpose.DANGER,
-            onTap: refresh,
+            onTap: () => widget.entityModel
+                .refreshMetadata(force: true, skipChildren: true),
             rightIcon: FeatherIcons.refreshCw,
           );
         else if (widget.entityModel.feed.hasError)
@@ -117,7 +118,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             mainText: widget.entityModel.feed.errorMessage,
             purpose: Purpose.DANGER,
             rightTextPurpose: Purpose.DANGER,
-            onTap: refresh,
+            onTap: () => widget.entityModel.refreshFeed(),
             rightIcon: FeatherIcons.refreshCw,
           );
         else
@@ -475,9 +476,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   subscribeToEntity(BuildContext ctx) async {
-    setState(() {
-      _processingSubscription = true;
-    });
+    setState(() => _processingSubscription = true);
 
     try {
       final currentAccount = globalAppState.currentAccount;
@@ -485,10 +484,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         throw Exception("Internal error: null account");
 
       await currentAccount.subscribe(widget.entityModel);
+      setState(() => _processingSubscription = false);
 
       showMessage(Lang.of(ctx).get("Organization successfully added"),
           context: ctx, purpose: Purpose.GOOD);
     } on Exception catch (err) {
+      if (!mounted) return;
+      setState(() => _processingSubscription = false);
+
       if (err.toString() == "Exception: Already subscribed") {
         showMessage(
             Lang.of(ctx).get(
@@ -503,62 +506,31 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             purpose: Purpose.DANGER);
       }
     }
-    if (!mounted) return;
-    setState(() {
-      _processingSubscription = false;
-    });
   }
 
   unsubscribeFromEntity(BuildContext ctx) async {
-    setState(() {
-      _processingSubscription = true;
-    });
+    setState(() => _processingSubscription = true);
     try {
       final currentAccount = globalAppState.currentAccount;
       if (currentAccount == null)
         throw Exception("Internal error: null account");
 
       await currentAccount.unsubscribe(widget.entityModel.reference);
+
+      if (!mounted) return;
+      setState(() => _processingSubscription = false);
+
       showMessage(
           Lang.of(ctx)
               .get("You will no longer see this organization in your feed"),
           context: ctx,
           purpose: Purpose.NONE);
-      if (!mounted) return;
-      setState(() {
-        _processingSubscription = false;
-      });
     } catch (err) {
+      if (!mounted) return;
+      setState(() => _processingSubscription = false);
       showMessage(Lang.of(ctx).get("The subscription could not be canceled"),
           context: ctx, purpose: Purpose.DANGER);
     }
-  }
-
-  refresh() async {
-    await widget.entityModel.refresh();
-
-/*
-    String errorMessage = "";
-    bool fail = false;
-
-    if (widget.entityModel.metadata == DataState.ERROR) {
-      errorMessage = "Unable to retrieve details";
-      fail = true;
-    } else if (widget.entityModel.processessMetadataUpdated == false) {
-      errorMessage = "Unable to retrieve processess";
-      fail = true;
-    } else if (widget.entityModel.feedUpdated == false) {
-      errorMessage = "Unable to retrieve news feed";
-      fail = true;
-    }
-
-    if (!mounted) return;
-    setState(() {
-      entityModel = entityModel;
-      _status = fail ? "fail" : "ok";
-      _errorMessage = errorMessage;
-    });
-*/
   }
 
   goBack(BuildContext ctx) {

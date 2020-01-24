@@ -77,19 +77,21 @@ class _StartupPageState extends State<StartupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Builder(builder: (BuildContext context) {
-      return Center(
-        child: Align(
-          alignment: Alignment(0, -0.3),
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-            color: Color(0x00ff0000),
-            child: loading
-                ? Text("Please, wait...", style: TextStyle(fontSize: 18))
-                : buildError(context),
+    return Scaffold(
+      body: Builder(builder: (BuildContext context) {
+        return Center(
+          child: Align(
+            alignment: Alignment(0, -0.3),
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+              color: Color(0x00ff0000),
+              child: loading
+                  ? Text("Please, wait...", style: TextStyle(fontSize: 18))
+                  : buildError(context),
+            ),
           ),
-        ),
-      );
-    }));
+        );
+      }),
+    );
   }
 }

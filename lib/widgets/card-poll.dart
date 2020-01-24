@@ -4,6 +4,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -19,7 +20,13 @@ class CardPoll extends StatelessWidget {
   final int index;
 
   CardPoll(
-      {@required this.process, @required this.entity, @required this.index});
+      {@required this.process, @required this.entity, @required this.index}) {
+    this
+        .process
+        .refreshCurrentParticipants()
+        .then((_) => this.process.refreshCensusSize())
+        .catchError((err) => devPrint(err));
+  }
 
   @override
   Widget build(context) {
@@ -38,9 +45,10 @@ class CardPoll extends StatelessWidget {
 
     String participation = "";
     if (this.process.censusSize.hasValue &&
-        this.process.currentParticipants.hasValue)
+        this.process.currentParticipants.hasValue) {
       participation =
           getFriendlyParticipation(this.process.currentParticipation);
+    }
 
     return BaseCard(
       onTap: () => this.onCardTapped(context),
@@ -70,14 +78,14 @@ class CardPoll extends StatelessWidget {
               item: DashboardText(
                   mainText: timeLeft, secondaryText: "", purpose: Purpose.GOOD),
             ),
-            DashboardItem(
-              label: "Vote now!",
-              item: Icon(
-                FeatherIcons.arrowRightCircle,
-                size: iconSizeMedium,
-                color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
-              ),
-            ),
+            // DashboardItem(
+            //   label: "Vote now!",
+            //   item: Icon(
+            //     FeatherIcons.arrowRightCircle,
+            //     size: iconSizeMedium,
+            //     color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
+            //   ),
+            // ),
           ],
         ),
         buildProcessTitle(),
@@ -100,17 +108,19 @@ class CardPoll extends StatelessWidget {
   }
 
   String getFriendlyParticipation(double participation) {
-    return participation.round().toString();
+    return participation.toStringAsPrecision(3);
   }
 
   String getFriendlyTimeLeft(DateTime date) {
-    final timeLeft = DateTime.now().difference(date);
+    if (!(date is DateTime)) return throw Exception("Invlaid date");
+
+    final timeLeft = date.difference(DateTime.now());
     if (timeLeft.inSeconds <= 0)
       return "-";
     else if (timeLeft.inDays >= 365)
       return "" + (timeLeft.inDays / 365).floor().toString() + "y";
     else if (timeLeft.inDays >= 30)
-      return "" + (timeLeft.inDays / 28).floor().toString() + "m";
+      return "" + (timeLeft.inDays / 28).floor().toString() + "mo";
     else if (timeLeft.inDays >= 1)
       return timeLeft.inDays.toString() + "d";
     else if (timeLeft.inHours >= 1)

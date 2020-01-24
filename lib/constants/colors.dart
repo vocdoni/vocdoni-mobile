@@ -54,7 +54,7 @@ const double iconSizeLarge = 48;
 const double iconSizeHuge = 128;
 
 const double fontSizeTitle = 24;
-const double fontSizeBase = 18;
+const double fontSizeBase = 16;
 const double fontSizeSecondary = 16;
 
 const FontWeight fontWeightLight = FontWeight.w300;

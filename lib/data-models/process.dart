@@ -167,8 +167,9 @@ class ProcessModel implements StateRefreshable {
   final StateNotifier<ProcessMetadata> metadata =
       StateNotifier<ProcessMetadata>();
   final StateNotifier<bool> isInCensus =
-      StateNotifier<bool>().withFreshness(30);
-  final StateNotifier<bool> hasVoted = StateNotifier<bool>().withFreshness(60);
+      StateNotifier<bool>().withFreshness(60 * 5);
+  final StateNotifier<bool> hasVoted =
+      StateNotifier<bool>().withFreshness(60 * 5);
   final StateNotifier<int> currentParticipants =
       StateNotifier<int>().withFreshness(60 * 5);
   final StateNotifier<int> censusSize =
@@ -409,22 +410,30 @@ class ProcessModel implements StateRefreshable {
       return 0.0;
     else if (this.censusSize.value <= 0) return 0.0;
 
-    return this.currentParticipants.value * 100 / this.censusSize.value;
+    return this.currentParticipants.value *
+        100.0 /
+        this.censusSize.value.toDouble();
   }
 
   DateTime get startDate {
-    if (!globalAppState.referenceBlock.hasValue) return null;
+    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
+      return null;
 
     final remainingDuration =
         globalAppState.getDurationUntilBlock(this.metadata.value.startBlock);
-    return DateTime.now().add(remainingDuration);
+    if (remainingDuration is Duration)
+      return DateTime.now().add(remainingDuration);
+    return null;
   }
 
   DateTime get endDate {
-    if (!globalAppState.referenceBlock.hasValue) return null;
+    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
+      return null;
 
     final remainingDuration = globalAppState.getDurationUntilBlock(
         this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
-    return DateTime.now().add(remainingDuration);
+    if (remainingDuration is Duration)
+      return DateTime.now().add(remainingDuration);
+    return null;
   }
 }

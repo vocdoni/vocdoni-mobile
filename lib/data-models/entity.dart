@@ -292,6 +292,8 @@ class EntityModel implements StateRefreshable {
 
       throw err;
     }
+
+    this.metadata.notify();
   }
 
   Future<void> refreshProcesses([bool force = false]) async {

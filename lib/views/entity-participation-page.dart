@@ -17,15 +17,15 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   EntityModel entityModel;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
     try {
-      entityModel = ModalRoute.of(context).settings.arguments;
-
       if (entityModel is EntityModel) {
         globalAnalytics.trackPage("EntityParticipationPage",
             entityId: entityModel.reference.entityId);
+      } else {
+        entityModel = ModalRoute.of(context).settings.arguments;
       }
     } catch (err) {
       devPrint(err);

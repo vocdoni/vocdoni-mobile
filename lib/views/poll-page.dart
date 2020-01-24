@@ -1,13 +1,13 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:vocdoni/lib/util.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
@@ -40,18 +40,21 @@ class _PollPageState extends State<PollPage> {
   List<String> choices = [];
 
   @override
-  void initState() async {
-    super.initState();
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+
     final PollPageArgs args = ModalRoute.of(context).settings.arguments;
     if (args == null) {
       Navigator.of(context).pop();
-      print("Invalid parameters");
+      devPrint("Invalid parameters");
       return;
     } else if (!args.process.metadata.hasValue) {
       Navigator.of(context).pop();
-      print("Empty process metadata");
+      devPrint("Empty process metadata");
       return;
-    }
+    } else if (entity == args.entity &&
+        process == args.process &&
+        index == args.index) return;
 
     entity = args.entity;
     process = args.process;
@@ -65,46 +68,57 @@ class _PollPageState extends State<PollPage> {
     globalAnalytics.trackPage("PollPage",
         entityId: entity.reference.entityId, processId: process.processId);
 
-    await process.refresh(); // Values will refresh if not fresh
+    await process
+        .refreshHasVoted()
+        .then((_) => process.refreshIsInCensus())
+        .then((_) => globalAppState.refreshBlockInfo())
+        .catchError((err) => devPrint(err)); // Values will refresh if not fresh
   }
 
   @override
   Widget build(context) {
     if (entity == null) return buildEmptyEntity(context);
 
-    return ChangeNotifierProvider.value(
-        value: process.metadata,
-        child: Builder(builder: (context) {
-          if (process.metadata.isLoading)
-            return buildLoading();
-          else if (process.metadata.hasError)
-            return buildError(process.metadata.errorMessage);
+    // By the constructor, this.process.metadata is guaranteed to exist
+
+    return StateNotifierListener(
+      values: [process.metadata, entity.metadata],
+      child: Builder(
+        builder: (context) {
+          if (process.metadata.hasError || !process.metadata.hasValue)
+            return buildErrorScaffold(process.metadata.errorMessage);
 
           final headerUrl =
               Uri.tryParse(process.metadata.value.details?.headerImage)
                   ?.toString();
 
           return ScaffoldWithImage(
-              headerImageUrl: headerUrl ?? "",
-              headerTag: headerUrl == null
-                  ? null
-                  : makeElementTag(
-                      entity.reference.entityId, process.processId, index),
-              avatarHexSource: process.processId,
-              appBarTitle: "Poll",
-              actionsBuilder: (context) => [
-                    buildShareButton(context, entity),
-                  ],
-              builder: Builder(
-                  builder: (ctx) => SliverList(
-                      delegate: SliverChildListDelegate(
-                          getScaffoldChildren(ctx, entity)))));
-        }));
+            headerImageUrl: headerUrl ?? "",
+            headerTag: headerUrl == null
+                ? null
+                : makeElementTag(
+                    entity.reference.entityId, process.processId, index),
+            avatarHexSource: process.processId,
+            appBarTitle: "Poll",
+            actionsBuilder: (context) => [
+              buildShareButton(context, entity),
+            ],
+            builder: Builder(
+              builder: (ctx) => SliverList(
+                delegate: SliverChildListDelegate(
+                  getScaffoldChildren(ctx, entity),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   List<Widget> getScaffoldChildren(BuildContext context, EntityModel entity) {
     List<Widget> children = [];
-    if (process.metadata.value == null) return children;
+    if (!process.metadata.hasValue) return children;
 
     children.add(buildTitle(context, entity));
     children.add(buildSummary());
@@ -125,8 +139,8 @@ class _PollPageState extends State<PollPage> {
     final title =
         process.metadata.value.details.title[globalAppState.currentLanguage];
 
-    return ChangeNotifierProvider.value(
-        value: entity.metadata,
+    return StateNotifierListener(
+        values: [entity.metadata],
         child: ListItem(
           // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
           mainText: title,
@@ -157,8 +171,8 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildCensusItem(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: process.isInCensus,
+    return StateNotifierListener(
+      values: [process.isInCensus],
       child: Builder(builder: (ctx) {
         String text;
         Purpose purpose;
@@ -187,7 +201,7 @@ class _PollPageState extends State<PollPage> {
           icon: FeatherIcons.users,
           mainText: text,
           isSpinning: process.isInCensus.isLoading,
-          onTap: () => process.refreshIsInCensus(),
+          onTap: () => process.refreshIsInCensus(true),
           rightTextPurpose: purpose,
           rightIcon: icon,
           purpose: process.isInCensus.hasError ? Purpose.DANGER : Purpose.NONE,
@@ -207,8 +221,8 @@ class _PollPageState extends State<PollPage> {
 
   buildTimeItem(BuildContext context) {
     // Rebuild when the reference block changes
-    return ChangeNotifierProvider.value(
-      value: globalAppState.referenceBlockTimestamp,
+    return StateNotifierListener(
+      values: [process.metadata, globalAppState.referenceBlockTimestamp],
       child: Builder(builder: (context) {
         if (process.startDate is DateTime &&
             process.startDate.isBefore(DateTime.now())) {
@@ -226,11 +240,11 @@ class _PollPageState extends State<PollPage> {
         } else if (process.endDate is DateTime) {
           String rowText;
           final formattedTime =
-              DateFormat("dd/MM H:mm").format(process.endDate) + "h";
+              DateFormat("dd/MM HH:mm").format(process.endDate) + "h";
           if (process.endDate.isBefore(DateTime.now()))
-            rowText = "Ending on " + formattedTime;
-          else
             rowText = "Ended on " + formattedTime;
+          else
+            rowText = "Ending on " + formattedTime;
 
           return ListItem(
             icon: FeatherIcons.clock,
@@ -475,12 +489,15 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildLoading() {
-    return ListItem(
-      mainText: "Loading...",
-      rightIcon: null,
-      icon: FeatherIcons.activity,
-      purpose: Purpose.NONE,
+  Widget buildErrorScaffold(String error) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          "Error:\n" + error,
+          style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 

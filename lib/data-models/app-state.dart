@@ -23,9 +23,10 @@ class AppStateModel implements StatePersistable, StateRefreshable {
 
   final StateNotifier<int> averageBlockTime =
       StateNotifier<int>(5); // 5 seconds by default
-  final StateNotifier<int> referenceBlock = StateNotifier<int>();
+  final StateNotifier<int> referenceBlock =
+      StateNotifier<int>().withFreshness(10);
   final StateNotifier<DateTime> referenceBlockTimestamp =
-      StateNotifier<DateTime>();
+      StateNotifier<DateTime>().withFreshness(10);
 
   // INTERNAL DATA HANDLERS
 

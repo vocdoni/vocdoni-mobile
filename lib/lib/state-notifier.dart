@@ -94,7 +94,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
 
   /// Explicitly emits a change notification event to the listeners
   StateNotifier notify() {
-    Timer(Duration(milliseconds: 1), () => this.notifyListeners());
+    Timer(Duration(milliseconds: 50), () => this.notifyListeners());
     return this;
   }
 }

@@ -25,6 +25,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   @override
   Widget build(ctx) {
     final currentAccount = globalAppState.currentAccount;
+    
     if (currentAccount == null)
       return buildNoEntities(ctx);
     else if (!currentAccount.entities.hasValue ||
@@ -33,18 +34,18 @@ class _EntitiesTabState extends State<EntitiesTab> {
     // Rebuild if the pool changes (not the items)
     return StateNotifierListener(
         values: [currentAccount.entities, currentAccount.identity],
-        child: Builder(
-          builder: (context) => ListView.builder(
+        child: Builder(builder: (context) {
+          return ListView.builder(
               itemCount: currentAccount.entities.value.length,
-              itemBuilder: (BuildContext ctxt, int index) {
+              itemBuilder: (BuildContext context, int index) {
                 final entity = currentAccount.entities.value[index];
 
                 if (entity.metadata.hasValue)
                   return buildCard(ctx, entity);
                 else if (entity.metadata.isLoading) return CardLoading();
                 return buildEmptyMetadataCard(ctx, entity);
-              }),
-        ));
+              });
+        }));
   }
 
   Widget buildEmptyMetadataCard(BuildContext ctx, EntityModel entityModel) {
