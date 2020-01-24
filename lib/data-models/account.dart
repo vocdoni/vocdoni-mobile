@@ -130,6 +130,16 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
         newAccount.identity.value.keys.length == 0)
       throw Exception("The account needs to have an identity set");
 
+    final currentIdentities = globalIdentitiesPersistence.get();
+    final alias = newAccount.identity.value.alias.trim();
+    final reducedAlias = alias.toLowerCase().trim();
+    if (currentIdentities
+            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
+            .length >
+        0) {
+      throw Exception("An account with this name already exists");
+    }
+
     // Prevent duplicates
     final duplicate = this.value.any((account) =>
         account.identity.value.keys.length > 0 &&
@@ -224,7 +234,8 @@ class AccountModel implements StateRefreshable {
     var newThreshold = DateTime.now();
     this.failedAuthAttempts.setValue(0);
     this.authThresholdDate.setValue(newThreshold);
-    return globalAccountPool.writeToStorage();
+    return Future.delayed(Duration(milliseconds: 50))
+        .then((_) => globalAccountPool.writeToStorage());
   }
 
   Future<void> trackFailedAuth() {
@@ -348,25 +359,15 @@ class AccountModel implements StateRefreshable {
 
   /// Returns a Model with the identity restored from the given mnemonic and an empty list of entities.
   /// NOTE: The returned model is not added to the global pool.
-  static Future<AccountModel> restoredFromMnemonic(
-      String alias, String mnemonic, String patternEncryptionKey) async {
-    if (!(alias is String) || alias.length < 1)
-      throw Exception("Invalid alias");
-    else if (!(mnemonic is String) || mnemonic.length < 2)
+  static Future<AccountModel> fromMnemonic(
+      String mnemonic, String alias, String patternEncryptionKey) async {
+    if (!(mnemonic is String) || mnemonic.length < 2)
       throw Exception("Invalid patternEncryptionKey");
+    else if (!(alias is String) || alias.length < 1)
+      throw Exception("Invalid alias");
     else if (!(patternEncryptionKey is String) ||
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
-
-    final currentIdentities = globalIdentitiesPersistence.get();
-    alias = alias.trim();
-    final reducedAlias = alias.toLowerCase().trim();
-    if (currentIdentities
-            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
-            .length >
-        0) {
-      throw Exception("An account with this name already exists");
-    }
 
     final privateKey = await mnemonicToPrivateKey(mnemonic);
     final publicKey = await mnemonicToPublicKey(mnemonic);
@@ -405,16 +406,6 @@ class AccountModel implements StateRefreshable {
     else if (!(patternEncryptionKey is String) ||
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
-
-    final currentIdentities = globalIdentitiesPersistence.get();
-    alias = alias.trim();
-    final reducedAlias = alias.toLowerCase().trim();
-    if (currentIdentities
-            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
-            .length >
-        0) {
-      throw Exception("An account with this name already exists");
-    }
 
     final mnemonic = await generateMnemonic(size: 192);
     final privateKey = await mnemonicToPrivateKey(mnemonic);

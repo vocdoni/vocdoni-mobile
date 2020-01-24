@@ -1,3 +1,4 @@
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
@@ -54,12 +55,18 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
           final lang = entityModel.metadata.value.languages[0] ??
               globalAppState.currentLanguage;
 
+          final availableProcesses = List<ProcessModel>();
+          if (entityModel.processes.hasValue) {
+            availableProcesses.addAll(entityModel.processes.value
+                .where((item) => item.metadata.hasValue));
+          }
+
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
             body: ListView.builder(
-              itemCount: entityModel.processes.value.length,
+              itemCount: availableProcesses.length ?? 0,
               itemBuilder: (BuildContext ctx, int index) {
-                final process = entityModel.processes.value[index];
+                final process = availableProcesses[index];
 
                 return CardPoll(
                     entity: entityModel, process: process, index: index);

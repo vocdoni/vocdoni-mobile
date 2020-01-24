@@ -182,7 +182,12 @@ class ProcessModel implements StateRefreshable {
       bool isInCensus,
       bool hasVoted,
       int currentParticipants]) {
-    if (metadata is ProcessMetadata) this.metadata.load(metadata);
+    if (metadata is ProcessMetadata) {
+      // Ensure we can read it back
+      metadata.meta[META_PROCESS_ID] = this.processId;
+      metadata.meta[META_ENTITY_ID] = this.entityId;
+      this.metadata.load(metadata);
+    }
     if (isInCensus is bool) this.isInCensus.load(isInCensus);
     if (hasVoted is bool) this.hasVoted.load(hasVoted);
     if (currentParticipants is int)
@@ -191,8 +196,8 @@ class ProcessModel implements StateRefreshable {
 
   ProcessModel.fromMetadata(
       ProcessMetadata metadata, this.processId, this.entityId) {
-    metadata.meta[META_PROCESS_ID] =
-        this.processId; // Ensure we can read it back
+    // Ensure we can read it back
+    metadata.meta[META_PROCESS_ID] = this.processId;
     metadata.meta[META_ENTITY_ID] = this.entityId;
 
     this.metadata.load(metadata);
@@ -267,7 +272,9 @@ class ProcessModel implements StateRefreshable {
   }
 
   Future<void> refreshIsInCensus([bool force = false]) async {
-    if (!force && this.isInCensus.isFresh)
+    if (!this.metadata.hasValue)
+      return;
+    else if (!force && this.isInCensus.isFresh)
       return;
     else if (!force && this.isInCensus.isLoading)
       return;

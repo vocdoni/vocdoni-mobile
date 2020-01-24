@@ -6,8 +6,6 @@ import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
-import 'package:dvote/dvote.dart';
-import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -103,40 +101,40 @@ class DevMenu extends StatelessWidget {
         currentAccount.identity.value.keys.length == 0)
       throw Exception("No account is currently selected");
 
-    var patternLockKey = await Navigator.push(
+    var patternEncryptionKey = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(currentAccount)));
 
-    if (patternLockKey == null || patternLockKey is InvalidPatternError) {
+    if (patternEncryptionKey == null)
+      return;
+    else if (patternEncryptionKey is InvalidPatternError) {
+      await Future.delayed(Duration(milliseconds: 50));
+
       showMessage("The pattern you entered is not valid",
           context: context, purpose: Purpose.DANGER);
       return;
     }
 
+    await Future.delayed(Duration(milliseconds: 50));
+
+    // loading...
     final loadingIndicator = showLoading("Updating...", context: context);
 
-    final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
-    final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
-    final address = await mnemonicToAddress(NEW_MNEMONIC);
-
-    final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
-    final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
-    loadingIndicator.close();
+    final newAccount = await AccountModel.fromMnemonic(NEW_MNEMONIC,
+        currentAccount.identity.value.alias, patternEncryptionKey);
 
     final updatedIdentity = currentAccount.identity.value;
-    updatedIdentity.meta[META_ACCOUNT_ID] = address;
+    updatedIdentity.meta[META_ACCOUNT_ID] =
+        newAccount.identity.value.keys[0].address;
 
-    dvote.Key k = dvote.Key();
-    k.type = Key_Type.SECP256K1;
-    k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedPrivateKey = encryptedPrivateKey;
-    k.publicKey = publicKey;
-    k.address = address;
+    updatedIdentity.keys[0] = newAccount.identity.value.keys[0];
+    currentAccount.identity.notify();
+    globalAccountPool.notify();
 
-    updatedIdentity.keys[0] = k;
-    currentAccount.identity.setValue(updatedIdentity);
+    // done
+    loadingIndicator.close();
 
     await globalAccountPool.writeToStorage();
 

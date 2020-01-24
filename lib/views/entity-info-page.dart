@@ -1,4 +1,5 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
@@ -209,20 +210,21 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ChangeNotifierProvider.value(
         value: widget.entityModel.feed,
         child: Builder(builder: (context) {
-          String postCount = "0";
-          if (widget.entityModel.feed.hasValue)
-            postCount = widget.entityModel.feed.value.items.length.toString();
-          else if (widget.entityModel.feed.hasError) postCount = "!";
+          int postCount = 0;
+          if (widget.entityModel.feed.hasValue) {
+            postCount = widget.entityModel.feed.value.items?.length ?? 0;
+          }
 
           return ListItem(
             icon: FeatherIcons.rss,
             mainText: "Feed",
-            rightText: postCount,
+            rightText: postCount.toString(),
             rightTextIsBadge: true,
             rightTextPurpose:
                 widget.entityModel.feed.hasError ? Purpose.DANGER : null,
             disabled: widget.entityModel.feed.hasError ||
-                widget.entityModel.feed.isLoading,
+                widget.entityModel.feed.isLoading ||
+                postCount == 0,
             isSpinning: widget.entityModel.feed.isLoading,
             onTap: () => onShowFeed(context),
           );
@@ -236,8 +238,15 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       child: Builder(
         builder: (context) {
           int processCount = 0;
-          if (widget.entityModel.processes.hasValue)
-            processCount = widget.entityModel.processes.value.length;
+          if (widget.entityModel.processes.hasValue) {
+            final availableProcesses = List<ProcessModel>();
+            if (widget.entityModel.processes.hasValue) {
+              availableProcesses.addAll(widget.entityModel.processes.value
+                  .where((item) => item.metadata.hasValue));
+            }
+
+            processCount = availableProcesses.length;
+          }
 
           return ListItem(
               icon: FeatherIcons.mail,
@@ -247,7 +256,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               rightTextPurpose:
                   widget.entityModel.processes.hasError ? Purpose.DANGER : null,
               disabled: widget.entityModel.processes.hasError ||
-                  widget.entityModel.processes.isLoading,
+                  widget.entityModel.processes.isLoading ||
+                  processCount == 0,
               isSpinning: widget.entityModel.processes.isLoading,
               onTap: () => onShowParticipation(context));
         },

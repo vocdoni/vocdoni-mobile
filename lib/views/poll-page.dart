@@ -89,7 +89,7 @@ class _PollPageState extends State<PollPage> {
             return buildErrorScaffold(process.metadata.errorMessage);
 
           final headerUrl =
-              Uri.tryParse(process.metadata.value.details?.headerImage)
+              Uri.tryParse(process.metadata.value.details?.headerImage ?? "")
                   ?.toString();
 
           return ScaffoldWithImage(

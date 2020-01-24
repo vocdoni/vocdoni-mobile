@@ -38,6 +38,8 @@ class CardPoll extends StatelessWidget {
   }
 
   Widget buildCard(BuildContext context) {
+    if (!this.process.metadata.hasValue) return Container();
+
     String timeLeft = "";
     if (this.process.endDate is DateTime) {
       timeLeft = getFriendlyTimeLeft(this.process.endDate);
@@ -52,8 +54,9 @@ class CardPoll extends StatelessWidget {
 
     return BaseCard(
       onTap: () => this.onCardTapped(context),
-      image: Uri.tryParse(this.process.metadata.value?.details?.headerImage)
-          ?.toString(),
+      image:
+          Uri.tryParse(this.process.metadata.value?.details?.headerImage ?? "")
+              ?.toString(),
       imageTag: makeElementTag(this.entity.reference.entityId,
           this.process.metadata.value?.meta[META_PROCESS_ID], this.index),
       children: <Widget>[

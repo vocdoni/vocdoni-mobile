@@ -1,6 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
@@ -25,16 +26,18 @@ class _EntitiesTabState extends State<EntitiesTab> {
   @override
   Widget build(ctx) {
     final currentAccount = globalAppState.currentAccount;
-    
-    if (currentAccount == null)
-      return buildNoEntities(ctx);
-    else if (!currentAccount.entities.hasValue ||
-        currentAccount.entities.value.length == 0) return buildNoEntities(ctx);
+
+    if (currentAccount == null) return buildNoEntities(ctx);
 
     // Rebuild if the pool changes (not the items)
     return StateNotifierListener(
         values: [currentAccount.entities, currentAccount.identity],
         child: Builder(builder: (context) {
+          if (!currentAccount.entities.hasValue ||
+              currentAccount.entities.value.length == 0) {
+            return buildNoEntities(ctx);
+          }
+
           return ListView.builder(
               itemCount: currentAccount.entities.value.length,
               itemBuilder: (BuildContext context, int index) {
@@ -92,16 +95,25 @@ class _EntitiesTabState extends State<EntitiesTab> {
     // the entity's process list changes
     return StateNotifierListener(
       values: [entity.processes],
-      child: ListItem(
-          mainText: "Participation",
-          icon: FeatherIcons.mail,
-          rightText: entity.processes.hasValue
-              ? entity.processes.value.length.toString()
-              : "0",
-          rightTextIsBadge: true,
-          onTap: () => onTapParticipation(ctx, entity),
-          disabled:
-              !entity.processes.hasValue || entity.processes.value.length == 0),
+      child: Builder(builder: (context) {
+        int itemCount = 0;
+        if (entity.processes.hasValue) {
+          final availableProcesses = List<ProcessModel>();
+          if (entity.processes.hasValue) {
+            availableProcesses.addAll(
+                entity.processes.value.where((item) => item.metadata.hasValue));
+          }
+          itemCount = availableProcesses.length;
+        }
+
+        return ListItem(
+            mainText: "Participation",
+            icon: FeatherIcons.mail,
+            rightText: itemCount.toString(),
+            rightTextIsBadge: true,
+            onTap: () => onTapParticipation(ctx, entity),
+            disabled: itemCount == 0);
+      }),
     );
   }
 
