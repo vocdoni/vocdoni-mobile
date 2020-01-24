@@ -47,11 +47,12 @@ class _PollPackagingState extends State<PollPackaging> {
             fullscreenDialog: true,
             builder: (context) => PaternPromptModal(currentAccount)));
 
-    if (!mounted) return;
-
-    // TODO: ERROR => THIS IS NOT A SCAFFOLD
-
-    if (patternLockKey == null || patternLockKey is InvalidPatternError) {
+    if (!mounted)
+      return;
+    else if (patternLockKey == null) {
+      setState(() => _currentStep = 0);
+      return;
+    } else if (patternLockKey is InvalidPatternError) {
       setState(() => _currentStep = 0);
       showMessage("The pattern you entered is not valid",
           context: context, purpose: Purpose.DANGER);
@@ -80,7 +81,6 @@ class _PollPackagingState extends State<PollPackaging> {
     if (!(merkleProof is String)) {
       showMessage("The vote data could not be signed", context: context);
       setState(() => _currentStep = 0);
-
       return;
     }
 
