@@ -18,40 +18,51 @@ class _StartupPageState extends State<StartupPage> {
   }
 
   Future<void> initApplication() {
-    analytics.init();
+    globalAnalytics.init();
 
-    // RESTORE PERSISTED DATA
-    return appStateBloc
-        .init()
-        .then((_) => entitiesBloc.init())
-        .then((_) => identitiesBloc.init())
-        .then((_) => newsFeedsBloc.init())
-        .then((_) => processesBloc.init())
-        // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-        .then((_) => appStateBloc.fetchRemoteState())
-        // DETERMINE THE NEXT SCREEN AND GO THERE
-        .then((_) {
-      if (identitiesBloc.value.length > 0 ?? false) {
-        // Replace all routes with /identity/select on top
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/identity/select", (Route _) => false);
+    // READ PERSISTED DATA (protobuf)
+    return Future.wait([
+      globalBootnodesPersistence.read(),
+      globalIdentitiesPersistence.readAll(),
+      globalEntitiesPersistence.readAll(),
+      globalProcessesPersistence.readAll(),
+      globalFeedPersistence.readAll(),
+    ]).then((_) {
+      // POPULATE THE MODEL POOLS (Read into memory)
+      return Future.wait([
+        // NOTE: Read's should be done first on the models that
+        // don't depend on others to be restored
+        globalProcessPool.readFromStorage(),
+        globalFeedPool.readFromStorage(),
+        globalAppState.readFromStorage(),
+      ])
+          .then((_) => globalEntityPool.readFromStorage())
+          .then((_) => globalAccountPool.readFromStorage());
+    }).then((_) {
+      // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
+      return Future.wait([
+        globalAppState.refresh(),
+      ]);
+    }).then((_) {
+      // DETERMINE THE NEXT SCREEN AND GO THERE
+      String nextRoutePath;
+      if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
+        nextRoutePath = "/identity/select";
       } else {
-        // Replace all routes with /identity/create on top
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/identity/create", (Route _) => false);
+        nextRoutePath = "/identity/create";
       }
+
+      // Replace all routes with /identity/select on top
+      Navigator.pushNamedAndRemoveUntil(
+          context, nextRoutePath, (Route _) => false);
     }).catchError((err) {
       setState(() {
         loading = false;
-        // if (err is String) error = err;
-        // else
         error = "Could not load the status of the app";
       });
 
-      // RETRY
-      Future.delayed(Duration(seconds: 5))
-          .then((_) => initApplication())
-          .catchError((_) {});
+      // RETRY ITSELF
+      Future.delayed(Duration(seconds: 5)).then((_) => initApplication());
     });
   }
 
@@ -66,19 +77,21 @@ class _StartupPageState extends State<StartupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Builder(builder: (BuildContext context) {
-      return Center(
-        child: Align(
-          alignment: Alignment(0, -0.3),
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-            color: Color(0x00ff0000),
-            child: loading
-                ? Text("Please, wait...", style: TextStyle(fontSize: 18))
-                : buildError(context),
+    return Scaffold(
+      body: Builder(builder: (BuildContext context) {
+        return Center(
+          child: Align(
+            alignment: Alignment(0, -0.3),
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+              color: Color(0x00ff0000),
+              child: loading
+                  ? Text("Please, wait...", style: TextStyle(fontSize: 18))
+                  : buildError(context),
+            ),
           ),
-        ),
-      );
-    }));
+        );
+      }),
+    );
   }
 }

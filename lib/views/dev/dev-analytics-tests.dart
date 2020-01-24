@@ -14,7 +14,7 @@ class AnalyticsTests extends StatelessWidget {
           children: <Widget>[
             ListItem(
               mainText: "Track page Page1",
-              onTap: analytics.trackPage("Page1"),
+              onTap: globalAnalytics.trackPage("Page1"),
             ),
           ],
         ));

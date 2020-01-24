@@ -3,7 +3,259 @@ Official implementation of the Vocdoni core features.
 
 The repository depends on a Git submodule mounted on `lib/models` => `git@gitlab.com:vocdoni/dvote-protobuf.git`
 
+## Development
+
+### Data Architecture and internal Models
+
+The global state of the app is built on top of the [Provider package](https://pub.dev/packages/provider). The provider package allows to track updates on objects that implement the `ChangeNotifier` protocol. 
+
+#### State Container
+
+In addition to this, this project provides the `StateContainer` abstract class. It provides a clean and safe way to consume a data structure that is guaranteed to exist (inspired on Rust's `Option` enum). The state container is ideal for tracking a widget's local data that needs to be fetched remotely.
+
+Basic usage example:
+
+```dart
+final myString = StateContainer<String>();
+// ...
+myString.setToLoading("Optional loading message");
+myString.isLoading // true
+mString.hasError // false
+myString.hasValue // false
+myString.value // null
+
+myString.setError("Something went wrong");
+myString.isLoading // false
+myString.hasError // true
+myString.errorMessage  // "Something went wrong"
+myString.hasValue // false
+myString.value // null
+
+myString.setValue("I am ready!");
+myString.isLoading // false
+myString.hasError // false
+myString.hasValue // true
+myString.value // "I am ready!"
+```
+
+Additional features:
+
+```dart
+// Initial value of 0
+// Data will be considered "not fresh" after 5 seconds
+final myInteger = StateContainer<int>(0).withFreshness(5);
+myInteger.isFresh // false   (we have not called setValue yet)
+myInteger.lastUpdated // null
+myInteger.lastError // null
+myInteger.hasValue // true
+myInteger.value // 0
+
+myInteger.setValue(5);
+myInteger.isFresh // true
+myInteger.lastUpdated // (DateTime)
+myInteger.lastError // null
+myInteger.value // 5
+
+// 5 seconds after
+myInteger.isFresh // false
+```
+
+#### State Notifier
+
+The `StateNotifier` class extends the functionality of `StateContainer` by implementing the `ChangeNotifier` interface of `Provider`. The internal method `notifyListeners` is called whenever the internal state changes (`setValue()`, `setError()`, `setToLoading()`) or by using `notify()`. 
+
+State Notifiers are mainly used to build and compose data models used in the global state of the app. 
+
+```dart
+final myBool = StateNotifier<int>();
+myBool.setToLoading();  // calls notifyListeners()
+myBool.setError("Network error");  // calls notifyListeners()
+myBool.setValue(true);  // calls notifyListeners()
+myBool.notify();  // forces a call to notifyListeners() with the current value
+```
+
+#### Model classes
+
+They can be of the type:
+* Single models
+  * AppStateModel, AccountModel, EntityModel, ProcessModel, FeedModel
+  * A model can contain references to other models
+* Pools of data
+  * Typically, they contain a collection of single models
+  * Usually used as global variables
+  * Their goal is to track whether the collection changes, but not the individual items
+  * They contain all the model instances known to the system
+  * Any modification on a model should happen in models obtained from a global pool, since the pool manages persistence
+
+This separation allows for efficient and granular widget tree rebuilds whenever the state is updated. If a single value changes, only the relevant subwidgets should rebuild.
+
+#### Usage
+
+**Initialize and read Global Model's data from the Persistence helpers**
+
+```dart
+final globalEntitiesPersistence = EntitiesPersistence();
+await globalEntitiesPersistence.readAll();
+
+// ...
+await globalEntityPool.readFromStorage();  // will import and arrange the persisted data
+```
+
+**Provide the Global Models at the root context**
+
+```dart
+final globalEntityPool = EntityPoolModel();
+
+// ...
+
+runApp(MultiProvider(
+	providers: [
+        Provider<EntityPoolModel>(create: (_) => globalEntityPool),
+		// ...
+    ],
+    child: MaterialApp(
+		// ...
+	)
+))
+```
+
+Then, they can be retrieved later on. 
+
+```dart
+// Widget 1
+@override
+Widget build(BuildContext context) {
+	// Consume dynamically
+    return Consumer<EntityPoolModel>(
+        builder: (BuildContext context, entityModels, _) {
+			// Use the fresh version: entityModels
+
+			// Whenever `globalEntityPool` changes, this builder will be executed again
+		}
+}
+
+// Widget 2
+@override
+Widget build(BuildContext context) {
+	// Retrieve the provided value at the time of building (may become outdated later on)
+
+	final entityModels = Provider.of<EntityPoolModel>(context);
+	if (entityModels == null) throw Exception("Internal error");
+
+    // use `entityModels`
+	// ...
+}
+```
+
+**Consume Local Models in specific places**
+
+Unike the global modes (data pools), any other StateNotifier instance will not be provided on the root context. You will typically have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. This single instance can't simply use `Consumer` because `EntityModel` is no longer a global and unique value provided on the context.
+
+This means, that any `StateNotifier<T>` values within `EntityModel` need to be consumed locally.
+
+```dart
+final globalEntityPool = EntityPoolModel();
+
+// ...
+
+// Widget 1
+@override
+Widget build(BuildContext context) {
+	final myEntity = globalEntityPool.value.first;
+
+	// Consume one value locally
+	return ChangeNotifierProvider.value(
+    	value: myEntity.feed,  // StateNotifier<T> value that may change over time
+		child: Builder(
+			builder: (context) {
+				// Use myEntity.feed.hasValue, myEntity.feed.isLoading, etc.
+
+				// The type is inferred automatically, but the `value` needs to be 
+				// your StateNotifier or derive from ChangeNotifier
+
+				// ...
+			}
+		)
+	);
+}
+
+// Widget 2
+@override
+Widget build(BuildContext context) {
+	final myEntity = globalEntityPool.value.first;
+
+	// Consume many values locally
+	return StateNotifierListener(
+    	values: [myEntity.feed, myEntity.processes],  // StateNotifier<T> values that may change over time
+		child: Builder(
+			builder: (context) {
+				// rebuilt whenever either of myEntity.feed or myEntity.processes change
+
+				// ...
+			}
+		)
+	);
+}
+```
+
+In the example above, updates on the global Feed pool, or any unrelated Feed items, will not affect the current widget. But as soon as we call `myEntity.feed.refresh()` on this particular instance, the Builder will be triggered because of the changes in `isLoading`, `hasError` and `hasValue`.
+
+#### Extra methods
+
+Certain models implement the `StateRefreshable` interface. This ensures that callers can call `refresh()` to request a refetch of remote data, based on the current model's ID or metadata.
+
+Other models (mainly pools) also implement the `StatePersistable` interface, so that `readFromStorage()` and `writeToStorage()` can be called.
+
+#### General
+
+It is important not to mix the models (account, entity, process, feed, app state) with the Persistence classes. Persistence classes map diretly to `dvote-protobuf` classes, which allow for binary serialization and consistently have a 1:1 mapping.
+
+Models can contain both data which is persisted (entity metadata, process metadata) as well as data that is ephemeral (current participants on a vote, selected account). When `readFromStorage` is called, data needs to be deserialized and restored properly, often across multiple models.
+
+### Internationalization
+
+- First of all, declare any new string on `lib/lang/index.dart` &gt; `_definitions()`
+- Add `import '../lang/index.dart';` on your widget file
+- Access the new string with `Lang.of(context).get("My new string to translate")`
+- Generate the string template with `make lang-extract`
+- Import the translated bundles with `make lang-compile`
+
+### Dependencies
+
+The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 
+
 ## Integration
+
+### Deep linking
+
+The app accepts incoming requests using the `vocdoni:` schema. 
+
+
+#### Show an organization
+
+On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
+
+To point the user to an organization, use:
+
+```
+vocdoni://vocdoni.app/entity?entityId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
+```
+
+- `entityId`: The ID of the organization. See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
+- `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
+
+#### Prompt to sign a payload
+
+On developoment, you can test it by running `make launch-ios-sign` or `make launch-android-sign`
+
+To let the user sign a given payload, use:
+
+```
+vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
+```
+
+- `payload`: A URI-encoded version of the text to sign
+- `returnURI`: A URI-encoded string containing the URI that will be launched after a successful signature. The URI will be appended the query string parameter `?signature=...`
 
 ### Entity Actions
 
@@ -136,72 +388,3 @@ sendHostRequest({ method: "closeWindow" })
 		console.error(err);
 	});
 ```
-
-### Deep linking
-
-The app accepts incoming requests using the `vocdoni:` schema. 
-
-
-#### Show an organization
-
-On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
-
-To point the user to an organization, use:
-
-```
-vocdoni://vocdoni.app/entity?resolverAddress=__ADDR__&entityId=__ID__&networkId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
-```
-
-- `resolverAddress`: The address of the entity resolver contract instance
-- `entityId`: The ID of the organization. See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
-- `networkId`: The of the network (currently supported 0 => mainnet)
-- `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
-
-#### Prompt to sign a payload
-
-On developoment, you can test it by running `make launch-ios-sign` or `make launch-android-sign`
-
-To let the user sign a given payload, use:
-
-```
-vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
-```
-
-- `payload`: A URI-encoded version of the text to sign
-- `returnURI`: A URI-encoded string containing the URI that will be launched after a successful signature. The URI will be appended the query string parameter `?signature=...`
-
-## Development
-
-### Internationalization
-
-- First of all, declare any new string on `lib/lang/index.dart` &gt; `_definitions()`
-- Add `import '../lang/index.dart';` on your widget file
-- Access the new string with `Lang.of(context).get("My new string to translate")`
-- Generate the string template with `make lang-extract`
-- Import the translated bundles with `make lang-compile`
-
-### Dependencies
-
-The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 
-
-### Model lifecycle
-
-recover model
-- By id
-- Make new one
-  
-1. sync()
-2. update()
-   1. fetch()
-   2. stage()
-3. save()
-
-
-
-# Updates
-
-## Shallow update
-- EntityMetadata
-
-## Notifications
-Shallow updates only

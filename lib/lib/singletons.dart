@@ -1,31 +1,40 @@
 import "package:flutter/material.dart";
+
+import 'package:vocdoni/data-persistence/bootnodes-persistence.dart';
+import 'package:vocdoni/data-persistence/entities-persistence.dart';
+import 'package:vocdoni/data-persistence/identities-persistence.dart';
+import 'package:vocdoni/data-persistence/processes-persistence.dart';
+import 'package:vocdoni/data-persistence/feed-persistence.dart';
+
+import 'package:vocdoni/data-models/app-state.dart';
 import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/feed.dart';
+import 'package:vocdoni/data-models/process.dart';
+
 import 'package:vocdoni/lib/analtyics.dart';
-import 'package:vocdoni/data-models/vochain.dart';
-import '../data-storage/feedBloc.dart';
-import "../data-storage/app-state.dart";
-import "../data-storage/identityBloc.dart";
-import "../data-storage/entityMetadataBloc.dart";
-import "../data-storage/processMetadataBloc.dart";
 
-// Export classes
-export "../data-storage/app-state.dart";
-export "../data-storage/identityBloc.dart";
-export "../data-storage/entityMetadataBloc.dart";
-export "../data-storage/processMetadataBloc.dart";
-export "../data-storage/feedBloc.dart";
+// EXPORTED SINGLETON STORAGE INSTANCES
 
-// EXPORTED SINGLETON INSTANCES
+final globalBootnodesPersistence = BootnodesPersistence();
+final globalIdentitiesPersistence = IdentitiesPersistence();
+final globalEntitiesPersistence = EntitiesPersistence();
+final globalProcessesPersistence = ProcessesPersistence();
+final globalFeedPersistence = NewsFeedPersistence();
 
-// Bloc entities
-AppStateBloc appStateBloc = AppStateBloc();
-IdentityBloc identitiesBloc = IdentityBloc();
-EntityMetadataBloc entitiesBloc = EntityMetadataBloc();
-ProccessMetadataBloc processesBloc = ProccessMetadataBloc();
-FeedBloc newsFeedsBloc = FeedBloc();
-Account account = Account();
-Analytics analytics = Analytics();
-VochainModel vochainModel = VochainModel();
+// EXPORTED SINGLETON GLOBAL MODEL INSTANCES
+
+// The global variables below contain the full state of the app in memory.
+// They are the single source of truth when updating and persisting data.
+
+final globalAppState = AppStateModel();
+
+final globalAccountPool = AccountPoolModel();
+final globalEntityPool = EntityPoolModel();
+final globalProcessPool = ProcessPoolModel();
+final globalFeedPool = FeedPool();
+
+final globalAnalytics = Analytics();
 
 // Global scaffold key for snackbars
 GlobalKey<ScaffoldState> homePageScaffoldKey = new GlobalKey<ScaffoldState>();

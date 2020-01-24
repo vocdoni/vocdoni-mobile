@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 class Analytics {
@@ -8,7 +9,7 @@ class Analytics {
   MixpanelAnalytics _mixpanelBatch;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  init() {
+  void init() {
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
       userId$: _user$.stream,
@@ -28,12 +29,19 @@ class Analytics {
         onError: (e) => () {});
   }
 
-  setUser() {
+  void setUser() {
     _user$.add(getUserId());
   }
 
   getUserId() {
-    return account.identity.keys[0].address;
+    final currentAccount = globalAppState.currentAccount;
+    if (!(currentAccount is AccountModel))
+      return null;
+    else if (!currentAccount.identity.hasValue)
+      return null;
+    else if (currentAccount.identity.value.keys.length == 0) return null;
+    
+    return currentAccount.identity.value.keys[0].address;
   }
 
   // OS, OS version, screen size...

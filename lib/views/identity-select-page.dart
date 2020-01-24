@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
+import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import '../lib/singletons.dart';
-import 'package:dvote/dvote.dart';
 
 class IdentitySelectPage extends StatefulWidget {
   @override
@@ -16,47 +17,43 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("IdentitySelectPage");
+    globalAnalytics.trackPage("IdentitySelectPage");
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: identitiesBloc.stream,
-        builder: (BuildContext _, AsyncSnapshot<List<Identity>> identities) {
-          return StreamBuilder(
-              stream: appStateBloc.stream,
-              builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return listContent(ctx, appState.data, identities.data);
-              });
-        });
-  }
+    // We use Provider.of() befause the underlying data will not be able to trigger a redraw of the UI
+    // final appState = Provider.of<AppStateModel>(context);
+    final accountPool = Provider.of<AccountPoolModel>(context);
 
-  Widget listContent(
-      BuildContext ctx, AppState appState, List<Identity> identities) {
     return WillPopScope(
         onWillPop: handleWillPop,
         child: Scaffold(
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Section(text: "Select an identity"),
-              buildExistingIdentities(ctx, identities),
-              ListItem(
-                  mainText: "Create a new one", onTap: () => createNew(ctx)),
-            ],
-          ),
+          body: Builder(
+              builder: (context) => Column(
+                    // use this context within Scaffold for Toast's to work
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Section(text: "Select an identity"),
+                      buildExistingIdentities(context, accountPool.value),
+                      ListItem(
+                          mainText: "Create a new one",
+                          onTap: () => createNew(context)),
+                    ],
+                  )),
         ));
   }
 
-  buildExistingIdentities(BuildContext ctx, identities) {
+  buildExistingIdentities(BuildContext ctx, List<AccountModel> accounts) {
     List<Widget> list = new List<Widget>();
-    if (identities == null) return Column(children: list);
+    if (accounts == null) return Column(children: list);
 
-    for (var i = 0; i < identities.length; i++) {
+    for (var i = 0; i < accounts.length; i++) {
+      if (!accounts[i].identity.hasValue) continue;
+
       list.add(ListItem(
-        mainText: identities[i].alias,
-        onTap: () => onIdentitySelected(ctx, i),
+        mainText: accounts[i].identity.value.alias,
+        onTap: () => onAccountSelected(ctx, accounts[i], i),
       ));
     }
     return Column(children: list);
@@ -77,21 +74,24 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   // LOCAL EVENTS
   /////////////////////////////////////////////////////////////////////////////
 
-  onIdentitySelected(BuildContext ctx, int idx) async {
-    final identity = identitiesBloc.value[idx];
-
-    var result = await Navigator.push(
+  onAccountSelected(
+      BuildContext ctx, AccountModel account, int accountIdx) async {
+    var patternEncryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) =>
-                PaternPromptModal(identity.keys[0].encryptedPrivateKey)));
-    if (result == null || result is InvalidPatternError) {
+            builder: (context) => PaternPromptModal(account)));
+
+    if (patternEncryptionKey == null ||
+        patternEncryptionKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
-    appStateBloc.selectIdentity(idx);
+    globalAppState.selectAccount(accountIdx);
+
+    account.refresh(false, patternEncryptionKey); // detached async
+
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
   }

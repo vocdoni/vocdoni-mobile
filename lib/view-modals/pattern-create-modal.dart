@@ -42,10 +42,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("PatternCreateModal");
+    globalAnalytics.trackPage("PatternCreateModal");
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +105,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   onApprovePattern() {
     setState(() {
       patternStep = PatternStep.PATTERN_CONFIRMING;
-      debugPrint("confirmed");
     });
   }
 
@@ -143,10 +140,9 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onSettingPatternStop(BuildContext context, List<int> pattern) {
-    debugPrint(pattern.length.toString());
     if (pattern.length < minPatternDots) {
       showMessage("The pattern must have at least $minPatternDots points",
-          context: context, duration: toasterDuration , purpose: Purpose.DANGER);
+          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       setState(() {
         patternColor = colorRed;
       });
@@ -158,7 +154,6 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
-    debugPrint(pattern.toString());
 
     setState(() {
       patternColor = colorGreen;
@@ -192,7 +187,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onConfirmingPatternStop(BuildContext context, List<int> pattern) {
-    debugPrint(pattern.toString() + "==" + setPattern.toString());
+    // devPrint(pattern.toString() + "==" + setPattern.toString());
 
     if (!listEquals(setPattern, pattern)) {
       setState(() {
@@ -204,7 +199,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       return;
     }
 
-    String stringPattern = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
+    String stringPattern =
+        patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
     Navigator.pop(context, stringPattern);
   }
 }

@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
-import 'package:dvote/dvote.dart';
-import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/widgets/toast.dart';
@@ -90,47 +90,55 @@ class DevMenu extends StatelessWidget {
   }
 
   setCustomIdentityKeys(context) async {
+    // CHANGEME: Set the new Mnemonic key here
     const NEW_MNEMONIC =
         "wealth matrix piano veteran disease digital hard arrow blossom eight simple solid";
 
-    var patternLockKey = await Navigator.push(
+    final currentAccount = globalAppState.currentAccount;
+    if (!(currentAccount is AccountModel))
+      throw Exception("No account is currently selected");
+    else if (!currentAccount.identity.hasValue ||
+        currentAccount.identity.value.keys.length == 0)
+      throw Exception("No account is currently selected");
+
+    var patternEncryptionKey = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(
-                account.identity.keys[0].encryptedPrivateKey)));
+            builder: (context) => PaternPromptModal(currentAccount)));
 
-    if (patternLockKey == null || patternLockKey is InvalidPatternError) {
+    if (patternEncryptionKey == null)
+      return;
+    else if (patternEncryptionKey is InvalidPatternError) {
+      await Future.delayed(Duration(milliseconds: 50));
+
       showMessage("The pattern you entered is not valid",
           context: context, purpose: Purpose.DANGER);
       return;
     }
 
-    // final privateKey = await decryptString(
-    //     account.identity.keys[0].encryptedPrivateKey, patternLockKey);
+    await Future.delayed(Duration(milliseconds: 50));
 
-    final currentIdentity = identitiesBloc.getCurrentIdentity();
+    // loading...
+    final loadingIndicator = showLoading("Updating...", context: context);
 
-    final privateKey = await mnemonicToPrivateKey(NEW_MNEMONIC);
-    final publicKey = await mnemonicToPublicKey(NEW_MNEMONIC);
-    final address = await mnemonicToAddress(NEW_MNEMONIC);
+    final newAccount = await AccountModel.fromMnemonic(NEW_MNEMONIC,
+        currentAccount.identity.value.alias, patternEncryptionKey);
 
-    final encryptedMenmonic = await encryptString(NEW_MNEMONIC, patternLockKey);
-    final encryptedPrivateKey = await encryptString(privateKey, patternLockKey);
+    final updatedIdentity = currentAccount.identity.value;
+    updatedIdentity.meta[META_ACCOUNT_ID] =
+        newAccount.identity.value.keys[0].address;
 
-    currentIdentity.identityId = publicKey;
+    updatedIdentity.keys[0] = newAccount.identity.value.keys[0];
+    currentAccount.identity.notify();
+    globalAccountPool.notify();
 
-    dvote.Key k = dvote.Key();
-    k.type = Key_Type.SECP256K1;
-    k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedPrivateKey = encryptedPrivateKey;
-    k.publicKey = publicKey;
-    k.address = address;
+    // done
+    loadingIndicator.close();
 
-    currentIdentity.keys[0] = k;
-    identitiesBloc.value[appStateBloc.value.selectedIdentity] = currentIdentity;
+    await globalAccountPool.writeToStorage();
 
-    identitiesBloc.set(identitiesBloc.value);
-    identitiesBloc.persist();
+    showMessage("The identity keys have been replaced",
+        context: context, purpose: Purpose.GOOD);
   }
 }

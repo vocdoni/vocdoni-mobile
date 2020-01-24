@@ -1,11 +1,11 @@
-import 'package:dvote/dvote.dart';
+import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/pollCard.dart';
+import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
 class EntityParticipationPage extends StatefulWidget {
@@ -15,54 +15,65 @@ class EntityParticipationPage extends StatefulWidget {
 }
 
 class _EntityParticipationPageState extends State<EntityParticipationPage> {
-  EntityModel entModel;
+  EntityModel entityModel;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     try {
-      final EntityReference entityReference =
-          ModalRoute.of(context).settings.arguments;
-      entModel = account.findEntity(entityReference);
-      analytics.trackPage("EntityParticipationPage",
-          entityId: entityReference.entityId);
+      if (entityModel is EntityModel) {
+        globalAnalytics.trackPage("EntityParticipationPage",
+            entityId: entityModel.reference.entityId);
+      } else {
+        entityModel = ModalRoute.of(context).settings.arguments;
+      }
     } catch (err) {
-      print(err);
+      devPrint(err);
     }
   }
 
   @override
   Widget build(context) {
-    return StateBuilder(
-        viewModels: [entModel],
-        tag: [EntityStateTags.PROCESSES],
-        builder: (ctx, tagId) {
-          if (entModel == null ||
-              !entModel.entityMetadata.hasValue ||
-              !entModel.processes.hasValue) return buildNoProcessesess(context);
+    if (entityModel == null) return buildNoProcessesess(context);
+
+    return ChangeNotifierProvider.value(
+        value: entityModel.processes, // rebuild upon updates on this value
+        child: Builder(builder: (context) {
+          if (!entityModel.metadata.hasValue || !entityModel.processes.hasValue)
+            return buildNoProcessesess(context);
+          else if (entityModel.metadata.isLoading ||
+              entityModel.processes.isLoading)
+            return buildLoading(context);
+          else if (entityModel.metadata.hasError ||
+              entityModel.processes.hasError)
+            return buildError(
+                context,
+                entityModel.metadata.errorMessage ??
+                    entityModel.processes.errorMessage);
+
+          final lang = entityModel.metadata.value.languages[0] ??
+              globalAppState.currentLanguage;
+
+          final availableProcesses = List<ProcessModel>();
+          if (entityModel.processes.hasValue) {
+            availableProcesses.addAll(entityModel.processes.value
+                .where((item) => item.metadata.hasValue));
+          }
 
           return Scaffold(
-            appBar: TopNavigation(
-              title: entModel.entityMetadata.value
-                  .name[entModel.entityMetadata.value.languages[0]],
-            ),
+            appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
             body: ListView.builder(
-              itemCount: entModel.processes.value is List
-                  ? entModel.processes.value.length
-                  : 0,
+              itemCount: availableProcesses.length ?? 0,
               itemBuilder: (BuildContext ctx, int index) {
-                if (!(entModel.processes.value is List))
-                  return buildLoading(ctx);
-                else if (entModel.processes.value.length == 0)
-                  return buildNoProcessesess(ctx);
+                final process = availableProcesses[index];
 
-                final ProcessModel process = entModel.processes.value[index];
-
-                return PollCard(ent: entModel, process: process, index: index);
+                return CardPoll(
+                    entity: entityModel, process: process, index: index);
               },
             ),
           );
-        });
+        }));
   }
 
   Widget buildNoProcessesess(BuildContext ctx) {
@@ -76,6 +87,13 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
     return Scaffold(
         body: Center(
       child: Text("Loading..."),
+    ));
+  }
+
+  Widget buildError(BuildContext ctx, String message) {
+    return Scaffold(
+        body: Center(
+      child: Text("ERROR: $message"),
     ));
   }
 }

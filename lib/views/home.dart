@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/constants/colors.dart';
@@ -13,8 +13,8 @@ import 'package:vocdoni/views/identity-tab.dart';
 import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:dvote/dvote.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int selectedTab = 0;
+  bool scanning = false;
 
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
@@ -54,18 +55,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // DETERMINE INITIAL TAB
+    final currentAccount =
+        globalAppState.currentAccount; // It is expected to be non-null
+
     // No organizations => identity
-    if (identitiesBloc.value == null || identitiesBloc.value == null) {
+    if (!currentAccount.entities.hasValue ||
+        currentAccount.entities.value.length == 0) {
       selectedTab = 2;
-    } else if (appStateBloc != null &&
-        appStateBloc.value != null &&
-        identitiesBloc
-                .value[appStateBloc.value.selectedIdentity].peers.entities !=
-            null &&
-        identitiesBloc.value[appStateBloc.value.selectedIdentity].peers.entities
-                .length ==
-            0) {
-      selectedTab = 2;
+    } else {
+      // internally, this will only refresh outdated individual elements
+      currentAccount.refresh(); // detached from async
     }
 
     super.initState();
@@ -79,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    print(err);
+    devPrint(err);
     showAlert(
         title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
         text: Lang.of(homePageScaffoldKey.currentContext)
@@ -104,17 +103,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        if (!kReleaseMode) print("Inactive");
+        devPrint("Inactive");
         break;
       case AppLifecycleState.paused:
-        if (!kReleaseMode) print("Paused");
+        devPrint("Paused");
         break;
       case AppLifecycleState.resumed:
-        if (!kReleaseMode) print("Resumed");
-        connectGateways();
+        devPrint("Resumed");
+        ensureConnectedGateways();
         break;
       case AppLifecycleState.suspending:
-        if (!kReleaseMode) print("Suspending");
+        devPrint("Suspending");
         break;
     }
   }
@@ -140,70 +139,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(context) {
-    return StreamBuilder(
-        stream: identitiesBloc.stream,
-        builder: (BuildContext _, AsyncSnapshot<List<Identity>> identities) {
-          return StreamBuilder(
-              stream: appStateBloc.stream,
-              builder: (BuildContext ctx, AsyncSnapshot<AppState> appState) {
-                return WillPopScope(
-                    onWillPop: handleWillPop,
-                    child: Scaffold(
-                      floatingActionButtonLocation:
-                          FloatingActionButtonLocation.endFloat,
-                      floatingActionButtonAnimator:
-                          FloatingActionButtonAnimator.scaling,
-                      floatingActionButton: selectedTab == 1
-                          ? FloatingActionButton(
-                              onPressed: () async {
-                                String string = await new QRCodeReader()
-                                    .setAutoFocusIntervalInMs(
-                                        400) // default 5000
-                                    .setForceAutoFocus(true) // default false
-                                    .setTorchEnabled(true) // default false
-                                    .setHandlePermissions(true) // default true
-                                    .setExecuteAfterPermissionGranted(
-                                        true) // default true
-                                    .scan();
-                                Uri link;
-                                try {
-                                  link = Uri.parse(string);
-                                } catch (e) {}
-                                handleIncomingLink(link, context);
-                              },
-                              backgroundColor: colorDescription,
-                              child: Icon(
-                                FeatherIcons.plus,
-                              ),
-                              elevation: 5.0)
-                          : null,
-                      appBar: TopNavigation(
-                        title: getTabName(selectedTab),
-                        showBackButton: false,
+    return WillPopScope(
+        onWillPop: handleWillPop,
+        child: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+          floatingActionButton: selectedTab == 1
+              ? Builder(
+                  // Toast context descending from Scaffold
+                  builder: (context) => FloatingActionButton(
+                      onPressed: () => onScanQrCode(context),
+                      backgroundColor: colorDescription,
+                      child: Icon(
+                        FeatherIcons.plus,
                       ),
-                      key: homePageScaffoldKey,
-                      body: buildBody(ctx, appState?.data, identities?.data),
-                      bottomNavigationBar: BottomNavigation(
-                        onTabSelect: (index) => onTabSelect(index),
-                        selectedTab: selectedTab,
-                      ),
-                    ));
-              });
-        });
+                      elevation: 5.0))
+              : null,
+          appBar: TopNavigation(
+            title: getTabName(selectedTab),
+            showBackButton: false,
+          ),
+          key: homePageScaffoldKey,
+          body: buildBody(context),
+          bottomNavigationBar: BottomNavigation(
+            onTabSelect: (index) => onTabSelect(index),
+            selectedTab: selectedTab,
+          ),
+        ));
   }
 
-  buildBody(BuildContext ctx, AppState appState, List<Identity> identities) {
+  buildBody(BuildContext ctx) {
     Widget body;
 
     // RENDER THE CURRENT TAB BODY
     switch (selectedTab) {
       // VOTES FEED
       case 0:
-        body = StreamBuilder(
-            stream: newsFeedsBloc.stream,
-            builder: (BuildContext ctx, AsyncSnapshot<List<Feed>> newsFeeds) {
-              return HomeTab();
-            });
+        body = HomeTab();
         break;
       // SUBSCRIBED ENTITIES
       case 1:
@@ -229,9 +201,47 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  getTabName(int idx) {
-    if (idx == 0) return "Home";
-    if (idx == 1) return "Your entities";
-    if (idx == 2) return "Your identity";
+  onScanQrCode(BuildContext context) async {
+    if (scanning) return;
+    scanning = true;
+
+    try {
+      final result = await QRCodeReader()
+          .setAutoFocusIntervalInMs(400) // default 5000
+          .setForceAutoFocus(true) // default false
+          .setTorchEnabled(true) // default false
+          .setHandlePermissions(true) // default true
+          .setExecuteAfterPermissionGranted(true) // default true
+          .scan();
+
+      if (!(result is String)) return;
+
+      final link = Uri.tryParse(result);
+      if (!(link is Uri) || !link.hasScheme || link.hasEmptyPath)
+        throw Exception();
+
+      await handleIncomingLink(link, context);
+      scanning = false;
+    } catch (err) {
+      scanning = false;
+
+      await Future.delayed(Duration(milliseconds: 10));
+
+      showMessage(
+          "The QR code does not contain a valid link or the details cannot be retrieved",
+          context: context,
+          purpose: Purpose.DANGER);
+    }
+  }
+
+  String getTabName(int idx) {
+    if (idx == 0)
+      return "Home";
+    else if (idx == 1)
+      return "Your entities";
+    else if (idx == 2)
+      return "Your identity";
+    else
+      return "";
   }
 }

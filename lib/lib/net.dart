@@ -5,72 +5,88 @@ import 'package:vocdoni/constants/settings.dart';
 
 DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
+bool connecting = false;
 
-connectGateways() {
-  if (_dvoteGw is DVoteGateway) _dvoteGw.disconnect();
-  if (_web3Gw is Web3Gateway) _web3Gw.disconnect();
+ensureConnectedGateways() {
+  if (connecting) return;
 
   final gwInfo = _selectRandomGatewayInfo();
-  if (gwInfo == null) throw "There is no gateway available";
+  if (gwInfo == null) throw Exception("There is no gateway available");
 
-  _dvoteGw = DVoteGateway(gwInfo.dvote, publicKey: gwInfo.publicKey);
-  _web3Gw = Web3Gateway(gwInfo.web3);
+  connecting = true;
+  if (_dvoteGw is DVoteGateway) {
+    if (!_dvoteGw.isConnected) {
+      if (_dvoteGw.publicKey == gwInfo.publicKey)
+        _dvoteGw.connect(gwInfo.dvote);
+      else {
+        _dvoteGw = DVoteGateway(gwInfo.dvote,
+            publicKey: gwInfo.publicKey); // calls `connect()` internally
+      }
+    }
+  } else {
+    _dvoteGw = DVoteGateway(gwInfo.dvote,
+        publicKey: gwInfo.publicKey); // calls `connect()` internally
+  }
+
+  if (!(_web3Gw is Web3Gateway)) {
+    _web3Gw = Web3Gateway(gwInfo.web3);
+  }
+  connecting = false;
 }
 
-bool hasGatewaysConnected() =>
-    _dvoteGw is DVoteGateway && _web3Gw is Web3Gateway;
+bool areGatewaysConnected() =>
+    _dvoteGw is DVoteGateway && _dvoteGw.isConnected && _web3Gw is Web3Gateway;
 
 DVoteGateway getDVoteGateway() {
-  if (!hasGatewaysConnected()) connectGateways();
+  if (!areGatewaysConnected()) ensureConnectedGateways();
   return _dvoteGw;
 }
 
 Web3Gateway getWeb3Gateway() {
-  if (!hasGatewaysConnected()) connectGateways();
+  if (!areGatewaysConnected()) ensureConnectedGateways();
   return _web3Gw;
 }
 
 GatewayInfo _selectRandomGatewayInfo() {
-  if (appStateBloc.value == null || appStateBloc.value.bootnodes == null)
-    return null;
+  if (!globalAppState.bootnodes.hasValue) return null;
 
   final gw = GatewayInfo();
 
   if (NETWORK_ID == "homestead") {
-    if (appStateBloc.value.bootnodes.homestead.dvote.length < 1) {
+    if (globalAppState.bootnodes.value.homestead.dvote.length < 1) {
       print("The DVote gateway list is empty for Homestead");
       return null;
     }
 
     // PROD
     int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.dvote.length);
+        random.nextInt(globalAppState.bootnodes.value.homestead.dvote.length);
     int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.homestead.web3.length);
+        random.nextInt(globalAppState.bootnodes.value.homestead.web3.length);
 
-    gw.dvote = appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].uri;
+    gw.dvote = globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].uri;
     gw.publicKey =
-        appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].pubKey;
+        globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].pubKey;
     gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.homestead.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.homestead.web3[web3Idx].uri;
+        .addAll(globalAppState.bootnodes.value.homestead.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.bootnodes.value.homestead.web3[web3Idx].uri;
   } else {
-    if (appStateBloc.value.bootnodes.goerli.dvote.length < 1) {
+    if (globalAppState.bootnodes.value.goerli.dvote.length < 1) {
       print("The DVote gateway list is empty for Goerli");
       return null;
     }
 
     // DEV
     int dvoteIdx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.dvote.length);
+        random.nextInt(globalAppState.bootnodes.value.goerli.dvote.length);
     int web3Idx =
-        random.nextInt(appStateBloc.value.bootnodes.goerli.web3.length);
+        random.nextInt(globalAppState.bootnodes.value.goerli.web3.length);
 
-    gw.dvote = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].uri;
-    gw.publicKey = appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].pubKey;
+    gw.dvote = globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].uri;
+    gw.publicKey = globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].pubKey;
     gw.supportedApis
-        .addAll(appStateBloc.value.bootnodes.goerli.dvote[dvoteIdx].apis);
-    gw.web3 = appStateBloc.value.bootnodes.goerli.web3[web3Idx].uri;
+        .addAll(globalAppState.bootnodes.value.goerli.dvote[dvoteIdx].apis);
+    gw.web3 = globalAppState.bootnodes.value.goerli.web3[web3Idx].uri;
   }
   return gw;
 }

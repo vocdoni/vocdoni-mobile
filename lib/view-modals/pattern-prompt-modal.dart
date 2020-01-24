@@ -1,7 +1,7 @@
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/section.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
@@ -13,9 +13,9 @@ import 'package:vocdoni/constants/settings.dart';
 /// The component will attempt to decrypt `encryptedText`. If it succeeds, the
 /// passphrase will be returned via the router as a string.
 class PaternPromptModal extends StatefulWidget {
-  final String encryptedText;
+  final AccountModel account; // to unlock
 
-  PaternPromptModal(this.encryptedText);
+  PaternPromptModal(this.account);
 
   @override
   _PaternPromptModalState createState() => _PaternPromptModalState();
@@ -34,7 +34,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("PatternPrompModal");
+    globalAnalytics.trackPage("PatternPrompModal");
   }
 
   @override
@@ -45,28 +45,29 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
           showBackButton: true,
           onBackButton: onCancel,
         ),
-        body: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Spacer(flex: 3),
-              Section(
-                withDectoration: false,
-                text: "Unlock",
-              ),
-              Spacer(),
-              Center(
-                child: buildConfirming(),
-              ),
-              Spacer(),
-            ]));
+        body: Builder(
+            builder: (context) => Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Spacer(flex: 3),
+                      Section(
+                        withDectoration: false,
+                        text: "Unlock",
+                      ),
+                      Spacer(),
+                      Center(
+                        child: buildConfirming(context),
+                      ),
+                      Spacer(),
+                    ])));
   }
 
   onCancel() {
     Navigator.pop(context, null);
   }
 
-  DrawPattern buildConfirming() {
+  DrawPattern buildConfirming(BuildContext context) {
     // TODO: Implement exponential back-off
 
     return DrawPattern(
@@ -81,7 +82,7 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
       dotColor: colorDescription,
       canDraw: true,
       onPatternStarted: onPatternStart,
-      onPatternStopped: onPatternStop,
+      onPatternStopped: (_, dots) => onPatternStop(context, dots),
     );
   }
 
@@ -93,25 +94,30 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
 
   onPatternStop(BuildContext context, List<int> pattern) async {
     try {
-      String passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
-      String decryptedPayload =
-          await dvote.decryptString(widget.encryptedText, passphrase);
+      final encryptedText =
+          widget.account.identity.value.keys[0].encryptedPrivateKey;
+      // check if we can decrypt it
+
+      final passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
+      final decryptedPayload =
+          await dvote.decryptString(encryptedText, passphrase);
+
       if (decryptedPayload == null)
         throw InvalidPatternError("The decryption key is invalid");
 
+      if (!mounted) return;
+
       // OK
-      await appStateBloc.trackAuthAttemp(true);
+      await widget.account.trackSuccessfulAuth();
       Navigator.pop(context, passphrase);
     } catch (err) {
-      await appStateBloc.trackAuthAttemp(false);
+      await widget.account.trackFailedAuth();
       if (!mounted) return;
 
       setState(() {
         patternColor = colorRed;
       });
 
-      // TODO: Do not use this instance of context, because it does not
-      // come from a Scaffold right now
       Navigator.pop(
           context, InvalidPatternError("The pattern you entered is not valid"));
     }

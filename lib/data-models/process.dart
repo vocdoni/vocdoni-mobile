@@ -1,302 +1,446 @@
 import 'package:dvote/dvote.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/state-base.dart';
+import 'package:vocdoni/lib/state-notifier.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import "package:vocdoni/constants/meta-keys.dart";
-import 'package:vocdoni/lib/value-state.dart';
+import 'package:vocdoni/lib/util.dart';
 
-enum ProcessStateTags {
-  PROCESS_METADATA,
-  CENSUS_STATE,
-  PARTICIPATION,
-  VOTE_CONFIRMED
+/// This class should be used exclusively as a global singleton via MultiProvider.
+/// ProcessPoolModel tracks all the registered accounts and provides individual models that
+/// can be listened to as well.
+///
+/// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
+///
+class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
+    implements StatePersistable, StateRefreshable {
+  ProcessPoolModel() {
+    this.load(List<ProcessModel>());
+  }
+
+  // EXTERNAL DATA HANDLERS
+
+  /// Read the global collection of all objects from the persistent storage
+  @override
+  Future<void> readFromStorage() async {
+    if (!hasValue) this.load(List<ProcessModel>());
+
+    try {
+      this.setToLoading();
+      final processList = globalProcessesPersistence.get();
+      final processModelList = processList
+          .where((processMeta) =>
+              processMeta.meta[META_PROCESS_ID] is String &&
+              processMeta.meta[META_ENTITY_ID] is String)
+          .map((processMeta) => ProcessModel.fromMetadata(
+              processMeta,
+              processMeta.meta[META_PROCESS_ID],
+              processMeta.meta[META_ENTITY_ID]))
+          .cast<ProcessModel>()
+          .toList();
+      this.setValue(processModelList);
+    } catch (err) {
+      devPrint(err);
+      this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
+      throw RestoreError("There was an error while accessing the local data");
+    }
+  }
+
+  /// Write the given collection of all objects to the persistent storage
+  @override
+  Future<void> writeToStorage() async {
+    if (!hasValue) this.load(List<ProcessModel>());
+
+    try {
+      final processList = this
+          .value
+          .where((processModel) =>
+              processModel is ProcessModel && processModel.metadata.hasValue)
+          .map((processModel) {
+            // COPY STATE FIELDS INTO META
+            processModel.metadata.value.meta[META_PROCESS_ID] =
+                processModel.processId;
+            processModel.metadata.value.meta[META_ENTITY_ID] =
+                processModel.entityId;
+
+            if (processModel.isInCensus.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_CENSUS_BELONGS] =
+                  processModel.isInCensus.value ? "true" : "false";
+
+            if (processModel.hasVoted.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_HAS_VOTED] =
+                  processModel.hasVoted.value ? "true" : "false";
+
+            if (processModel.censusSize.hasValue)
+              processModel.metadata.value.meta[META_PROCESS_CENSUS_SIZE] =
+                  processModel.censusSize.value.toString();
+
+            return processModel.metadata.value;
+          })
+          .cast<ProcessMetadata>()
+          .toList();
+      await globalProcessesPersistence.writeAll(processList);
+    } catch (err) {
+      devPrint(err);
+      throw PersistError("Cannot store the current state");
+    }
+  }
+
+  @override
+  Future<void> refresh([bool force = false]) async {
+    if (!hasValue ||
+        globalAppState.currentAccount == null ||
+        !globalAppState.currentAccount.entities.hasValue) return;
+
+    devPrint("Refreshing related user's processes");
+
+    try {
+      // Get a filtered list of the Entities of the current user
+      final entityIds = globalAppState.currentAccount.entities.value
+          .map((entity) => entity.reference.entityId)
+          .toList();
+
+      // This will call `setValue` on the individual models that are already within the pool.
+      // No need to update the pool list itself.
+      await Future.wait(this
+          .value
+          .where((processModel) => entityIds.contains(processModel.entityId))
+          .map((processModel) => processModel.refresh(force))
+          .toList());
+
+      await this.writeToStorage();
+    } catch (err) {
+      devPrint(err);
+    }
+  }
+
+  /// Removes the given feed from the pool and persists the new pool.
+  Future<void> remove(List<ProcessModel> processModelsToRemove) async {
+    if (!this.hasValue) throw Exception("The pool has no value yet");
+
+    final updatedValue = this
+        .value
+        .where((poolProcess) {
+          for (var rmModel in processModelsToRemove) {
+            if (poolProcess.processId == rmModel.processId)
+              return false; // get it out
+          }
+
+          return true; // keep it
+        })
+        .cast<ProcessModel>()
+        .toList();
+    this.setValue(updatedValue);
+
+    await this.writeToStorage();
+  }
+
+  // HELPERS
+
+  /// Returns the voting processes from the given entity
+  List<ProcessModel> getFromEntityId(String entityId) {
+    if (!this.hasValue) return [];
+
+    return this
+        .value
+        .where((process) {
+          if (!(process is ProcessModel) || !process.metadata.hasValue)
+            return false;
+
+          return process.metadata.value.meta[META_ENTITY_ID] == entityId;
+        })
+        .cast<ProcessModel>()
+        .toList();
+  }
 }
 
-class ProcessModel extends StatesRebuilder {
-  String processId;
-  EntityReference entityReference;
-  String lang = "default";
+/// ProcessModel encapsulates the relevant information of a Vocdoni Process.
+/// This includes its metadata and the participation processes.
+///
+class ProcessModel implements StateRefreshable {
+  final String processId;
+  final String entityId;
+  final String lang = "default";
+  final StateNotifier<ProcessMetadata> metadata =
+      StateNotifier<ProcessMetadata>();
+  final StateNotifier<bool> isInCensus =
+      StateNotifier<bool>().withFreshness(60 * 5);
+  final StateNotifier<bool> hasVoted =
+      StateNotifier<bool>().withFreshness(60 * 5);
+  final StateNotifier<int> currentParticipants =
+      StateNotifier<int>().withFreshness(60 * 5);
+  final StateNotifier<int> censusSize =
+      StateNotifier<int>().withFreshness(60 * 30);
 
-  final ValueState<ProcessMetadata> processMetadata = ValueState();
+  List<dynamic> choices = [];
 
-  final ValueState<bool> isInCensus = ValueState();
-  final ValueState<bool> hasVoted = ValueState();
-
-  final ValueState<int> participantsTotal = ValueState();
-  final ValueState<int> participantsCurrent = ValueState();
-
-  final ValueState<DateTime> startDate = ValueState();
-  final ValueState<DateTime> endDate = ValueState();
-
-  ProcessModel({this.processId, this.entityReference}) {
-    syncLocal();
+  ProcessModel(this.processId, this.entityId,
+      [ProcessMetadata metadata,
+      bool isInCensus,
+      bool hasVoted,
+      int currentParticipants]) {
+    if (metadata is ProcessMetadata) {
+      // Ensure we can read it back
+      metadata.meta[META_PROCESS_ID] = this.processId;
+      metadata.meta[META_ENTITY_ID] = this.entityId;
+      this.metadata.load(metadata);
+    }
+    if (isInCensus is bool) this.isInCensus.load(isInCensus);
+    if (hasVoted is bool) this.hasVoted.load(hasVoted);
+    if (currentParticipants is int)
+      this.currentParticipants.load(currentParticipants);
   }
 
-  syncLocal() {
-    syncProcessMetadata();
-    syncCensusState();
-    syncParticipation();
-  }
+  ProcessModel.fromMetadata(
+      ProcessMetadata metadata, this.processId, this.entityId) {
+    // Ensure we can read it back
+    metadata.meta[META_PROCESS_ID] = this.processId;
+    metadata.meta[META_ENTITY_ID] = this.entityId;
 
-  update() async {
-    syncLocal();
-    await updateProcessMetadataIfNeeded();
-    await updateCensusStateIfNeeded();
-    await updateParticipation();
-    await updateDates();
+    this.metadata.load(metadata);
 
-    // Sync process times
-    // Check if active?
-    // Check participation
-    // Check census
-    // Check if voted
-    // Fetch results
-    // Fetch private key
-  }
+    switch (this.metadata.value.meta[META_PROCESS_CENSUS_BELONGS]) {
+      case "true":
+        this.isInCensus.load(true);
+        break;
+      case "false":
+        this.isInCensus.load(false);
+        break;
+    }
 
-  save() async {
-    await processesBloc.add(this.processMetadata.value);
-  }
+    switch (this.metadata.value.meta[META_PROCESS_HAS_VOTED]) {
+      case "true":
+        this.isInCensus.load(true);
+        break;
+      case "false":
+        this.isInCensus.load(false);
+        break;
+    }
 
-  syncProcessMetadata() {
-    ProcessMetadata value = processesBloc.value.firstWhere((process) {
-      bool isProcessId = process.meta[META_PROCESS_ID] == this.processId;
-      bool isFromEntity =
-          process.meta[META_ENTITY_ID] == this.entityReference.entityId;
-      bool isFromUser = true;
-      return isProcessId && isFromEntity && isFromUser;
-    }, orElse: () => null);
-
-    if (value == null)
-      this.processMetadata.setError("Not found");
-    else
-      this.processMetadata.setValue(value);
-
-    if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
-  }
-
-  updateProcessMetadataIfNeeded() async {
-    if (!this.processMetadata.hasValue) {
-      await updateProcessMetadata();
+    if (this.metadata.value.meta[META_PROCESS_CENSUS_SIZE] is String) {
+      final strValue =
+          this.metadata.value.meta[META_PROCESS_CENSUS_SIZE] ?? "0";
+      final newSize = int.tryParse(strValue) ?? 0;
+      this.censusSize.load(newSize);
     }
   }
 
-  updateProcessMetadata() async {
+  @override
+  Future<void> refresh([bool force = false]) {
+    devPrint("Refreshing process ${this.processId}");
+
+    return Future.wait([
+      refreshMetadata(force),
+      refreshIsInCensus(force),
+      refreshHasVoted(force),
+      refreshCurrentParticipants(force),
+      refreshCensusSize(force),
+    ]);
+  }
+
+  Future<void> refreshMetadata([bool force = false]) async {
+    if (!force && this.metadata.isFresh) return;
+    // else if (!force && this.metadata.isLoading) return;
+
+    devPrint("- Refreshing process metadata [${this.processId}]");
+
+    // TODO: Don't refetch if the IPFS hash is the same
+
+    final dvoteGw = getDVoteGateway();
+    final Web3Gateway web3Gw = getWeb3Gateway();
+
     try {
-      this.processMetadata.setToLoading();
+      this.metadata.setToLoading();
+      final newMetadata =
+          await getProcessMetadata(this.processId, dvoteGw, web3Gw);
+      newMetadata.meta[META_PROCESS_ID] =
+          this.processId; // Ensure we can read it back
+      newMetadata.meta[META_ENTITY_ID] = this.entityId;
 
-      final DVoteGateway dvoteGw = getDVoteGateway();
-      final Web3Gateway web3Gw = getWeb3Gateway();
+      devPrint("- Refreshing process metadata [DONE] [${this.processId}]");
 
-      this
-          .processMetadata
-          .setValue(await getProcessMetadata(processId, dvoteGw, web3Gw));
-
-      processMetadata.value.meta[META_PROCESS_ID] = processId;
-      processMetadata.value.meta[META_ENTITY_ID] = entityReference.entityId;
+      this.metadata.setValue(newMetadata);
     } catch (err) {
-      this.processMetadata.setError("Unable to fetch the vote details");
-    }
-    if (hasState) rebuildStates([ProcessStateTags.PROCESS_METADATA]);
-  }
+      devPrint(
+          "- Refreshing process metadata [ERROR: $err] [${this.processId}]");
 
-  syncCensusState() {
-    if (!this.processMetadata.hasValue) return;
-    try {
-      String str = this.processMetadata.value.meta[META_PROCESS_CENSUS_IS_IN];
-      if (str == 'true')
-        this.isInCensus.setValue(true);
-      else if (str == 'false')
-        this.isInCensus.setValue(false);
-      else
-        this.isInCensus.setError("Not found");
-    } catch (e) {
-      this.isInCensus.setError(e?.toString());
+      this.metadata.setError("Could not fetch the process details");
     }
   }
 
-  updateCensusStateIfNeeded() async {
-    if (!this.isInCensus.hasValue) await updateCensusState();
-  }
+  Future<void> refreshIsInCensus([bool force = false]) async {
+    if (!this.metadata.hasValue)
+      return;
+    else if (!force && this.isInCensus.isFresh)
+      return;
+    else if (!force && this.isInCensus.isLoading)
+      return;
+    else if (this.isInCensus.value == true)
+      return; // we should never be excluded from a census once within
 
-  updateCensusState() async {
-    if (!processMetadata.hasValue) return;
+    devPrint("- Refreshing process isInCensus [${this.processId}]");
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final dvoteGw = getDVoteGateway();
 
-    this.isInCensus.setToLoading();
-    if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
-
-    String base64Claim =
-        await digestHexClaim(account.identity.keys[0].publicKey);
+    final currentAccount = globalAppState.currentAccount;
+    if (!(currentAccount is AccountModel)) return;
 
     try {
+      this.isInCensus.setToLoading();
+
+      final base64Claim =
+          await digestHexClaim(currentAccount.identity.value.keys[0].publicKey);
+
       final proof = await generateProof(
-          processMetadata.value.census.merkleRoot, base64Claim, dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.isInCensus.setError("You are not part of the census");
-
-        if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
         return;
       }
-      RegExp emptyProofRegexp =
+
+      final emptyProofRegexp =
           RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
-      if (emptyProofRegexp.hasMatch(proof)) // 0x0000000000.....
-        this.isInCensus.setValue(false);
-      else
-        this.isInCensus.setValue(true);
+      if (emptyProofRegexp.hasMatch(proof)) {
+        this.isInCensus.setValue(false); // 0x0000000000.....
+        return;
+      }
 
-      stageCensusState();
-      save();
-      if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
+      final valid = await checkProof(
+          this.metadata.value.census.merkleRoot, base64Claim, proof, dvoteGw);
 
-      // final valid = await checkProof(
-      //     processMetadata.census.merkleRoot, base64Claim, proof, dvoteGw);
-      // if (!valid) {
-      //   censusState = CensusState.OUT;
-      //   return;
-      // }
-    } catch (error) {
-      this.isInCensus.setError("Unable to check the census");
-      if (hasState) rebuildStates([ProcessStateTags.CENSUS_STATE]);
+      devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
+
+      this.isInCensus.setValue(valid);
+    } catch (err) {
+      devPrint(
+          "- Refreshing process isInCensus [ERROR: $err] [${this.processId}]");
+
+      this.isInCensus.setError("Could not check the census");
     }
   }
 
-  updateHasVoted() async {
-    if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+  Future<void> refreshHasVoted([bool force = false]) async {
+    if (!force && this.hasVoted.isFresh)
+      return;
+    else if (!force && this.hasVoted.isLoading)
+      return;
+    else if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
 
-    final String pollNullifier = getPollNullifier(
-        identitiesBloc.getCurrentIdentity().keys[0].address, this.processId);
+    devPrint("- Refreshing process hasVoted [${this.processId}]");
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
-    final success =
-        await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
-            .catchError((_) {});
-
-    if (success is bool) {
-      this.hasVoted.setValue(success);
-    } else {
-      this.hasVoted.setError("Unable to check the process status");
-    }
-  }
-
-  stageCensusState() {
-    if (processMetadata == null) return null;
-
-    this.processMetadata.value.meta[META_PROCESS_CENSUS_IS_IN] =
-        isInCensus.toString();
-  }
-
-  Future<int> getTotalParticipants() async {
-    if (this.processMetadata == null) return null;
-
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    final currentAccount = globalAppState.currentAccount;
+    if (!(currentAccount is AccountModel)) return;
 
     try {
-      final size =
-          await getCensusSize(processMetadata.value.census.merkleRoot, dvoteGw);
-      return size;
-    } catch (e) {
-      return null;
+      this.hasVoted.setToLoading();
+      final String pollNullifier = getPollNullifier(
+          globalAppState.currentAccount.identity.value.keys[0].address,
+          this.processId);
+
+      final dvoteGw = getDVoteGateway();
+      final success =
+          await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
+              .catchError((_) {});
+
+      if (success is bool) {
+        devPrint("- Refreshing process hasVoted [DONE] [${this.processId}]");
+
+        this.hasVoted.setValue(success);
+      } else {
+        devPrint("- Refreshing process hasVoted [NO BOOL] [${this.processId}]");
+
+        this.hasVoted.setError("Could not check the process status");
+      }
+    } catch (err) {
+      devPrint(
+          "- Refreshing process hasVoted [ERROR: $err] [${this.processId}]");
+
+      this.hasVoted.setError("Could not check the vote status");
     }
   }
 
-  Future<int> getCurrentParticipants() async {
-    if (processMetadata == null) return null;
+  Future<void> refreshCensusSize([bool force = false]) {
+    if (!this.metadata.hasValue) return null;
 
-    final DVoteGateway dvoteGw = getDVoteGateway();
+    devPrint("- Refreshing process censusSize [${this.processId}]");
 
-    try {
-      final height = await getEnvelopeHeight(this.processId, dvoteGw);
-      return height;
-    } catch (e) {
-      return null;
-    }
+    final dvoteGw = getDVoteGateway();
+
+    this.censusSize.setToLoading();
+    return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
+        .then((size) {
+      devPrint("- Refreshing process censusSize [DONE] [${this.processId}]");
+
+      return this.censusSize.setValue(size);
+    }).catchError((err) {
+      devPrint(
+          "- Refreshing process censusSize [ERROR: $err] [${this.processId}]");
+
+      this.censusSize.setError("Could not check the census size");
+    });
   }
 
-  syncParticipation() {
-    if (!processMetadata.hasValue) return;
-    int total;
-    int current;
-    try {
-      total = int.parse(
-          processMetadata.value.meta[META_PROCESS_PARTICIPANTS_TOTAL]);
+  Future<void> refreshCurrentParticipants([bool force = false]) {
+    if (!this.metadata.hasValue)
+      return Future.value();
+    else if (!force && this.currentParticipants.isFresh)
+      return Future.value();
+    else if (!force && this.currentParticipants.isLoading)
+      return Future.value();
 
-      current = int.parse(
-          processMetadata.value.meta[META_PROCESS_PARTICIPANTS_CURRENT]);
-    } catch (e) {}
+    devPrint("- Refreshing process currentParticipants [${this.processId}]");
 
-    if (total == null)
-      this.participantsTotal.setError("Not found");
-    else
-      this.participantsTotal.setValue(total);
+    final dvoteGw = getDVoteGateway();
 
-    if (total == null)
-      this.participantsCurrent.setError("Not found");
-    else
-      this.participantsCurrent.setValue(current);
+    this.currentParticipants.setToLoading();
+    return getEnvelopeHeight(this.processId, dvoteGw).then((numVotes) {
+      devPrint(
+          "- Refreshing process currentParticipants [DONE] [${this.processId}]");
 
-    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
+      return this.currentParticipants.setValue(numVotes);
+    }).catchError((err) {
+      devPrint(
+          "- Refreshing process currentParticipants [ERROR: $err] [${this.processId}]");
+
+      this.currentParticipants.setError("Could not check the census size");
+    });
   }
 
-  updateParticipation() async {
-    this.participantsTotal.setToLoading();
-    this.participantsCurrent.setToLoading();
-    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
+  // GETTERS
 
-    int total = await getTotalParticipants();
-    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
-
-    int current = await getCurrentParticipants();
-
-    if (total == null || total <= 0)
-      this.participantsTotal.setError("Invalid census size");
-    else
-      this.participantsTotal.setValue(total);
-
-    if (current == null)
-      this.participantsCurrent.setError("Invalid amount of participants");
-    else
-      this.participantsCurrent.setValue(total);
-
-    stageParticipation();
-    save();
-    if (hasState) rebuildStates([ProcessStateTags.PARTICIPATION]);
-  }
-
-  stageParticipation() {
-    if (participantsTotal.hasValue) {
-      String total = this.participantsTotal.toString();
-      processMetadata.value.meta[META_PROCESS_PARTICIPANTS_TOTAL] = total;
-    }
-
-    if (participantsCurrent.hasValue) {
-      String current = this.participantsCurrent.toString();
-      processMetadata.value.meta[META_PROCESS_PARTICIPANTS_CURRENT] = current;
-    }
-  }
-
-  double get participation {
-    if (!this.participantsTotal.hasValue || !this.participantsCurrent.hasValue)
+  double get currentParticipation {
+    if (!this.censusSize.hasValue || !this.currentParticipants.hasValue)
       return 0.0;
+    else if (this.censusSize.value <= 0) return 0.0;
 
-    return this.participantsCurrent.value * 100 / this.participantsTotal.value;
+    return this.currentParticipants.value *
+        100.0 /
+        this.censusSize.value.toDouble();
   }
 
-  updateDates() {
-    if (!(processMetadata.value is ProcessMetadata)) return;
+  DateTime get startDate {
+    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
+      return null;
 
-    //TODO subscribe to vochainModel changes
-    if (vochainModel.referenceBlock.hasValue) {
-      this.startDate.setValue(DateTime.now().add(vochainModel
-          .getDurationUntilBlock(processMetadata.value.startBlock)));
-      this.endDate.setValue(DateTime.now().add(
-          vochainModel.getDurationUntilBlock(processMetadata.value.startBlock +
-              processMetadata.value.numberOfBlocks)));
-    } else {
-      this.startDate.setError("Vochain is not in sync");
-      this.endDate.setError("Vochain is not in sync");
-    }
+    final remainingDuration =
+        globalAppState.getDurationUntilBlock(this.metadata.value.startBlock);
+    if (remainingDuration is Duration)
+      return DateTime.now().add(remainingDuration);
+    return null;
+  }
+
+  DateTime get endDate {
+    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
+      return null;
+
+    final remainingDuration = globalAppState.getDurationUntilBlock(
+        this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
+    if (remainingDuration is Duration)
+      return DateTime.now().add(remainingDuration);
+    return null;
   }
 }

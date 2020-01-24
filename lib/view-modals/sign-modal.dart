@@ -18,6 +18,9 @@ class SignModal extends StatelessWidget {
     final SignModalArguments args = ModalRoute.of(context).settings.arguments;
     if (args == null || !(args is SignModalArguments))
       return buildEmptyData(context);
+    else if (globalAppState.currentAccount == null ||
+        !globalAppState.currentAccount.identity.hasValue)
+      return buildEmptyAccount(context);
 
     return Scaffold(
       appBar: TopNavigation(
@@ -35,8 +38,7 @@ class SignModal extends StatelessWidget {
             height: 20,
           ),
           Text("Using: " +
-              identitiesBloc
-                  .value[appStateBloc.value.selectedIdentity].alias +
+              globalAppState.currentAccount.identity.value.alias +
               "?")
         ]),
       ),
@@ -44,6 +46,18 @@ class SignModal extends StatelessWidget {
   }
 
   buildEmptyData(BuildContext context) {
+    return Scaffold(
+      appBar: TopNavigation(
+        showBackButton: true,
+        title: Lang.of(context).get("Sign"),
+      ),
+      body: Center(
+        child: Text("(No data)"),
+      ),
+    );
+  }
+
+  buildEmptyAccount(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,

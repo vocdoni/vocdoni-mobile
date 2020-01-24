@@ -1,7 +1,6 @@
 import 'package:dvote/dvote.dart';
-import 'package:states_rebuilder/states_rebuilder.dart';
 
-class QuestionSingleChoice extends StatesRebuilder {
+class QuestionSingleChoice {
   final ProcessMetadata_Details_Question questionDetails;
   String selectedAnswer;
   String error;

@@ -15,7 +15,6 @@ class _DevPagerState extends State<DevPager> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _optionSelected1 = null;
   }

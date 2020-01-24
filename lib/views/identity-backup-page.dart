@@ -80,7 +80,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
   @override
   void initState() {
     super.initState();
-    analytics.trackPage("IdentityBackupPage");
+    globalAnalytics.trackPage("IdentityBackupPage");
   }
 
   @override
