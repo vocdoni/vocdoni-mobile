@@ -437,9 +437,14 @@ class EntityModel implements StateRefreshable {
             if (action.register) {
               return _isActionVisible(action, this.reference.entityId)
                   .then((visible) {
-                if (!(visible is bool)) throw Exception();
+                devPrint("TODO: UNCOMMENT HERE");
+                // TODO: FIXME UNCOMENT
+                // if (!(visible is bool)) throw Exception();
+                // this.isRegistered.setValue(!visible);
                 this.registerAction.setValue(action);
-                this.isRegistered.setValue(!visible);
+
+                // TODO: FIXME REMOVE
+                this.isRegistered.setValue(false);
               }).catchError((err) {
                 // capture the error locally
                 this

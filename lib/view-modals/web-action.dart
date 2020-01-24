@@ -41,36 +41,50 @@ class _WebActionState extends State<WebAction> {
       appBar: AppBar(
         title: Text(widget.title ?? "Vocdoni"),
       ),
-      body: WebView(
-        navigationDelegate: (NavigationRequest request) {
-          // Forget any premissions that the user may have granted before
-          hasPublicReadPermission = false;
-          setState(() {
-            loading = true;
-          });
-          return NavigationDecision.navigate;
-        },
-        initialUrl: widget.url,
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController webViewController) {
-          setState(() {
-            webViewCtrl = webViewController;
-          });
-        },
-        onPageFinished: (String url) async {
-          if (webViewCtrl == null) return;
-          bool back = await webViewCtrl.canGoBack();
-          bool fwd = await webViewCtrl.canGoForward();
-          setState(() {
-            canGoBack = back;
-            canGoForward = fwd;
-            loading = false;
-          });
-        },
-        // TODO(iskakaushik): Remove this when collection literals makes it to stable.
-        // ignore: prefer_collection_literals
-        javascriptChannels: javascriptChannels,
-      ),
+      body: Builder(
+          builder: (context) => WebView(
+                navigationDelegate: (NavigationRequest request) {
+                  // Forget any premissions that the user may have granted before
+                  hasPublicReadPermission = false;
+                  setState(() {
+                    loading = true;
+                  });
+                  return NavigationDecision.navigate;
+                },
+                initialUrl: widget.url,
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (WebViewController webViewController) {
+                  setState(() {
+                    webViewCtrl = webViewController;
+                  });
+                },
+                onPageFinished: (String url) async {
+                  if (webViewCtrl == null) return;
+
+                  bool back = await webViewCtrl.canGoBack();
+                  bool fwd = await webViewCtrl.canGoForward();
+                  setState(() {
+                    canGoBack = back;
+                    canGoForward = fwd;
+                    loading = false;
+                  });
+
+                  // DID IT LOAD?
+                  final currentUrl = await webViewCtrl
+                      .evaluateJavascript("window.location.href");
+                  if (currentUrl == "\"about:blank\"") {
+                    Navigator.of(context).pop();
+
+                    await showAlert(
+                        title: Lang.of(context).get("Error"),
+                        text: Lang.of(context).get("The page cannot be loaded"),
+                        context: context);
+                  }
+                },
+                // TODO(iskakaushik): Remove this when collection literals makes it to stable.
+                // ignore: prefer_collection_literals
+                javascriptChannels: javascriptChannels,
+              )),
       bottomNavigationBar: buildBottomBar(context),
     );
   }
