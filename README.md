@@ -148,6 +148,7 @@ Widget build(BuildContext context) {
 ```
 
 **Consume Local Models in specific places**
+
 Unike the global modes (data pools), any other StateNotifier instance will not be provided on the root context. You will typically have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. This single instance can't simply use `Consumer` because `EntityModel` is no longer a global and unique value provided on the context.
 
 This means, that any `StateNotifier<T>` values within `EntityModel` need to be consumed locally.
@@ -183,13 +184,13 @@ Widget build(BuildContext context) {
 Widget build(BuildContext context) {
 	final myEntity = globalEntityPool.value.first;
 
-	// Consume may values locally
+	// Consume many values locally
 	return StateNotifierListener(
-    	values: [myEntity.feed, myEntity.processes],  // StateNotifier<T> value that may change over time
+    	values: [myEntity.feed, myEntity.processes],  // StateNotifier<T> values that may change over time
 		child: Builder(
 			builder: (context) {
 				// rebuilt whenever either of myEntity.feed or myEntity.processes change
-				
+
 				// ...
 			}
 		)
@@ -207,7 +208,7 @@ Other models (mainly pools) also implement the `StatePersistable` interface, so 
 
 #### General
 
-It is important not to mix the models (account, entity, process, feed, app state) with the Persistence classes. The latter map diretly to the Protobuf classes, which allow for binary serialization and consistently have a 1:1 mapping.
+It is important not to mix the models (account, entity, process, feed, app state) with the Persistence classes. Persistence classes map diretly to `dvote-protobuf` classes, which allow for binary serialization and consistently have a 1:1 mapping.
 
 Models can contain both data which is persisted (entity metadata, process metadata) as well as data that is ephemeral (current participants on a vote, selected account). When `readFromStorage` is called, data needs to be deserialized and restored properly, often across multiple models.
 
