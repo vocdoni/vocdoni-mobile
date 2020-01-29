@@ -318,7 +318,7 @@ class _PollPageState extends State<PollPage> {
     final newRoute = MaterialPageRoute(
         fullscreenDialog: true,
         builder: (context) =>
-            PollPackaging(process: process, answers: intAnswers));
+            PollPackaging(process: process, choices: intAnswers));
     await Navigator.push(ctx, newRoute);
   }
 
