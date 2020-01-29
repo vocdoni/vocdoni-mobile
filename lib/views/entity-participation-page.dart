@@ -39,7 +39,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
     return StateNotifierListener(
         values: [entityModel.processes], // rebuild upon updates on this value
-        child: Builder(builder: (context) {
+        builder: (context) {
           if (!entityModel.metadata.hasValue || !entityModel.processes.hasValue)
             return buildNoProcessesess(context);
           else if (entityModel.metadata.isLoading ||
@@ -73,7 +73,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
               },
             ),
           );
-        }));
+        });
   }
 
   Widget buildNoProcessesess(BuildContext ctx) {

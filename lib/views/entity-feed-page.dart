@@ -40,11 +40,14 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
     return StateNotifierListener(
         values: [entityModel.feed], // rebuild upon updates on this value
-        child: Builder(builder: (context) {
-          if (!entityModel.metadata.hasValue) return buildEmptyEntity(context);
-          if (!entityModel.feed.hasValue)
+        builder: (context) {
+          if (!entityModel.metadata.hasValue)
+            return buildEmptyEntity(context);
+          else if (!entityModel.feed.hasValue)
             return buildEmptyPosts(context);
-          else if (entityModel.metadata.isLoading || entityModel.feed.isLoading)
+          else if ((!entityModel.metadata.hasValue &&
+                  entityModel.metadata.isLoading) ||
+              (!entityModel.feed.hasValue && entityModel.feed.isLoading))
             return buildLoading(context);
           else if (entityModel.metadata.hasError ||
               entityModel.feed.hasError ||
@@ -68,7 +71,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
               },
             ),
           );
-        }));
+        });
   }
 
   Widget buildEmptyEntity(BuildContext ctx) {

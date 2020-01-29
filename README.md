@@ -20,12 +20,17 @@ final myString = StateContainer<String>();
 // ...
 myString.setToLoading("Optional loading message");
 myString.isLoading // true
-mString.hasError // false
+myString.isLoadingStalled // false
+myString.hasError // false
 myString.hasValue // false
 myString.value // null
 
+// > 10 seconds later
+myString.isLoadingStalled // true
+
 myString.setError("Something went wrong");
 myString.isLoading // false
+myString.isLoadingStalled // false
 myString.hasError // true
 myString.errorMessage  // "Something went wrong"
 myString.hasValue // false
@@ -33,6 +38,7 @@ myString.value // null
 
 myString.setValue("I am ready!");
 myString.isLoading // false
+myString.isLoadingStalled // false
 myString.hasError // false
 myString.hasValue // true
 myString.value // "I am ready!"
@@ -158,28 +164,7 @@ final globalEntityPool = EntityPoolModel();
 
 // ...
 
-// Widget 1
-@override
-Widget build(BuildContext context) {
-	final myEntity = globalEntityPool.value.first;
-
-	// Consume one value locally
-	return ChangeNotifierProvider.value(
-    	value: myEntity.feed,  // StateNotifier<T> value that may change over time
-		child: Builder(
-			builder: (context) {
-				// Use myEntity.feed.hasValue, myEntity.feed.isLoading, etc.
-
-				// The type is inferred automatically, but the `value` needs to be 
-				// your StateNotifier or derive from ChangeNotifier
-
-				// ...
-			}
-		)
-	);
-}
-
-// Widget 2
+// Widget
 @override
 Widget build(BuildContext context) {
 	final myEntity = globalEntityPool.value.first;
@@ -187,12 +172,10 @@ Widget build(BuildContext context) {
 	// Consume many values locally
 	return StateNotifierListener(
     	values: [myEntity.feed, myEntity.processes],  // StateNotifier<T> values that may change over time
-		child: Builder(
-			builder: (context) {
-				// rebuilt whenever either of myEntity.feed or myEntity.processes change
+		builder: (context) {
+			// rebuilt whenever either of myEntity.feed or myEntity.processes change
 
-				// ...
-			}
+			// ...
 		)
 	);
 }

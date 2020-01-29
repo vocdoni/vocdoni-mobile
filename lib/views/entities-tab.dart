@@ -32,7 +32,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     // Rebuild if the pool changes (not the items)
     return StateNotifierListener(
         values: [currentAccount.entities, currentAccount.identity],
-        child: Builder(builder: (context) {
+        builder: (context) {
           if (!currentAccount.entities.hasValue ||
               currentAccount.entities.value.length == 0) {
             return buildNoEntities(ctx);
@@ -48,7 +48,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
                 else if (entity.metadata.isLoading) return CardLoading();
                 return buildEmptyMetadataCard(ctx, entity);
               });
-        }));
+        });
   }
 
   Widget buildEmptyMetadataCard(BuildContext ctx, EntityModel entityModel) {
@@ -95,7 +95,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     // the entity's process list changes
     return StateNotifierListener(
       values: [entity.processes],
-      child: Builder(builder: (context) {
+      builder: (context) {
         int itemCount = 0;
         if (entity.processes.hasValue) {
           final availableProcesses = List<ProcessModel>();
@@ -113,7 +113,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
             rightTextIsBadge: true,
             onTap: () => onTapParticipation(ctx, entity),
             disabled: itemCount == 0);
-      }),
+      },
     );
   }
 
@@ -122,7 +122,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
     // the entity's news feed changes
     return StateNotifierListener(
       values: [entity.feed],
-      child: Builder(builder: (ctx) {
+      builder: (ctx) {
         final feedPostAmount = getFeedPostCount(entity);
         return ListItem(
             mainText: "Feed",
@@ -131,7 +131,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
             rightTextIsBadge: true,
             onTap: () => onTapFeed(ctx, entity),
             disabled: feedPostAmount == 0);
-      }),
+      },
     );
   }
 

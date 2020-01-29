@@ -9,17 +9,21 @@
 /// from your code using `hasValue`, `hasError` and `isLoading`.
 ///
 class StateContainer<T> {
-  bool _loading = false;
-  String _loadingMessage; // optional
+  DateTime
+      _loadingStarted; // Dat when the loading state was set. Null => not loading.
+  String _loadingMessage; // optional message
 
-  String _errorMessage; // If not null, then _currentValue is not valid
-  DateTime _lastError;
+  DateTime
+      _errorEncountered; // Date when the error state was set. Null => no error. Not Null => invalid _currentValue
+  String _errorMessage;
 
   T _currentValue;
-  DateTime _lastUpdated;
+  DateTime _currentValueUpdated;
 
-  int _freshnessSecondsThreshold =
-      10; // Amount of seconds before `isFresh` returns false
+  int _freshnessTimeAmount =
+      10; // Amount of seconds before `isFresh` starts returning false
+  int _stallTimeAmount =
+      10; // Amount of seconds before `isLoadingStall` starts returning true
 
   /// Initializes the state with no value by default. If an argument is passed,
   /// the argument is set as the initial value.
@@ -30,7 +34,7 @@ class StateContainer<T> {
   /// Sets the loading flag to true and an optional loading text.
   /// Returns itself so further methods can be chained right after.
   StateContainer setToLoading([String loadingMessage]) {
-    _loading = true;
+    _loadingStarted = DateTime.now();
     if (loadingMessage is String && loadingMessage.length > 0) {
       _loadingMessage = loadingMessage;
     }
@@ -44,14 +48,14 @@ class StateContainer<T> {
   /// Returns itself so further methods can be chained right after.
   StateContainer setError(String error, {bool keepPreviousValue = false}) {
     _errorMessage = error;
-    _lastError = DateTime.now();
+    _errorEncountered = DateTime.now();
 
-    _loading = false;
+    _loadingStarted = null;
     _loadingMessage = null;
 
     if (keepPreviousValue != true) {
       _currentValue = null;
-      _lastUpdated = null;
+      _currentValueUpdated = null;
     }
     return this;
   }
@@ -61,13 +65,13 @@ class StateContainer<T> {
   /// Returns itself so further methods can be chained right after.
   StateContainer setValue(T value) {
     _currentValue = value;
-    _lastUpdated = DateTime.now();
+    _currentValueUpdated = DateTime.now();
 
-    _loading = false;
+    _loadingStarted = null;
     _loadingMessage = null;
 
     _errorMessage = null;
-    _lastError = null;
+    _errorEncountered = null;
     return this;
   }
 
@@ -77,7 +81,7 @@ class StateContainer<T> {
   StateContainer load(T value) {
     _currentValue = value;
 
-    _loading = false;
+    _loadingStarted = null;
     _loadingMessage = null;
 
     return this;
@@ -89,13 +93,23 @@ class StateContainer<T> {
   withFreshness(int seconds) {
     if (seconds < 0) throw Exception("The amount of seconds must be positive");
 
-    this._freshnessSecondsThreshold = seconds;
+    this._freshnessTimeAmount = seconds;
     return this;
   }
 
-  /// Returns true if the loading flag is currently active
+  /// Returns `true` if the loading flag is currently active
   bool get isLoading {
-    return _loading;
+    return _loadingStarted is DateTime;
+  }
+
+  /// Returns `true` if `setToLoading()` was called more than X seconds ago (by default, 10).
+  /// Returns `false` if `setToLoading()` was just called or the value is simply not "loading".
+  bool get isLoadingStalled {
+    if (!isLoading) return false;
+
+    final stallThreshold =
+        _loadingStarted.add(Duration(seconds: _stallTimeAmount)); // loading date + N seconds
+    return _loadingStarted.isAfter(stallThreshold);
   }
 
   /// Returns the optional loading message string
@@ -105,7 +119,7 @@ class StateContainer<T> {
 
   /// Returns true if an error message is currently set
   bool get hasError {
-    return _errorMessage != null;
+    return _errorEncountered != null;
   }
 
   /// Returns the last error message defined
@@ -127,19 +141,19 @@ class StateContainer<T> {
 
   /// Returns the last successful update
   DateTime get lastUpdated {
-    return _lastUpdated;
+    return _currentValueUpdated;
   }
 
   /// Returns the timestamp of the last error encountered
   DateTime get lastError {
-    return _lastError;
+    return _errorEncountered;
   }
 
   /// Returns true if a valid value was set less than 10 seconds ago
   bool get isFresh {
     return hasValue &&
-        _lastUpdated is DateTime &&
-        DateTime.now().difference(_lastUpdated) <
-            Duration(seconds: this._freshnessSecondsThreshold);
+        _currentValueUpdated is DateTime &&
+        DateTime.now().difference(_currentValueUpdated) <
+            Duration(seconds: this._freshnessTimeAmount);
   }
 }

@@ -242,8 +242,11 @@ class ProcessModel implements StateRefreshable {
   }
 
   Future<void> refreshMetadata([bool force = false]) async {
-    if (!force && this.metadata.isFresh) return;
-    // else if (!force && this.metadata.isLoading) return;
+    if (!force && this.metadata.isFresh)
+      return;
+    else if (!force &&
+        this.metadata.isLoading &&
+        !this.metadata.isLoadingStalled) return;
 
     devPrint("- Refreshing process metadata [${this.processId}]");
 

@@ -129,7 +129,9 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   /////////////////////////////////////////////////////////////////////////////
 
   Future<bool> handleWillPop() async {
-    if (!Navigator.canPop(context)) {
+    if (generating)
+      return false;
+    else if (!Navigator.canPop(context)) {
       // dispose any resource in use
     }
     return true;

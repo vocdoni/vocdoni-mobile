@@ -8,7 +8,6 @@ import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/state-base.dart';
@@ -217,7 +216,9 @@ class EntityModel implements StateRefreshable {
     // TODO: Don't refetch if the IPFS hash is the same
     if (!(reference is EntityReference))
       return;
-    else if (this.metadata.isLoading) return;
+    else if (!force &&
+        this.metadata.isLoading &&
+        !this.metadata.isLoadingStalled) return;
 
     devPrint("Refreshing entity metadata [${reference.entityId}]");
 
@@ -354,8 +355,10 @@ class EntityModel implements StateRefreshable {
   }
 
   Future<void> refreshFeed([bool force = false]) async {
-    if (!this.metadata.hasValue) return;
-    // else if (!force && this.feed.isLoading) return;
+    if (!this.metadata.hasValue)
+      return;
+    else if (!force && this.feed.isLoading && !this.feed.isLoadingStalled)
+      return;
 
     if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
         is String)) return;
@@ -419,7 +422,9 @@ class EntityModel implements StateRefreshable {
       return;
     else if (!force && this.visibleActions.isFresh)
       return;
-    else if (!force && this.visibleActions.isLoading) return;
+    else if (!force &&
+        this.visibleActions.isLoading &&
+        !this.visibleActions.isLoadingStalled) return;
 
     devPrint(
         "- Refreshing entity dependent visible actions [${reference.entityId}]");

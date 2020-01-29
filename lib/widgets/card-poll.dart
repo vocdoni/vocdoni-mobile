@@ -33,7 +33,7 @@ class CardPoll extends StatelessWidget {
     // Consume individual items that may rebuild only themselves
     return StateNotifierListener(
       values: [entity.metadata, process.metadata],
-      child: this.buildCard(context),
+      builder: (context) => this.buildCard(context),
     );
   }
 

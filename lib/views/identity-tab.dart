@@ -34,7 +34,7 @@ class _IdentityTabState extends State<IdentityTab> {
     // Rebuild whenever the identity is updated
     return StateNotifierListener(
       values: [currentAccount.identity],
-      child: Builder(builder: (ctx) {
+      builder: (ctx) {
         if (currentAccount.identity.hasError ||
             !currentAccount.identity.hasValue) return buildEmpty(ctx);
 
@@ -71,7 +71,7 @@ class _IdentityTabState extends State<IdentityTab> {
                     })
           ],
         );
-      }),
+      },
     );
   }
 

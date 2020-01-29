@@ -47,13 +47,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // Rebuild when the metadata updates
     return StateNotifierListener(
       values: [widget.entityModel.metadata],
-      child: Builder(
-        builder: (BuildContext context) {
-          return widget.entityModel.metadata.hasValue
-              ? buildScaffold(context)
-              : buildScaffoldWithoutMetadata(context);
-        },
-      ),
+      builder: (BuildContext context) {
+        return widget.entityModel.metadata.hasValue
+            ? buildScaffold(context)
+            : buildScaffoldWithoutMetadata(context);
+      },
     );
   }
 
@@ -85,7 +83,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         widget.entityModel.processes,
         widget.entityModel.feed
       ],
-      child: Builder(builder: (context) {
+      builder: (context) {
         if (widget.entityModel.metadata.isLoading)
           return ListItem(
             mainText: "Fetching details...",
@@ -123,7 +121,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           );
         else
           return Container();
-      }),
+      },
     );
   }
 
@@ -208,7 +206,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // Rebuild when the feed updates
     return StateNotifierListener(
         values: [widget.entityModel.feed],
-        child: Builder(builder: (context) {
+        builder: (context) {
           int postCount = 0;
           if (widget.entityModel.feed.hasValue) {
             postCount = widget.entityModel.feed.value.items?.length ?? 0;
@@ -227,40 +225,41 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             isSpinning: widget.entityModel.feed.isLoading,
             onTap: () => onShowFeed(context),
           );
-        }));
+        });
   }
 
   buildParticipationRow(BuildContext context) {
     // Rebuild when the process list updates (not the items)
     return StateNotifierListener(
       values: [widget.entityModel.processes],
-      child: Builder(
-        builder: (context) {
-          int processCount = 0;
+      builder: (context) {
+        int processCount = 0;
+        if (widget.entityModel.processes.hasValue) {
+          final availableProcesses = List<ProcessModel>();
           if (widget.entityModel.processes.hasValue) {
-            final availableProcesses = List<ProcessModel>();
-            if (widget.entityModel.processes.hasValue) {
-              availableProcesses.addAll(widget.entityModel.processes.value
-                  .where((item) => item.metadata.hasValue));
-            }
-
-            processCount = availableProcesses.length;
+            availableProcesses.addAll(widget.entityModel.processes.value
+                .where((item) => item.metadata.hasValue));
           }
 
-          return ListItem(
-              icon: FeatherIcons.mail,
-              mainText: "Participation",
-              rightText: processCount.toString(),
-              rightTextIsBadge: true,
-              rightTextPurpose:
-                  widget.entityModel.processes.hasError ? Purpose.DANGER : null,
-              disabled: widget.entityModel.processes.hasError ||
-                  widget.entityModel.processes.isLoading ||
-                  processCount == 0,
-              isSpinning: widget.entityModel.processes.isLoading,
-              onTap: () => onShowParticipation(context));
-        },
-      ),
+          processCount = availableProcesses.length;
+        }
+
+        return ListItem(
+            icon: FeatherIcons.mail,
+            mainText: "Participation",
+            rightText: processCount.toString(),
+            rightTextIsBadge: true,
+            rightTextPurpose:
+                widget.entityModel.processes.hasError ? Purpose.DANGER : null,
+            disabled: widget.entityModel.processes.hasError ||
+                widget.entityModel.processes.isLoading ||
+                processCount == 0,
+            isSpinning: widget.entityModel.processes.isLoading ||
+                (widget.entityModel.processes.hasValue &&
+                    widget.entityModel.processes.value
+                        .any((proc) => proc.metadata.isLoading)),
+            onTap: () => onShowParticipation(context));
+      },
     );
   }
 
@@ -277,17 +276,17 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         values: [
           currentAccount.identity
         ], // when peers > entities are updated, identity emits an event
-        child: ListItem(
-          mainText: subscribeText,
-          icon: FeatherIcons.heart,
-          disabled: _processingSubscription,
-          isSpinning: _processingSubscription,
-          rightIcon: isSubscribed ? FeatherIcons.check : null,
-          rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
-          onTap: () => isSubscribed
-              ? unsubscribeFromEntity(context)
-              : subscribeToEntity(context),
-        ));
+        builder: (context) => ListItem(
+              mainText: subscribeText,
+              icon: FeatherIcons.heart,
+              disabled: _processingSubscription,
+              isSpinning: _processingSubscription,
+              rightIcon: isSubscribed ? FeatherIcons.check : null,
+              rightTextPurpose: isSubscribed ? Purpose.GOOD : null,
+              onTap: () => isSubscribed
+                  ? unsubscribeFromEntity(context)
+                  : subscribeToEntity(context),
+            ));
   }
 
   buildSubscribeButton(BuildContext context) {
@@ -335,36 +334,34 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // Rebuild if `isRegistered` changes
     return StateNotifierListener(
       values: [widget.entityModel.isRegistered],
-      child: Builder(
-        builder: (context) {
-          if (widget.entityModel.isRegistered.hasError ||
-              widget.entityModel.registerAction.hasError)
-            return Container();
-          else if (!widget.entityModel.isRegistered.hasValue ||
-              !widget.entityModel.registerAction.hasValue)
-            return Container();
-          else if (!widget.entityModel.isRegistered.value) {
-            // Not yet
-            return BaseButton(
-              purpose: Purpose.HIGHLIGHT,
-              leftIconData: FeatherIcons.feather,
-              text: "Register",
-              isSmall: true,
-              onTap: () => onTapRegister(context),
-            );
-          }
-
-          // Already registered
+      builder: (context) {
+        if (widget.entityModel.isRegistered.hasError ||
+            widget.entityModel.registerAction.hasError)
+          return Container();
+        else if (!widget.entityModel.isRegistered.hasValue ||
+            !widget.entityModel.registerAction.hasValue)
+          return Container();
+        else if (!widget.entityModel.isRegistered.value) {
+          // Not yet
           return BaseButton(
-            purpose: Purpose.GUIDE,
-            leftIconData: FeatherIcons.check,
-            text: "Registered",
+            purpose: Purpose.HIGHLIGHT,
+            leftIconData: FeatherIcons.feather,
+            text: "Register",
             isSmall: true,
-            style: BaseButtonStyle.FILLED,
-            isDisabled: true,
+            onTap: () => onTapRegister(context),
           );
-        },
-      ),
+        }
+
+        // Already registered
+        return BaseButton(
+          purpose: Purpose.GUIDE,
+          leftIconData: FeatherIcons.check,
+          text: "Registered",
+          isSmall: true,
+          style: BaseButtonStyle.FILLED,
+          isDisabled: true,
+        );
+      },
     );
   }
 
@@ -372,73 +369,71 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // Rebuild if `isRegistered` changes
     return StateNotifierListener(
       values: [widget.entityModel.visibleActions],
-      child: Builder(
-        builder: (context) {
-          final List<Widget> actionsToShow = [];
+      builder: (context) {
+        final List<Widget> actionsToShow = [];
 
-          actionsToShow.add(Section(text: "Actions"));
+        actionsToShow.add(Section(text: "Actions"));
 
-          if (widget.entityModel.visibleActions.hasError) {
-            return ListItem(
-              mainText: widget.entityModel.visibleActions.errorMessage,
-              purpose: Purpose.DANGER,
-              rightTextPurpose: Purpose.DANGER,
+        if (widget.entityModel.visibleActions.hasError) {
+          return ListItem(
+            mainText: widget.entityModel.visibleActions.errorMessage,
+            purpose: Purpose.DANGER,
+            rightTextPurpose: Purpose.DANGER,
+          );
+        } else if (!widget.entityModel.visibleActions.hasValue ||
+            widget.entityModel.visibleActions.value.length == 0) {
+          return ListItem(
+            mainText: "No actions defined",
+            disabled: true,
+            rightIcon: null,
+            icon: FeatherIcons.helpCircle,
+          );
+        }
+
+        // Unregistered warning
+        if (!widget.entityModel.isRegistered.value) {
+          final entityName = widget
+              .entityModel.metadata.value.name[globalAppState.currentLanguage];
+          ListItem noticeItem = ListItem(
+            mainText: "Regsiter to $entityName first",
+            // secondaryText: null,
+            // rightIcon: null,
+            disabled: false,
+            purpose: Purpose.HIGHLIGHT,
+          );
+          actionsToShow.add(noticeItem);
+        }
+
+        // disabled if not registered
+        for (EntityMetadata_Action action
+            in widget.entityModel.visibleActions.value) {
+          ListItem item;
+          if (action.type == "browser") {
+            if (action.name == null ||
+                !(action.name[globalAppState.currentLanguage] is String))
+              return Container();
+
+            item = ListItem(
+              icon: FeatherIcons.arrowRightCircle,
+              mainText: action.name[globalAppState.currentLanguage],
+              secondaryText: action.visible,
+              disabled: !widget.entityModel.isRegistered.value,
+              onTap: () => onBrowserAction(ctx, action),
             );
-          } else if (!widget.entityModel.visibleActions.hasValue ||
-              widget.entityModel.visibleActions.value.length == 0) {
-            return ListItem(
-              mainText: "No actions defined",
-              disabled: true,
-              rightIcon: null,
+          } else {
+            item = ListItem(
+              mainText: action.name[globalAppState.currentLanguage],
+              secondaryText: "Action not yet supported: " + action.type,
               icon: FeatherIcons.helpCircle,
+              disabled: true,
             );
           }
 
-          // Unregistered warning
-          if (!widget.entityModel.isRegistered.value) {
-            final entityName = widget.entityModel.metadata.value
-                .name[globalAppState.currentLanguage];
-            ListItem noticeItem = ListItem(
-              mainText: "Regsiter to $entityName first",
-              // secondaryText: null,
-              // rightIcon: null,
-              disabled: false,
-              purpose: Purpose.HIGHLIGHT,
-            );
-            actionsToShow.add(noticeItem);
-          }
+          actionsToShow.add(item);
+        }
 
-          // disabled if not registered
-          for (EntityMetadata_Action action
-              in widget.entityModel.visibleActions.value) {
-            ListItem item;
-            if (action.type == "browser") {
-              if (action.name == null ||
-                  !(action.name[globalAppState.currentLanguage] is String))
-                return Container();
-
-              item = ListItem(
-                icon: FeatherIcons.arrowRightCircle,
-                mainText: action.name[globalAppState.currentLanguage],
-                secondaryText: action.visible,
-                disabled: !widget.entityModel.isRegistered.value,
-                onTap: () => onBrowserAction(ctx, action),
-              );
-            } else {
-              item = ListItem(
-                mainText: action.name[globalAppState.currentLanguage],
-                secondaryText: "Action not yet supported: " + action.type,
-                icon: FeatherIcons.helpCircle,
-                disabled: true,
-              );
-            }
-
-            actionsToShow.add(item);
-          }
-
-          return ListView(children: actionsToShow);
-        },
-      ),
+        return ListView(children: actionsToShow);
+      },
     );
   }
 

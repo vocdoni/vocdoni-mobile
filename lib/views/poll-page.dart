@@ -83,36 +83,34 @@ class _PollPageState extends State<PollPage> {
 
     return StateNotifierListener(
       values: [process.metadata, entity.metadata],
-      child: Builder(
-        builder: (context) {
-          if (process.metadata.hasError || !process.metadata.hasValue)
-            return buildErrorScaffold(process.metadata.errorMessage);
+      builder: (context) {
+        if (process.metadata.hasError || !process.metadata.hasValue)
+          return buildErrorScaffold(process.metadata.errorMessage);
 
-          final headerUrl =
-              Uri.tryParse(process.metadata.value.details?.headerImage ?? "")
-                  ?.toString();
+        final headerUrl =
+            Uri.tryParse(process.metadata.value.details?.headerImage ?? "")
+                ?.toString();
 
-          return ScaffoldWithImage(
-            headerImageUrl: headerUrl ?? "",
-            headerTag: headerUrl == null
-                ? null
-                : makeElementTag(
-                    entity.reference.entityId, process.processId, index),
-            avatarHexSource: process.processId,
-            appBarTitle: "Poll",
-            actionsBuilder: (context) => [
-              buildShareButton(context, entity),
-            ],
-            builder: Builder(
-              builder: (ctx) => SliverList(
-                delegate: SliverChildListDelegate(
-                  getScaffoldChildren(ctx, entity),
-                ),
+        return ScaffoldWithImage(
+          headerImageUrl: headerUrl ?? "",
+          headerTag: headerUrl == null
+              ? null
+              : makeElementTag(
+                  entity.reference.entityId, process.processId, index),
+          avatarHexSource: process.processId,
+          appBarTitle: "Poll",
+          actionsBuilder: (context) => [
+            buildShareButton(context, entity),
+          ],
+          builder: Builder(
+            builder: (ctx) => SliverList(
+              delegate: SliverChildListDelegate(
+                getScaffoldChildren(ctx, entity),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -140,26 +138,26 @@ class _PollPageState extends State<PollPage> {
         process.metadata.value.details.title[globalAppState.currentLanguage];
 
     return StateNotifierListener(
-        values: [entity.metadata],
-        child: ListItem(
-          // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
-          mainText: title,
-          secondaryText: entity.metadata.hasValue
-              ? entity.metadata.value.name[globalAppState.currentLanguage]
-              : "",
-          isTitle: true,
-          rightIcon: null,
-          isBold: true,
-          avatarUrl: entity.metadata.hasValue
-              ? entity.metadata.value.media.avatar
-              : "",
-          avatarText: entity.metadata.hasValue
-              ? entity.metadata.value.name[globalAppState.currentLanguage]
-              : "",
-          avatarHexSource: entity.reference.entityId,
-          //avatarHexSource: entity.entitySummary.entityId,
-          mainTextFullWidth: true,
-        ));
+      values: [entity.metadata],
+      builder: (context) => ListItem(
+        // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
+        mainText: title,
+        secondaryText: entity.metadata.hasValue
+            ? entity.metadata.value.name[globalAppState.currentLanguage]
+            : "",
+        isTitle: true,
+        rightIcon: null,
+        isBold: true,
+        avatarUrl:
+            entity.metadata.hasValue ? entity.metadata.value.media.avatar : "",
+        avatarText: entity.metadata.hasValue
+            ? entity.metadata.value.name[globalAppState.currentLanguage]
+            : "",
+        avatarHexSource: entity.reference.entityId,
+        //avatarHexSource: entity.entitySummary.entityId,
+        mainTextFullWidth: true,
+      ),
+    );
   }
 
   Widget buildSummary() {
@@ -173,7 +171,7 @@ class _PollPageState extends State<PollPage> {
   buildCensusItem(BuildContext context) {
     return StateNotifierListener(
       values: [process.isInCensus],
-      child: Builder(builder: (ctx) {
+      builder: (ctx) {
         String text;
         Purpose purpose;
         IconData icon;
@@ -206,7 +204,7 @@ class _PollPageState extends State<PollPage> {
           rightIcon: icon,
           purpose: process.isInCensus.hasError ? Purpose.DANGER : Purpose.NONE,
         );
-      }),
+      },
     );
   }
 
@@ -223,7 +221,7 @@ class _PollPageState extends State<PollPage> {
     // Rebuild when the reference block changes
     return StateNotifierListener(
       values: [process.metadata, globalAppState.referenceBlockTimestamp],
-      child: Builder(builder: (context) {
+      builder: (context) {
         if (process.startDate is DateTime &&
             process.startDate.isBefore(DateTime.now())) {
           // display time until start date
@@ -255,7 +253,7 @@ class _PollPageState extends State<PollPage> {
           );
         }
         return Container();
-      }),
+      },
     );
   }
 
@@ -283,7 +281,7 @@ class _PollPageState extends State<PollPage> {
     // rebuild when isInCensus or hasVoted change
     return StateNotifierListener(
       values: [process.hasVoted, process.isInCensus],
-      child: Builder(builder: (ctx) {
+      builder: (ctx) {
         if (process.isInCensus.hasError) {
           return Padding(
               padding: EdgeInsets.all(paddingPage),
@@ -308,7 +306,7 @@ class _PollPageState extends State<PollPage> {
               isDisabled: cannotVote,
               onTap: () => onSubmit(ctx, process.metadata)),
         );
-      }),
+      },
     );
   }
 
@@ -326,7 +324,7 @@ class _PollPageState extends State<PollPage> {
     // rebuild when isInCensus or hasVoted change
     return StateNotifierListener(
       values: [process.hasVoted, process.isInCensus],
-      child: Builder(builder: (ctx) {
+      builder: (ctx) {
         final nextPendingChoice = getNextPendingChoice();
 
         if (process.hasVoted.hasValue && process.hasVoted.value) {
@@ -386,7 +384,7 @@ class _PollPageState extends State<PollPage> {
         } else {
           return Container(); // unknown error
         }
-      }),
+      },
     );
   }
 

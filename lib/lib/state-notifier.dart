@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vocdoni/lib/state-container.dart';
+import 'package:vocdoni/lib/util.dart';
 
 // --------------------------------------------------------------------------
 // GLOBAL DATA TRACKING
@@ -28,13 +29,10 @@ import 'package:vocdoni/lib/state-container.dart';
 ///   - Persistence is made upon request of the StateNotifier
 ///   - Data initialization is done from the StateNotifier perspective
 ///   - Operations are made on the StateNotifier subclass
-/// - Provider
-///   - Provide a global instance of your StateNotifier's to the root of the widget tree
-///   - Use MultiProvider if you have more than one
-///   - Use global (pool) models using `Consume` or `Provider.of` within a widget or directly use the global pools from `singletons.dart`
-///   - Use standard models using `StateNotifierListener()` within a widget
+/// - Consuming data
+///   - Consume state models using the `StateNotifierListener()` widget
 ///
-/// More info:
+/// Inspired on:
 /// - https://pub.dev/packages/provider
 /// - https://www.youtube.com/watch?v=d_m5csmrf7I
 ///
@@ -62,7 +60,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
     super.setToLoading(loadingMessage);
 
     // Notify after the state is changed
-    this.notify();
+    this._notify();
     return this;
   }
 
@@ -75,7 +73,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
     super.setError(error, keepPreviousValue: keepPreviousValue);
 
     // Notify after the state is changed
-    this.notify();
+    this._notify();
     return this;
   }
 
@@ -88,13 +86,25 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
     super.setValue(newValue);
 
     // Notify after the state is changed
-    this.notify();
+    this._notify();
     return this;
   }
 
   /// Explicitly emits a change notification event to the listeners
   StateNotifier notify() {
-    Timer(Duration(milliseconds: 50), () => this.notifyListeners());
+    _notify();
     return this;
+  }
+
+  _notify([int retries = 10]) {
+    assert(retries is int);
+    try {
+      this.notifyListeners();
+    } catch (err) {
+      // If it fails because a build is already in progress, wait a bit
+      devPrint(err);
+      Timer(Duration(milliseconds: 5),
+          () => retries > 0 ? this._notify(retries - 1) : null);
+    }
   }
 }

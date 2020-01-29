@@ -41,7 +41,7 @@ class _HomeTabState extends State<HomeTab> {
 
     return StateNotifierListener(
       values: [currentAccount.entities, globalProcessPool, globalFeedPool],
-      child: Builder(builder: (BuildContext context) {
+      builder: (context) {
         if (!currentAccount.entities.hasValue ||
             currentAccount.entities.value.length == 0)
           return buildNoEntries(ctx);
@@ -53,7 +53,7 @@ class _HomeTabState extends State<HomeTab> {
             itemCount: items.length,
             itemBuilder: (BuildContext ctx, int index) =>
                 items[index] ?? Container());
-      }),
+      },
     );
   }
 
