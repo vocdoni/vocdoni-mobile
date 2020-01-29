@@ -1,5 +1,3 @@
-import "package:flutter/material.dart";
-
 import 'package:vocdoni/data-persistence/bootnodes-persistence.dart';
 import 'package:vocdoni/data-persistence/entities-persistence.dart';
 import 'package:vocdoni/data-persistence/identities-persistence.dart';
@@ -35,6 +33,3 @@ final globalProcessPool = ProcessPoolModel();
 final globalFeedPool = FeedPool();
 
 final globalAnalytics = Analytics();
-
-// Global scaffold key for snackbars
-GlobalKey<ScaffoldState> homePageScaffoldKey = new GlobalKey<ScaffoldState>();

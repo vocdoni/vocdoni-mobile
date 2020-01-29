@@ -26,6 +26,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int selectedTab = 0;
   bool scanning = false;
 
+  /// Store it on build, so that external events like deep link handling can display
+  /// snackbars on it
+  BuildContext scaffoldBuildContext;
+
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
   /////////////////////////////////////////////////////////////////////////////
@@ -73,17 +77,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   handleLink(Uri givenUri) {
     if (givenUri == null) return;
 
-    handleIncomingLink(givenUri, homePageScaffoldKey.currentContext)
+    handleIncomingLink(givenUri, scaffoldBuildContext ?? context)
         .catchError(handleIncomingLinkError);
   }
 
   handleIncomingLinkError(err) {
     devPrint(err);
     showAlert(
-        title: Lang.of(homePageScaffoldKey.currentContext).get("Error"),
-        text: Lang.of(homePageScaffoldKey.currentContext)
+        title: Lang.of(scaffoldBuildContext ?? context).get("Error"),
+        text: Lang.of(scaffoldBuildContext ?? context)
             .get("There was a problem handling the link"),
-        context: homePageScaffoldKey.currentContext);
+        context: scaffoldBuildContext ?? context);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -159,8 +163,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             title: getTabName(selectedTab),
             showBackButton: false,
           ),
-          key: homePageScaffoldKey,
-          body: buildBody(context),
+          body: Builder(builder: (context) {
+            // Store the build context from the scaffold, so that deep links can show
+            // snackbars on top of this scaffold
+            scaffoldBuildContext = context;
+
+            return buildBody(context);
+          }),
           bottomNavigationBar: BottomNavigation(
             onTabSelect: (index) => onTabSelect(index),
             selectedTab: selectedTab,

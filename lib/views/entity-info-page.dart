@@ -3,7 +3,6 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/state-notifier-listener.dart';
@@ -46,8 +45,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   @override
   Widget build(context) {
     // Rebuild when the metadata updates
-    return ChangeNotifierProvider.value(
-      value: widget.entityModel.metadata,
+    return StateNotifierListener(
+      values: [widget.entityModel.metadata],
       child: Builder(
         builder: (BuildContext context) {
           return widget.entityModel.metadata.hasValue
@@ -207,8 +206,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildFeedRow(BuildContext context) {
     // Rebuild when the feed updates
-    return ChangeNotifierProvider.value(
-        value: widget.entityModel.feed,
+    return StateNotifierListener(
+        values: [widget.entityModel.feed],
         child: Builder(builder: (context) {
           int postCount = 0;
           if (widget.entityModel.feed.hasValue) {
@@ -233,8 +232,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildParticipationRow(BuildContext context) {
     // Rebuild when the process list updates (not the items)
-    return ChangeNotifierProvider.value(
-      value: widget.entityModel.processes,
+    return StateNotifierListener(
+      values: [widget.entityModel.processes],
       child: Builder(
         builder: (context) {
           int processCount = 0;
@@ -274,9 +273,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     String subscribeText = isSubscribed ? "Following" : "Follow";
 
     // Rebuild when the selected account's identity updates
-    return ChangeNotifierProvider.value(
-        value: currentAccount
-            .identity, // when peers > entities are updated, identity emits an event
+    return StateNotifierListener(
+        values: [
+          currentAccount.identity
+        ], // when peers > entities are updated, identity emits an event
         child: ListItem(
           mainText: subscribeText,
           icon: FeatherIcons.heart,
@@ -333,8 +333,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildRegisterButton(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
-    return ChangeNotifierProvider.value(
-      value: widget.entityModel.isRegistered,
+    return StateNotifierListener(
+      values: [widget.entityModel.isRegistered],
       child: Builder(
         builder: (context) {
           if (widget.entityModel.isRegistered.hasError ||
@@ -370,8 +370,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   Widget buildActionList(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
-    return ChangeNotifierProvider.value(
-      value: widget.entityModel.visibleActions,
+    return StateNotifierListener(
+      values: [widget.entityModel.visibleActions],
       child: Builder(
         builder: (context) {
           final List<Widget> actionsToShow = [];

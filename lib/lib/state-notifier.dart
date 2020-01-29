@@ -9,7 +9,7 @@ import 'package:vocdoni/lib/state-container.dart';
 /// Base class that wraps and manages **eventual data**, which can be unresolved,
 /// have an error or have a non-null valid value.
 ///
-/// It also provides notification capabilities, so that `ChangeNotifierProvider.value()` widgets can listen
+/// It also provides notification capabilities, so that `StateNotifierListener()` widgets can listen
 /// and rebuild upon any updates on it.
 ///
 /// **Use this class if you need to track eventual data and notify consumers about any changes**
@@ -32,7 +32,7 @@ import 'package:vocdoni/lib/state-container.dart';
 ///   - Provide a global instance of your StateNotifier's to the root of the widget tree
 ///   - Use MultiProvider if you have more than one
 ///   - Use global (pool) models using `Consume` or `Provider.of` within a widget or directly use the global pools from `singletons.dart`
-///   - Use standard models using `ChangeNotifierProvider.value()` within a widget
+///   - Use standard models using `StateNotifierListener()` within a widget
 ///
 /// More info:
 /// - https://pub.dev/packages/provider

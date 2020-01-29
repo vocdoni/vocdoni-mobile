@@ -1,7 +1,7 @@
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/card-post.dart';
@@ -38,8 +38,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   Widget build(context) {
     if (entityModel == null) return buildEmptyEntity(context);
 
-    return ChangeNotifierProvider.value(
-        value: entityModel.feed, // rebuild upon updates on this value
+    return StateNotifierListener(
+        values: [entityModel.feed], // rebuild upon updates on this value
         child: Builder(builder: (context) {
           if (!entityModel.metadata.hasValue) return buildEmptyEntity(context);
           if (!entityModel.feed.hasValue)

@@ -1,8 +1,8 @@
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:native_widgets/native_widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
@@ -37,8 +37,8 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget build(context) {
     if (entityModel == null) return buildNoProcessesess(context);
 
-    return ChangeNotifierProvider.value(
-        value: entityModel.processes, // rebuild upon updates on this value
+    return StateNotifierListener(
+        values: [entityModel.processes], // rebuild upon updates on this value
         child: Builder(builder: (context) {
           if (!entityModel.metadata.hasValue || !entityModel.processes.hasValue)
             return buildNoProcessesess(context);
