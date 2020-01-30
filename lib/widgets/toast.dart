@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
+import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:vocdoni/constants/colors.dart';
-import 'package:native_widgets/native_widgets.dart';
 
 final toasterTextStyle =
     TextStyle(fontSize: fontSizeBase, fontWeight: fontWeightRegular);
@@ -38,7 +38,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
     duration: Duration(hours: 1),
     content: Row(
       children: <Widget>[
-        NativeLoadingIndicator(),
+        LoadingSpinner(),
         Padding(padding: EdgeInsets.only(left: 10), child: Text(text))
       ],
     ),

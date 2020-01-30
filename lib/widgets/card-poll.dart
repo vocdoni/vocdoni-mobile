@@ -111,7 +111,7 @@ class CardPoll extends StatelessWidget {
   }
 
   String getFriendlyParticipation(double participation) {
-    return participation.toStringAsPrecision(3);
+    return participation.toStringAsPrecision(2);
   }
 
   String getFriendlyTimeLeft(DateTime date) {

@@ -6,8 +6,8 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/alerts.dart';
-import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/lib/net.dart';
 
@@ -116,7 +116,7 @@ class _WebActionState extends State<WebAction> {
                     Spacer(),
                     loading
                         ? Padding(
-                            child: NativeLoadingIndicator(),
+                            child: LoadingSpinner(),
                             padding: EdgeInsets.only(right: 12),
                           )
                         : IconButton(

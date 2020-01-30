@@ -1,10 +1,10 @@
 import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
-import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/card-post.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
@@ -91,7 +91,10 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   Widget buildLoading(BuildContext ctx) {
     return Scaffold(
         body: Center(
-      child: Text("Loading..."),
+      child: Column(children: [
+        Text("Loading..."),
+        LoadingSpinner(),
+      ]),
     ));
   }
 

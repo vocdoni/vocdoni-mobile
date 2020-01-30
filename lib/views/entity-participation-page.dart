@@ -2,10 +2,10 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
-import 'package:native_widgets/native_widgets.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
 class EntityParticipationPage extends StatefulWidget {
@@ -86,7 +86,10 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget buildLoading(BuildContext ctx) {
     return Scaffold(
         body: Center(
-      child: Text("Loading..."),
+      child: Column(children: [
+        Text("Loading..."),
+        LoadingSpinner()
+      ]),
     ));
   }
 

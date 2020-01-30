@@ -6,7 +6,6 @@ import 'package:vocdoni/lib/state-notifier-listener.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
-import 'package:native_widgets/native_widgets.dart';
 import 'package:intl/intl.dart';
 
 class CardPost extends StatelessWidget {

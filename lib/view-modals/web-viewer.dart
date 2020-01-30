@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:native_widgets/native_widgets.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/lib/net.dart';
 
@@ -82,7 +82,7 @@ class _WebViewerState extends State<WebViewer> {
                     Spacer(),
                     loading
                         ? Padding(
-                            child: NativeLoadingIndicator(),
+                            child: LoadingSpinner(),
                             padding: EdgeInsets.only(right: 12),
                           )
                         : IconButton(

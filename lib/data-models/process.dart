@@ -376,7 +376,7 @@ class ProcessModel implements StateRefreshable {
     this.censusSize.setToLoading();
     return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
         .then((size) {
-      devPrint("- Refreshing process censusSize [DONE] [${this.processId}]");
+      devPrint("- Refreshing process censusSize [DONE $size] [${this.processId}]");
 
       return this.censusSize.setValue(size);
     }).catchError((err) {
