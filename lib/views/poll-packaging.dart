@@ -44,7 +44,7 @@ class _PollPackagingState extends State<PollPackaging> {
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(currentAccount)));
+            builder: (context) => PatternPromptModal(currentAccount)));
 
     if (!mounted)
       return;

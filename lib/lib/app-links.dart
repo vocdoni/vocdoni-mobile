@@ -10,7 +10,7 @@ import 'package:vocdoni/widgets/toast.dart'; // for kReleaseMode
 // MAIN
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleIncomingLink(Uri newLink, BuildContext context) async {
+Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   if (!(newLink is Uri)) throw Exception();
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
@@ -18,18 +18,19 @@ Future handleIncomingLink(Uri newLink, BuildContext context) async {
   try {
     switch (newLink.path) {
       case "/entity":
-        indicator = showLoading("Please, wait...", context: context);
+        indicator =
+            showLoading("Please, wait...", context: scaffoldBodyContext);
         await fetchAndShowEntity(
             entityId: newLink.queryParameters["entityId"],
             entryPoints: newLink.queryParametersAll["entryPoints[]"],
-            context: context);
+            context: scaffoldBodyContext);
         indicator.close();
         break;
       case "/signature":
         await showSignatureScreen(
             payload: newLink.queryParameters["payload"],
             returnUri: newLink.queryParameters["returnUri"],
-            context: context);
+            context: scaffoldBodyContext);
         break;
       default:
         if (!kReleaseMode)

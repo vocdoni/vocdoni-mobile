@@ -38,7 +38,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
     duration: Duration(hours: 1),
     content: Row(
       children: <Widget>[
-        LoadingSpinner(),
+        LoadingSpinner(color: Colors.white),
         Padding(padding: EdgeInsets.only(left: 10), child: Text(text))
       ],
     ),

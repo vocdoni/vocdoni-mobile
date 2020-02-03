@@ -12,16 +12,16 @@ import 'package:vocdoni/constants/settings.dart';
 /// This component prompts for a visual lock patten, which is transformed into a passphrase.
 /// The component will attempt to decrypt `encryptedText`. If it succeeds, the
 /// passphrase will be returned via the router as a string.
-class PaternPromptModal extends StatefulWidget {
+class PatternPromptModal extends StatefulWidget {
   final AccountModel account; // to unlock
 
-  PaternPromptModal(this.account);
+  PatternPromptModal(this.account);
 
   @override
-  _PaternPromptModalState createState() => _PaternPromptModalState();
+  _PatternPromptModalState createState() => _PatternPromptModalState();
 }
 
-class _PaternPromptModalState extends State<PaternPromptModal> {
+class _PatternPromptModalState extends State<PatternPromptModal> {
   int minLength = 5;
   int maxLength = 100;
   double widthSize = 300;
@@ -108,8 +108,8 @@ class _PaternPromptModalState extends State<PaternPromptModal> {
       if (!mounted) return;
 
       // OK
-      await widget.account.trackSuccessfulAuth();
       Navigator.pop(context, passphrase);
+      widget.account.trackSuccessfulAuth().catchError((_) {});
     } catch (err) {
       await widget.account.trackFailedAuth();
       if (!mounted) return;

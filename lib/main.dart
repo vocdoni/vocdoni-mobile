@@ -28,6 +28,11 @@ import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
 void main() async {
+  // If you're running an application and need to access the binary messenger before `runApp()`
+  // has been called (for example, during plugin initialization), then you need to explicitly
+  // call the `WidgetsFlutterBinding.ensureInitialized()` first.
+  WidgetsFlutterBinding.ensureInitialized();
+
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
@@ -97,7 +102,10 @@ void main() async {
 Route<dynamic> generateRoute(RouteSettings settings) {
   return MaterialPageRoute(builder: (_) {
     switch (settings.name) {
+      // VIEWS
       case '/entity':
+        if (!(settings.arguments is EntityModel))
+          throw Exception("settings.arguments must be of type EntityModel");
         return EntityInfoPage(settings.arguments);
       default:
         return null;
