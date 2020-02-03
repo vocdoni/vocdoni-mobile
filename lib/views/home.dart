@@ -7,6 +7,7 @@ import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/app-links.dart';
+import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-tab.dart';
 import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
@@ -15,7 +16,6 @@ import 'package:vocdoni/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/widgets/toast.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:qrcode_reader/qrcode_reader.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   /// Store it on build, so that external events like deep link handling can display
   /// snackbars on it
-  BuildContext scaffoldBuildContext;
+  BuildContext scaffoldBodyContext;
 
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
@@ -77,17 +77,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   handleLink(Uri givenUri) {
     if (givenUri == null) return;
 
-    handleIncomingLink(givenUri, scaffoldBuildContext ?? context)
+    handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
         .catchError(handleIncomingLinkError);
   }
 
   handleIncomingLinkError(err) {
     devPrint(err);
     showAlert(
-        title: Lang.of(scaffoldBuildContext ?? context).get("Error"),
-        text: Lang.of(scaffoldBuildContext ?? context)
+        title: Lang.of(scaffoldBodyContext ?? context).get("Error"),
+        text: Lang.of(scaffoldBodyContext ?? context)
             .get("There was a problem handling the link"),
-        context: scaffoldBuildContext ?? context);
+        context: scaffoldBodyContext ?? context);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -116,8 +116,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         devPrint("Resumed");
         ensureConnectedGateways();
         break;
-      case AppLifecycleState.suspending:
-        devPrint("Suspending");
+      case AppLifecycleState.detached:
+        devPrint("Detached");
         break;
     }
   }
@@ -151,8 +151,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           floatingActionButton: selectedTab == 1
               ? Builder(
                   // Toast context descending from Scaffold
-                  builder: (context) => FloatingActionButton(
-                      onPressed: () => onScanQrCode(context),
+                  builder: (floatingBtnContext) => FloatingActionButton(
+                      onPressed: () => onScanQrCode(floatingBtnContext),
                       backgroundColor: colorDescription,
                       child: Icon(
                         FeatherIcons.plus,
@@ -163,10 +163,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             title: getTabName(selectedTab),
             showBackButton: false,
           ),
-          body: Builder(builder: (context) {
+          body: Builder(builder: (ctx) {
             // Store the build context from the scaffold, so that deep links can show
             // snackbars on top of this scaffold
-            scaffoldBuildContext = context;
+            scaffoldBodyContext = ctx;
 
             return buildBody(context);
           }),
@@ -210,26 +210,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  onScanQrCode(BuildContext context) async {
+  onScanQrCode(BuildContext floatingBtnContext) async {
     if (scanning) return;
     scanning = true;
 
     try {
-      final result = await QRCodeReader()
-          .setAutoFocusIntervalInMs(400) // default 5000
-          .setForceAutoFocus(true) // default false
-          .setTorchEnabled(true) // default false
-          .setHandlePermissions(true) // default true
-          .setExecuteAfterPermissionGranted(true) // default true
-          .scan();
+      final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) =>
+                  QrScanModal()));
 
-      if (!(result is String)) return;
+      if (!(result is String)) {
+        scanning = false;
+        return;
+      }
+      // await Future.delayed(Duration(milliseconds: 50));
 
       final link = Uri.tryParse(result);
       if (!(link is Uri) || !link.hasScheme || link.hasEmptyPath)
-        throw Exception();
+        throw Exception("Invalid URI");
 
-      await handleIncomingLink(link, context);
+      await handleIncomingLink(link, scaffoldBodyContext ?? context);
       scanning = false;
     } catch (err) {
       scanning = false;
@@ -238,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       showMessage(
           "The QR code does not contain a valid link or the details cannot be retrieved",
-          context: context,
+          context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }
   }

@@ -53,7 +53,7 @@ run:
 
 apk:
 	flutter build apk
-	if [ -x $$(which open) ] ; then open build/app/outputs/apk/release ; fi
+	@open build/app/outputs/apk/release 2>/dev/null || xdg-open build/app/outputs/apk/release 2>/dev/null || true
 
 ios:
 	flutter build ios

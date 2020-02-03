@@ -1,7 +1,6 @@
 // import 'dart:math';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import "package:vocdoni/lib/singletons.dart";
 import "package:vocdoni/constants/meta-keys.dart";

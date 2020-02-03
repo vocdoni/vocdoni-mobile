@@ -163,7 +163,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
             }
 
             a {
-              color: ${htmlLinkColor};
+              color: $htmlLinkColor;
             }
 
 						img {

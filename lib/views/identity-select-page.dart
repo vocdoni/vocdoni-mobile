@@ -80,7 +80,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(account)));
+            builder: (context) => PatternPromptModal(account)));
 
     if (patternEncryptionKey == null ||
         patternEncryptionKey is InvalidPatternError) {

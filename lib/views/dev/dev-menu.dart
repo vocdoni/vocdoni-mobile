@@ -105,7 +105,7 @@ class DevMenu extends StatelessWidget {
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (context) => PaternPromptModal(currentAccount)));
+            builder: (context) => PatternPromptModal(currentAccount)));
 
     if (patternEncryptionKey == null)
       return;

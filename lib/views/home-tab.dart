@@ -1,7 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:provider/provider.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';

@@ -90,7 +90,7 @@ class _IdentityTabState extends State<IdentityTab> {
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) =>
-                PaternPromptModal(globalAppState.currentAccount)));
+                PatternPromptModal(globalAppState.currentAccount)));
 
     if (result == null)
       return;
