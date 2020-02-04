@@ -49,7 +49,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
             entityRef.entryPoints
                 .addAll(entityMeta.meta[META_ENTITY_ENTRY_POINTS].split(","));
 
-            final procsModels = EntityModel.getProcessesForEntity(
+            final procsModels = EntityModel.getProcessesPersistedForEntity(
                 entityMeta.meta[META_ENTITY_ID]);
             final feedModel =
                 EntityModel.getFeedForEntity(entityMeta.meta[META_ENTITY_ID]);
@@ -564,8 +564,8 @@ class EntityModel implements StateRefreshable {
         .get()
         .where((procMeta) => procMeta.meta[META_ENTITY_ID] == entityId)
         .map((procMeta) {
-          return ProcessModel(procMeta.meta[META_PROCESS_ID],
-              procMeta.meta[META_ENTITY_ID], procMeta);
+          return ProcessModel.fromMetadata(procMeta,
+              procMeta.meta[META_PROCESS_ID], procMeta.meta[META_ENTITY_ID]);
         })
         .cast<ProcessModel>()
         .toList();

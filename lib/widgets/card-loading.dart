@@ -7,10 +7,12 @@ class CardLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseCard(children: <Widget>[
       Center(
-        child: Column(children: [
-          Text("Loading..."),
-          LoadingSpinner(),
-        ]),
+        child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 40.0),
+            child: Column(children: [
+              Text("Loading..."),
+              LoadingSpinner(),
+            ])),
       )
     ]);
   }

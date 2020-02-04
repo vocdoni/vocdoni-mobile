@@ -40,17 +40,21 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
     return StateNotifierListener(
         values: [entityModel.processes], // rebuild upon updates on this value
         builder: (context) {
-          if (!entityModel.metadata.hasValue || !entityModel.processes.hasValue)
+          if (!entityModel.metadata.hasValue ||
+              !entityModel.processes.hasValue) {
             return buildNoProcessesess(context);
-          else if (entityModel.metadata.isLoading ||
-              entityModel.processes.isLoading)
+          } else if (entityModel.metadata.isLoading ||
+              entityModel.processes.isLoading) {
             return buildLoading(context);
-          else if (entityModel.metadata.hasError ||
-              entityModel.processes.hasError)
+          } else if ((!entityModel.metadata.hasValue &&
+                  entityModel.metadata.hasError) ||
+              (!entityModel.processes.hasValue &&
+                  entityModel.processes.hasError)) {
             return buildError(
                 context,
                 entityModel.metadata.errorMessage ??
                     entityModel.processes.errorMessage);
+          }
 
           final lang = entityModel.metadata.value.languages[0] ??
               globalAppState.currentLanguage;
@@ -88,7 +92,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         body: Center(
       child: Column(children: [
         Text("Loading..."),
-        LoadingSpinner()
+        LoadingSpinner(),
       ]),
     ));
   }

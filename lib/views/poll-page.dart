@@ -222,36 +222,35 @@ class _PollPageState extends State<PollPage> {
     return StateNotifierListener(
       values: [process.metadata, globalAppState.referenceBlockTimestamp],
       builder: (context) {
-        if (process.startDate is DateTime &&
-            process.startDate.isBefore(DateTime.now())) {
-          // display time until start date
-          final formattedTime =
-              DateFormat("dd/MM HH:mm").format(process.startDate) + "h";
+        String rowText;
 
-          return ListItem(
-            icon: FeatherIcons.clock,
-            mainText: "Starting on " + formattedTime,
-            //secondaryText: "18/09/2019 at 19:00",
-            rightIcon: null,
-            disabled: false,
-          );
+        if (process.startDate is DateTime &&
+            DateTime.now().isBefore(process.startDate)) {
+          // display time until start date
+          rowText = "Starting on " +
+              DateFormat("dd/MM HH:mm").format(process.startDate) +
+              "h";
         } else if (process.endDate is DateTime) {
-          String rowText;
+          // time until/from end date
           final formattedTime =
               DateFormat("dd/MM HH:mm").format(process.endDate) + "h";
+
           if (process.endDate.isBefore(DateTime.now()))
             rowText = "Ended on " + formattedTime;
           else
             rowText = "Ending on " + formattedTime;
+        }
 
+        if (rowText is String) {
           return ListItem(
             icon: FeatherIcons.clock,
             mainText: rowText,
-            // secondaryText: "18/09/2019 at 19:00",
+            //secondaryText: "18/09/2019 at 19:00",
             rightIcon: null,
             disabled: false,
           );
         }
+
         return Container();
       },
     );
