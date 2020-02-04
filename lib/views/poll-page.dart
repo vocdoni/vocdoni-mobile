@@ -226,7 +226,7 @@ class _PollPageState extends State<PollPage> {
             process.startDate.isBefore(DateTime.now())) {
           // display time until start date
           final formattedTime =
-              DateFormat("dd/MM H:mm").format(process.startDate) + "h";
+              DateFormat("dd/MM HH:mm").format(process.startDate) + "h";
 
           return ListItem(
             icon: FeatherIcons.clock,
@@ -296,7 +296,9 @@ class _PollPageState extends State<PollPage> {
         final nextPendingChoice = getNextPendingChoice();
         final cannotVote = nextPendingChoice >= 0 ||
             !process.isInCensus.hasValue ||
-            !process.isInCensus.value;
+            !process.isInCensus.value ||
+            process.startDate.isAfter(DateTime.now()) ||
+            process.endDate.isBefore(DateTime.now());
 
         return Padding(
           padding: EdgeInsets.all(paddingPage),
@@ -366,6 +368,18 @@ class _PollPageState extends State<PollPage> {
             mainText: "Your vote status cannot be checked",
             mainTextMultiline: 3,
             secondaryText: process.hasVoted.errorMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.startDate.isAfter(DateTime.now())) {
+          return ListItem(
+            mainText: "The process is not active yet",
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.endDate.isBefore(DateTime.now())) {
+          return ListItem(
+            mainText: "The process has already ended",
             purpose: Purpose.WARNING,
             rightIcon: null,
           );

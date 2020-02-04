@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/constants/settings.dart';
+import 'package:vocdoni/lib/util.dart';
 
 DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
@@ -16,22 +17,30 @@ ensureConnectedGateways() {
   connecting = true;
   if (_dvoteGw is DVoteGateway) {
     if (!_dvoteGw.isConnected) {
+      // TODO: ON .connect() EXCEPTION RETRY UNTIL OK
       if (_dvoteGw.publicKey == gwInfo.publicKey)
         _dvoteGw.connect(gwInfo.dvote);
       else {
         _dvoteGw = DVoteGateway(gwInfo.dvote,
-            publicKey: gwInfo.publicKey); // calls `connect()` internally
+            publicKey: gwInfo.publicKey,
+            onTimeout: _onGatewayTimeout); // calls `connect()` internally
       }
     }
   } else {
     _dvoteGw = DVoteGateway(gwInfo.dvote,
-        publicKey: gwInfo.publicKey); // calls `connect()` internally
+        publicKey: gwInfo.publicKey,
+        onTimeout: _onGatewayTimeout); // calls `connect()` internally
   }
 
   if (!(_web3Gw is Web3Gateway)) {
     _web3Gw = Web3Gateway(gwInfo.web3);
   }
   connecting = false;
+}
+
+void _onGatewayTimeout() {
+  devPrint("GW timeout handler: RECONNECTING TO ${_dvoteGw.uri}");
+  _dvoteGw.reconnect(null);
 }
 
 bool areGatewaysConnected() =>

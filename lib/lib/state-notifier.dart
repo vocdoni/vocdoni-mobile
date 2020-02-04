@@ -56,7 +56,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   /// Notifies any change subscribers.
   /// Returns itself so further methods can be chained right after.
   @override
-  StateNotifier setToLoading([String loadingMessage]) {
+  StateNotifier<T> setToLoading([String loadingMessage]) {
     super.setToLoading(loadingMessage);
 
     // Notify after the state is changed
@@ -69,7 +69,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
   @override
-  StateNotifier setError(String error, {bool keepPreviousValue = false}) {
+  StateNotifier<T> setError(String error, {bool keepPreviousValue = false}) {
     super.setError(error, keepPreviousValue: keepPreviousValue);
 
     // Notify after the state is changed
@@ -82,7 +82,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   /// Notifies any change subscribers.
   /// Returns itself so further methods can be chained right after.
   @override
-  StateNotifier setValue(T newValue) {
+  StateNotifier<T> setValue(T newValue) {
     super.setValue(newValue);
 
     // Notify after the state is changed
@@ -90,8 +90,22 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
     return this;
   }
 
+  // Dummy method to override the generic return type
+  @override
+  StateNotifier<T> load(T newValue) {
+    super.load(newValue);
+    return this;
+  }
+
+  // Dummy method to override the generic return type
+  @override
+  StateNotifier<T> withFreshness(int seconds) {
+    super.withFreshness(seconds);
+    return this;
+  }
+
   /// Explicitly emits a change notification event to the listeners
-  StateNotifier notify() {
+  StateNotifier<T> notify() {
     _notify();
     return this;
   }

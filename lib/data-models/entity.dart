@@ -168,10 +168,11 @@ class EntityModel implements StateRefreshable {
       StateNotifier<List<ProcessModel>>().withFreshness(60);
   final StateNotifier<Feed> feed = StateNotifier<Feed>().withFreshness(60 * 2);
 
-  final StateNotifier<List<EntityMetadata_Action>> visibleActions =
-      StateNotifier();
-  final StateNotifier<EntityMetadata_Action> registerAction = StateNotifier();
-  final StateNotifier<bool> isRegistered = StateNotifier(false);
+  final visibleActions =
+      StateNotifier<List<EntityMetadata_Action>>().withFreshness(60 * 2);
+  final registerAction =
+      StateNotifier<EntityMetadata_Action>().withFreshness(30);
+  final isRegistered = StateNotifier<bool>(false).withFreshness(30);
 
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
@@ -442,14 +443,9 @@ class EntityModel implements StateRefreshable {
             if (action.register) {
               return _isActionVisible(action, this.reference.entityId)
                   .then((visible) {
-                devPrint("TODO: UNCOMMENT HERE");
-                // TODO: FIXME UNCOMENT
-                // if (!(visible is bool)) throw Exception();
-                // this.isRegistered.setValue(!visible);
+                if (!(visible is bool)) throw Exception();
+                this.isRegistered.setValue(!visible);
                 this.registerAction.setValue(action);
-
-                // TODO: FIXME REMOVE
-                this.isRegistered.setValue(false);
               }).catchError((err) {
                 // capture the error locally
                 this
@@ -551,14 +547,26 @@ class EntityModel implements StateRefreshable {
     }, orElse: () => null);
   }
 
+  /// Gets a filtered list of current process models belonging to the given entity
   static List<ProcessModel> getProcessesForEntity(String entityId) {
     return globalProcessPool.value
         .where((processModel) =>
             processModel.metadata.hasValue &&
             processModel.metadata.value.meta[META_ENTITY_ID] == entityId)
-        .map((processModel) => ProcessModel(
-            processModel.metadata.value.meta[META_PROCESS_ID],
-            processModel.metadata.value.meta[META_ENTITY_ID]))
+        .cast<ProcessModel>()
+        .toList();
+  }
+
+  /// Creates a list of Process Model's from the metadata currently persisted that
+  /// belongs to the given entity
+  static List<ProcessModel> getProcessesPersistedForEntity(String entityId) {
+    return globalProcessesPersistence
+        .get()
+        .where((procMeta) => procMeta.meta[META_ENTITY_ID] == entityId)
+        .map((procMeta) {
+          return ProcessModel(procMeta.meta[META_PROCESS_ID],
+              procMeta.meta[META_ENTITY_ID], procMeta);
+        })
         .cast<ProcessModel>()
         .toList();
   }

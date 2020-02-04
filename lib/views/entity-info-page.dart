@@ -354,7 +354,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
         // Already registered
         return BaseButton(
-          purpose: Purpose.GUIDE,
+          purpose: Purpose.HIGHLIGHT,
           leftIconData: FeatherIcons.check,
           text: "Registered",
           isSmall: true,
@@ -469,15 +469,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
     final url = action.url;
-    final title = action.name[globalAppState.currentAccount] ??
-        widget.entityModel.metadata.value.name[globalAppState.currentAccount];
+    final title = action.name[globalAppState.currentLanguage] ??
+        widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
 
     final route = MaterialPageRoute(
         builder: (context) => WebAction(
               url: url,
               title: title,
             ));
-    Navigator.push(ctx, route);
+    Navigator.push(ctx, route)
+        .then((_) => widget.entityModel.refreshVisibleActions());
   }
 
   subscribeToEntity(BuildContext ctx) async {

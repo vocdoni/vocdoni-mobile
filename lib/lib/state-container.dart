@@ -33,7 +33,7 @@ class StateContainer<T> {
 
   /// Sets the loading flag to true and an optional loading text.
   /// Returns itself so further methods can be chained right after.
-  StateContainer setToLoading([String loadingMessage]) {
+  StateContainer<T> setToLoading([String loadingMessage]) {
     _loadingStarted = DateTime.now();
     if (loadingMessage is String && loadingMessage.length > 0) {
       _loadingMessage = loadingMessage;
@@ -46,7 +46,7 @@ class StateContainer<T> {
   /// Sets the error message to the given value and toggles loading to false.
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
-  StateContainer setError(String error, {bool keepPreviousValue = false}) {
+  StateContainer<T> setError(String error, {bool keepPreviousValue = false}) {
     _errorMessage = error;
     _errorEncountered = DateTime.now();
 
@@ -63,7 +63,7 @@ class StateContainer<T> {
   /// Sets the underlying value, clears any previous error and
   /// sets loading to false.
   /// Returns itself so further methods can be chained right after.
-  StateContainer setValue(T value) {
+  StateContainer<T> setValue(T value) {
     _currentValue = value;
     _currentValueUpdated = DateTime.now();
 
@@ -78,7 +78,7 @@ class StateContainer<T> {
   /// Immediately sets the given value and unlike `setValue`, does not update the modification date or any error message.
   /// Use `load()` if you want `model.isFresh` to return `false` right after.
   /// Returns itself so further methods can be chained right after.
-  StateContainer load(T value) {
+  StateContainer<T> load(T value) {
     _currentValue = value;
 
     _loadingStarted = null;
@@ -90,7 +90,7 @@ class StateContainer<T> {
   /// By default `isFresh` returns `false` 10 seconds after the value is set.
   /// Alter the recency threshold with a new value.
   /// Returns itself so further methods can be chained right after.
-  withFreshness(int seconds) {
+  StateContainer<T> withFreshness(int seconds) {
     if (seconds < 0) throw Exception("The amount of seconds must be positive");
 
     this._freshnessTimeAmount = seconds;
@@ -107,8 +107,8 @@ class StateContainer<T> {
   bool get isLoadingStalled {
     if (!isLoading) return false;
 
-    final stallThreshold =
-        _loadingStarted.add(Duration(seconds: _stallTimeAmount)); // loading date + N seconds
+    final stallThreshold = _loadingStarted
+        .add(Duration(seconds: _stallTimeAmount)); // loading date + N seconds
     return _loadingStarted.isAfter(stallThreshold);
   }
 
@@ -130,7 +130,6 @@ class StateContainer<T> {
   /// Returns true if a valid value is registered and no error has
   /// cleared it
   bool get hasValue {
-    if (hasError) return false;
     return _currentValue is T;
   }
 
