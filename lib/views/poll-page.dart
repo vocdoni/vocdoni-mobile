@@ -178,6 +178,7 @@ class _PollPageState extends State<PollPage> {
 
         if (process.isInCensus.isLoading) {
           text = "Checking census";
+          purpose = Purpose.GUIDE;
         } else if (process.isInCensus.hasValue) {
           if (process.isInCensus.value) {
             text = "You are in the census";
@@ -190,6 +191,7 @@ class _PollPageState extends State<PollPage> {
           }
         } else if (process.isInCensus.hasError) {
           text = process.isInCensus.errorMessage;
+          purpose = Purpose.DANGER;
           icon = FeatherIcons.alertTriangle;
         } else {
           text = "Check census state";
@@ -202,7 +204,7 @@ class _PollPageState extends State<PollPage> {
           onTap: () => process.refreshIsInCensus(true),
           rightTextPurpose: purpose,
           rightIcon: icon,
-          purpose: process.isInCensus.hasError ? Purpose.DANGER : Purpose.NONE,
+          purpose: purpose ?? Purpose.NONE,
         );
       },
     );

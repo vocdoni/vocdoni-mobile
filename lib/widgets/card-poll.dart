@@ -14,17 +14,28 @@ import 'package:vocdoni/widgets/dashboardRow.dart';
 import 'package:vocdoni/widgets/dashboardText.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 
-class CardPoll extends StatelessWidget {
+class CardPoll extends StatefulWidget {
   final ProcessModel process;
   final EntityModel entity;
   final int index;
 
   CardPoll(
-      {@required this.process, @required this.entity, @required this.index}) {
+      {@required this.process, @required this.entity, @required this.index});
+
+  @override
+  _CardPollState createState() => _CardPollState();
+}
+
+class _CardPollState extends State<CardPoll> {
+  @override
+  void initState() {
+    super.initState();
+
     this
+        .widget
         .process
         .refreshCurrentParticipants()
-        .then((_) => this.process.refreshCensusSize())
+        .then((_) => this.widget.process.refreshCensusSize())
         .catchError((err) => devPrint(err));
   }
 
@@ -32,33 +43,35 @@ class CardPoll extends StatelessWidget {
   Widget build(context) {
     // Consume individual items that may rebuild only themselves
     return StateNotifierListener(
-      values: [entity.metadata, process.metadata],
+      values: [widget.entity.metadata, widget.process.metadata],
       builder: (context) => this.buildCard(context),
     );
   }
 
   Widget buildCard(BuildContext context) {
-    if (!this.process.metadata.hasValue) return Container();
+    if (!this.widget.process.metadata.hasValue) return Container();
 
     String timeLeft = "";
-    if (this.process.endDate is DateTime) {
-      timeLeft = getFriendlyTimeLeft(this.process.endDate);
+    if (this.widget.process.endDate is DateTime) {
+      timeLeft = getFriendlyTimeLeft(this.widget.process.endDate);
     }
 
     String participation = "";
-    if (this.process.censusSize.hasValue &&
-        this.process.currentParticipants.hasValue) {
+    if (this.widget.process.censusSize.hasValue &&
+        this.widget.process.currentParticipants.hasValue) {
       participation =
-          getFriendlyParticipation(this.process.currentParticipation);
+          getFriendlyParticipation(this.widget.process.currentParticipation);
     }
 
     return BaseCard(
       onTap: () => this.onCardTapped(context),
-      image:
-          Uri.tryParse(this.process.metadata.value?.details?.headerImage ?? "")
-              ?.toString(),
-      imageTag: makeElementTag(this.entity.reference.entityId,
-          this.process.metadata.value?.meta[META_PROCESS_ID], this.index),
+      image: Uri.tryParse(
+              this.widget.process.metadata.value?.details?.headerImage ?? "")
+          ?.toString(),
+      imageTag: makeElementTag(
+          this.widget.entity.reference.entityId,
+          this.widget.process.metadata.value?.meta[META_PROCESS_ID],
+          this.widget.index),
       children: <Widget>[
         DashboardRow(
           children: <Widget>[
@@ -97,15 +110,16 @@ class CardPoll extends StatelessWidget {
   }
 
   Widget buildProcessTitle() {
-    String title = this.process.metadata.value.details.title.values.first;
+    String title =
+        this.widget.process.metadata.value.details.title.values.first;
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextFullWidth: true,
-      secondaryText: this.entity.metadata.value.name.values.first,
-      avatarUrl: this.entity.metadata.value.media.avatar,
-      avatarHexSource: this.entity.reference.entityId,
-      avatarText: this.entity.metadata.value.name.values.first,
+      secondaryText: this.widget.entity.metadata.value.name.values.first,
+      avatarUrl: this.widget.entity.metadata.value.media.avatar,
+      avatarHexSource: this.widget.entity.reference.entityId,
+      avatarText: this.widget.entity.metadata.value.name.values.first,
       rightIcon: null,
     );
   }
@@ -137,6 +151,8 @@ class CardPoll extends StatelessWidget {
   onCardTapped(BuildContext context) {
     Navigator.pushNamed(context, "/entity/participation/poll",
         arguments: PollPageArgs(
-            entity: this.entity, process: this.process, index: this.index));
+            entity: this.widget.entity,
+            process: this.widget.process,
+            index: this.widget.index));
   }
 }
