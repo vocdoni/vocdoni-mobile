@@ -69,7 +69,7 @@ class StateNotifier<T> extends StateContainer<T> with ChangeNotifier {
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
   @override
-  StateNotifier<T> setError(String error, {bool keepPreviousValue = false}) {
+  StateNotifier<T> setError(String error, {bool keepPreviousValue = true}) {
     super.setError(error, keepPreviousValue: keepPreviousValue);
 
     // Notify after the state is changed

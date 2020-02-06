@@ -46,7 +46,7 @@ class StateContainer<T> {
   /// Sets the error message to the given value and toggles loading to false.
   /// Optionally, allows to keep the current value, even if there is an error.
   /// Returns itself so further methods can be chained right after.
-  StateContainer<T> setError(String error, {bool keepPreviousValue = false}) {
+  StateContainer<T> setError(String error, {bool keepPreviousValue = true}) {
     _errorMessage = error;
     _errorEncountered = DateTime.now();
 

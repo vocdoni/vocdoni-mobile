@@ -141,16 +141,14 @@ class AppStateModel implements StatePersistable, StateRefreshable {
   // CUSTOM METHODS
 
   /// Returns a duration if the block times are defined or `null` otherwise
-  Duration getDurationUntilBlock(int blockNumber) {
+  DateTime getDateTimeAtBlock(int blockNumber) {
     if (!this.referenceBlock.hasValue || !this.referenceBlockTimestamp.hasValue)
       return null;
 
-    int blocksLeftFromReference = blockNumber - this.referenceBlock.value;
-    Duration referenceToBlock = getDurationForBlocks(blocksLeftFromReference);
-    Duration nowToReference =
-        DateTime.now().difference(this.referenceBlockTimestamp.value);
+    final blockDiff = blockNumber - this.referenceBlock.value;
+    final durationDiff = getDurationForBlocks(blockDiff);
 
-    return nowToReference - referenceToBlock;
+    return DateTime.now().add(durationDiff);
   }
 
   /// Returns a duration if the block times are defined or `null` otherwise

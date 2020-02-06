@@ -367,7 +367,11 @@ class ProcessModel implements StateRefreshable {
   }
 
   Future<void> refreshCensusSize([bool force = false]) {
-    if (!this.metadata.hasValue) return null;
+    if (!this.metadata.hasValue)
+      return null;
+    else if (!force && this.censusSize.isFresh)
+      return Future.value();
+    else if (!force && this.censusSize.isLoading) return Future.value();
 
     devPrint("- Refreshing process censusSize [${this.processId}]");
 
@@ -376,7 +380,8 @@ class ProcessModel implements StateRefreshable {
     this.censusSize.setToLoading();
     return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
         .then((size) {
-      devPrint("- Refreshing process censusSize [DONE $size] [${this.processId}]");
+      devPrint(
+          "- Refreshing process censusSize [DONE $size] [${this.processId}]");
 
       return this.censusSize.setValue(size);
     }).catchError((err) {
@@ -429,21 +434,14 @@ class ProcessModel implements StateRefreshable {
     if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
       return null;
 
-    final remainingDuration =
-        globalAppState.getDurationUntilBlock(this.metadata.value.startBlock);
-    if (remainingDuration is Duration)
-      return DateTime.now().add(remainingDuration);
-    return null;
+    return globalAppState.getDateTimeAtBlock(this.metadata.value.startBlock);
   }
 
   DateTime get endDate {
     if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
       return null;
 
-    final remainingDuration = globalAppState.getDurationUntilBlock(
+    return globalAppState.getDateTimeAtBlock(
         this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
-    if (remainingDuration is Duration)
-      return DateTime.now().add(remainingDuration);
-    return null;
   }
 }

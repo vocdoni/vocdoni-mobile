@@ -51,7 +51,7 @@ class _CardPollState extends State<CardPoll> {
   Widget buildCard(BuildContext context) {
     if (!this.widget.process.metadata.hasValue) return Container();
 
-    String timeLabel = "Starting";
+    String timeLabel = "";
     String timeLeft = "";
     final now = DateTime.now();
     final startDate = this.widget.process.startDate;
@@ -83,7 +83,7 @@ class _CardPollState extends State<CardPoll> {
         timeLabel = "Ended";
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
-    } else {
+    } else if (startDate is DateTime) {
       // Refer to startDate
       if (now.isBefore(startDate))
         timeLabel = "Starting";

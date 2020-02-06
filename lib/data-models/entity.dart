@@ -223,7 +223,7 @@ class EntityModel implements StateRefreshable {
 
     devPrint("Refreshing entity metadata [${reference.entityId}]");
 
-    final oldEntityModel = this.metadata;
+    final oldEntityMetadata = this.metadata;
     EntityMetadata freshEntityMetadata;
     bool needsProcessListReload = false;
     bool needsFeedReload = false;
@@ -262,19 +262,19 @@ class EntityModel implements StateRefreshable {
 
     try {
       // Process ID's changed?
-      if (oldEntityModel.hasValue &&
-          !listEquals(oldEntityModel.value.votingProcesses.active,
+      if (oldEntityMetadata.hasValue &&
+          !listEquals(oldEntityMetadata.value.votingProcesses.active,
               freshEntityMetadata.votingProcesses.active)) {
         needsProcessListReload = true;
       }
 
       // URI changed?
-      if (!oldEntityModel.hasValue)
+      if (!oldEntityMetadata.hasValue)
         needsFeedReload = true;
-      else if (oldEntityModel.hasValue) {
-        if (!(oldEntityModel.value.newsFeed[globalAppState.currentLanguage]
+      else if (oldEntityMetadata.hasValue) {
+        if (!(oldEntityMetadata.value.newsFeed[globalAppState.currentLanguage]
                 is String) ||
-            oldEntityModel.value.newsFeed[globalAppState.currentLanguage] !=
+            oldEntityMetadata.value.newsFeed[globalAppState.currentLanguage] !=
                 freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
           needsFeedReload = true;
       }
@@ -321,22 +321,25 @@ class EntityModel implements StateRefreshable {
           "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length}]");
 
       // add new
-      final myFreshProcessModels = newProcessIds
-          .map((processId) {
+      final myFreshProcessModels = await Future.wait(newProcessIds
+          .map((processId) async {
             final prevModel = oldEntityProcessModels.firstWhere(
-                (model) => model.entityId == this.reference.entityId,
+                (model) =>
+                    model.processId == processId &&
+                    model.entityId == this.reference.entityId,
                 orElse: () => null);
+
             if (prevModel is ProcessModel) {
-              prevModel.refreshMetadata(); // detached async
+              await prevModel.refreshMetadata(); // detached async
               return prevModel;
             } else {
               final newModel = ProcessModel(processId, this.reference.entityId);
-              newModel.refreshMetadata(); // detached async
+              await newModel.refreshMetadata(); // detached async
               return newModel;
             }
           })
-          .cast<ProcessModel>()
-          .toList();
+          .cast<Future<ProcessModel>>()
+          .toList());
 
       // local update
       this.processes.setValue(myFreshProcessModels);
