@@ -51,12 +51,49 @@ class _CardPollState extends State<CardPoll> {
   Widget buildCard(BuildContext context) {
     if (!this.widget.process.metadata.hasValue) return Container();
 
+    String timeLabel = "Starting";
     String timeLeft = "";
-    if (this.widget.process.endDate is DateTime) {
-      timeLeft = getFriendlyTimeLeft(this.widget.process.endDate);
+    final now = DateTime.now();
+    final startDate = this.widget.process.startDate;
+    final endDate = this.widget.process.endDate;
+
+    if (startDate is DateTime && endDate is DateTime) {
+      if (now.isAfter(startDate)) {
+        // Refer to endDate
+        if (now.isBefore(endDate))
+          timeLabel = "Ending";
+        else
+          timeLabel = "Ended";
+
+        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+      } else {
+        // Refer to startDate
+        if (now.isBefore(startDate))
+          timeLabel = "Starting";
+        else
+          timeLabel = "Started";
+
+        timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
+      }
+    } else if (endDate is DateTime) {
+      // Refer to endDate
+      if (now.isBefore(endDate))
+        timeLabel = "Ending";
+      else
+        timeLabel = "Ended";
+
+      timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+    } else {
+      // Refer to startDate
+      if (now.isBefore(startDate))
+        timeLabel = "Starting";
+      else
+        timeLabel = "Started";
+
+      timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
     }
 
-    String participation = "";
+    String participation = "0";
     if (this.widget.process.censusSize.hasValue &&
         this.widget.process.currentParticipants.hasValue) {
       participation =
@@ -90,7 +127,7 @@ class _CardPollState extends State<CardPoll> {
                   purpose: Purpose.WARNING),
             ),
             DashboardItem(
-              label: "Time left",
+              label: timeLabel,
               item: DashboardText(
                   mainText: timeLeft, secondaryText: "", purpose: Purpose.GOOD),
             ),
@@ -128,24 +165,26 @@ class _CardPollState extends State<CardPoll> {
     return participation.toStringAsPrecision(2);
   }
 
-  String getFriendlyTimeLeft(DateTime date) {
-    if (!(date is DateTime)) return throw Exception("Invlaid date");
+  String getFriendlyTimeDifference(DateTime date) {
+    if (!(date is DateTime)) return throw Exception("Invalid date");
 
-    final timeLeft = date.difference(DateTime.now());
-    if (timeLeft.inSeconds <= 0)
-      return "-";
-    else if (timeLeft.inDays >= 365)
-      return "" + (timeLeft.inDays / 365).floor().toString() + "y";
-    else if (timeLeft.inDays >= 30)
-      return "" + (timeLeft.inDays / 28).floor().toString() + "mo";
-    else if (timeLeft.inDays >= 1)
-      return timeLeft.inDays.toString() + "d";
-    else if (timeLeft.inHours >= 1)
-      return timeLeft.inHours.toString() + "h";
-    else if (timeLeft.inMinutes >= 1)
-      return timeLeft.inMinutes.toString() + "min";
+    Duration diff = date.difference(DateTime.now());
+    if (diff.isNegative) diff = DateTime.now().difference(date);
+
+    if (diff.inSeconds <= 0)
+      return "now";
+    else if (diff.inDays >= 365)
+      return "" + (diff.inDays / 365).floor().toString() + "y";
+    else if (diff.inDays >= 30)
+      return "" + (diff.inDays / 28).floor().toString() + "mo";
+    else if (diff.inDays >= 1)
+      return diff.inDays.toString() + "d";
+    else if (diff.inHours >= 1)
+      return diff.inHours.toString() + "h";
+    else if (diff.inMinutes >= 1)
+      return diff.inMinutes.toString() + "min";
     else
-      return timeLeft.inSeconds.toString() + "s";
+      return diff.inSeconds.toString() + "s";
   }
 
   onCardTapped(BuildContext context) {
