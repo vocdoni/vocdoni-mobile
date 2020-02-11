@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 /// Classes implementing this interface allow to refetch the current data from remote sources
-abstract class StateRefreshable {
+abstract class ModelRefreshable {
   /// Fetch any internal items that might have become outdated and notify
   /// the listeners. Care should be taken to avoid refetching when not really
   /// necessary.
@@ -12,7 +12,7 @@ abstract class StateRefreshable {
 
 /// Classes implementing this interface allow to read and write its internal data to
 /// the global persistence objects
-abstract class StatePersistable {
+abstract class ModelPersistable {
   /// Read from the internal storage, update its own contents and notify the listeners.
   /// Tell all submodels to do the same.
   Future<void> readFromStorage();

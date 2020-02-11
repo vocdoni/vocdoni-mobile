@@ -6,7 +6,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
@@ -81,9 +81,9 @@ class _PollPageState extends State<PollPage> {
 
     // By the constructor, this.process.metadata is guaranteed to exist
 
-    return StateNotifierListener(
-      values: [process.metadata, entity.metadata],
-      builder: (context) {
+    return EventualBuilder(
+      notifiers: [process.metadata, entity.metadata],
+      builder: (context, _, __) {
         if (process.metadata.hasError || !process.metadata.hasValue)
           return buildErrorScaffold(process.metadata.errorMessage);
 
@@ -137,9 +137,9 @@ class _PollPageState extends State<PollPage> {
     final title =
         process.metadata.value.details.title[globalAppState.currentLanguage];
 
-    return StateNotifierListener(
-      values: [entity.metadata],
-      builder: (context) => ListItem(
+    return EventualBuilder(
+      notifier: entity.metadata,
+      builder: (context, _, __) => ListItem(
         // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
         mainText: title,
         secondaryText: entity.metadata.hasValue
@@ -169,9 +169,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   buildCensusItem(BuildContext context) {
-    return StateNotifierListener(
-      values: [process.isInCensus],
-      builder: (ctx) {
+    return EventualBuilder(
+      notifier: process.isInCensus,
+      builder: (ctx, _, __) {
         String text;
         Purpose purpose;
         IconData icon;
@@ -221,9 +221,9 @@ class _PollPageState extends State<PollPage> {
 
   buildTimeItem(BuildContext context) {
     // Rebuild when the reference block changes
-    return StateNotifierListener(
-      values: [process.metadata, globalAppState.referenceBlockTimestamp],
-      builder: (context) {
+    return EventualBuilder(
+      notifiers: [process.metadata, globalAppState.referenceBlockTimestamp],
+      builder: (context, _, __) {
         String rowText;
 
         if (process.startDate is DateTime &&
@@ -280,9 +280,9 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitVoteButton(BuildContext ctx) {
     // rebuild when isInCensus or hasVoted change
-    return StateNotifierListener(
-      values: [process.hasVoted, process.isInCensus],
-      builder: (ctx) {
+    return EventualBuilder(
+      notifiers: [process.hasVoted, process.isInCensus],
+      builder: (ctx, _, __) {
         if (process.isInCensus.hasError) {
           return Padding(
               padding: EdgeInsets.all(paddingPage),
@@ -325,9 +325,9 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitInfo() {
     // rebuild when isInCensus or hasVoted change
-    return StateNotifierListener(
-      values: [process.hasVoted, process.isInCensus],
-      builder: (ctx) {
+    return EventualBuilder(
+      notifiers: [process.hasVoted, process.isInCensus],
+      builder: (ctx, _, __) {
         final nextPendingChoice = getNextPendingChoice();
 
         if (process.hasVoted.hasValue && process.hasVoted.value) {

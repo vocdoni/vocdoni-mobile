@@ -10,23 +10,23 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
+import 'package:vocdoni/lib/model-base.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 // POOL
 
-/// This class should be used exclusively as a global singleton via MultiProvider.
+/// This class should be used exclusively as a global singleton.
 /// EntityPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateNotifier or StateNotifier.
+/// Updates on the children models will be notified by the objects themselves if using EventualNotifier or EventualNotifier.
 ///
-class EntityPoolModel extends StateNotifier<List<EntityModel>>
-    implements StatePersistable, StateRefreshable {
+class EntityPoolModel extends EventualNotifier<List<EntityModel>>
+    implements ModelPersistable, ModelRefreshable {
   EntityPoolModel() {
-    this.load(List<EntityModel>());
+    this.setDefaultValue(List<EntityModel>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -35,7 +35,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
   /// and populate related models
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.load(List<EntityModel>());
+    if (!hasValue) this.setValue(List<EntityModel>());
 
     try {
       this.setToLoading();
@@ -69,7 +69,7 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.load(List<EntityModel>());
+    if (!hasValue) this.setValue(List<EntityModel>());
 
     try {
       // WRITE THE DIRECT DATA THAT WE MANAGE
@@ -160,19 +160,23 @@ class EntityPoolModel extends StateNotifier<List<EntityModel>>
 /// EntityModel encapsulates the relevant information of a Vocdoni Entity.
 /// This includes its metadata and the participation processes.
 ///
-class EntityModel implements StateRefreshable {
+class EntityModel implements ModelRefreshable {
   final EntityReference reference; // This is never fetched
-  final StateNotifier<EntityMetadata> metadata =
-      StateNotifier<EntityMetadata>().withFreshness(60 * 5);
-  final StateNotifier<List<ProcessModel>> processes =
-      StateNotifier<List<ProcessModel>>().withFreshness(60);
-  final StateNotifier<Feed> feed = StateNotifier<Feed>().withFreshness(60 * 2);
+  final EventualNotifier<EntityMetadata> metadata =
+      EventualNotifier<EntityMetadata>()
+          .withFreshnessTimeout(Duration(minutes: 5));
+  final EventualNotifier<List<ProcessModel>> processes =
+      EventualNotifier<List<ProcessModel>>()
+          .withFreshnessTimeout(Duration(seconds: 60));
+  final EventualNotifier<Feed> feed =
+      EventualNotifier<Feed>().withFreshnessTimeout(Duration(minutes: 2));
 
-  final visibleActions =
-      StateNotifier<List<EntityMetadata_Action>>().withFreshness(60 * 2);
-  final registerAction =
-      StateNotifier<EntityMetadata_Action>().withFreshness(30);
-  final isRegistered = StateNotifier<bool>(false).withFreshness(30);
+  final visibleActions = EventualNotifier<List<EntityMetadata_Action>>()
+      .withFreshnessTimeout(Duration(minutes: 2));
+  final registerAction = EventualNotifier<EntityMetadata_Action>()
+      .withFreshnessTimeout(Duration(seconds: 30));
+  final isRegistered =
+      EventualNotifier<bool>(false).withFreshnessTimeout(Duration(seconds: 30));
 
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
@@ -185,17 +189,17 @@ class EntityModel implements StateRefreshable {
           .reference
           .entryPoints
           .join(","); // Ensure we can read it back later on
-      this.metadata.load(entityMeta);
+      this.metadata.setDefaultValue(entityMeta);
     } else {
       final newMetadata = EntityMetadata();
       newMetadata.meta[META_ENTITY_ID] = this.reference.entityId;
       newMetadata.meta[META_ENTITY_ENTRY_POINTS] =
           this.reference.entryPoints.join(",");
-      this.metadata.load(entityMeta);
+      this.metadata.setDefaultValue(entityMeta);
     }
 
-    if (procs is List) this.processes.load(procs);
-    if (feed is Feed) this.feed.load(feed);
+    if (procs is List) this.processes.setDefaultValue(procs);
+    if (feed is Feed) this.feed.setDefaultValue(feed);
   }
 
   /// Fetch any internal items that might have become outdated and notify
@@ -217,9 +221,8 @@ class EntityModel implements StateRefreshable {
     // TODO: Don't refetch if the IPFS hash is the same
     if (!(reference is EntityReference))
       return;
-    else if (!force &&
-        this.metadata.isLoading &&
-        !this.metadata.isLoadingStalled) return;
+    else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
+      return;
 
     devPrint("Refreshing entity metadata [${reference.entityId}]");
 
@@ -295,7 +298,7 @@ class EntityModel implements StateRefreshable {
       throw err;
     }
 
-    this.metadata.notify();
+    this.metadata.notifyChange();
   }
 
   Future<void> refreshProcesses([bool force = false]) async {
@@ -361,8 +364,7 @@ class EntityModel implements StateRefreshable {
   Future<void> refreshFeed([bool force = false]) async {
     if (!this.metadata.hasValue)
       return;
-    else if (!force && this.feed.isLoading && !this.feed.isLoadingStalled)
-      return;
+    else if (!force && this.feed.isLoading && this.feed.isLoadingFresh) return;
 
     if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
         is String)) return;
@@ -405,7 +407,7 @@ class EntityModel implements StateRefreshable {
       } else {
         globalFeedPool.value[idx] = this.feed.value;
       }
-      globalFeedPool.notify();
+      globalFeedPool.notifyChange();
 
       await globalFeedPool.writeToStorage();
     } catch (err) {
@@ -428,7 +430,7 @@ class EntityModel implements StateRefreshable {
       return;
     else if (!force &&
         this.visibleActions.isLoading &&
-        !this.visibleActions.isLoadingStalled) return;
+        this.visibleActions.isLoadingFresh) return;
 
     devPrint(
         "- Refreshing entity dependent visible actions [${reference.entityId}]");

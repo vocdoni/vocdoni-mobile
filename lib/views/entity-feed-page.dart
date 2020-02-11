@@ -1,4 +1,4 @@
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
@@ -38,9 +38,12 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   Widget build(context) {
     if (entityModel == null) return buildEmptyEntity(context);
 
-    return StateNotifierListener(
-        values: [entityModel.feed], // rebuild upon updates on this value
-        builder: (context) {
+    return EventualBuilder(
+        notifiers: [
+          entityModel.metadata,
+          entityModel.feed
+        ], // rebuild upon updates on these value
+        builder: (context, _, __) {
           if (!entityModel.metadata.hasValue)
             return buildEmptyEntity(context);
           else if (!entityModel.feed.hasValue)

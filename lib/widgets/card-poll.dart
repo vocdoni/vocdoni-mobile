@@ -6,7 +6,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:vocdoni/constants/meta-keys.dart";
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/dashboardItem.dart';
@@ -42,9 +42,9 @@ class _CardPollState extends State<CardPoll> {
   @override
   Widget build(context) {
     // Consume individual items that may rebuild only themselves
-    return StateNotifierListener(
-      values: [widget.entity.metadata, widget.process.metadata],
-      builder: (context) => this.buildCard(context),
+    return EventualBuilder(
+      notifiers: [widget.entity.metadata, widget.process.metadata],
+      builder: (context, _, __) => this.buildCard(context),
     );
   }
 

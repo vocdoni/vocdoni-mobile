@@ -130,8 +130,8 @@ class DevMenu extends StatelessWidget {
         newAccount.identity.value.keys[0].address;
 
     updatedIdentity.keys[0] = newAccount.identity.value.keys[0];
-    currentAccount.identity.notify();
-    globalAccountPool.notify();
+    currentAccount.identity.notifyChange();
+    globalAccountPool.notifyChange();
 
     // done
     loadingIndicator.close();

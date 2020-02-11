@@ -6,12 +6,12 @@ import 'package:dvote/dvote.dart' as dvote;
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
-import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
+import 'package:vocdoni/lib/model-base.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
-/// This class should be used exclusively as a global singleton via MultiProvider.
+/// This class should be used exclusively as a global singleton.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
@@ -19,12 +19,12 @@ import 'package:vocdoni/lib/singletons.dart';
 /// This is, the underlying identity and all the relevant metadata.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or EventualNotifier.
 ///
-class AccountPoolModel extends StateNotifier<List<AccountModel>>
-    implements StatePersistable {
+class AccountPoolModel extends EventualNotifier<List<AccountModel>>
+    implements ModelPersistable {
   AccountPoolModel() {
-    this.setValue(List<AccountModel>());
+    this.setDefaultValue(List<AccountModel>());
   }
 
   // OVERRIDES
@@ -32,7 +32,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.load(List<AccountModel>());
+    if (!hasValue) this.setValue(List<AccountModel>());
 
     try {
       this.setToLoading();
@@ -58,8 +58,8 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
             final authThresholdDate = DateTime.tryParse(
                     identity.meta[META_ACCOUNT_AUTH_THRESHOLD_DATE]) ??
                 DateTime.now();
-            result.failedAuthAttempts.load(failedAttempts);
-            result.authThresholdDate.load(authThresholdDate);
+            result.failedAuthAttempts.setValue(failedAttempts);
+            result.authThresholdDate.setValue(authThresholdDate);
 
             return result;
           })
@@ -76,7 +76,7 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.load(List<AccountModel>());
+    if (!hasValue) this.setValue(List<AccountModel>());
 
     try {
       final identitiesList = this
@@ -164,28 +164,28 @@ class AccountPoolModel extends StateNotifier<List<AccountModel>>
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
-class AccountModel implements StateRefreshable {
-  final StateNotifier<Identity> identity = StateNotifier<Identity>();
-  final StateNotifier<List<EntityModel>> entities = StateNotifier<
+class AccountModel implements ModelRefreshable {
+  final EventualNotifier<Identity> identity = EventualNotifier<Identity>();
+  final EventualNotifier<List<EntityModel>> entities = EventualNotifier<
       List<EntityModel>>(); // generated from `identity.peers.entities`
 
-  final StateNotifier<int> failedAuthAttempts = StateNotifier<int>(0);
-  final StateNotifier<DateTime> authThresholdDate =
-      StateNotifier<DateTime>(DateTime.now());
+  final EventualNotifier<int> failedAuthAttempts = EventualNotifier<int>(0);
+  final EventualNotifier<DateTime> authThresholdDate =
+      EventualNotifier<DateTime>(DateTime.now());
 
   /// The original json string with the timestamp, used to make the signature
-  final StateNotifier<String> timestampSigned =
-      StateNotifier<String>().withFreshness(21600);
+  final EventualNotifier<String> timestampSigned =
+      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 6));
 
   /// The signature of `timestampSigned`. Used for action visibility checks
-  final StateNotifier<String> timestampSignature =
-      StateNotifier<String>().withFreshness(21600);
+  final EventualNotifier<String> timestampSignature =
+      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 6));
 
   // CONSTRUCTORS
 
   /// Create a model with the given identity and the peer entities found on the Entity Pool
   AccountModel.fromIdentity(Identity idt) {
-    this.identity.load(idt);
+    this.identity.setDefaultValue(idt);
 
     if (globalEntityPool.hasValue) {
       final entityList = this
@@ -198,7 +198,7 @@ class AccountModel implements StateRefreshable {
           .cast<EntityModel>()
           .toList();
 
-      this.entities.load(entityList);
+      this.entities.setDefaultValue(entityList);
     }
   }
 

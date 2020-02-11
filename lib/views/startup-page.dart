@@ -41,7 +41,7 @@ class _StartupPageState extends State<StartupPage> {
     }).then((_) {
       // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
       return Future.wait([
-        globalAppState.refresh(),
+        globalAppState.refresh(true),
       ]);
     }).then((_) {
       // DETERMINE THE NEXT SCREEN AND GO THERE

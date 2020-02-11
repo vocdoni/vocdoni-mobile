@@ -2,18 +2,19 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
-import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
+import 'package:vocdoni/lib/model-base.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
-/// This class should be used exclusively as a global singleton via MultiProvider.
+/// This class should be used exclusively as a global singleton.
 /// FeedPool tracks all the registered account's feeds and provides individual instances.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
 ///
-class FeedPool extends StateNotifier<List<Feed>> implements StatePersistable {
+class FeedPool extends EventualNotifier<List<Feed>>
+    implements ModelPersistable {
   FeedPool() {
-    this.load(List<Feed>());
+    this.setDefaultValue(List<Feed>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -21,7 +22,7 @@ class FeedPool extends StateNotifier<List<Feed>> implements StatePersistable {
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.load(List<Feed>());
+    if (!hasValue) this.setValue(List<Feed>());
 
     try {
       this.setToLoading();
@@ -44,7 +45,7 @@ class FeedPool extends StateNotifier<List<Feed>> implements StatePersistable {
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.load(List<Feed>());
+    if (!hasValue) this.setValue(List<Feed>());
 
     try {
       final feedList = this

@@ -3,7 +3,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 
@@ -37,9 +37,9 @@ class _HomeTabState extends State<HomeTab> {
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) return buildNoEntries(ctx);
 
-    return StateNotifierListener(
-      values: [currentAccount.entities, globalProcessPool, globalFeedPool],
-      builder: (context) {
+    return EventualBuilder(
+      notifiers: [currentAccount.entities, globalProcessPool, globalFeedPool],
+      builder: (context, _, __) {
         if (!currentAccount.entities.hasValue ||
             currentAccount.entities.value.length == 0)
           return buildNoEntries(ctx);

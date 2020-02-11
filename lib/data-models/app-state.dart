@@ -2,8 +2,8 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
+import 'package:vocdoni/lib/model-base.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/util.dart';
@@ -12,21 +12,22 @@ import 'package:vocdoni/lib/util.dart';
 ///
 /// Updates on the children models will be notified by the objects themselves.
 ///
-class AppStateModel implements StatePersistable, StateRefreshable {
+class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// Index of the currently active identity
-  final StateNotifier<int> selectedAccount = StateNotifier<int>(-1);
+  final EventualNotifier<int> selectedAccount = EventualNotifier<int>(-1);
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
-  final StateNotifier<BootNodeGateways> bootnodes =
-      StateNotifier<BootNodeGateways>().withFreshness(60 * 10);
+  final EventualNotifier<BootNodeGateways> bootnodes =
+      EventualNotifier<BootNodeGateways>()
+          .withFreshnessTimeout(Duration(minutes: 2));
 
-  final StateNotifier<int> averageBlockTime =
-      StateNotifier<int>(5); // 5 seconds by default
-  final StateNotifier<int> referenceBlock =
-      StateNotifier<int>().withFreshness(10);
-  final StateNotifier<DateTime> referenceBlockTimestamp =
-      StateNotifier<DateTime>().withFreshness(10);
+  final EventualNotifier<int> averageBlockTime =
+      EventualNotifier<int>(5); // 5 seconds by default
+  final EventualNotifier<int> referenceBlock =
+      EventualNotifier<int>().withFreshnessTimeout(Duration(seconds: 20));
+  final EventualNotifier<DateTime> referenceBlockTimestamp =
+      EventualNotifier<DateTime>().withFreshnessTimeout(Duration(seconds: 20));
 
   // INTERNAL DATA HANDLERS
 
@@ -52,7 +53,7 @@ class AppStateModel implements StatePersistable, StateRefreshable {
     try {
       this.bootnodes.setToLoading();
       final gwList = globalBootnodesPersistence.get();
-      this.bootnodes.load(gwList);
+      this.bootnodes.setValue(gwList);
     } catch (err) {
       devPrint(err);
       this

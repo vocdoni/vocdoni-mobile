@@ -2,7 +2,7 @@ import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/widgets/baseCard.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -18,9 +18,9 @@ class CardPost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Consume individual items that may rebuild only themselves
-    return StateNotifierListener(
-      values: [entity.metadata, entity.feed],
-      builder: (context) => BaseCard(
+    return EventualBuilder(
+      notifiers: [entity.metadata, entity.feed],
+      builder: (context, _, __) => BaseCard(
           onTap: () => onPostCardTap(context, post, entity, index),
           image: post.image,
           imageTag: makeElementTag(entity.reference.entityId, post.id, index),

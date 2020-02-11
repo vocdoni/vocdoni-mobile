@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import 'package:provider/provider.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/widgets/listItem.dart';
@@ -22,10 +21,6 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
   @override
   Widget build(BuildContext context) {
-    // We use Provider.of() befause the underlying data will not be able to trigger a redraw of the UI
-    // final appState = Provider.of<AppStateModel>(context);
-    final accountPool = Provider.of<AccountPoolModel>(context);
-
     return WillPopScope(
         onWillPop: handleWillPop,
         child: Scaffold(
@@ -35,7 +30,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Section(text: "Select an identity"),
-                      buildExistingIdentities(context, accountPool.value),
+                      buildExistingIdentities(context, globalAccountPool.value),
                       ListItem(
                           mainText: "Create a new one",
                           onTap: () => createNew(context)),

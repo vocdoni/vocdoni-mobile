@@ -3,22 +3,22 @@ import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/state-base.dart';
-import 'package:vocdoni/lib/state-notifier.dart';
+import 'package:vocdoni/lib/model-base.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/util.dart';
 
-/// This class should be used exclusively as a global singleton via MultiProvider.
+/// This class should be used exclusively as a global singleton.
 /// ProcessPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
 ///
 /// IMPORTANT: **Updates** on the own state must call `notifyListeners()` or use `setXXX()`.
-/// Updates on the children models will be notified by the objects themselves if using StateContainer or StateNotifier.
+/// Updates on the children models will be notified by the objects themselves if using StateContainer or EventualNotifier.
 ///
-class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
-    implements StatePersistable, StateRefreshable {
+class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
+    implements ModelPersistable, ModelRefreshable {
   ProcessPoolModel() {
-    this.load(List<ProcessModel>());
+    this.setDefaultValue(List<ProcessModel>());
   }
 
   // EXTERNAL DATA HANDLERS
@@ -26,7 +26,7 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
   /// Read the global collection of all objects from the persistent storage
   @override
   Future<void> readFromStorage() async {
-    if (!hasValue) this.load(List<ProcessModel>());
+    if (!hasValue) this.setValue(List<ProcessModel>());
 
     try {
       this.setToLoading();
@@ -52,7 +52,7 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
   /// Write the given collection of all objects to the persistent storage
   @override
   Future<void> writeToStorage() async {
-    if (!hasValue) this.load(List<ProcessModel>());
+    if (!hasValue) this.setValue(List<ProcessModel>());
 
     try {
       final processList = this
@@ -160,20 +160,20 @@ class ProcessPoolModel extends StateNotifier<List<ProcessModel>>
 /// ProcessModel encapsulates the relevant information of a Vocdoni Process.
 /// This includes its metadata and the participation processes.
 ///
-class ProcessModel implements StateRefreshable {
+class ProcessModel implements ModelRefreshable {
   final String processId;
   final String entityId;
   final String lang = "default";
-  final StateNotifier<ProcessMetadata> metadata =
-      StateNotifier<ProcessMetadata>();
-  final StateNotifier<bool> isInCensus =
-      StateNotifier<bool>().withFreshness(60 * 5);
-  final StateNotifier<bool> hasVoted =
-      StateNotifier<bool>().withFreshness(60 * 5);
-  final StateNotifier<int> currentParticipants =
-      StateNotifier<int>().withFreshness(60 * 5);
-  final StateNotifier<int> censusSize =
-      StateNotifier<int>().withFreshness(60 * 30);
+  final EventualNotifier<ProcessMetadata> metadata =
+      EventualNotifier<ProcessMetadata>();
+  final EventualNotifier<bool> isInCensus =
+      EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
+  final EventualNotifier<bool> hasVoted =
+      EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
+  final EventualNotifier<int> currentParticipants =
+      EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 5));
+  final EventualNotifier<int> censusSize =
+      EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 30));
 
   List<dynamic> choices = [];
 
@@ -186,12 +186,12 @@ class ProcessModel implements StateRefreshable {
       // Ensure we can read it back
       metadata.meta[META_PROCESS_ID] = this.processId;
       metadata.meta[META_ENTITY_ID] = this.entityId;
-      this.metadata.load(metadata);
+      this.metadata.setDefaultValue(metadata);
     }
-    if (isInCensus is bool) this.isInCensus.load(isInCensus);
-    if (hasVoted is bool) this.hasVoted.load(hasVoted);
+    if (isInCensus is bool) this.isInCensus.setDefaultValue(isInCensus);
+    if (hasVoted is bool) this.hasVoted.setDefaultValue(hasVoted);
     if (currentParticipants is int)
-      this.currentParticipants.load(currentParticipants);
+      this.currentParticipants.setDefaultValue(currentParticipants);
   }
 
   ProcessModel.fromMetadata(
@@ -200,23 +200,23 @@ class ProcessModel implements StateRefreshable {
     metadata.meta[META_PROCESS_ID] = this.processId;
     metadata.meta[META_ENTITY_ID] = this.entityId;
 
-    this.metadata.load(metadata);
+    this.metadata.setDefaultValue(metadata);
 
     switch (this.metadata.value.meta[META_PROCESS_CENSUS_BELONGS]) {
       case "true":
-        this.isInCensus.load(true);
+        this.isInCensus.setDefaultValue(true);
         break;
       case "false":
-        this.isInCensus.load(false);
+        this.isInCensus.setDefaultValue(false);
         break;
     }
 
     switch (this.metadata.value.meta[META_PROCESS_HAS_VOTED]) {
       case "true":
-        this.isInCensus.load(true);
+        this.isInCensus.setDefaultValue(true);
         break;
       case "false":
-        this.isInCensus.load(false);
+        this.isInCensus.setDefaultValue(false);
         break;
     }
 
@@ -224,7 +224,7 @@ class ProcessModel implements StateRefreshable {
       final strValue =
           this.metadata.value.meta[META_PROCESS_CENSUS_SIZE] ?? "0";
       final newSize = int.tryParse(strValue) ?? 0;
-      this.censusSize.load(newSize);
+      this.censusSize.setDefaultValue(newSize);
     }
   }
 
@@ -244,9 +244,8 @@ class ProcessModel implements StateRefreshable {
   Future<void> refreshMetadata([bool force = false]) async {
     if (!force && this.metadata.isFresh)
       return;
-    else if (!force &&
-        this.metadata.isLoading &&
-        !this.metadata.isLoadingStalled) return;
+    else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
+      return;
 
     devPrint("- Refreshing process metadata [${this.processId}]");
 

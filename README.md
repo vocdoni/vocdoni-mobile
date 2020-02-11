@@ -1,84 +1,11 @@
 # Vocdoni Mobile Client
 Official implementation of the Vocdoni core features.
 
-The repository depends on a Git submodule mounted on `lib/models` => `git@gitlab.com:vocdoni/dvote-protobuf.git`
-
 ## Development
 
 ### Data Architecture and internal Models
 
-The global state of the app is built on top of the [Provider package](https://pub.dev/packages/provider). The provider package allows to track updates on objects that implement the `ChangeNotifier` protocol. 
-
-#### State Container
-
-In addition to this, this project provides the `StateContainer` abstract class. It provides a clean and safe way to consume a data structure that is guaranteed to exist (inspired on Rust's `Option` enum). The state container is ideal for tracking a widget's local data that needs to be fetched remotely.
-
-Basic usage example:
-
-```dart
-final myString = StateContainer<String>();
-// ...
-myString.setToLoading("Optional loading message");
-myString.isLoading // true
-myString.isLoadingStalled // false
-myString.hasError // false
-myString.hasValue // false
-myString.value // null
-
-// > 10 seconds later
-myString.isLoadingStalled // true
-
-myString.setError("Something went wrong");
-myString.isLoading // false
-myString.isLoadingStalled // false
-myString.hasError // true
-myString.errorMessage  // "Something went wrong"
-myString.hasValue // false
-myString.value // null
-
-myString.setValue("I am ready!");
-myString.isLoading // false
-myString.isLoadingStalled // false
-myString.hasError // false
-myString.hasValue // true
-myString.value // "I am ready!"
-```
-
-Additional features:
-
-```dart
-// Initial value of 0
-// Data will be considered "not fresh" after 5 seconds
-final myInteger = StateContainer<int>(0).withFreshness(5);
-myInteger.isFresh // false   (we have not called setValue yet)
-myInteger.lastUpdated // null
-myInteger.lastError // null
-myInteger.hasValue // true
-myInteger.value // 0
-
-myInteger.setValue(5);
-myInteger.isFresh // true
-myInteger.lastUpdated // (DateTime)
-myInteger.lastError // null
-myInteger.value // 5
-
-// 5 seconds after
-myInteger.isFresh // false
-```
-
-#### State Notifier
-
-The `StateNotifier` class extends the functionality of `StateContainer` by implementing the `ChangeNotifier` interface of `Provider`. The internal method `notifyListeners` is called whenever the internal state changes (`setValue()`, `setError()`, `setToLoading()`) or by using `notify()`. 
-
-State Notifiers are mainly used to build and compose data models used in the global state of the app. 
-
-```dart
-final myBool = StateNotifier<int>();
-myBool.setToLoading();  // calls notifyListeners()
-myBool.setError("Network error");  // calls notifyListeners()
-myBool.setValue(true);  // calls notifyListeners()
-myBool.notify();  // forces a call to notifyListeners() with the current value
-```
+The State Management architecture of the app is built on top of the [Eventual package](https://pub.dev/packages/eventual). Eventual allows to track updates on objects and rebuild their corresponding UI accordingly. 
 
 #### Model classes
 
@@ -93,7 +20,7 @@ They can be of the type:
   * They contain all the model instances known to the system
   * Any modification on a model should happen in models obtained from a global pool, since the pool manages persistence
 
-This separation allows for efficient and granular widget tree rebuilds whenever the state is updated. If a single value changes, only the relevant subwidgets should rebuild.
+This separation allows for efficient and granular widget tree rebuilds whenever the state is updated. If a single value changes, only the relevant children should rebuild.
 
 #### Usage
 
@@ -104,60 +31,13 @@ final globalEntitiesPersistence = EntitiesPersistence();
 await globalEntitiesPersistence.readAll();
 
 // ...
+final globalEntityPool = EntityPoolModel();
 await globalEntityPool.readFromStorage();  // will import and arrange the persisted data
 ```
 
-**Provide the Global Models at the root context**
+**Consume Models in specific places**
 
-```dart
-final globalEntityPool = EntityPoolModel();
-
-// ...
-
-runApp(MultiProvider(
-	providers: [
-        Provider<EntityPoolModel>(create: (_) => globalEntityPool),
-		// ...
-    ],
-    child: MaterialApp(
-		// ...
-	)
-))
-```
-
-Then, they can be retrieved later on. 
-
-```dart
-// Widget 1
-@override
-Widget build(BuildContext context) {
-	// Consume dynamically
-    return Consumer<EntityPoolModel>(
-        builder: (BuildContext context, entityModels, _) {
-			// Use the fresh version: entityModels
-
-			// Whenever `globalEntityPool` changes, this builder will be executed again
-		}
-}
-
-// Widget 2
-@override
-Widget build(BuildContext context) {
-	// Retrieve the provided value at the time of building (may become outdated later on)
-
-	final entityModels = Provider.of<EntityPoolModel>(context);
-	if (entityModels == null) throw Exception("Internal error");
-
-    // use `entityModels`
-	// ...
-}
-```
-
-**Consume Local Models in specific places**
-
-Unike the global modes (data pools), any other StateNotifier instance will not be provided on the root context. You will typically have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. This single instance can't simply use `Consumer` because `EntityModel` is no longer a global and unique value provided on the context.
-
-This means, that any `StateNotifier<T>` values within `EntityModel` need to be consumed locally.
+Typically, you will have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. 
 
 ```dart
 final globalEntityPool = EntityPoolModel();
@@ -167,11 +47,12 @@ final globalEntityPool = EntityPoolModel();
 // Widget
 @override
 Widget build(BuildContext context) {
+	// From the pool, we grab the first entity model
 	final myEntity = globalEntityPool.value.first;
 
-	// Consume many values locally
-	return StateNotifierListener(
-    	values: [myEntity.feed, myEntity.processes],  // StateNotifier<T> values that may change over time
+	// Consume many values (EventualNotifier) locally
+	return EventualBuilder(
+    	notifiers: [myEntity.feed, myEntity.processes],  // EventualNotifier<T> values that may change over time
 		builder: (context) {
 			// rebuilt whenever either of myEntity.feed or myEntity.processes change
 
@@ -181,13 +62,13 @@ Widget build(BuildContext context) {
 }
 ```
 
-In the example above, updates on the global Feed pool, or any unrelated Feed items, will not affect the current widget. But as soon as we call `myEntity.feed.refresh()` on this particular instance, the Builder will be triggered because of the changes in `isLoading`, `hasError` and `hasValue`.
+In the example above, updates on specifig Feed items, will not affect the current widget. But as soon as we call `myEntity.feed.refresh()` on this instance, the Builder will be triggered because of the changes in `isLoading`, `hasError` and `hasValue`.
 
 #### Extra methods
 
-Certain models implement the `StateRefreshable` interface. This ensures that callers can call `refresh()` to request a refetch of remote data, based on the current model's ID or metadata.
+Certain models implement the `ModelRefreshable` interface. This ensures that callers can call `refresh()` to request a refetch of remote data, based on the current model's ID or metadata.
 
-Other models (mainly pools) also implement the `StatePersistable` interface, so that `readFromStorage()` and `writeToStorage()` can be called.
+Other models (mainly pools) also implement the `ModelPersistable` interface, so that `readFromStorage()` and `writeToStorage()` can be called.
 
 #### General
 
@@ -212,7 +93,6 @@ The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plu
 ### Deep linking
 
 The app accepts incoming requests using the `vocdoni:` schema. 
-
 
 #### Show an organization
 

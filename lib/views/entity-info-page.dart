@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/state-notifier-listener.dart';
+import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
@@ -45,9 +45,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   @override
   Widget build(context) {
     // Rebuild when the metadata updates
-    return StateNotifierListener(
-      values: [widget.entityModel.metadata],
-      builder: (BuildContext context) {
+    return EventualBuilder(
+      notifier: widget.entityModel.metadata,
+      builder: (context, _, __) {
         return widget.entityModel.metadata.hasValue
             ? buildScaffold(context)
             : buildScaffoldWithoutMetadata(context);
@@ -77,13 +77,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildLoadingStatus() {
-    return StateNotifierListener(
-      values: [
+    return EventualBuilder(
+      notifiers: [
         widget.entityModel.metadata,
         widget.entityModel.processes,
         widget.entityModel.feed
       ],
-      builder: (context) {
+      builder: (context, _, __) {
         if (widget.entityModel.metadata.isLoading)
           return ListItem(
             mainText: "Fetching details...",
@@ -204,9 +204,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildFeedRow(BuildContext context) {
     // Rebuild when the feed updates
-    return StateNotifierListener(
-        values: [widget.entityModel.feed],
-        builder: (context) {
+    return EventualBuilder(
+        notifier: widget.entityModel.feed,
+        builder: (context, _, __) {
           int postCount = 0;
           if (widget.entityModel.feed.hasValue) {
             postCount = widget.entityModel.feed.value.items?.length ?? 0;
@@ -230,9 +230,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildParticipationRow(BuildContext context) {
     // Rebuild when the process list updates (not the items)
-    return StateNotifierListener(
-      values: [widget.entityModel.processes],
-      builder: (context) {
+    return EventualBuilder(
+      notifier: widget.entityModel.processes,
+      builder: (context, _, __) {
         int processCount = 0;
         if (widget.entityModel.processes.hasValue) {
           final availableProcesses = List<ProcessModel>();
@@ -272,11 +272,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     String subscribeText = isSubscribed ? "Following" : "Follow";
 
     // Rebuild when the selected account's identity updates
-    return StateNotifierListener(
-        values: [
+    return EventualBuilder(
+        notifiers: [
           currentAccount.identity
         ], // when peers > entities are updated, identity emits an event
-        builder: (context) => ListItem(
+        builder: (context, _, __) => ListItem(
               mainText: subscribeText,
               icon: FeatherIcons.heart,
               disabled: _processingSubscription,
@@ -293,7 +293,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
-    // No need to use ChangeNotifierProvider here, since the only place that can change the subscription status is here.
+    // No need to use EventualBuilder here, since the only place that can change the subscription status is here.
     // Hence, we don't need to worry about rebuilding on external updates
 
     bool isSubscribed =
@@ -332,9 +332,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildRegisterButton(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
-    return StateNotifierListener(
-      values: [widget.entityModel.isRegistered],
-      builder: (context) {
+    return EventualBuilder(
+      notifier: widget.entityModel.isRegistered,
+      builder: (context, _, __) {
         if (widget.entityModel.isRegistered.hasError ||
             widget.entityModel.registerAction.hasError)
           return Container();
@@ -367,9 +367,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   Widget buildActionList(BuildContext ctx) {
     // Rebuild if `isRegistered` changes
-    return StateNotifierListener(
-      values: [widget.entityModel.visibleActions],
-      builder: (context) {
+    return EventualBuilder(
+      notifier: widget.entityModel.visibleActions,
+      builder: (context, _, __) {
         final List<Widget> actionsToShow = [];
 
         actionsToShow.add(Section(text: "Actions"));
