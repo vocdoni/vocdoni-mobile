@@ -213,10 +213,10 @@ class ProcessModel implements ModelRefreshable {
 
     switch (this.metadata.value.meta[META_PROCESS_HAS_VOTED]) {
       case "true":
-        this.isInCensus.setDefaultValue(true);
+        this.hasVoted.setDefaultValue(true);
         break;
       case "false":
-        this.isInCensus.setDefaultValue(false);
+        this.hasVoted.setDefaultValue(false);
         break;
     }
 
@@ -251,8 +251,8 @@ class ProcessModel implements ModelRefreshable {
 
     // TODO: Don't refetch if the IPFS hash is the same
 
-    final dvoteGw = getDVoteGateway();
-    final Web3Gateway web3Gw = getWeb3Gateway();
+    final dvoteGw = await getDVoteGateway();
+    final Web3Gateway web3Gw = await getWeb3Gateway();
 
     try {
       this.metadata.setToLoading();
@@ -285,7 +285,7 @@ class ProcessModel implements ModelRefreshable {
 
     devPrint("- Refreshing process isInCensus [${this.processId}]");
 
-    final dvoteGw = getDVoteGateway();
+    final dvoteGw = await getDVoteGateway();
 
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
@@ -343,7 +343,7 @@ class ProcessModel implements ModelRefreshable {
           globalAppState.currentAccount.identity.value.keys[0].address,
           this.processId);
 
-      final dvoteGw = getDVoteGateway();
+      final dvoteGw = await getDVoteGateway();
       final success =
           await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
               .catchError((_) {});
@@ -374,10 +374,10 @@ class ProcessModel implements ModelRefreshable {
 
     devPrint("- Refreshing process censusSize [${this.processId}]");
 
-    final dvoteGw = getDVoteGateway();
-
     this.censusSize.setToLoading();
-    return getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw)
+    return getDVoteGateway()
+        .then((dvoteGw) =>
+            getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw))
         .then((size) {
       devPrint(
           "- Refreshing process censusSize [DONE $size] [${this.processId}]");
@@ -401,10 +401,10 @@ class ProcessModel implements ModelRefreshable {
 
     devPrint("- Refreshing process currentParticipants [${this.processId}]");
 
-    final dvoteGw = getDVoteGateway();
-
     this.currentParticipants.setToLoading();
-    return getEnvelopeHeight(this.processId, dvoteGw).then((numVotes) {
+    return getDVoteGateway()
+        .then((dvoteGw) => getEnvelopeHeight(this.processId, dvoteGw))
+        .then((numVotes) {
       devPrint(
           "- Refreshing process currentParticipants [DONE] [${this.processId}]");
 

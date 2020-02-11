@@ -84,7 +84,7 @@ class _PollPageState extends State<PollPage> {
     return EventualBuilder(
       notifiers: [process.metadata, entity.metadata],
       builder: (context, _, __) {
-        if (process.metadata.hasError || !process.metadata.hasValue)
+        if (process.metadata.hasError && !process.metadata.hasValue)
           return buildErrorScaffold(process.metadata.errorMessage);
 
         final headerUrl =
