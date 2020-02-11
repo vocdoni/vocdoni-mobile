@@ -213,10 +213,10 @@ class ProcessModel implements ModelRefreshable {
 
     switch (this.metadata.value.meta[META_PROCESS_HAS_VOTED]) {
       case "true":
-        this.isInCensus.setDefaultValue(true);
+        this.hasVoted.setDefaultValue(true);
         break;
       case "false":
-        this.isInCensus.setDefaultValue(false);
+        this.hasVoted.setDefaultValue(false);
         break;
     }
 

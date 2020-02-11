@@ -20,6 +20,11 @@ class _StartupPageState extends State<StartupPage> {
   Future<void> initApplication() {
     globalAnalytics.init();
 
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
     // READ PERSISTED DATA (protobuf)
     return Future.wait([
       globalBootnodesPersistence.read(),
@@ -62,24 +67,38 @@ class _StartupPageState extends State<StartupPage> {
       });
 
       // RETRY ITSELF
-      Future.delayed(Duration(seconds: 5)).then((_) => initApplication());
+      Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
     });
   }
 
   Widget buildError(BuildContext context) {
     return Center(
-        child: Text(
-      "Error:\n" + error,
-      style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
-      textAlign: TextAlign.center,
+        child: Column(
+      children: [
+        Text(
+          "Error:\n$error",
+          style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 20.0),
+        InkWell(
+            onTap: () => initApplication(),
+            child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                child: Text(
+                  "Tap to retry",
+                  style: TextStyle(fontSize: 18, color: Colors.black45),
+                  textAlign: TextAlign.center,
+                )))
+      ],
     ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Builder(builder: (BuildContext context) {
-        return Center(
+      body: Builder(
+        builder: (context) => Center(
           child: Align(
             alignment: Alignment(0, -0.3),
             child: Container(
@@ -90,8 +109,8 @@ class _StartupPageState extends State<StartupPage> {
                   : buildError(context),
             ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }
