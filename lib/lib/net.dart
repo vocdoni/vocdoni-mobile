@@ -17,7 +17,6 @@ ensureConnectedGateways() async {
   connecting = true;
   if (_dvoteGw is DVoteGateway) {
     if (!_dvoteGw.isConnected) {
-      // TODO: ON .connect() EXCEPTION RETRY UNTIL OK
       if (_dvoteGw.publicKey == gwInfo.publicKey)
         _dvoteGw.connect(gwInfo.dvote);
       else {
@@ -39,8 +38,12 @@ ensureConnectedGateways() async {
 }
 
 void _onGatewayTimeout() {
-  devPrint("GW timeout handler: RECONNECTING TO ${_dvoteGw.uri}");
-  _dvoteGw.reconnect(null);
+  devPrint("GW timeout: ${_dvoteGw.uri}\nConnecting again...");
+  ensureConnectedGateways().then(() {
+    devPrint("Connected to ${_dvoteGw.uri}");
+  }).catchError((err) {
+    devPrint("Reconnect failed: ${err.toString()}");
+  });
 }
 
 bool areGatewaysConnected() =>
