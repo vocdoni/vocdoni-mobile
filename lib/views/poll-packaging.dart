@@ -60,7 +60,7 @@ class _PollPackagingState extends State<PollPackaging> {
     setState(() => _currentStep = 1);
 
     // PREPARE DATA
-    final dvoteGw = getDVoteGateway();
+    final dvoteGw = await getDVoteGateway();
     String merkleProof;
 
     try {
@@ -123,8 +123,7 @@ class _PollPackagingState extends State<PollPackaging> {
   void stepSendVote(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
-      final dvoteGw = getDVoteGateway();
-      // final Web3Gateway web3Gw = getWeb3Gateway();
+      final dvoteGw = await getDVoteGateway();
 
       await submitEnvelope(_envelope, dvoteGw);
 

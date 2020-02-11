@@ -120,7 +120,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     this.referenceBlock.setToLoading();
 
     try {
-      final dvoteGw = getDVoteGateway();
+      final dvoteGw = await getDVoteGateway();
       final newReferenceblock = await getBlockHeight(dvoteGw);
 
       if (newReferenceblock == null) {
