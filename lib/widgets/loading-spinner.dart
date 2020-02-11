@@ -10,12 +10,12 @@ class LoadingSpinner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 25.0,
-      height: 25.0,
+      width: size ?? 25.0,
+      height: size ?? 25.0,
       child: SpinKitRing(
         lineWidth: 2,
-        size: 25.0,
-        color: Colors.black54,
+        size: size ?? 25.0,
+        color: color ?? Colors.black54,
       ),
     );
 

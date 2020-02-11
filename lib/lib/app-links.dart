@@ -47,7 +47,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 Future fetchAndShowEntity(
-    {String entityId, List<String> entryPoints, BuildContext context}) async {
+    {@required String entityId, @required List<String> entryPoints, @required BuildContext context}) async {
   if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw LinkingError("Invalid entityId");

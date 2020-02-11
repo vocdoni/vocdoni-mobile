@@ -93,7 +93,7 @@ class _CardPollState extends State<CardPoll> {
       timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
     }
 
-    String participation = "0";
+    String participation = "0.0";
     if (this.widget.process.censusSize.hasValue &&
         this.widget.process.currentParticipants.hasValue) {
       participation =

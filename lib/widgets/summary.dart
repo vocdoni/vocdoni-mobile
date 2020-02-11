@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/lib/util.dart';
 
 class Summary extends StatefulWidget {
   final String text;
@@ -23,7 +22,6 @@ class _SummaryState extends State<Summary> with TickerProviderStateMixin {
         vsync: this,
         child: InkWell(
             onTap: () => setState(() {
-                  devPrint("is collapsed" + collapsed.toString());
                   collapsed = !collapsed;
                 }),
             child: Container(
