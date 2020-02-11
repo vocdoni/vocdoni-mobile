@@ -45,7 +45,8 @@ class _EntitiesTabState extends State<EntitiesTab> {
 
                 if (entity.metadata.hasValue)
                   return buildCard(ctx, entity);
-                else if (entity.metadata.isLoading) return CardLoading();
+                else if (entity.metadata.isLoading)
+                  return CardLoading("Loading entity...");
                 return buildEmptyMetadataCard(ctx, entity);
               });
         });

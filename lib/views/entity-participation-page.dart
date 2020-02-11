@@ -4,8 +4,8 @@ import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
-import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 
 class EntityParticipationPage extends StatefulWidget {
@@ -35,25 +35,23 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
   @override
   Widget build(context) {
-    if (entityModel == null) return buildNoProcessesess(context);
+    if (entityModel == null) return buildNoProcessesess();
 
     return EventualBuilder(
         notifier: entityModel.processes, // rebuild upon updates on this value
         builder: (context, _, __) {
           if (!entityModel.metadata.hasValue ||
               !entityModel.processes.hasValue) {
-            return buildNoProcessesess(context);
+            return buildNoProcessesess();
           } else if (entityModel.metadata.isLoading ||
               entityModel.processes.isLoading) {
-            return buildLoading(context);
+            return buildLoading();
           } else if ((!entityModel.metadata.hasValue &&
                   entityModel.metadata.hasError) ||
               (!entityModel.processes.hasValue &&
                   entityModel.processes.hasError)) {
-            return buildError(
-                context,
-                entityModel.metadata.errorMessage ??
-                    entityModel.processes.errorMessage);
+            return buildError(entityModel.metadata.errorMessage ??
+                entityModel.processes.errorMessage);
           }
 
           final lang = entityModel.metadata.value.languages[0] ??
@@ -80,24 +78,23 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         });
   }
 
-  Widget buildNoProcessesess(BuildContext ctx) {
+  Widget buildNoProcessesess() {
     return Scaffold(
         body: Center(
       child: Text("No participation processess"),
     ));
   }
 
-  Widget buildLoading(BuildContext ctx) {
+  Widget buildLoading() {
     return Scaffold(
+        appBar: TopNavigation(title: "Participation"),
         body: Center(
-      child: Column(children: [
-        Text("Loading..."),
-        LoadingSpinner(),
-      ]),
-    ));
+          child:
+              SizedBox(height: 140.0, child: CardLoading("Loading posts...")),
+        ));
   }
 
-  Widget buildError(BuildContext ctx, String message) {
+  Widget buildError(String message) {
     return Scaffold(
         body: Center(
       child: Text("ERROR: $message"),

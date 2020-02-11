@@ -3,8 +3,8 @@ import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-post.dart';
-import 'package:vocdoni/widgets/loading-spinner.dart';
 import 'package:vocdoni/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
@@ -36,7 +36,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   @override
   Widget build(context) {
-    if (entityModel == null) return buildEmptyEntity(context);
+    if (entityModel == null) return buildEmptyEntity();
 
     return EventualBuilder(
         notifiers: [
@@ -45,66 +45,68 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
         ], // rebuild upon updates on these value
         builder: (context, _, __) {
           if (!entityModel.metadata.hasValue)
-            return buildEmptyEntity(context);
+            return buildEmptyEntity();
           else if (!entityModel.feed.hasValue)
-            return buildEmptyPosts(context);
+            return buildEmptyPosts();
           else if ((!entityModel.metadata.hasValue &&
                   entityModel.metadata.isLoading) ||
               (!entityModel.feed.hasValue && entityModel.feed.isLoading))
-            return buildLoading(context);
+            return buildLoading();
           else if (entityModel.metadata.hasError ||
               entityModel.feed.hasError ||
               entityModel.feed.hasError)
-            return buildError(
-                context,
-                entityModel.metadata.errorMessage ??
-                    entityModel.feed.errorMessage);
+            return buildError(entityModel.metadata.errorMessage ??
+                entityModel.feed.errorMessage);
 
           final lang = entityModel.metadata.value.languages[0] ??
               globalAppState.currentLanguage;
 
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
-            body: ListView.builder(
-              itemCount: entityModel.feed.value.items.length ?? 0,
-              itemBuilder: (BuildContext context, int index) {
-                final post = entityModel.feed.value.items[index];
+            body: Builder(builder: (context) {
+              return ListView.builder(
+                itemCount: entityModel.feed.value.items.length ?? 0,
+                itemBuilder: (BuildContext context, int index) {
+                  final post = entityModel.feed.value.items[index];
 
-                return CardPost(entityModel, post, index);
-              },
-            ),
+                  return CardPost(entityModel, post, index);
+                },
+              );
+            }),
           );
         });
   }
 
-  Widget buildEmptyEntity(BuildContext ctx) {
+  Widget buildEmptyEntity() {
     return Scaffold(
+        appBar: TopNavigation(title: "News feed"),
         body: Center(
-      child: Text("(No entity)"),
-    ));
+          child: Text("(No entity)"),
+        ));
   }
 
-  Widget buildEmptyPosts(BuildContext ctx) {
+  Widget buildEmptyPosts() {
     return Scaffold(
+        appBar: TopNavigation(title: "News feed"),
         body: Center(
-      child: Text("(No posts)"),
-    ));
+          child: Text("(No posts)"),
+        ));
   }
 
-  Widget buildLoading(BuildContext ctx) {
+  Widget buildLoading() {
     return Scaffold(
+        appBar: TopNavigation(title: "News feed"),
         body: Center(
-      child: Column(children: [
-        Text("Loading..."),
-        LoadingSpinner(),
-      ]),
-    ));
+          child:
+              SizedBox(height: 140.0, child: CardLoading("Loading posts...")),
+        ));
   }
 
-  Widget buildError(BuildContext ctx, String message) {
+  Widget buildError(String message) {
     return Scaffold(
+        appBar: TopNavigation(title: "News feed"),
         body: Center(
-      child: Text("ERROR: $message"),
-    ));
+          child: Text("ERROR: $message"),
+        ));
   }
 }
