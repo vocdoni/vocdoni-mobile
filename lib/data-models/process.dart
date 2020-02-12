@@ -256,7 +256,8 @@ class ProcessModel implements ModelRefreshable {
     // TODO: Don't refetch if the IPFS hash is the same
 
     final dvoteGw = await getDVoteGateway();
-    final Web3Gateway web3Gw = await getWeb3Gateway();
+    if (dvoteGw == null) throw Exception("No DVote gateway is available");
+    final web3Gw = await getWeb3Gateway();
 
     try {
       this.metadata.setToLoading();
@@ -290,6 +291,7 @@ class ProcessModel implements ModelRefreshable {
     devPrint("- Refreshing process isInCensus [${this.processId}]");
 
     final dvoteGw = await getDVoteGateway();
+    if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel)) return;
@@ -348,6 +350,7 @@ class ProcessModel implements ModelRefreshable {
           this.processId);
 
       final dvoteGw = await getDVoteGateway();
+      if (dvoteGw == null) throw Exception("No DVote gateway is available");
       final success =
           await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
               .catchError((_) {});

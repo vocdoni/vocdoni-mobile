@@ -61,6 +61,8 @@ class _PollPackagingState extends State<PollPackaging> {
 
     // PREPARE DATA
     final dvoteGw = await getDVoteGateway();
+    if (dvoteGw == null) throw Exception("No DVote gateway is available");
+
     String merkleProof;
 
     try {
@@ -124,6 +126,7 @@ class _PollPackagingState extends State<PollPackaging> {
     try {
       setState(() => _currentStep = 2);
       final dvoteGw = await getDVoteGateway();
+      if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
       await submitEnvelope(_envelope, dvoteGw);
 

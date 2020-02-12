@@ -236,7 +236,10 @@ class EntityModel implements ModelRefreshable {
     try {
       if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
         final dvoteGw = await getDVoteGateway();
+        if (dvoteGw == null) throw Exception("No DVote gateway is available");
+
         final web3Gw = await getWeb3Gateway();
+        if (web3Gw == null) throw Exception();
 
         this.metadata.setToLoading();
 
@@ -388,6 +391,7 @@ class EntityModel implements ModelRefreshable {
       // Fetch from a new URI
       final cUri = ContentURI(currentContentUri);
       final dvoteGw = await getDVoteGateway();
+      if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
       final result = await fetchFileString(cUri, dvoteGw);
       final Feed feed = parseFeed(result);

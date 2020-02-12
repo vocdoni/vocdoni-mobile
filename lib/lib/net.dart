@@ -8,7 +8,7 @@ DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
 bool connecting = false;
 
-ensureConnectedGateways() async {
+Future<void> ensureConnectedGateways() async {
   if (connecting) return;
 
   final gwInfo = await _getFastestGatewayInfo();
@@ -39,7 +39,7 @@ ensureConnectedGateways() async {
 
 void _onGatewayTimeout() {
   devPrint("GW timeout: ${_dvoteGw.uri}\nConnecting again...");
-  ensureConnectedGateways().then(() {
+  ensureConnectedGateways().then((_) {
     devPrint("Connected to ${_dvoteGw.uri}");
   }).catchError((err) {
     devPrint("Reconnect failed: ${err.toString()}");
@@ -51,7 +51,7 @@ bool areGatewaysConnected() =>
 
 Future<DVoteGateway> getDVoteGateway() {
   if (!areGatewaysConnected()) {
-    return ensureConnectedGateways().then(() => _dvoteGw);
+    return ensureConnectedGateways().then((_) => _dvoteGw);
   } else {
     return Future.value(_dvoteGw);
   }
@@ -59,7 +59,7 @@ Future<DVoteGateway> getDVoteGateway() {
 
 Future<Web3Gateway> getWeb3Gateway() {
   if (!areGatewaysConnected()) {
-    return ensureConnectedGateways().then(() => _web3Gw);
+    return ensureConnectedGateways().then((_) => _web3Gw);
   } else {
     return Future.value(_web3Gw);
   }
@@ -93,12 +93,15 @@ Future<GatewayInfo> _getFastestGatewayInfo() async {
   }
 
   // Find the fastest to respond
-  final fastestDVoteIdx = await Future.any(dvoteNodes.map((node) {
-    return DVoteGateway(node.uri).isUp().then((isUp) {
-      if (!isUp) return -1;
-      return dvoteNodes.indexOf(node); // who are we?
-    });
-  }));
+  int fastestDVoteIdx = -1;
+
+  await Future.wait(dvoteNodes
+      .map((node) => DVoteGateway(node.uri).isUp().then((isUp) {
+            if (fastestDVoteIdx < 0) fastestDVoteIdx = dvoteNodes.indexOf(node);
+          }).catchError((_) {}))
+      .cast<Future>()
+      .toList());
+
   if (fastestDVoteIdx < 0) {
     devPrint("None of the gateways is available");
     return null;

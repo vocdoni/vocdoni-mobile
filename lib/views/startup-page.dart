@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lib/net.dart';
 import '../lib/singletons.dart';
 
 class StartupPage extends StatefulWidget {
@@ -32,41 +33,52 @@ class _StartupPageState extends State<StartupPage> {
       globalEntitiesPersistence.readAll(),
       globalProcessesPersistence.readAll(),
       globalFeedPersistence.readAll(),
-    ]).then((_) {
-      // POPULATE THE MODEL POOLS (Read into memory)
-      return Future.wait([
-        // NOTE: Read's should be done first on the models that
-        // don't depend on others to be restored
-        globalProcessPool.readFromStorage(),
-        globalFeedPool.readFromStorage(),
-        globalAppState.readFromStorage(),
-      ])
-          .then((_) => globalEntityPool.readFromStorage())
-          .then((_) => globalAccountPool.readFromStorage());
-    }).then((_) {
-      // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-      return globalAppState.refresh(true);
-    }).then((_) {
-      // DETERMINE THE NEXT SCREEN AND GO THERE
-      String nextRoutePath;
-      if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
-        nextRoutePath = "/identity/select";
-      } else {
-        nextRoutePath = "/identity/create";
-      }
+    ])
+        .then((_) {
+          // POPULATE THE MODEL POOLS (Read into memory)
+          return Future.wait([
+            // NOTE: Read's should be done first on the models that
+            // don't depend on others to be restored
+            globalProcessPool.readFromStorage(),
+            globalFeedPool.readFromStorage(),
+            globalAppState.readFromStorage(),
+          ])
+              .then((_) => globalEntityPool.readFromStorage())
+              .then((_) => globalAccountPool.readFromStorage());
+        })
+        .then((_) {
+          // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
+          return globalAppState.refresh(true);
+        })
+        .then(
+          (_) => getDVoteGateway().then((dvoteGw) {
+            if (dvoteGw == null)
+              throw Exception("No DVote Gateway is available");
+          }),
+        )
+        .then((_) {
+          // DETERMINE THE NEXT SCREEN AND GO THERE
+          String nextRoutePath;
+          if (globalAccountPool.hasValue &&
+              globalAccountPool.value.length > 0) {
+            nextRoutePath = "/identity/select";
+          } else {
+            nextRoutePath = "/identity/create";
+          }
 
-      // Replace all routes with /identity/select on top
-      Navigator.pushNamedAndRemoveUntil(
-          context, nextRoutePath, (Route _) => false);
-    }).catchError((err) {
-      setState(() {
-        loading = false;
-        error = "Could not load the status of the app";
-      });
+          // Replace all routes with /identity/select on top
+          Navigator.pushNamedAndRemoveUntil(
+              context, nextRoutePath, (Route _) => false);
+        })
+        .catchError((err) {
+          setState(() {
+            loading = false;
+            error = "Could not load the status of the app";
+          });
 
-      // RETRY ITSELF
-      Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
-    });
+          // RETRY ITSELF
+          Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
+        });
   }
 
   Widget buildError(BuildContext context) {

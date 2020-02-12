@@ -121,6 +121,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     try {
       final dvoteGw = await getDVoteGateway();
+      if (dvoteGw == null) throw Exception();
       final newReferenceblock = await getBlockHeight(dvoteGw);
 
       if (newReferenceblock == null) {
