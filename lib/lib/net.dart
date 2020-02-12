@@ -17,6 +17,7 @@ Future<void> ensureConnectedGateways() async {
   connecting = true;
   if (_dvoteGw is DVoteGateway) {
     if (!_dvoteGw.isConnected) {
+      devPrint("Connecting to ${gwInfo.dvote}");
       if (_dvoteGw.publicKey == gwInfo.publicKey)
         _dvoteGw.connect(gwInfo.dvote);
       else {
@@ -26,6 +27,7 @@ Future<void> ensureConnectedGateways() async {
       }
     }
   } else {
+    devPrint("Connecting to ${gwInfo.dvote}");
     _dvoteGw = DVoteGateway(gwInfo.dvote,
         publicKey: gwInfo.publicKey,
         onTimeout: _onGatewayTimeout); // calls `connect()` internally
@@ -96,7 +98,7 @@ Future<GatewayInfo> _getFastestGatewayInfo() async {
   int fastestDVoteIdx = -1;
 
   await Future.wait(dvoteNodes
-      .map((node) => DVoteGateway(node.uri).isUp().then((isUp) {
+      .map((node) => DVoteGateway.isUp(node.uri).then((isUp) {
             if (fastestDVoteIdx < 0) fastestDVoteIdx = dvoteNodes.indexOf(node);
           }).catchError((_) {}))
       .cast<Future>()
