@@ -209,7 +209,9 @@ class AccountModel implements ModelRefreshable {
   Future<void> refresh(
       [bool force = false, String patternEncryptionKey]) async {
     if (this.entities.hasValue) {
-      await Future.wait(this.entities.value.map((e) => e.refresh(force)));
+      for (final entity in this.entities.value) {
+        await entity.refresh();
+      }
     }
     if (patternEncryptionKey is String)
       await refreshSignedTimestamp(patternEncryptionKey);

@@ -105,11 +105,13 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
 
       // This will call `setValue` on the individual models that are already within the pool.
       // No need to update the pool list itself.
-      await Future.wait(this
+      final updatableProcs = this
           .value
           .where((processModel) => entityIds.contains(processModel.entityId))
-          .map((processModel) => processModel.refresh(force))
-          .toList());
+          .toList();
+      for (final procModel in updatableProcs) {
+        await procModel.refresh(force);
+      }
 
       await this.writeToStorage();
     } catch (err) {
@@ -232,13 +234,15 @@ class ProcessModel implements ModelRefreshable {
   Future<void> refresh([bool force = false]) {
     devPrint("Refreshing process ${this.processId}");
 
-    return Future.wait([
-      refreshMetadata(force),
-      refreshIsInCensus(force),
-      refreshHasVoted(force),
-      refreshCurrentParticipants(force),
-      refreshCensusSize(force),
-    ]);
+    return refreshMetadata(force)
+        .catchError((_) {}) // update what we can
+        .then((_) => refreshIsInCensus(force))
+        .catchError((_) {})
+        .then((_) => refreshHasVoted(force))
+        .catchError((_) {})
+        .then((_) => refreshCurrentParticipants(force))
+        .catchError((_) {})
+        .then((_) => refreshCensusSize(force));
   }
 
   Future<void> refreshMetadata([bool force = false]) async {

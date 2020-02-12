@@ -110,12 +110,14 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
 
       // This will call `setValue` on the individual models already within the pool.
       // No need to update the pool list itself.
-      await Future.wait(this
+      final entities = this
           .value
           .where((entityModel) =>
               entityIds.contains(entityModel.reference.entityId))
-          .map((entityModel) => entityModel.refresh(force))
-          .toList());
+          .toList();
+      for (final entityModel in entities) {
+        await entityModel.refresh(force);
+      }
 
       await this.writeToStorage();
     } catch (err) {
@@ -324,25 +326,23 @@ class EntityModel implements ModelRefreshable {
           "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length}]");
 
       // add new
-      final myFreshProcessModels = await Future.wait(newProcessIds
-          .map((processId) async {
-            final prevModel = oldEntityProcessModels.firstWhere(
-                (model) =>
-                    model.processId == processId &&
-                    model.entityId == this.reference.entityId,
-                orElse: () => null);
+      final List<ProcessModel> myFreshProcessModels = [];
+      for (final processId in newProcessIds) {
+        final prevModel = oldEntityProcessModels.firstWhere(
+            (model) =>
+                model.processId == processId &&
+                model.entityId == this.reference.entityId,
+            orElse: () => null);
 
-            if (prevModel is ProcessModel) {
-              await prevModel.refreshMetadata(); // detached async
-              return prevModel;
-            } else {
-              final newModel = ProcessModel(processId, this.reference.entityId);
-              await newModel.refreshMetadata(); // detached async
-              return newModel;
-            }
-          })
-          .cast<Future<ProcessModel>>()
-          .toList());
+        if (prevModel is ProcessModel) {
+          await prevModel.refreshMetadata().catchError((_) {});
+          myFreshProcessModels.add(prevModel);
+        } else {
+          final newModel = ProcessModel(processId, this.reference.entityId);
+          await newModel.refreshMetadata().catchError((_) {});
+          myFreshProcessModels.add(newModel);
+        }
+      }
 
       // local update
       this.processes.setValue(myFreshProcessModels);
@@ -432,52 +432,42 @@ class EntityModel implements ModelRefreshable {
         this.visibleActions.isLoading &&
         this.visibleActions.isLoadingFresh) return;
 
-    devPrint(
-        "- Refreshing entity dependent visible actions [${reference.entityId}]");
+    devPrint("- Refreshing entity visible actions [${reference.entityId}]");
 
     this.registerAction.setToLoading();
     this.isRegistered.setToLoading();
     this.visibleActions.setToLoading();
 
     try {
-      await Future.wait(this
-          .metadata
-          .value
-          .actions
-          .map((action) async {
-            if (action.register) {
-              return _isActionVisible(action, this.reference.entityId)
-                  .then((visible) {
-                if (!(visible is bool)) throw Exception();
-                this.isRegistered.setValue(!visible);
-                this.registerAction.setValue(action);
-              }).catchError((err) {
-                // capture the error locally
-                this
-                    .registerAction
-                    .setError("Could not load the register status");
-                this
-                    .isRegistered
-                    .setError("Could not load the register status");
-              });
-            } else {
-              // standard action
-              // in case of error: propagate to the global catcher
-              bool isVisible =
-                  await _isActionVisible(action, this.reference.entityId);
-              if (isVisible) visibleStandardActions.add(action);
-            }
-          })
-          .cast<Future>()
-          .toList());
+      for (final action in this.metadata.value.actions) {
+        if (action.register) {
+          await _isActionVisible(action, this.reference.entityId)
+              .then((visible) {
+            if (!(visible is bool)) throw Exception();
+            this.isRegistered.setValue(!visible);
+            this.registerAction.setValue(action);
+          }).catchError((err) {
+            // capture the error locally
+            this.registerAction.setError("Could not load the register status");
+            this.isRegistered.setError("Could not load the register status");
+          });
+        } else {
+          // standard action
+          // in case of error: propagate to the global catcher
+          final isVisible =
+              await _isActionVisible(action, this.reference.entityId)
+                  .catchError((_) => false);
+          if (isVisible) visibleStandardActions.add(action);
+        }
+      }
 
       devPrint(
-          "- Refreshing entity dependent visible actions [DONE] [${reference.entityId}]");
+          "- Refreshing entity visible actions [DONE] [${reference.entityId}]");
 
       this.visibleActions.setValue(visibleStandardActions);
     } catch (err) {
       devPrint(
-          "- Refreshing entity dependent visible actions [ERROR: $err] [${reference.entityId}]");
+          "- Refreshing entity visible actions [ERROR: $err] [${reference.entityId}]");
 
       this.visibleActions.setError("Could not fetch the entity details");
 

@@ -45,11 +45,11 @@ void main() async {
     home: StartupPage(),
     onGenerateRoute: generateRoute,
     routes: {
-      // NO IDENTITIES YET
+      // NO ACCOUNTS YET
       "/identity/create": (context) => IdentityCreatePage(),
       "/identity/select": (context) => IdentitySelectPage(),
 
-      // WHEN THERE IS AN IDENTITY
+      // WHEN THERE IS AN ACCOUNT
       "/home": (context) => HomeScreen(),
       "/entity/feed": (context) => EntityFeedPage(),
       "/entity/feed/post": (context) => FeedPostPage(),
