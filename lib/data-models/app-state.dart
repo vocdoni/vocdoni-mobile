@@ -103,7 +103,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodes.setToLoading();
     try {
-      final gwList = await getDefaultGatewaysInfo(NETWORK_ID);
+      final gwList = await getDefaultGatewaysDetails(NETWORK_ID);
       this.bootnodes.setValue(gwList);
     } catch (err) {
       this.bootnodes.setError("Cannot fetch the boot nodes list",

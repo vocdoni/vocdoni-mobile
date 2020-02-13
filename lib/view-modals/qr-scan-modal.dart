@@ -34,11 +34,10 @@ class _QrScanModalState extends State<QrScanModal> {
           qrCodeCallback: (data) => onScan(data),
           fit: BoxFit.cover,
           formats: [BarcodeFormats.QR_CODE],
-          notStartedBuilder: (context) => Container(
-            child: Center(
-              child: Text("The camera is not available"),
-            ),
-          ),
+          onError: (context, err) =>
+              _buildMessage(context, "The camera is not available"),
+          notStartedBuilder: (context) =>
+              _buildMessage(context, "The camera is not available"),
         ));
       }),
     );
@@ -52,5 +51,13 @@ class _QrScanModalState extends State<QrScanModal> {
     this.setState(() => scanning = false);
     Future.delayed(Duration(milliseconds: 50))
         .then((_) => Navigator.of(context).pop(value));
+  }
+
+  Widget _buildMessage(BuildContext context, String message) {
+    return Container(
+      child: Center(
+        child: Text(message ?? "The camera is not available"),
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -6,37 +7,39 @@ import 'package:vocdoni/lib/util.dart';
 
 DVoteGateway _dvoteGw;
 Web3Gateway _web3Gw;
-bool connecting = false;
+Future<void> connectingFuture;
 
-Future<void> ensureConnectedGateways() async {
-  if (connecting) return;
+Future<void> ensureConnectedGateways() {
+  if (connectingFuture is Future) {
+    return connectingFuture;
+  } else if ((_dvoteGw is DVoteGateway && _dvoteGw.isConnected))
+    return Future.value();
 
-  final gwInfo = await _getFastestGatewayInfo();
-  if (gwInfo == null) throw Exception("There is no gateway available");
+  final completer = Completer<void>();
+  connectingFuture = completer.future;
+  GatewayInfo gwInfo;
 
-  connecting = true;
-  if (_dvoteGw is DVoteGateway) {
-    if (!_dvoteGw.isConnected) {
-      devPrint("Connecting to ${gwInfo.dvote}");
-      if (_dvoteGw.publicKey == gwInfo.publicKey)
-        _dvoteGw.connect(gwInfo.dvote);
-      else {
-        _dvoteGw = DVoteGateway(gwInfo.dvote,
-            publicKey: gwInfo.publicKey,
-            onTimeout: _onGatewayTimeout); // calls `connect()` internally
-      }
-    }
-  } else {
+  return _getFastestGatewayInfo().then((_gwInfo) {
+    if (_gwInfo == null) throw Exception("There is no gateway available");
+    gwInfo = _gwInfo;
+
     devPrint("Connecting to ${gwInfo.dvote}");
     _dvoteGw = DVoteGateway(gwInfo.dvote,
-        publicKey: gwInfo.publicKey,
-        onTimeout: _onGatewayTimeout); // calls `connect()` internally
-  }
+        publicKey: gwInfo.publicKey, onTimeout: _onGatewayTimeout);
 
-  if (!(_web3Gw is Web3Gateway)) {
-    _web3Gw = Web3Gateway(gwInfo.web3);
-  }
-  connecting = false;
+    return _dvoteGw.connect();
+  }).then((_) {
+    if (!(_web3Gw is Web3Gateway)) {
+      devPrint("Using: ${gwInfo.web3}");
+      _web3Gw = Web3Gateway(gwInfo.web3);
+    }
+    completer.complete();
+    connectingFuture = null;
+  }).catchError((err) {
+    completer.completeError(err);
+    connectingFuture = null;
+    throw err;
+  });
 }
 
 void _onGatewayTimeout() {
