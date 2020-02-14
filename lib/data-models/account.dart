@@ -174,8 +174,8 @@ class AccountModel implements ModelRefreshable {
       EventualNotifier<DateTime>(DateTime.now());
 
   /// The original json string with the timestamp, used to make the signature
-  final EventualNotifier<String> timestampSigned =
-      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 6));
+  final EventualNotifier<int> timestampSigned =
+      EventualNotifier<int>().withFreshnessTimeout(Duration(hours: 6));
 
   /// The signature of `timestampSigned`. Used for action visibility checks
   final EventualNotifier<String> timestampSignature =
@@ -208,13 +208,14 @@ class AccountModel implements ModelRefreshable {
   @override
   Future<void> refresh(
       [bool force = false, String patternEncryptionKey]) async {
+    if (patternEncryptionKey is String)
+      await refreshSignedTimestamp(patternEncryptionKey).catchError((_) {});
+
     if (this.entities.hasValue) {
       for (final entity in this.entities.value) {
         await entity.refresh();
       }
     }
-    if (patternEncryptionKey is String)
-      await refreshSignedTimestamp(patternEncryptionKey);
   }
 
   Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
@@ -222,7 +223,7 @@ class AccountModel implements ModelRefreshable {
     final privateKey =
         await decryptString(encryptedPrivateKey, patternEncryptionKey);
 
-    final ts = DateTime.now().millisecondsSinceEpoch.toString();
+    final ts = DateTime.now().millisecondsSinceEpoch;
 
     final payload = jsonEncode({"timestamp": ts});
     final signature = await signString(payload, privateKey);

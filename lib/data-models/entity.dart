@@ -494,7 +494,7 @@ class EntityModel implements ModelRefreshable {
   Future<bool> _isActionVisible(
       EntityMetadata_Action action, String entityId) async {
     // Hardcoded value
-    if (action.visible == "true")
+    if (action.visible == "always")
       return true;
     else if (!(action.visible is String) || action.visible == "false")
       return false;
@@ -510,11 +510,10 @@ class EntityModel implements ModelRefreshable {
 
     try {
       Map payload = {
-        "type": action.type,
-        'publicKey': publicKey,
+        'publicKey': "0x" + publicKey,
         "entityId": entityId,
         "timestamp": currentAccount.timestampSigned.value,
-        "signature": currentAccount.timestampSignature.value
+        "signature": "0x" + currentAccount.timestampSignature.value
       };
 
       Map<String, String> headers = {
@@ -525,11 +524,16 @@ class EntityModel implements ModelRefreshable {
       var response = await http.post(action.visible,
           body: jsonEncode(payload), headers: headers);
       if (response.statusCode != 200 || !(response.body is String))
-        return false;
+        throw Exception("Invalid response");
       final body = jsonDecode(response.body);
-      if (body is Map && body["visible"] == true) return true;
+      if (body is Map) {
+        if (body["error"] is String)
+          throw Exception(body["error"]);
+        else if (body["visible"] is bool) return body["visible"];
+      }
     } catch (err) {
-      return null;
+      devPrint("Action visibility error: $err");
+      throw err;
     }
 
     return false;
