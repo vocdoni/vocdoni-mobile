@@ -166,19 +166,19 @@ class EntityModel implements ModelRefreshable {
   final EntityReference reference; // This is never fetched
   final EventualNotifier<EntityMetadata> metadata =
       EventualNotifier<EntityMetadata>()
-          .withFreshnessTimeout(Duration(minutes: 5));
+          .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
   final EventualNotifier<List<ProcessModel>> processes =
       EventualNotifier<List<ProcessModel>>()
-          .withFreshnessTimeout(Duration(seconds: 60));
-  final EventualNotifier<Feed> feed =
-      EventualNotifier<Feed>().withFreshnessTimeout(Duration(minutes: 2));
+          .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
+  final EventualNotifier<Feed> feed = EventualNotifier<Feed>()
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
 
   final visibleActions = EventualNotifier<List<EntityMetadata_Action>>()
-      .withFreshnessTimeout(Duration(minutes: 2));
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
   final registerAction = EventualNotifier<EntityMetadata_Action>()
-      .withFreshnessTimeout(Duration(seconds: 30));
-  final isRegistered =
-      EventualNotifier<bool>(false).withFreshnessTimeout(Duration(seconds: 30));
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 30 : 1));
+  final isRegistered = EventualNotifier<bool>(false)
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 30 : 1));
 
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field

@@ -478,7 +478,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
               title: title,
             ));
     Navigator.push(ctx, route)
-        .then((_) => widget.entityModel.refreshVisibleActions());
+        .then((_) => widget.entityModel.refreshVisibleActions(true));
   }
 
   subscribeToEntity(BuildContext ctx) async {
