@@ -63,10 +63,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     if (!(alias is String) || alias == "")
       return;
     else if (alias.length < 2) {
-      showAlert(
-          title: Lang.of(context).get("Error"),
-          text: Lang.of(context).get("The identity name is too short"),
-          context: context);
+      showAlert(Lang.of(context).get("The identity name is too short"),
+          title: Lang.of(context).get("Error"), context: context);
       return;
     }
     String patternEncryptionKey = await Navigator.push(
@@ -119,8 +117,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
             .get("An error occurred while generating the identity");
       }
 
-      showAlert(
-          title: Lang.of(context).get("Error"), text: text, context: context);
+      showAlert(text, title: Lang.of(context).get("Error"), context: context);
     }
   }
 

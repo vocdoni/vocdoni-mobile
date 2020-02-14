@@ -509,14 +509,14 @@ class EntityModel implements ModelRefreshable {
     final publicKey = currentAccount.identity.value.identityId;
 
     try {
-      Map payload = {
+      final Map payload = {
         'publicKey': "0x" + publicKey,
         "entityId": entityId,
         "timestamp": currentAccount.timestampSigned.value,
         "signature": "0x" + currentAccount.timestampSignature.value
       };
 
-      Map<String, String> headers = {
+      final Map<String, String> headers = {
         'Content-type': 'application/json',
         'Accept': 'application/json',
       };

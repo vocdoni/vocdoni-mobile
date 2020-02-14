@@ -82,7 +82,7 @@ class BaseButton extends StatelessWidget {
               height: isSmall ? 32 : 48,
               constraints: maxWidth == null
                   ? null
-                  : BoxConstraints(maxWidth: 150, minHeight: 32),
+                  : BoxConstraints(maxWidth: maxWidth ?? 150, minHeight: 38),
               child: Material(
                 color: backgroundColor,
                 borderOnForeground: true,

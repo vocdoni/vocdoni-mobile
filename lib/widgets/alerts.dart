@@ -1,15 +1,13 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/lang/index.dart';
 
-Future showAlert(
-    {String title, String text, String okButton, BuildContext context}) {
-  if (text == null)
-    throw FlutterError("No text");
-  else if (context == null) throw FlutterError("No context");
+Future<void> showAlert(String text,
+    {String title, String okButton, @required BuildContext context}) {
+  assert(text is String);
 
   return showDialog(
     context: context,
-    builder: (BuildContext context) {
+    builder: (context) {
       return AlertDialog(
         title: Text(title ?? "Vocdoni"),
         content: Text(text),
@@ -24,19 +22,16 @@ Future showAlert(
   );
 }
 
-Future showPrompt(
+Future<bool> showPrompt(String text,
     {String title,
-    String text,
     String okButton,
     String cancelButton,
-    BuildContext context}) {
-  if (text == null)
-    throw FlutterError("No text");
-  else if (context == null) throw FlutterError("No context");
+    @required BuildContext context}) {
+  assert(text is String);
 
   return showDialog(
     context: context,
-    builder: (BuildContext context) {
+    builder: (context) {
       return AlertDialog(
         title: Text(title ?? "Vocdoni"),
         content: Text(text),

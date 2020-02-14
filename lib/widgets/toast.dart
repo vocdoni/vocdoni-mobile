@@ -9,7 +9,7 @@ final toasterTextStyle =
 /// `IMPORTANT`: If the `context` does not descend from a `Scaffold` the call will fail
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
     String text,
-    {BuildContext context,
+    {@required BuildContext context,
     int duration = 4,
     Function onPressed,
     Purpose purpose = Purpose.NONE}) {
@@ -31,7 +31,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMessage(
 /// `IMPORTANT`: If the `context` does not descend from a `Scaffold` the call will fail
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoading(
     String text,
-    {BuildContext context}) {
+    {@required BuildContext context}) {
   if (text == null) throw Exception("No text");
 
   final loadingSnackBar = SnackBar(

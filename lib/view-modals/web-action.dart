@@ -76,8 +76,8 @@ class _WebActionState extends State<WebAction> {
                     Navigator.of(context).pop();
 
                     await showAlert(
+                        Lang.of(context).get("The page cannot be loaded"),
                         title: Lang.of(context).get("Error"),
-                        text: Lang.of(context).get("The page cannot be loaded"),
                         context: context);
                   }
                 },
@@ -161,9 +161,9 @@ class _WebActionState extends State<WebAction> {
         // hasPublicReadPermission may be null
         if (hasPublicReadPermission != true) {
           hasPublicReadPermission = await showPrompt(
-              title: Lang.of(context).get("Permission"),
-              text: Lang.of(context).get(
+              Lang.of(context).get(
                   "The current service is requesting access to your public information.\nDo you want to continue?"),
+              title: Lang.of(context).get("Permission"),
               context: context);
         }
 

@@ -14,7 +14,7 @@ description: Decentralized anonymous E2E verifiable voting system client app
 version: 0.3.4+4
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter:

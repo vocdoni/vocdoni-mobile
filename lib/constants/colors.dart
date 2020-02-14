@@ -33,7 +33,7 @@ const Color colorTitle = Color(0xFF000000);
 const Color colorChip = Color(0xFFFFEEBF);
 const Color colorLink = colorBlue;
 
-const double paddingPage = 32;
+const double paddingPage = 16;
 const double paddingChip = 4;
 const double paddingButton = 8;
 const double paddingBubble = 12;

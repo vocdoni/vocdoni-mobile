@@ -12,12 +12,12 @@ class BaseCard extends StatelessWidget {
   @override
   Widget build(context) {
     List<Widget> items = [];
-    if (image != null) items.insert(0, buildImageWithHero());
-    if (children != null) items = new List.from(items)..addAll(children);
+    if (image != null) items.add(buildImageWithHero());
+    if (children != null) items.addAll(children);
 
     return Padding(
-        padding: EdgeInsets.fromLTRB(
-            paddingPage, spaceCard * 0.5, paddingPage, spaceCard * 0.5),
+        padding: EdgeInsets.symmetric(
+            horizontal: paddingPage, vertical: spaceCard / 2),
         child: Container(
           //padding: EdgeInsets.fromLTRB(0, image == null  ? 6 : 0, 0, children != null  ? 6:0),
           decoration: BoxDecoration(
@@ -47,6 +47,7 @@ class BaseCard extends StatelessWidget {
   }
 
   buildImage() {
+    // TODO: CHECK valid URL
     return Image.network(
       image,
       fit: BoxFit.cover,

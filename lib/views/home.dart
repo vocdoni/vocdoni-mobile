@@ -49,9 +49,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
     } catch (err) {
       showAlert(
+          Lang.of(context).get("The link you followed appears to be invalid"),
           title: Lang.of(context).get("Error"),
-          text: Lang.of(context)
-              .get("The link you followed appears to be invalid"),
           context: context);
     }
 
@@ -84,9 +83,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   handleIncomingLinkError(err) {
     devPrint(err);
     showAlert(
-        title: Lang.of(scaffoldBodyContext ?? context).get("Error"),
-        text: Lang.of(scaffoldBodyContext ?? context)
+        Lang.of(scaffoldBodyContext ?? context)
             .get("There was a problem handling the link"),
+        title: Lang.of(scaffoldBodyContext ?? context).get("Error"),
         context: scaffoldBodyContext ?? context);
   }
 
@@ -218,9 +217,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final result = await Navigator.push(
           context,
           MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) =>
-                  QrScanModal()));
+              fullscreenDialog: true, builder: (context) => QrScanModal()));
 
       if (!(result is String)) {
         scanning = false;

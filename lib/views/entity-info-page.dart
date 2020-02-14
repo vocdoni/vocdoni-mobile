@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
+// import 'package:vocdoni/view-modals/action-register.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
+import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/widgets/baseButton.dart';
 import 'package:vocdoni/widgets/listItem.dart';
 import 'package:vocdoni/widgets/section.dart';
@@ -289,30 +291,30 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             ));
   }
 
-  buildSubscribeButton(BuildContext context) {
-    final currentAccount = globalAppState.currentAccount;
-    if (currentAccount == null) throw Exception("Internal error");
+  // buildSubscribeButton(BuildContext context) {
+  //   final currentAccount = globalAppState.currentAccount;
+  //   if (currentAccount == null) throw Exception("Internal error");
 
-    // No need to use EventualBuilder here, since the only place that can change the subscription status is here.
-    // Hence, we don't need to worry about rebuilding on external updates
+  //   // No need to use EventualBuilder here, since the only place that can change the subscription status is here.
+  //   // Hence, we don't need to worry about rebuilding on external updates
 
-    bool isSubscribed =
-        currentAccount.isSubscribed(widget.entityModel.reference);
-    String subscribeText = isSubscribed ? "Following" : "Follow";
+  //   bool isSubscribed =
+  //       currentAccount.isSubscribed(widget.entityModel.reference);
+  //   String subscribeText = isSubscribed ? "Following" : "Follow";
 
-    return BaseButton(
-        text: subscribeText,
-        leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
-        isDisabled: _processingSubscription,
-        isSmall: true,
-        style: BaseButtonStyle.OUTLINE_WHITE,
-        onTap: () {
-          if (isSubscribed)
-            unsubscribeFromEntity(context);
-          else
-            subscribeToEntity(context);
-        });
-  }
+  //   return BaseButton(
+  //       text: subscribeText,
+  //       leftIconData: isSubscribed ? FeatherIcons.check : FeatherIcons.plus,
+  //       isDisabled: _processingSubscription,
+  //       isSmall: true,
+  //       style: BaseButtonStyle.OUTLINE_WHITE,
+  //       onTap: () {
+  //         if (isSubscribed)
+  //           unsubscribeFromEntity(context);
+  //         else
+  //           subscribeToEntity(context);
+  //       });
+  // }
 
   buildShareItem(BuildContext context) {
     return ListItem(
@@ -347,7 +349,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             purpose: Purpose.HIGHLIGHT,
             leftIconData: FeatherIcons.feather,
             text: "Register",
-            isSmall: true,
+            // isSmall: true,
             onTap: () => onTapRegister(context),
           );
         }
@@ -462,9 +464,16 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onTapRegister(BuildContext context) {
-    if (widget.entityModel.registerAction.value.type == "browser") {
-      onBrowserAction(context, widget.entityModel.registerAction.value);
-    }
+    final action = widget.entityModel.registerAction.value;
+    // final action = widget.entityModel.metadata.value.actions.first;
+
+    // final route = MaterialPageRoute(
+    //     builder: (context) =>
+    //         ActionRegisterPage(action, widget.entityModel.reference.entityId));
+    final route = MaterialPageRoute(
+        builder: (context) => WebAction(title: "Register", url: action.url));
+    Navigator.push(context, route)
+        .then((_) => widget.entityModel.refreshVisibleActions(true));
   }
 
   onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
@@ -515,6 +524,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   unsubscribeFromEntity(BuildContext ctx) async {
+    final confirmUnsubscribe = await showPrompt(
+        Lang.of(ctx).get(
+            "You are about to stop following the entity.\nDo you want to continue?"),
+        title: Lang.of(ctx).get("Unsubscribe"),
+        context: ctx);
+    if (confirmUnsubscribe != true) return;
+
     setState(() => _processingSubscription = true);
     try {
       final currentAccount = globalAppState.currentAccount;
