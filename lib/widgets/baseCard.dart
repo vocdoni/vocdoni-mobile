@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 
 class BaseCard extends StatelessWidget {
   final String image;
@@ -48,8 +50,11 @@ class BaseCard extends StatelessWidget {
 
   buildImage() {
     // TODO: CHECK valid URL
-    return Image.network(
-      image,
+
+    return CachedNetworkImage(
+      imageUrl: image,
+      placeholder: (context, url) => LoadingSpinner(),
+      errorWidget: (context, url, error) => Icon(Icons.error),
       fit: BoxFit.cover,
     );
   }

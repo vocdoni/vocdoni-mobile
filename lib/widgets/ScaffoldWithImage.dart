@@ -2,6 +2,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/widgets/baseAvatar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:vocdoni/widgets/loading-spinner.dart';
 
 class ScaffoldWithImage extends StatefulWidget {
   final String appBarTitle;
@@ -199,11 +201,13 @@ class _ScaffoldWithImageState extends State<ScaffoldWithImage>
         ? Container()
         : Hero(
             tag: widget.headerTag,
-            child: Image.network(widget.headerImageUrl,
+            child: CachedNetworkImage(
+                imageUrl: widget.headerImageUrl,
+                placeholder: (context, url) => LoadingSpinner(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
                 fit: BoxFit.cover,
                 height: headerImageHeight,
-                width: double.infinity),
-          );
+                width: double.infinity));
   }
 
   Widget buildHeaderBackground(headerImageHeight) {
