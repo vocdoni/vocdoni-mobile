@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
-// import 'package:vocdoni/view-modals/action-register.dart';
+import 'package:vocdoni/view-modals/action-register.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 import 'package:vocdoni/widgets/alerts.dart';
@@ -464,14 +464,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onTapRegister(BuildContext context) {
-    final action = widget.entityModel.registerAction.value;
-    // final action = widget.entityModel.metadata.value.actions.first;
-
-    // final route = MaterialPageRoute(
-    //     builder: (context) =>
-    //         ActionRegisterPage(action, widget.entityModel.reference.entityId));
+    final action = widget.entityModel.metadata.value.actions.first;
     final route = MaterialPageRoute(
-        builder: (context) => WebAction(title: "Register", url: action.url));
+        builder: (context) =>
+            ActionRegisterPage(action, widget.entityModel.reference.entityId));
     Navigator.push(context, route)
         .then((_) => widget.entityModel.refreshVisibleActions(true));
   }

@@ -17,6 +17,11 @@ import 'package:http/http.dart' as http;
 
 final _formKey = GlobalKey<FormState>();
 
+final emailRegExp = RegExp(
+    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+final phoneRegExp = RegExp(r"^\+?[0-9\- ]+$");
+final dateRegExp = RegExp(r"^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$");
+
 class ActionRegisterPage extends StatelessWidget {
   final EntityMetadata_Action action;
   final String entityId;
@@ -52,7 +57,17 @@ class ActionRegisterPage extends StatelessWidget {
       Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Text(
+                Lang.of(context).get("Personal details"),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23),
+              ).withBottomPadding(8),
+              Text(
+                      Lang.of(context).get(
+                          "Please, fill in the fields below to complete your registration"),
+                      style: TextStyle(color: Colors.black45))
+                  .withBottomPadding(20),
               TextFormField(
                 validator: (value) => nameValidator(value),
                 decoration: InputDecoration(
@@ -129,8 +144,6 @@ class ActionRegisterPage extends StatelessWidget {
   String dateValidator(String value) {
     if (value.isEmpty) return 'Please complete your birth date';
 
-    final dateRegExp = RegExp(r"^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$");
-
     if (dateRegExp.hasMatch(value)) return null;
     return "Please, enter a valid date";
   }
@@ -138,17 +151,12 @@ class ActionRegisterPage extends StatelessWidget {
   String emailValidator(String value) {
     if (value.isEmpty) return 'Please enter your email';
 
-    final emailRegExp = RegExp(
-        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-
     if (emailRegExp.hasMatch(value)) return null;
     return "Please, enter a valid email";
   }
 
   String phoneValidator(String value) {
     if (value.isEmpty) return 'Please enter a valid phone number';
-
-    final phoneRegExp = RegExp(r"^\+?[0-9\- ]+$");
 
     if (phoneRegExp.hasMatch(value)) return null;
     return "Please, enter a valid phone number";
@@ -226,12 +234,22 @@ class ActionRegisterPage extends StatelessWidget {
         await signString(jsonEncode({"fullName": fullName}), privateKey);
     privateKey = null;
 
+    // Birth date in JSON format
+    final dateItems = birthDateCtrl.text.split("-");
+    if (dateItems.length != 3) {
+      showMessage(Lang.of(context).get("Please, select a valid date"),
+          purpose: Purpose.DANGER, context: context);
+      return;
+    }
+    final dateOfBirth = DateTime(int.tryParse(dateItems[0]),
+        int.tryParse(dateItems[1]), int.tryParse(dateItems[2]));
+
     final Map<String, dynamic> payload = {
       "request": {
         "method": "register",
-        "name": nameCtrl.text,
+        "firstName": nameCtrl.text,
         "lastName": lastNameCtrl.text,
-        "birth": birthDateCtrl.text,
+        "dateOfBirth": dateOfBirth.toIso8601String(),
         "email": emailCtrl.text,
         "phone": phoneCtrl.text,
         "entityId": entityId
