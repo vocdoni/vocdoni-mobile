@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
+import 'package:dvote/util/json-sign.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -229,11 +230,6 @@ class ActionRegisterPage extends StatelessWidget {
 
     String privateKey = await decryptString(encryptedPrivateKey, patternStr);
 
-    final fullName = nameCtrl.text + " " + lastNameCtrl.text;
-    final signature =
-        await signString(jsonEncode({"fullName": fullName}), privateKey);
-    privateKey = null;
-
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
     if (dateItems.length != 3) {
@@ -241,21 +237,27 @@ class ActionRegisterPage extends StatelessWidget {
           purpose: Purpose.DANGER, context: context);
       return;
     }
-    final dateOfBirth = DateTime(int.tryParse(dateItems[0]),
-        int.tryParse(dateItems[1]), int.tryParse(dateItems[2]));
+    final dateOfBirth = DateTime.utc(int.tryParse(dateItems[0]),
+        int.tryParse(dateItems[1]), int.tryParse(dateItems[2]), 12);
 
     final Map<String, dynamic> payload = {
       "request": {
         "method": "register",
+        "actionKey": action.actionKey,
         "firstName": nameCtrl.text,
         "lastName": lastNameCtrl.text,
         "dateOfBirth": dateOfBirth.toIso8601String(),
         "email": emailCtrl.text,
         "phone": phoneCtrl.text,
-        "entityId": entityId
+        "entityId": entityId,
+        "timestamp": DateTime.now().millisecondsSinceEpoch
       },
-      "signature": signature
+      "signature": "" // set right after
     };
+
+    payload["signature"] =
+        "0x" + await signJsonPayload(payload["request"], privateKey);
+    privateKey = null;
 
     final Map<String, String> headers = {
       'Content-type': 'application/json',
@@ -273,18 +275,19 @@ class ActionRegisterPage extends StatelessWidget {
       final body = jsonDecode(response.body);
       if (!(body is Map))
         throw Exception("Invalid response");
-      else if (body["ok"] != true) {
-        if (body["error"] is String)
-          throw Exception(body["error"]);
-        else
-          throw Exception("The request failed");
-      }
+      else if (!(body["response"] is Map))
+        throw Exception("Invalid response");
+      else if (body["response"]["error"] is String ||
+          body["response"]["ok"] != true)
+        throw Exception(body["response"]["error"] ?? "Invalid response");
+
       // SUCCESS
       loadingCtrl.close();
       showMessage(Lang.of(context).get("Your registration has been handled"),
           purpose: Purpose.GOOD, context: context);
 
-      Navigator.of(context).pop();
+      Future.delayed(Duration(seconds: 4))
+          .then((_) => Navigator.of(context).pop());
     }).catchError((err) {
       loadingCtrl.close();
       showMessage(Lang.of(context).get("The registration process failed"),

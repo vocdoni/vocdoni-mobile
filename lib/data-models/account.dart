@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
+import 'package:dvote/util/json-sign.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -173,13 +173,13 @@ class AccountModel implements ModelRefreshable {
   final EventualNotifier<DateTime> authThresholdDate =
       EventualNotifier<DateTime>(DateTime.now());
 
-  /// The original json string with the timestamp, used to make the signature
-  final EventualNotifier<int> timestampSigned =
-      EventualNotifier<int>().withFreshnessTimeout(Duration(hours: 6));
+  /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
+  final EventualNotifier<int> actionVisibilityTimestampUsed =
+      EventualNotifier<int>().withFreshnessTimeout(Duration(hours: 1));
 
-  /// The signature of `timestampSigned`. Used for action visibility checks
-  final EventualNotifier<String> timestampSignature =
-      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 6));
+  /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks
+  final EventualNotifier<String> actionVisibilityCheckSignature =
+      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 1));
 
   // CONSTRUCTORS
 
@@ -218,17 +218,19 @@ class AccountModel implements ModelRefreshable {
     }
   }
 
+  /// Precompute a request signature for entity registry backends to accept
+  /// our requests for a certain period of time
   Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
     final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
     final privateKey =
         await decryptString(encryptedPrivateKey, patternEncryptionKey);
 
     final ts = DateTime.now().millisecondsSinceEpoch;
-
-    final payload = jsonEncode({"timestamp": ts});
-    final signature = await signString(payload, privateKey);
-    this.timestampSignature.setValue(signature);
-    this.timestampSigned.setValue(ts);
+    final body = {"method": "getVisibility", "timestamp": ts};
+    final signature = await signJsonPayload(body, privateKey);
+    
+    this.actionVisibilityCheckSignature.setValue(signature);
+    this.actionVisibilityTimestampUsed.setValue(ts);
   }
 
   // PUBLIC METHODS

@@ -444,7 +444,7 @@ class EntityModel implements ModelRefreshable {
 
     try {
       for (final action in this.metadata.value.actions) {
-        if (action.register) {
+        if (action.type == "register") {
           await _isActionVisible(action, this.reference.entityId)
               .then((visible) {
             if (!(visible is bool)) throw Exception();
@@ -504,16 +504,18 @@ class EntityModel implements ModelRefreshable {
     final currentAccount = globalAppState.currentAccount;
     if (!(currentAccount is AccountModel))
       return null;
-    else if (!currentAccount.timestampSignature.hasValue) return null;
-
-    final publicKey = currentAccount.identity.value.identityId;
+    else if (!currentAccount.actionVisibilityCheckSignature.hasValue)
+      return null;
 
     try {
-      final Map payload = {
-        'publicKey': "0x" + publicKey,
-        "entityId": entityId,
-        "timestamp": currentAccount.timestampSigned.value,
-        "signature": "0x" + currentAccount.timestampSignature.value
+      final Map<String, dynamic> payload = {
+        "request": {
+          "method": "getVisibility",
+          "actionKey": action.actionKey,
+          "entityId": entityId,
+          "timestamp": currentAccount.actionVisibilityTimestampUsed.value
+        },
+        "signature": "0x" + currentAccount.actionVisibilityCheckSignature.value
       };
 
       final Map<String, String> headers = {
@@ -525,12 +527,17 @@ class EntityModel implements ModelRefreshable {
           body: jsonEncode(payload), headers: headers);
       if (response.statusCode != 200 || !(response.body is String))
         throw Exception("Invalid response");
+
       final body = jsonDecode(response.body);
-      if (body is Map) {
-        if (body["error"] is String)
-          throw Exception(body["error"]);
-        else if (body["visible"] is bool) return body["visible"];
-      }
+      if (!(body is Map))
+        throw Exception("Invalid response");
+      else if (!(body["response"] is Map))
+        throw Exception("Invalid response");
+      else if (body["response"]["error"] is String ||
+          body["response"]["ok"] != true)
+        throw Exception(body["response"]["error"] ?? "Invalid response");
+      else if (body["response"]["visible"] is bool)
+        return body["response"]["visible"];
     } catch (err) {
       devPrint("Action visibility error: $err");
       throw err;
