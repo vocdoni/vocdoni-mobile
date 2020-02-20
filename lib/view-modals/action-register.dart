@@ -273,13 +273,14 @@ class ActionRegisterPage extends StatelessWidget {
         throw Exception("Invalid response");
 
       final body = jsonDecode(response.body);
-      if (!(body is Map))
+      if (!(body is Map) || !(body["response"] is Map))
         throw Exception("Invalid response");
-      else if (!(body["response"] is Map))
-        throw Exception("Invalid response");
-      else if (body["response"]["error"] is String ||
-          body["response"]["ok"] != true)
-        throw Exception(body["response"]["error"] ?? "Invalid response");
+      else if (body["response"]["ok"] != true) {
+        if (body["response"]["error"] is String)
+          throw Exception(body["response"]["error"]);
+        else
+          throw Exception("The request failed");
+      }
 
       // SUCCESS
       loadingCtrl.close();
