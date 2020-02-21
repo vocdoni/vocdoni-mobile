@@ -329,23 +329,27 @@ class EntityModel implements ModelRefreshable {
           "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length}]");
 
       // add new
-      final List<ProcessModel> myFreshProcessModels = [];
-      for (final processId in newProcessIds) {
-        final prevModel = oldEntityProcessModels.firstWhere(
-            (model) =>
-                model.processId == processId &&
-                model.entityId == this.reference.entityId,
-            orElse: () => null);
+      final List<ProcessModel> myFreshProcessModels =
+          await Future.wait(newProcessIds
+              .map((processId) async {
+                final prevModel = oldEntityProcessModels.firstWhere(
+                    (model) =>
+                        model.processId == processId &&
+                        model.entityId == this.reference.entityId,
+                    orElse: () => null);
 
-        if (prevModel is ProcessModel) {
-          await prevModel.refreshMetadata().catchError((_) {});
-          myFreshProcessModels.add(prevModel);
-        } else {
-          final newModel = ProcessModel(processId, this.reference.entityId);
-          await newModel.refreshMetadata().catchError((_) {});
-          myFreshProcessModels.add(newModel);
-        }
-      }
+                if (prevModel is ProcessModel) {
+                  await prevModel.refreshMetadata().catchError((_) {});
+                  return prevModel;
+                } else {
+                  final newModel =
+                      ProcessModel(processId, this.reference.entityId);
+                  await newModel.refreshMetadata().catchError((_) {});
+                  return newModel;
+                }
+              })
+              .cast<Future<ProcessModel>>()
+              .toList());
 
       // local update
       this.processes.setValue(myFreshProcessModels);
@@ -443,27 +447,37 @@ class EntityModel implements ModelRefreshable {
     this.visibleActions.setToLoading();
 
     try {
-      for (final action in this.metadata.value.actions) {
-        if (action.type == "register") {
-          await _isActionVisible(action, this.reference.entityId)
-              .then((visible) {
-            if (!(visible is bool)) throw Exception();
-            this.isRegistered.setValue(!visible);
-            this.registerAction.setValue(action);
-          }).catchError((err) {
-            // capture the error locally
-            this.registerAction.setError("Could not load the register status");
-            this.isRegistered.setError("Could not load the register status");
-          });
-        } else {
-          // standard action
-          // in case of error: propagate to the global catcher
-          final isVisible =
+      await Future.wait(this
+          .metadata
+          .value
+          .actions
+          .map((action) async {
+            if (action.type == "register") {
               await _isActionVisible(action, this.reference.entityId)
-                  .catchError((_) => false);
-          if (isVisible) visibleStandardActions.add(action);
-        }
-      }
+                  .then((visible) {
+                if (!(visible is bool)) throw Exception();
+                this.isRegistered.setValue(!visible);
+                this.registerAction.setValue(action);
+              }).catchError((err) {
+                // capture the error locally
+                this
+                    .registerAction
+                    .setError("Could not load the register status");
+                this
+                    .isRegistered
+                    .setError("Could not load the register status");
+              });
+            } else {
+              // standard action
+              // in case of error: propagate to the global catcher
+              final isVisible =
+                  await _isActionVisible(action, this.reference.entityId)
+                      .catchError((_) => false);
+              if (isVisible) visibleStandardActions.add(action);
+            }
+          })
+          .cast<Future>()
+          .toList());
 
       devPrint(
           "- Refreshing entity visible actions [DONE] [${reference.entityId}]");

@@ -100,7 +100,7 @@ class _PollPageState extends State<PollPage> {
           avatarHexSource: process.processId,
           appBarTitle: "Poll",
           actionsBuilder: (context) => [
-            buildShareButton(context, entity),
+            buildShareButton(context, process.processId),
           ],
           builder: Builder(
             builder: (ctx) => SliverList(
@@ -403,15 +403,15 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildShareButton(BuildContext context, EntityModel ent) {
+  buildShareButton(BuildContext context, String processId) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
-          Clipboard.setData(ClipboardData(text: ent.reference.entityId));
-          showMessage("Entity ID copied on the clipboard",
-              context: context, purpose: Purpose.GUIDE);
+          Clipboard.setData(ClipboardData(text: processId));
+          showMessage("Poll ID copied on the clipboard",
+              context: context, purpose: Purpose.GOOD);
         });
   }
 

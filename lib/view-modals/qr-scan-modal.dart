@@ -22,7 +22,7 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: " ", // Lang.of(context).get("Scan")
+        title: "Vocdoni", // Lang.of(context).get("Scan")
         showBackButton: true,
         onBackButton: onCancel,
       ),
