@@ -21,6 +21,7 @@ class _StartupPageState extends State<StartupPage> {
   Future<void> initApplication() {
     globalAnalytics.init();
 
+    if (!mounted) return Future.value();
     setState(() {
       loading = true;
       error = null;
@@ -71,6 +72,8 @@ class _StartupPageState extends State<StartupPage> {
               context, nextRoutePath, (Route _) => false);
         })
         .catchError((err) {
+          if (!mounted) return;
+
           setState(() {
             loading = false;
             error = "Could not load the status of the app";

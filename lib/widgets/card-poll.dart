@@ -152,6 +152,7 @@ class _CardPollState extends State<CardPoll> {
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
+      mainTextMultiline: 2,
       mainTextFullWidth: true,
       secondaryText: this.widget.entity.metadata.value.name.values.first,
       avatarUrl: this.widget.entity.metadata.value.media.avatar,

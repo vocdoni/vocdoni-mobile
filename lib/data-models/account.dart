@@ -195,6 +195,7 @@ class AccountModel implements ModelRefreshable {
           .entities
           .map((EntityReference entitySummary) =>
               EntityModel.getFromPool(entitySummary))
+          .where((e) => e != null)
           .cast<EntityModel>()
           .toList();
 
@@ -228,7 +229,7 @@ class AccountModel implements ModelRefreshable {
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
     final signature = await signJsonPayload(body, privateKey);
-    
+
     this.actionVisibilityCheckSignature.setValue(signature);
     this.actionVisibilityTimestampUsed.setValue(ts);
   }

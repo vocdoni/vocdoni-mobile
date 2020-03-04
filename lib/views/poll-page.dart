@@ -142,6 +142,7 @@ class _PollPageState extends State<PollPage> {
       builder: (context, _, __) => ListItem(
         // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
         mainText: title,
+        mainTextMultiline: 3,
         secondaryText: entity.metadata.hasValue
             ? entity.metadata.value.name[globalAppState.currentLanguage]
             : "",
@@ -517,6 +518,7 @@ class _PollPageState extends State<PollPage> {
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
     return ListItem(
       mainText: question.question['default'],
+      mainTextMultiline: 3,
       secondaryText: question.description['default'],
       secondaryTextMultiline: 100,
       rightIcon: null,

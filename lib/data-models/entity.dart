@@ -539,15 +539,15 @@ class EntityModel implements ModelRefreshable {
 
       var response = await http.post(action.visible,
           body: jsonEncode(payload), headers: headers);
-      if (response.statusCode != 200 || !(response.body is String))
-        throw Exception("Invalid response");
+      if (!(response.body is String)) throw Exception("Invalid response");
 
       final body = jsonDecode(response.body);
       if (!(body is Map))
         throw Exception("Invalid response");
       else if (!(body["response"] is Map))
         throw Exception("Invalid response");
-      else if (body["response"]["error"] is String ||
+      else if (response.statusCode != 200 ||
+          body["response"]["error"] is String ||
           body["response"]["ok"] != true)
         throw Exception(body["response"]["error"] ?? "Invalid response");
       else if (body["response"]["visible"] is bool)

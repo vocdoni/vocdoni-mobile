@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
 
-const double opacitySecondaryElement = 0.7;
+const double opacitySecondaryElement = 0.5;
 const double opacityDecorationLines = 0.1;
 const double opacityBackgroundColor = 0.1;
 const double opacityDisabled = 0.6;
@@ -38,7 +38,7 @@ const double paddingChip = 4;
 const double paddingButton = 8;
 const double paddingBubble = 12;
 const double paddingBadge = 10;
-const double paddingIcon = 24;
+const double paddingIcon = 20;
 const double paddingAvatar = 18;
 const double spaceElement = 12;
 const double spaceCard = 24;
@@ -55,7 +55,7 @@ const double iconSizeHuge = 128;
 
 const double fontSizeTitle = 24;
 const double fontSizeBase = 16;
-const double fontSizeSecondary = 16;
+const double fontSizeSecondary = 14;
 
 const FontWeight fontWeightLight = FontWeight.w300;
 const FontWeight fontWeightRegular = FontWeight.w400;
