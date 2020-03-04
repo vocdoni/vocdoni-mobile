@@ -81,6 +81,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     return ListItem(
       //mainTextTag: process.meta['processId'] + title,
       mainText: post.title,
+      mainTextMultiline: 3,
       secondaryText: ent.metadata.value.name['default'],
       isTitle: true,
       rightIcon: null,

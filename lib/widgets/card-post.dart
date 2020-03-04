@@ -27,6 +27,7 @@ class CardPost extends StatelessWidget {
           children: <Widget>[
             ListItem(
               mainText: post.title,
+              mainTextMultiline: 3,
               mainTextFullWidth: true,
               secondaryText: entity
                   .metadata.value.name[entity.metadata.value.languages[0]],
