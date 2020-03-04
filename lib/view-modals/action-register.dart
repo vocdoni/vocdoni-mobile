@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
-import 'package:dvote/util/json-sign.dart';
+import 'package:dvote/util/json-signature.dart';
+import 'package:vocdoni/lib/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -228,7 +229,7 @@ class ActionRegisterPage extends StatelessWidget {
       return;
     }
 
-    String privateKey = await decryptString(encryptedPrivateKey, patternStr);
+    String privateKey = await decryptAsString(encryptedPrivateKey, patternStr);
 
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");

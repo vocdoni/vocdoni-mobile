@@ -10,7 +10,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
-import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/encryption.dart';
 
 class IdentityTab extends StatefulWidget {
   IdentityTab();
@@ -85,22 +85,22 @@ class _IdentityTabState extends State<IdentityTab> {
     final encryptedMnemonic =
         globalAppState.currentAccount.identity.value.keys[0].encryptedMnemonic;
 
-    var result = await Navigator.push(
+    var patternEncryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) =>
                 PatternPromptModal(globalAppState.currentAccount)));
 
-    if (result == null)
+    if (patternEncryptionKey == null)
       return;
-    else if (result is InvalidPatternError) {
+    else if (patternEncryptionKey is InvalidPatternError) {
       showMessage("The pattern you entered is not valid",
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
 
-    final mnemonic = await decryptString(encryptedMnemonic, result);
+    final mnemonic = await decryptString(encryptedMnemonic, patternEncryptionKey);
 
     Navigator.pushNamed(ctx, "/identity/backup",
         arguments: IdentityBackupArguments(

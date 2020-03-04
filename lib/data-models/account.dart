@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:dvote/util/json-sign.dart';
+import 'package:dvote/util/json-signature.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -378,9 +378,11 @@ class AccountModel implements ModelRefreshable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final privateKey = await mnemonicToPrivateKey(mnemonic);
-    final publicKey = await mnemonicToPublicKey(mnemonic);
-    final address = await mnemonicToAddress(mnemonic);
+    final wallet = EthereumWallet.fromMnemonic(mnemonic);
+
+    final privateKey = wallet.privateKey;
+    final publicKey = wallet.publicKey;
+    final address = wallet.address;
     final encryptedMenmonic =
         await encryptString(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
@@ -416,10 +418,12 @@ class AccountModel implements ModelRefreshable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final mnemonic = await generateMnemonic(size: 192);
-    final privateKey = await mnemonicToPrivateKey(mnemonic);
-    final publicKey = await mnemonicToPublicKey(mnemonic);
-    final address = await mnemonicToAddress(mnemonic);
+    final wallet = EthereumWallet.random(size: 192);
+
+    final mnemonic = wallet.mnemonic;
+    final privateKey = wallet.privateKey;
+    final publicKey = wallet.publicKey;
+    final address = wallet.address;
     final encryptedMenmonic =
         await encryptString(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
