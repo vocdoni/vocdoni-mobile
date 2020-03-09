@@ -1,4 +1,4 @@
-import 'package:dvote/dvote.dart' as dvote;
+import 'package:vocdoni/lib/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -100,7 +100,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
 
       final passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
       final decryptedPayload =
-          await dvote.decryptString(encryptedText, passphrase);
+          Symmetric.decryptString(encryptedText, passphrase);
 
       if (decryptedPayload == null)
         throw InvalidPatternError("The decryption key is invalid");

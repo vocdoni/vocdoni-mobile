@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote/util/json-signature.dart';
+import 'package:vocdoni/lib/encryption.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -224,7 +225,7 @@ class AccountModel implements ModelRefreshable {
   Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
     final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
     final privateKey =
-        await decryptString(encryptedPrivateKey, patternEncryptionKey);
+        Symmetric.decryptString(encryptedPrivateKey, patternEncryptionKey);
 
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
@@ -384,9 +385,9 @@ class AccountModel implements ModelRefreshable {
     final publicKey = wallet.publicKey;
     final address = wallet.address;
     final encryptedMenmonic =
-        await encryptString(mnemonic, patternEncryptionKey);
+        Symmetric.encryptString(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
-        await encryptString(privateKey, patternEncryptionKey);
+        Symmetric.encryptString(privateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;
@@ -425,9 +426,9 @@ class AccountModel implements ModelRefreshable {
     final publicKey = wallet.publicKey;
     final address = wallet.address;
     final encryptedMenmonic =
-        await encryptString(mnemonic, patternEncryptionKey);
+        Symmetric.encryptString(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
-        await encryptString(privateKey, patternEncryptionKey);
+        Symmetric.encryptString(privateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;

@@ -11,6 +11,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/encryption.dart';
 
 class PollPackaging extends StatefulWidget {
   final ProcessModel process;
@@ -98,7 +99,7 @@ class _PollPackagingState extends State<PollPackaging> {
       }
 
       // PREPARE THE VOTE ENVELOPE
-      final privateKey = await decryptString(
+      final privateKey = Symmetric.decryptString(
           currentAccount.identity.value.keys[0].encryptedPrivateKey,
           patternLockKey);
 

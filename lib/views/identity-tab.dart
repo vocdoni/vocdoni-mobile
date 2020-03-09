@@ -100,7 +100,8 @@ class _IdentityTabState extends State<IdentityTab> {
       return;
     }
 
-    final mnemonic = await decryptString(encryptedMnemonic, patternEncryptionKey);
+    final mnemonic =
+        Symmetric.decryptString(encryptedMnemonic, patternEncryptionKey);
 
     Navigator.pushNamed(ctx, "/identity/backup",
         arguments: IdentityBackupArguments(

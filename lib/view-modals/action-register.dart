@@ -229,7 +229,8 @@ class ActionRegisterPage extends StatelessWidget {
       return;
     }
 
-    String privateKey = await decryptAsString(encryptedPrivateKey, patternStr);
+    String privateKey =
+        Symmetric.decryptString(encryptedPrivateKey, patternStr);
 
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
