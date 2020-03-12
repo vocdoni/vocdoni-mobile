@@ -529,7 +529,7 @@ class EntityModel implements ModelRefreshable {
           "entityId": entityId,
           "timestamp": currentAccount.actionVisibilityTimestampUsed.value
         },
-        "signature": "0x" + currentAccount.actionVisibilityCheckSignature.value
+        "signature": currentAccount.actionVisibilityCheckSignature.value
       };
 
       final Map<String, String> headers = {
