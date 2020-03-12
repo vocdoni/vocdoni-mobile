@@ -230,7 +230,10 @@ class AccountModel implements ModelRefreshable {
     final body = {"method": "getVisibility", "timestamp": ts};
     final signature = await signJsonPayload(body, privateKey);
 
-    this.actionVisibilityCheckSignature.setValue(signature);
+    if (signature.startsWith("0x"))
+      this.actionVisibilityCheckSignature.setValue(signature);
+    else
+      this.actionVisibilityCheckSignature.setValue("0x" + signature);
     this.actionVisibilityTimestampUsed.setValue(ts);
   }
 
