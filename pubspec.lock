@@ -112,7 +112,7 @@ packages:
       name: dvote
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0"
+    version: "0.8.2"
   dvote_common:
     dependency: "direct main"
     description:
@@ -531,7 +531,7 @@ packages:
       name: web3dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.3"
+    version: "2.0.0-dev.1"
   webview_flutter:
     dependency: "direct main"
     description:

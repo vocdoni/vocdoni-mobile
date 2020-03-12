@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/lib/encryption.dart';
+import 'package:dvote/crypto/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lang/index.dart';
@@ -211,7 +211,7 @@ class _WebActionState extends State<WebAction> {
 
         String privateKey =
             Symmetric.decryptString(encryptedPrivateKey, patternStr);
-        final signature = await signString(payload["payload"], privateKey);
+        final signature = signString(payload["payload"], privateKey);
         privateKey = "";
 
         return respond(id, '''

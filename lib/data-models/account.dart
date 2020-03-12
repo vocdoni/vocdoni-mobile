@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote/util/json-signature.dart';
-import 'package:vocdoni/lib/encryption.dart';
+import 'package:dvote/crypto/encryption.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -211,7 +211,7 @@ class AccountModel implements ModelRefreshable {
   Future<void> refresh(
       [bool force = false, String patternEncryptionKey]) async {
     if (patternEncryptionKey is String)
-      await refreshSignedTimestamp(patternEncryptionKey).catchError((_) {});
+      refreshSignedTimestamp(patternEncryptionKey);
 
     if (this.entities.hasValue) {
       for (final entity in this.entities.value) {
@@ -222,14 +222,14 @@ class AccountModel implements ModelRefreshable {
 
   /// Precompute a request signature for entity registry backends to accept
   /// our requests for a certain period of time
-  Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
+  void refreshSignedTimestamp(String patternEncryptionKey) {
     final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
     final privateKey =
         Symmetric.decryptString(encryptedPrivateKey, patternEncryptionKey);
 
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
-    final signature = await signJsonPayload(body, privateKey);
+    final signature = signJsonPayload(body, privateKey);
 
     if (signature.startsWith("0x"))
       this.actionVisibilityCheckSignature.setValue(signature);
@@ -404,7 +404,7 @@ class AccountModel implements ModelRefreshable {
     newIdentity.keys.add(k);
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
-    await result.refreshSignedTimestamp(patternEncryptionKey);
+    result.refreshSignedTimestamp(patternEncryptionKey);
 
     return result;
   }
@@ -446,7 +446,7 @@ class AccountModel implements ModelRefreshable {
     newIdentity.meta[META_ACCOUNT_ID] = address;
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
-    await result.refreshSignedTimestamp(patternEncryptionKey);
+    result.refreshSignedTimestamp(patternEncryptionKey);
 
     return result;
   }

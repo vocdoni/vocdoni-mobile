@@ -11,7 +11,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/encryption.dart';
+import 'package:dvote/crypto/encryption.dart';
 
 class PollPackaging extends StatefulWidget {
   final ProcessModel process;
@@ -105,7 +105,7 @@ class _PollPackagingState extends State<PollPackaging> {
 
       if (!mounted) return;
 
-      Map<String, String> envelope = await packagePollEnvelope(
+      Map<String, String> envelope = packagePollEnvelope(
           widget.choices, merkleProof, widget.process.processId, privateKey);
 
       if (!mounted) return;

@@ -10,7 +10,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
-import 'package:vocdoni/lib/encryption.dart';
+import 'package:dvote/crypto/encryption.dart';
 
 class IdentityTab extends StatefulWidget {
   IdentityTab();
