@@ -6,6 +6,16 @@ extension NumberParsing on Widget {
     return Padding(padding: EdgeInsets.all(padding), child: this);
   }
 
+  Widget withHPadding(double padding) {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: padding), child: this);
+  }
+
+  Widget withVPadding(double padding) {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: padding), child: this);
+  }
+
   Widget withTopPadding(double padding) {
     return Padding(padding: EdgeInsets.only(top: padding), child: this);
   }
