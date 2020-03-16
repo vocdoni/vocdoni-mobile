@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 
 class DevUiListItem extends StatelessWidget {
   @override
@@ -32,8 +32,7 @@ class DevUiListItem extends StatelessWidget {
               isBold: true,
               rightIcon: FeatherIcons.copy,
               mainTextFullWidth: true,
-              secondaryText:
-                  longhex,
+              secondaryText: longhex,
             ),
             ListItem(
               mainText: "Participation page",

@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/unlockPattern/drawPattern.dart';
 import 'package:vocdoni/constants/settings.dart';
 
 enum PatternStep {

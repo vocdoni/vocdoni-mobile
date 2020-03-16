@@ -2,14 +2,14 @@ import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
 
 class PollPackaging extends StatefulWidget {

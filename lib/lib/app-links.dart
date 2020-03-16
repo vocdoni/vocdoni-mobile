@@ -4,7 +4,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/sign-modal.dart';
 import 'package:flutter/foundation.dart';
-import 'package:vocdoni/widgets/toast.dart'; // for kReleaseMode
+import 'package:dvote_common/widgets/toast.dart'; // for kReleaseMode
 
 // /////////////////////////////////////////////////////////////////////////////
 // MAIN
@@ -47,7 +47,9 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 Future fetchAndShowEntity(
-    {@required String entityId, @required List<String> entryPoints, @required BuildContext context}) async {
+    {@required String entityId,
+    @required List<String> entryPoints,
+    @required BuildContext context}) async {
   if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw LinkingError("Invalid entityId");

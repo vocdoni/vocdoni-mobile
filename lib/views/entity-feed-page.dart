@@ -3,9 +3,9 @@ import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/card-loading.dart';
+import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-post.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
 
 class EntityFeedPage extends StatefulWidget {

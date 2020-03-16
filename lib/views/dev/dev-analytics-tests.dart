@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 
 class AnalyticsTests extends StatelessWidget {
   @override
