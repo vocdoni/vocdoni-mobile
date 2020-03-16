@@ -97,10 +97,16 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           mnemonic, alias, patternEncryptionKey);
       await globalAccountPool.addAccount(newAccount);
 
-      final newIndex = globalAccountPool.value.indexWhere((account) =>
-          account.identity.hasValue &&
-          account.identity.value.identityId ==
-              newAccount.identity.value.identityId);
+      int newIndex = -1;
+      for (int i = 0; i < globalAccountPool.value.length; i++) {
+        // TODO: Compare by identityId instead of publicKey
+        if (!globalAccountPool.value[i].identity.hasValue)
+          continue;
+        else if (globalAccountPool.value[i].identity.value.keys[0].publicKey !=
+            newAccount.identity.value.keys[0].publicKey) continue;
+        newIndex = i;
+        break;
+      }
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 
@@ -162,7 +168,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
       body: Builder(
         builder: (context) {
           if (restoring) return renderLoading();
-          
+
           return ListView(children: <Widget>[
             Text("Please, get the seed phrase of your wallet and enter the words below, separated by spaces.")
                 .withPadding(16),
