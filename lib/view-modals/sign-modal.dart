@@ -3,7 +3,7 @@ import 'package:vocdoni/lib/singletons.dart';
 // import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 // import 'package:vocdoni/widgets/alerts.dart';
 // import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import '../lang/index.dart';
 
 class SignModalArguments {

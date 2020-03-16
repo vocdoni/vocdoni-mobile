@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/widgets/baseAvatar.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/widgets/baseAvatar.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'dart:math' as math;
 
 class DevUiAvatarColor extends StatelessWidget {

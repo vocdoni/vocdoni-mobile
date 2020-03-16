@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/widgets/baseCard.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/baseCard.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 
 
 class DevUiCard extends StatelessWidget {

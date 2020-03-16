@@ -1,6 +1,6 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/makers.dart';
@@ -8,11 +8,11 @@ import 'package:vocdoni/lib/util.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/poll-page.dart';
-import 'package:vocdoni/widgets/baseCard.dart';
-import 'package:vocdoni/widgets/dashboardItem.dart';
-import 'package:vocdoni/widgets/dashboardRow.dart';
-import 'package:vocdoni/widgets/dashboardText.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/baseCard.dart';
+import 'package:dvote_common/widgets/dashboardItem.dart';
+import 'package:dvote_common/widgets/dashboardRow.dart';
+import 'package:dvote_common/widgets/dashboardText.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 
 class CardPoll extends StatefulWidget {
   final ProcessModel process;

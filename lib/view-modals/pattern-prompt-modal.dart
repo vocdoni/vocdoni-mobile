@@ -1,11 +1,11 @@
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:flutter/material.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/unlockPattern/drawPattern.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/unlockPattern/drawPattern.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/constants/settings.dart';
 

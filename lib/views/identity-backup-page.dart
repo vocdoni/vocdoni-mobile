@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/singletons.dart';
 
 class IdentityBackupArguments {

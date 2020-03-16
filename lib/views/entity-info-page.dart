@@ -8,16 +8,16 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/action-register.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
-import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
-import 'package:vocdoni/widgets/alerts.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/summary.dart' as summary;
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
+import 'package:dvote_common/widgets/alerts.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/summary.dart' as summary;
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote/dvote.dart';
 import '../lang/index.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 
 class EntityInfoPage extends StatefulWidget {
   final EntityModel entityModel;

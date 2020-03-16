@@ -5,9 +5,9 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
-import 'package:vocdoni/widgets/baseCard.dart';
-import 'package:vocdoni/widgets/card-loading.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/baseCard.dart';
+import 'package:dvote_common/widgets/card-loading.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 
 class EntitiesTab extends StatefulWidget {
   EntitiesTab();

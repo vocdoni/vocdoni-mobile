@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/section.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/section.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import '../lib/singletons.dart';
 
 class IdentitySelectPage extends StatefulWidget {

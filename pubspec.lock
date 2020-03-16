@@ -85,6 +85,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.8"
+  dvote_common:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "9277d13ad1a5676fe25c65a905b076166029af60"
+      url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
+    source: git
+    version: "0.1.0"
   eventual:
     dependency: "direct main"
     description:
@@ -143,7 +152,7 @@ packages:
       name: flutter_spinkit
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.1+1"
+    version: "4.1.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -347,7 +356,14 @@ packages:
       name: sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "1.3.0"
+  sqflite_common:
+    dependency: transitive
+    description:
+      name: sqflite_common
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0+1"
   stack_trace:
     dependency: transitive
     description:
@@ -475,5 +491,5 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=2.6.0 <3.0.0"
+  dart: ">=2.7.0 <3.0.0"
   flutter: ">=1.12.13+hotfix.5 <2.0.0"

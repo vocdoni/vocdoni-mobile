@@ -1,14 +1,14 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/dvote.dart';
 

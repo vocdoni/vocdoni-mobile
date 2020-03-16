@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
-import 'package:vocdoni/widgets/bubble.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/pager/pager.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/bubble.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/pager/pager.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 
 class DevPager extends StatefulWidget {
   @override

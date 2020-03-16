@@ -4,8 +4,8 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/widgets/baseCard.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/baseCard.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 import 'package:intl/intl.dart';
 
 class CardPost extends StatelessWidget {
@@ -35,7 +35,7 @@ class CardPost extends StatelessWidget {
               avatarText: entity
                   .metadata.value.name[entity.metadata.value.languages[0]],
               avatarHexSource: entity.reference.entityId,
-              rightText: DateFormat('MMMM dd')
+              rightText: DateFormat('MMM dd')
                   .format(DateTime.parse(post.datePublished).toLocal()),
             )
           ]),

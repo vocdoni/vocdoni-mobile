@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lang/index.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/alerts.dart';
+import 'package:dvote_common/widgets/alerts.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/widgets/loading-spinner.dart';
+import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/lib/net.dart';
 

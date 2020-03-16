@@ -10,14 +10,14 @@ import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
 
 import 'package:vocdoni/views/poll-packaging.dart';
-import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
-import 'package:vocdoni/widgets/baseButton.dart';
-import 'package:vocdoni/widgets/listItem.dart';
-import 'package:vocdoni/widgets/section.dart';
-import 'package:vocdoni/widgets/summary.dart';
-import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
+import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/section.dart';
+import 'package:dvote_common/widgets/summary.dart';
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {

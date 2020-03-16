@@ -3,7 +3,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/app-links.dart';
@@ -11,11 +11,11 @@ import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-tab.dart';
 import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
-import 'package:vocdoni/widgets/alerts.dart';
-import 'package:vocdoni/widgets/bottomNavigation.dart';
+import 'package:dvote_common/widgets/alerts.dart';
+import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lang/index.dart';
-import 'package:vocdoni/widgets/toast.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

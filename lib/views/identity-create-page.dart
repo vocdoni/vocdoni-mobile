@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/widgets/alerts.dart';
+import 'package:dvote_common/widgets/alerts.dart';
 import '../lang/index.dart';
 
 class IdentityCreatePage extends StatefulWidget {

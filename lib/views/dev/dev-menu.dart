@@ -1,14 +1,14 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/app-links.dart';
-import 'package:vocdoni/widgets/topNavigation.dart';
-import 'package:vocdoni/widgets/listItem.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
-import 'package:vocdoni/widgets/toast.dart';
+import 'package:dvote_common/widgets/toast.dart';
 
 class DevMenu extends StatelessWidget {
   @override
