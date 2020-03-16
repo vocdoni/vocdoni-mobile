@@ -429,7 +429,9 @@ class ProcessModel implements ModelRefreshable {
   double get currentParticipation {
     if (!this.censusSize.hasValue || !this.currentParticipants.hasValue)
       return 0.0;
-    else if (this.censusSize.value <= 0) return 0.0;
+    else if (this.censusSize.value <= 0)
+      return 0.0;
+    else if (this.currentParticipants == this.censusSize) return 100.0;
 
     return this.currentParticipants.value *
         100.0 /

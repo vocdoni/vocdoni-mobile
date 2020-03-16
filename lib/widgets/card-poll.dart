@@ -163,6 +163,7 @@ class _CardPollState extends State<CardPoll> {
   }
 
   String getFriendlyParticipation(double participation) {
+    if (participation == 100.0) return "100";
     return participation.toStringAsPrecision(2);
   }
 

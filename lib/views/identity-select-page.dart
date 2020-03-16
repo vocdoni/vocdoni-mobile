@@ -34,6 +34,9 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                       ListItem(
                           mainText: "Create a new one",
                           onTap: () => createNew(context)),
+                      ListItem(
+                          mainText: "Restore existing",
+                          onTap: () => restorePreviousIdentity(context)),
                     ],
                   )),
         ));
@@ -93,5 +96,9 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
   createNew(BuildContext ctx) {
     Navigator.pushNamed(ctx, "/identity/create");
+  }
+
+  restorePreviousIdentity(BuildContext ctx) {
+    Navigator.pushNamed(ctx, "/identity/restore");
   }
 }

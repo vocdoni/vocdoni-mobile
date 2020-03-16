@@ -11,6 +11,7 @@ import 'package:vocdoni/views/dev/dev-ui-listItem.dart';
 import 'package:vocdoni/views/entity-feed-page.dart';
 import 'package:vocdoni/views/entity-participation-page.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
+import 'package:vocdoni/views/identity-restore-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/startup-page.dart';
 import 'lang/index.dart';
@@ -45,8 +46,9 @@ void main() async {
     home: StartupPage(),
     onGenerateRoute: generateRoute,
     routes: {
-      // NO ACCOUNTS YET
+      // NO ACCOUNT SELECTED YET
       "/identity/create": (context) => IdentityCreatePage(),
+      "/identity/restore": (context) => IdentityRestorePage(),
       "/identity/select": (context) => IdentitySelectPage(),
 
       // WHEN THERE IS AN ACCOUNT
