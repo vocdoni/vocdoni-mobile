@@ -305,7 +305,7 @@ class ProcessModel implements ModelRefreshable {
       final proof = await generateProof(
           this.metadata.value.census.merkleRoot, base64Claim, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
-        this.isInCensus.setError("You are not part of the census");
+        this.isInCensus.setValue(false);
         return;
       }
 

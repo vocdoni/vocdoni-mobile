@@ -284,23 +284,17 @@ class _PollPageState extends State<PollPage> {
     return EventualBuilder(
       notifiers: [process.hasVoted, process.isInCensus],
       builder: (ctx, _, __) {
-        if (process.isInCensus.hasError) {
-          return Padding(
-              padding: EdgeInsets.all(paddingPage),
-              child: BaseButton(
-                  text: process.isInCensus.errorMessage,
-                  purpose: Purpose.DANGER,
-                  isDisabled: true));
-        } else if (process.hasVoted.hasValue && process.hasVoted.value) {
-          return Container();
-        }
-
         final nextPendingChoice = getNextPendingChoice();
         final cannotVote = nextPendingChoice >= 0 ||
             !process.isInCensus.hasValue ||
             !process.isInCensus.value ||
+            process.hasVoted.value == true ||
             process.startDate.isAfter(DateTime.now()) ||
             process.endDate.isBefore(DateTime.now());
+
+        if (cannotVote) {
+          return Container();
+        }
 
         return Padding(
           padding: EdgeInsets.all(paddingPage),
