@@ -1,12 +1,13 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/action-register.dart';
+import 'package:vocdoni/view-modals/qr-show-modal.dart';
 import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/alerts.dart';
@@ -187,6 +188,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     return ListItem(
       heroTag: widget.entityModel.reference.entityId + title,
       mainText: title,
+      mainTextMultiline: 2,
       secondaryText: widget.entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
@@ -359,7 +361,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           purpose: Purpose.HIGHLIGHT,
           leftIconData: FeatherIcons.check,
           text: "Registered",
-          isSmall: true,
+          // isSmall: true,
           style: BaseButtonStyle.FILLED,
           isDisabled: true,
         );
@@ -380,6 +382,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           return ListItem(
             mainText: widget.entityModel.visibleActions.errorMessage,
             purpose: Purpose.DANGER,
+            rightIcon: null,
             rightTextPurpose: Purpose.DANGER,
           );
         } else if (!widget.entityModel.visibleActions.hasValue ||
@@ -442,16 +445,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   // EVENTS
 
   onShare(BuildContext context) {
-    Clipboard.setData(
-            ClipboardData(text: widget.entityModel.reference.entityId))
-        .then((_) => showMessage("Identity ID copied on the clipboard",
-            context: context, purpose: Purpose.GOOD))
-        .catchError((err) {
-      devPrint(err);
+    final link = generateEntityLink(widget.entityModel.reference.entityId,
+        widget.entityModel.reference.entryPoints);
 
-      showMessage("Could not copy the Entity ID",
-          context: context, purpose: Purpose.DANGER);
-    });
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => QrShowModal(
+                widget.entityModel.metadata.hasValue
+                    ? widget.entityModel.metadata.value
+                        .name[globalAppState.currentLanguage]
+                    : "Entity",
+                link)));
   }
 
   onShowFeed(BuildContext context) {
