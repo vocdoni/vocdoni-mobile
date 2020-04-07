@@ -37,7 +37,7 @@ class _PollPageState extends State<PollPage> {
   EntityModel entity;
   ProcessModel process;
   int index;
-  List<String> choices = [];
+  List<int> choices = [];
 
   @override
   void didChangeDependencies() async {
@@ -62,7 +62,7 @@ class _PollPageState extends State<PollPage> {
 
     choices = process.metadata.value.details.questions
         .map((question) => null)
-        .cast<String>()
+        .cast<int>()
         .toList();
 
     globalAnalytics.trackPage("PollPage",
@@ -259,7 +259,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  setChoice(int questionIndex, String value) {
+  setChoice(int questionIndex, int value) {
     setState(() {
       choices[questionIndex] = value;
     });
@@ -269,8 +269,8 @@ class _PollPageState extends State<PollPage> {
   /// Returns -1 if all questions have a valid choice
   int getNextPendingChoice() {
     int idx = 0;
-    for (final response in choices) {
-      if (response is String && response.length > 0) {
+    for (final choice in choices) {
+      if (choice is int) {
         idx++;
         continue; // GOOD
       }
@@ -309,12 +309,10 @@ class _PollPageState extends State<PollPage> {
   }
 
   onSubmit(BuildContext ctx, metadata) async {
-    var intAnswers = choices.map(int.parse).toList();
-
     final newRoute = MaterialPageRoute(
         fullscreenDialog: true,
         builder: (context) =>
-            PollPackaging(process: process, choices: intAnswers));
+            PollPackaging(process: process, choices: choices));
     await Navigator.push(ctx, newRoute);
   }
 

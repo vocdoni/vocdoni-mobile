@@ -72,6 +72,7 @@ class _PollPackagingState extends State<PollPackaging> {
       merkleProof = await generateProof(
           widget.process.metadata.value.census.merkleRoot,
           publicKeyClaim,
+          true,
           dvoteGw);
 
       if (!mounted) return;

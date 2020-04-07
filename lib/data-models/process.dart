@@ -303,7 +303,7 @@ class ProcessModel implements ModelRefreshable {
           await digestHexClaim(currentAccount.identity.value.keys[0].publicKey);
 
       final proof = await generateProof(
-          this.metadata.value.census.merkleRoot, base64Claim, dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, true, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;
@@ -318,7 +318,7 @@ class ProcessModel implements ModelRefreshable {
       }
 
       final valid = await checkProof(
-          this.metadata.value.census.merkleRoot, base64Claim, proof, dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, true, proof, dvoteGw);
 
       devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
 
