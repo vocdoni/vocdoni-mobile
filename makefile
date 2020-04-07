@@ -92,7 +92,15 @@ run:
 apk:
 	flutter build apk
 	@open build/app/outputs/apk/release 2>/dev/null || xdg-open build/app/outputs/apk/release 2>/dev/null || true
+appbundle:
+	flutter build appbundle --target-platform android-arm,android-arm64,android-x64
+	@open build/app/outputs/bundle/release 2>/dev/null || xdg-open build/app/outputs/bundle/release 2>/dev/null || true
 
 ## ios: Compile the iOS package
 ios:
 	flutter build ios
+
+## :
+## clean: Clean build artifacts
+clean:
+	flutter clean
