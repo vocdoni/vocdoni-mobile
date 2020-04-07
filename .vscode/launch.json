@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter",
+            "name": "Vocdoni Dev",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
@@ -15,6 +15,18 @@
                 "--flavor",
                 "dev"
             ]
+        },
+        {
+          "name": "Vocdoni Profile",
+          "request": "launch",
+          "type": "dart",
+          "flutterMode": "profile",
+          "args": [
+            "-t",
+            "lib/main-dev.dart",
+            "--flavor",
+            "dev"
+          ]
         }
     ]
 }
