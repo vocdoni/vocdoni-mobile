@@ -1,11 +1,11 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/flavors/config.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/util.dart';
 
 /// AppStateModel handles the global state of the application.
@@ -103,8 +103,19 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodes.setToLoading();
     try {
-      final gwList = await getDefaultGatewaysDetails(NETWORK_ID);
-      this.bootnodes.setValue(gwList);
+      if (FlavorConfig.isProduction()) {
+        // Get the bootnodes URL from the blockchain
+        final gwList = await getDefaultGatewaysDetails(
+            FlavorConfig.instance.constants.networkId);
+        this.bootnodes.setValue(gwList);
+      } else {
+        // Use the parameterized URL
+        devPrint(
+            "Checking " + FlavorConfig.instance.constants.gatewayBootNodesUrl);
+        final gwList = await getGatewaysDetailsFromBootNode(
+            FlavorConfig.instance.constants.gatewayBootNodesUrl);
+        this.bootnodes.setValue(gwList);
+      }
     } catch (err) {
       this.bootnodes.setError("Cannot fetch the boot nodes list",
           keepPreviousValue: true);

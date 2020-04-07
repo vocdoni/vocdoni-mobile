@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/flavors/config.dart';
 // import 'package:dvote_common/flavors/config.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/constants/settings.dart';
@@ -77,15 +78,8 @@ Future<GatewayInfo> _getFastestGatewayInfo() async {
   List<BootNodeGateways_NetworkNodes_DVote> dvoteNodes;
   List<BootNodeGateways_NetworkNodes_Web3> web3Nodes;
 
-  // if (!FlavorConfig.isProduction()) {
-  //   // Fetch from the default
-
-  // } else {
-  //   // Fetch from .dev
-  // }
-
   // Detect the network
-  if (NETWORK_ID == "homestead") {
+  if (FlavorConfig.instance.constants.networkId == "homestead") {
     if (globalAppState.bootnodes.value.homestead.dvote.length < 1) {
       print("The DVote gateway list is empty for Homestead");
       return null;
