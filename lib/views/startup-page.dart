@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/net.dart';
 import '../lib/singletons.dart';
+import 'package:dvote_common/widgets/flavor-banner.dart';
 
 class StartupPage extends StatefulWidget {
   @override
@@ -109,17 +110,19 @@ class _StartupPageState extends State<StartupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Builder(
-        builder: (context) => Center(
-          child: Align(
-            alignment: Alignment(0, -0.3),
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-              color: Color(0x00ff0000),
-              child: loading
-                  ? Text("Please, wait...", style: TextStyle(fontSize: 18))
-                  : buildError(context),
+    return FlavorBanner(
+      child: Scaffold(
+        body: Builder(
+          builder: (context) => Center(
+            child: Align(
+              alignment: Alignment(0, -0.3),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+                color: Color(0x00ff0000),
+                child: loading
+                    ? Text("Please, wait...", style: TextStyle(fontSize: 18))
+                    : buildError(context),
+              ),
             ),
           ),
         ),

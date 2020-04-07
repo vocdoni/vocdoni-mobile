@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
@@ -143,7 +144,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(context) {
     return WillPopScope(
-        onWillPop: handleWillPop,
+      onWillPop: handleWillPop,
+      child: FlavorBanner(
         child: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
@@ -173,7 +175,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onTabSelect: (index) => onTabSelect(index),
             selectedTab: selectedTab,
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   buildBody(BuildContext ctx) {

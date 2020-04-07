@@ -23,7 +23,9 @@ import 'package:vocdoni/views/dev/dev-menu.dart';
 import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
-void main() async {
+/// The actual main function is defined on main-dev.dart and main-production.dart.
+/// These are expected to call mainCommon() when done
+void mainCommon() async {
   // If you're running an application and need to access the binary messenger before `runApp()`
   // has been called (for example, during plugin initialization), then you need to explicitly
   // call the `WidgetsFlutterBinding.ensureInitialized()` first.

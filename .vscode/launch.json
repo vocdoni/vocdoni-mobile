@@ -7,7 +7,14 @@
         {
             "name": "Flutter",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "-t",
+                "lib/main-dev.dart",
+                "--flavor",
+                "dev"
+            ]
         }
     ]
 }

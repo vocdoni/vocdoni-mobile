@@ -118,7 +118,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "9277d13ad1a5676fe25c65a905b076166029af60"
+      resolved-ref: "35c9203cfb9cef93215732b729010d5b4f140894"
       url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
     source: git
     version: "0.1.0"
@@ -194,7 +194,7 @@ packages:
       name: flutter_spinkit
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.2"
+    version: "4.1.2+1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -552,7 +552,7 @@ packages:
       name: web3dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-dev.2"
+    version: "2.0.0-dev.4"
   webview_flutter:
     dependency: "direct main"
     description:

@@ -13,7 +13,7 @@ SHELL := /bin/bash
 .PHONY: help
 help: makefile
 	@echo
-	@echo " Available actions in "$(PROJECTNAME)":"
+	@echo " Available actions on "$(PROJECTNAME)":"
 	@echo
 	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
 	@echo
@@ -86,19 +86,39 @@ launch-android-sign:
 
 ## run: Run the app in development mode on a currently active device or simulator
 run: 
-	flutter run
+	flutter run --flavor dev -t lib/main-dev.dart
 
-## apk: Compile the Android APK
+## :
+
+## apk-beta: Compile the Android APK  [beta]
+apk-beta:
+	flutter build apk -t lib/main-beta.dart --flavor beta
+	@open build/app/outputs/apk/beta/release 2>/dev/null || xdg-open build/app/outputs/apk/beta/release 2>/dev/null || true
+
+## appbundle-beta: Compile the app bundle for Google Play  [beta]
+appbundle-beta:
+	flutter build appbundle -t lib/main-beta.dart --target-platform android-arm,android-arm64,android-x64 --flavor beta
+	@open build/app/outputs/bundle/betaRelease 2>/dev/null || xdg-open build/app/outputs/bundle/betaRelease 2>/dev/null || true
+
+## ios-beta: Compile the iOS package  [beta]
+ios-beta:
+	flutter build ios -t lib/main-beta.dart --flavor beta
+
+## :
+
+## apk: Compile the Android APK  [release]
 apk:
-	flutter build apk
-	@open build/app/outputs/apk/release 2>/dev/null || xdg-open build/app/outputs/apk/release 2>/dev/null || true
-appbundle:
-	flutter build appbundle --target-platform android-arm,android-arm64,android-x64
-	@open build/app/outputs/bundle/release 2>/dev/null || xdg-open build/app/outputs/bundle/release 2>/dev/null || true
+	flutter build apk -t lib/main-production.dart --flavor production
+	@open build/app/outputs/apk/production/release 2>/dev/null || xdg-open build/app/outputs/apk/production/release 2>/dev/null || true
 
-## ios: Compile the iOS package
+## appbundle: Compile the app bundle for Google Play  [release]
+appbundle:
+	flutter build appbundle -t lib/main-production.dart --target-platform android-arm,android-arm64,android-x64 --flavor production
+	@open build/app/outputs/bundle/productionRelease 2>/dev/null || xdg-open build/app/outputs/bundle/productionRelease 2>/dev/null || true
+
+## ios: Compile the iOS package  [release]
 ios:
-	flutter build ios
+	flutter build ios -t lib/main-production.dart --flavor production
 
 ## :
 ## clean: Clean build artifacts

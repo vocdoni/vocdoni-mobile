@@ -1,6 +1,16 @@
 # Vocdoni Mobile Client
 Official implementation of the Vocdoni core features.
 
+## Flavors
+
+The app can run in three diferent flavors:
+* Development
+	- Uses the development blockchain
+* Beta
+	- Uses the development blockchain
+* Production
+	- Uses the production blockchain
+
 ## Development
 
 ### Data Architecture and internal Models
