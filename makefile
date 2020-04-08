@@ -92,7 +92,8 @@ run:
 
 ## apk-beta: Compile the Android APK  [beta]
 apk-beta:
-	flutter build apk -t lib/main-beta.dart --flavor beta
+	#flutter build apk -t lib/main-beta.dart --flavor beta
+	flutter build apk -t lib/main-beta.dart --flavor beta --target-platform android-arm,android-arm64,android-x64 --split-per-abi
 	@open build/app/outputs/apk/beta/release 2>/dev/null || xdg-open build/app/outputs/apk/beta/release 2>/dev/null || true
 
 ## appbundle-beta: Compile the app bundle for Google Play  [beta]
@@ -108,7 +109,8 @@ ios-beta:
 
 ## apk: Compile the Android APK  [release]
 apk:
-	flutter build apk -t lib/main-production.dart --flavor production
+	#flutter build apk -t lib/main-production.dart --flavor production
+	flutter build apk -t lib/main-production.dart --flavor production --target-platform android-arm,android-arm64,android-x64 --split-per-abi
 	@open build/app/outputs/apk/production/release 2>/dev/null || xdg-open build/app/outputs/apk/production/release 2>/dev/null || true
 
 ## appbundle: Compile the app bundle for Google Play  [release]
