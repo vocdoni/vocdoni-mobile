@@ -258,7 +258,7 @@ class ActionRegisterPage extends StatelessWidget {
     };
 
     payload["signature"] =
-        "0x" + await signJsonPayloadAsync(payload["request"], privateKey);
+        await signJsonPayloadAsync(payload["request"], privateKey);
     privateKey = null;
 
     final Map<String, String> headers = {
