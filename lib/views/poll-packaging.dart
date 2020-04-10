@@ -100,7 +100,7 @@ class _PollPackagingState extends State<PollPackaging> {
       }
 
       // PREPARE THE VOTE ENVELOPE
-      final privateKey = Symmetric.decryptString(
+      final privateKey = await Symmetric.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedPrivateKey,
           patternLockKey);
 

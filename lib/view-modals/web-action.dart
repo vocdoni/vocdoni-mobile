@@ -210,8 +210,8 @@ class _WebActionState extends State<WebAction> {
         }
 
         String privateKey =
-            Symmetric.decryptString(encryptedPrivateKey, patternStr);
-        final signature = signString(payload["payload"], privateKey);
+            await Symmetric.decryptStringAsync(encryptedPrivateKey, patternStr);
+        final signature = await signStringAsync(payload["payload"], privateKey);
         privateKey = "";
 
         return respond(id, '''

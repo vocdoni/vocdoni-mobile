@@ -100,7 +100,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
 
       final passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
       final decryptedPayload =
-          Symmetric.decryptString(encryptedText, passphrase);
+          await Symmetric.decryptStringAsync(encryptedText, passphrase);
 
       if (decryptedPayload == null)
         throw InvalidPatternError("The decryption key is invalid");

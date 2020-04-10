@@ -84,7 +84,7 @@ launch-android-sign:
 
 ## :
 
-## run: Run the app in development mode on a currently active device or simulator
+## run: Run the app on the currently active device or simulator  [dev]
 run: 
 	flutter run --flavor dev -t lib/main-dev.dart
 
@@ -107,18 +107,19 @@ ios-beta:
 
 ## :
 
-## apk: Compile the Android APK  [release]
+## apk: Compile the Android APK  [production]
 apk:
 	#flutter build apk -t lib/main-production.dart --flavor production
 	flutter build apk -t lib/main-production.dart --flavor production --target-platform android-arm,android-arm64,android-x64 --split-per-abi
 	@open build/app/outputs/apk/production/release 2>/dev/null || xdg-open build/app/outputs/apk/production/release 2>/dev/null || true
 
-## appbundle: Compile the app bundle for Google Play  [release]
+## appbundle: Compile the app bundle for Google Play  [production]
 appbundle:
 	flutter build appbundle -t lib/main-production.dart --target-platform android-arm,android-arm64,android-x64 --flavor production
 	@open build/app/outputs/bundle/productionRelease 2>/dev/null || xdg-open build/app/outputs/bundle/productionRelease 2>/dev/null || true
 
-## ios: Compile the iOS package  [release]
+## ios: Compile the iOS package  [production]
+.PHONY: ios
 ios:
 	flutter build ios -t lib/main-production.dart --flavor production
 

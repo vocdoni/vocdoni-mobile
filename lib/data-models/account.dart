@@ -211,7 +211,7 @@ class AccountModel implements ModelRefreshable {
   Future<void> refresh(
       [bool force = false, String patternEncryptionKey]) async {
     if (patternEncryptionKey is String)
-      refreshSignedTimestamp(patternEncryptionKey);
+      await refreshSignedTimestamp(patternEncryptionKey);
 
     if (this.entities.hasValue) {
       for (final entity in this.entities.value) {
@@ -222,14 +222,14 @@ class AccountModel implements ModelRefreshable {
 
   /// Precompute a request signature for entity registry backends to accept
   /// our requests for a certain period of time
-  void refreshSignedTimestamp(String patternEncryptionKey) {
+  Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
     final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
-    final privateKey =
-        Symmetric.decryptString(encryptedPrivateKey, patternEncryptionKey);
+    final privateKey = await Symmetric.decryptStringAsync(
+        encryptedPrivateKey, patternEncryptionKey);
 
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
-    final signature = signJsonPayload(body, privateKey);
+    final signature = await signJsonPayloadAsync(body, privateKey);
 
     if (signature.startsWith("0x"))
       this.actionVisibilityCheckSignature.setValue(signature);
@@ -381,13 +381,13 @@ class AccountModel implements ModelRefreshable {
 
     final wallet = EthereumWallet.fromMnemonic(mnemonic);
 
-    final privateKey = wallet.privateKey;
-    final publicKey = wallet.publicKey;
-    final address = wallet.address;
+    final privateKey = await wallet.privateKeyAsync;
+    final publicKey = await wallet.publicKeyAsync;
+    final address = await wallet.addressAsync;
     final encryptedMenmonic =
-        Symmetric.encryptString(mnemonic, patternEncryptionKey);
+        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
-        Symmetric.encryptString(privateKey, patternEncryptionKey);
+        await Symmetric.encryptStringAsync(privateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;
@@ -404,7 +404,7 @@ class AccountModel implements ModelRefreshable {
     newIdentity.keys.add(k);
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
-    result.refreshSignedTimestamp(patternEncryptionKey);
+    await result.refreshSignedTimestamp(patternEncryptionKey);
 
     return result;
   }
@@ -419,16 +419,16 @@ class AccountModel implements ModelRefreshable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = EthereumWallet.random(size: 192);
+    final wallet = await EthereumWallet.randomAsync(size: 192);
 
     final mnemonic = wallet.mnemonic;
-    final privateKey = wallet.privateKey;
-    final publicKey = wallet.publicKey;
-    final address = wallet.address;
+    final privateKey = await wallet.privateKeyAsync;
+    final publicKey = await wallet.publicKeyAsync;
+    final address = await wallet.addressAsync;
     final encryptedMenmonic =
-        Symmetric.encryptString(mnemonic, patternEncryptionKey);
+        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
     final encryptedPrivateKey =
-        Symmetric.encryptString(privateKey, patternEncryptionKey);
+        await Symmetric.encryptStringAsync(privateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;
@@ -446,7 +446,7 @@ class AccountModel implements ModelRefreshable {
     newIdentity.meta[META_ACCOUNT_ID] = address;
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
-    result.refreshSignedTimestamp(patternEncryptionKey);
+    await result.refreshSignedTimestamp(patternEncryptionKey);
 
     return result;
   }
