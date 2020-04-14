@@ -329,18 +329,19 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.GOOD,
             rightIcon: null,
           );
-        } else if (process.isInCensus.hasValue) {
-          if (process.isInCensus.hasValue && process.isInCensus.value) {
-            if (nextPendingChoice < 0) return Container(); // all good to go
-
-            return ListItem(
-              mainText:
-                  'Select your choice for question #${nextPendingChoice + 1}',
-              purpose: Purpose.WARNING,
-              rightIcon: null,
-            );
-          }
-
+        } else if (process.startDate.isAfter(DateTime.now())) {
+          return ListItem(
+            mainText: "The process is not active yet",
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.endDate.isBefore(DateTime.now())) {
+          return ListItem(
+            mainText: "The process has already ended",
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.isInCensus.hasValue && !process.isInCensus.value) {
           return ListItem(
             mainText: "You are not in the census",
             secondaryText:
@@ -357,23 +358,18 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
+        } else if (nextPendingChoice >= 0) {
+          return ListItem(
+            mainText:
+                'Select your choice for question #${nextPendingChoice + 1}',
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
         } else if (process.hasVoted.hasError) {
           return ListItem(
             mainText: "Your vote status cannot be checked",
             mainTextMultiline: 3,
             secondaryText: process.hasVoted.errorMessage,
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.startDate.isAfter(DateTime.now())) {
-          return ListItem(
-            mainText: "The process is not active yet",
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.endDate.isBefore(DateTime.now())) {
-          return ListItem(
-            mainText: "The process has already ended",
             purpose: Purpose.WARNING,
             rightIcon: null,
           );

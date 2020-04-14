@@ -29,7 +29,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
       textColor: Colors.white,
       disabledColor: Colors.grey,
       disabledTextColor: Colors.black,
-      padding: EdgeInsets.all(paddingButton),
+      padding: EdgeInsets.all(paddingButton * 1.5),
       splashColor: Colors.blueAccent,
       onPressed: () {
         Navigator.pop(context);

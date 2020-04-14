@@ -90,7 +90,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         appBar: TopNavigation(title: "Participation"),
         body: Center(
           child:
-              SizedBox(height: 140.0, child: CardLoading("Loading posts...")),
+              SizedBox(height: 140.0, child: CardLoading("Loading votes...")),
         ));
   }
 
