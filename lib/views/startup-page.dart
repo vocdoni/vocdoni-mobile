@@ -1,5 +1,7 @@
+import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/net.dart';
+// import 'package:vocdoni/lib/extensions.dart';
 import '../lib/singletons.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 
@@ -77,7 +79,7 @@ class _StartupPageState extends State<StartupPage> {
 
           setState(() {
             loading = false;
-            error = "Could not load the status of the app";
+            error = "Could not connect to the network";
           });
 
           // RETRY ITSELF
@@ -86,12 +88,11 @@ class _StartupPageState extends State<StartupPage> {
   }
 
   Widget buildError(BuildContext context) {
-    return Center(
-        child: Column(
+    return Column(
       children: [
         Text(
-          "Error:\n$error",
-          style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
+          error,
+          style: new TextStyle(fontSize: 24, color: Color(0xff888888)),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 20.0),
@@ -105,7 +106,19 @@ class _StartupPageState extends State<StartupPage> {
                   textAlign: TextAlign.center,
                 )))
       ],
-    ));
+    );
+  }
+
+  buildLoading() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text("Please wait...", style: TextStyle(fontSize: 18)),
+        SizedBox(height: 20),
+        LoadingSpinner(),
+      ],
+    );
   }
 
   @override
@@ -115,13 +128,13 @@ class _StartupPageState extends State<StartupPage> {
         body: Builder(
           builder: (context) => Center(
             child: Align(
-              alignment: Alignment(0, -0.3),
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-                color: Color(0x00ff0000),
-                child: loading
-                    ? Text("Please, wait...", style: TextStyle(fontSize: 18))
-                    : buildError(context),
+              alignment: Alignment(0, -0.1),
+              child: Center(
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+                  color: Color(0x00ff0000),
+                  child: loading ? buildLoading() : buildError(context),
+                ),
               ),
             ),
           ),

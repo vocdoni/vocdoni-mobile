@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/dvote_common.dart';
+import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
@@ -133,12 +134,20 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   renderLoading() {
     return Center(
       child: Align(
-        alignment: Alignment(0, -0.3),
+        alignment: Alignment(0, -0.1),
         child: Container(
-            constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
-            color: Color(0x00ff0000),
-            child:
-                Text("Restoring identity...", style: TextStyle(fontSize: 18))),
+          constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+          color: Color(0x00ff0000),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text("Restoring identity...", style: TextStyle(fontSize: 18)),
+              SizedBox(height: 20),
+              LoadingSpinner(),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/lib/extensions.dart';
 
 class WebViewer extends StatefulWidget {
   @override
@@ -81,10 +82,7 @@ class _WebViewerState extends State<WebViewer> {
                     ),
                     Spacer(),
                     loading
-                        ? Padding(
-                            child: LoadingSpinner(),
-                            padding: EdgeInsets.only(right: 12),
-                          )
+                        ? LoadingSpinner().withRightPadding(12)
                         : IconButton(
                             icon: const Icon(Icons.replay),
                             color: Colors.black54,

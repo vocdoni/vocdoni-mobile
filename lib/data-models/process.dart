@@ -317,8 +317,8 @@ class ProcessModel implements ModelRefreshable {
         return;
       }
 
-      final valid = await checkProof(
-          this.metadata.value.census.merkleRoot, base64Claim, true, proof, dvoteGw);
+      final valid = await checkProof(this.metadata.value.census.merkleRoot,
+          base64Claim, true, proof, dvoteGw);
 
       devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
 
@@ -345,7 +345,7 @@ class ProcessModel implements ModelRefreshable {
 
     try {
       this.hasVoted.setToLoading();
-      final String pollNullifier = getPollNullifier(
+      final String pollNullifier = await getPollNullifier(
           globalAppState.currentAccount.identity.value.keys[0].address,
           this.processId);
 

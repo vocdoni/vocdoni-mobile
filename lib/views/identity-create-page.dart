@@ -1,8 +1,11 @@
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/loading-spinner.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/alerts.dart';
+import 'package:vocdoni/lib/extensions.dart';
 import '../lang/index.dart';
 
 class IdentityCreatePage extends StatefulWidget {
@@ -26,14 +29,11 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         child: Scaffold(body: Builder(builder: (BuildContext context) {
           return Center(
             child: Align(
-              alignment: Alignment(0, -0.3),
+              alignment: Alignment(0, -0.1),
               child: Container(
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
                 color: Color(0x00ff0000),
-                child: generating
-                    ? Text("Generating an identity...",
-                        style: TextStyle(fontSize: 18))
-                    : buildWelcome(context),
+                child: generating ? buildGenerating() : buildWelcome(context),
               ),
             ),
           );
@@ -55,6 +55,18 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               decoration: InputDecoration(hintText: "What's your name?"),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
+      ],
+    );
+  }
+
+  buildGenerating() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text("Generating identity...", style: TextStyle(fontSize: 18)),
+        SizedBox(height: 20),
+        LoadingSpinner(),
       ],
     );
   }

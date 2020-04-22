@@ -106,7 +106,7 @@ class _PollPackagingState extends State<PollPackaging> {
 
       if (!mounted) return;
 
-      Map<String, String> envelope = packagePollEnvelope(
+      Map<String, String> envelope = await packagePollEnvelope(
           widget.choices, merkleProof, widget.process.processId, privateKey);
 
       if (!mounted) return;

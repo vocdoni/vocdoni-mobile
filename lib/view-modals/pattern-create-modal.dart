@@ -63,7 +63,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
               withDectoration: false,
               text: patternStep == PatternStep.PATTERN_SETTING ||
                       patternStep == PatternStep.PATTERN_WAITING_CONFIRM
-                  ? "Set a a new pattern"
+                  ? "Set a new pattern"
                   : "Confirm your pattern",
             ),
             Spacer(),
