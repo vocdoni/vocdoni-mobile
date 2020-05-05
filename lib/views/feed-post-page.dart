@@ -9,8 +9,6 @@ import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart'; // TODO: REMOVE
-import 'package:vocdoni/lib/net.dart';
 
 class FeedPostArgs {
   final EntityModel entity;
@@ -73,7 +71,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
   getScaffoldChildren(BuildContext context, EntityModel ent, FeedPost post) {
     List<Widget> children = [];
     children.add(buildTitle(context, ent, post));
-    children.add(html2(post.contentHtml));
+    children.add(renderHtmlBody(post.contentHtml));
     return children;
   }
 
@@ -93,24 +91,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
     );
   }
 
-  html1(String htmlBody) {
-    final String html = styleHtml(htmlBody);
-    final uri = uriFromContent(html);
-    return Container(
-        padding: EdgeInsets.fromLTRB(
-            paddingPage, spaceElement, paddingPage, spaceElement),
-        width: double.infinity,
-        height: 500,
-        child: WebView(
-            navigationDelegate: (NavigationRequest request) {
-              launchUrl(request.url);
-              return NavigationDecision.prevent;
-            },
-            initialUrl: uri,
-            javascriptMode: JavascriptMode.disabled));
-  }
-
-  html2(String htmlBody) {
+  renderHtmlBody(String htmlBody) {
     return Html(
       data: htmlBody,
       padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, spaceElement),

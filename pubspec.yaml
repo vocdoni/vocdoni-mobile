@@ -11,7 +11,7 @@ description: Decentralized anonymous E2E verifiable voting system client app
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.7.1+7
+version: 0.7.1+8
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
@@ -34,7 +34,7 @@ dependencies:
   qr_flutter: ^3.2.0
   feather_icons_flutter: ^4.7.4
   path_provider: ^1.6.0
-  webview_flutter: ^0.3.19+5
+  webview_flutter: ^0.3.21
   mixpanel_analytics: ^1.2.1
   qr_mobile_vision: ^0.3.1
   cupertino_icons: ^0.1.2
@@ -48,7 +48,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.7.4"
+  flutter_launcher_icons: "^0.7.5"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
