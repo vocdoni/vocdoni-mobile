@@ -1,5 +1,5 @@
 PODS:
-  - dvote (0.0.1):
+  - dvote_native (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - FMDB (2.7.5):
@@ -21,6 +21,8 @@ PODS:
   - native_device_orientation (0.0.1):
     - Flutter
   - path_provider (0.0.1):
+    - Flutter
+  - path_provider_macos (0.0.1):
     - Flutter
   - Protobuf (3.11.3)
   - qr_mobile_vision (0.0.1):
@@ -47,10 +49,11 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - dvote (from `.symlinks/plugins/dvote/ios`)
+  - dvote_native (from `.symlinks/plugins/dvote_native/ios`)
   - Flutter (from `Flutter`)
   - native_device_orientation (from `.symlinks/plugins/native_device_orientation/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
   - qr_mobile_vision (from `.symlinks/plugins/qr_mobile_vision/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
@@ -71,14 +74,16 @@ SPEC REPOS:
     - Protobuf
 
 EXTERNAL SOURCES:
-  dvote:
-    :path: ".symlinks/plugins/dvote/ios"
+  dvote_native:
+    :path: ".symlinks/plugins/dvote_native/ios"
   Flutter:
     :path: Flutter
   native_device_orientation:
     :path: ".symlinks/plugins/native_device_orientation/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  path_provider_macos:
+    :path: ".symlinks/plugins/path_provider_macos/ios"
   qr_mobile_vision:
     :path: ".symlinks/plugins/qr_mobile_vision/ios"
   shared_preferences:
@@ -101,7 +106,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter/ios"
 
 SPEC CHECKSUMS:
-  dvote: 751a6ea65ed36928042e8c66b6a869dfe91a1583
+  dvote_native: 794d62db96e0655cbec911fda31c4db37aba9017
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GoogleMobileVision: 31cfb4319fd0c03d80105680abd9eae9da5e3b47
@@ -109,6 +114,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: cea130bbfe5a7edc8d06d3f0d17288c32ffe9925
   native_device_orientation: e24d00be281de72996640885d80e706142707660
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
+  path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
   Protobuf: 0e94afe3b47cb11876eb6aee296638711a24bf75
   qr_mobile_vision: be1c3c9f00796683610e8bab9bbab2920dd4ffca
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
@@ -119,7 +125,7 @@ SPEC CHECKSUMS:
   url_launcher: a1c0cc845906122c4784c542523d8cacbded5626
   url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
-  webview_flutter: bec7599de6bfbe8008a739aa3ebd7b364ea9d0cd
+  webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
 
 PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
 
