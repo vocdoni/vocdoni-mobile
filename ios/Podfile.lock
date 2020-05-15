@@ -5,29 +5,14 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleMobileVision/BarcodeDetector (1.6.0):
-    - GoogleMobileVision/Detector (~> 1.6)
-  - GoogleMobileVision/Detector (1.6.0):
-    - GoogleToolboxForMac/Logger (~> 2.1)
-    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
-    - GTMSessionFetcher/Core (~> 1.1)
-    - Protobuf (~> 3.1)
-  - GoogleToolboxForMac/Defines (2.2.2)
-  - GoogleToolboxForMac/Logger (2.2.2):
-    - GoogleToolboxForMac/Defines (= 2.2.2)
-  - "GoogleToolboxForMac/NSData+zlib (2.2.2)":
-    - GoogleToolboxForMac/Defines (= 2.2.2)
-  - GTMSessionFetcher/Core (1.3.1)
-  - native_device_orientation (0.0.1):
-    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - path_provider_macos (0.0.1):
     - Flutter
-  - Protobuf (3.11.3)
-  - qr_mobile_vision (0.0.1):
+  - "permission_handler (5.0.0+hotfix.6)":
     - Flutter
-    - GoogleMobileVision/BarcodeDetector
+  - r_scan (0.0.1):
+    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_macos (0.0.1):
@@ -51,10 +36,10 @@ PODS:
 DEPENDENCIES:
   - dvote_native (from `.symlinks/plugins/dvote_native/ios`)
   - Flutter (from `Flutter`)
-  - native_device_orientation (from `.symlinks/plugins/native_device_orientation/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
-  - qr_mobile_vision (from `.symlinks/plugins/qr_mobile_vision/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - r_scan (from `.symlinks/plugins/r_scan/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
@@ -68,24 +53,20 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - FMDB
-    - GoogleMobileVision
-    - GoogleToolboxForMac
-    - GTMSessionFetcher
-    - Protobuf
 
 EXTERNAL SOURCES:
   dvote_native:
     :path: ".symlinks/plugins/dvote_native/ios"
   Flutter:
     :path: Flutter
-  native_device_orientation:
-    :path: ".symlinks/plugins/native_device_orientation/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   path_provider_macos:
     :path: ".symlinks/plugins/path_provider_macos/ios"
-  qr_mobile_vision:
-    :path: ".symlinks/plugins/qr_mobile_vision/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
+  r_scan:
+    :path: ".symlinks/plugins/r_scan/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   shared_preferences_macos:
@@ -109,14 +90,10 @@ SPEC CHECKSUMS:
   dvote_native: 794d62db96e0655cbec911fda31c4db37aba9017
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleMobileVision: 31cfb4319fd0c03d80105680abd9eae9da5e3b47
-  GoogleToolboxForMac: 800648f8b3127618c1b59c7f97684427630c5ea3
-  GTMSessionFetcher: cea130bbfe5a7edc8d06d3f0d17288c32ffe9925
-  native_device_orientation: e24d00be281de72996640885d80e706142707660
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
-  Protobuf: 0e94afe3b47cb11876eb6aee296638711a24bf75
-  qr_mobile_vision: be1c3c9f00796683610e8bab9bbab2920dd4ffca
+  permission_handler: b7a0953389e699927c6217933754cdcd0fa2c5a7
+  r_scan: ff1d53ccf15e760a9b244da3bbf3c5ec7bd763b4
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
@@ -127,6 +104,6 @@ SPEC CHECKSUMS:
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
   webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
 
-PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+PODFILE CHECKSUM: bde9bdf7dccca02050514126282faa643fc88c20
 
 COCOAPODS: 1.8.4

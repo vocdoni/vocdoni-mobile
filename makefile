@@ -84,44 +84,50 @@ launch-android-sign:
 
 ## :
 
-## run: Run the app on the currently active device or simulator  [dev]
+## run: Run the app on the active (Android) device or simulator  [DEV]
+.PHONY: run
 run: 
 	flutter run --flavor dev -t lib/main-dev.dart
 
+## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
+.PHONY: run-ios
+run-ios: 
+	flutter run -t lib/main-dev.dart
+
 ## :
 
-## apk-beta: Compile the Android APK  [beta]
+## apk-beta: Compile the Android APK  [BETA]
+.PHONY: apk-beta
 apk-beta:
 	#flutter build apk -t lib/main-beta.dart --flavor beta
 	flutter build apk -t lib/main-beta.dart --flavor beta --target-platform android-arm,android-arm64,android-x64 --split-per-abi
 	@open build/app/outputs/apk/beta/release 2>/dev/null || xdg-open build/app/outputs/apk/beta/release 2>/dev/null || true
 
-## appbundle-beta: Compile the app bundle for Google Play  [beta]
+## appbundle-beta: Compile the app bundle for Google Play  [BETA]
+.PHONY: appbundle-beta
 appbundle-beta:
 	flutter build appbundle -t lib/main-beta.dart --target-platform android-arm,android-arm64,android-x64 --flavor beta
 	@open build/app/outputs/bundle/betaRelease 2>/dev/null || xdg-open build/app/outputs/bundle/betaRelease 2>/dev/null || true
 
-## ios-beta: Compile the iOS package  [beta]
-ios-beta:
-	flutter build ios -t lib/main-beta.dart --flavor beta
-
 ## :
 
-## apk: Compile the Android APK  [production]
+## apk: Compile the Android APK  [PROD]
+.PHONY: apk
 apk:
 	#flutter build apk -t lib/main-production.dart --flavor production
 	flutter build apk -t lib/main-production.dart --flavor production --target-platform android-arm,android-arm64,android-x64 --split-per-abi
 	@open build/app/outputs/apk/production/release 2>/dev/null || xdg-open build/app/outputs/apk/production/release 2>/dev/null || true
 
-## appbundle: Compile the app bundle for Google Play  [production]
+## appbundle: Compile the app bundle for Google Play  [PROD]
+.PHONY: appbundle
 appbundle:
 	flutter build appbundle -t lib/main-production.dart --target-platform android-arm,android-arm64,android-x64 --flavor production
 	@open build/app/outputs/bundle/productionRelease 2>/dev/null || xdg-open build/app/outputs/bundle/productionRelease 2>/dev/null || true
 
-## ios: Compile the iOS package  [production]
+## ios: Compile the iOS Runner.app  [PROD]
 .PHONY: ios
 ios:
-	flutter build ios -t lib/main-production.dart --flavor production
+	flutter build ios -t lib/main-production.dart
 
 ## :
 ## clean: Clean build artifacts
