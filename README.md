@@ -3,13 +3,17 @@ Official implementation of the Vocdoni core features.
 
 ## Flavors
 
-The app can run in three diferent flavors:
+The app can run in three diferent targets:
 * Development
 	- Uses the development blockchain
 * Beta
 	- Uses the development blockchain
 * Production
 	- Uses the production blockchain
+
+Targets correspond to `lib/main-dev.dart`, `lib/main-beta.dart` and `lib/main-production.dart`.
+
+Flavors are available on Android. The iOS project uses `dev` and `production` depending on the XCode target.
 
 ## Development
 
@@ -261,3 +265,8 @@ sendHostRequest({ method: "closeWindow" })
 		console.error(err);
 	});
 ```
+
+## Rtoubleshooting
+
+- Can't compile iOS because `App.framework` is built for another architecture
+	- Run `rm -Rf ios/Flutter/App.framework` and try again

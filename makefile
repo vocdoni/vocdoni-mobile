@@ -92,6 +92,7 @@ run:
 ## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
 .PHONY: run-ios
 run-ios: 
+	rm -Rf ios/Flutter/App.framework
 	flutter run -t lib/main-dev.dart
 
 ## :
@@ -124,10 +125,12 @@ appbundle:
 	flutter build appbundle -t lib/main-production.dart --target-platform android-arm,android-arm64,android-x64 --flavor production
 	@open build/app/outputs/bundle/productionRelease 2>/dev/null || xdg-open build/app/outputs/bundle/productionRelease 2>/dev/null || true
 
-## ios: Compile the iOS Runner.app  [PROD]
+## ios: Open the iOS Runner.app for archiving  [PROD]
 .PHONY: ios
 ios:
-	flutter build ios -t lib/main-production.dart
+	rm -Rf ios/Flutter/App.framework
+	open ios/Runner.xcworkspace/
+	#flutter build ios -t lib/main-production.dart
 
 ## :
 ## clean: Clean build artifacts
