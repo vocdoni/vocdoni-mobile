@@ -20,24 +20,20 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
     else
       return;
   }
-  final strLink = newLink.toString();
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
   try {
     switch (newLink.pathSegments[0]) {
       case "entities":
-        final idx = strLink.indexOf("#");
-        if (idx < 0) return;
-
-        final path = strLink.substring(idx + 1);
-        final pathSegments = path.split("/");
-        if (pathSegments.length < 1) return;
+        if (newLink.fragment.length < 2) throw Exception;
+        final pathSegments = newLink.fragment.split("/");
+        if (pathSegments.length < 2) return;
 
         indicator =
             showLoading("Please, wait...", context: scaffoldBodyContext);
         await fetchAndShowEntity(
-            entityId: pathSegments[0], context: scaffoldBodyContext);
+            entityId: pathSegments[1], context: scaffoldBodyContext);
         indicator.close();
         break;
       // case "signature":

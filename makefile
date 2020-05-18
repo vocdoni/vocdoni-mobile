@@ -68,11 +68,11 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 
 ## launch-ios-org: Launch a URI pointing to an Entity on iOS
 launch-ios-org:
-	/usr/bin/xcrun simctl openurl booted "https://vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"
+	/usr/bin/xcrun simctl openurl booted "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"
 
 ## launch-android-org: Launch a URI pointing to an Entity on Android
 launch-android-org:
-	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"'
+	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"'
 
 # ## launch-ios-sign: Launch a URI requesting to sign a payload on iOS
 # launch-ios-sign:
