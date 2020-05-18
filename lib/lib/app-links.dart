@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/flavors/config.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -11,27 +12,40 @@ import 'package:dvote_common/widgets/toast.dart'; // for kReleaseMode
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
-  if (!(newLink is Uri)) throw Exception();
+  if (!(newLink is Uri))
+    throw Exception();
+  else if (newLink.pathSegments.length < 1) {
+    if (kReleaseMode)
+      throw Exception();
+    else
+      return;
+  }
+  final strLink = newLink.toString();
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
   try {
-    switch (newLink.path) {
-      case "/entity":
+    switch (newLink.pathSegments[0]) {
+      case "entities":
+        final idx = strLink.indexOf("#");
+        if (idx < 0) return;
+
+        final path = strLink.substring(idx + 1);
+        final pathSegments = path.split("/");
+        if (pathSegments.length < 1) return;
+
         indicator =
             showLoading("Please, wait...", context: scaffoldBodyContext);
         await fetchAndShowEntity(
-            entityId: newLink.queryParameters["entityId"],
-            entryPoints: newLink.queryParametersAll["entryPoints[]"],
-            context: scaffoldBodyContext);
+            entityId: pathSegments[0], context: scaffoldBodyContext);
         indicator.close();
         break;
-      case "/signature":
-        await showSignatureScreen(
-            payload: newLink.queryParameters["payload"],
-            returnUri: newLink.queryParameters["returnUri"],
-            context: scaffoldBodyContext);
-        break;
+      // case "signature":
+      //   await showSignatureScreen(
+      //       payload: newLink.queryParameters["payload"],
+      //       returnUri: newLink.queryParameters["returnUri"],
+      //       context: scaffoldBodyContext);
+      //   break;
       default:
         if (!kReleaseMode)
           throw LinkingError(
@@ -49,29 +63,29 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 
 Future fetchAndShowEntity(
     {@required String entityId,
-    @required List<String> entryPoints,
+    // @required List<String> entryPoints,
     @required BuildContext context}) async {
   if (!(entityId is String) ||
       !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
     throw LinkingError("Invalid entityId");
-  } else if (!(entryPoints is List) || entryPoints.length == 0) {
-    throw LinkingError("Invalid entryPoints");
   }
+  // } else if (!(entryPoints is List) || entryPoints.length == 0) {
+  //   throw LinkingError("Invalid entryPoints");
 
-  List<String> validEntryPoints = entryPoints
-      .map((String uri) {
-        try {
-          return Uri.decodeFull(uri);
-        } catch (err) {
-          throw LinkingError("Invalid entry point URI");
-        }
-      })
-      .where((uri) => uri != null)
-      .toList();
+  // List<String> validEntryPoints = entryPoints
+  //     .map((String uri) {
+  //       try {
+  //         return Uri.decodeFull(uri);
+  //       } catch (err) {
+  //         throw LinkingError("Invalid entry point URI");
+  //       }
+  //     })
+  //     .where((uri) => uri != null)
+  //     .toList();
 
   EntityReference entityRef = EntityReference();
   entityRef.entityId = entityId;
-  entityRef.entryPoints.addAll(validEntryPoints);
+  // entityRef.entryPoints.addAll(validEntryPoints);
 
   final entityModel = EntityModel(entityRef);
 
@@ -116,10 +130,9 @@ showSignatureScreen(
 // / GENERATORS
 // /////////////////////////////////////////////////////////////////////////////
 
-String generateEntityLink(String entityId, List<String> entryPoints) {
-  String result = "vocdoni://vocdoni.app/entity?entityId=$entityId&";
-  result += entryPoints.map((url) => "entryPoints[]=$url").join("&");
-  return result;
+String generateEntityLink(String entityId) {
+  final domain = FlavorConfig.instance.constants.linkingDomain;
+  return "https://$domain/entities/$entityId";
 }
 
 // ////////////////////////////////////////////////////////////////////////////

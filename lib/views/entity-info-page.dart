@@ -445,8 +445,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   // EVENTS
 
   onShare(BuildContext context) {
-    final link = generateEntityLink(widget.entityModel.reference.entityId,
-        widget.entityModel.reference.entryPoints);
+    // Entry points: widget.entityModel.reference.entryPoints (unused)
+    final link = generateEntityLink(widget.entityModel.reference.entityId);
 
     Navigator.push(
         context,

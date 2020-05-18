@@ -106,9 +106,12 @@ The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plu
 
 ### Deep linking
 
-The app accepts `https://app.vocdoni.net/...` links. To enable them:
+The app accepts `https://app.vocdoni.net/...` links.
+
+To enable them:
 
 - Place `linking/assetlink.json` on `https://app.vocdoni.net/.well-known/assetlinks.json`
+	- Also place `linking/assetlink.json` on `https://app.dev.vocdoni.net/.well-known/assetlinks.json`
 - Place `linking/apple-app-site-association` on `https://app.vocdoni.net/.well-known/apple-app-site-association`
 
 Supported Paths:
@@ -116,20 +119,16 @@ Supported Paths:
 - `https://app.vocdoni.net/#/processes/<entity-id>/<process-id>`
 - `https://app.vocdoni.net/#/posts/<entity-id>/<idx>`
 
-The app also accepts URI's using the `vocdoni:` schema. 
+The same applies to `app.dev.vocdoni.net`
+
+The app also accepts URI's using the `vocdoni:` schema:
+- `vocdoni://vocdoni.app/#/entities/<entity-id>`
+- `vocdoni://vocdoni.app/#/processes/<entity-id>/<process-id>`
+- `vocdoni://vocdoni.app/#/posts/<entity-id>/<idx>`
 
 #### Show an organization
 
 On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
-
-To point the user to an organization, use:
-
-```
-vocdoni://vocdoni.app/entity?entityId=__ID__&entryPoints[]=__URI_1__&entryPoints[]=__URI_2__
-```
-
-- `entityId`: The ID of the organization. See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
-- `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
 
 <!--
 #### Prompt to sign a payload

@@ -10,5 +10,17 @@
                 "32:19:ED:AF:45:72:89:65:C5:7F:F1:A8:0F:45:9B:F2:40:E5:FB:79:1C:BD:07:0A:4A:CD:2D:09:36:A0:79:7F"
             ]
         }
+    },
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "org.vocdoni.app.dev",
+            "sha256_cert_fingerprints": [
+                "32:19:ED:AF:45:72:89:65:C5:7F:F1:A8:0F:45:9B:F2:40:E5:FB:79:1C:BD:07:0A:4A:CD:2D:09:36:A0:79:7F"
+            ]
+        }
     }
 ]

@@ -24,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-
             <!-- Deep Links -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -35,7 +34,7 @@
                 android:host="vocdoni.app" />
             </intent-filter>
 
-            <!-- App Links -->
+            <!-- Universal Links -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -51,6 +50,18 @@
                 <data
                     android:scheme="https"
                     android:host="app.vocdoni.net"
+                    android:pathPrefix="/posts" />
+                <data
+                    android:scheme="https"
+                    android:host="app.dev.vocdoni.net"
+                    android:pathPrefix="/entities" />
+                <data
+                    android:scheme="https"
+                    android:host="app.dev.vocdoni.net"
+                    android:pathPrefix="/processes" />
+                <data
+                    android:scheme="https"
+                    android:host="app.dev.vocdoni.net"
                     android:pathPrefix="/posts" />
             </intent-filter>
 

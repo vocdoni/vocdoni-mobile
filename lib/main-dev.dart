@@ -6,7 +6,8 @@ void main() async {
   // Set the global flavor config in the singleton
   final constants = FlavorConstants(
       gatewayBootNodesUrl: "https://bootnodes.github.io/gateways.dev.json",
-      networkId: "goerli");
+      networkId: "goerli",
+      linkingDomain: "dev.vocdoni.link");
   FlavorConfig(
       flavor: Flavor.DEV, constants: constants, bannerColor: Colors.red);
 
