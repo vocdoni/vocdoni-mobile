@@ -106,7 +106,17 @@ The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plu
 
 ### Deep linking
 
-The app accepts incoming requests using the `vocdoni:` schema. 
+The app accepts `https://app.vocdoni.net/...` links. To enable them:
+
+- Place `linking/assetlink.json` on `https://app.vocdoni.net/.well-known/assetlinks.json`
+- Place `linking/apple-app-site-association` on `https://app.vocdoni.net/.well-known/apple-app-site-association`
+
+Supported Paths:
+- `https://app.vocdoni.net/#/entities/<entity-id>`
+- `https://app.vocdoni.net/#/processes/<entity-id>/<process-id>`
+- `https://app.vocdoni.net/#/posts/<entity-id>/<idx>`
+
+The app also accepts URI's using the `vocdoni:` schema. 
 
 #### Show an organization
 
@@ -121,6 +131,7 @@ vocdoni://vocdoni.app/entity?entityId=__ID__&entryPoints[]=__URI_1__&entryPoints
 - `entityId`: The ID of the organization. See https://vocdoni.io/docs/#/architecture/components/entity?id=entity-resolver
 - `entryPoints[]`: Array of entry point URL's to use for connecting to the blockchain
 
+<!--
 #### Prompt to sign a payload
 
 On developoment, you can test it by running `make launch-ios-sign` or `make launch-android-sign`
@@ -133,7 +144,9 @@ vocdoni://vocdoni.app/signature?payload=__TEXT__&returnUri=__URI__
 
 - `payload`: A URI-encoded version of the text to sign
 - `returnURI`: A URI-encoded string containing the URI that will be launched after a successful signature. The URI will be appended the query string parameter `?signature=...`
+-->
 
+<!--
 ### Entity Actions
 
 Web sites loaded by the Vocdoni host app need can communicate to it by using a simple interface.
@@ -265,6 +278,7 @@ sendHostRequest({ method: "closeWindow" })
 		console.error(err);
 	});
 ```
+-->
 
 ## Rtoubleshooting
 

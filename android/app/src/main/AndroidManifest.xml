@@ -41,8 +41,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                android:scheme="https"
-                android:host="vocdoni.app" />
+                    android:scheme="https"
+                    android:host="app.vocdoni.net"
+                    android:pathPrefix="/entities" />
+                <data
+                    android:scheme="https"
+                    android:host="app.vocdoni.net"
+                    android:pathPrefix="/processes" />
+                <data
+                    android:scheme="https"
+                    android:host="app.vocdoni.net"
+                    android:pathPrefix="/posts" />
             </intent-filter>
 
         </activity>
