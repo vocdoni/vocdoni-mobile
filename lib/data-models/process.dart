@@ -327,7 +327,7 @@ class ProcessModel implements ModelRefreshable {
       devPrint(
           "- Refreshing process isInCensus [ERROR: $err] [${this.processId}]");
 
-      this.isInCensus.setError("Could not check the census");
+      this.isInCensus.setError("The census is not available");
     }
   }
 
@@ -394,7 +394,7 @@ class ProcessModel implements ModelRefreshable {
       devPrint(
           "- Refreshing process censusSize [ERROR: $err] [${this.processId}]");
 
-      this.censusSize.setError("Could not check the census size");
+      this.censusSize.setError("The census info is not available");
     });
   }
 
@@ -420,7 +420,7 @@ class ProcessModel implements ModelRefreshable {
       devPrint(
           "- Refreshing process currentParticipants [ERROR: $err] [${this.processId}]");
 
-      this.currentParticipants.setError("Could not check the census size");
+      this.currentParticipants.setError("The census info is not available");
     });
   }
 

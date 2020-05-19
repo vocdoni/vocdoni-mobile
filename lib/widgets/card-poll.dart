@@ -58,21 +58,15 @@ class _CardPollState extends State<CardPoll> {
     final endDate = this.widget.process.endDate;
 
     if (startDate is DateTime && endDate is DateTime) {
-      if (now.isAfter(startDate)) {
-        // Refer to endDate
-        if (now.isBefore(endDate))
-          timeLabel = "Ending";
-        else
-          timeLabel = "Ended";
-
+      // TODO: CHECK IF CANCELED
+      if (now.isAfter(endDate)) {
+        timeLabel = "Ended";
+        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+      } else if (now.isAfter(startDate)) {
+        timeLabel = "Time left";
         timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
       } else {
-        // Refer to startDate
-        if (now.isBefore(startDate))
-          timeLabel = "Starting";
-        else
-          timeLabel = "Started";
-
+        timeLabel = "Starting in";
         timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
       }
     } else if (endDate is DateTime) {
