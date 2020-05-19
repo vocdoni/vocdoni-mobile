@@ -41,24 +41,24 @@ class DevMenu extends StatelessWidget {
                     mainText: "Handle deeplink (Esqueixada)",
                     onTap: () {
                       String link =
-                          'vocdoni://vocdoni.app/entity?entityId=0x8dfbc9c552338427b13ae755758bb5fd7df4fce0f98ceff56c791e5b74fcffba&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
-                      handleIncomingLink(Uri.parse(link), ctx);
+                          'https://app.vocdoni.net/entities/#/0x8dfbc9c552338427b13ae755758bb5fd7df4fce0f98ceff56c791e5b74fcffba';
+                      handleIncomingLink(Uri.parse(link), context);
                     },
                   ),
                   ListItem(
                     mainText: "Handle deeplink (VocdoniTest)",
                     onTap: () {
                       String link =
-                          'vocdoni://vocdoni.app/entity?entityId=0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
-                      handleIncomingLink(Uri.parse(link), ctx);
+                          'https://app.vocdoni.net/entities/#/0x33e9ee1a35cc74dee64e13b46db4f52d61bb450a71cfcb810a3175d1f308f658';
+                      handleIncomingLink(Uri.parse(link), context);
                     },
                   ),
                   ListItem(
                     mainText: "Handle deeplink (A new world)",
                     onTap: () {
                       String link =
-                          'vocdoni://vocdoni.app/entity?entityId=0xf6a97d2ec8bb9fabde28b9e377edbd31e92bef3b44040f0752e28896f4baed90&entryPoints[]=https://gwdev1.vocdoni.net/web3&entryPoints[]=https://gwdev2.vocdoni.net/web3';
-                      handleIncomingLink(Uri.parse(link), ctx);
+                          'https://app.vocdoni.net/entities/#/0xf6a97d2ec8bb9fabde28b9e377edbd31e92bef3b44040f0752e28896f4baed90';
+                      handleIncomingLink(Uri.parse(link), context);
                     },
                   ),
                   ListItem(

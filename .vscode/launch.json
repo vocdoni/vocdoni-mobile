@@ -1,32 +1,42 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Vocdoni Dev",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "debug",
-            "args": [
-                "-t",
-                "lib/main-dev.dart",
-                "--flavor",
-                "dev"
-            ]
-        },
-        {
-          "name": "Vocdoni Profile",
-          "request": "launch",
-          "type": "dart",
-          "flutterMode": "profile",
-          "args": [
-            "-t",
-            "lib/main-dev.dart",
-            "--flavor",
-            "dev"
-          ]
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Vocdoni Dev (Android)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-t",
+        "lib/main-dev.dart",
+        "--flavor",
+        "dev"
+      ]
+    },
+    {
+      "name": "Vocdoni Dev (iOS)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-t",
+        "lib/main-dev.dart"
+      ]
+    },
+    {
+      "name": "Vocdoni Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "args": [
+        "-t",
+        "lib/main-dev.dart",
+        "--flavor",
+        "dev"
+      ]
+    }
+  ]
 }
