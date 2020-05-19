@@ -5,6 +5,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:app.vocdoni.net</string>
+		<string>applinks:app.dev.vocdoni.net</string>
 	</array>
 </dict>
 </plist>

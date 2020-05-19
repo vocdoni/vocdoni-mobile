@@ -4,7 +4,7 @@
         "details": [
             {
                 "appID": "4FRK7Z27CB.com.vocdoni.app",
-                "paths": [ "/entities/*", "/processes/*", "/posts/*"]
+                "paths": [ "*" ]
             }
         ]
     }
