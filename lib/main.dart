@@ -14,13 +14,13 @@ import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/identity-restore-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/startup-page.dart';
-import 'lang/index.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/views/identity-select-page.dart';
 import "package:vocdoni/views/identity-create-page.dart";
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
 import 'package:vocdoni/views/dev/dev-menu.dart';
-import 'package:vocdoni/view-modals/sign-modal.dart';
+// import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
 /// The actual main function is defined on main-dev.dart and main-production.dart.
@@ -38,13 +38,14 @@ void mainCommon() async {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'Vocdoni',
+    supportedLocales:
+        SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
     localizationsDelegates: [
-      LangDelegate(),
+      AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate
+      GlobalWidgetsLocalizations.delegate,
     ],
-    supportedLocales: [Locale("en"), Locale("fr"), Locale("ca"), Locale("es")],
-    onGenerateTitle: (BuildContext context) => Lang.of(context).get("Vocdoni"),
+    onGenerateTitle: (BuildContext context) => getText(context, "Vocdoni"),
     home: StartupPage(),
     onGenerateRoute: generateRoute,
     routes: {
@@ -63,7 +64,7 @@ void mainCommon() async {
 
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
-      "/signature": (context) => SignModal(),
+      // "/signature": (context) => SignModal(),
 
       // DEV
       "/dev": (context) => DevMenu(),

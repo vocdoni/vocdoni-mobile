@@ -14,7 +14,7 @@ import 'package:vocdoni/views/entities-tab.dart';
 import 'package:vocdoni/views/identity-tab.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/bottomNavigation.dart';
-import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 
@@ -49,10 +49,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       linkChangeStream = getUriLinksStream()
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
     } catch (err) {
-      showAlert(
-          Lang.of(context).get("The link you followed appears to be invalid"),
-          title: Lang.of(context).get("Error"),
-          context: context);
+      showAlert(getText(context, "The link you followed appears to be invalid"),
+          title: getText(context, "Error"), context: context);
     }
 
     // APP EVENT LISTENER
@@ -84,9 +82,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   handleIncomingLinkError(err) {
     devPrint(err);
     showAlert(
-        Lang.of(scaffoldBodyContext ?? context)
-            .get("There was a problem handling the link"),
-        title: Lang.of(scaffoldBodyContext ?? context).get("Error"),
+        getText(scaffoldBodyContext ?? context,
+            "There was a problem handling the link"),
+        title: getText(scaffoldBodyContext ?? context, "Error"),
         context: scaffoldBodyContext ?? context);
   }
 
@@ -241,7 +239,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       await Future.delayed(Duration(milliseconds: 10));
 
       showMessage(
-          "The QR code does not contain a valid link or the details cannot be retrieved",
+          getText(context,
+              "The QR code does not contain a valid link or the details cannot be retrieved"),
           context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }
@@ -249,11 +248,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String getTabName(int idx) {
     if (idx == 0)
-      return "Home";
+      return getText(context, "Home");
     else if (idx == 1)
-      return "Your entities";
+      return getText(context, "Your entities");
     else if (idx == 2)
-      return "Your identity";
+      return getText(context, "Your identity");
     else
       return "";
   }

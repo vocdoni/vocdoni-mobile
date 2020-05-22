@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/entity-info-page.dart';
@@ -46,7 +47,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
                 if (entity.metadata.hasValue)
                   return buildCard(ctx, entity);
                 else if (entity.metadata.isLoading)
-                  return CardLoading("Loading entity...");
+                  return CardLoading(getText(context, "Loading entity..."));
                 return buildEmptyMetadataCard(ctx, entity);
               });
         });
@@ -108,7 +109,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
         }
 
         return ListItem(
-            mainText: "Participation",
+            mainText: getText(context, "Participation"),
             icon: FeatherIcons.mail,
             rightText: itemCount.toString(),
             rightTextIsBadge: true,
@@ -126,7 +127,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
       builder: (context, _, __) {
         final feedPostAmount = getFeedPostCount(entity);
         return ListItem(
-            mainText: "Feed",
+            mainText: getText(context, "Feed"),
             icon: FeatherIcons.rss,
             rightText: feedPostAmount.toString(),
             rightTextIsBadge: true,
@@ -139,7 +140,7 @@ class _EntitiesTabState extends State<EntitiesTab> {
   Widget buildNoEntities(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text("No entities"),
+      child: Text(getText(context, "No entities")),
     );
   }
 

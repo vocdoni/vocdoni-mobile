@@ -2,6 +2,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
@@ -49,23 +51,25 @@ class _IdentityTabState extends State<IdentityTab> {
                 onTap: () {
                   Clipboard.setData(ClipboardData(
                       text: currentAccount.identity.value.identityId));
-                  showMessage("Identity ID copied on the clipboard",
-                      context: ctx, purpose: Purpose.GOOD);
+                  showMessage(
+                      getText(context, "Identity ID copied on the clipboard"),
+                      context: ctx,
+                      purpose: Purpose.GOOD);
                 }),
-            Section(text: "Your identity"),
+            Section(text: getText(context, "Your identity")),
             ListItem(
-              mainText: "Back up my identity",
+              mainText: getText(context, "Back up my identity"),
               onTap: () => showIdentityBackup(ctx),
             ),
             ListItem(
-                mainText: "Log out",
+                mainText: getText(context, "Log out"),
                 onTap: () {
                   onLogOut(ctx);
                 }),
             kReleaseMode // TODO: DEV BUTTON OUT
                 ? Container()
                 : ListItem(
-                    mainText: "Development testing",
+                    mainText: getText(context, "Development testing"),
                     onTap: () {
                       onDevelopmentTesting(ctx);
                     })
@@ -77,7 +81,7 @@ class _IdentityTabState extends State<IdentityTab> {
 
   Widget buildEmpty(BuildContext ctx) {
     return Center(
-      child: Text("(No identity)"),
+      child: Text(getText(context, "(No identity)")),
     );
   }
 
@@ -95,7 +99,7 @@ class _IdentityTabState extends State<IdentityTab> {
     if (patternEncryptionKey == null)
       return;
     else if (patternEncryptionKey is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid",
+      showMessage(getText(context, "The pattern you entered is not valid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }

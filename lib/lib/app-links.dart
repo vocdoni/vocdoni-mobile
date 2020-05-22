@@ -2,6 +2,8 @@ import 'package:dvote/dvote.dart';
 import 'package:dvote_common/flavors/config.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/view-modals/sign-modal.dart';
 import 'package:flutter/foundation.dart';
@@ -30,8 +32,8 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
         final pathSegments = newLink.fragment.split("/");
         if (pathSegments.length < 2) return;
 
-        indicator =
-            showLoading("Please, wait...", context: scaffoldBodyContext);
+        indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
+            context: scaffoldBodyContext);
         await fetchAndShowEntity(
             entityId: pathSegments[1], context: scaffoldBodyContext);
         indicator.close();
@@ -98,7 +100,7 @@ Future fetchAndShowEntity(
   } catch (err) {
     // showMessage("Could not fetch the entity details",
     //     context: context, purpose: Purpose.DANGER);
-    throw Exception("Could not fetch the entity details");
+    throw Exception(getText(context, "Could not fetch the entity details"));
   }
 }
 
@@ -129,14 +131,4 @@ showSignatureScreen(
 String generateEntityLink(String entityId) {
   final domain = FlavorConfig.instance.constants.linkingDomain;
   return "https://$domain/entities/$entityId";
-}
-
-// ////////////////////////////////////////////////////////////////////////////
-// / UTILITIES
-// ////////////////////////////////////////////////////////////////////////////
-
-class LinkingError implements Exception {
-  final String msg;
-  const LinkingError(this.msg);
-  String toString() => 'LinkingError: $msg';
 }

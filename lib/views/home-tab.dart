@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote/dvote.dart';
 import 'package:eventual/eventual-builder.dart';
@@ -57,7 +58,8 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget buildNoEntries(BuildContext ctx) {
     return Center(
-      child: Text("Pretty lonley in here...   ¯\\_(ツ)_/¯"),
+      child:
+          Text(getText(context, "Pretty lonley in here...") + "   ¯\\_(ツ)_/¯"),
     );
   }
 

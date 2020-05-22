@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:vocdoni/constants/meta-keys.dart";
@@ -60,29 +61,29 @@ class _CardPollState extends State<CardPoll> {
     if (startDate is DateTime && endDate is DateTime) {
       // TODO: CHECK IF CANCELED
       if (now.isAfter(endDate)) {
-        timeLabel = "Ended";
+        timeLabel = getText(context, "Ended");
         timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
       } else if (now.isAfter(startDate)) {
-        timeLabel = "Time left";
+        timeLabel = getText(context, "Time left");
         timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
       } else {
-        timeLabel = "Starting in";
+        timeLabel = getText(context, "Starting in");
         timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
       }
     } else if (endDate is DateTime) {
       // Refer to endDate
       if (now.isBefore(endDate))
-        timeLabel = "Ending";
+        timeLabel = getText(context, "Ending");
       else
-        timeLabel = "Ended";
+        timeLabel = getText(context, "Ended");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
     } else if (startDate is DateTime) {
       // Refer to startDate
       if (now.isBefore(startDate))
-        timeLabel = "Starting";
+        timeLabel = getText(context, "Starting");
       else
-        timeLabel = "Started";
+        timeLabel = getText(context, "Started");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
     }
@@ -107,14 +108,14 @@ class _CardPollState extends State<CardPoll> {
         DashboardRow(
           children: <Widget>[
             DashboardItem(
-              label: "Poll",
+              label: getText(context, "Poll"),
               item: Icon(
                 FeatherIcons.barChart2,
                 size: iconSizeMedium,
               ),
             ),
             DashboardItem(
-              label: "Voted",
+              label: getText(context, "Voted"),
               item: DashboardText(
                   mainText: participation,
                   secondaryText: '%',
@@ -168,19 +169,19 @@ class _CardPollState extends State<CardPoll> {
     if (diff.isNegative) diff = DateTime.now().difference(date);
 
     if (diff.inSeconds <= 0)
-      return "now";
+      return getText(context, "now");
     else if (diff.inDays >= 365)
-      return "" + (diff.inDays / 365).floor().toString() + "y";
+      return getText(context, "{{NUM}} y").replaceFirst("{{NUM}}", (diff.inDays / 365).floor().toString());
     else if (diff.inDays >= 30)
-      return "" + (diff.inDays / 28).floor().toString() + "mo";
+      return getText(context, "{{NUM}} mo").replaceFirst("{{NUM}}", (diff.inDays / 28).floor().toString());
     else if (diff.inDays >= 1)
-      return diff.inDays.toString() + "d";
+      return getText(context, "{{NUM}} d").replaceFirst("{{NUM}}", diff.inDays.toString());
     else if (diff.inHours >= 1)
-      return diff.inHours.toString() + "h";
+      return getText(context, "{{NUM}} h").replaceFirst("{{NUM}}", diff.inHours.toString());
     else if (diff.inMinutes >= 1)
-      return diff.inMinutes.toString() + "min";
+      return getText(context, "{{NUM}} min").replaceFirst("{{NUM}}", diff.inMinutes.toString());
     else
-      return diff.inSeconds.toString() + "s";
+      return getText(context, "{{NUM}} s").replaceFirst("{{NUM}}", diff.inSeconds.toString());
   }
 
   onCardTapped(BuildContext context) {

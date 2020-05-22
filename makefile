@@ -30,17 +30,13 @@ init:
 # ##############################################################################
 
 ## lang-extract: Parse the string literals and extract them into lib/lang
-lang-extract: ./lib/lang/intl_messages.arb
+.PHONY: lang-extract
+lang-extract: scripts/node_modules
+	node scripts/i18n-extract.js
 
-./lib/lang/intl_messages.arb: $(SOURCES)
-	@flutter pub pub run intl_translation:extract_to_arb --output-dir=lib/lang lib/lang/index.dart
-	@echo "Upload ./lib/lang/intl_messages.arb to https://translate.google.com/toolkit/ and translate the files"
-
-## lang-compile: Parse the ARB files and import them as Dart translations
-.PHONY: lang-compile
-lang-compile:
-	@flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/lang \
-		--no-use-deferred-loading lib/lang/index.dart lib/lang/intl_*.arb
+scripts/node_modules: scripts/package.json
+	npm install
+	touch $@
 
 ## icons: Scale assets/icon/* for Android/iOS
 icons: round-icons square-icons

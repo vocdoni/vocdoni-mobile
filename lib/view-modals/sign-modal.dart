@@ -4,7 +4,7 @@ import 'package:vocdoni/lib/singletons.dart';
 // import 'package:vocdoni/widgets/alerts.dart';
 // import 'package:vocdoni/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
-import '../lang/index.dart';
+import 'package:vocdoni/lib/i18n.dart';
 
 class SignModalArguments {
   final String payload;
@@ -25,19 +25,20 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: Lang.of(context).get("Sign"),
+        title: getText(context, "Sign"),
       ),
       body: Center(
         child: Column(children: <Widget>[
-          Text("Do you want to sign: " + args.payload),
+          Text(getText(context, "Do you want to sign:") + " " + args.payload),
           SizedBox(
             height: 20,
           ),
-          Text("To: " + args.returnUri.toString()),
+          Text(getText(context, "To:") + " " + args.returnUri.toString()),
           SizedBox(
             height: 20,
           ),
-          Text("Using: " +
+          Text(getText(context, "Using:") +
+              " " +
               globalAppState.currentAccount.identity.value.alias +
               "?")
         ]),
@@ -49,10 +50,10 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: Lang.of(context).get("Sign"),
+        title: getText(context, "Sign"),
       ),
       body: Center(
-        child: Text("(No data)"),
+        child: Text(getText(context, "(No data)")),
       ),
     );
   }
@@ -61,10 +62,10 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: Lang.of(context).get("Sign"),
+        title: getText(context, "Sign"),
       ),
       body: Center(
-        child: Text("(No data)"),
+        child: Text(getText(context, "(No data)")),
       ),
     );
   }

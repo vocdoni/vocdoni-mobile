@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:r_scan/r_scan.dart';
 
 import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
@@ -70,17 +71,20 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Vocdoni", // Lang.of(context).get("Scan")
+        title: "Vocdoni", // getText(context, "Scan")
         showBackButton: true,
         onBackButton: onCancel,
       ),
       body: Builder(builder: (_) {
         if (!(availableCameras is List) || availableCameras.length == 0)
-          return _buildMessage(context, "No cameras are available");
+          return _buildMessage(
+              context, getText(context, "No cameras are available"));
         else if (_controller == null || !_controller.value.isInitialized)
-          return _buildMessage(context, "Please, allow access to the camera");
+          return _buildMessage(
+              context, getText(context, "Please, allow access to the camera"));
         else if (!hasScanPermissions)
-          return _buildMessage(context, "Please, allow access to the camera");
+          return _buildMessage(
+              context, getText(context, "Please, allow access to the camera"));
         else if (!scanning) return _buildLoading(context);
 
         // FUTURE: Preserve aspect ratio
@@ -118,7 +122,7 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget _buildMessage(BuildContext context, String message) {
     return Container(
       child: Center(
-        child: Text(message ?? "The camera is not available"),
+        child: Text(message ?? getText(context, "The camera is not available")),
       ),
     ).withBottomPadding(100);
   }
@@ -128,7 +132,7 @@ class _QrScanModalState extends State<QrScanModal> {
         child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text("Processing the code..."),
+        Text(getText(context, "Processing the code...")),
         LoadingSpinner().withLeftPadding(30),
       ],
     )).withBottomPadding(100);

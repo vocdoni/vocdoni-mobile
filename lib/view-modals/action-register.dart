@@ -5,7 +5,8 @@ import 'package:dvote/crypto/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/util.dart';
 // import 'package:vocdoni/widgets/alerts.dart';
@@ -45,7 +46,7 @@ class ActionRegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopNavigation(title: Lang.of(context).get("Register")),
+      appBar: TopNavigation(title: getText(context, "Register")),
       body: Builder(
           builder: (context) => ListView.builder(
                 itemCount: 1,
@@ -62,18 +63,18 @@ class ActionRegisterPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                Lang.of(context).get("Personal details"),
+                getText(context, "Personal details"),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23),
               ).withBottomPadding(8),
               Text(
-                      Lang.of(context).get(
+                      getText(context,
                           "Please, fill in the fields below to complete your registration"),
                       style: TextStyle(color: Colors.black45))
                   .withBottomPadding(20),
               TextFormField(
-                validator: (value) => nameValidator(value),
+                validator: (value) => nameValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: "What's your name?",
+                    hintText: getText(context, "What's your name?"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
@@ -83,9 +84,9 @@ class ActionRegisterPage extends StatelessWidget {
                 controller: nameCtrl,
               ).withBottomPadding(20),
               TextFormField(
-                validator: (value) => nameValidator(value),
+                validator: (value) => nameValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: "What's your last name?",
+                    hintText: getText(context, "What's your last name?"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
@@ -94,9 +95,9 @@ class ActionRegisterPage extends StatelessWidget {
                 controller: lastNameCtrl,
               ).withBottomPadding(20),
               TextFormField(
-                validator: (value) => dateValidator(value),
+                validator: (value) => dateValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: "What is your birthday?",
+                    hintText: getText(context, "What is your birthday?"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.datetime,
                 textInputAction: TextInputAction.next,
@@ -108,9 +109,9 @@ class ActionRegisterPage extends StatelessWidget {
                 onTap: () => showBirthDatePicker(context),
               ).withBottomPadding(20),
               TextFormField(
-                validator: (value) => emailValidator(value),
+                validator: (value) => emailValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: "What's your Email?",
+                    hintText: getText(context, "What's your Email?"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -120,9 +121,9 @@ class ActionRegisterPage extends StatelessWidget {
                 controller: emailCtrl,
               ).withBottomPadding(20),
               TextFormField(
-                validator: (value) => phoneValidator(value),
+                validator: (value) => phoneValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: "Phone number",
+                    hintText: getText(context, "Phone number"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.phone,
                 focusNode: phoneNode,
@@ -133,35 +134,35 @@ class ActionRegisterPage extends StatelessWidget {
           )).withPadding(20.0),
       RaisedButton(
         onPressed: () => onSubmit(context),
-        child: Text('Register'),
+        child: Text(getText(context, 'Register')),
       ).withBottomPadding(20).centered()
     ]);
   }
 
-  String nameValidator(String value) {
-    if (value.isEmpty) return 'Please complete this field';
+  String nameValidator(String value, BuildContext ctx) {
+    if (value.isEmpty) return getText(ctx, 'Please, enter your name');
     return null;
   }
 
-  String dateValidator(String value) {
-    if (value.isEmpty) return 'Please complete your birth date';
+  String dateValidator(String value, BuildContext ctx) {
+    if (value.isEmpty) return getText(ctx, 'Please, enter your birth date');
 
     if (dateRegExp.hasMatch(value)) return null;
-    return "Please, enter a valid date";
+    return getText(ctx, "Please, select a valid date");
   }
 
-  String emailValidator(String value) {
-    if (value.isEmpty) return 'Please enter your email';
+  String emailValidator(String value, BuildContext ctx) {
+    if (value.isEmpty) return getText(ctx, 'Please, enter your email');
 
     if (emailRegExp.hasMatch(value)) return null;
-    return "Please, enter a valid email";
+    return getText(ctx, "Please, enter a valid email");
   }
 
-  String phoneValidator(String value) {
-    if (value.isEmpty) return 'Please enter a valid phone number';
+  String phoneValidator(String value, BuildContext ctx) {
+    if (value.isEmpty) return getText(ctx, 'Please, enter a valid phone number');
 
     if (phoneRegExp.hasMatch(value)) return null;
-    return "Please, enter a valid phone number";
+    return getText(ctx, "Please, enter a valid phone number");
   }
 
   Future<void> showBirthDatePicker(BuildContext context) async {
@@ -225,8 +226,11 @@ class ActionRegisterPage extends StatelessWidget {
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PatternPromptModal(selectedAccount)));
-    if (patternStr == null || patternStr is InvalidPatternError) {
+    if (patternStr == null) {
       return;
+    } else if (patternStr is InvalidPatternError) {
+      showMessage(getText(context, "The pattern you entered is not valid"),
+          purpose: Purpose.DANGER, context: context);
     }
 
     String privateKey =
@@ -235,7 +239,7 @@ class ActionRegisterPage extends StatelessWidget {
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
     if (dateItems.length != 3) {
-      showMessage(Lang.of(context).get("Please, select a valid date"),
+      showMessage(getText(context, "Please, select a valid date"),
           purpose: Purpose.DANGER, context: context);
       return;
     }
@@ -266,7 +270,8 @@ class ActionRegisterPage extends StatelessWidget {
       'Accept': 'application/json',
     };
 
-    final loadingCtrl = showLoading("Please, wait...", context: context);
+    final loadingCtrl =
+        showLoading(getText(context, "Please, wait..."), context: context);
 
     return http
         .post(action.url, body: jsonEncode(payload), headers: headers)
@@ -286,14 +291,14 @@ class ActionRegisterPage extends StatelessWidget {
 
       // SUCCESS
       loadingCtrl.close();
-      showMessage(Lang.of(context).get("Your registration has been handled"),
+      showMessage(getText(context, "Your registration has been handled"),
           purpose: Purpose.GOOD, context: context);
 
       Future.delayed(Duration(seconds: 4))
           .then((_) => Navigator.of(context).pop());
     }).catchError((err) {
       loadingCtrl.close();
-      showMessage(Lang.of(context).get("The registration process failed"),
+      showMessage(getText(context, "The registration process failed"),
           purpose: Purpose.DANGER, context: context);
 
       devPrint("Register error: $err");

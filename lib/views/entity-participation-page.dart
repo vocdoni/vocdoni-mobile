@@ -1,5 +1,6 @@
 import 'package:vocdoni/data-models/process.dart';
 import 'package:eventual/eventual-builder.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
@@ -81,23 +82,24 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget buildNoProcessesess() {
     return Scaffold(
         body: Center(
-      child: Text("No participation processess"),
+      child: Text(getText(context, "No participation processess")),
     ));
   }
 
   Widget buildLoading() {
     return Scaffold(
-        appBar: TopNavigation(title: "Participation"),
+        appBar: TopNavigation(title: getText(context, "Participation")),
         body: Center(
-          child:
-              SizedBox(height: 140.0, child: CardLoading("Loading votes...")),
+          child: SizedBox(
+              height: 140.0,
+              child: CardLoading(getText(context, "Loading processes..."))),
         ));
   }
 
   Widget buildError(String message) {
     return Scaffold(
         body: Center(
-      child: Text("ERROR: $message"),
+      child: Text(getText(context, "Error") + ": " + message),
     ));
   }
 }

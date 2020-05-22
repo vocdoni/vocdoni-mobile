@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
@@ -56,7 +57,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
         headerImageUrl: post.image,
         headerTag: makeElementTag(entity.reference.entityId, post.id, index),
         avatarHexSource: post.id,
-        appBarTitle: "Post",
+        appBarTitle: getText(context, "Post"),
         //actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
@@ -119,45 +120,45 @@ class _FeedPostPageState extends State<FeedPostPage> {
   Widget buildNoPost(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text("(No posts)"),
+      child: Text(getText(context, "(No posts)")),
     );
   }
 
-  String styleHtml(String content) {
-    String hex = colorLink.value.toRadixString(16);
-    String htmlLinkColor = hex.replaceRange(0, 2, '#');
+//   String styleHtml(String content) {
+//     String hex = colorLink.value.toRadixString(16);
+//     String htmlLinkColor = hex.replaceRange(0, 2, '#');
 
-    return '''<!DOCTYPE html>
-<html>
-		<head>
-				<meta charset="utf-8">
-				<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
+//     return '''<!DOCTYPE html>
+// <html>
+// 		<head>
+// 				<meta charset="utf-8">
+// 				<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
 
-				<style>
-            body {
-							
-              font-family: 'Open Sans' Helvetica Neue', Helvetica, Sans-serif, Arial;
-              	user-select: none;
-              -webkit-user-select: none;
-              margin: 0px;
-              line-height: 1.6;
-              font-size: 16px;
-            }
+// 				<style>
+//             body {
 
-            a {
-              color: $htmlLinkColor;
-            }
+//               font-family: 'Open Sans' Helvetica Neue', Helvetica, Sans-serif, Arial;
+//               	user-select: none;
+//               -webkit-user-select: none;
+//               margin: 0px;
+//               line-height: 1.6;
+//               font-size: 16px;
+//             }
 
-						img {
-								margin: 15px 0 8px;
-								/*display: none;*/
-								max-width: 100% !important;
-						}
-				</style>
-		</head>
-		<body>
-			$content
-		</body>
-''';
-  }
+//             a {
+//               color: $htmlLinkColor;
+//             }
+
+// 						img {
+// 								margin: 15px 0 8px;
+// 								/*display: none;*/
+// 								max-width: 100% !important;
+// 						}
+// 				</style>
+// 		</head>
+// 		<body>
+// 			$content
+// 		</body>
+// ''';
+//   }
 }

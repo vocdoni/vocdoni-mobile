@@ -92,11 +92,10 @@ Models can contain both data which is persisted (entity metadata, process metada
 
 ### Internationalization
 
-- First of all, declare any new string on `lib/lang/index.dart` &gt; `_definitions()`
-- Add `import '../lang/index.dart';` on your widget file
-- Access the new string with `Lang.of(context).get("My new string to translate")`
-- Generate the string template with `make lang-extract`
-- Import the translated bundles with `make lang-compile`
+- Add `import 'package:vocdoni/lib/i18n.dart';` on your widget file
+- Access the new string with `getText(context, "My new string to translate")`
+- Parse the new strings with `make lang-extract`
+- Translate the files on `assets/i18n/*.json`
 
 ### Dependencies
 

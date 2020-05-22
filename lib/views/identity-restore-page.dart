@@ -9,7 +9,7 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
-import '../lang/index.dart';
+import 'package:vocdoni/lib/i18n.dart';
 
 class IdentityRestorePage extends StatefulWidget {
   @override
@@ -47,11 +47,11 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
     String err;
     if (alias.length == 0)
-      err = "Enter a name for the account";
+      err = getText(context, "Enter a name for the account");
     else if (mnemonic.length == 0)
-      err = "Enter the seed phrase to recover";
+      err = getText(context, "Enter the seed phrase to recover");
     else if (!RegExp(r"^([a-zA-Z]+ )+[a-zA-Z]+$").hasMatch(mnemonic))
-      err = "The seed phrase you entered is not valid";
+      err = getText(context, "The seed phrase you entered is not valid");
     if (err is String) {
       showMessage(err, context: context, purpose: Purpose.WARNING);
       return;
@@ -66,8 +66,10 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
       case 24:
         break;
       default:
-        showMessage("The number of words you entered is not valid",
-            context: context, purpose: Purpose.WARNING);
+        showMessage(
+            getText(context, "The number of words you entered is not valid"),
+            context: context,
+            purpose: Purpose.WARNING);
         return;
     }
 
@@ -75,7 +77,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
       final _ = await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(_ is String)) throw Exception();
     } catch (err) {
-      showMessage("The seed phrase you entered is not valid",
+      showMessage(getText(context, "The seed phrase you entered is not valid"),
           context: context, purpose: Purpose.WARNING);
       return;
     }
@@ -121,13 +123,13 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
       if (err.toString() ==
           "Exception: An account with this name already exists") {
-        text = Lang.of(context).get("An account with this name already exists");
+        text = getText(context, "An account with this name already exists");
       } else {
-        text = Lang.of(context)
-            .get("An error occurred while restoring the identity");
+        text =
+            getText(context, "An error occurred while restoring the identity");
       }
 
-      showAlert(text, title: Lang.of(context).get("Error"), context: context);
+      showAlert(text, title: getText(context, "Error"), context: context);
     }
   }
 
@@ -142,7 +144,8 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text("Restoring identity...", style: TextStyle(fontSize: 18)),
+              Text(getText(context, "Restoring identity..."),
+                  style: TextStyle(fontSize: 18)),
               SizedBox(height: 20),
               LoadingSpinner(),
             ],
@@ -162,7 +165,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
       splashColor: Colors.blueAccent,
       onPressed: () => onSubmit(context),
       child: Text(
-        "Restore identity",
+        getText(context, "Restore identity"),
         style: TextStyle(fontSize: 20.0),
       ),
     ).withPadding(16).withTopPadding(8);
@@ -172,14 +175,15 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   Widget build(context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Identity Restore",
+        title: getText(context, "Identity"),
       ),
       body: Builder(
         builder: (context) {
           if (restoring) return renderLoading();
 
           return ListView(children: <Widget>[
-            Text("Please, get the seed phrase of your wallet and enter the words below, separated by spaces.")
+            Text(getText(context,
+                    "Please, get the seed phrase of your wallet and enter the words below, separated by spaces."))
                 .withPadding(16),
             TextField(
               controller: nameController,
@@ -188,7 +192,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 // border: InputBorder.none,
-                hintText: 'What\'s your name?',
+                hintText: getText(context, "What's your name?"),
               ),
             ).withHPadding(16),
             TextField(
@@ -198,7 +202,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
               maxLines: 4,
               decoration: InputDecoration(
                 // border: InputBorder.none,
-                hintText: 'Seed phrase',
+                hintText: getText(context, 'Seed phrase'),
               ),
             ).withPadding(16).withTopPadding(8),
             renderOkButton(context),

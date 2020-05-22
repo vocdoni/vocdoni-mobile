@@ -2,6 +2,8 @@ import 'package:dvote/crypto/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -53,7 +55,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
                       Spacer(flex: 3),
                       Section(
                         withDectoration: false,
-                        text: "Unlock",
+                        text: getText(context, "Unlock"),
                       ),
                       Spacer(),
                       Center(
@@ -122,10 +124,4 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
           context, InvalidPatternError("The pattern you entered is not valid"));
     }
   }
-}
-
-class InvalidPatternError implements Exception {
-  final String msg;
-  const InvalidPatternError(this.msg);
-  String toString() => 'InvalidPatternError: $msg';
 }

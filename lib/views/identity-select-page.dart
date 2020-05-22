@@ -3,6 +3,8 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import '../lib/singletons.dart';
@@ -29,13 +31,13 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                     // use this context within Scaffold for Toast's to work
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Section(text: "Select an identity"),
+                      Section(text: getText(context, "Select an identity")),
                       buildExistingIdentities(context, globalAccountPool.value),
                       ListItem(
-                          mainText: "Create a new one",
+                          mainText: getText(context, "Create a new identity"),
                           onTap: () => createNew(context)),
                       ListItem(
-                          mainText: "Restore existing",
+                          mainText: getText(context, "Restore an existing identity"),
                           onTap: () => restorePreviousIdentity(context)),
                     ],
                   )),
@@ -82,7 +84,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
     if (patternEncryptionKey == null ||
         patternEncryptionKey is InvalidPatternError) {
-      showMessage("The pattern you entered is not valid",
+      showMessage(getText(context, "The pattern you entered is not valid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
