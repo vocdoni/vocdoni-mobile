@@ -1,5 +1,6 @@
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/net.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import '../lib/singletons.dart';
@@ -79,7 +80,7 @@ class _StartupPageState extends State<StartupPage> {
 
           setState(() {
             loading = false;
-            error = "Could not connect to the network";
+            error = getText(context, "Could not connect to the network");
           });
 
           // RETRY ITSELF
@@ -101,7 +102,7 @@ class _StartupPageState extends State<StartupPage> {
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 child: Text(
-                  "Tap to retry",
+                  getText(context, "Tap to retry"),
                   style: TextStyle(fontSize: 18, color: Colors.black45),
                   textAlign: TextAlign.center,
                 )))
@@ -114,7 +115,8 @@ class _StartupPageState extends State<StartupPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text("Please wait...", style: TextStyle(fontSize: 18)),
+        Text(getText(context, "Please, wait..."),
+            style: TextStyle(fontSize: 18)),
         SizedBox(height: 20),
         LoadingSpinner(),
       ],

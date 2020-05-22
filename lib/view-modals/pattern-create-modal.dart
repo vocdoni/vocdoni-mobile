@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -63,8 +64,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
               withDectoration: false,
               text: patternStep == PatternStep.PATTERN_SETTING ||
                       patternStep == PatternStep.PATTERN_WAITING_CONFIRM
-                  ? "Set a new pattern"
-                  : "Confirm your pattern",
+                  ? getText(context, "Set a new pattern")
+                  : getText(context, "Confirm your pattern"),
             ),
             Spacer(),
             Center(
@@ -82,7 +83,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
                       ? null
                       : BaseButton(
                           maxWidth: buttonDefaultWidth,
-                          text: "Continue",
+                          text: getText(context, "Continue"),
                           // isDisabled:patternState != SetPatternState.waitingConfirmation,
                           onTap: () => onApprovePattern(),
                         ),
@@ -141,7 +142,10 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
   void onSettingPatternStop(BuildContext context, List<int> pattern) {
     if (pattern.length < minPatternDots) {
-      showMessage("The pattern must have at least $minPatternDots points",
+      final err =
+          getText(context, "The pattern must have at least {{NUM}} points")
+              .replaceFirst("{{NUM}}", minPatternDots.toString());
+      showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       setState(() {
         patternColor = colorRed;
@@ -150,7 +154,10 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
     }
 
     if (pattern.length >= maxPatternDots) {
-      showMessage("The pattern should not exceed $maxPatternDots points",
+      final err =
+          getText(context, "The pattern should not exceed {{NUM}} points")
+              .replaceFirst("{{NUM}}", maxPatternDots.toString());
+      showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
@@ -194,7 +201,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         patternColor = colorRed;
       });
 
-      showMessage("The patterns you entered don't match",
+      final err = getText(context, "The patterns you entered don't match");
+      showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }

@@ -4,6 +4,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
@@ -17,12 +18,14 @@ class QrShowModal extends StatelessWidget {
 
   onCopy(BuildContext context) {
     Clipboard.setData(ClipboardData(text: content))
-        .then((_) => showMessage("Content copied toe the clipboard",
-            context: context, purpose: Purpose.GOOD))
+        .then((_) => showMessage(
+            getText(context, "Content copied to the clipboard"),
+            context: context,
+            purpose: Purpose.GOOD))
         .catchError((err) {
       devPrint(err);
 
-      showMessage("Could not copy the Entity ID",
+      showMessage(getText(context, "Could not copy the Entity ID"),
           context: context, purpose: Purpose.DANGER);
     });
   }
@@ -31,7 +34,7 @@ class QrShowModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: title ?? "Vocdoni", // Lang.of(context).get("Scan")
+        title: title ?? "Vocdoni", // getText(context, "Scan")
         showBackButton: true,
         onBackButton: () => Navigator.of(context).pop(),
       ),
@@ -56,7 +59,7 @@ class QrShowModal extends StatelessWidget {
                 splashColor: Colors.blueAccent,
                 onPressed: () => onCopy(context),
                 child: Text(
-                  "Copy to the clipboard",
+                  getText(context, "Copy to the clipboard"),
                   style: TextStyle(fontSize: 20.0),
                 ).withHPadding(16).withVPadding(8),
               ).withPadding(32).withTopPadding(8),

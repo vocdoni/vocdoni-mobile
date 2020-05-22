@@ -4,7 +4,7 @@ import 'package:dvote/dvote.dart';
 import 'package:dvote_common/flavors/config.dart';
 // import 'package:dvote_common/flavors/config.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/constants/settings.dart';
+// import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/util.dart';
 
 DVoteGateway _dvoteGw;

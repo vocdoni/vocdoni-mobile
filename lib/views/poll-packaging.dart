@@ -1,5 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
@@ -54,7 +56,7 @@ class _PollPackagingState extends State<PollPackaging> {
       return;
     } else if (patternLockKey is InvalidPatternError) {
       setState(() => _currentStep = 0);
-      showMessage("The pattern you entered is not valid",
+      showMessage(getText(context, "The pattern you entered is not valid"),
           context: context, purpose: Purpose.DANGER);
       return;
     }
@@ -82,7 +84,7 @@ class _PollPackagingState extends State<PollPackaging> {
     }
 
     if (!(merkleProof is String)) {
-      showMessage("The vote data could not be signed", context: context);
+      showMessage(getText(context, "The vote data could not be signed"), context: context);
       setState(() => _currentStep = 0);
       return;
     }
@@ -94,7 +96,7 @@ class _PollPackagingState extends State<PollPackaging> {
 
       if (widget.process.hasVoted.hasValue && widget.process.hasVoted.value) {
         setState(() => _currentStep = 0);
-        showMessage("Your vote has already been registered",
+        showMessage(getText(context, "Your vote has already been registered"),
             context: context, purpose: Purpose.GUIDE);
         return;
       }
@@ -117,7 +119,7 @@ class _PollPackagingState extends State<PollPackaging> {
 
       stepSendVote(context);
     } catch (err) {
-      showMessage("The vote data could not be prepared", context: context);
+      showMessage(getText(context, "The vote data could not be prepared"), context: context);
       setState(() {
         _currentStep = 0;
       });
@@ -141,7 +143,7 @@ class _PollPackagingState extends State<PollPackaging> {
       if (!mounted) return;
 
       setState(() => _currentStep = 0);
-      showMessage("The vote could not be delivered",
+      showMessage(getText(context, "The vote could not be delivered"),
           purpose: Purpose.DANGER, context: context);
     }
   }
@@ -164,7 +166,7 @@ class _PollPackagingState extends State<PollPackaging> {
       if (widget.process.hasVoted.hasError ||
           widget.process.hasVoted.value == false) {
         setState(() => _currentStep = 0);
-        showMessage("The status of the envelope could not be validated",
+        showMessage(getText(context, "The status of the envelope could not be validated"),
             context: context, purpose: Purpose.WARNING);
         return;
       }
@@ -172,7 +174,7 @@ class _PollPackagingState extends State<PollPackaging> {
       // DONE!
       setState(() => _currentStep = 4);
     } catch (err) {
-      showMessage("The vote delivery could not be checked",
+      showMessage(getText(context, "The vote delivery could not be checked"),
           purpose: Purpose.DANGER, context: context);
 
       if (mounted) setState(() => _currentStep = 0);
@@ -192,18 +194,18 @@ class _PollPackagingState extends State<PollPackaging> {
                 Spacer(),
                 Section(
                   text: _currentStep == 0
-                      ? "Ready when you are"
-                      : "Delivering the vote",
+                      ? getText(context, "Ready when you are")
+                      : getText(context, "Delivering the vote"),
                   withDectoration: false,
                 ),
                 /*Summary(
                   maxLines: 10,
                   text:
                       "This may take some time, please do not close this screen"),*/
-                buildStep("Sigining", "Signed", 1),
+                buildStep(getText(context, "Sigining"), getText(context, "Signed"), 1),
                 // buildStep("Generating proof", "Proof generated", 2),
-                buildStep("Delivering", "Sent", 2),
-                buildStep("Waiting confirmation", "Confirmed", 3),
+                buildStep(getText(context, "Delivering"), getText(context, "Sent"), 2),
+                buildStep(getText(context, "Waiting confirmation"), getText(context, "Confirmed"), 3),
                 Spacer(),
                 // Padding(
                 //   padding: EdgeInsets.all(48),
@@ -227,7 +229,7 @@ class _PollPackagingState extends State<PollPackaging> {
                     : Padding(
                         padding: EdgeInsets.all(paddingPage),
                         child: BaseButton(
-                            text: "Confirm",
+                            text: getText(context, "Confirm"),
                             isSmall: false,
                             style: BaseButtonStyle.FILLED,
                             purpose: Purpose.HIGHLIGHT,
@@ -238,7 +240,7 @@ class _PollPackagingState extends State<PollPackaging> {
                     : Padding(
                         padding: EdgeInsets.all(paddingPage),
                         child: BaseButton(
-                            text: "Close",
+                            text: getText(context, "Close"),
                             isSmall: false,
                             style: BaseButtonStyle.FILLED,
                             purpose: Purpose.HIGHLIGHT,

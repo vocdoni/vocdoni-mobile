@@ -1,0 +1,11 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "extract": "node i18n-extract.js"
+  },
+  "dependencies": {
+    "glob": "^7.1.6"
+  }
+}

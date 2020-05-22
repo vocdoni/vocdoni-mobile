@@ -16,3 +16,15 @@ class PersistError implements Exception {
   const PersistError(this.msg);
   String toString() => 'PersistError: $msg';
 }
+
+class InvalidPatternError implements Exception {
+  final String msg;
+  const InvalidPatternError(this.msg);
+  String toString() => 'InvalidPatternError: $msg';
+}
+
+class LinkingError implements Exception {
+  final String msg;
+  const LinkingError(this.msg);
+  String toString() => 'LinkingError: $msg';
+}

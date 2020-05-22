@@ -1,4 +1,5 @@
 import 'package:eventual/eventual-builder.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
@@ -79,34 +80,35 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   Widget buildEmptyEntity() {
     return Scaffold(
-        appBar: TopNavigation(title: "News feed"),
+        appBar: TopNavigation(title: getText(context, "News feed")),
         body: Center(
-          child: Text("(No entity)"),
+          child: Text(getText(context, "(No entity)")),
         ));
   }
 
   Widget buildEmptyPosts() {
     return Scaffold(
-        appBar: TopNavigation(title: "News feed"),
+        appBar: TopNavigation(title: getText(context, "News feed")),
         body: Center(
-          child: Text("(No posts)"),
+          child: Text(getText(context, "(No posts)")),
         ));
   }
 
   Widget buildLoading() {
     return Scaffold(
-        appBar: TopNavigation(title: "News feed"),
+        appBar: TopNavigation(title: getText(context, "News feed")),
         body: Center(
-          child:
-              SizedBox(height: 140.0, child: CardLoading("Loading posts...")),
+          child: SizedBox(
+              height: 140.0,
+              child: CardLoading(getText(context, "Loading posts..."))),
         ));
   }
 
   Widget buildError(String message) {
     return Scaffold(
-        appBar: TopNavigation(title: "News feed"),
+        appBar: TopNavigation(title: getText(context, "News feed")),
         body: Center(
-          child: Text("ERROR: $message"),
+          child: Text(getText(context, "Error") + ": " + message),
         ));
   }
 }

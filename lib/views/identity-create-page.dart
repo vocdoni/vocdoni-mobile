@@ -1,12 +1,12 @@
-import 'package:dvote_common/constants/colors.dart';
+// import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/alerts.dart';
-import 'package:vocdoni/lib/extensions.dart';
-import '../lang/index.dart';
+// import 'package:vocdoni/lib/extensions.dart';
+import 'package:vocdoni/lib/i18n.dart';
 
 class IdentityCreatePage extends StatefulWidget {
   @override
@@ -45,14 +45,14 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
-            child: Text("Welcome!",
+            child: Text(getText(context, "Welcome!"),
                 style: new TextStyle(fontSize: 30, color: Color(0xff888888)))),
         SizedBox(height: 100),
         Center(
           child: TextField(
               textCapitalization: TextCapitalization.words,
               style: TextStyle(fontSize: 20),
-              decoration: InputDecoration(hintText: "What's your name?"),
+              decoration: InputDecoration(hintText: getText(context, "What's your name?")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
       ],
@@ -64,7 +64,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text("Generating identity...", style: TextStyle(fontSize: 18)),
+        Text(getText(context, "Generating identity..."), style: TextStyle(fontSize: 18)),
         SizedBox(height: 20),
         LoadingSpinner(),
       ],
@@ -75,8 +75,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     if (!(alias is String) || alias == "")
       return;
     else if (alias.length < 2) {
-      showAlert(Lang.of(context).get("The identity name is too short"),
-          title: Lang.of(context).get("Error"), context: context);
+      showAlert(getText(context, "The identity name is too short"),
+          title: getText(context, "Error"), context: context);
       return;
     }
     String patternEncryptionKey = await Navigator.push(
@@ -123,13 +123,12 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       if (err.toString() ==
           "Exception: An account with this name already exists") {
-        text = Lang.of(context).get("An account with this name already exists");
+        text = getText(context, "An account with this name already exists");
       } else {
-        text = Lang.of(context)
-            .get("An error occurred while generating the identity");
+        text = getText(context, "An error occurred while generating the identity");
       }
 
-      showAlert(text, title: Lang.of(context).get("Error"), context: context);
+      showAlert(text, title: getText(context, "Error"), context: context);
     }
   }
 

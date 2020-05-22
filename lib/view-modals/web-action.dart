@@ -4,7 +4,8 @@ import 'package:dvote/dvote.dart';
 import 'package:dvote/crypto/encryption.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lang/index.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
@@ -77,8 +78,8 @@ class _WebActionState extends State<WebAction> {
                     Navigator.of(context).pop();
 
                     await showAlert(
-                        Lang.of(context).get("The page cannot be loaded"),
-                        title: Lang.of(context).get("Error"),
+                        getText(context, "The page cannot be loaded"),
+                        title: getText(context, "Error"),
                         context: context);
                   }
                 },
@@ -162,9 +163,9 @@ class _WebActionState extends State<WebAction> {
         // hasPublicReadPermission may be null
         if (hasPublicReadPermission != true) {
           hasPublicReadPermission = await showPrompt(
-              Lang.of(context).get(
+              getText(context, 
                   "The current service is requesting access to your public information.\nDo you want to continue?"),
-              title: Lang.of(context).get("Permission"),
+              title: getText(context, "Permission"),
               context: context);
         }
 
@@ -206,7 +207,7 @@ class _WebActionState extends State<WebAction> {
                 fullscreenDialog: true,
                 builder: (context) => PatternPromptModal(selectedAccount)));
         if (patternStr == null || patternStr is InvalidPatternError) {
-          return respondError(id, "The pattern you entered is not valid");
+          return respondError(id, "The pattern entered by the user is not valid");
         }
 
         String privateKey =

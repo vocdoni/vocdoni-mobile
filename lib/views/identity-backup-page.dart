@@ -1,6 +1,7 @@
 import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
@@ -35,7 +36,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
         Navigator.pop(context);
       },
       child: Text(
-        "I wrote them down",
+        getText(context, "I wrote them down"),
         style: TextStyle(fontSize: 20.0),
       ),
     ).withPadding(16).withTopPadding(8);
@@ -47,7 +48,8 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
         ModalRoute.of(context).settings.arguments;
 
     final List<Widget> items = [
-      Text("Please, take a sheet of paper, write down the following words in order and keep them in a safe place.")
+      Text(getText(context,
+              "Please, take a sheet of paper, write down the following words in order and keep them in a safe place."))
           .withPadding(16)
     ];
     final words = args.mnemonic.split(" ");
@@ -75,7 +77,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
 
     return Scaffold(
       appBar: TopNavigation(
-        title: "Identity Backup",
+        title: getText(context, "Identity"),
       ),
       body: ListView(children: items),
     );
