@@ -262,7 +262,9 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 (widget.entityModel.processes.hasValue &&
                     widget.entityModel.processes.value
                         .any((proc) => proc.metadata.isLoading)),
-            onTap: () => onShowParticipation(context));
+            onTap: () {
+              onShowParticipation(context);
+            });
       },
     );
   }

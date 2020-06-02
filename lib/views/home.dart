@@ -145,6 +145,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onWillPop: handleWillPop,
       child: FlavorBanner(
         child: Scaffold(
+          appBar: TopNavigation(
+            title: getTabName(selectedTab),
+            showBackButton: false,
+          ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
           floatingActionButton: selectedTab == 1
@@ -158,10 +162,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                       elevation: 5.0))
               : null,
-          appBar: TopNavigation(
-            title: getTabName(selectedTab),
-            showBackButton: false,
-          ),
           body: Builder(builder: (ctx) {
             // Store the build context from the scaffold, so that deep links can show
             // snackbars on top of this scaffold

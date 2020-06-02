@@ -8,6 +8,7 @@ import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote/dvote.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class EntityFeedPage extends StatefulWidget {
   @override
@@ -19,6 +20,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
   Feed remoteNewsFeed;
   bool loading = false;
   bool remoteFetched = false;
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   @override
   void didChangeDependencies() {
@@ -33,6 +36,19 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     } catch (err) {
       devPrint(err);
     }
+  }
+
+  void _onRefresh() {
+    if (entityModel == null) {
+      _refreshController.refreshFailed();
+      return;
+    }
+
+    entityModel.refresh().then((_) {
+      _refreshController.refreshCompleted();
+    }).catchError((err) {
+      _refreshController.refreshFailed();
+    });
   }
 
   @override
@@ -53,9 +69,9 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                   entityModel.metadata.isLoading) ||
               (!entityModel.feed.hasValue && entityModel.feed.isLoading))
             return buildLoading();
-          else if (entityModel.metadata.hasError ||
-              entityModel.feed.hasError ||
-              entityModel.feed.hasError)
+          else if ((!entityModel.metadata.hasValue &&
+                  entityModel.metadata.hasError) ||
+              (!entityModel.feed.hasValue && entityModel.feed.hasError))
             return buildError(entityModel.metadata.errorMessage ??
                 entityModel.feed.errorMessage);
 
@@ -65,13 +81,37 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
             body: Builder(builder: (context) {
-              return ListView.builder(
-                itemCount: entityModel.feed.value.items.length ?? 0,
-                itemBuilder: (BuildContext context, int index) {
-                  final post = entityModel.feed.value.items[index];
+              return SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: false,
+                header: WaterDropHeader(
+                  complete: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(Icons.done, color: Colors.grey),
+                        Container(width: 10.0),
+                        Text(getText(context, "Refresh completed"),
+                            style: TextStyle(color: Colors.grey))
+                      ]),
+                  failed: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(Icons.close, color: Colors.grey),
+                        Container(width: 10.0),
+                        Text(getText(context, "Could not refresh"),
+                            style: TextStyle(color: Colors.grey))
+                      ]),
+                ),
+                controller: _refreshController,
+                onRefresh: _onRefresh,
+                child: ListView.builder(
+                  itemCount: entityModel.feed.value.items.length ?? 0,
+                  itemBuilder: (BuildContext context, int index) {
+                    final post = entityModel.feed.value.items[index];
 
-                  return CardPost(entityModel, post, index);
-                },
+                    return CardPost(entityModel, post, index);
+                  },
+                ),
               );
             }),
           );

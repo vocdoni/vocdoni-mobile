@@ -36,6 +36,7 @@ dependencies:
   permission_handler: ^5.0.0+hotfix.6
   feather_icons_flutter: ^4.7.4
   path_provider: ^1.6.0
+  pull_to_refresh: ^1.5.8
   webview_flutter: ^0.3.21
   mixpanel_analytics: ^1.2.1
   cupertino_icons: ^0.1.2

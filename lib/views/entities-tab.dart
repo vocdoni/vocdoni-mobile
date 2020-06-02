@@ -5,10 +5,11 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:vocdoni/views/entity-info-page.dart';
+import 'package:vocdoni/views/entity-page.dart';
 import 'package:dvote_common/widgets/baseCard.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:dvote_common/widgets/listItem.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class EntitiesTab extends StatefulWidget {
   EntitiesTab();
@@ -18,10 +19,23 @@ class EntitiesTab extends StatefulWidget {
 }
 
 class _EntitiesTabState extends State<EntitiesTab> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
   @override
   void initState() {
     super.initState();
     globalAnalytics.trackPage("EntitiesTab");
+  }
+
+  void _onRefresh() {
+    final currentAccount = globalAppState.currentAccount;
+
+    currentAccount.refresh().then((_) {
+      _refreshController.refreshCompleted();
+    }).catchError((err) {
+      _refreshController.refreshFailed();
+    });
   }
 
   @override
@@ -30,16 +44,38 @@ class _EntitiesTabState extends State<EntitiesTab> {
 
     if (currentAccount == null) return buildNoEntities(ctx);
 
-    // Rebuild if the pool changes (not the items)
     return EventualBuilder(
-        notifiers: [currentAccount.entities, currentAccount.identity],
-        builder: (context, _, __) {
-          if (!currentAccount.entities.hasValue ||
-              currentAccount.entities.value.length == 0) {
-            return buildNoEntities(ctx);
-          }
+      notifiers: [currentAccount.entities, currentAccount.identity],
+      builder: (context, _, __) {
+        if (!currentAccount.entities.hasValue ||
+            currentAccount.entities.value.length == 0) {
+          return buildNoEntities(ctx);
+        }
 
-          return ListView.builder(
+        return SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: false,
+          header: WaterDropHeader(
+            complete: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Icon(Icons.done, color: Colors.grey),
+                  Container(width: 10.0),
+                  Text(getText(context, "Refresh completed"),
+                      style: TextStyle(color: Colors.grey))
+                ]),
+            failed: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Icon(Icons.close, color: Colors.grey),
+                  Container(width: 10.0),
+                  Text(getText(context, "Could not refresh"),
+                      style: TextStyle(color: Colors.grey))
+                ]),
+          ),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
+          child: ListView.builder(
               itemCount: currentAccount.entities.value.length,
               itemBuilder: (BuildContext context, int index) {
                 final entity = currentAccount.entities.value[index];
@@ -49,8 +85,10 @@ class _EntitiesTabState extends State<EntitiesTab> {
                 else if (entity.metadata.isLoading)
                   return CardLoading(getText(context, "Loading entity..."));
                 return buildEmptyMetadataCard(ctx, entity);
-              });
-        });
+              }),
+        );
+      },
+    );
   }
 
   Widget buildEmptyMetadataCard(BuildContext ctx, EntityModel entityModel) {

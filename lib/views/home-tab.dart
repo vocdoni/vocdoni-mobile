@@ -7,6 +7,7 @@ import 'package:dvote/dvote.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/card-post.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 // Used to merge and sort feed items
 class CardItem {
@@ -27,10 +28,23 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
   @override
   void initState() {
     super.initState();
     globalAnalytics.trackPage("HomeTab");
+  }
+
+  void _onRefresh() {
+    final currentAccount = globalAppState.currentAccount;
+
+    currentAccount.refresh().then((_) {
+      _refreshController.refreshCompleted();
+    }).catchError((err) {
+      _refreshController.refreshFailed();
+    });
   }
 
   @override
@@ -48,10 +62,34 @@ class _HomeTabState extends State<HomeTab> {
         final items = _digestCardList();
         if (items.length == 0) return buildNoEntries(ctx);
 
-        return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (BuildContext ctx, int index) =>
-                items[index] ?? Container());
+        return SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: false,
+          header: WaterDropHeader(
+            complete: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Icon(Icons.done, color: Colors.grey),
+                  Container(width: 10.0),
+                  Text(getText(context, "Refresh completed"),
+                      style: TextStyle(color: Colors.grey))
+                ]),
+            failed: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Icon(Icons.close, color: Colors.grey),
+                  Container(width: 10.0),
+                  Text(getText(context, "Could not refresh"),
+                      style: TextStyle(color: Colors.grey))
+                ]),
+          ),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
+          child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (BuildContext ctx, int index) =>
+                  items[index] ?? Container()),
+        );
       },
     );
   }
