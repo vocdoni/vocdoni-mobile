@@ -25,17 +25,23 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
-  try {
-    switch (newLink.pathSegments[0]) {
-      case "entities":
-        if (newLink.fragment.length < 2) throw Exception;
-        final pathSegments = newLink.fragment.split("/");
-        if (pathSegments.length < 2) return;
+  final pathSegments = newLink.pathSegments
+      .where((str) => str.length > 0)
+      .cast<String>()
+      .toList();
+  final hashSegments = newLink.fragment
+      .split("/")
+      .where((str) => str.length > 0)
+      .cast<String>()
+      .toList();
 
+  try {
+    switch (pathSegments[0]) {
+      case "entities":
         indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
             context: scaffoldBodyContext);
-        await fetchAndShowEntity(
-            entityId: pathSegments[1], context: scaffoldBodyContext);
+        await handleEntityLink(pathSegments, hashSegments,
+            context: scaffoldBodyContext);
         indicator.close();
         break;
       // case "signature":
@@ -59,12 +65,23 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // / HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future fetchAndShowEntity(
-    {@required String entityId,
-    // @required List<String> entryPoints,
-    @required BuildContext context}) async {
-  if (!(entityId is String) ||
-      !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(entityId)) {
+Future handleEntityLink(List<String> pathSegments, List<String> hashSegments,
+    {@required BuildContext context}) async {
+  // Possible values:
+  // https://dev.vocdoni.link/entities/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  // https://app.vocdoni.dev/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+
+  String entityId;
+  if (pathSegments.length >= 2 &&
+      pathSegments[1] is String &&
+      RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(pathSegments[1])) {
+    entityId = pathSegments[1];
+  } else if (hashSegments[0] is String &&
+      RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(hashSegments[0])) {
+    entityId = hashSegments[0];
+  }
+
+  if (!(entityId is String)) {
     throw LinkingError("Invalid entityId");
   }
   // } else if (!(entryPoints is List) || entryPoints.length == 0) {
