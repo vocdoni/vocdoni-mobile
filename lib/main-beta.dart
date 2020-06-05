@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 void main() async {
   // Set the global flavor config in the singleton
   final constants = FlavorConstants(
-      gatewayBootNodesUrl: "https://bootnodes.github.io/gateways.dev.json",
+      gatewayBootNodesUrl: "https://bootnodes.vocdoni.net/gateways.dev.json",
       networkId: "goerli",
       linkingDomain: "dev.vocdoni.link");
   FlavorConfig(
