@@ -37,7 +37,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                           mainText: getText(context, "Create a new identity"),
                           onTap: () => createNew(context)),
                       ListItem(
-                          mainText: getText(context, "Restore an existing identity"),
+                          mainText:
+                              getText(context, "Restore an existing identity"),
                           onTap: () => restorePreviousIdentity(context)),
                     ],
                   )),
@@ -89,6 +90,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       return;
     }
     globalAppState.selectAccount(accountIdx);
+    globalAppState.currentAccount?.cleanEphemeral();
 
     account.refresh(false, patternEncryptionKey); // detached async
 

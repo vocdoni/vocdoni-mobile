@@ -113,6 +113,8 @@ class _IdentityTabState extends State<IdentityTab> {
   }
 
   onLogOut(BuildContext ctx) async {
+    globalAppState.currentAccount?.cleanEphemeral();
+
     Navigator.pushNamedAndRemoveUntil(
         ctx, "/identity/select", (Route _) => false);
   }

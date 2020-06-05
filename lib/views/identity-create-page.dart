@@ -52,7 +52,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
           child: TextField(
               textCapitalization: TextCapitalization.words,
               style: TextStyle(fontSize: 20),
-              decoration: InputDecoration(hintText: getText(context, "What's your name?")),
+              decoration: InputDecoration(
+                  hintText: getText(context, "What's your name?")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
       ],
@@ -64,7 +65,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(getText(context, "Generating identity..."), style: TextStyle(fontSize: 18)),
+        Text(getText(context, "Generating identity..."),
+            style: TextStyle(fontSize: 18)),
         SizedBox(height: 20),
         LoadingSpinner(),
       ],
@@ -108,6 +110,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         throw Exception("The new account can't be found on the pool");
 
       globalAppState.selectAccount(newIndex);
+      // globalAppState.currentAccount?.cleanEphemeral();
       // globalAccountPool.writeToStorage();   not needed => addAccount() does it
 
       setState(() {
@@ -125,7 +128,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
           "Exception: An account with this name already exists") {
         text = getText(context, "An account with this name already exists");
       } else {
-        text = getText(context, "An error occurred while generating the identity");
+        text =
+            getText(context, "An error occurred while generating the identity");
       }
 
       showAlert(text, title: getText(context, "Error"), context: context);

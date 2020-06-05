@@ -114,6 +114,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
         throw Exception("The new account can't be found on the pool");
 
       globalAppState.selectAccount(newIndex);
+      // globalAppState.currentAccount?.cleanEphemeral();
       // globalAccountPool.writeToStorage();   not needed => addAccount() does it
 
       showHomePage(context);
