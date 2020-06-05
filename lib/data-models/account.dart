@@ -165,21 +165,21 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
 /// This includes the personal identity information and the entities subscribed to.
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
-class AccountModel implements ModelRefreshable {
-  final EventualNotifier<Identity> identity = EventualNotifier<Identity>();
-  final EventualNotifier<List<EntityModel>> entities = EventualNotifier<
-      List<EntityModel>>(); // generated from `identity.peers.entities`
+class AccountModel implements ModelRefreshable, ModelCleanable {
+  final identity = EventualNotifier<Identity>();
 
-  final EventualNotifier<int> failedAuthAttempts = EventualNotifier<int>(0);
-  final EventualNotifier<DateTime> authThresholdDate =
-      EventualNotifier<DateTime>(DateTime.now());
+  /// generated from `identity.peers.entities`
+  final entities = EventualNotifier<List<EntityModel>>();
+
+  final failedAuthAttempts = EventualNotifier<int>(0);
+  final authThresholdDate = EventualNotifier<DateTime>(DateTime.now());
 
   /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
-  final EventualNotifier<int> actionVisibilityTimestampUsed =
+  final actionVisibilityTimestampUsed =
       EventualNotifier<int>().withFreshnessTimeout(Duration(hours: 1));
 
   /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks
-  final EventualNotifier<String> actionVisibilityCheckSignature =
+  final actionVisibilityCheckSignature =
       EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 1));
 
   // CONSTRUCTORS
@@ -364,6 +364,12 @@ class AccountModel implements ModelRefreshable {
   //   peers.identities.addAll(account.peers.identities);
   //   account.peers = peers;
   // }
+
+  /// Cleans the ephemeral state of the account's subscribed entities
+  @override
+  void cleanEphemeral() {
+    this.entities.value.forEach((entity) => entity.cleanEphemeral());
+  }
 
   // STATIC METHODS
 

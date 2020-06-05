@@ -21,3 +21,9 @@ abstract class ModelPersistable {
   /// Tell all submodels to do the same.
   Future<void> writeToStorage();
 }
+
+/// Classes implementing this interface allow to clean values that correspond to a specific account
+abstract class ModelCleanable {
+  /// Set all variables containing ephemeral account-related data to null
+  dynamic cleanEphemeral();
+}

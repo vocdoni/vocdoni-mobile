@@ -24,7 +24,7 @@ import 'package:vocdoni/lib/singletons.dart';
 /// Updates on the children models will be notified by the objects themselves if using EventualNotifier or EventualNotifier.
 ///
 class EntityPoolModel extends EventualNotifier<List<EntityModel>>
-    implements ModelPersistable, ModelRefreshable {
+    implements ModelPersistable, ModelRefreshable, ModelCleanable {
   EntityPoolModel() {
     this.setDefaultValue(List<EntityModel>());
   }
@@ -126,6 +126,12 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
     }
   }
 
+  /// Cleans the ephemeral state of all entities
+  @override
+  void cleanEphemeral() {
+    this.value.forEach((entity) => entity.cleanEphemeral());
+  }
+
   /// Removes the given entity from the pool and persists the new pool.
   /// Also updates the Feed and Process pools if needed
   Future<void> remove(EntityReference entityRef) async {
@@ -162,15 +168,13 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
 /// EntityModel encapsulates the relevant information of a Vocdoni Entity.
 /// This includes its metadata and the participation processes.
 ///
-class EntityModel implements ModelRefreshable {
+class EntityModel implements ModelRefreshable, ModelCleanable {
   final EntityReference reference; // This is never fetched
-  final EventualNotifier<EntityMetadata> metadata =
-      EventualNotifier<EntityMetadata>()
-          .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
-  final EventualNotifier<List<ProcessModel>> processes =
-      EventualNotifier<List<ProcessModel>>()
-          .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
-  final EventualNotifier<Feed> feed = EventualNotifier<Feed>()
+  final metadata = EventualNotifier<EntityMetadata>()
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
+  final processes = EventualNotifier<List<ProcessModel>>()
+      .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
+  final feed = EventualNotifier<Feed>()
       .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 5 : 1));
 
   final visibleActions = EventualNotifier<List<EntityMetadata_Action>>()
@@ -498,6 +502,16 @@ class EntityModel implements ModelRefreshable {
       }
       throw err;
     }
+  }
+
+  /// Cleans the ephemeral state of the entity related to an account
+  @override
+  void cleanEphemeral() {
+    if (this.processes.hasValue)
+      this.processes.value.forEach((process) => process.cleanEphemeral());
+    this.visibleActions.setValue(null);
+    this.registerAction.setValue(null);
+    this.isRegistered.setValue(null);
   }
 
   // PRIVATE METHODS

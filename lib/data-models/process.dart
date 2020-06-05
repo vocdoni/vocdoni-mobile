@@ -16,7 +16,7 @@ import 'package:vocdoni/lib/util.dart';
 /// Updates on the children models will be notified by the objects themselves if using StateContainer or EventualNotifier.
 ///
 class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
-    implements ModelPersistable, ModelRefreshable {
+    implements ModelPersistable, ModelRefreshable, ModelCleanable {
   ProcessPoolModel() {
     this.setDefaultValue(List<ProcessModel>());
   }
@@ -119,6 +119,12 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
     }
   }
 
+  /// Cleans the ephemeral state of all processes
+  @override
+  void cleanEphemeral() {
+    this.value.forEach((process) => process.cleanEphemeral());
+  }
+
   /// Removes the given feed from the pool and persists the new pool.
   Future<void> remove(List<ProcessModel> processModelsToRemove) async {
     if (!this.hasValue) throw Exception("The pool has no value yet");
@@ -162,19 +168,19 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
 /// ProcessModel encapsulates the relevant information of a Vocdoni Process.
 /// This includes its metadata and the participation processes.
 ///
-class ProcessModel implements ModelRefreshable {
+class ProcessModel implements ModelRefreshable, ModelCleanable {
   final String processId;
   final String entityId;
   final String lang = "default";
-  final EventualNotifier<ProcessMetadata> metadata =
-      EventualNotifier<ProcessMetadata>();
-  final EventualNotifier<bool> isInCensus =
+
+  final metadata = EventualNotifier<ProcessMetadata>();
+  final isInCensus =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
-  final EventualNotifier<bool> hasVoted =
+  final hasVoted =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
-  final EventualNotifier<int> currentParticipants =
+  final currentParticipants =
       EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 5));
-  final EventualNotifier<int> censusSize =
+  final censusSize =
       EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 30));
 
   List<dynamic> choices = [];
@@ -422,6 +428,15 @@ class ProcessModel implements ModelRefreshable {
 
       this.currentParticipants.setError("The census info is not available");
     });
+  }
+
+  /// Cleans the ephemeral state of the process related to an account
+  @override
+  void cleanEphemeral() {
+    this.isInCensus.setValue(null);
+    this.hasVoted.setValue(null);
+    this.currentParticipants.setValue(null);
+    this.censusSize.setValue(null);
   }
 
   // GETTERS

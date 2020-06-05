@@ -14,19 +14,17 @@ import 'package:vocdoni/lib/util.dart';
 ///
 class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// Index of the currently active identity
-  final EventualNotifier<int> selectedAccount = EventualNotifier<int>(-1);
+  final selectedAccount = EventualNotifier<int>(-1);
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
-  final EventualNotifier<BootNodeGateways> bootnodes =
-      EventualNotifier<BootNodeGateways>()
-          .withFreshnessTimeout(Duration(minutes: 2));
+  final bootnodes = EventualNotifier<BootNodeGateways>()
+      .withFreshnessTimeout(Duration(minutes: 2));
 
-  final EventualNotifier<int> averageBlockTime =
-      EventualNotifier<int>(5); // 5 seconds by default
-  final EventualNotifier<int> referenceBlock =
+  final averageBlockTime = EventualNotifier<int>(5); // 5 seconds by default
+  final referenceBlock =
       EventualNotifier<int>().withFreshnessTimeout(Duration(seconds: 20));
-  final EventualNotifier<DateTime> referenceBlockTimestamp =
+  final referenceBlockTimestamp =
       EventualNotifier<DateTime>().withFreshnessTimeout(Duration(seconds: 20));
 
   // INTERNAL DATA HANDLERS
