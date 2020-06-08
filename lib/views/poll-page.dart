@@ -10,7 +10,7 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
 
-import 'package:vocdoni/views/poll-packaging.dart';
+import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -316,7 +316,7 @@ class _PollPageState extends State<PollPage> {
     final newRoute = MaterialPageRoute(
         fullscreenDialog: true,
         builder: (context) =>
-            PollPackaging(process: process, choices: choices));
+            PollPackagingPage(process: process, choices: choices));
     await Navigator.push(ctx, newRoute);
   }
 

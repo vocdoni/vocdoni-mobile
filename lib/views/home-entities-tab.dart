@@ -11,21 +11,21 @@ import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class EntitiesTab extends StatefulWidget {
-  EntitiesTab();
+class HomeEntitiesTab extends StatefulWidget {
+  HomeEntitiesTab();
 
   @override
-  _EntitiesTabState createState() => _EntitiesTabState();
+  _HomeEntitiesTabState createState() => _HomeEntitiesTabState();
 }
 
-class _EntitiesTabState extends State<EntitiesTab> {
+class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("EntitiesTab");
+    globalAnalytics.trackPage("HomeEntitiesTab");
   }
 
   void _onRefresh() {

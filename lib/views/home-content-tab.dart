@@ -20,21 +20,21 @@ class CardItem {
       {@required this.entity, @required this.date, this.process, this.post});
 }
 
-class HomeTab extends StatefulWidget {
-  HomeTab();
+class HomeContentTab extends StatefulWidget {
+  HomeContentTab();
 
   @override
-  _HomeTabState createState() => _HomeTabState();
+  _HomeContentTabState createState() => _HomeContentTabState();
 }
 
-class _HomeTabState extends State<HomeTab> {
+class _HomeContentTabState extends State<HomeContentTab> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("HomeTab");
+    globalAnalytics.trackPage("HomeContentTab");
   }
 
   void _onRefresh() {

@@ -14,18 +14,18 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/crypto/encryption.dart';
 
-class IdentityTab extends StatefulWidget {
-  IdentityTab();
+class HomeIdentityTab extends StatefulWidget {
+  HomeIdentityTab();
 
   @override
-  _IdentityTabState createState() => _IdentityTabState();
+  _HomeIdentityTabState createState() => _HomeIdentityTabState();
 }
 
-class _IdentityTabState extends State<IdentityTab> {
+class _HomeIdentityTabState extends State<HomeIdentityTab> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("IdentityTab");
+    globalAnalytics.trackPage("HomeIdentityTab");
   }
 
   @override

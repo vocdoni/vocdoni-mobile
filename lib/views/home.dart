@@ -9,9 +9,9 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
-import 'package:vocdoni/views/home-tab.dart';
-import 'package:vocdoni/views/entities-tab.dart';
-import 'package:vocdoni/views/identity-tab.dart';
+import 'package:vocdoni/views/home-content-tab.dart';
+import 'package:vocdoni/views/home-entities-tab.dart';
+import 'package:vocdoni/views/home-identity-tab.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -183,17 +183,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // RENDER THE CURRENT TAB BODY
     switch (selectedTab) {
-      // VOTES FEED
+      // VOTES+FEED
       case 0:
-        body = HomeTab();
+        body = HomeContentTab();
         break;
       // SUBSCRIBED ENTITIES
       case 1:
-        body = EntitiesTab();
+        body = HomeEntitiesTab();
         break;
       // IDENTITY INFO
       case 2:
-        body = IdentityTab();
+        body = HomeIdentityTab();
         break;
       default:
         body = Container(

@@ -15,17 +15,17 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:dvote/crypto/encryption.dart';
 
-class PollPackaging extends StatefulWidget {
+class PollPackagingPage extends StatefulWidget {
   final ProcessModel process;
   final List<int> choices;
 
-  PollPackaging({@required this.process, @required this.choices});
+  PollPackagingPage({@required this.process, @required this.choices});
 
   @override
-  _PollPackagingState createState() => _PollPackagingState();
+  _PollPackagingPageState createState() => _PollPackagingPageState();
 }
 
-class _PollPackagingState extends State<PollPackaging> {
+class _PollPackagingPageState extends State<PollPackagingPage> {
   int _currentStep;
   Map<String, String> _envelope;
 
@@ -33,7 +33,7 @@ class _PollPackagingState extends State<PollPackaging> {
   void initState() {
     super.initState();
 
-    globalAnalytics.trackPage("PollPackaging",
+    globalAnalytics.trackPage("PollPackagingPage",
         entityId: widget.process.entityId, processId: widget.process.processId);
 
     _currentStep = 0;
