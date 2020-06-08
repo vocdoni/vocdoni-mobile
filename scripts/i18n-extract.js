@@ -1,9 +1,9 @@
 const glob = require("glob")
 const fs = require("fs")
 
-const dqRegExp = /getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*"[^"\\]*(?:\\.[^"\\]*)*"\)/gm
-const sqRegExp = /getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*'[^'\\]*(?:\\.[^'\\]*)*'\)/gm
-const tqRegExp = /getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*"""[^"""]*"""\)/gm
+const dqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"[^"\\]*(?:\\.[^"\\]*)*"\)/gm
+const sqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*'[^'\\]*(?:\\.[^'\\]*)*'\)/gm
+const tqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"""[^"]*(?:(?:"?"?)[^"])*"""\)/gm
 
 const languages = ["en", "fr", "es", "ca"]
 const defaultLanguage = languages[0]
@@ -54,7 +54,7 @@ function processFile(path) {
     const text = fs.readFileSync(path).toString()
     var dqMatches = text.match(dqRegExp) || []
     dqMatches = dqMatches.map(txt => {
-        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*"/, "")
+        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"/, "")
             .replace(/\\n/g, "\n")
             .replace(/\\r/g, "\r")
             .replace(/\\t/g, "\t")
@@ -62,7 +62,7 @@ function processFile(path) {
     })
     var sqMatches = text.match(sqRegExp) || []
     sqMatches = sqMatches.map(txt => {
-        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*'/, "")
+        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*'/, "")
             .replace(/\\n/g, "\n")
             .replace(/\\r/g, "\r")
             .replace(/\\'/g, "'")
@@ -71,7 +71,7 @@ function processFile(path) {
     })
     var tqMatches = text.match(tqRegExp) || []
     tqMatches = tqMatches.map(txt => {
-        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z0-9_]+,[\s]*"""/, "")
+        txt = txt.replace(/^getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"""/, "")
             .replace(/\\n/g, "\n")
             .replace(/\\r/g, "\r")
             .replace(/\\t/g, "\t")
