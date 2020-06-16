@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote/wrappers/process-keys.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -27,7 +28,7 @@ class PollPackagingPage extends StatefulWidget {
 
 class _PollPackagingPageState extends State<PollPackagingPage> {
   int _currentStep;
-  Map<String, String> _envelope;
+  Map<String, dynamic> _envelope;
 
   @override
   void initState() {
@@ -84,7 +85,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     }
 
     if (!(merkleProof is String)) {
-      showMessage(getText(context, "The vote data could not be signed"), context: context);
+      showMessage(getText(context, "The vote data could not be signed"),
+          context: context);
       setState(() => _currentStep = 0);
       return;
     }
@@ -108,8 +110,14 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       if (!mounted) return;
 
-      Map<String, String> envelope = await packagePollEnvelope(
-          widget.choices, merkleProof, widget.process.processId, privateKey);
+      ProcessKeys processKeys;
+      if (widget.process.metadata.value.type == "encrypted-poll") {
+        processKeys = await getProcessKeys(widget.process.processId, dvoteGw);
+      }
+
+      Map<String, dynamic> envelope = await packagePollEnvelope(
+          widget.choices, merkleProof, widget.process.processId, privateKey,
+          processKeys: processKeys);
 
       if (!mounted) return;
 
@@ -119,7 +127,9 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       stepSendVote(context);
     } catch (err) {
-      showMessage(getText(context, "The vote data could not be prepared"), context: context);
+      devPrint("stepMakeEnvelope error: $err");
+      showMessage(getText(context, "The vote data could not be prepared"),
+          context: context);
       setState(() {
         _currentStep = 0;
       });
@@ -166,8 +176,11 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       if (widget.process.hasVoted.hasError ||
           widget.process.hasVoted.value == false) {
         setState(() => _currentStep = 0);
-        showMessage(getText(context, "The status of the envelope could not be validated"),
-            context: context, purpose: Purpose.WARNING);
+        showMessage(
+            getText(
+                context, "The status of the envelope could not be validated"),
+            context: context,
+            purpose: Purpose.WARNING);
         return;
       }
 
@@ -202,10 +215,13 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
                   maxLines: 10,
                   text:
                       "This may take some time, please do not close this screen"),*/
-                buildStep(getText(context, "Sigining"), getText(context, "Signed"), 1),
+                buildStep(getText(context, "Sigining"),
+                    getText(context, "Signed"), 1),
                 // buildStep("Generating proof", "Proof generated", 2),
-                buildStep(getText(context, "Delivering"), getText(context, "Sent"), 2),
-                buildStep(getText(context, "Waiting confirmation"), getText(context, "Confirmed"), 3),
+                buildStep(getText(context, "Delivering"),
+                    getText(context, "Sent"), 2),
+                buildStep(getText(context, "Waiting confirmation"),
+                    getText(context, "Confirmed"), 3),
                 Spacer(),
                 // Padding(
                 //   padding: EdgeInsets.all(48),
