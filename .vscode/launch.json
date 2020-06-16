@@ -17,6 +17,18 @@
       ]
     },
     {
+      "name": "Vocdoni Prod (Android)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-t",
+        "lib/main-production.dart",
+        "--flavor",
+        "production"
+      ]
+    },
+    {
       "name": "Vocdoni Dev (iOS)",
       "request": "launch",
       "type": "dart",
