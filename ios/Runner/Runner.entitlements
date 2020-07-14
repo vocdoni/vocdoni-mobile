@@ -6,6 +6,8 @@
 	<array>
 		<string>applinks:app.vocdoni.net</string>
 		<string>applinks:app.dev.vocdoni.net</string>
+		<string>applinks:vocdoni.page.link</string>
+		<string>applinks:vocdonidev.page.link</string>
 	</array>
 </dict>
 </plist>

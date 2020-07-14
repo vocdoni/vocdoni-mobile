@@ -11,7 +11,7 @@ description: Decentralized anonymous E2E verifiable voting system client app
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.7.5+14
+version: 0.7.7+15
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
@@ -27,7 +27,7 @@ dependencies:
       url: https://gitlab.com/vocdoni/dvote-flutter-common.git
   eventual: ^0.10.2
   protobuf: ^1.0.1
-  uni_links: ^0.2.0
+  uni_links: ^0.4.0
   url_launcher: ^5.4.1
   http: ^0.12.0+4
   flutter_html: ^0.11.1

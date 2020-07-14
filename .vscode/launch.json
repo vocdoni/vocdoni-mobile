@@ -39,6 +39,16 @@
       ]
     },
     {
+      "name": "Vocdoni Prod (iOS)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-t",
+        "lib/main-production.dart"
+      ]
+    },
+    {
       "name": "Vocdoni Profile",
       "request": "launch",
       "type": "dart",

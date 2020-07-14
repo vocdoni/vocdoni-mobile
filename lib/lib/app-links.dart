@@ -14,15 +14,24 @@ import 'package:dvote_common/widgets/toast.dart'; // for kReleaseMode
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
-  if (!(newLink is Uri))
-    throw Exception();
-  else if (newLink.pathSegments.length < 1) {
+  if (!(newLink is Uri)) throw Exception();
+
+  // Accepted domains:
+  // - app.vocdoni.net, app.dev.vocdoni.net => Use as they are
+  // - vocdoni.page.link, vocdonidev.page.link => Extract the `link` parameter
+
+  if (newLink.host == "vocdoni.page.link" ||
+      newLink.host == "vocdonidev.page.link") {
+    final extractedUrl = newLink.queryParameters["link"];
+    newLink = Uri.parse(extractedUrl);
+  }
+
+  if (newLink.pathSegments.length < 1) {
     if (kReleaseMode)
       throw Exception();
     else
       return;
   }
-
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
   final pathSegments = newLink.pathSegments
