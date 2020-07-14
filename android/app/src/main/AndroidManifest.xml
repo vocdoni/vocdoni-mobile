@@ -63,6 +63,12 @@
                     android:scheme="https"
                     android:host="app.dev.vocdoni.net"
                     android:pathPrefix="/posts" />
+                <data
+                    android:scheme="https"
+                    android:host="vocdoni.page.link" />
+                <data
+                    android:scheme="https"
+                    android:host="vocdonidev.page.link" />
             </intent-filter>
 
         </activity>
