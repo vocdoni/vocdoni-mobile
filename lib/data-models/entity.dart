@@ -434,6 +434,10 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   }
 
   Future<void> refreshVisibleActions([bool force = false]) async {
+    // TODO: Skipping until the new API is available
+    return null;
+    // TODO: Reenable
+
     final List<EntityMetadata_Action> visibleStandardActions = [];
 
     if (!this.metadata.hasValue)

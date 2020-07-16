@@ -339,6 +339,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildRegisterButton(BuildContext ctx) {
+    // TODO: Temporarily disabled
+    // TODO: Reenable
+    return null;
+
     // Rebuild if `isRegistered` changes
     return EventualBuilder(
       notifier: widget.entityModel.isRegistered,
