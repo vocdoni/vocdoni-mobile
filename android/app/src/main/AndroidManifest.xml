@@ -39,36 +39,26 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="app.vocdoni.net"
-                    android:pathPrefix="/entities" />
-                <data
-                    android:scheme="https"
-                    android:host="app.vocdoni.net"
-                    android:pathPrefix="/processes" />
-                <data
-                    android:scheme="https"
-                    android:host="app.vocdoni.net"
-                    android:pathPrefix="/posts" />
-                <data
-                    android:scheme="https"
-                    android:host="app.dev.vocdoni.net"
-                    android:pathPrefix="/entities" />
-                <data
-                    android:scheme="https"
-                    android:host="app.dev.vocdoni.net"
-                    android:pathPrefix="/processes" />
-                <data
-                    android:scheme="https"
-                    android:host="app.dev.vocdoni.net"
-                    android:pathPrefix="/posts" />
-                <data
-                    android:scheme="https"
-                    android:host="vocdoni.page.link" />
-                <data
-                    android:scheme="https"
-                    android:host="vocdonidev.page.link" />
+
+                <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/entities" />
+                <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/processes" />
+                <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/posts" />
+                <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/validation" />
+
+                <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/entities" />
+                <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/processes" />
+                <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/posts" />
+                <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/validation" />
+
+                <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/entities" />
+                <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/processes" />
+                <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/posts" />
+                <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/validation" />
+                
+                <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/entities" />
+                <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/processes" />
+                <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/posts" />
+                <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/validation" />
             </intent-filter>
 
         </activity>

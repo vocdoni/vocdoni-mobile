@@ -128,7 +128,7 @@ Future handleValidationLink(List<String> hashSegments,
       !(hashSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
   } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0]) ||
-      !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(hashSegments[1])) {
+      !RegExp(r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$").hasMatch(hashSegments[1])) {
     throw LinkingError("Invalid validation link");
   }
 
@@ -143,6 +143,7 @@ Future handleValidationLink(List<String> hashSegments,
   try {
     // fetch metadata from the reference. The view will fetch the rest.
     await entityModel.refreshMetadata();
+    await entityModel.refreshVisibleActions();
 
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");

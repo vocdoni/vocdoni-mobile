@@ -209,7 +209,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
                   text: _currentStep == 0
                       ? getText(context, "Ready when you are")
                       : getText(context, "Delivering the vote"),
-                  withDectoration: false,
+                  withDectoration: true,
                 ),
                 /*Summary(
                   maxLines: 10,

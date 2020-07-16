@@ -1,4 +1,6 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/widgets/summary.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -81,23 +83,13 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
           currentAccount.identity.value.keys[0].encryptedPrivateKey,
           patternLockKey);
 
-      final dvoteGw =
-          DVoteGateway(widget.backendUri, publicKey: widget.backendPublicKey);
+      final dvoteGw = DVoteGateway(widget.backendUri,
+          publicKey: widget.backendPublicKey, skipHealthCheck: true);
       if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
       // API CALL
-      EntityReference entityRef = EntityReference();
-      entityRef.entityId = widget.entityId;
-
-      final Map<String, dynamic> userInfo = {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "phone": "",
-        "dateOfBirth": ""
-      };
       await validateRegistrationToken(
-          entityRef, widget.validationtoken, userInfo, dvoteGw, privateKey);
+          widget.entityId, widget.validationtoken, dvoteGw, privateKey);
 
       if (!mounted) return;
 
@@ -117,6 +109,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
   @override
   Widget build(BuildContext c) {
     return Scaffold(
+      appBar: TopNavigation(title: getText(context, "Registration")),
       body: Builder(
         builder: (BuildContext context) => Center(
           child: Container(
@@ -126,18 +119,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
               children: <Widget>[
                 Spacer(),
                 Section(
-                  text: _currentStep == Steps.READY
-                      ? getText(
-                              context, "Confirm your registration to {{NAME}}")
-                          .replaceAll("{{NAME}}", widget.entityName)
-                      : getText(context, "Registration to {{NAME}}")
-                          .replaceAll("{{NAME}}", widget.entityName),
-                  withDectoration: false,
+                  text: getText(context, "Confirmation"),
+                  withDectoration: true,
                 ),
-                /*Summary(
-                  maxLines: 10,
-                  text:
-                      "This may take some time, please do not close this screen"),*/
+                Summary(
+                    maxLines: 10,
+                    text: getText(context,
+                            "You are about to register your digital identity to {{NAME}}")
+                        .replaceAll("{{NAME}}", widget.entityName)),
                 buildStep(getText(context, "Authorizing"),
                     getText(context, "Authorized"), Steps.AUTHORIZE_ACTION),
                 buildStep(getText(context, "Confirming"),
