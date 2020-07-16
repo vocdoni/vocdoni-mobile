@@ -105,7 +105,11 @@ The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plu
 
 ### Deep linking
 
-The app accepts `https://app.vocdoni.net/...` links.
+The app accepts Deep Links from the following domains:
+- `app.vocdoni.net`
+- `app.dev.vocdoni.net`
+- `vocdoni.page.link`
+- `vocdonidev.page.link`
 
 To enable them:
 
@@ -113,19 +117,28 @@ To enable them:
 	- Also place `linking/assetlink.json` on `https://app.dev.vocdoni.net/.well-known/assetlinks.json`
 - Place `linking/apple-app-site-association` on `https://app.vocdoni.net/.well-known/apple-app-site-association`
 
-Supported Paths:
-- `https://app.vocdoni.net/#/entities/<entity-id>`
-- `https://app.vocdoni.net/#/processes/<entity-id>/<process-id>`
-- `https://app.vocdoni.net/#/posts/<entity-id>/<idx>`
+#### Supported Paths and Parameters
+- `app.vocdoni.net` and `app.dev.vocdoni.net`
+	- `https://app.vocdoni.net/entities/#/<entity-id>`
+	- ~~`https://app.vocdoni.net/entities/#/<process-id>`~~
+	- ~~`https://app.vocdoni.net/news/#/<process-id>`~~
+	- `https://app.vocdoni.net/validation/#/<entity-id>/<validation-token>`
 
 The same applies to `app.dev.vocdoni.net`
 
-The app also accepts URI's using the `vocdoni:` schema:
-- `vocdoni://vocdoni.app/#/entities/<entity-id>`
-- `vocdoni://vocdoni.app/#/processes/<entity-id>/<process-id>`
-- `vocdoni://vocdoni.app/#/posts/<entity-id>/<idx>`
+- `vocdoni.page.link` and `vocdonidev.page.link`
+	- They wrap dynamic links
+	- The `link` query string parameter is extracted, which should contain a link like the ones above from `app.vocdoni.net` and `app.dev.vocdoni.net`
 
-#### Show an organization
+#### Supported Schemas
+
+The app also accepts URI's using the `vocdoni:` schema, with the same paths and parameters as above:
+- `vocdoni://vocdoni.app/entities/#/<entity-id>`
+- ~~`vocdoni://vocdoni.app/processes/#/<entity-id>/<process-id>`~~
+- ~~`vocdoni://vocdoni.app/posts/#/<entity-id>/<idx>`~~
+- `vocdoni://vocdoni.app/validation/#/<entity-id>/<validation-token>`
+
+#### Show an entity
 
 On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
 
