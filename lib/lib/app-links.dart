@@ -5,9 +5,9 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/view-modals/sign-modal.dart';
 import 'package:flutter/foundation.dart';
-import 'package:dvote_common/widgets/toast.dart'; // for kReleaseMode
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
 
 // /////////////////////////////////////////////////////////////////////////////
 // / MAIN
@@ -49,8 +49,13 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
       case "entities":
         indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
             context: scaffoldBodyContext);
-        await handleEntityLink(pathSegments, hashSegments,
+        await handleEntityLink(hashSegments, context: scaffoldBodyContext);
+        indicator.close();
+        break;
+      case "validation":
+        indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
             context: scaffoldBodyContext);
+        await handleValidationLink(hashSegments, context: scaffoldBodyContext);
         indicator.close();
         break;
       // case "signature":
@@ -74,42 +79,24 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // / HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleEntityLink(List<String> pathSegments, List<String> hashSegments,
+Future handleEntityLink(List<String> hashSegments,
     {@required BuildContext context}) async {
   // Possible values:
-  // https://dev.vocdoni.link/entities/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
-  // https://app.vocdoni.dev/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  // https://app.vocdoni.net/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  // https://app.dev.vocdoni.net/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
 
   String entityId;
-  if (pathSegments.length >= 2 &&
-      pathSegments[1] is String &&
-      RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(pathSegments[1])) {
-    entityId = pathSegments[1];
-  } else if (hashSegments[0] is String &&
-      RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(hashSegments[0])) {
+  if (hashSegments[0] is String &&
+      RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0])) {
     entityId = hashSegments[0];
   }
 
   if (!(entityId is String)) {
     throw LinkingError("Invalid entityId");
   }
-  // } else if (!(entryPoints is List) || entryPoints.length == 0) {
-  //   throw LinkingError("Invalid entryPoints");
-
-  // List<String> validEntryPoints = entryPoints
-  //     .map((String uri) {
-  //       try {
-  //         return Uri.decodeFull(uri);
-  //       } catch (err) {
-  //         throw LinkingError("Invalid entry point URI");
-  //       }
-  //     })
-  //     .where((uri) => uri != null)
-  //     .toList();
 
   EntityReference entityRef = EntityReference();
   entityRef.entityId = entityId;
-  // entityRef.entryPoints.addAll(validEntryPoints);
 
   final entityModel = EntityModel(entityRef);
 
@@ -130,25 +117,72 @@ Future handleEntityLink(List<String> pathSegments, List<String> hashSegments,
   }
 }
 
-showSignatureScreen(
-    {@required BuildContext context,
-    @required String payload,
-    @required String returnUri}) {
-  if (!(payload is String) || payload.length == 0) {
-    throw LinkingError("Invalid payload");
-  } else if (!(returnUri is String) || returnUri.length == 0) {
-    throw LinkingError("Invalid returnUri");
+Future handleValidationLink(List<String> hashSegments,
+    {@required BuildContext context}) async {
+  // Possible values:
+  // https://app.vocdoni.net/validation/#/0x-entity-id/0x-token
+  // https://app.dev.vocdoni.net/validation/#/0x-entity-id/0x-token
+
+  if (hashSegments.length < 2 ||
+      !(hashSegments[0] is String) ||
+      !(hashSegments[1] is String)) {
+    throw LinkingError("Invalid validation link");
+  } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0]) ||
+      !RegExp(r"^0x[a-zA-Z0-9]{64}$").hasMatch(hashSegments[1])) {
+    throw LinkingError("Invalid validation link");
   }
 
-  payload = Uri.decodeFull(payload);
-  final rtnUri = Uri.parse(returnUri);
-  if (rtnUri == null) throw LinkingError("Invalid return URI");
+  final entityId = hashSegments[0];
+  final validationToken = hashSegments[1];
 
-  final SignModalArguments args =
-      SignModalArguments(payload: payload, returnUri: rtnUri);
+  EntityReference entityRef = EntityReference();
+  entityRef.entityId = entityId;
 
-  Navigator.pushNamed(context, "/signature", arguments: args);
+  final entityModel = EntityModel(entityRef);
+
+  try {
+    // fetch metadata from the reference. The view will fetch the rest.
+    await entityModel.refreshMetadata();
+
+    final currentAccount = globalAppState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    // subscribe if not already
+    await currentAccount.subscribe(entityModel);
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => RegisterValidationPage(
+                entityId: entityId,
+                entityName: entityModel.metadata.value.name["default"],
+                backendUri: entityModel.registerAction.value.url,
+                validationtoken: validationToken)));
+  } catch (err) {
+    throw Exception(getText(context, "Could not fetch the entity details"));
+  }
 }
+
+// showSignatureScreen(
+//     {@required BuildContext context,
+//     @required String payload,
+//     @required String returnUri}) {
+//   if (!(payload is String) || payload.length == 0) {
+//     throw LinkingError("Invalid payload");
+//   } else if (!(returnUri is String) || returnUri.length == 0) {
+//     throw LinkingError("Invalid returnUri");
+//   }
+
+//   payload = Uri.decodeFull(payload);
+//   final rtnUri = Uri.parse(returnUri);
+//   if (rtnUri == null) throw LinkingError("Invalid return URI");
+
+//   final SignModalArguments args =
+//       SignModalArguments(payload: payload, returnUri: rtnUri);
+
+//   Navigator.pushNamed(context, "/signature", arguments: args);
+// }
 
 // /////////////////////////////////////////////////////////////////////////////
 // / GENERATORS

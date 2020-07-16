@@ -42,27 +42,29 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: TopNavigation(
-          title: " ",
-          showBackButton: true,
-          onBackButton: onCancel,
-        ),
-        body: Builder(
-            builder: (context) => Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Spacer(flex: 3),
-                      Section(
-                        withDectoration: false,
-                        text: getText(context, "Unlock"),
-                      ),
-                      Spacer(),
-                      Center(
-                        child: buildConfirming(context),
-                      ),
-                      Spacer(),
-                    ])));
+      appBar: TopNavigation(
+        title: " ",
+        showBackButton: true,
+        onBackButton: onCancel,
+      ),
+      body: Builder(
+        builder: (context) => Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Spacer(flex: 3),
+              Section(
+                withDectoration: false,
+                text: getText(context, "Unlock"),
+              ),
+              Spacer(),
+              Center(
+                child: buildConfirming(context),
+              ),
+              Spacer(),
+            ]),
+      ),
+    );
   }
 
   onCancel() {
