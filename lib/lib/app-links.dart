@@ -128,7 +128,8 @@ Future handleValidationLink(List<String> hashSegments,
       !(hashSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
   } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0]) ||
-      !RegExp(r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$").hasMatch(hashSegments[1])) {
+      !RegExp(r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$")
+          .hasMatch(hashSegments[1])) {
     throw LinkingError("Invalid validation link");
   }
 
@@ -143,7 +144,6 @@ Future handleValidationLink(List<String> hashSegments,
   try {
     // fetch metadata from the reference. The view will fetch the rest.
     await entityModel.refreshMetadata();
-    await entityModel.refreshVisibleActions();
 
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
@@ -151,14 +151,20 @@ Future handleValidationLink(List<String> hashSegments,
     // subscribe if not already
     await currentAccount.subscribe(entityModel);
 
+    final name = entityModel.metadata.value?.name["default"];
+    if (!(name is String)) throw Exception("Invalid entity data");
+    final uri = entityModel.metadata.value?.actions[0]?.url;
+    if (!(uri is String) || uri.length < 1)
+      throw Exception("Invalid entity data");
+
     Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => RegisterValidationPage(
                 entityId: entityId,
-                entityName: entityModel.metadata.value.name["default"],
-                backendUri: entityModel.registerAction.value.url,
+                entityName: name,
+                backendUri: uri,
                 validationtoken: validationToken)));
   } catch (err) {
     throw Exception(getText(context, "Could not fetch the entity details"));

@@ -42,6 +42,8 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     globalAnalytics.trackPage("RegisterValidationPage");
 
+    // TODO: Check if already registered
+
     _currentStep = Steps.READY;
   }
 
@@ -99,10 +101,17 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
           context: context, purpose: Purpose.GOOD);
     } catch (error) {
       if (!mounted) return;
-
       setState(() => _currentStep = Steps.READY);
-      showMessage(getText(context, "The registration could not be completed"),
-          purpose: Purpose.DANGER, context: context);
+
+      // Already registered?
+      if (error.toString() == "Exception: duplicate user") {
+        showMessage(getText(context, "You are already registered"),
+            purpose: Purpose.GOOD, context: context);
+        Navigator.of(context).pop();
+      } else {
+        showMessage(getText(context, "The registration could not be completed"),
+            purpose: Purpose.DANGER, context: context);
+      }
     }
   }
 
@@ -119,14 +128,13 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
               children: <Widget>[
                 Spacer(),
                 Section(
-                  text: getText(context, "Confirmation"),
+                  text: widget.entityName,
                   withDectoration: true,
                 ),
                 Summary(
                     maxLines: 10,
                     text: getText(context,
-                            "You are about to register your digital identity to {{NAME}}")
-                        .replaceAll("{{NAME}}", widget.entityName)),
+                        "You are about to validate your digital identity. Do you want to continue?")),
                 buildStep(getText(context, "Authorizing"),
                     getText(context, "Authorized"), Steps.AUTHORIZE_ACTION),
                 buildStep(getText(context, "Confirming"),
