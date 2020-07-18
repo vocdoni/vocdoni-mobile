@@ -42,8 +42,6 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     globalAnalytics.trackPage("RegisterValidationPage");
 
-    // TODO: Check if already registered
-
     _currentStep = Steps.READY;
   }
 
@@ -88,6 +86,16 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       final dvoteGw = DVoteGateway(widget.backendUri,
           publicKey: widget.backendPublicKey, skipHealthCheck: true);
       if (dvoteGw == null) throw Exception("No DVote gateway is available");
+
+      // Already registered?
+      final status =
+          await registrationStatus(widget.entityId, dvoteGw, privateKey);
+      if (status["registered"] == true) {
+        showMessage(getText(context, "You are already registered"),
+            purpose: Purpose.GOOD, context: context);
+        Navigator.of(context).pop();
+        return;
+      }
 
       // API CALL
       await validateRegistrationToken(
