@@ -4,18 +4,15 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:dvote_common/widgets/baseButton.dart';
+// import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/unlockPattern/drawPattern.dart';
+import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/constants/settings.dart';
 
-enum PatternStep {
-  PATTERN_SETTING,
-  PATTERN_WAITING_CONFIRM,
-  PATTERN_CONFIRMING
-}
+enum PatternStep { READY, CONFIRMING, DONE }
 
 /// This component prompts for a visual lock patten, which is transformed into a passphrase
 /// and returned as a string via the router.
@@ -29,15 +26,15 @@ class PatternCreateModal extends StatefulWidget {
 }
 
 class _PatternCreateModalState extends State<PatternCreateModal> {
-  int minPatternDots = 5;
-  int maxPatternDots = 100;
-  double widthSize = 300;
-  double dotRadius = 5;
-  double hitRadius = 20;
-  int toasterDuration = 3;
-  Color hitColor = Colors.transparent;
+  final minPatternDots = 5;
+  final maxPatternDots = 100;
+  final widthSize = 300.0;
+  final dotRadius = 5.0;
+  final hitRadius = 20.0;
+  final toasterDuration = 3;
+  final hitColor = Colors.transparent;
   Color patternColor = colorBlue;
-  PatternStep patternStep = PatternStep.PATTERN_SETTING;
+  PatternStep patternStep = PatternStep.READY;
   List<int> setPattern = [];
 
   @override
@@ -48,76 +45,96 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
   @override
   Widget build(BuildContext context) {
+    String message = "";
+    switch (patternStep) {
+      case PatternStep.READY:
+        message =
+            getText(context, "Draw a pattern to lock your identity") + ". ";
+        message += getText(context,
+                    "Your pattern should include at least {{NUM}} dots")
+                .replaceAll("{{NUM}}", minPatternDots.toString()) +
+            ".";
+        break;
+      case PatternStep.CONFIRMING:
+        message = getText(context,
+            "Confirm the lock pattern you entered to create your identity");
+        break;
+      case PatternStep.DONE:
+        message = getText(context,
+            "Your pattern has been set, you will need it to unlock your identity");
+        break;
+    }
+
     return Scaffold(
       appBar: TopNavigation(
         title: " ",
         showBackButton:
-            widget.canGoBack || patternStep == PatternStep.PATTERN_CONFIRMING,
+            widget.canGoBack || patternStep == PatternStep.CONFIRMING,
         onBackButton: onCancel,
       ),
       body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Spacer(flex: 3),
-            Section(
-              withDectoration: false,
-              text: patternStep == PatternStep.PATTERN_SETTING ||
-                      patternStep == PatternStep.PATTERN_WAITING_CONFIRM
-                  ? getText(context, "Set a new pattern")
-                  : getText(context, "Confirm your pattern"),
-            ),
+            Section(text: getText(context, "Lock pattern")),
+            SizedBox(height: 20),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 16, color: colorGuide, fontWeight: FontWeight.w400),
+            ).withHPadding(24),
             Spacer(),
             Center(
-              child: patternStep == PatternStep.PATTERN_SETTING ||
-                      patternStep == PatternStep.PATTERN_WAITING_CONFIRM
-                  ? buildSetting()
-                  : buildConfirming(),
+              child: patternStep == PatternStep.READY
+                  ? buildFirstPass()
+                  : buildSecondPass(),
             ),
-            Spacer(),
-            SizedBox(
-              height: 100,
-              child: Center(
-                child: Container(
-                  child: patternStep != PatternStep.PATTERN_WAITING_CONFIRM
-                      ? null
-                      : BaseButton(
-                          maxWidth: buttonDefaultWidth,
-                          text: getText(context, "Continue"),
-                          // isDisabled:patternState != SetPatternState.waitingConfirmation,
-                          onTap: () => onApprovePattern(),
-                        ),
-                ),
-              ),
-            ),
-            Spacer(),
+            // Spacer(),
+            // SizedBox(
+            //   height: 100,
+            //   child: Center(
+            //     child: Container(
+            //       child: patternStep != PatternStep.WAIT_CONFIRM
+            //           ? null
+            //           : BaseButton(
+            //               maxWidth: buttonDefaultWidth,
+            //               text: getText(context, "Continue"),
+            //               // isDisabled:patternState != SetPatternState.waitingConfirmation,
+            //               onTap: () => onApprovePattern(),
+            //             ),
+            //     ),
+            //   ),
+            // ),
+            Spacer(flex: 3),
           ]),
     );
   }
 
   onCancel() {
-    if (patternStep == PatternStep.PATTERN_CONFIRMING) {
-      resetToSetting();
-    } else {
-      Navigator.pop(context, null);
-    }
+    // if (patternStep == PatternStep.CONFIRMING) {
+    //   resetToSetting();
+    // } else {
+    Navigator.pop(context, null);
+    // }
   }
 
   onApprovePattern() {
     setState(() {
-      patternStep = PatternStep.PATTERN_CONFIRMING;
+      patternStep = PatternStep.CONFIRMING;
     });
   }
 
-  resetToSetting() {
-    setState(() {
-      patternStep = PatternStep.PATTERN_SETTING;
-      patternColor = colorBlue;
-    });
-  }
+  // resetToSetting() {
+  //   setState(() {
+  //     patternStep = PatternStep.READY;
+  //     patternColor = colorBlue;
+  //   });
+  // }
 
   /// Builds the UI of a lock pattern that is entered for the first time
-  DrawPattern buildSetting() {
+  DrawPattern buildFirstPass() {
     return DrawPattern(
         key: Key("SetPattern"),
         gridSize: PATTERN_GRID_SIZE,
@@ -129,48 +146,12 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         patternColor: patternColor,
         dotColor: colorDescription,
         canDraw: true,
-        onPatternStarted: onSettingPatternStart,
-        onPatternStopped: onSettingPatternStop);
-  }
-
-  void onSettingPatternStart(BuildContext context) {
-    setState(() {
-      patternStep = PatternStep.PATTERN_SETTING;
-      patternColor = colorBlue;
-    });
-  }
-
-  void onSettingPatternStop(BuildContext context, List<int> pattern) {
-    if (pattern.length < minPatternDots) {
-      final err =
-          getText(context, "The pattern must have at least {{NUM}} points")
-              .replaceFirst("{{NUM}}", minPatternDots.toString());
-      showMessage(err,
-          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
-      setState(() {
-        patternColor = colorRed;
-      });
-      return;
-    }
-
-    if (pattern.length >= maxPatternDots) {
-      final err =
-          getText(context, "The pattern should not exceed {{NUM}} points")
-              .replaceFirst("{{NUM}}", maxPatternDots.toString());
-      showMessage(err,
-          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
-      return;
-    }
-
-    setState(() {
-      patternColor = colorGreen;
-      setPattern = pattern;
-      patternStep = PatternStep.PATTERN_WAITING_CONFIRM;
-    });
+        onPatternStarted: onFirstPassStart,
+        onPatternStopped: onFirstPassDone);
   }
 
   /// Builds the UI of a lock pattern that is entered for the second time
-  DrawPattern buildConfirming() {
+  DrawPattern buildSecondPass() {
     return DrawPattern(
       key: Key("ConfirmPattern"),
       gridSize: PATTERN_GRID_SIZE,
@@ -182,18 +163,52 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       patternColor: patternColor,
       dotColor: colorDescription,
       canDraw: true,
-      onPatternStarted: onConfirmingPatternStart,
-      onPatternStopped: onConfirmingPatternStop,
+      onPatternStarted: onSecondPassStart,
+      onPatternStopped: onSecondPassDone,
     );
   }
 
-  void onConfirmingPatternStart(BuildContext context) {
+  void onFirstPassStart(BuildContext context) {
+    setState(() {
+      patternStep = PatternStep.READY;
+      patternColor = colorBlue;
+    });
+  }
+
+  void onFirstPassDone(BuildContext context, List<int> newPattern) {
+    if (newPattern.length < minPatternDots) {
+      final err =
+          getText(context, "The pattern needs to have at least {{NUM}} dots")
+              .replaceFirst("{{NUM}}", minPatternDots.toString());
+      showMessage(err,
+          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
+      setState(() {
+        patternColor = colorRed;
+      });
+      return;
+    } else if (newPattern.length >= maxPatternDots) {
+      final err =
+          getText(context, "The pattern should not have more than {{NUM}} dots")
+              .replaceFirst("{{NUM}}", maxPatternDots.toString());
+      showMessage(err,
+          context: context, duration: toasterDuration, purpose: Purpose.DANGER);
+      return;
+    }
+
+    setState(() {
+      patternColor = colorGreen;
+      setPattern = newPattern;
+      patternStep = PatternStep.CONFIRMING;
+    });
+  }
+
+  void onSecondPassStart(BuildContext context) {
     setState(() {
       patternColor = colorBlue;
     });
   }
 
-  void onConfirmingPatternStop(BuildContext context, List<int> pattern) {
+  void onSecondPassDone(BuildContext context, List<int> pattern) {
     // devPrint(pattern.toString() + "==" + setPattern.toString());
 
     if (!listEquals(setPattern, pattern)) {
@@ -201,14 +216,22 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         patternColor = colorRed;
       });
 
-      final err = getText(context, "The patterns you entered don't match");
-      showMessage(err,
+      final msg = getText(context, "The patterns you entered do not match");
+      showMessage(msg,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
     }
 
-    String stringPattern =
-        patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
-    Navigator.pop(context, stringPattern);
+    this.setState(() {
+      patternStep = PatternStep.DONE;
+      patternColor = colorGreen;
+    });
+    showMessage(getText(context, "Your pattern has been set"),
+        context: context, duration: toasterDuration, purpose: Purpose.GOOD);
+
+    Future.delayed(Duration(seconds: 2)).then((_) {
+      final strPattern = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
+      Navigator.pop(context, strPattern);
+    });
   }
 }

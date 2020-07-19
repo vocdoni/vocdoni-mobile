@@ -1,5 +1,8 @@
 // import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
@@ -15,6 +18,7 @@ class IdentityCreatePage extends StatefulWidget {
 
 class _IdentityCreateScreen extends State<IdentityCreatePage> {
   bool generating = false;
+  TextEditingController nameTextFieldController = TextEditingController();
 
   @override
   void initState() {
@@ -31,7 +35,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
             child: Align(
               alignment: Alignment(0, -0.1),
               child: Container(
-                constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+                constraints: BoxConstraints(maxWidth: 320, maxHeight: 400),
                 color: Color(0x00ff0000),
                 child: generating ? buildGenerating() : buildWelcome(context),
               ),
@@ -50,12 +54,21 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         SizedBox(height: 100),
         Center(
           child: TextField(
+              controller: nameTextFieldController,
               textCapitalization: TextCapitalization.words,
               style: TextStyle(fontSize: 20),
+              textAlign: TextAlign.center,
               decoration: InputDecoration(
                   hintText: getText(context, "What's your name?")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
+        SizedBox(height: 100),
+        BaseButton(
+          maxWidth: double.infinity,
+          text: getText(context, "Continue"),
+          // isDisabled:patternState != SetPatternState.waitingConfirmation,
+          onTap: () => createIdentity(context, nameTextFieldController.text),
+        )
       ],
     );
   }
@@ -74,14 +87,32 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   }
 
   createIdentity(BuildContext context, String alias) async {
+    alias = alias.trim();
     if (!(alias is String) || alias == "")
       return;
     else if (alias.length < 2) {
-      showAlert(getText(context, "The identity name is too short"),
-          title: getText(context, "Error"), context: context);
+      showMessage(getText(context, "The name is too short"),
+          context: context, purpose: Purpose.WARNING);
+      return;
+    } else if (RegExp(r"[<>/\\|%=^*`´]").hasMatch(alias)) {
+      showMessage(getText(context, "The name contains invalid symbols"),
+          context: context, purpose: Purpose.WARNING);
       return;
     }
-    String patternEncryptionKey = await Navigator.push(
+
+    final repeated = globalAccountPool.value.any((item) {
+      if (!item.identity.hasValue) return false;
+      return item.identity.value.alias == alias;
+    });
+    if (repeated) {
+      showMessage(
+          getText(context, "You already have an account with this name"),
+          context: context,
+          purpose: Purpose.WARNING);
+      return;
+    }
+
+    final String patternEncryptionKey = await Navigator.push(
       context,
       MaterialPageRoute(
           fullscreenDialog: true,
@@ -92,6 +123,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       return; // showMessage("Pattern was cancelled", context: context);
     }
     // showSuccessMessage("Pattern has been set!", context: context);
+
+    // READY, now create the identity
 
     try {
       setState(() {
