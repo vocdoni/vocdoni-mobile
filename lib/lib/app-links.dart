@@ -165,7 +165,7 @@ Future handleValidationLink(List<String> hashSegments,
                 entityId: entityId,
                 entityName: name,
                 backendUri: uri,
-                validationtoken: validationToken)));
+                validationToken: validationToken)));
   } catch (err) {
     throw Exception(getText(context, "Could not fetch the entity details"));
   }

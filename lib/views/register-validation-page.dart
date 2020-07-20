@@ -20,14 +20,14 @@ class RegisterValidationPage extends StatefulWidget {
   final String entityName;
   final String backendUri;
   final String backendPublicKey;
-  final String validationtoken;
+  final String validationToken;
 
   RegisterValidationPage(
       {@required this.entityId,
       @required this.entityName,
       @required this.backendUri,
       this.backendPublicKey,
-      @required this.validationtoken});
+      @required this.validationToken});
 
   @override
   _RegisterValidationPageState createState() => _RegisterValidationPageState();
@@ -93,13 +93,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       if (status["registered"] == true) {
         showMessage(getText(context, "You are already registered"),
             purpose: Purpose.GOOD, context: context);
+        await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
         return;
       }
 
       // API CALL
       await validateRegistrationToken(
-          widget.entityId, widget.validationtoken, dvoteGw, privateKey);
+          widget.entityId, widget.validationToken, dvoteGw, privateKey);
 
       if (!mounted) return;
 
@@ -115,6 +116,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       if (error.toString() == "Exception: duplicate user") {
         showMessage(getText(context, "You are already registered"),
             purpose: Purpose.GOOD, context: context);
+        await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
         showMessage(getText(context, "The registration could not be completed"),
