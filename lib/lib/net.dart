@@ -79,24 +79,26 @@ Future<GatewayInfo> _getFastestGatewayInfo() async {
   List<BootNodeGateways_NetworkNodes_Web3> web3Nodes;
 
   // Detect the network
-  if (FlavorConfig.instance.constants.networkId == "homestead") {
-    if (globalAppState.bootnodes.value.homestead.dvote.length < 1) {
-      print("The DVote gateway list is empty for Homestead");
-      return null;
-    }
+  switch (FlavorConfig.instance.constants.networkId) {
+    case "homestead":
+    case "mainnet":
+      dvoteNodes = globalAppState.bootnodes.value.homestead.dvote;
+      web3Nodes = globalAppState.bootnodes.value.homestead.web3;
+      break;
+    case "goerli":
+      dvoteNodes = globalAppState.bootnodes.value.goerli.dvote;
+      web3Nodes = globalAppState.bootnodes.value.goerli.web3;
+      break;
+    case "xdai":
+      dvoteNodes = globalAppState.bootnodes.value.xdai.dvote;
+      web3Nodes = globalAppState.bootnodes.value.xdai.web3;
+      break;
+  }
 
-    // PROD
-    dvoteNodes = globalAppState.bootnodes.value.homestead.dvote;
-    web3Nodes = globalAppState.bootnodes.value.homestead.web3;
-  } else {
-    if (globalAppState.bootnodes.value.goerli.dvote.length < 1) {
-      print("The DVote gateway list is empty for Goerli");
-      return null;
-    }
-
-    // DEV
-    dvoteNodes = globalAppState.bootnodes.value.goerli.dvote;
-    web3Nodes = globalAppState.bootnodes.value.goerli.web3;
+  if (dvoteNodes.length < 1) {
+    print("The DVote gateway list is empty for " +
+        FlavorConfig.instance.constants.networkId);
+    return null;
   }
 
   // Find the fastest to respond

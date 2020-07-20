@@ -5,7 +5,7 @@ void main() async {
   // Set the global flavor config in the singleton
   final constants = FlavorConstants(
       gatewayBootNodesUrl: "https://bootnodes.vocdoni.net/gateways.json",
-      networkId: "goerli");
+      networkId: "xdai");
   FlavorConfig(flavor: Flavor.PRODUCTION, constants: constants);
 
   // Start the app

@@ -127,50 +127,52 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
   Widget build(BuildContext c) {
     return Scaffold(
       appBar: TopNavigation(title: getText(context, "Registration")),
-      body: Builder(
-        builder: (BuildContext context) => Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 350),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Spacer(),
-                Section(
-                  text: widget.entityName,
-                  withDectoration: true,
-                ),
-                Summary(
-                    maxLines: 10,
-                    text: getText(context,
-                        "You are about to validate your digital identity. Do you want to continue?")),
-                buildStep(getText(context, "Authorizing"),
-                    getText(context, "Authorized"), Steps.AUTHORIZE_ACTION),
-                buildStep(getText(context, "Confirming"),
-                    getText(context, "Confirmed"), Steps.CONFIRM_TOKEN),
-                Spacer(),
-                _currentStep != Steps.READY
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.all(paddingPage),
-                        child: BaseButton(
-                            text: getText(context, "Confirm"),
-                            isSmall: false,
-                            style: BaseButtonStyle.FILLED,
-                            purpose: Purpose.HIGHLIGHT,
-                            onTap: () => stepConfirmToken(context)),
-                      ),
-                _currentStep != Steps.DONE
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.all(paddingPage),
-                        child: BaseButton(
-                            text: getText(context, "Close"),
-                            isSmall: false,
-                            style: BaseButtonStyle.FILLED,
-                            purpose: Purpose.HIGHLIGHT,
-                            onTap: () => Navigator.of(context).pop()),
-                      )
-              ],
+      body: SafeArea(
+        child: Builder(
+          builder: (BuildContext context) => Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 350),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Spacer(),
+                  Section(
+                    text: widget.entityName,
+                    withDectoration: true,
+                  ),
+                  Summary(
+                      maxLines: 10,
+                      text: getText(context,
+                          "You are about to validate your digital identity. Do you want to continue?")),
+                  buildStep(getText(context, "Authorizing"),
+                      getText(context, "Authorized"), Steps.AUTHORIZE_ACTION),
+                  buildStep(getText(context, "Confirming"),
+                      getText(context, "Confirmed"), Steps.CONFIRM_TOKEN),
+                  Spacer(),
+                  _currentStep != Steps.READY
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.all(paddingPage),
+                          child: BaseButton(
+                              text: getText(context, "Confirm"),
+                              isSmall: false,
+                              style: BaseButtonStyle.FILLED,
+                              purpose: Purpose.HIGHLIGHT,
+                              onTap: () => stepConfirmToken(context)),
+                        ),
+                  _currentStep != Steps.DONE
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.all(paddingPage),
+                          child: BaseButton(
+                              text: getText(context, "Close"),
+                              isSmall: false,
+                              style: BaseButtonStyle.FILLED,
+                              purpose: Purpose.HIGHLIGHT,
+                              onTap: () => Navigator.of(context).pop()),
+                        )
+                ],
+              ),
             ),
           ),
         ),
