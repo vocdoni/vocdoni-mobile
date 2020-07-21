@@ -109,7 +109,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
   }
 
   launchUrl(String url) async {
-    print(url);
+    // print(url);
     if (await canLaunch(url)) {
       await launch(url);
     } else {

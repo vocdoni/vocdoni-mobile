@@ -2,6 +2,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -13,6 +14,7 @@ import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:dvote/crypto/encryption.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeIdentityTab extends StatefulWidget {
   HomeIdentityTab();
@@ -60,9 +62,19 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
             ListItem(
               mainText: getText(context, "Back up my identity"),
               onTap: () => showIdentityBackup(ctx),
+              icon: FeatherIcons.archive,
             ),
             ListItem(
+                mainText: getText(context, "Help"),
+                icon: FeatherIcons.lifeBuoy,
+                onTap: () {
+                  canLaunch(HELP_URL).then((ok) {
+                    if (ok) launch(HELP_URL);
+                  });
+                }),
+            ListItem(
                 mainText: getText(context, "Log out"),
+                icon: FeatherIcons.logOut,
                 onTap: () {
                   onLogOut(ctx);
                 }),
@@ -70,6 +82,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                 ? Container()
                 : ListItem(
                     mainText: getText(context, "Development testing"),
+                    icon: FeatherIcons.info,
                     onTap: () {
                       onDevelopmentTesting(ctx);
                     })

@@ -16,9 +16,16 @@ import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMod
 Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   if (!(newLink is Uri)) throw Exception();
 
-  // Accepted domains:
+  // DEEP LINKS
   // - app.vocdoni.net, app.dev.vocdoni.net => Use as they are
+  //    - https://<domain>/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  //    - https://<domain>/validation/#/0x-entity-id/0x-token
   // - vocdoni.page.link, vocdonidev.page.link => Extract the `link` parameter
+
+  // QR SCAN LINKS
+  // - vocdoni.link, dev.vocdoni.link
+  //    - https://vocdoni.link/entities/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  //    - https://vocdoni.link/validation/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46/token-1234
 
   if (newLink.host == "vocdoni.page.link" ||
       newLink.host == "vocdonidev.page.link") {
@@ -34,6 +41,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   }
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
+  // Merge path and hash segments
   final pathSegments = newLink.pathSegments
       .where((str) => str.length > 0)
       .cast<String>()
@@ -44,18 +52,24 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
       .cast<String>()
       .toList();
 
+  final allSegments = <String>[];
+  allSegments.addAll(pathSegments);
+  allSegments.addAll(hashSegments);
+
   try {
-    switch (pathSegments[0]) {
+    switch (allSegments[0]) {
       case "entities":
         indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
             context: scaffoldBodyContext);
-        await handleEntityLink(hashSegments, context: scaffoldBodyContext);
+        await handleEntityLink(allSegments.skip(1).toList(),
+            context: scaffoldBodyContext);
         indicator.close();
         break;
       case "validation":
         indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
             context: scaffoldBodyContext);
-        await handleValidationLink(hashSegments, context: scaffoldBodyContext);
+        await handleValidationLink(allSegments.skip(1).toList(),
+            context: scaffoldBodyContext);
         indicator.close();
         break;
       // case "signature":
@@ -65,9 +79,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
       //       context: scaffoldBodyContext);
       //   break;
       default:
-        if (!kReleaseMode)
-          throw LinkingError(
-              "Invalid path"); // Throw on debug, ignore on release
+        throw LinkingError("Invalid path");
     }
   } catch (err) {
     if (indicator != null) indicator.close();
@@ -79,16 +91,14 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // / HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleEntityLink(List<String> hashSegments,
+Future handleEntityLink(List<String> paramSegments,
     {@required BuildContext context}) async {
-  // Possible values:
-  // https://app.vocdoni.net/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
-  // https://app.dev.vocdoni.net/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46" ]
 
   String entityId;
-  if (hashSegments[0] is String &&
-      RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0])) {
-    entityId = hashSegments[0];
+  if (paramSegments[0] is String &&
+      RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(paramSegments[0])) {
+    entityId = paramSegments[0];
   }
 
   if (!(entityId is String)) {
@@ -117,24 +127,22 @@ Future handleEntityLink(List<String> hashSegments,
   }
 }
 
-Future handleValidationLink(List<String> hashSegments,
+Future handleValidationLink(List<String> paramSegments,
     {@required BuildContext context}) async {
-  // Possible values:
-  // https://app.vocdoni.net/validation/#/0x-entity-id/0x-token
-  // https://app.dev.vocdoni.net/validation/#/0x-entity-id/0x-token
+  // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46", "token-1234" ]
 
-  if (hashSegments.length < 2 ||
-      !(hashSegments[0] is String) ||
-      !(hashSegments[1] is String)) {
+  if (paramSegments.length < 2 ||
+      !(paramSegments[0] is String) ||
+      !(paramSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
-  } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(hashSegments[0]) ||
+  } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(paramSegments[0]) ||
       !RegExp(r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$")
-          .hasMatch(hashSegments[1])) {
+          .hasMatch(paramSegments[1])) {
     throw LinkingError("Invalid validation link");
   }
 
-  final entityId = hashSegments[0];
-  final validationToken = hashSegments[1];
+  final entityId = paramSegments[0];
+  final validationToken = paramSegments[1];
 
   EntityReference entityRef = EntityReference();
   entityRef.entityId = entityId;
