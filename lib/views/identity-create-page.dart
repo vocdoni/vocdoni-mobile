@@ -80,10 +80,10 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               // maxLines: 2,
               text: TextSpan(text: '', children: [
                 TextSpan(
-                    text: getText(context, "I accept the") + " ",
+                    text: getText(context, "I accept") + " ",
                     style: TextStyle(color: Color(0xff888888))),
                 TextSpan(
-                  text: "Privacy Policy",
+                  text: getText(context, "the Privacy Policy"),
                   style: TextStyle(
                       color: Color(0xff888888),
                       decoration: TextDecoration.underline),
@@ -92,10 +92,10 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
                         () => launch("https://vocdoni.io/privacy-policy/)"),
                 ),
                 TextSpan(
-                    text: " " + getText(context, "and the") + " ",
+                    text: " " + getText(context, "and") + " ",
                     style: TextStyle(color: Color(0xff888888))),
                 TextSpan(
-                  text: "Terms of Service",
+                  text: getText(context, "the Terms of Service"),
                   style: TextStyle(
                       color: Color(0xff888888),
                       decoration: TextDecoration.underline),
