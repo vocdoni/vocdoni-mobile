@@ -136,7 +136,7 @@ Future handleValidationLink(List<String> paramSegments,
       !(paramSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
   } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(paramSegments[0]) ||
-      !RegExp(r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$")
+      !RegExp(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
           .hasMatch(paramSegments[1])) {
     throw LinkingError("Invalid validation link");
   }
