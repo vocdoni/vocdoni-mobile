@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote/wrappers/process-keys.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -197,72 +198,81 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   @override
   Widget build(BuildContext c) {
     return Scaffold(
+      appBar: TopNavigation(
+        title: getText(context, "Participation"),
+        showBackButton: true,
+        onBackButton: () {
+          Navigator.of(context).pop();
+        },
+      ),
       body: Builder(
-        builder: (BuildContext context) => Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 350),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Spacer(),
-                Section(
-                  text: _currentStep == 0
-                      ? getText(context, "Ready when you are")
-                      : getText(context, "Delivering the vote"),
-                  withDectoration: true,
-                ),
-                /*Summary(
-                  maxLines: 10,
-                  text:
-                      "This may take some time, please do not close this screen"),*/
-                buildStep(getText(context, "Sigining"),
-                    getText(context, "Signed"), 1),
-                // buildStep("Generating proof", "Proof generated", 2),
-                buildStep(getText(context, "Delivering"),
-                    getText(context, "Sent"), 2),
-                buildStep(getText(context, "Waiting confirmation"),
-                    getText(context, "Confirmed"), 3),
-                Spacer(),
-                // Padding(
-                //   padding: EdgeInsets.all(48),
-                //   child: BaseButton(
-                //       text: "Return",
-                //       isSmall: true,
-                //       style: BaseButtonStyle.OUTLINE,
-                //       maxWidth: buttonDefaultWidth,
-                //       //purpose: Purpose.HIGHLIGHT,
-                //       //isDisabled: true,
-                //       onTap: () {
-                //         setState(() {
-                //           _currentStep++;
-                //         });
-                //         if (_currentStep == 5) Navigator.pop(context, false);
-                //       }),
-                // ),
+        builder: (BuildContext context) => SafeArea(
+          child: Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 350),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Spacer(),
+                  Section(
+                    text: _currentStep == 0
+                        ? getText(context, "Ready when you are")
+                        : getText(context, "Delivering the vote"),
+                    withDectoration: true,
+                  ),
+                  /*Summary(
+                    maxLines: 10,
+                    text:
+                        "This may take some time, please do not close this screen"),*/
+                  buildStep(getText(context, "Sigining"),
+                      getText(context, "Signed"), 1),
+                  // buildStep("Generating proof", "Proof generated", 2),
+                  buildStep(getText(context, "Delivering"),
+                      getText(context, "Sent"), 2),
+                  buildStep(getText(context, "Waiting confirmation"),
+                      getText(context, "Confirmed"), 3),
+                  Spacer(),
+                  // Padding(
+                  //   padding: EdgeInsets.all(48),
+                  //   child: BaseButton(
+                  //       text: "Return",
+                  //       isSmall: true,
+                  //       style: BaseButtonStyle.OUTLINE,
+                  //       maxWidth: buttonDefaultWidth,
+                  //       //purpose: Purpose.HIGHLIGHT,
+                  //       //isDisabled: true,
+                  //       onTap: () {
+                  //         setState(() {
+                  //           _currentStep++;
+                  //         });
+                  //         if (_currentStep == 5) Navigator.pop(context, false);
+                  //       }),
+                  // ),
 
-                _currentStep != 0
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.all(paddingPage),
-                        child: BaseButton(
-                            text: getText(context, "Confirm"),
-                            isSmall: false,
-                            style: BaseButtonStyle.FILLED,
-                            purpose: Purpose.HIGHLIGHT,
-                            onTap: () => stepMakeEnvelope(context)),
-                      ),
-                _currentStep != 4
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.all(paddingPage),
-                        child: BaseButton(
-                            text: getText(context, "Close"),
-                            isSmall: false,
-                            style: BaseButtonStyle.FILLED,
-                            purpose: Purpose.HIGHLIGHT,
-                            onTap: () => Navigator.of(context).pop()),
-                      )
-              ],
+                  _currentStep != 0
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.all(paddingPage),
+                          child: BaseButton(
+                              text: getText(context, "Confirm"),
+                              isSmall: false,
+                              style: BaseButtonStyle.FILLED,
+                              purpose: Purpose.HIGHLIGHT,
+                              onTap: () => stepMakeEnvelope(context)),
+                        ),
+                  _currentStep != 4
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.all(paddingPage),
+                          child: BaseButton(
+                              text: getText(context, "Close"),
+                              isSmall: false,
+                              style: BaseButtonStyle.FILLED,
+                              purpose: Purpose.HIGHLIGHT,
+                              onTap: () => Navigator.of(context).pop()),
+                        )
+                ],
+              ),
             ),
           ),
         ),
