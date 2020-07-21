@@ -183,9 +183,6 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           if (restoring) return renderLoading();
 
           return ListView(children: <Widget>[
-            Text(getText(context,
-                    "Please, get the seed phrase of your wallet and enter the words below, separated by spaces."))
-                .withPadding(16),
             TextField(
               controller: nameController,
               focusNode: nameNode,
@@ -206,6 +203,9 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
                 hintText: getText(context, 'Seed phrase'),
               ),
             ).withPadding(16).withTopPadding(8),
+            Text(getText(context,
+                    "Please, get the seed phrase of your wallet and enter the words below, separated by spaces."))
+                .withPadding(16),
             renderOkButton(context),
           ]);
         },

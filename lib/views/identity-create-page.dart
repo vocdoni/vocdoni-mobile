@@ -3,7 +3,9 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -18,6 +20,7 @@ class IdentityCreatePage extends StatefulWidget {
 
 class _IdentityCreateScreen extends State<IdentityCreatePage> {
   bool generating = false;
+  bool termsAccepted = false;
   TextEditingController nameTextFieldController = TextEditingController();
 
   @override
@@ -62,11 +65,54 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
                   hintText: getText(context, "What's your name?")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
-        SizedBox(height: 100),
+        SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Checkbox(
+                value: termsAccepted,
+                onChanged: (value) {
+                  this.setState(() => {this.termsAccepted = value});
+                },
+                activeColor: Theme.of(context).primaryColor),
+            Expanded(
+                child: RichText(
+              // maxLines: 2,
+              text: TextSpan(text: '', children: [
+                TextSpan(
+                    text: getText(context, "I accept the") + " ",
+                    style: TextStyle(color: Color(0xff888888))),
+                TextSpan(
+                  text: "Privacy Policy",
+                  style: TextStyle(
+                      color: Color(0xff888888),
+                      decoration: TextDecoration.underline),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap =
+                        () => launch("https://vocdoni.io/privacy-policy/)"),
+                ),
+                TextSpan(
+                    text: " " + getText(context, "and the") + " ",
+                    style: TextStyle(color: Color(0xff888888))),
+                TextSpan(
+                  text: "Terms of Service",
+                  style: TextStyle(
+                      color: Color(0xff888888),
+                      decoration: TextDecoration.underline),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap =
+                        () => launch("https://vocdoni.io/terms-of-service/"),
+                ),
+              ]),
+            )),
+          ],
+        ),
+        SizedBox(height: 20),
         BaseButton(
           maxWidth: double.infinity,
+          purpose: Purpose.HIGHLIGHT,
           text: getText(context, "Continue"),
-          // isDisabled:patternState != SetPatternState.waitingConfirmation,
+          isDisabled: !termsAccepted,
           onTap: () => createIdentity(context, nameTextFieldController.text),
         )
       ],
@@ -87,6 +133,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   }
 
   createIdentity(BuildContext context, String alias) async {
+    if (!termsAccepted) return;
+
     alias = alias.trim();
     if (!(alias is String) || alias == "")
       return;

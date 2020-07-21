@@ -1,3 +1,4 @@
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -35,10 +36,12 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                       buildExistingIdentities(context, globalAccountPool.value),
                       ListItem(
                           mainText: getText(context, "Create a new identity"),
+                          icon: FeatherIcons.plusCircle,
                           onTap: () => createNew(context)),
                       ListItem(
                           mainText:
                               getText(context, "Restore an existing identity"),
+                          icon: FeatherIcons.fileText,
                           onTap: () => restorePreviousIdentity(context)),
                     ],
                   )),
@@ -54,6 +57,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
       list.add(ListItem(
         mainText: accounts[i].identity.value.alias,
+        icon: FeatherIcons.user,
         onTap: () => onAccountSelected(ctx, accounts[i], i),
       ));
     }
