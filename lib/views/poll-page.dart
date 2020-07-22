@@ -99,7 +99,7 @@ class _PollPageState extends State<PollPage> {
               : makeElementTag(
                   entity.reference.entityId, process.processId, index),
           avatarHexSource: process.processId,
-          appBarTitle: getText(context, "Poll"),
+          appBarTitle: getText(context, "Vote"),
           actionsBuilder: (context) => [
             buildShareButton(context, process.processId),
           ],
@@ -215,7 +215,7 @@ class _PollPageState extends State<PollPage> {
   buildPollItem(BuildContext context) {
     return ListItem(
       icon: FeatherIcons.barChart2,
-      mainText: getText(context, "Public poll"),
+      mainText: getText(context, "Public vote"),
       rightIcon: null,
       disabled: false,
     );

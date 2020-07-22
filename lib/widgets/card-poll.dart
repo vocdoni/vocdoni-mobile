@@ -108,7 +108,7 @@ class _CardPollState extends State<CardPoll> {
         DashboardRow(
           children: <Widget>[
             DashboardItem(
-              label: getText(context, "Poll"),
+              label: getText(context, "Vote"),
               item: Icon(
                 FeatherIcons.barChart2,
                 size: iconSizeMedium,
@@ -171,17 +171,23 @@ class _CardPollState extends State<CardPoll> {
     if (diff.inSeconds <= 0)
       return getText(context, "now");
     else if (diff.inDays >= 365)
-      return getText(context, "{{NUM}} y").replaceFirst("{{NUM}}", (diff.inDays / 365).floor().toString());
+      return getText(context, "{{NUM}} y")
+          .replaceFirst("{{NUM}}", (diff.inDays / 365).floor().toString());
     else if (diff.inDays >= 30)
-      return getText(context, "{{NUM}} mo").replaceFirst("{{NUM}}", (diff.inDays / 28).floor().toString());
+      return getText(context, "{{NUM}} mo")
+          .replaceFirst("{{NUM}}", (diff.inDays / 28).floor().toString());
     else if (diff.inDays >= 1)
-      return getText(context, "{{NUM}} d").replaceFirst("{{NUM}}", diff.inDays.toString());
+      return getText(context, "{{NUM}} d")
+          .replaceFirst("{{NUM}}", diff.inDays.toString());
     else if (diff.inHours >= 1)
-      return getText(context, "{{NUM}} h").replaceFirst("{{NUM}}", diff.inHours.toString());
+      return getText(context, "{{NUM}} h")
+          .replaceFirst("{{NUM}}", diff.inHours.toString());
     else if (diff.inMinutes >= 1)
-      return getText(context, "{{NUM}} min").replaceFirst("{{NUM}}", diff.inMinutes.toString());
+      return getText(context, "{{NUM}} min")
+          .replaceFirst("{{NUM}}", diff.inMinutes.toString());
     else
-      return getText(context, "{{NUM}} s").replaceFirst("{{NUM}}", diff.inSeconds.toString());
+      return getText(context, "{{NUM}} s")
+          .replaceFirst("{{NUM}}", diff.inSeconds.toString());
   }
 
   onCardTapped(BuildContext context) {
