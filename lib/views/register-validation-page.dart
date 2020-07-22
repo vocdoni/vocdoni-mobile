@@ -113,7 +113,8 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       setState(() => _currentStep = Steps.READY);
 
       // Already registered?
-      if (error.toString().contains("Exception: duplicate user")) {
+      if (error.toString().contains("duplicate user") ||
+          error.toString().contains("already registered")) {
         showMessage(getText(context, "You are already registered"),
             purpose: Purpose.GOOD, context: context);
         await Future.delayed(Duration(seconds: 2));

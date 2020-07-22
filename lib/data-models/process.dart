@@ -426,7 +426,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       devPrint(
           "- Refreshing process currentParticipants [ERROR: $err] [${this.processId}]");
 
-      this.currentParticipants.setError("The census info is not available");
+      this.currentParticipants.setError("The process info is not available");
     });
   }
 
