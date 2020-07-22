@@ -118,7 +118,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: f1ced0bcd15da5849684d13affa46999cb2a791b
+      resolved-ref: c32a65273076e34a499a1c5c13fb8f5574e59288
       url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
     source: git
     version: "0.1.0"

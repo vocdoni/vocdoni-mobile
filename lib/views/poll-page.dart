@@ -228,6 +228,7 @@ class _PollPageState extends State<PollPage> {
       builder: (context, _, __) {
         String rowText;
 
+        Purpose purpose;
         if (process.startDate is DateTime &&
             DateTime.now().isBefore(process.startDate)) {
           // TODO: Localize date formats
@@ -235,22 +236,27 @@ class _PollPageState extends State<PollPage> {
               DateFormat("dd/MM HH:mm").format(process.startDate) + "h";
           rowText = getText(context, "Starting on {{DATE}}")
               .replaceFirst("{{DATE}}", formattedTime);
+          purpose = Purpose.WARNING;
         } else if (process.endDate is DateTime) {
           // TODO: Localize date formats
           final formattedTime =
               DateFormat("dd/MM HH:mm").format(process.endDate) + "h";
 
-          if (process.endDate.isBefore(DateTime.now()))
+          if (process.endDate.isBefore(DateTime.now())) {
             rowText = getText(context, "Ended on {{DATE}}")
                 .replaceFirst(("{{DATE}}"), formattedTime);
-          else
+            purpose = Purpose.WARNING;
+          } else {
             rowText = getText(context, "Ending on {{DATE}}")
                 .replaceFirst(("{{DATE}}"), formattedTime);
+            purpose = Purpose.GOOD;
+          }
         }
 
         if (rowText is String) {
           return ListItem(
             icon: FeatherIcons.clock,
+            purpose: purpose,
             mainText: rowText,
             //secondaryText: "18/09/2019 at 19:00",
             rightIcon: null,
@@ -320,7 +326,7 @@ class _PollPageState extends State<PollPage> {
     await Navigator.push(ctx, newRoute);
   }
 
-  buildSubmitInfo() {
+  Widget buildSubmitInfo() {
     // rebuild when isInCensus or hasVoted change
     return EventualBuilder(
       notifiers: [process.hasVoted, process.isInCensus],
@@ -398,7 +404,7 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  buildShareButton(BuildContext context, String processId) {
+  Widget buildShareButton(BuildContext context, String processId) {
     return BaseButton(
         leftIconData: FeatherIcons.share2,
         isSmall: false,

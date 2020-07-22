@@ -56,6 +56,9 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   allSegments.addAll(pathSegments);
   allSegments.addAll(hashSegments);
 
+  // Just open the app, do nothing
+  if (allSegments.length == 0) return;
+
   try {
     switch (allSegments[0]) {
       case "entities":

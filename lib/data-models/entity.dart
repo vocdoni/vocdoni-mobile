@@ -475,6 +475,9 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
                     .isRegistered
                     .setError("Could not load the register status");
               });
+              // final status = await registrationStatus(
+              //     this.reference.entityId, dvoteGw, privateKey);
+              // this.isRegistered.setValue(status["registered"] == true);
             } else {
               // standard action
               // in case of error: propagate to the global catcher
@@ -519,6 +522,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   }
 
   // PRIVATE METHODS
+
+  // TODO: DEPRECATED
 
   /// Returns true/false if the value is defined or the request succeeds. Returns null if the request
   /// can't be signed or the response is otherwise undefined.
