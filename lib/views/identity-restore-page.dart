@@ -196,6 +196,8 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
             TextField(
               controller: mnemonicController,
               focusNode: mnemonicNode,
+              autocorrect: false,
+              textCapitalization: TextCapitalization.none,
               minLines: 2,
               maxLines: 4,
               decoration: InputDecoration(

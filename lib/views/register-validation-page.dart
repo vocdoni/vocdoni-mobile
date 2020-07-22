@@ -92,7 +92,9 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
           await registrationStatus(widget.entityId, dvoteGw, privateKey);
       if (status["registered"] == true) {
         showMessage(getText(context, "You are already registered"),
-            purpose: Purpose.GOOD, context: context);
+            purpose: Purpose.HIGHLIGHT, context: context);
+
+        setState(() => _currentStep = Steps.DONE);
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
         return;
@@ -116,7 +118,9 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       if (error.toString().contains("duplicate user") ||
           error.toString().contains("already registered")) {
         showMessage(getText(context, "You are already registered"),
-            purpose: Purpose.GOOD, context: context);
+            purpose: Purpose.HIGHLIGHT, context: context);
+
+        setState(() => _currentStep = Steps.DONE);
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {

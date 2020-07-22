@@ -269,6 +269,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       this.metadata.setToLoading();
       final newMetadata =
           await getProcessMetadata(this.processId, dvoteGw, web3Gw);
+      if (!(newMetadata is ProcessMetadata))
+        throw Exception("The process cannot be found");
+
       newMetadata.meta[META_PROCESS_ID] =
           this.processId; // Ensure we can read it back
       newMetadata.meta[META_ENTITY_ID] = this.entityId;

@@ -168,7 +168,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildLoadingStatus());
     children.add(buildFeedRow(context));
     children.add(buildParticipationRow(context));
-    children.add(buildActionList(context));
+    // TODO: show back?
+    // children.add(buildActionList(context));
     children.add(Section(text: getText(context, "Details")));
     children.add(summary.Summary(
       text: widget.entityModel.metadata.value

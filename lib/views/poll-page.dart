@@ -125,7 +125,7 @@ class _PollPageState extends State<PollPage> {
     children.add(buildCensusItem(context));
     children.add(buildTimeItem(context));
     children.addAll(buildQuestions(context));
-    children.add(Section());
+    children.add(Section(withDectoration: false));
     children.add(buildSubmitInfo());
     children.add(buildSubmitVoteButton(context));
 
@@ -304,7 +304,7 @@ class _PollPageState extends State<PollPage> {
           padding: EdgeInsets.all(paddingPage),
           child: BaseButton(
               text: getText(context, "Submit"),
-              purpose: Purpose.HIGHLIGHT,
+              purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
               isDisabled: cannotVote,
               onTap: () => onSubmit(ctx, process.metadata)),
         );
@@ -351,7 +351,7 @@ class _PollPageState extends State<PollPage> {
             secondaryText: getText(context,
                 "Register to this organization to participate in the future"),
             secondaryTextMultiline: 5,
-            purpose: Purpose.HIGHLIGHT,
+            purpose: Purpose.DANGER,
             rightIcon: null,
           );
         } else if (process.isInCensus.hasError) {
