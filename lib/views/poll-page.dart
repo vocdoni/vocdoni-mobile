@@ -9,7 +9,6 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
-
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -78,7 +77,7 @@ class _PollPageState extends State<PollPage> {
 
   @override
   Widget build(context) {
-    if (entity == null) return buildEmptyEntity(context);
+    if (entity == null) return buildEmptyPoll(context);
 
     // By the constructor, this.process.metadata is guaranteed to exist
 
@@ -416,13 +415,13 @@ class _PollPageState extends State<PollPage> {
         });
   }
 
-  Widget buildEmptyEntity(BuildContext ctx) {
+  Widget buildEmptyPoll(BuildContext ctx) {
     return Scaffold(
         appBar: TopNavigation(
           title: "",
         ),
         body: Center(
-          child: Text(getText(context, "(No entity)")),
+          child: Text(getText(context, "(No poll)")),
         ));
   }
 

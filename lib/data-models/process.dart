@@ -6,6 +6,8 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/singletons.dart';
+import 'package:convert/convert.dart';
+import 'dart:convert';
 import 'package:vocdoni/lib/util.dart';
 
 /// This class should be used exclusively as a global singleton.
@@ -307,12 +309,15 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     try {
       this.isInCensus.setToLoading();
+      final publicKey =
+          currentAccount.identity.value.keys[0].publicKey?.replaceAll("0x", "");
+      if (!(publicKey is String)) throw Exception("Invalid public key");
 
-      final base64Claim =
-          await digestHexClaim(currentAccount.identity.value.keys[0].publicKey);
+      // Undigested
+      final base64Claim = base64.encode(hex.decode(publicKey));
 
       final proof = await generateProof(
-          this.metadata.value.census.merkleRoot, base64Claim, true, dvoteGw);
+          this.metadata.value.census.merkleRoot, base64Claim, false, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;
@@ -327,7 +332,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       }
 
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
-          base64Claim, true, proof, dvoteGw);
+          base64Claim, false, proof, dvoteGw);
 
       devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
 

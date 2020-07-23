@@ -15,6 +15,8 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:convert/convert.dart';
+import 'dart:convert';
 import 'package:dvote/crypto/encryption.dart';
 
 class PollPackagingPage extends StatefulWidget {
@@ -72,11 +74,12 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     try {
       final publicKey = currentAccount.identity.value.keys[0].publicKey;
-      final publicKeyClaim = await digestHexClaim(publicKey);
+      final base64Claim =
+          base64.encode(hex.decode(publicKey.replaceAll("0x", "")));
       merkleProof = await generateProof(
           widget.process.metadata.value.census.merkleRoot,
-          publicKeyClaim,
-          true,
+          base64Claim,
+          false,
           dvoteGw);
 
       if (!mounted) return;
