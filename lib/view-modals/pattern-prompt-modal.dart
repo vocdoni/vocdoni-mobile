@@ -99,7 +99,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
   onPatternStop(BuildContext context, List<int> pattern) async {
     try {
       final encryptedText =
-          widget.account.identity.value.keys[0].encryptedPrivateKey;
+          widget.account.identity.value.keys[0].encryptedMnemonic;
       // check if we can decrypt it
 
       final passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);

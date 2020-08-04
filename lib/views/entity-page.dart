@@ -8,7 +8,7 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/action-register.dart';
 import 'package:vocdoni/view-modals/qr-show-modal.dart';
-import 'package:vocdoni/view-modals/web-action.dart';
+// import 'package:vocdoni/view-modals/web-action.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -16,7 +16,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/summary.dart' as summary;
 import 'package:dvote_common/widgets/toast.dart';
-import 'package:dvote/dvote.dart';
+// import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/constants/colors.dart';
 
@@ -378,79 +378,79 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
-  Widget buildActionList(BuildContext ctx) {
-    // Rebuild if `isRegistered` changes
-    return EventualBuilder(
-      notifier: widget.entityModel.visibleActions,
-      builder: (context, _, __) {
-        final List<Widget> actionsToShow = [];
+  // Widget buildActionList(BuildContext ctx) {
+  //   // Rebuild if `visibleActions` changes
+  //   return EventualBuilder(
+  //     notifier: widget.entityModel.visibleActions,
+  //     builder: (context, _, __) {
+  //       final List<Widget> actionsToShow = [];
 
-        actionsToShow.add(Section(text: getText(context, "Actions")));
+  //       actionsToShow.add(Section(text: getText(context, "Actions")));
 
-        if (widget.entityModel.visibleActions.hasError) {
-          return ListItem(
-            mainText: widget.entityModel.visibleActions.errorMessage,
-            purpose: Purpose.DANGER,
-            rightIcon: null,
-            rightTextPurpose: Purpose.DANGER,
-          );
-        } else if (!widget.entityModel.visibleActions.hasValue ||
-            widget.entityModel.visibleActions.value.length == 0) {
-          return ListItem(
-            mainText: getText(context, "No actions defined"),
-            disabled: true,
-            rightIcon: null,
-            icon: FeatherIcons.helpCircle,
-          );
-        }
+  //       if (widget.entityModel.visibleActions.hasError) {
+  //         return ListItem(
+  //           mainText: widget.entityModel.visibleActions.errorMessage,
+  //           purpose: Purpose.DANGER,
+  //           rightIcon: null,
+  //           rightTextPurpose: Purpose.DANGER,
+  //         );
+  //       } else if (!widget.entityModel.visibleActions.hasValue ||
+  //           widget.entityModel.visibleActions.value.length == 0) {
+  //         return ListItem(
+  //           mainText: getText(context, "No actions defined"),
+  //           disabled: true,
+  //           rightIcon: null,
+  //           icon: FeatherIcons.helpCircle,
+  //         );
+  //       }
 
-        // Unregistered warning
-        if (!widget.entityModel.isRegistered.value) {
-          final entityName = widget
-              .entityModel.metadata.value.name[globalAppState.currentLanguage];
-          ListItem noticeItem = ListItem(
-            mainText: getText(context, "Regsiter to {{NAME}} first")
-                .replaceFirst("{{NAME}}", entityName),
-            // secondaryText: null,
-            // rightIcon: null,
-            disabled: false,
-            purpose: Purpose.HIGHLIGHT,
-          );
-          actionsToShow.add(noticeItem);
-        }
+  //       // Unregistered warning
+  //       if (!widget.entityModel.isRegistered.value) {
+  //         final entityName = widget
+  //             .entityModel.metadata.value.name[globalAppState.currentLanguage];
+  //         ListItem noticeItem = ListItem(
+  //           mainText: getText(context, "Register to {{NAME}} first")
+  //               .replaceFirst("{{NAME}}", entityName),
+  //           // secondaryText: null,
+  //           // rightIcon: null,
+  //           disabled: false,
+  //           purpose: Purpose.HIGHLIGHT,
+  //         );
+  //         actionsToShow.add(noticeItem);
+  //       }
 
-        // disabled if not registered
-        for (EntityMetadata_Action action
-            in widget.entityModel.visibleActions.value) {
-          ListItem item;
-          if (action.type == "browser") {
-            if (action.name == null ||
-                !(action.name[globalAppState.currentLanguage] is String))
-              return Container();
+  //       // disabled if not registered
+  //       for (EntityMetadata_Action action
+  //           in widget.entityModel.visibleActions.value) {
+  //         ListItem item;
+  //         if (action.type == "browser") {
+  //           if (action.name == null ||
+  //               !(action.name[globalAppState.currentLanguage] is String))
+  //             return Container();
 
-            item = ListItem(
-              icon: FeatherIcons.arrowRightCircle,
-              mainText: action.name[globalAppState.currentLanguage],
-              secondaryText: action.visible,
-              disabled: !widget.entityModel.isRegistered.value,
-              onTap: () => onBrowserAction(ctx, action),
-            );
-          } else {
-            item = ListItem(
-              mainText: action.name[globalAppState.currentLanguage],
-              secondaryText: getText(context, "Action not supported"),
-              icon: FeatherIcons.helpCircle,
-              disabled: true,
-            );
-          }
+  //           item = ListItem(
+  //             icon: FeatherIcons.arrowRightCircle,
+  //             mainText: action.name[globalAppState.currentLanguage],
+  //             secondaryText: action.visible,
+  //             disabled: !widget.entityModel.isRegistered.value,
+  //             onTap: () => onBrowserAction(ctx, action),
+  //           );
+  //         } else {
+  //           item = ListItem(
+  //             mainText: action.name[globalAppState.currentLanguage],
+  //             secondaryText: getText(context, "Action not supported"),
+  //             icon: FeatherIcons.helpCircle,
+  //             disabled: true,
+  //           );
+  //         }
 
-          actionsToShow.add(item);
-        }
+  //         actionsToShow.add(item);
+  //       }
 
-        return ListView(children: actionsToShow);
-      },
-    );
-  }
+  //       return ListView(children: actionsToShow);
+  //     },
+  //   );
+  // }
 
   // EVENTS
 
@@ -488,19 +488,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         .then((_) => widget.entityModel.refreshVisibleActions(true));
   }
 
-  onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
-    final url = action.url;
-    final title = action.name[globalAppState.currentLanguage] ??
-        widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
+  // onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
+  //   final url = action.url;
+  //   final title = action.name[globalAppState.currentLanguage] ??
+  //       widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
 
-    final route = MaterialPageRoute(
-        builder: (context) => WebAction(
-              url: url,
-              title: title,
-            ));
-    Navigator.push(ctx, route)
-        .then((_) => widget.entityModel.refreshVisibleActions(true));
-  }
+  //   final route = MaterialPageRoute(
+  //       builder: (context) => WebAction(
+  //             url: url,
+  //             title: title,
+  //           ));
+  //   Navigator.push(ctx, route)
+  //       .then((_) => widget.entityModel.refreshVisibleActions(true));
+  // }
 
   subscribeToEntity(BuildContext ctx) async {
     setState(() => _processingSubscription = true);

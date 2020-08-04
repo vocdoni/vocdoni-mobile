@@ -47,7 +47,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     final currentAccount = globalAppState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
-    var patternLockKey = await Navigator.push(
+    final patternLockKey = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
@@ -64,36 +64,54 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
           context: context, purpose: Purpose.DANGER);
       return;
     }
+
     setState(() => _currentStep = 1);
 
     // PREPARE DATA
+    String merkleProof;
+    EthereumWallet wallet;
+
     final dvoteGw = await getDVoteGateway();
     if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
-    String merkleProof;
-
     try {
-      final publicKey = currentAccount.identity.value.keys[0].publicKey;
-      final base64Claim =
-          base64.encode(hex.decode(publicKey.replaceAll("0x", "")));
+      // Derive per-entity key
+      final entityAddressHash = widget.process.metadata.value.details.entityId;
+
+      final mnemonic = await Symmetric.decryptStringAsync(
+          currentAccount.identity.value.keys[0].encryptedMnemonic,
+          patternLockKey);
+
+      if (!mounted) return;
+
+      wallet = EthereumWallet.fromMnemonic(mnemonic,
+          entityAddressHash: entityAddressHash);
+
+      // Merkle Proof
+
+      final publicKey = (await wallet.publicKeyAsync).replaceAll("0x", "");
+      final base64Claim = base64.encode(hex.decode(publicKey));
+
       merkleProof = await generateProof(
           widget.process.metadata.value.census.merkleRoot,
           base64Claim,
           false,
           dvoteGw);
 
-      if (!mounted) return;
+      if (!mounted)
+        return;
+      else if (!(merkleProof is String)) throw Exception("Empty census proof");
     } catch (err) {
-      // continue below
       devPrint(err);
-    }
 
-    if (!(merkleProof is String)) {
-      showMessage(getText(context, "The vote data could not be signed"),
+      showMessage(getText(context, "The census could not be checked"),
           context: context);
       setState(() => _currentStep = 0);
       return;
     }
+
+    assert(merkleProof is String);
+    assert(wallet is EthereumWallet);
 
     try {
       // CHECK IF THE VOTE IS ALREADY REGISTERED
@@ -108,19 +126,15 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       }
 
       // PREPARE THE VOTE ENVELOPE
-      final privateKey = await Symmetric.decryptStringAsync(
-          currentAccount.identity.value.keys[0].encryptedPrivateKey,
-          patternLockKey);
-
-      if (!mounted) return;
-
       ProcessKeys processKeys;
       if (widget.process.metadata.value.type == "encrypted-poll") {
         processKeys = await getProcessKeys(widget.process.processId, dvoteGw);
       }
 
-      Map<String, dynamic> envelope = await packagePollEnvelope(
-          widget.choices, merkleProof, widget.process.processId, privateKey,
+      if (!mounted) return;
+
+      Map<String, dynamic> envelope = await packagePollEnvelope(widget.choices,
+          merkleProof, widget.process.processId, await wallet.privateKeyAsync,
           processKeys: processKeys);
 
       if (!mounted) return;

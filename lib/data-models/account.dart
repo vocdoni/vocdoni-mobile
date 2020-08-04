@@ -89,7 +89,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
             final identity = accountModel.identity.value;
 
             identity.meta[META_ACCOUNT_ID] =
-                accountModel.identity.value.keys[0].address;
+                accountModel.identity.value.keys[0].rootAddress;
 
             // Failed attempts
             if (accountModel.failedAuthAttempts.hasValue)
@@ -144,8 +144,8 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
     // Prevent duplicates
     final duplicate = this.value.any((account) =>
         account.identity.value.keys.length > 0 &&
-        account.identity.value.keys[0].publicKey ==
-            newAccount.identity.value.keys[0].publicKey);
+        account.identity.value.keys[0].rootPublicKey ==
+            newAccount.identity.value.keys[0].rootPublicKey);
 
     if (duplicate) {
       devPrint("WARNING: Attempting to add a duplicate identity. Skipping.");
@@ -223,13 +223,14 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   /// Precompute a request signature for entity registry backends to accept
   /// our requests for a certain period of time
   Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
-    final encryptedPrivateKey = identity.value.keys[0].encryptedPrivateKey;
-    final privateKey = await Symmetric.decryptStringAsync(
-        encryptedPrivateKey, patternEncryptionKey);
+    final encryptedRootPrivateKey =
+        identity.value.keys[0].encryptedRootPrivateKey;
+    final rootPrivateKey = await Symmetric.decryptStringAsync(
+        encryptedRootPrivateKey, patternEncryptionKey);
 
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
-    final signature = await signJsonPayloadAsync(body, privateKey);
+    final signature = await signJsonPayloadAsync(body, rootPrivateKey);
 
     if (signature.startsWith("0x"))
       this.actionVisibilityCheckSignature.setValue(signature);
@@ -331,8 +332,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       else if (existingAccount.identity.value.keys.length == 0)
         continue;
       // skip ourselves
-      else if (existingAccount.identity.value.keys[0].publicKey ==
-          this.identity.value.keys[0].publicKey) continue;
+      else if (existingAccount.identity.value.keys[0].rootPublicKey ==
+          this.identity.value.keys[0].rootPublicKey) continue;
 
       if (existingAccount.isSubscribed(entityReference)) {
         subscribedFromOtherAccounts = true;
@@ -387,25 +388,25 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
     final wallet = EthereumWallet.fromMnemonic(mnemonic);
 
-    final privateKey = await wallet.privateKeyAsync;
-    final publicKey = await wallet.publicKeyAsync;
-    final address = await wallet.addressAsync;
+    final rootPrivateKey = await wallet.privateKeyAsync;
+    final rootPublicKey = await wallet.publicKeyAsync;
+    final rootAddress = await wallet.addressAsync;
     final encryptedMenmonic =
         await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedPrivateKey =
-        await Symmetric.encryptStringAsync(privateKey, patternEncryptionKey);
+    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
+        rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;
-    newIdentity.identityId = publicKey;
-    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
+    newIdentity.identityId = rootPublicKey;
+    newIdentity.type = Identity_Type.ECDSA;
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;
     k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedPrivateKey = encryptedPrivateKey;
-    k.publicKey = publicKey;
-    k.address = address;
+    k.encryptedRootPrivateKey = encryptedRootPrivateKey;
+    k.rootPublicKey = rootPublicKey;
+    k.rootAddress = rootAddress;
 
     newIdentity.keys.add(k);
 
@@ -428,28 +429,28 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final wallet = await EthereumWallet.randomAsync(size: 192);
 
     final mnemonic = wallet.mnemonic;
-    final privateKey = await wallet.privateKeyAsync;
-    final publicKey = await wallet.publicKeyAsync;
-    final address = await wallet.addressAsync;
+    final rootPrivateKey = await wallet.privateKeyAsync;
+    final rootPublicKey = await wallet.publicKeyAsync;
+    final rootAddress = await wallet.addressAsync;
     final encryptedMenmonic =
         await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedPrivateKey =
-        await Symmetric.encryptStringAsync(privateKey, patternEncryptionKey);
+    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
+        rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
     newIdentity.alias = alias;
-    newIdentity.identityId = publicKey;
-    newIdentity.type = Identity_Type.ECDSA_SECP256k1;
+    newIdentity.identityId = rootPublicKey;
+    newIdentity.type = Identity_Type.ECDSA;
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;
     k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedPrivateKey = encryptedPrivateKey;
-    k.publicKey = publicKey;
-    k.address = address;
+    k.encryptedRootPrivateKey = encryptedRootPrivateKey;
+    k.rootPublicKey = rootPublicKey;
+    k.rootAddress = rootAddress;
 
     newIdentity.keys.add(k);
-    newIdentity.meta[META_ACCOUNT_ID] = address;
+    newIdentity.meta[META_ACCOUNT_ID] = rootAddress;
 
     AccountModel result = AccountModel.fromIdentity(newIdentity);
     await result.refreshSignedTimestamp(patternEncryptionKey);

@@ -102,11 +102,12 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
       int newIndex = -1;
       for (int i = 0; i < globalAccountPool.value.length; i++) {
-        // TODO: Compare by identityId instead of publicKey
+        // TODO: Compare by identityId instead of rootPublicKey
         if (!globalAccountPool.value[i].identity.hasValue)
           continue;
-        else if (globalAccountPool.value[i].identity.value.keys[0].publicKey !=
-            newAccount.identity.value.keys[0].publicKey) continue;
+        else if (globalAccountPool
+                .value[i].identity.value.keys[0].rootPublicKey !=
+            newAccount.identity.value.keys[0].rootPublicKey) continue;
         newIndex = i;
         break;
       }

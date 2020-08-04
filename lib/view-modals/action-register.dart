@@ -159,7 +159,8 @@ class ActionRegisterPage extends StatelessWidget {
   }
 
   String phoneValidator(String value, BuildContext ctx) {
-    if (value.isEmpty) return getText(ctx, 'Please, enter a valid phone number');
+    if (value.isEmpty)
+      return getText(ctx, 'Please, enter a valid phone number');
 
     if (phoneRegExp.hasMatch(value)) return null;
     return getText(ctx, "Please, enter a valid phone number");
@@ -219,7 +220,7 @@ class ActionRegisterPage extends StatelessWidget {
 
     // SIGN
     final identity = selectedAccount.identity.value;
-    final encryptedPrivateKey = identity.keys[0].encryptedPrivateKey;
+    final encryptedMnemonic = identity.keys[0].encryptedMnemonic;
 
     var patternStr = await Navigator.push(
         context,
@@ -233,8 +234,12 @@ class ActionRegisterPage extends StatelessWidget {
           purpose: Purpose.DANGER, context: context);
     }
 
-    String privateKey =
-        await Symmetric.decryptStringAsync(encryptedPrivateKey, patternStr);
+    // Derive the key for the entity
+
+    final mnemonic =
+        await Symmetric.decryptStringAsync(encryptedMnemonic, patternStr);
+    final wallet =
+        EthereumWallet.fromMnemonic(mnemonic, entityAddressHash: entityId);
 
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
@@ -261,9 +266,8 @@ class ActionRegisterPage extends StatelessWidget {
       "signature": "" // set right after
     };
 
-    payload["signature"] =
-        await signJsonPayloadAsync(payload["request"], privateKey);
-    privateKey = null;
+    payload["signature"] = await signJsonPayloadAsync(
+        payload["request"], await wallet.privateKeyAsync);
 
     final Map<String, String> headers = {
       'Content-type': 'application/json',
