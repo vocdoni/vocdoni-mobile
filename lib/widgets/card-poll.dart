@@ -53,8 +53,8 @@ class _CardPollState extends State<CardPoll> {
   Widget buildCard(BuildContext context) {
     if (!this.widget.process.metadata.hasValue) return Container();
 
-    String timeLabel = "";
-    String timeLeft = "";
+    String timeLabel = getText(context, "Starting");
+    String timeLeft = "-";
     final now = DateTime.now();
     final startDate = this.widget.process.startDate.value;
     final endDate = this.widget.process.endDate.value;
