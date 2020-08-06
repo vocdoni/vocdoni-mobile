@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dvote/util/json-signature.dart';
 import 'package:dvote/util/parsers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
-import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
@@ -97,7 +97,7 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
   }
 
   @override
-  Future<void> refresh([bool force = false]) async {
+  Future<void> refresh({bool force = false, String derivedPrivateKey}) async {
     if (!hasValue ||
         globalAppState.currentAccount == null ||
         !globalAppState.currentAccount.entities.hasValue) return;
@@ -116,7 +116,8 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
               entityIds.contains(entityModel.reference.entityId))
           .toList();
       for (final entityModel in entities) {
-        await entityModel.refresh(force);
+        await entityModel.refresh(
+            force: force, derivedPrivateKey: derivedPrivateKey);
       }
 
       await this.writeToStorage();
@@ -184,6 +185,12 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   final isRegistered = EventualNotifier<bool>(false)
       .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 30 : 1));
 
+  /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
+  int actionVisibilityTimestampUsed;
+
+  /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks
+  String actionVisibilityCheckSignature;
+
   /// Builds an EntityModel with the given reference and optional data.
   /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
   EntityModel(this.reference,
@@ -211,9 +218,15 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// Fetch any internal items that might have become outdated and notify
   /// the listeners. Care should be taken to avoid refetching when not really
   /// necessary.
-  /// IMPORTANT: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
+  /// **IMPORTANT**: Persistence is not managed by this function. Make sure to call `writeToPersistence` on the pool right after.
   @override
-  Future<void> refresh([bool force = false]) {
+  Future<void> refresh({bool force = false, String derivedPrivateKey}) async {
+    if (derivedPrivateKey is String) {
+      await refreshSignedTimestamp(derivedPrivateKey);
+    }
+
+    // TODO: Simplify and call the dependent refresh's after refreshMetadata
+
     return refreshMetadata(force: force, skipChildren: false);
 
     // refreshMetadata will call the dependent models if needed
@@ -225,6 +238,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       {bool force = false, bool skipChildren = true}) async {
     // TODO: Get the IPFS hash
     // TODO: Don't refetch if the IPFS hash is the same
+
     if (!(reference is EntityReference))
       return;
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
@@ -293,12 +307,10 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       devPrint("- Refreshing entity dependent data [${reference.entityId}]");
 
-      await Future.wait([
-        needsProcessListReload
-            ? this.refreshProcesses(true)
-            : this.refreshProcesses(),
-        needsFeedReload ? this.refreshFeed(true) : this.refreshFeed(),
-        refreshVisibleActions(force)
+      return Future.wait([
+        this.refreshProcesses(force: needsProcessListReload),
+        this.refreshFeed(force: needsFeedReload),
+        refreshVisibleActions(force: force)
       ]);
     } catch (err) {
       devPrint(
@@ -306,11 +318,9 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       throw err;
     }
-
-    this.metadata.notifyChange();
   }
 
-  Future<void> refreshProcesses([bool force = false]) async {
+  Future<void> refreshProcesses({bool force = false}) async {
     if (!this.metadata.hasValue)
       return;
     else if (!force && !(this.metadata.value.votingProcesses.active is List) ||
@@ -330,7 +340,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       final newProcessIds = this.metadata.value.votingProcesses.active;
 
       devPrint(
-          "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length}]");
+          "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length} active]");
 
       // add new
       final List<ProcessModel> myFreshProcessModels =
@@ -372,7 +382,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  Future<void> refreshFeed([bool force = false]) async {
+  Future<void> refreshFeed({bool force = false}) async {
     if (!this.metadata.hasValue)
       return;
     else if (!force && this.feed.isLoading && this.feed.isLoadingFresh) return;
@@ -433,7 +443,23 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  Future<void> refreshVisibleActions([bool force = false]) async {
+  /// Precompute a request signature for entity registry backends to accept
+  /// our requests for a certain period of time
+  Future<void> refreshSignedTimestamp(String derivedPrivateKey) async {
+    // TODO: Add the entity ID to the Payload (nice to have, since the public key is unique to the entity)
+
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final body = {"method": "getVisibility", "timestamp": ts};
+    final signature = await signJsonPayloadAsync(body, derivedPrivateKey);
+
+    if (signature.startsWith("0x"))
+      this.actionVisibilityCheckSignature = signature;
+    else
+      this.actionVisibilityCheckSignature = "0x" + signature;
+    this.actionVisibilityTimestampUsed = ts;
+  }
+
+  Future<void> refreshVisibleActions({bool force = false}) async {
     // TODO: Skipping until the new API is available
     return null;
     // TODO: Reenable
@@ -516,9 +542,13 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   void cleanEphemeral() {
     if (this.processes.hasValue)
       this.processes.value.forEach((process) => process.cleanEphemeral());
+
     this.visibleActions.setValue(null);
     this.registerAction.setValue(null);
     this.isRegistered.setValue(null);
+
+    this.actionVisibilityCheckSignature = null;
+    this.actionVisibilityTimestampUsed = null;
   }
 
   // PRIVATE METHODS
@@ -528,6 +558,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// Returns true/false if the value is defined or the request succeeds. Returns null if the request
   /// can't be signed or the response is otherwise undefined.
   ///
+  @deprecated
   Future<bool> _isActionVisible(
       EntityMetadata_Action action, String entityId) async {
     // Hardcoded value
@@ -538,11 +569,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
     // OTHERWISE => the `visible` field is expected to be a URL
 
-    final currentAccount = globalAppState.currentAccount;
-    if (!(currentAccount is AccountModel))
-      return null;
-    else if (!currentAccount.actionVisibilityCheckSignature.hasValue)
-      return null;
+    if (actionVisibilityCheckSignature == null ||
+        actionVisibilityTimestampUsed == null) return null;
 
     try {
       final Map<String, dynamic> payload = {
@@ -550,9 +578,9 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
           "method": "getVisibility",
           "actionKey": action.actionKey,
           "entityId": entityId,
-          "timestamp": currentAccount.actionVisibilityTimestampUsed.value
+          "timestamp": actionVisibilityTimestampUsed
         },
-        "signature": currentAccount.actionVisibilityCheckSignature.value
+        "signature": actionVisibilityCheckSignature
       };
 
       final Map<String, String> headers = {

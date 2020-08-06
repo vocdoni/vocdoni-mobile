@@ -1,6 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/model-base.dart';
@@ -9,6 +10,8 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:convert/convert.dart';
 import 'dart:convert';
 import 'package:vocdoni/lib/util.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:web3dart/credentials.dart';
 
 /// This class should be used exclusively as a global singleton.
 /// ProcessPoolModel tracks all the registered accounts and provides individual models that
@@ -92,7 +95,7 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
   }
 
   @override
-  Future<void> refresh([bool force = false]) async {
+  Future<void> refresh({bool force = false}) async {
     if (!hasValue ||
         globalAppState.currentAccount == null ||
         !globalAppState.currentAccount.entities.hasValue) return;
@@ -112,7 +115,7 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
           .where((processModel) => entityIds.contains(processModel.entityId))
           .toList();
       for (final procModel in updatableProcs) {
-        await procModel.refresh(force);
+        await procModel.refresh(force: force);
       }
 
       await this.writeToStorage();
@@ -239,21 +242,21 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   }
 
   @override
-  Future<void> refresh([bool force = false]) {
+  Future<void> refresh({bool force = false}) {
     devPrint("Refreshing process ${this.processId}");
 
-    return refreshMetadata(force)
+    return refreshMetadata(force: force)
         .catchError((_) {}) // update what we can
-        .then((_) => refreshIsInCensus(force))
+        .then((_) => refreshIsInCensus(force: force))
         .catchError((_) {})
-        .then((_) => refreshHasVoted(force))
+        .then((_) => refreshHasVoted(force: force))
         .catchError((_) {})
-        .then((_) => refreshCurrentParticipants(force))
+        .then((_) => refreshCurrentParticipants(force: force))
         .catchError((_) {})
-        .then((_) => refreshCensusSize(force));
+        .then((_) => refreshCensusSize(force: force));
   }
 
-  Future<void> refreshMetadata([bool force = false]) async {
+  Future<void> refreshMetadata({bool force = false}) async {
     if (!force && this.metadata.isFresh)
       return;
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
@@ -289,7 +292,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  Future<void> refreshIsInCensus([bool force = false]) async {
+  Future<void> refreshIsInCensus({bool force = false}) async {
     if (!this.metadata.hasValue)
       return;
     else if (!force && this.isInCensus.isFresh)
@@ -299,25 +302,32 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (this.isInCensus.value == true)
       return; // we should never be excluded from a census once within
 
+    final account = globalAppState.currentAccount;
+    if (account is! AccountModel)
+      throw Exception("No current account selected");
+    else if (!account.hasPublicKeyForEntity(this.entityId)) {
+      devPrint(
+          "No public key is available yet for the entity " + this.entityId);
+      this.isInCensus.setValue(null);
+      return;
+    }
+
     devPrint("- Refreshing process isInCensus [${this.processId}]");
 
     final dvoteGw = await getDVoteGateway();
     if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
-    final currentAccount = globalAppState.currentAccount;
-    if (!(currentAccount is AccountModel)) return;
-
     try {
       this.isInCensus.setToLoading();
-      final publicKey =
-          currentAccount.identity.value.keys[0].publicKey?.replaceAll("0x", "");
-      if (!(publicKey is String)) throw Exception("Invalid public key");
+
+      final pubKey =
+          account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
+      final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
 
       // Undigested
-      final base64Claim = base64.encode(hex.decode(publicKey));
 
-      final proof = await generateProof(
-          this.metadata.value.census.merkleRoot, base64Claim, false, dvoteGw);
+      final proof = await generateProof(this.metadata.value.census.merkleRoot,
+          censusPublicKeyClaim, false, dvoteGw);
       if (!(proof is String) || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;
@@ -332,7 +342,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       }
 
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
-          base64Claim, false, proof, dvoteGw);
+          censusPublicKeyClaim, false, proof, dvoteGw);
 
       devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
 
@@ -345,23 +355,38 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  Future<void> refreshHasVoted([bool force = false]) async {
+  Future<void> refreshHasVoted({bool force = false}) async {
     if (!force && this.hasVoted.isFresh)
       return;
     else if (!force && this.hasVoted.isLoading)
       return;
     else if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
 
-    devPrint("- Refreshing process hasVoted [${this.processId}]");
+    final account = globalAppState.currentAccount;
+    if (account is! AccountModel)
+      throw Exception("No current account selected");
+    else if (!account.hasPublicKeyForEntity(this.entityId)) {
+      devPrint(
+          "No public key is available yet for the entity " + this.entityId);
+      this.isInCensus.setValue(null);
+      return;
+    }
 
-    final currentAccount = globalAppState.currentAccount;
-    if (!(currentAccount is AccountModel)) return;
+    devPrint("- Refreshing process hasVoted [${this.processId}]");
 
     try {
       this.hasVoted.setToLoading();
-      final String pollNullifier = await getPollNullifier(
-          globalAppState.currentAccount.identity.value.keys[0].address,
-          this.processId);
+
+      final entity = this.entity;
+      if (entity is! EntityModel) throw Exception("No entity for process");
+
+      final hexPubKey = account.getPublicKeyForEntity(this.entityId);
+      final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x", ""));
+
+      final addrBytes = publicKeyToAddress(publicKeyBytes);
+      final userAddress = EthereumAddress(addrBytes).hexEip55;
+
+      final pollNullifier = await getPollNullifier(userAddress, this.processId);
 
       final dvoteGw = await getDVoteGateway();
       if (dvoteGw == null) throw Exception("No DVote gateway is available");
@@ -386,7 +411,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  Future<void> refreshCensusSize([bool force = false]) {
+  Future<void> refreshCensusSize({bool force = false}) {
     if (!this.metadata.hasValue)
       return null;
     else if (!force && this.censusSize.isFresh)
@@ -412,7 +437,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     });
   }
 
-  Future<void> refreshCurrentParticipants([bool force = false]) {
+  Future<void> refreshCurrentParticipants({bool force = false}) {
     if (!this.metadata.hasValue)
       return Future.value();
     else if (!force && this.currentParticipants.isFresh)
@@ -445,9 +470,21 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     this.hasVoted.setValue(null);
     this.currentParticipants.setValue(null);
     this.censusSize.setValue(null);
+    this.choices = [];
   }
 
   // GETTERS
+
+  /// Returns the entity model that corresponds to the current process. Returns null if not found.
+  EntityModel get entity {
+    if (!globalEntityPool.hasValue) return null;
+
+    return globalEntityPool.value.firstWhere((entity) {
+      if (!(entity is EntityModel) || !entity.metadata.hasValue) return false;
+
+      return entity.reference.entityId == entityId;
+    }, orElse: () => null);
+  }
 
   double get currentParticipation {
     if (!this.censusSize.hasValue || !this.currentParticipants.hasValue)
@@ -461,6 +498,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
         this.censusSize.value.toDouble();
   }
 
+  @deprecated
   DateTime get startDate {
     if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
       return null;
@@ -468,11 +506,12 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     return globalAppState.getDateTimeAtBlock(this.metadata.value.startBlock);
   }
 
+  @deprecated
   DateTime get endDate {
     if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
       return null;
 
     return globalAppState.getDateTimeAtBlock(
-        this.metadata.value.startBlock + this.metadata.value.numberOfBlocks);
+        this.metadata.value.startBlock + this.metadata.value.blockCount);
   }
 }

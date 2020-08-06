@@ -40,8 +40,8 @@ class Analytics {
     else if (!currentAccount.identity.hasValue)
       return null;
     else if (currentAccount.identity.value.keys.length == 0) return null;
-    
-    return currentAccount.identity.value.keys[0].address;
+
+    return currentAccount.identity.value.keys[0].rootAddress;
   }
 
   // OS, OS version, screen size...

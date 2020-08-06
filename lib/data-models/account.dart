@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:dvote/util/json-signature.dart';
 import 'package:dvote/crypto/encryption.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
@@ -174,13 +173,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   final failedAuthAttempts = EventualNotifier<int>(0);
   final authThresholdDate = EventualNotifier<DateTime>(DateTime.now());
 
-  /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
-  final actionVisibilityTimestampUsed =
-      EventualNotifier<int>().withFreshnessTimeout(Duration(hours: 1));
-
-  /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks
-  final actionVisibilityCheckSignature =
-      EventualNotifier<String>().withFreshnessTimeout(Duration(hours: 1));
+  /// A map containing the user's public key (hex) for each entity
+  final _derivedPublicKeysPerEntity = Map<String, String>();
 
   // CONSTRUCTORS
 
@@ -188,55 +182,61 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   AccountModel.fromIdentity(Identity idt) {
     this.identity.setDefaultValue(idt);
 
-    if (globalEntityPool.hasValue) {
-      final entityList = this
-          .identity
-          .value
-          .peers
-          .entities
-          .map((EntityReference entitySummary) =>
-              EntityModel.getFromPool(entitySummary))
-          .where((e) => e != null)
-          .cast<EntityModel>()
-          .toList();
+    if (!globalEntityPool.hasValue) return;
 
-      this.entities.setDefaultValue(entityList);
-    }
+    final entityList = this
+        .identity
+        .value
+        .peers
+        .entities
+        .map((EntityReference entitySummary) =>
+            EntityModel.getFromPool(entitySummary))
+        .where((e) => e != null)
+        .cast<EntityModel>()
+        .toList();
+
+    this.entities.setDefaultValue(entityList);
   }
 
   /// Trigger a refresh of the related entities metadata.
-  /// Also recompute the signed timestamp so that entity actions can be checked
+  /// Also recompute the signed timestamps so that entity actions can be checked
   /// for visibility.
   @override
   Future<void> refresh(
-      [bool force = false, String patternEncryptionKey]) async {
-    if (patternEncryptionKey is String)
-      await refreshSignedTimestamp(patternEncryptionKey);
+      {bool force = false, String patternEncryptionKey}) async {
+    if (!this.entities.hasValue) return;
 
-    if (this.entities.hasValue) {
+    if (patternEncryptionKey is String) {
+      // Refresh with private key available
+
+      final currentAccount = globalAppState.currentAccount;
+      if (currentAccount is! AccountModel) return;
+
+      final mnemonic = await Symmetric.decryptStringAsync(
+          currentAccount.identity.value.keys[0].encryptedMnemonic,
+          patternEncryptionKey);
+      if (mnemonic == null) return;
+
       for (final entity in this.entities.value) {
-        await entity.refresh();
+        final wallet = EthereumWallet.fromMnemonic(mnemonic,
+            entityAddressHash: entity.reference.entityId);
+
+        // Store the public key within the map for future use
+        if (!hasPublicKeyForEntity(entity.reference.entityId)) {
+          setPublicKeyForEntity(
+              await wallet.publicKeyAsync, entity.reference.entityId);
+        }
+
+        await entity.refresh(
+            force: force, derivedPrivateKey: await wallet.privateKeyAsync);
+      }
+    } else {
+      // Shallow refresh, using what is already available (no private/public key available here)
+
+      for (final entity in this.entities.value) {
+        await entity.refresh(force: force);
       }
     }
-  }
-
-  /// Precompute a request signature for entity registry backends to accept
-  /// our requests for a certain period of time
-  Future<void> refreshSignedTimestamp(String patternEncryptionKey) async {
-    final encryptedRootPrivateKey =
-        identity.value.keys[0].encryptedRootPrivateKey;
-    final rootPrivateKey = await Symmetric.decryptStringAsync(
-        encryptedRootPrivateKey, patternEncryptionKey);
-
-    final ts = DateTime.now().millisecondsSinceEpoch;
-    final body = {"method": "getVisibility", "timestamp": ts};
-    final signature = await signJsonPayloadAsync(body, rootPrivateKey);
-
-    if (signature.startsWith("0x"))
-      this.actionVisibilityCheckSignature.setValue(signature);
-    else
-      this.actionVisibilityCheckSignature.setValue("0x" + signature);
-    this.actionVisibilityTimestampUsed.setValue(ts);
   }
 
   // PUBLIC METHODS
@@ -366,6 +366,18 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   //   account.peers = peers;
   // }
 
+  String getPublicKeyForEntity(String entityId) {
+    return _derivedPublicKeysPerEntity[entityId];
+  }
+
+  bool hasPublicKeyForEntity(String entityId) {
+    return _derivedPublicKeysPerEntity.containsKey(entityId);
+  }
+
+  void setPublicKeyForEntity(String derivedPublicKey, String entityId) {
+    _derivedPublicKeysPerEntity[entityId] = derivedPublicKey;
+  }
+
   /// Cleans the ephemeral state of the account's subscribed entities
   @override
   void cleanEphemeral() {
@@ -410,10 +422,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
     newIdentity.keys.add(k);
 
-    AccountModel result = AccountModel.fromIdentity(newIdentity);
-    await result.refreshSignedTimestamp(patternEncryptionKey);
-
-    return result;
+    return AccountModel.fromIdentity(newIdentity);
   }
 
   /// Populates the object with a new identity and an empty list of organizations.
@@ -452,9 +461,6 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     newIdentity.keys.add(k);
     newIdentity.meta[META_ACCOUNT_ID] = rootAddress;
 
-    AccountModel result = AccountModel.fromIdentity(newIdentity);
-    await result.refreshSignedTimestamp(patternEncryptionKey);
-
-    return result;
+    return AccountModel.fromIdentity(newIdentity);
   }
 }

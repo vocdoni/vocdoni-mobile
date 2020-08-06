@@ -115,7 +115,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     try {
       // CHECK IF THE VOTE IS ALREADY REGISTERED
-      await widget.process.refreshHasVoted(true);
+      await widget.process.refreshHasVoted(force: true);
       if (!mounted) return;
 
       if (widget.process.hasVoted.hasValue && widget.process.hasVoted.value) {
@@ -181,7 +181,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     try {
       const RETRIES = 4;
       for (int i = 0; i < RETRIES; i++) {
-        await widget.process.refreshHasVoted(true);
+        await widget.process.refreshHasVoted(force: true);
         if (!mounted) return;
 
         if (widget.process.hasVoted.hasValue && widget.process.hasVoted.value)

@@ -7,7 +7,7 @@ abstract class ModelRefreshable {
   /// Fetch any internal items that might have become outdated and notify
   /// the listeners. Care should be taken to avoid refetching when not really
   /// necessary.
-  Future<void> refresh([bool force = false]);
+  Future<void> refresh({bool force = false});
 }
 
 /// Classes implementing this interface allow to read and write its internal data to

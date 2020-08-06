@@ -485,7 +485,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         builder: (context) =>
             ActionRegisterPage(action, widget.entityModel.reference.entityId));
     Navigator.push(context, route)
-        .then((_) => widget.entityModel.refreshVisibleActions(true));
+        .then((_) => widget.entityModel.refreshVisibleActions(force: true));
   }
 
   // onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {

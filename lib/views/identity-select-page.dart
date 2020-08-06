@@ -81,22 +81,26 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
 
   onAccountSelected(
       BuildContext ctx, AccountModel account, int accountIdx) async {
-    var patternEncryptionKey = await Navigator.push(
+    final lockPattern = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PatternPromptModal(account)));
 
-    if (patternEncryptionKey == null ||
-        patternEncryptionKey is InvalidPatternError) {
+    if (lockPattern == null)
+      return;
+    else if (lockPattern is InvalidPatternError) {
       showMessage(getText(context, "The pattern you entered is not valid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
     globalAppState.selectAccount(accountIdx);
-    globalAppState.currentAccount?.cleanEphemeral();
+    if (globalAppState.currentAccount is! AccountModel)
+      throw Exception("No account available");
 
-    account.refresh(false, patternEncryptionKey); // detached async
+    globalAppState.currentAccount.cleanEphemeral();
+    globalAppState.currentAccount.refresh(
+        force: false, patternEncryptionKey: lockPattern); // detached async
 
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);

@@ -79,7 +79,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
   /// Fetch the list of bootnodes and store it locally
   @override
-  Future<void> refresh([bool force = false]) async {
+  Future<void> refresh({bool force = false}) async {
     try {
       // Refresh bootnodes
       await this.refreshBootNodes(force);
@@ -121,6 +121,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     }
   }
 
+  @deprecated
   Future<void> refreshBlockInfo([bool force = false]) async {
     if (!force && this.referenceBlock.isFresh)
       return;

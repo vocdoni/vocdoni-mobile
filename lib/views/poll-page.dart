@@ -3,12 +3,14 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
+import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/util.dart';
+import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -73,6 +75,50 @@ class _PollPageState extends State<PollPage> {
         .then((_) => process.refreshIsInCensus())
         .then((_) => globalAppState.refreshBlockInfo())
         .catchError((err) => devPrint(err)); // Values will refresh if not fresh
+  }
+
+  Future<void> onCheckCensus(BuildContext context) async {
+    if (globalAppState.currentAccount == null) {
+      process.isInCensus.setError(getText(context, "Cannot check the census"));
+      return;
+    }
+    final account = globalAppState.currentAccount;
+
+    // Ensure that we have the public key
+    if (!globalAppState.currentAccount
+        .hasPublicKeyForEntity(entity.reference.entityId)) {
+      // Ask the pattern
+      final route = MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => PatternPromptModal(account));
+      final patternEncryptionKey = await Navigator.push(context, route);
+
+      if (patternEncryptionKey == null)
+        return;
+      else if (patternEncryptionKey is InvalidPatternError) {
+        showMessage(getText(context, "The pattern you entered is not valid"),
+            context: context, purpose: Purpose.DANGER);
+        return;
+      }
+
+      // Good
+      final mnemonic = await Symmetric.decryptStringAsync(
+          account.identity.value.keys[0].encryptedMnemonic,
+          patternEncryptionKey);
+      if (mnemonic == null) {
+        process.isInCensus
+            .setError(getText(context, "Cannot access the wallet"));
+        return;
+      }
+
+      final wallet = EthereumWallet.fromMnemonic(mnemonic,
+          entityAddressHash: entity.reference.entityId);
+
+      account.setPublicKeyForEntity(
+          await wallet.publicKeyAsync, entity.reference.entityId);
+    }
+
+    process.refreshIsInCensus(force: true);
   }
 
   @override
@@ -177,7 +223,12 @@ class _PollPageState extends State<PollPage> {
         Purpose purpose;
         IconData icon;
 
-        if (process.isInCensus.isLoading) {
+        if (!globalAppState.currentAccount
+            .hasPublicKeyForEntity(entity.reference.entityId)) {
+          // We don't have the user's public key, probably because the entity was unknown when all
+          // public keys were precomputed. Ask for the pattern.
+          text = getText(context, "Check the census");
+        } else if (process.isInCensus.isLoading) {
           text = getText(context, "Checking the census");
           purpose = Purpose.GUIDE;
         } else if (process.isInCensus.hasValue) {
@@ -202,7 +253,7 @@ class _PollPageState extends State<PollPage> {
           icon: FeatherIcons.users,
           mainText: text,
           isSpinning: process.isInCensus.isLoading,
-          onTap: () => process.refreshIsInCensus(true),
+          onTap: () => onCheckCensus(context),
           rightTextPurpose: purpose,
           rightIcon: icon,
           purpose: purpose ?? Purpose.NONE,
@@ -350,7 +401,7 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
-        } else if (process.isInCensus.hasValue && !process.isInCensus.value) {
+        } else if (!process.isInCensus.value) {
           return ListItem(
             mainText: getText(context, "You are not in the census"),
             secondaryText: getText(context,
@@ -365,6 +416,15 @@ class _PollPageState extends State<PollPage> {
                 context, "Your identity cannot be checked within the census"),
             mainTextMultiline: 3,
             secondaryText: process.isInCensus.errorMessage,
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (!process.isInCensus.hasValue) {
+          return ListItem(
+            mainText: getText(context, "The census cannot be checked"),
+            secondaryText: getText(
+                context, "Tap above on 'Check the census' and try again"),
+            secondaryTextMultiline: 5,
             purpose: Purpose.WARNING,
             rightIcon: null,
           );

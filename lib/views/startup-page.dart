@@ -32,60 +32,54 @@ class _StartupPageState extends State<StartupPage> {
     });
 
     // READ PERSISTED DATA (protobuf)
-    return Future.wait([
+    final persistenceReadPromises = <Future>[
       globalBootnodesPersistence.read(),
       globalIdentitiesPersistence.readAll(),
       globalEntitiesPersistence.readAll(),
       globalProcessesPersistence.readAll(),
       globalFeedPersistence.readAll(),
-    ])
-        .then((_) {
-          // POPULATE THE MODEL POOLS (Read into memory)
-          return Future.wait([
-            // NOTE: Read's should be done first on the models that
-            // don't depend on others to be restored
-            globalProcessPool.readFromStorage(),
-            globalFeedPool.readFromStorage(),
-            globalAppState.readFromStorage(),
-          ])
-              .then((_) => globalEntityPool.readFromStorage())
-              .then((_) => globalAccountPool.readFromStorage());
-        })
-        .then((_) {
-          // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-          return globalAppState.refresh(true);
-        })
-        .then(
-          (_) => getDVoteGateway().then((dvoteGw) {
-            if (dvoteGw == null)
-              throw Exception("No DVote Gateway is available");
-          }),
-        )
-        .then((_) {
-          // DETERMINE THE NEXT SCREEN AND GO THERE
-          String nextRoutePath;
-          if (globalAccountPool.hasValue &&
-              globalAccountPool.value.length > 0) {
-            nextRoutePath = "/identity/select";
-          } else {
-            nextRoutePath = "/identity/create";
-          }
+    ];
 
-          // Replace all routes with /identity/select on top
-          Navigator.pushNamedAndRemoveUntil(
-              context, nextRoutePath, (Route _) => false);
-        })
-        .catchError((err) {
-          if (!mounted) return;
+    return Future.wait(persistenceReadPromises)
+        // POPULATE THE MODEL POOLS (Read into memory)
+        .then((_) => Future.wait([
+              // NOTE: Read's should be done first on the models that
+              // don't depend on others to be restored
+              globalProcessPool.readFromStorage(),
+              globalFeedPool.readFromStorage(),
+              globalAppState.readFromStorage(),
+            ]))
+        .then((_) => globalEntityPool.readFromStorage())
+        .then((_) => globalAccountPool.readFromStorage())
+        // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
+        .then((_) => globalAppState.refresh(force: true))
+        .then((_) => getDVoteGateway())
+        .then((dvoteGw) => dvoteGw == null
+            ? throw Exception("No DVote Gateway is available")
+            : null)
+        .then((_) {
+      // DETERMINE THE NEXT SCREEN AND GO THERE
+      String nextRoutePath;
+      if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
+        nextRoutePath = "/identity/select";
+      } else {
+        nextRoutePath = "/identity/create";
+      }
 
-          setState(() {
-            loading = false;
-            error = getText(context, "Could not connect to the network");
-          });
+      // Replace all routes with /identity/select on top
+      Navigator.pushNamedAndRemoveUntil(
+          context, nextRoutePath, (Route _) => false);
+    }).catchError((err) {
+      if (!mounted) return;
 
-          // RETRY ITSELF
-          Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
-        });
+      setState(() {
+        loading = false;
+        error = getText(context, "Could not connect to the network");
+      });
+
+      // RETRY ITSELF
+      Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
+    });
   }
 
   Widget buildError(BuildContext context) {
