@@ -37,6 +37,7 @@ class _CardPollState extends State<CardPoll> {
         .process
         .refreshCurrentParticipants()
         .then((_) => this.widget.process.refreshCensusSize())
+        .then((_) => this.widget.process.refreshDates())
         .catchError((err) => devPrint(err));
   }
 
@@ -55,20 +56,21 @@ class _CardPollState extends State<CardPoll> {
     String timeLabel = "";
     String timeLeft = "";
     final now = DateTime.now();
-    final startDate = this.widget.process.startDate;
-    final endDate = this.widget.process.endDate;
+    final startDate = this.widget.process.startDate.value;
+    final endDate = this.widget.process.endDate.value;
 
     if (startDate is DateTime && endDate is DateTime) {
       // TODO: CHECK IF CANCELED
       if (now.isAfter(endDate)) {
         timeLabel = getText(context, "Ended");
-        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
       } else if (now.isAfter(startDate)) {
         timeLabel = getText(context, "Time left");
-        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
       } else {
         timeLabel = getText(context, "Starting in");
-        timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
+        timeLeft =
+            getFriendlyTimeDifference(this.widget.process.startDate.value);
       }
     } else if (endDate is DateTime) {
       // Refer to endDate
@@ -77,7 +79,7 @@ class _CardPollState extends State<CardPoll> {
       else
         timeLabel = getText(context, "Ended");
 
-      timeLeft = getFriendlyTimeDifference(this.widget.process.endDate);
+      timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
     } else if (startDate is DateTime) {
       // Refer to startDate
       if (now.isBefore(startDate))
@@ -85,7 +87,7 @@ class _CardPollState extends State<CardPoll> {
       else
         timeLabel = getText(context, "Started");
 
-      timeLeft = getFriendlyTimeDifference(this.widget.process.startDate);
+      timeLeft = getFriendlyTimeDifference(this.widget.process.startDate.value);
     }
 
     String participation = "0.0";

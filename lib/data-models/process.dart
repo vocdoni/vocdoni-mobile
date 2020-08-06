@@ -187,6 +187,10 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 5));
   final censusSize =
       EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 30));
+  final startDate =
+      EventualNotifier<DateTime>().withFreshnessTimeout(Duration(minutes: 1));
+  final endDate =
+      EventualNotifier<DateTime>().withFreshnessTimeout(Duration(minutes: 1));
 
   List<dynamic> choices = [];
 
@@ -253,7 +257,10 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
         .catchError((_) {})
         .then((_) => refreshCurrentParticipants(force: force))
         .catchError((_) {})
-        .then((_) => refreshCensusSize(force: force));
+        .then((_) => refreshCensusSize(force: force))
+        .catchError((_) {})
+        .then((_) => refreshDates(force: force))
+        .catchError((_) {});
   }
 
   Future<void> refreshMetadata({bool force = false}) async {
@@ -360,7 +367,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return;
     else if (!force && this.hasVoted.isLoading)
       return;
-    else if (!this.hasVoted.hasError && this.hasVoted.value == true) return;
+    else if (!this.hasVoted.hasError && this.hasVoted.value == true)
+      return; // If you already voted, you can't un-vote
 
     final account = globalAppState.currentAccount;
     if (account is! AccountModel)
@@ -381,7 +389,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       if (entity is! EntityModel) throw Exception("No entity for process");
 
       final hexPubKey = account.getPublicKeyForEntity(this.entityId);
-      final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x", ""));
+      final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
 
       final addrBytes = publicKeyToAddress(publicKeyBytes);
       final userAddress = EthereumAddress(addrBytes).hexEip55;
@@ -463,6 +471,35 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     });
   }
 
+  Future<void> refreshDates({bool force = false}) {
+    if (!this.metadata.hasValue)
+      return null;
+    else if (!force && this.startDate.isFresh)
+      return null;
+    else if (!force && this.startDate.isLoading) return null;
+
+    devPrint("- Refreshing process start/end date [${this.processId}]");
+
+    final startBlock = this.metadata.value.startBlock;
+    final endBlock =
+        this.metadata.value.startBlock + this.metadata.value.blockCount;
+
+    DVoteGateway gw;
+    return getDVoteGateway()
+        .then((dvoteGw) => gw = dvoteGw)
+        .then((_) => estimateDateAtBlock(startBlock, gw))
+        .then((startDate) => this.startDate.setValue(startDate))
+        .then((_) => estimateDateAtBlock(endBlock, gw))
+        .then((endDate) => this.endDate.setValue(endDate))
+        .catchError((err, stack) {
+      devPrint("- Refreshing process dates [ERROR: $err] [${this.processId}]");
+      // devPrint(stack);
+
+      this.startDate.setError("Cannot estimate the date");
+      this.endDate.setError("Cannot estimate the date");
+    });
+  }
+
   /// Cleans the ephemeral state of the process related to an account
   @override
   void cleanEphemeral() {
@@ -496,22 +533,5 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     return this.currentParticipants.value *
         100.0 /
         this.censusSize.value.toDouble();
-  }
-
-  @deprecated
-  DateTime get startDate {
-    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
-      return null;
-
-    return globalAppState.getDateTimeAtBlock(this.metadata.value.startBlock);
-  }
-
-  @deprecated
-  DateTime get endDate {
-    if (!this.metadata.hasValue || !globalAppState.referenceBlock.hasValue)
-      return null;
-
-    return globalAppState.getDateTimeAtBlock(
-        this.metadata.value.startBlock + this.metadata.value.blockCount);
   }
 }

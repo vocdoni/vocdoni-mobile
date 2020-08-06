@@ -539,6 +539,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         getText(ctx,
             "You are about to stop following the entity.\nDo you want to continue?"),
         title: getText(ctx, "Unsubscribe"),
+        okButton: getText(ctx, "OK"),
+        cancelButton: getText(ctx, "Cancel"),
         context: ctx);
     if (confirmUnsubscribe != true) return;
 

@@ -1,4 +1,3 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -6,6 +5,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
+import 'dart:async';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
@@ -20,6 +20,7 @@ import 'package:dvote_common/widgets/summary.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
@@ -36,10 +37,26 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPageState extends State<PollPage> {
+  Timer refreshCheck;
   EntityModel entity;
   ProcessModel process;
   int index;
   List<int> choices = [];
+
+  @override
+  void initState() {
+    // Try to update every 10 seconds (only if needed)
+    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (refreshCheck is Timer) refreshCheck.cancel();
+
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() async {
@@ -70,11 +87,15 @@ class _PollPageState extends State<PollPage> {
     globalAnalytics.trackPage("PollPage",
         entityId: entity.reference.entityId, processId: process.processId);
 
-    await process
+    await onRefresh();
+  }
+
+  Future<void> onRefresh() {
+    return process
         .refreshHasVoted()
         .then((_) => process.refreshIsInCensus())
-        .then((_) => globalAppState.refreshBlockInfo())
-        .catchError((err) => devPrint(err)); // Values will refresh if not fresh
+        .then((_) => process.refreshDates())
+        .catchError((err) => devPrint(err)); // Values will refresh if needed
   }
 
   Future<void> onCheckCensus(BuildContext context) async {
@@ -274,25 +295,26 @@ class _PollPageState extends State<PollPage> {
   buildTimeItem(BuildContext context) {
     // Rebuild when the reference block changes
     return EventualBuilder(
-      notifiers: [process.metadata, globalAppState.referenceBlockTimestamp],
+      notifiers: [process.metadata, process.startDate, process.endDate],
       builder: (context, _, __) {
         String rowText;
-
         Purpose purpose;
-        if (process.startDate is DateTime &&
-            DateTime.now().isBefore(process.startDate)) {
+        final now = DateTime.now();
+
+        if (process.startDate.hasValue &&
+            now.isBefore(process.startDate.value)) {
           // TODO: Localize date formats
           final formattedTime =
-              DateFormat("dd/MM HH:mm").format(process.startDate) + "h";
+              DateFormat("dd/MM HH:mm").format(process.startDate.value) + "h";
           rowText = getText(context, "Starting on {{DATE}}")
               .replaceFirst("{{DATE}}", formattedTime);
           purpose = Purpose.WARNING;
-        } else if (process.endDate is DateTime) {
+        } else if (process.endDate.hasValue) {
           // TODO: Localize date formats
           final formattedTime =
-              DateFormat("dd/MM HH:mm").format(process.endDate) + "h";
+              DateFormat("dd/MM HH:mm").format(process.endDate.value) + "h";
 
-          if (process.endDate.isBefore(DateTime.now())) {
+          if (process.endDate.value.isBefore(now)) {
             rowText = getText(context, "Ended on {{DATE}}")
                 .replaceFirst(("{{DATE}}"), formattedTime);
             purpose = Purpose.WARNING;
@@ -303,18 +325,16 @@ class _PollPageState extends State<PollPage> {
           }
         }
 
-        if (rowText is String) {
-          return ListItem(
-            icon: FeatherIcons.clock,
-            purpose: purpose,
-            mainText: rowText,
-            //secondaryText: "18/09/2019 at 19:00",
-            rightIcon: null,
-            disabled: false,
-          );
-        }
+        if (rowText is! String) return Container();
 
-        return Container();
+        return ListItem(
+          icon: FeatherIcons.clock,
+          purpose: purpose,
+          mainText: rowText,
+          //secondaryText: "18/09/2019 at 19:00",
+          rightIcon: null,
+          disabled: false,
+        );
       },
     );
   }
@@ -349,8 +369,10 @@ class _PollPageState extends State<PollPage> {
             !process.isInCensus.hasValue ||
             !process.isInCensus.value ||
             process.hasVoted.value == true ||
-            process.startDate.isAfter(DateTime.now()) ||
-            process.endDate.isBefore(DateTime.now());
+            !process.startDate.hasValue ||
+            !process.endDate.hasValue ||
+            process.startDate.value.isAfter(DateTime.now()) ||
+            process.endDate.value.isBefore(DateTime.now());
 
         if (cannotVote) {
           return Container();
@@ -389,13 +411,20 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.GOOD,
             rightIcon: null,
           );
-        } else if (process.startDate.isAfter(DateTime.now())) {
+        } else if (!process.startDate.hasValue || !process.endDate.hasValue) {
+          return ListItem(
+            mainText:
+                getText(context, "The process dates cannot be determined"),
+            purpose: Purpose.WARNING,
+            rightIcon: null,
+          );
+        } else if (process.startDate.value.isAfter(DateTime.now())) {
           return ListItem(
             mainText: getText(context, "The process is not active yet"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
-        } else if (process.endDate.isBefore(DateTime.now())) {
+        } else if (process.endDate.value.isBefore(DateTime.now())) {
           return ListItem(
             mainText: getText(context, "The process has already ended"),
             purpose: Purpose.WARNING,
