@@ -218,7 +218,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       if (mnemonic == null) return;
 
       for (final entity in this.entities.value) {
-        final wallet = EthereumWallet.fromMnemonic(mnemonic,
+        final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
             entityAddressHash: entity.reference.entityId);
 
         // Store the public key within the map for future use
@@ -398,7 +398,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = EthereumWallet.fromMnemonic(mnemonic);
+    final wallet = EthereumNativeWallet.fromMnemonic(mnemonic);
 
     final rootPrivateKey = await wallet.privateKeyAsync;
     final rootPublicKey = await wallet.publicKeyAsync;
@@ -435,7 +435,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = await EthereumWallet.randomAsync(size: 192);
+    final wallet = await EthereumNativeWallet.randomAsync(size: 192);
 
     final mnemonic = wallet.mnemonic;
     final rootPrivateKey = await wallet.privateKeyAsync;

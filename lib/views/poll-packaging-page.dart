@@ -69,7 +69,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     // PREPARE DATA
     String merkleProof;
-    EthereumWallet wallet;
+    EthereumNativeWallet wallet;
 
     final dvoteGw = await getDVoteGateway();
     if (dvoteGw == null) throw Exception("No DVote gateway is available");
@@ -84,18 +84,22 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       if (!mounted) return;
 
-      wallet = EthereumWallet.fromMnemonic(mnemonic,
+      wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
           entityAddressHash: entityAddressHash);
 
       // Merkle Proof
 
-      final publicKey = (await wallet.publicKeyAsync).replaceAll("0x", "");
-      final base64Claim = base64.encode(hex.decode(publicKey));
+      // final publicKey = (await wallet.publicKeyAsync).replaceAll("0x", "");
+      // final base64Claim = base64.encode(hex.decode(publicKey));
+
+      final publicKey = await wallet.publicKeyAsync;
+      final b64DigestedClaim = await digestHexClaim(publicKey);
+      final alreadyDigested = true;
 
       merkleProof = await generateProof(
           widget.process.metadata.value.census.merkleRoot,
-          base64Claim,
-          false,
+          b64DigestedClaim,
+          alreadyDigested,
           dvoteGw);
 
       if (!mounted)
@@ -111,7 +115,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     }
 
     assert(merkleProof is String);
-    assert(wallet is EthereumWallet);
+    assert(wallet is EthereumNativeWallet);
 
     try {
       // CHECK IF THE VOTE IS ALREADY REGISTERED

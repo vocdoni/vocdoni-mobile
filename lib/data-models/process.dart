@@ -327,15 +327,21 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     try {
       this.isInCensus.setToLoading();
 
+      // Undigested
+      // final pubKey = account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
+      // final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
+      // final proof = await generateProof(this.metadata.value.census.merkleRoot,
+      //     censusPublicKeyClaim, false, dvoteGw);
+
+      // Digested
       final pubKey =
           account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
-      final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
-
-      // Undigested
+      final censusPublicKeyClaim = await digestHexClaim(pubKey);
+      final alreadyDigested = true;
 
       final proof = await generateProof(this.metadata.value.census.merkleRoot,
-          censusPublicKeyClaim, false, dvoteGw);
-      if (!(proof is String) || !proof.startsWith("0x")) {
+          censusPublicKeyClaim, alreadyDigested, dvoteGw);
+      if (proof is! String || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;
       }
@@ -349,7 +355,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       }
 
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
-          censusPublicKeyClaim, false, proof, dvoteGw);
+          censusPublicKeyClaim, alreadyDigested, proof, dvoteGw);
 
       devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
 

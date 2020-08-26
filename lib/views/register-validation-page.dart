@@ -86,7 +86,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       if (!mounted) return;
 
       // Derive per-entity key
-      final wallet = EthereumWallet.fromMnemonic(mnemonic,
+      final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
           entityAddressHash: widget.entityId);
 
       final dvoteGw = DVoteGateway(widget.backendUri,

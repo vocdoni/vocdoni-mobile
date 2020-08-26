@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:dvote/util/json-signature.dart';
+import 'package:dvote/util/json-signature-native.dart';
 import 'package:dvote/util/parsers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -257,7 +257,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
         final web3Gw = await getWeb3Gateway();
-        if (web3Gw == null) throw Exception();
+        if (web3Gw == null) throw Exception("No Web3 gateway is available");
 
         this.metadata.setToLoading();
 
@@ -450,7 +450,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
-    final signature = await signJsonPayloadAsync(body, derivedPrivateKey);
+    final signature =
+        await JSONSignatureNative.signJsonPayloadAsync(body, derivedPrivateKey);
 
     if (signature.startsWith("0x"))
       this.actionVisibilityCheckSignature = signature;

@@ -14,8 +14,11 @@ Future<void> connectingFuture;
 Future<void> ensureConnectedGateways() {
   if (connectingFuture is Future) {
     return connectingFuture;
-  } else if ((_dvoteGw is DVoteGateway && _dvoteGw.isConnected))
+  } else if (_dvoteGw is DVoteGateway &&
+      _dvoteGw.isConnected &&
+      _web3Gw is Web3Gateway) {
     return Future.value();
+  }
 
   final completer = Completer<void>();
   connectingFuture = completer.future;

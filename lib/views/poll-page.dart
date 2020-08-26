@@ -132,7 +132,7 @@ class _PollPageState extends State<PollPage> {
         return;
       }
 
-      final wallet = EthereumWallet.fromMnemonic(mnemonic,
+      final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
           entityAddressHash: entity.reference.entityId);
 
       account.setPublicKeyForEntity(

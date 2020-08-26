@@ -74,8 +74,9 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
     }
 
     try {
-      final _ = await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
-      if (!(_ is String)) throw Exception();
+      final w =
+          await EthereumNativeWallet.fromMnemonic(mnemonic).privateKeyAsync;
+      if (!(w is String)) throw Exception();
     } catch (err) {
       showMessage(getText(context, "The seed phrase you entered is not valid"),
           context: context, purpose: Purpose.WARNING);
