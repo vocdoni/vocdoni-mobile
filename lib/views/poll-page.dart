@@ -136,7 +136,8 @@ class _PollPageState extends State<PollPage> {
           entityAddressHash: entity.reference.entityId);
 
       account.setPublicKeyForEntity(
-          await wallet.publicKeyAsync, entity.reference.entityId);
+          await wallet.publicKeyAsync(uncompressed: true),
+          entity.reference.entityId);
     }
 
     process.refreshIsInCensus(force: true);

@@ -112,7 +112,7 @@ packages:
       name: dvote
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.0"
+    version: "0.14.0"
   dvote_common:
     dependency: "direct main"
     description:
@@ -128,7 +128,7 @@ packages:
       name: dvote_native
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0"
+    version: "0.9.1"
   eventual:
     dependency: "direct main"
     description:

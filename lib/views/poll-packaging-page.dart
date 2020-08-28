@@ -89,10 +89,10 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       // Merkle Proof
 
-      // final publicKey = (await wallet.publicKeyAsync).replaceAll("0x", "");
+      // final publicKey = (await wallet.publicKeyAsync(uncompressed: true)).replaceAll("0x", "");
       // final base64Claim = base64.encode(hex.decode(publicKey));
 
-      final publicKey = await wallet.publicKeyAsync;
+      final publicKey = await wallet.publicKeyAsync(uncompressed: true);
       final b64DigestedClaim = await digestHexClaim(publicKey);
       final alreadyDigested = true;
 

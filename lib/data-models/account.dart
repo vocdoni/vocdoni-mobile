@@ -223,8 +223,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
         // Store the public key within the map for future use
         if (!hasPublicKeyForEntity(entity.reference.entityId)) {
-          setPublicKeyForEntity(
-              await wallet.publicKeyAsync, entity.reference.entityId);
+          setPublicKeyForEntity(await wallet.publicKeyAsync(uncompressed: true),
+              entity.reference.entityId);
         }
 
         await entity.refresh(
@@ -401,7 +401,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final wallet = EthereumNativeWallet.fromMnemonic(mnemonic);
 
     final rootPrivateKey = await wallet.privateKeyAsync;
-    final rootPublicKey = await wallet.publicKeyAsync;
+    final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
     final encryptedMenmonic =
         await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
@@ -439,7 +439,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
     final mnemonic = wallet.mnemonic;
     final rootPrivateKey = await wallet.privateKeyAsync;
-    final rootPublicKey = await wallet.publicKeyAsync;
+    final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
     final encryptedMenmonic =
         await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
