@@ -253,15 +253,9 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
     try {
       if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
-        final dvoteGw = await getDVoteGateway();
-        if (dvoteGw == null) throw Exception("No DVote gateway is available");
-
-        final web3Gw = await getWeb3Gateway();
-        if (web3Gw == null) throw Exception("No Web3 gateway is available");
-
         this.metadata.setToLoading();
 
-        freshEntityMetadata = await fetchEntity(reference, dvoteGw, web3Gw);
+        freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
         devPrint("- Refreshing entity metadata [DONE] [${reference.entityId}]");
@@ -408,10 +402,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       // Fetch from a new URI
       final cUri = ContentURI(currentContentUri);
-      final dvoteGw = await getDVoteGateway();
-      if (dvoteGw == null) throw Exception("No DVote gateway is available");
 
-      final result = await fetchFileString(cUri, dvoteGw);
+      final result = await fetchFileString(cUri, AppNetworking.pool);
       final Feed feed = parseFeed(result);
       feed.meta[META_FEED_CONTENT_URI] = currentContentUri;
       feed.meta[META_ENTITY_ID] = this.reference.entityId;

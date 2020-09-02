@@ -1,3 +1,4 @@
+import 'package:dvote/util/dev.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -52,12 +53,21 @@ class _StartupPageState extends State<StartupPage> {
         .then((_) => globalEntityPool.readFromStorage())
         .then((_) => globalAccountPool.readFromStorage())
         // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-        .then((_) => globalAppState.refresh(force: true))
-        .then((_) => getDVoteGateway())
-        .then((dvoteGw) => dvoteGw == null
-            ? throw Exception("No DVote Gateway is available")
-            : null)
-        .then((_) {
+        .then((dvoteGw) {
+      // Try to fetch bootnodes from the well-known URI
+
+      return AppNetworking.init(forceReload: true).then((_) {
+        if (!AppNetworking.isReady)
+          throw Exception("No DVote Gateway is available");
+      }).catchError((err) {
+        devPrint("[App] Network initialization failed: $err");
+        devPrint("[App] Trying to use the local gateway cache");
+
+        // Retry with the existing cached gateways
+        return AppNetworking.useFromGatewayInfo(
+            globalAppState.bootnodeInfo.value);
+      });
+    }).then((_) {
       // DETERMINE THE NEXT SCREEN AND GO THERE
       String nextRoutePath;
       if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
@@ -69,6 +79,10 @@ class _StartupPageState extends State<StartupPage> {
       // Replace all routes with /identity/select on top
       Navigator.pushNamedAndRemoveUntil(
           context, nextRoutePath, (Route _) => false);
+
+      // Detached update of the cached bootnodes
+      globalAppState.refresh(force: true).catchError(
+          (err) => devPrint("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;
 

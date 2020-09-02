@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         devPrint("Resumed");
-        ensureConnectedGateways();
+        if (!AppNetworking.isReady) AppNetworking.init(forceReload: true);
         break;
       case AppLifecycleState.detached:
         devPrint("Detached");

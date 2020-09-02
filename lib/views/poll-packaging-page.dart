@@ -71,9 +71,6 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     String merkleProof;
     EthereumNativeWallet wallet;
 
-    final dvoteGw = await getDVoteGateway();
-    if (dvoteGw == null) throw Exception("No DVote gateway is available");
-
     try {
       // Derive per-entity key
       final entityAddressHash = widget.process.metadata.value.details.entityId;
@@ -100,7 +97,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
           widget.process.metadata.value.census.merkleRoot,
           b64DigestedClaim,
           alreadyDigested,
-          dvoteGw);
+          AppNetworking.pool);
 
       if (!mounted)
         return;
@@ -132,13 +129,17 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // PREPARE THE VOTE ENVELOPE
       ProcessKeys processKeys;
       if (widget.process.metadata.value.type == "encrypted-poll") {
-        processKeys = await getProcessKeys(widget.process.processId, dvoteGw);
+        processKeys =
+            await getProcessKeys(widget.process.processId, AppNetworking.pool);
       }
 
       if (!mounted) return;
 
-      Map<String, dynamic> envelope = await packagePollEnvelope(widget.choices,
-          merkleProof, widget.process.processId, await wallet.privateKeyAsync,
+      Map<String, dynamic> envelope = await packageSignedEnvelope(
+          widget.choices,
+          merkleProof,
+          widget.process.processId,
+          await wallet.privateKeyAsync,
           processKeys: processKeys);
 
       if (!mounted) return;
@@ -161,10 +162,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void stepSendVote(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
-      final dvoteGw = await getDVoteGateway();
-      if (dvoteGw == null) throw Exception("No DVote gateway is available");
-
-      await submitEnvelope(_envelope, dvoteGw);
+      await submitEnvelope(_envelope, AppNetworking.pool);
 
       if (!mounted) return;
 

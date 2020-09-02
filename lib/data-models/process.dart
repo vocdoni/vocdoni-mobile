@@ -269,18 +269,14 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
       return;
 
-    devPrint("- Refreshing process metadata [${this.processId}]");
+    devPrint("- [refreshMetadata] [${this.processId}]");
 
     // TODO: Don't refetch if the IPFS hash is the same
-
-    final dvoteGw = await getDVoteGateway();
-    if (dvoteGw == null) throw Exception("No DVote gateway is available");
-    final web3Gw = await getWeb3Gateway();
 
     try {
       this.metadata.setToLoading();
       final newMetadata =
-          await getProcessMetadata(this.processId, dvoteGw, web3Gw);
+          await getProcessMetadata(this.processId, AppNetworking.pool);
       if (!(newMetadata is ProcessMetadata))
         throw Exception("The process cannot be found");
 
@@ -288,12 +284,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           this.processId; // Ensure we can read it back
       newMetadata.meta[META_ENTITY_ID] = this.entityId;
 
-      devPrint("- Refreshing process metadata [DONE] [${this.processId}]");
+      devPrint("- [refreshMetadata] DONE [${this.processId}]");
 
       this.metadata.setValue(newMetadata);
     } catch (err) {
-      devPrint(
-          "- Refreshing process metadata [ERROR: $err] [${this.processId}]");
+      devPrint("- [refreshMetadata] ERROR: $err [${this.processId}]");
 
       this.metadata.setError("Could not fetch the process details");
     }
@@ -319,10 +314,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return;
     }
 
-    devPrint("- Refreshing process isInCensus [${this.processId}]");
-
-    final dvoteGw = await getDVoteGateway();
-    if (dvoteGw == null) throw Exception("No DVote gateway is available");
+    devPrint("- [refreshIsInCensus] [${this.processId}]");
 
     try {
       this.isInCensus.setToLoading();
@@ -340,7 +332,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final alreadyDigested = true;
 
       final proof = await generateProof(this.metadata.value.census.merkleRoot,
-          censusPublicKeyClaim, alreadyDigested, dvoteGw);
+          censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;
@@ -355,14 +347,13 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       }
 
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
-          censusPublicKeyClaim, alreadyDigested, proof, dvoteGw);
+          censusPublicKeyClaim, alreadyDigested, proof, AppNetworking.pool);
 
-      devPrint("- Refreshing process isInCensus [DONE] [${this.processId}]");
+      devPrint("- [refreshIsInCensus] DONE [${this.processId}]");
 
       this.isInCensus.setValue(valid);
     } catch (err) {
-      devPrint(
-          "- Refreshing process isInCensus [ERROR: $err] [${this.processId}]");
+      devPrint("- [refreshIsInCensus] ERROR: $err [${this.processId}]");
 
       this.isInCensus.setError("The census is not available");
     }
@@ -386,7 +377,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return;
     }
 
-    devPrint("- Refreshing process hasVoted [${this.processId}]");
+    devPrint("- [refreshHasVoted] [${this.processId}]");
 
     try {
       this.hasVoted.setToLoading();
@@ -400,26 +391,24 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final addrBytes = publicKeyToAddress(publicKeyBytes);
       final userAddress = EthereumAddress(addrBytes).hexEip55;
 
-      final pollNullifier = await getPollNullifier(userAddress, this.processId);
+      final pollNullifier =
+          await getSignedVoteNullifier(userAddress, this.processId);
 
-      final dvoteGw = await getDVoteGateway();
-      if (dvoteGw == null) throw Exception("No DVote gateway is available");
-      final success =
-          await getEnvelopeStatus(this.processId, pollNullifier, dvoteGw)
-              .catchError((_) {});
+      final success = await getEnvelopeStatus(
+              this.processId, pollNullifier, AppNetworking.pool)
+          .catchError((_) {});
 
       if (success is bool) {
-        devPrint("- Refreshing process hasVoted [DONE] [${this.processId}]");
+        devPrint("- [refreshHasVoted] DONE [${this.processId}]");
 
         this.hasVoted.setValue(success);
       } else {
-        devPrint("- Refreshing process hasVoted [NO BOOL] [${this.processId}]");
+        devPrint("- [refreshHasVoted] NO BOOL [${this.processId}]");
 
         this.hasVoted.setError("Could not check the process status");
       }
     } catch (err) {
-      devPrint(
-          "- Refreshing process hasVoted [ERROR: $err] [${this.processId}]");
+      devPrint("- [refreshHasVoted] ERROR: $err [${this.processId}]");
 
       this.hasVoted.setError("Could not check the vote status");
     }
@@ -432,20 +421,17 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return Future.value();
     else if (!force && this.censusSize.isLoading) return Future.value();
 
-    devPrint("- Refreshing process censusSize [${this.processId}]");
+    devPrint("- [refreshCensusSize] [${this.processId}]");
 
     this.censusSize.setToLoading();
-    return getDVoteGateway()
-        .then((dvoteGw) =>
-            getCensusSize(this.metadata.value.census.merkleRoot, dvoteGw))
+    return getCensusSize(
+            this.metadata.value.census.merkleRoot, AppNetworking.pool)
         .then((size) {
-      devPrint(
-          "- Refreshing process censusSize [DONE $size] [${this.processId}]");
+      devPrint("- [refreshCensusSize] DONE: size $size [${this.processId}]");
 
       return this.censusSize.setValue(size);
     }).catchError((err) {
-      devPrint(
-          "- Refreshing process censusSize [ERROR: $err] [${this.processId}]");
+      devPrint("- [refreshCensusSize] ERROR: $err [${this.processId}]");
 
       this.censusSize.setError("The census info is not available");
     });
@@ -462,16 +448,15 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     devPrint("- Refreshing process currentParticipants [${this.processId}]");
 
     this.currentParticipants.setToLoading();
-    return getDVoteGateway()
-        .then((dvoteGw) => getEnvelopeHeight(this.processId, dvoteGw))
+    return getEnvelopeHeight(this.processId, AppNetworking.pool)
         .then((numVotes) {
       devPrint(
-          "- Refreshing process currentParticipants [DONE] [${this.processId}]");
+          "- Refreshing process currentParticipants DONE [${this.processId}]");
 
       return this.currentParticipants.setValue(numVotes);
     }).catchError((err) {
       devPrint(
-          "- Refreshing process currentParticipants [ERROR: $err] [${this.processId}]");
+          "- Refreshing process currentParticipants ERROR: $err [${this.processId}]");
 
       this.currentParticipants.setError("The process info is not available");
     });
@@ -490,18 +475,15 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     final endBlock =
         this.metadata.value.startBlock + this.metadata.value.blockCount;
 
-    DVoteGateway gw;
-    return getDVoteGateway()
-        .then((dvoteGw) => gw = dvoteGw)
-        .then((_) => estimateDateAtBlock(startBlock, gw))
+    return estimateDateAtBlock(startBlock, AppNetworking.pool)
         .then((startDate) => this.startDate.setValue(startDate))
-        .then((_) => estimateDateAtBlock(endBlock, gw))
+        .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool))
         .then((endDate) {
       devPrint("- Refreshing process start/end date [DONE ${this.processId}]");
 
       this.endDate.setValue(endDate);
     }).catchError((err, stack) {
-      devPrint("- Refreshing process dates [ERROR: $err] [${this.processId}]");
+      devPrint("- Refreshing process dates ERROR: $err [${this.processId}]");
       // devPrint(stack);
 
       this.startDate.setError("Cannot estimate the date");
