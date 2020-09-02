@@ -496,8 +496,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
         .then((_) => estimateDateAtBlock(startBlock, gw))
         .then((startDate) => this.startDate.setValue(startDate))
         .then((_) => estimateDateAtBlock(endBlock, gw))
-        .then((endDate) => this.endDate.setValue(endDate))
-        .catchError((err, stack) {
+        .then((endDate) {
+      devPrint("- Refreshing process start/end date [DONE ${this.processId}]");
+
+      this.endDate.setValue(endDate);
+    }).catchError((err, stack) {
       devPrint("- Refreshing process dates [ERROR: $err] [${this.processId}]");
       // devPrint(stack);
 

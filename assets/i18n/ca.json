@@ -184,7 +184,7 @@
   "{{NUM}} d": "{{NUM}} d",
   "{{NUM}} h": "{{NUM}} h",
   "{{NUM}} min": "{{NUM}} min",
-  "{{NUM}} mo": "{{NUM}} m",
+  "{{NUM}} mo": "{{NUM}} mes",
   "{{NUM}} s": "{{NUM}} s",
   "{{NUM}} y": "{{NUM}} a"
 }
