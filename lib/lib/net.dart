@@ -111,7 +111,10 @@ Future<GatewayInfo> _getFastestGatewayInfo() async {
       .map((node) => DVoteGateway.isUp(node.uri).then((isUp) {
             if (isUp && fastestDVoteIdx < 0)
               fastestDVoteIdx = dvoteNodes.indexOf(node);
-          }).catchError((_) {}))
+            devPrint("${node.uri} is ${isUp ? "up" : "down"}");
+          }).catchError((err) {
+            devPrint("${node.uri} failed: $err");
+          }))
       .cast<Future>()
       .toList());
 
