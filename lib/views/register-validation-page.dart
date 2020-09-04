@@ -79,7 +79,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     try {
       // PREPARE THE REQUEST
-      final mnemonic = await Symmetric.decryptStringAsync(
+      final mnemonic = await SymmetricNative.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternLockKey);
 
@@ -89,9 +89,8 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
           entityAddressHash: widget.entityId);
 
-      final dvoteGw = DVoteGateway(widget.backendUri,
-          publicKey: widget.backendPublicKey, skipHealthCheck: true);
-      if (dvoteGw == null) throw Exception("No DVote gateway is available");
+      final dvoteGw =
+          DVoteGateway(widget.backendUri, publicKey: widget.backendPublicKey);
 
       // Already registered?
       final privateKey = await wallet.privateKeyAsync;
@@ -109,7 +108,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       // API CALL
       await validateRegistrationToken(
-          widget.entityId, widget.validationToken, dvoteGw, privateKey);
+          widget.entityId, widget.validationToken, ___dvoteGw, privateKey);
 
       if (!mounted) return;
 

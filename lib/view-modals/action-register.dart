@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/json-signature-native.dart';
-import 'package:dvote/crypto/encryption.dart';
+import 'package:dvote/crypto/encryption-native.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -237,7 +237,7 @@ class ActionRegisterPage extends StatelessWidget {
     // Derive the key for the entity
 
     final mnemonic =
-        await Symmetric.decryptStringAsync(encryptedMnemonic, patternStr);
+        await SymmetricNative.decryptStringAsync(encryptedMnemonic, patternStr);
     final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
         entityAddressHash: entityId);
 

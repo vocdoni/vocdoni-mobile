@@ -15,9 +15,9 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:convert/convert.dart';
-import 'dart:convert';
-import 'package:dvote/crypto/encryption.dart';
+import 'package:dvote/crypto/encryption-native.dart';
+// import 'package:convert/convert.dart';
+// import 'dart:convert';
 
 class PollPackagingPage extends StatefulWidget {
   final ProcessModel process;
@@ -75,7 +75,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // Derive per-entity key
       final entityAddressHash = widget.process.metadata.value.details.entityId;
 
-      final mnemonic = await Symmetric.decryptStringAsync(
+      final mnemonic = await SymmetricNative.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternLockKey);
 
@@ -90,7 +90,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // final base64Claim = base64.encode(hex.decode(publicKey));
 
       final publicKey = await wallet.publicKeyAsync(uncompressed: true);
-      final b64DigestedClaim = await digestHexClaim(publicKey);
+      final b64DigestedClaim = Hashing.digestHexClaim(publicKey);
       final alreadyDigested = true;
 
       merkleProof = await generateProof(

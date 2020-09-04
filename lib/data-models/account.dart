@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:dvote/crypto/encryption.dart';
+import 'package:dvote/crypto/encryption-native.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -212,7 +212,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       final currentAccount = globalAppState.currentAccount;
       if (currentAccount is! AccountModel) return;
 
-      final mnemonic = await Symmetric.decryptStringAsync(
+      final mnemonic = SymmetricNative.decryptString(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) return;
@@ -403,9 +403,9 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final rootPrivateKey = await wallet.privateKeyAsync;
     final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic =
-        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
+    final encryptedMenmonic = await SymmetricNative.encryptStringAsync(
+        mnemonic, patternEncryptionKey);
+    final encryptedRootPrivateKey = await SymmetricNative.encryptStringAsync(
         rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
@@ -441,9 +441,9 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final rootPrivateKey = await wallet.privateKeyAsync;
     final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic =
-        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
+    final encryptedMenmonic = await SymmetricNative.encryptStringAsync(
+        mnemonic, patternEncryptionKey);
+    final encryptedRootPrivateKey = await SymmetricNative.encryptStringAsync(
         rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();

@@ -123,7 +123,7 @@ class _PollPageState extends State<PollPage> {
       }
 
       // Good
-      final mnemonic = await Symmetric.decryptStringAsync(
+      final mnemonic = SymmetricNative.decryptString(
           account.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) {

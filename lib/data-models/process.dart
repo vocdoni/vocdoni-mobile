@@ -8,7 +8,7 @@ import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:convert/convert.dart';
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:vocdoni/lib/util.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/credentials.dart';
@@ -328,7 +328,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       // Digested
       final pubKey =
           account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
-      final censusPublicKeyClaim = await digestHexClaim(pubKey);
+      final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
       final alreadyDigested = true;
 
       final proof = await generateProof(this.metadata.value.census.merkleRoot,
