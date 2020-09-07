@@ -14,6 +14,7 @@ import 'package:dvote_common/widgets/dashboardItem.dart';
 import 'package:dvote_common/widgets/dashboardRow.dart';
 import 'package:dvote_common/widgets/dashboardText.dart';
 import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/spinner.dart';
 
 class CardPoll extends StatefulWidget {
   final ProcessModel process;
@@ -45,7 +46,14 @@ class _CardPollState extends State<CardPoll> {
   Widget build(context) {
     // Consume individual items that may rebuild only themselves
     return EventualBuilder(
-      notifiers: [widget.entity.metadata, widget.process.metadata],
+      notifiers: [
+        widget.entity.metadata,
+        widget.process.metadata,
+        widget.process.startDate,
+        widget.process.endDate,
+        widget.process.censusSize,
+        widget.process.currentParticipants
+      ],
       builder: (context, _, __) => this.buildCard(context),
     );
   }
@@ -58,6 +66,7 @@ class _CardPollState extends State<CardPoll> {
     final now = DateTime.now();
     final startDate = this.widget.process.startDate.value;
     final endDate = this.widget.process.endDate.value;
+    bool dateLoaded = false;
 
     if (startDate is DateTime && endDate is DateTime) {
       // TODO: CHECK IF CANCELED
@@ -72,6 +81,7 @@ class _CardPollState extends State<CardPoll> {
         timeLeft =
             getFriendlyTimeDifference(this.widget.process.startDate.value);
       }
+      dateLoaded = true;
     } else if (endDate is DateTime) {
       // Refer to endDate
       if (now.isBefore(endDate))
@@ -80,6 +90,7 @@ class _CardPollState extends State<CardPoll> {
         timeLabel = getText(context, "Ended");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
+      dateLoaded = true;
     } else if (startDate is DateTime) {
       // Refer to startDate
       if (now.isBefore(startDate))
@@ -88,6 +99,7 @@ class _CardPollState extends State<CardPoll> {
         timeLabel = getText(context, "Started");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.startDate.value);
+      dateLoaded = true;
     }
 
     String participation = "0.0";
@@ -125,17 +137,13 @@ class _CardPollState extends State<CardPoll> {
             ),
             DashboardItem(
               label: timeLabel,
-              item: DashboardText(
-                  mainText: timeLeft, secondaryText: "", purpose: Purpose.GOOD),
+              item: dateLoaded
+                  ? DashboardText(
+                      mainText: timeLeft,
+                      secondaryText: "",
+                      purpose: Purpose.GOOD)
+                  : SpinnerCircular(),
             ),
-            // DashboardItem(
-            //   label: "Vote now!",
-            //   item: Icon(
-            //     FeatherIcons.arrowRightCircle,
-            //     size: iconSizeMedium,
-            //     color: getColorByPurpose(purpose: Purpose.HIGHLIGHT),
-            //   ),
-            // ),
           ],
         ),
         buildProcessTitle(),

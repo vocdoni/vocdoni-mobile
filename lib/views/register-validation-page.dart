@@ -108,7 +108,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       // API CALL
       await validateRegistrationToken(
-          widget.entityId, widget.validationToken, ___dvoteGw, privateKey);
+          widget.entityId, widget.validationToken, dvoteGw, privateKey);
 
       if (!mounted) return;
 

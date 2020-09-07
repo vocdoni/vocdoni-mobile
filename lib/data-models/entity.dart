@@ -244,7 +244,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
       return;
 
-    devPrint("Refreshing entity metadata [${reference.entityId}]");
+    devPrint("[Entity meta] Refreshing [${reference.entityId}]");
 
     final oldEntityMetadata = this.metadata;
     EntityMetadata freshEntityMetadata;
@@ -258,13 +258,13 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
-        devPrint("- Refreshing entity metadata [DONE] [${reference.entityId}]");
+        devPrint("- [Entity meta] Refreshing [DONE] [${reference.entityId}]");
 
         this.metadata.setValue(freshEntityMetadata);
       }
     } catch (err) {
       devPrint(
-          "- Refreshing entity metadata [ERROR: $err] [${reference.entityId}]");
+          "- [Entity meta] Refreshing [ERROR: $err] [${reference.entityId}]");
 
       this.metadata.setError("The entity's data cannot be fetched",
           keepPreviousValue: true);
@@ -299,7 +299,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
           needsFeedReload = true;
       }
 
-      devPrint("- Refreshing entity dependent data [${reference.entityId}]");
+      devPrint("- [Entity children] Loading [${reference.entityId}]");
 
       return Future.wait([
         this.refreshProcesses(force: needsProcessListReload),
@@ -308,7 +308,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       ]);
     } catch (err) {
       devPrint(
-          "- Refreshing entity dependent data [ERROR: $err] [${reference.entityId}]");
+          "- [Entity children] Loading [ERROR: $err] [${reference.entityId}]");
 
       throw err;
     }
@@ -334,7 +334,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       final newProcessIds = this.metadata.value.votingProcesses.active;
 
       devPrint(
-          "- Refreshing entity's processes list [${this.metadata.value.votingProcesses.active.length} active]");
+          "- [Entity procs] Loading [${this.metadata.value.votingProcesses.active.length} active]");
 
       // add new
       final List<ProcessModel> myFreshProcessModels =
@@ -368,7 +368,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       await globalProcessPool.writeToStorage();
     } catch (err) {
       devPrint(
-          "- Refreshing entity dependent processes [ERROR: $err] [${reference.entityId}]");
+          "- [Entity procs] Loading [ERROR: $err] [${reference.entityId}]");
 
       this.processes.setError("Could not update the process list",
           keepPreviousValue: true);
@@ -398,7 +398,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       this.feed.setToLoading();
 
-      devPrint("- Refreshing entity's feed [${this.reference.entityId}]");
+      devPrint("- [Entity feed] Loading [${this.reference.entityId}]");
 
       // Fetch from a new URI
       final cUri = ContentURI(currentContentUri);
@@ -411,8 +411,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       this.feed.setValue(feed);
 
-      devPrint(
-          "- Refreshing entity's feed [DONE] [${this.reference.entityId}]");
+      devPrint("- [Entity feed] Loading [DONE] [${this.reference.entityId}]");
 
       final idx = globalFeedPool.value.indexWhere(
           (feed) => feed.meta[META_ENTITY_ID] == this.reference.entityId);
@@ -425,8 +424,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       await globalFeedPool.writeToStorage();
     } catch (err) {
-      devPrint(
-          "- Refreshing entity dependent feed [ERROR: $err] [${reference.entityId}]");
+      devPrint("- [Entity feed] Loading [ERROR: $err] [${reference.entityId}]");
 
       this
           .feed
@@ -467,7 +465,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         this.visibleActions.isLoading &&
         this.visibleActions.isLoadingFresh) return;
 
-    devPrint("- Refreshing entity visible actions [${reference.entityId}]");
+    devPrint("- [Entity actions] Loading [${reference.entityId}]");
 
     this.registerAction.setToLoading();
     this.isRegistered.setToLoading();
@@ -509,13 +507,12 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
           .cast<Future>()
           .toList());
 
-      devPrint(
-          "- Refreshing entity visible actions [DONE] [${reference.entityId}]");
+      devPrint("- [Entity actions] Loading [DONE] [${reference.entityId}]");
 
       this.visibleActions.setValue(visibleStandardActions);
     } catch (err) {
       devPrint(
-          "- Refreshing entity visible actions [ERROR: $err] [${reference.entityId}]");
+          "- [Entity actions] Loading [ERROR: $err] [${reference.entityId}]");
 
       this.visibleActions.setError("Could not fetch the entity details");
 

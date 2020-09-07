@@ -131,7 +131,7 @@ class _HomeContentTabState extends State<HomeContentTab> {
           else if (!process.metadata.hasValue) return;
 
           availableItems.add(CardItem(
-              entity: entity, date: process.startDate.value, process: process));
+              entity: entity, date: process.endDate.value, process: process));
         });
       }
     }

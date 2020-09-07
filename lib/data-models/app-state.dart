@@ -92,7 +92,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      devPrint("[App] Fetching: " +
+      devPrint("[App] Fetching " +
           FlavorConfig.instance.constants.gatewayBootNodesUrl);
       final bnGatewayInfo = await fetchBootnodeInfo(
           FlavorConfig.instance.constants.gatewayBootNodesUrl);
@@ -101,7 +101,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
           networkId: FlavorConfig.instance.constants.networkId);
 
-      devPrint("[App] Updating Gateway Pool");
+      devPrint("[App] Gateway Pool ready");
       AppNetworking.setGateways(
           gateways, FlavorConfig.instance.constants.networkId);
 

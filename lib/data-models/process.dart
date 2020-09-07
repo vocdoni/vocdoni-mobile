@@ -269,7 +269,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
       return;
 
-    devPrint("- [refreshMetadata] [${this.processId}]");
+    devPrint("- [Process meta] Refreshing [${this.processId}]");
 
     // TODO: Don't refetch if the IPFS hash is the same
 
@@ -284,11 +284,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           this.processId; // Ensure we can read it back
       newMetadata.meta[META_ENTITY_ID] = this.entityId;
 
-      devPrint("- [refreshMetadata] DONE [${this.processId}]");
+      devPrint("- [Process meta] Refreshing DONE [${this.processId}]");
 
       this.metadata.setValue(newMetadata);
     } catch (err) {
-      devPrint("- [refreshMetadata] ERROR: $err [${this.processId}]");
+      devPrint("- [Process meta] Refreshing ERROR: $err [${this.processId}]");
 
       this.metadata.setError("Could not fetch the process details");
     }
@@ -309,12 +309,12 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
       devPrint(
-          "No public key is available yet for the entity " + this.entityId);
+          "The public key is not loaded yet for the entity " + this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
 
-    devPrint("- [refreshIsInCensus] [${this.processId}]");
+    devPrint("- [Process census presence] Refreshing [${this.processId}]");
 
     try {
       this.isInCensus.setToLoading();
@@ -349,11 +349,13 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
           censusPublicKeyClaim, alreadyDigested, proof, AppNetworking.pool);
 
-      devPrint("- [refreshIsInCensus] DONE [${this.processId}]");
+      devPrint(
+          "- [Process census presence] Refreshing DONE [${this.processId}]");
 
       this.isInCensus.setValue(valid);
     } catch (err) {
-      devPrint("- [refreshIsInCensus] ERROR: $err [${this.processId}]");
+      devPrint(
+          "- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
 
       this.isInCensus.setError("The census is not available");
     }
@@ -372,7 +374,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
       devPrint(
-          "No public key is available yet for the entity " + this.entityId);
+          "The public key is not loaded yet for the entity " + this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
@@ -399,16 +401,16 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           .catchError((_) {});
 
       if (success is bool) {
-        devPrint("- [refreshHasVoted] DONE [${this.processId}]");
+        devPrint("- [Process voted] Refreshing DONE [${this.processId}]");
 
         this.hasVoted.setValue(success);
       } else {
-        devPrint("- [refreshHasVoted] NO BOOL [${this.processId}]");
+        devPrint("- [Process voted] Refreshing NO BOOL [${this.processId}]");
 
         this.hasVoted.setError("Could not check the process status");
       }
     } catch (err) {
-      devPrint("- [refreshHasVoted] ERROR: $err [${this.processId}]");
+      devPrint("- [Process voted] Refreshing ERROR: $err [${this.processId}]");
 
       this.hasVoted.setError("Could not check the vote status");
     }
@@ -421,17 +423,18 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return Future.value();
     else if (!force && this.censusSize.isLoading) return Future.value();
 
-    devPrint("- [refreshCensusSize] [${this.processId}]");
+    devPrint("- [Process census] Refreshing [${this.processId}]");
 
     this.censusSize.setToLoading();
     return getCensusSize(
             this.metadata.value.census.merkleRoot, AppNetworking.pool)
         .then((size) {
-      devPrint("- [refreshCensusSize] DONE: size $size [${this.processId}]");
+      devPrint(
+          "- [Process census] Refreshing DONE: size $size [${this.processId}]");
 
       return this.censusSize.setValue(size);
     }).catchError((err) {
-      devPrint("- [refreshCensusSize] ERROR: $err [${this.processId}]");
+      devPrint("- [Process census] Refreshing ERROR: $err [${this.processId}]");
 
       this.censusSize.setError("The census info is not available");
     });
@@ -445,18 +448,17 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.currentParticipants.isLoading)
       return Future.value();
 
-    devPrint("- Refreshing process currentParticipants [${this.processId}]");
+    devPrint("- [Process participants] Refreshing [${this.processId}]");
 
     this.currentParticipants.setToLoading();
     return getEnvelopeHeight(this.processId, AppNetworking.pool)
         .then((numVotes) {
-      devPrint(
-          "- Refreshing process currentParticipants DONE [${this.processId}]");
+      devPrint("- [Process participants] Refreshing DONE [${this.processId}]");
 
       return this.currentParticipants.setValue(numVotes);
     }).catchError((err) {
       devPrint(
-          "- Refreshing process currentParticipants ERROR: $err [${this.processId}]");
+          "- [Process participants] Refreshing ERROR: $err [${this.processId}]");
 
       this.currentParticipants.setError("The process info is not available");
     });
@@ -469,7 +471,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return null;
     else if (!force && this.startDate.isLoading) return null;
 
-    devPrint("- Refreshing process start/end date [${this.processId}]");
+    devPrint("- [Process dates] Refreshing [${this.processId}]");
 
     final startBlock = this.metadata.value.startBlock;
     final endBlock =
@@ -479,15 +481,15 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
         .then((startDate) => this.startDate.setValue(startDate))
         .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool))
         .then((endDate) {
-      devPrint("- Refreshing process start/end date [DONE ${this.processId}]");
+      devPrint("- [Process dates] Refreshing [DONE ${this.processId}]");
 
       this.endDate.setValue(endDate);
     }).catchError((err, stack) {
-      devPrint("- Refreshing process dates ERROR: $err [${this.processId}]");
+      devPrint("- [Process dates] ERROR: $err [${this.processId}]");
       // devPrint(stack);
 
-      this.startDate.setError("Cannot estimate the date");
-      this.endDate.setError("Cannot estimate the date");
+      if (!this.startDate.hasValue) this.startDate.setError("Cannot estimate");
+      this.endDate.setError("Cannot estimate");
     });
   }
 

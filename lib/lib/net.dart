@@ -37,13 +37,14 @@ class AppNetworking {
       if (gwPool is! GatewayPool)
         throw Exception("Could not initialize a pool of gateways");
 
-      devPrint("GW Pool initialized");
-      devPrint("- DVote Gateway: ${pool.current.dvote.uri}");
-      devPrint("- Web3 Gateway: ${pool.current.web3.uri}");
       _gwPool = gwPool;
+
+      devPrint("[App] GW Pool ready");
+      devPrint("- DVote Gateway: ${pool.current?.dvote?.uri}");
+      devPrint("- Web3 Gateway: ${pool.current?.web3?.uri}");
       _discoveryFuture = null;
     }).catchError((err) {
-      devPrint("GW Pool init failed: $err");
+      devPrint("[App] GW discovery failed: $err");
       _discoveryFuture = null;
     });
 
@@ -72,12 +73,12 @@ class AppNetworking {
       _gwPool = GatewayPool(gateways, FlavorConfig.instance.constants.networkId,
           bootnodeUri: FlavorConfig.instance.constants.gatewayBootNodesUrl);
 
-      devPrint("GW Pool initialized");
+      devPrint("[App] GW Pool ready");
       devPrint("- DVote Gateway: ${pool.current.dvote.uri}");
       devPrint("- Web3 Gateway: ${pool.current.web3.uri}");
       _discoveryFuture = null;
     }).catchError((err) {
-      devPrint("GW Pool init failed: $err");
+      devPrint("[App] GW discovery failed: $err");
       _discoveryFuture = null;
     });
 
