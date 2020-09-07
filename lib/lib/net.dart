@@ -3,127 +3,95 @@ import 'dart:convert';
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/flavors/config.dart';
 // import 'package:dvote_common/flavors/config.dart';
-import 'package:vocdoni/lib/singletons.dart';
 // import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/util.dart';
 
-DVoteGateway _dvoteGw;
-Web3Gateway _web3Gw;
-Future<void> connectingFuture;
+class AppNetworking {
+  static GatewayPool _gwPool;
+  static Future<void> _discoveryFuture;
 
-Future<void> ensureConnectedGateways() {
-  if (connectingFuture is Future) {
-    return connectingFuture;
-  } else if ((_dvoteGw is DVoteGateway && _dvoteGw.isConnected))
-    return Future.value();
+  static GatewayPool get pool => _gwPool;
+  static bool get isReady =>
+      _discoveryFuture == null &&
+      pool is GatewayPool &&
+      pool.current is Gateway &&
+      pool.current.dvote is DVoteGateway &&
+      pool.current.web3.isReady;
 
-  final completer = Completer<void>();
-  connectingFuture = completer.future;
-  GatewayInfo gwInfo;
-
-  return _getFastestGatewayInfo().then((_gwInfo) {
-    if (_gwInfo == null) throw Exception("There is no gateway available");
-    gwInfo = _gwInfo;
-
-    devPrint("Connecting to ${gwInfo.dvote}");
-    _dvoteGw = DVoteGateway(gwInfo.dvote,
-        publicKey: gwInfo.publicKey, onTimeout: _onGatewayTimeout);
-
-    return _dvoteGw.connect();
-  }).then((_) {
-    if (!(_web3Gw is Web3Gateway)) {
-      devPrint("Using: ${gwInfo.web3}");
-      _web3Gw = Web3Gateway(gwInfo.web3);
+  /// Fetch the list of gateways from a well-known URI and initialize a new Gateway Pool from scratch
+  static Future<void> init({bool forceReload = false}) {
+    if (!forceReload) {
+      // Skip reload if already doing so
+      if (_discoveryFuture is Future) {
+        return _discoveryFuture;
+      } else if (isReady) {
+        return Future.value();
+      }
     }
-    completer.complete();
-    connectingFuture = null;
-  }).catchError((err) {
-    completer.completeError(err);
-    connectingFuture = null;
-    throw err;
-  });
-}
 
-void _onGatewayTimeout() {
-  devPrint("GW timeout: ${_dvoteGw.uri}\nConnecting again...");
-  ensureConnectedGateways().then((_) {
-    devPrint("Connected to ${_dvoteGw.uri}");
-  }).catchError((err) {
-    devPrint("Reconnect failed: ${err.toString()}");
-  });
-}
+    // Fetch gateways
+    _discoveryFuture = GatewayPool.discover(
+            FlavorConfig.instance.constants.networkId,
+            bootnodeUri: FlavorConfig.instance.constants.gatewayBootNodesUrl)
+        .then((gwPool) {
+      if (gwPool is! GatewayPool)
+        throw Exception("Could not initialize a pool of gateways");
 
-bool areGatewaysConnected() =>
-    _dvoteGw is DVoteGateway && _dvoteGw.isConnected && _web3Gw is Web3Gateway;
+      _gwPool = gwPool;
 
-Future<DVoteGateway> getDVoteGateway() {
-  if (!areGatewaysConnected()) {
-    return ensureConnectedGateways().then((_) => _dvoteGw);
-  } else {
-    return Future.value(_dvoteGw);
-  }
-}
+      devPrint("[App] GW Pool ready");
+      devPrint("- DVote Gateway: ${pool.current?.dvote?.uri}");
+      devPrint("- Web3 Gateway: ${pool.current?.web3?.uri}");
+      _discoveryFuture = null;
+    }).catchError((err) {
+      devPrint("[App] GW discovery failed: $err");
+      _discoveryFuture = null;
+    });
 
-Future<Web3Gateway> getWeb3Gateway() {
-  if (!areGatewaysConnected()) {
-    return ensureConnectedGateways().then((_) => _web3Gw);
-  } else {
-    return Future.value(_web3Gw);
-  }
-}
-
-Future<GatewayInfo> _getFastestGatewayInfo() async {
-  if (!globalAppState.bootnodes.hasValue) return null;
-
-  List<BootNodeGateways_NetworkNodes_DVote> dvoteNodes;
-  List<BootNodeGateways_NetworkNodes_Web3> web3Nodes;
-
-  // Detect the network
-  switch (FlavorConfig.instance.constants.networkId) {
-    case "homestead":
-    case "mainnet":
-      dvoteNodes = globalAppState.bootnodes.value.homestead.dvote;
-      web3Nodes = globalAppState.bootnodes.value.homestead.web3;
-      break;
-    case "goerli":
-      dvoteNodes = globalAppState.bootnodes.value.goerli.dvote;
-      web3Nodes = globalAppState.bootnodes.value.goerli.web3;
-      break;
-    case "xdai":
-      dvoteNodes = globalAppState.bootnodes.value.xdai.dvote;
-      web3Nodes = globalAppState.bootnodes.value.xdai.web3;
-      break;
+    return _discoveryFuture;
   }
 
-  if (dvoteNodes.length < 1) {
-    print("The DVote gateway list is empty for " +
-        FlavorConfig.instance.constants.networkId);
-    return null;
+  /// Use pre-existing bootnode's data to initialize a Gateway Pool
+  static Future<void> useFromGatewayInfo(BootNodeGateways gwInfo,
+      {bool forceReload = false}) {
+    if (!forceReload) {
+      // Skip reload if already doing so
+      if (_discoveryFuture is Future) {
+        return _discoveryFuture;
+      } else if (isReady) {
+        return Future.value();
+      }
+    }
+
+    _discoveryFuture = discoverGatewaysFromBootnodeInfo(gwInfo,
+            networkId: FlavorConfig.instance.constants.networkId)
+        .then((gateways) {
+      if (gateways is! List || gateways.length == 0)
+        throw Exception("There are no active gateways");
+
+      // OK
+      _gwPool = GatewayPool(gateways, FlavorConfig.instance.constants.networkId,
+          bootnodeUri: FlavorConfig.instance.constants.gatewayBootNodesUrl);
+
+      devPrint("[App] GW Pool ready");
+      devPrint("- DVote Gateway: ${pool.current.dvote.uri}");
+      devPrint("- Web3 Gateway: ${pool.current.web3.uri}");
+      _discoveryFuture = null;
+    }).catchError((err) {
+      devPrint("[App] GW discovery failed: $err");
+      _discoveryFuture = null;
+    });
+
+    return _discoveryFuture;
   }
 
-  // Find the fastest to respond
-  int fastestDVoteIdx = -1;
+  /// Manually set the gateway pool
+  static void setGateways(List<Gateway> gateways, String networkId) {
+    if (gateways is! List || gateways.length == 0)
+      throw Exception("Empty list");
 
-  await Future.wait(dvoteNodes
-      .map((node) => DVoteGateway.isUp(node.uri).then((isUp) {
-            if (isUp && fastestDVoteIdx < 0)
-              fastestDVoteIdx = dvoteNodes.indexOf(node);
-          }).catchError((_) {}))
-      .cast<Future>()
-      .toList());
-
-  if (fastestDVoteIdx < 0) {
-    devPrint("None of the gateways is available");
-    return null;
+    _gwPool = GatewayPool(gateways, networkId);
   }
-  final web3Idx = random.nextInt(web3Nodes.length);
-
-  final gw = GatewayInfo();
-  gw.dvote = dvoteNodes[fastestDVoteIdx].uri;
-  gw.publicKey = dvoteNodes[fastestDVoteIdx].pubKey;
-  gw.supportedApis.addAll(dvoteNodes[fastestDVoteIdx].apis);
-  gw.web3 = web3Nodes[web3Idx].uri;
-  return gw;
 }
 
 /*

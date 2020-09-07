@@ -1,6 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/flavors/config.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
@@ -17,7 +18,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
-  final bootnodes = EventualNotifier<BootNodeGateways>()
+  final bootnodeInfo = EventualNotifier<BootNodeGateways>()
       .withFreshnessTimeout(Duration(minutes: 2));
 
   // INTERNAL DATA HANDLERS
@@ -42,13 +43,13 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   Future<void> readFromStorage() async {
     // Gateway boot nodes
     try {
-      this.bootnodes.setToLoading();
+      this.bootnodeInfo.setToLoading();
       final gwList = globalBootnodesPersistence.get();
-      this.bootnodes.setValue(gwList);
+      this.bootnodeInfo.setValue(gwList);
     } catch (err) {
       devPrint(err);
       this
-          .bootnodes
+          .bootnodeInfo
           .setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -59,8 +60,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   Future<void> writeToStorage() async {
     try {
       // Gateway boot nodes
-      if (this.bootnodes.hasValue)
-        await globalBootnodesPersistence.write(this.bootnodes.value);
+      if (this.bootnodeInfo.hasValue)
+        await globalBootnodesPersistence.write(this.bootnodeInfo.value);
       else
         await globalBootnodesPersistence
             .write(BootNodeGateways()); // empty data
@@ -85,27 +86,28 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   }
 
   Future<void> refreshBootNodes([bool force = false]) async {
-    if (!force && this.bootnodes.isFresh)
+    if (!force && this.bootnodeInfo.isFresh)
       return;
-    else if (!force && this.bootnodes.isLoading) return;
+    else if (!force && this.bootnodeInfo.isLoading) return;
 
-    this.bootnodes.setToLoading();
+    this.bootnodeInfo.setToLoading();
     try {
-      if (FlavorConfig.isProduction()) {
-        // Get the bootnodes URL from the blockchain
-        final gwList = await getDefaultGatewaysDetails(
-            FlavorConfig.instance.constants.networkId);
-        this.bootnodes.setValue(gwList);
-      } else {
-        // Use the parameterized URL
-        devPrint(
-            "Checking " + FlavorConfig.instance.constants.gatewayBootNodesUrl);
-        final gwList = await getGatewaysDetailsFromBootNode(
-            FlavorConfig.instance.constants.gatewayBootNodesUrl);
-        this.bootnodes.setValue(gwList);
-      }
+      devPrint("[App] Fetching " +
+          FlavorConfig.instance.constants.gatewayBootNodesUrl);
+      final bnGatewayInfo = await fetchBootnodeInfo(
+          FlavorConfig.instance.constants.gatewayBootNodesUrl);
+
+      devPrint("[App] Gateway discovery");
+      final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
+          networkId: FlavorConfig.instance.constants.networkId);
+
+      devPrint("[App] Gateway Pool ready");
+      AppNetworking.setGateways(
+          gateways, FlavorConfig.instance.constants.networkId);
+
+      this.bootnodeInfo.setValue(bnGatewayInfo);
     } catch (err) {
-      this.bootnodes.setError("Cannot fetch the boot nodes list",
+      this.bootnodeInfo.setError("Cannot fetch the boot nodes list",
           keepPreviousValue: true);
       throw err;
     }

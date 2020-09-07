@@ -81,9 +81,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   handleIncomingLinkError(err) {
     devPrint(err);
-    showAlert(
-        getText(scaffoldBodyContext ?? context,
-            "There was a problem handling the link"),
+    final ctx = scaffoldBodyContext ?? context;
+    showAlert(getText(ctx, "There was a problem handling the link"),
         title: getText(scaffoldBodyContext ?? context, "Error"),
         context: scaffoldBodyContext ?? context);
   }
@@ -112,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         devPrint("Resumed");
-        ensureConnectedGateways();
+        if (!AppNetworking.isReady) AppNetworking.init(forceReload: true);
         break;
       case AppLifecycleState.detached:
         devPrint("Detached");

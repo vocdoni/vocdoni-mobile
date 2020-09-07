@@ -123,7 +123,7 @@ class _PollPageState extends State<PollPage> {
       }
 
       // Good
-      final mnemonic = await Symmetric.decryptStringAsync(
+      final mnemonic = SymmetricNative.decryptString(
           account.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) {
@@ -132,11 +132,12 @@ class _PollPageState extends State<PollPage> {
         return;
       }
 
-      final wallet = EthereumWallet.fromMnemonic(mnemonic,
+      final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
           entityAddressHash: entity.reference.entityId);
 
       account.setPublicKeyForEntity(
-          await wallet.publicKeyAsync, entity.reference.entityId);
+          await wallet.publicKeyAsync(uncompressed: true),
+          entity.reference.entityId);
     }
 
     process.refreshIsInCensus(force: true);
