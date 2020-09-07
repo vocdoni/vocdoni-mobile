@@ -1,4 +1,4 @@
-# 0.8.4
+# 0.8.5
 
 - Using native symmetric encryption
 - Using HTTP gateway connections instead of Web Sockets
