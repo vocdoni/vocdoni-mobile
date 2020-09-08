@@ -33,6 +33,7 @@ dependencies:
   http: ^0.12.0+4
   flutter_html: ^0.11.1
   qr_flutter: ^3.2.0
+  firebase_messaging: ^7.0.0
   r_scan: ^0.1.4+1
   permission_handler: ^5.0.0+hotfix.6
   feather_icons_flutter: ^4.7.4

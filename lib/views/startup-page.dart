@@ -3,8 +3,8 @@ import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/views/identity-create-page.dart';
+import 'package:vocdoni/lib/notifications.dart';
+import 'package:vocdoni/lib/startup.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import '../lib/singletons.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
@@ -35,55 +35,12 @@ class _StartupPageState extends State<StartupPage> {
       error = null;
     });
 
-    // READ PERSISTED DATA (protobuf)
-    final persistenceReadPromises = <Future>[
-      globalBootnodesPersistence.read(),
-      globalIdentitiesPersistence.readAll(),
-      globalEntitiesPersistence.readAll(),
-      globalProcessesPersistence.readAll(),
-      globalFeedPersistence.readAll(),
-    ];
-
-    return Future.wait(persistenceReadPromises)
-        // POPULATE THE MODEL POOLS (Read into memory)
-        .then((_) => Future.wait([
-              // NOTE: Read's should be done first on the models that
-              // don't depend on others to be restored
-              globalProcessPool.readFromStorage(),
-              globalFeedPool.readFromStorage(),
-              globalAppState.readFromStorage(),
-            ]))
-        .then((_) => globalEntityPool.readFromStorage())
-        .then((_) => globalAccountPool.readFromStorage())
-        // FETCH REMOTE GATEWAYS, BLOCK HEIGHT, ETC
-        .then((dvoteGw) {
-      // Try to fetch bootnodes from the well-known URI
-
-      return AppNetworking.init(forceReload: true).then((_) {
-        if (!AppNetworking.isReady)
-          throw Exception("No DVote Gateway is available");
-      }).catchError((err) {
-        devPrint("[App] Network initialization failed: $err");
-        devPrint("[App] Trying to use the local gateway cache");
-
-        // Retry with the existing cached gateways
-        return AppNetworking.useFromGatewayInfo(
-            globalAppState.bootnodeInfo.value);
-      });
-    }).then((_) {
-      // DETERMINE THE NEXT SCREEN AND GO THERE
-      if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
-        // Replace all routes with /identity/create on top
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/identity/select", (Route _) => false);
-      } else {
-        // Create the first identity or allow to restore another one
-        final route = MaterialPageRoute(
-          builder: (context) =>
-              IdentityCreatePage(showRestoreIdentityAction: true),
-        );
-        Navigator.pushAndRemoveUntil(context, route, (Route _) => false);
-      }
+    return restorePersistence()
+        .then((_) => restoreDataPools()) // Depends on restorePersistence()
+        .then((_) => startNetworking())
+        .then((_) => initNotifications())
+        .then((_) {
+      showNextScreen();
 
       // Detached update of the cached bootnodes
       globalAppState.refresh(force: true).catchError(
@@ -99,6 +56,20 @@ class _StartupPageState extends State<StartupPage> {
       // RETRY ITSELF
       Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
     });
+  }
+
+  void showNextScreen() {
+    // Determine the next screen and go there
+    String nextRoutePath;
+    if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
+      nextRoutePath = "/identity/select";
+    } else {
+      nextRoutePath = "/identity/create";
+    }
+
+    // Replace all routes with /identity/select on top
+    Navigator.pushNamedAndRemoveUntil(
+        context, nextRoutePath, (Route _) => false);
   }
 
   Widget buildError(BuildContext context) {
