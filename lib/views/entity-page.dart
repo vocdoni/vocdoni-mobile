@@ -1,7 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -41,7 +41,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     // detached async
     widget.entityModel.refresh().catchError((err) {
-      devPrint(err);
+      log(err);
     });
   }
 
@@ -527,7 +527,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         final msg = getText(ctx, "main.youAreAlreadySubscribedToThisEntity");
         showMessage(msg, context: ctx, purpose: Purpose.DANGER);
       } else {
-        showMessage(getText(ctx, "main.theSubscriptionCouldNotBeRegistered"),
+        showMessage(getText(ctx, "error.theSubscriptionCouldNotBeRegistered"),
             context: ctx, purpose: Purpose.DANGER);
       }
     }
@@ -563,7 +563,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     } catch (err) {
       if (!mounted) return;
       setState(() => _processingSubscription = false);
-      showMessage(getText(ctx, "main.theSubscriptionCouldNotBeCanceled"),
+      showMessage(getText(ctx, "error.theSubscriptionCouldNotBeCanceled"),
           context: ctx, purpose: Purpose.DANGER);
     }
   }

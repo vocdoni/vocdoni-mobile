@@ -130,7 +130,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
-        showMessage(getText(context, "main.theRegistrationCouldNotBeCompleted"),
+        showMessage(getText(context, "error.theRegistrationCouldNotBeCompleted"),
             purpose: Purpose.DANGER, context: context);
       }
     }

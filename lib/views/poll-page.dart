@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/singletons.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
@@ -65,11 +65,11 @@ class _PollPageState extends State<PollPage> {
     final PollPageArgs args = ModalRoute.of(context).settings.arguments;
     if (args == null) {
       Navigator.of(context).pop();
-      devPrint("Invalid parameters");
+      log("Invalid parameters");
       return;
     } else if (!args.process.metadata.hasValue) {
       Navigator.of(context).pop();
-      devPrint("Empty process metadata");
+      log("Empty process metadata");
       return;
     } else if (entity == args.entity &&
         process == args.process &&
@@ -95,7 +95,7 @@ class _PollPageState extends State<PollPage> {
         .refreshHasVoted()
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshDates())
-        .catchError((err) => devPrint(err)); // Values will refresh if needed
+        .catchError((err) => log(err)); // Values will refresh if needed
   }
 
   Future<void> onCheckCensus(BuildContext context) async {

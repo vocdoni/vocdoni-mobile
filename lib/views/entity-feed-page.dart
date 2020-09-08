@@ -1,6 +1,6 @@
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -34,7 +34,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
             entityId: entityModel.reference.entityId);
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 

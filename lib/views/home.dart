@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:dvote_common/constants/colors.dart';
@@ -81,9 +81,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    devPrint(err);
+    log(err);
     final ctx = scaffoldBodyContext ?? context;
-    showAlert(getText(ctx, "main.thereWasAProblemHandlingTheLink"),
+    showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
         title: getText(scaffoldBodyContext ?? context, "main.error"),
         context: scaffoldBodyContext ?? context);
   }
@@ -105,17 +105,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        devPrint("Inactive");
+        log("Inactive");
         break;
       case AppLifecycleState.paused:
-        devPrint("Paused");
+        log("Paused");
         break;
       case AppLifecycleState.resumed:
-        devPrint("Resumed");
+        log("Resumed");
         if (!AppNetworking.isReady) AppNetworking.init(forceReload: true);
         break;
       case AppLifecycleState.detached:
-        devPrint("Detached");
+        log("Detached");
         break;
     }
   }
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       showMessage(
           getText(context,
-              "main.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
+              "error.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
           context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }

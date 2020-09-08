@@ -1,4 +1,4 @@
-import 'package:dvote/util/dev.dart';
+import 'dart:developer';
 import 'package:vocdoni/lib/singletons.dart';
 import 'net.dart';
 
@@ -33,8 +33,8 @@ Future<void> startNetworking() {
     if (!AppNetworking.isReady)
       throw Exception("No DVote Gateway is available");
   }).catchError((err) {
-    devPrint("[App] Network initialization failed: $err");
-    devPrint("[App] Trying to use the local gateway cache");
+    log("[App] Network initialization failed: $err");
+    log("[App] Trying to use the local gateway cache");
 
     // Retry with the existing cached gateways
     return AppNetworking.useFromGatewayInfo(globalAppState.bootnodeInfo.value);

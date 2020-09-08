@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -41,7 +41,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
             postTitle: args.post.title);
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 

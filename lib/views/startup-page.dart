@@ -1,4 +1,4 @@
-import 'package:dvote/util/dev.dart';
+import 'dart:developer';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
@@ -44,7 +44,7 @@ class _StartupPageState extends State<StartupPage> {
 
       // Detached update of the cached bootnodes
       globalAppState.refresh(force: true).catchError(
-          (err) => devPrint("[App] Detached bootnode update failed: $err"));
+          (err) => log("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;
 

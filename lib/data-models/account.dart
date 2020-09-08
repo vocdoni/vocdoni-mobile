@@ -1,9 +1,8 @@
-import 'dart:math';
-
+import 'dart:math' hide log;
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote/crypto/encryption-native.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/model-base.dart';
@@ -67,7 +66,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
           .toList();
       this.setValue(accountModelList);
     } catch (err) {
-      devPrint(err);
+      log(err);
       this.setError("Cannot read the account list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -114,7 +113,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       // Cascade the write request for the peer entities
       await globalEntityPool.writeToStorage();
     } catch (err) {
-      devPrint(err);
+      log(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -147,7 +146,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
             newAccount.identity.value.keys[0].rootPublicKey);
 
     if (duplicate) {
-      devPrint("WARNING: Attempting to add a duplicate identity. Skipping.");
+      log("WARNING: Attempting to add a duplicate identity. Skipping.");
       return;
     }
 

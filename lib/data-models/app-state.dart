@@ -6,7 +6,7 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 
 /// AppStateModel handles the global state of the application.
 ///
@@ -47,7 +47,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       final gwList = globalBootnodesPersistence.get();
       this.bootnodeInfo.setValue(gwList);
     } catch (err) {
-      devPrint(err);
+      log(err);
       this
           .bootnodeInfo
           .setError("Cannot read the app state", keepPreviousValue: true);
@@ -66,7 +66,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         await globalBootnodesPersistence
             .write(BootNodeGateways()); // empty data
     } catch (err) {
-      devPrint(err);
+      log(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -80,7 +80,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       await this.writeToStorage();
     } catch (err) {
-      devPrint("ERR: $err");
+      log("ERR: $err");
       throw err;
     }
   }
@@ -92,15 +92,15 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      devPrint("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
+      log("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
       final bnGatewayInfo =
           await fetchBootnodeInfo(AppConfig.GATEWAY_BOOTNODES_URL);
 
-      devPrint("[App] Gateway discovery");
+      log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
           networkId: AppConfig.NETWORK_ID);
 
-      devPrint("[App] Gateway Pool ready");
+      log("[App] Gateway Pool ready");
       AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);
 
       this.bootnodeInfo.setValue(bnGatewayInfo);

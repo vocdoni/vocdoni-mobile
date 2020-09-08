@@ -5,7 +5,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -39,7 +39,7 @@ class _CardPollState extends State<CardPoll> {
         .refreshCurrentParticipants()
         .then((_) => this.widget.process.refreshCensusSize())
         .then((_) => this.widget.process.refreshDates())
-        .catchError((err) => devPrint(err));
+        .catchError((err) => log(err));
   }
 
   @override

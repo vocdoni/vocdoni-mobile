@@ -8,7 +8,7 @@ import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/singletons.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 // import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/baseCard.dart';
@@ -302,10 +302,10 @@ class ActionRegisterPage extends StatelessWidget {
           .then((_) => Navigator.of(context).pop());
     }).catchError((err) {
       loadingCtrl.close();
-      showMessage(getText(context, "main.theRegistrationProcessFailed"),
+      showMessage(getText(context, "error.theRegistrationProcessFailed"),
           purpose: Purpose.DANGER, context: context);
 
-      devPrint("Register error: $err");
+      log("Register error: $err");
       throw err;
     });
   }

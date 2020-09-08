@@ -1,7 +1,7 @@
 import 'package:vocdoni/data-models/process.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -33,7 +33,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         entityModel = ModalRoute.of(context).settings.arguments;
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 

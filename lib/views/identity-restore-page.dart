@@ -79,7 +79,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           await EthereumNativeWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
-      showMessage(getText(context, "main.theWordsYouEnteredAreNotValid"),
+      showMessage(getText(context, "error.theWordsYouEnteredAreNotValid"),
           context: context, purpose: Purpose.WARNING);
       return;
     }

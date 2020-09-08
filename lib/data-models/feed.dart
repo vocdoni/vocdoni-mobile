@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/model-base.dart';
@@ -36,7 +36,7 @@ class FeedPool extends EventualNotifier<List<Feed>>
       this.setValue(feedList);
       // notifyListeners(); // Not needed => `setValue` already does it
     } catch (err) {
-      devPrint(err);
+      log(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -61,7 +61,7 @@ class FeedPool extends EventualNotifier<List<Feed>>
           .toList();
       await globalFeedPersistence.writeAll(feedList);
     } catch (err) {
-      devPrint(err);
+      log(err);
       throw PersistError("Cannot store the current state");
     }
   }
