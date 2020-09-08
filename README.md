@@ -92,10 +92,14 @@ Models can contain both data which is persisted (entity metadata, process metada
 
 ### Internationalization
 
+![Translations](https://hosted.weblate.org/widgets/vocdoni/-/mobile-client/svg-badge.svg)
+
 - Add `import 'package:vocdoni/lib/i18n.dart';` on your widget file
 - Access the new string with `getText(context, "My new string to translate")`
 - Parse the new strings with `make lang-extract`
 - Translate the files on `assets/i18n/*.json`
+
+The app's strings translation can be found on [Weblate](https://hosted.weblate.org/projects/vocdoni/mobile-client/).
 
 ### Dependencies
 

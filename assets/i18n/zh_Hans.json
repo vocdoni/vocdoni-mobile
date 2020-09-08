@@ -1,0 +1,9 @@
+{
+    "Authorizing": "审核中",
+    "Authorized": "已审核",
+    "Confirming": "确认中",
+    "Confirmed": "已确认",
+    "Confirm": "确认",
+    "An error occurred while generating the identity": "注册账号时出现错误",
+    "An account with this name already exists": "该账号已存在"
+}

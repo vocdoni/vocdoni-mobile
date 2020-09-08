@@ -111,7 +111,7 @@ class ActionRegisterPage extends StatelessWidget {
               TextFormField(
                 validator: (value) => emailValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "What's your Email?"),
+                    hintText: getText(context, "What's your e-mail address?"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
