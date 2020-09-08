@@ -39,8 +39,8 @@ class AppLocalizations {
 
     // Load the strings of the current language
     if (locale.languageCode != DEFAULT_LANGUAGE) {
-      final langStrings = await rootBundle
-          .loadString('assets/i18n/${locale.languageCode}.json');
+      final code = locale.languageCode.substring(0, 2);
+      final langStrings = await rootBundle.loadString('assets/i18n/$code.json');
       final Map<String, dynamic> stringMap = json.decode(langStrings);
 
       _localizedStrings = stringMap.map((key, value) {
