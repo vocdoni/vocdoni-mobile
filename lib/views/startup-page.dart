@@ -81,7 +81,7 @@ class _StartupPageState extends State<StartupPage> {
           builder: (context) =>
               IdentityCreatePage(showRestoreIdentityAction: true),
         );
-        Navigator.push(context, route);
+        Navigator.pushAndRemoveUntil(context, route, (Route _) => false);
       }
 
       // Detached update of the cached bootnodes
