@@ -55,7 +55,8 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
               Spacer(flex: 3),
               Section(
                 withDectoration: false,
-                text: getText(context, "Unlock"),
+                text: getText(context, "Unlock {{NAME}}").replaceFirst(
+                    "{{NAME}}", widget.account.identity.value.alias),
               ),
               Spacer(),
               Center(

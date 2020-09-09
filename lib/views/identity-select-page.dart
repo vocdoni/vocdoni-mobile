@@ -9,6 +9,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import '../lib/singletons.dart';
+import 'identity-create-page.dart';
 
 class IdentitySelectPage extends StatefulWidget {
   @override
@@ -34,6 +35,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                     children: <Widget>[
                       Section(text: getText(context, "Select an identity")),
                       buildExistingIdentities(context, globalAccountPool.value),
+                      SizedBox(height: 50),
+                      Section(text: getText(context, "Add an identity")),
                       ListItem(
                           mainText: getText(context, "Create a new identity"),
                           icon: FeatherIcons.plusCircle,
@@ -41,7 +44,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                       ListItem(
                           mainText:
                               getText(context, "Restore an existing identity"),
-                          icon: FeatherIcons.fileText,
+                          icon: FeatherIcons.rotateCw,
                           onTap: () => restorePreviousIdentity(context)),
                     ],
                   )),
@@ -107,7 +110,12 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   }
 
   createNew(BuildContext ctx) {
-    Navigator.pushNamed(ctx, "/identity/create");
+    // Navigator.pushNamed(ctx, "/identity/create");
+
+    final route = MaterialPageRoute(
+      builder: (context) => IdentityCreatePage(cangoBack: true),
+    );
+    Navigator.push(context, route);
   }
 
   restorePreviousIdentity(BuildContext ctx) {

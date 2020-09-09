@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/dvote_common.dart';
+import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -49,9 +50,9 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
     if (alias.length == 0)
       err = getText(context, "Enter a name for the account");
     else if (mnemonic.length == 0)
-      err = getText(context, "Enter the seed phrase to recover");
+      err = getText(context, "Enter the mnemonic words to recover");
     else if (!RegExp(r"^([a-zA-Z]+ )+[a-zA-Z]+$").hasMatch(mnemonic))
-      err = getText(context, "The seed phrase you entered is not valid");
+      err = getText(context, "The mnemonic words you entered is not valid");
     if (err is String) {
       showMessage(err, context: context, purpose: Purpose.WARNING);
       return;
@@ -78,7 +79,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           await EthereumNativeWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
-      showMessage(getText(context, "The seed phrase you entered is not valid"),
+      showMessage(getText(context, "The words you entered are not valid"),
           context: context, purpose: Purpose.WARNING);
       return;
     }
@@ -159,19 +160,12 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   }
 
   Widget renderOkButton(BuildContext context) {
-    return FlatButton(
-      color: colorBlue,
-      textColor: Colors.white,
-      disabledColor: Colors.grey,
-      disabledTextColor: Colors.black,
-      padding: EdgeInsets.all(paddingButton),
-      splashColor: Colors.blueAccent,
-      onPressed: () => onSubmit(context),
-      child: Text(
-        getText(context, "Restore identity"),
-        style: TextStyle(fontSize: 20.0),
-      ),
-    ).withPadding(16).withTopPadding(8);
+    return BaseButton(
+      maxWidth: double.infinity,
+      purpose: Purpose.HIGHLIGHT,
+      text: getText(context, "Restore identity"),
+      onTap: () => onSubmit(context),
+    ).withPadding(16);
   }
 
   @override
@@ -185,6 +179,11 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           if (restoring) return renderLoading();
 
           return ListView(children: <Widget>[
+            Text(
+              getText(context,
+                  "To restore your user keys enter the mnemonic words you saved during the back up."),
+              style: TextStyle(color: Colors.black45),
+            ).withPadding(16),
             TextField(
               controller: nameController,
               focusNode: nameNode,
@@ -204,12 +203,10 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
               maxLines: 4,
               decoration: InputDecoration(
                 // border: InputBorder.none,
-                hintText: getText(context, 'Seed phrase'),
+                hintText: getText(context, 'Mnemonic words'),
               ),
             ).withPadding(16).withTopPadding(8),
-            Text(getText(context,
-                    "Please, get the seed phrase of your wallet and enter the words below, separated by spaces."))
-                .withPadding(16),
+            SizedBox(height: 16),
             renderOkButton(context),
           ]);
         },

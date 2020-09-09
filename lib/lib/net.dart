@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/flavors/config.dart';
 // import 'package:dvote_common/flavors/config.dart';
@@ -45,6 +47,10 @@ class AppNetworking {
       _discoveryFuture = null;
     }).catchError((err) {
       devPrint("[App] GW discovery failed: $err");
+
+      if (err is SocketException) {
+        log("[App] The network seems to be down");
+      }
       _discoveryFuture = null;
     });
 

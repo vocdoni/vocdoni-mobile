@@ -3,6 +3,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:url_launcher/url_launcher.dart';
@@ -12,8 +13,15 @@ import 'package:vocdoni/lib/singletons.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/extensions.dart';
 
 class IdentityCreatePage extends StatefulWidget {
+  final bool showRestoreIdentityAction;
+  final bool cangoBack;
+
+  IdentityCreatePage(
+      {this.showRestoreIdentityAction = false, this.cangoBack = false});
+
   @override
   _IdentityCreateScreen createState() => _IdentityCreateScreen();
 }
@@ -33,18 +41,25 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   Widget build(context) {
     return WillPopScope(
         onWillPop: handleWillPop,
-        child: Scaffold(body: Builder(builder: (BuildContext context) {
-          return Center(
-            child: Align(
-              alignment: Alignment(0, -0.1),
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 320, maxHeight: 400),
-                color: Color(0x00ff0000),
-                child: generating ? buildGenerating() : buildWelcome(context),
+        child: Scaffold(
+          appBar: widget.cangoBack
+              ? TopNavigation(
+                  title: getText(context, "Identity"),
+                )
+              : null,
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: Align(
+                alignment: Alignment(0, 0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 320, maxHeight: 400),
+                  color: Color(0x00ff0000),
+                  child: generating ? buildGenerating() : buildWelcome(context),
+                ),
               ),
-            ),
-          );
-        })));
+            );
+          }),
+        ));
   }
 
   buildWelcome(BuildContext context) {
@@ -54,7 +69,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         Center(
             child: Text(getText(context, "Welcome!"),
                 style: new TextStyle(fontSize: 30, color: Color(0xff888888)))),
-        SizedBox(height: 100),
+        SizedBox(height: 50),
         Center(
           child: TextField(
               controller: nameTextFieldController,
@@ -62,10 +77,11 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               style: TextStyle(fontSize: 20),
               textAlign: TextAlign.center,
               decoration: InputDecoration(
+                  hintStyle: TextStyle(color: Colors.black38),
                   hintText: getText(context, "What's your name?")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 50),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -81,11 +97,13 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               text: TextSpan(text: '', children: [
                 TextSpan(
                     text: getText(context, "I accept") + " ",
-                    style: TextStyle(color: Color(0xff888888))),
+                    style: TextStyle(
+                        color:
+                            termsAccepted ? Colors.black54 : Colors.black38)),
                 TextSpan(
                   text: getText(context, "the Privacy Policy"),
                   style: TextStyle(
-                      color: Color(0xff888888),
+                      color: termsAccepted ? Colors.black54 : Colors.black38,
                       decoration: TextDecoration.underline),
                   recognizer: TapGestureRecognizer()
                     ..onTap =
@@ -93,11 +111,13 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
                 ),
                 TextSpan(
                     text: " " + getText(context, "and") + " ",
-                    style: TextStyle(color: Color(0xff888888))),
+                    style: TextStyle(
+                        color:
+                            termsAccepted ? Colors.black54 : Colors.black38)),
                 TextSpan(
                   text: getText(context, "the Terms of Service"),
                   style: TextStyle(
-                      color: Color(0xff888888),
+                      color: termsAccepted ? Colors.black54 : Colors.black38,
                       decoration: TextDecoration.underline),
                   recognizer: TapGestureRecognizer()
                     ..onTap =
@@ -114,7 +134,15 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
           text: getText(context, "Continue"),
           isDisabled: !termsAccepted,
           onTap: () => createIdentity(context, nameTextFieldController.text),
-        )
+        ),
+        // Only when showRestoreIdentityAction is set
+        BaseButton(
+          style: BaseButtonStyle.OUTLINE,
+          maxWidth: double.infinity,
+          purpose: Purpose.GUIDE,
+          text: getText(context, "I have an account"),
+          onTap: () => showRestoreIdentity(context),
+        ).withTopPadding(10).when(widget.showRestoreIdentityAction),
       ],
     );
   }
@@ -168,7 +196,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     );
 
     if (patternEncryptionKey == null) {
-      return; // showMessage("Pattern was cancelled", context: context);
+      return;
     }
     // showSuccessMessage("Pattern has been set!", context: context);
 
@@ -215,6 +243,10 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       showAlert(text, title: getText(context, "Error"), context: context);
     }
+  }
+
+  void showRestoreIdentity(BuildContext context) {
+    Navigator.pushNamed(context, "/identity/restore");
   }
 
   /////////////////////////////////////////////////////////////////////////////

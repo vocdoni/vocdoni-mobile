@@ -3,9 +3,11 @@ import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/views/identity-create-page.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import '../lib/singletons.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
+import 'package:vocdoni/lib/extensions.dart';
 
 class StartupPage extends StatefulWidget {
   @override
@@ -69,16 +71,18 @@ class _StartupPageState extends State<StartupPage> {
       });
     }).then((_) {
       // DETERMINE THE NEXT SCREEN AND GO THERE
-      String nextRoutePath;
       if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
-        nextRoutePath = "/identity/select";
+        // Replace all routes with /identity/create on top
+        Navigator.pushNamedAndRemoveUntil(
+            context, "/identity/select", (Route _) => false);
       } else {
-        nextRoutePath = "/identity/create";
+        // Create the first identity or allow to restore another one
+        final route = MaterialPageRoute(
+          builder: (context) =>
+              IdentityCreatePage(showRestoreIdentityAction: true),
+        );
+        Navigator.push(context, route);
       }
-
-      // Replace all routes with /identity/select on top
-      Navigator.pushNamedAndRemoveUntil(
-          context, nextRoutePath, (Route _) => false);
 
       // Detached update of the cached bootnodes
       globalAppState.refresh(force: true).catchError(
@@ -98,20 +102,27 @@ class _StartupPageState extends State<StartupPage> {
 
   Widget buildError(BuildContext context) {
     return Column(
-      children: [
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(height: 50),
+        Image(
+          image: AssetImage('assets/icon/icon-sm.png'),
+          width: 80,
+        ).withBottomPadding(10),
+        Text("Vocdoni").withBottomPadding(60),
         Text(
-          error,
-          style: new TextStyle(fontSize: 24, color: Color(0xff888888)),
+          error ?? getText(context, "Could not connect"),
+          style: new TextStyle(fontSize: 18, color: Color(0xff888888)),
           textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 20.0),
+        ).withBottomPadding(10),
         InkWell(
             onTap: () => initApplication(),
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 child: Text(
                   getText(context, "Tap to retry"),
-                  style: TextStyle(fontSize: 18, color: Colors.black45),
+                  style: TextStyle(fontSize: 16, color: Colors.black45),
                   textAlign: TextAlign.center,
                 )))
       ],
@@ -123,9 +134,12 @@ class _StartupPageState extends State<StartupPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(getText(context, "Please, wait..."),
-            style: TextStyle(fontSize: 18)),
-        SizedBox(height: 20),
+        SizedBox(height: 50),
+        Image(
+          image: AssetImage('assets/icon/icon-sm.png'),
+          width: 80,
+        ).withBottomPadding(10),
+        Text("Vocdoni").withBottomPadding(60),
         LoadingSpinner(),
       ],
     );
@@ -141,7 +155,7 @@ class _StartupPageState extends State<StartupPage> {
               alignment: Alignment(0, -0.1),
               child: Center(
                 child: Container(
-                  constraints: BoxConstraints(maxWidth: 300, maxHeight: 300),
+                  constraints: BoxConstraints(maxWidth: 300, maxHeight: 350),
                   color: Color(0x00ff0000),
                   child: loading ? buildLoading() : buildError(context),
                 ),
