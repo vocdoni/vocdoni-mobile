@@ -88,7 +88,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       // VIEWS
       case '/entity':
-        if (!(settings.arguments is EntityModel))
+        if (settings.arguments is! EntityModel)
           throw Exception("settings.arguments must be of type EntityModel");
         return EntityInfoPage(settings.arguments);
       default:
