@@ -68,7 +68,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       this.setValue(accountModelList);
     } catch (err) {
       devPrint(err);
-      this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
+      this.setError("Cannot read the account list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
   }

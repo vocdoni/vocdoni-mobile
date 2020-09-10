@@ -67,8 +67,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                   entityModel.metadata.hasError) ||
               (!entityModel.processes.hasValue &&
                   entityModel.processes.hasError)) {
-            return buildError(entityModel.metadata.errorMessage ??
-                entityModel.processes.errorMessage);
+            return buildError(getText(context, "error.theMetadataIsNotAvailable"));
           }
 
           final lang = entityModel.metadata.value.languages[0] ??

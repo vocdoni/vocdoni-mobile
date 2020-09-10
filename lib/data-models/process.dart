@@ -357,7 +357,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       devPrint(
           "- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
 
-      this.isInCensus.setError("The census is not available");
+      // NOTE: Leave the comment to enforce i18n parsing
+      // getText(context, "error.theCensusIsNotAvailable")
+      this.isInCensus.setError("error.theCensusIsNotAvailable");
     }
   }
 
@@ -407,12 +409,16 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       } else {
         devPrint("- [Process voted] Refreshing NO BOOL [${this.processId}]");
 
-        this.hasVoted.setError("Could not check the process status");
+        // NOTE: Leave the comment to enforce i18n parsing
+        // getText(context, "error.couldNotCheckTheProcessStatus")
+        this.hasVoted.setError("error.couldNotCheckTheProcessStatus");
       }
     } catch (err) {
       devPrint("- [Process voted] Refreshing ERROR: $err [${this.processId}]");
 
-      this.hasVoted.setError("Could not check the vote status");
+      // NOTE: Leave the comment to enforce i18n parsing
+      // getText(context, "error.couldNotCheckTheVoteStatus")
+      this.hasVoted.setError("error.couldNotCheckTheVoteStatus");
     }
   }
 

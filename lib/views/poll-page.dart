@@ -100,8 +100,9 @@ class _PollPageState extends State<PollPage> {
 
   Future<void> onCheckCensus(BuildContext context) async {
     if (globalAppState.currentAccount == null) {
-      process.isInCensus
-          .setError(getText(context, "main.cannotCheckTheCensus"));
+      // NOTE: Keep the comment to force i18n key parsing
+      // getText(context, "main.cannotCheckTheCensus")
+      process.isInCensus.setError("main.cannotCheckTheCensus");
       return;
     }
     final account = globalAppState.currentAccount;
@@ -128,8 +129,9 @@ class _PollPageState extends State<PollPage> {
           account.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) {
-        process.isInCensus
-            .setError(getText(context, "main.cannotAccessTheWallet"));
+        // NOTE: Keep the comment to force i18n key parsing
+        // getText(context, "main.cannotAccessTheWallet")
+        process.isInCensus.setError("main.cannotAccessTheWallet");
         return;
       }
 
@@ -154,7 +156,8 @@ class _PollPageState extends State<PollPage> {
       notifiers: [process.metadata, entity.metadata],
       builder: (context, _, __) {
         if (process.metadata.hasError && !process.metadata.hasValue)
-          return buildErrorScaffold(process.metadata.errorMessage);
+          return buildErrorScaffold(
+              getText(context, "error.theMetadataIsNotAvailable"));
 
         final headerUrl =
             Uri.tryParse(process.metadata.value.details?.headerImage ?? "")
@@ -253,26 +256,27 @@ class _PollPageState extends State<PollPage> {
             .hasPublicKeyForEntity(entity.reference.entityId)) {
           // We don't have the user's public key, probably because the entity was unknown when all
           // public keys were precomputed. Ask for the pattern.
-          text = getText(context, "main.checkTheCensus");
+          text = getText(context, "action.checkTheCensus");
         } else if (process.isInCensus.isLoading) {
-          text = getText(context, "main.checkingTheCensus");
+          text = getText(context, "status.checkingTheCensus");
           purpose = Purpose.GUIDE;
         } else if (process.isInCensus.hasValue) {
           if (process.isInCensus.value) {
-            text = getText(context, "main.youAreInTheCensus");
+            text = getText(context, "status.youAreInTheCensus");
             purpose = Purpose.GOOD;
             icon = FeatherIcons.check;
           } else {
-            text = getText(context, "main.youAreNotInTheCensus");
+            text = getText(context, "error.youAreNotInTheCensus");
             purpose = Purpose.DANGER;
             icon = FeatherIcons.x;
           }
         } else if (process.isInCensus.hasError) {
-          text = process.isInCensus.errorMessage;
+          // translate the key from setError()
+          text = getText(context, process.isInCensus.errorMessage);
           purpose = Purpose.DANGER;
           icon = FeatherIcons.alertTriangle;
         } else {
-          text = getText(context, "main.checkCensusState");
+          text = getText(context, "action.checkCensusState");
         }
 
         return ListItem(
@@ -389,7 +393,7 @@ class _PollPageState extends State<PollPage> {
         return Padding(
           padding: EdgeInsets.all(paddingPage),
           child: BaseButton(
-              text: getText(context, "main.submit"),
+              text: getText(context, "action.submit"),
               purpose: Purpose.HIGHLIGHT,
               // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
               // isDisabled: cannotVote,
@@ -416,32 +420,32 @@ class _PollPageState extends State<PollPage> {
 
         if (process.hasVoted.hasValue && process.hasVoted.value) {
           return ListItem(
-            mainText: getText(context, "main.yourVoteIsAlreadyRegistered"),
+            mainText: getText(context, "status.yourVoteIsAlreadyRegistered"),
             purpose: Purpose.GOOD,
             rightIcon: null,
           );
         } else if (!process.startDate.hasValue || !process.endDate.hasValue) {
           return ListItem(
             mainText:
-                getText(context, "main.theProcessDatesCannotBeDetermined"),
+                getText(context, "error.theProcessDatesCannotBeDetermined"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.startDate.value.isAfter(DateTime.now())) {
           return ListItem(
-            mainText: getText(context, "main.theProcessIsNotActiveYet"),
+            mainText: getText(context, "status.theProcessIsNotActiveYet"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.endDate.value.isBefore(DateTime.now())) {
           return ListItem(
-            mainText: getText(context, "main.theProcessHasAlreadyEnded"),
+            mainText: getText(context, "status.theProcessHasAlreadyEnded"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (!process.isInCensus.value) {
           return ListItem(
-            mainText: getText(context, "main.youAreNotInTheCensus"),
+            mainText: getText(context, "error.youAreNotInTheCensus"),
             secondaryText: getText(context,
                 "main.registerToThisOrganizationToParticipateInTheFuture"),
             secondaryTextMultiline: 5,
@@ -453,13 +457,14 @@ class _PollPageState extends State<PollPage> {
             mainText: getText(
                 context, "main.yourIdentityCannotBeCheckedWithinTheCensus"),
             mainTextMultiline: 3,
-            secondaryText: process.isInCensus.errorMessage,
+            // translate the key from setError()
+            secondaryText: getText(context, process.isInCensus.errorMessage),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (!process.isInCensus.hasValue) {
           return ListItem(
-            mainText: getText(context, "main.theCensusCannotBeChecked"),
+            mainText: getText(context, "error.theCensusCannotBeChecked"),
             secondaryText:
                 getText(context, "main.tapAboveOnCheckTheCensusAndTryAgain"),
             secondaryTextMultiline: 5,
@@ -475,21 +480,22 @@ class _PollPageState extends State<PollPage> {
           );
         } else if (process.hasVoted.hasError) {
           return ListItem(
-            mainText: getText(context, "main.yourVoteStatusCannotBeChecked"),
+            mainText: getText(context, "error.yourVoteStatusCannotBeChecked"),
             mainTextMultiline: 3,
-            secondaryText: process.hasVoted.errorMessage,
+            // translate the key from setError()
+            secondaryText: getText(context, process.hasVoted.errorMessage),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.isInCensus.isLoading) {
           return ListItem(
-            mainText: getText(context, "main.checkingTheCensus"),
+            mainText: getText(context, "status.checkingTheCensus"),
             purpose: Purpose.GUIDE,
             rightIcon: null,
           );
         } else if (process.hasVoted.isLoading) {
           return ListItem(
-            mainText: getText(context, "main.checkingYourVote"),
+            mainText: getText(context, "status.checkingYourVote"),
             purpose: Purpose.GUIDE,
             rightIcon: null,
           );

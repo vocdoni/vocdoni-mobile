@@ -72,8 +72,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
           else if ((!entityModel.metadata.hasValue &&
                   entityModel.metadata.hasError) ||
               (!entityModel.feed.hasValue && entityModel.feed.hasError))
-            return buildError(entityModel.metadata.errorMessage ??
-                entityModel.feed.errorMessage);
+            return buildError(
+                getText(context, "error.theMetadataIsNotAvailable"));
 
           final lang = entityModel.metadata.value.languages[0] ??
               globalAppState.currentLanguage;

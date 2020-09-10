@@ -107,7 +107,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           );
         else if (widget.entityModel.metadata.hasError)
           return ListItem(
-            mainText: widget.entityModel.metadata.errorMessage,
+            mainText: getText(context, "error.theMetadataIsNotAvailable"),
             purpose: Purpose.DANGER,
             rightTextPurpose: Purpose.DANGER,
             onTap: () => widget.entityModel
@@ -116,7 +116,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           );
         else if (widget.entityModel.feed.hasError)
           return ListItem(
-            mainText: widget.entityModel.feed.errorMessage,
+            mainText: getText(context, "error.theMetadataIsNotAvailable"),
             purpose: Purpose.DANGER,
             rightTextPurpose: Purpose.DANGER,
             onTap: () => widget.entityModel.refreshFeed(),

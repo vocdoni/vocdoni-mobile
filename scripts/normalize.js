@@ -12,12 +12,18 @@ function main() {
         let content = fs.readFileSync(path).toString()
 
         for (let originalTxt of Object.keys(baseLang)) {
-            if (content.indexOf('"' + originalTxt + '"') < 0) continue
+            while (content.indexOf('"' + originalTxt + '"') >= 0) {
+                const newKey = getKeFromText(originalTxt)
+                content = content.replace('"' + originalTxt + '"', '"main.' + newKey + '"')
 
-            const newKey = getKeFromText(originalTxt)
-            content = content.replace('"' + originalTxt + '"', '"main.' + newKey + '"')
+                console.log(`[${filename}] Replacing "${originalTxt}" as "main.${newKey}"`)
+            }
+            while (content.indexOf("'" + originalTxt + "'") >= 0) {
+                const newKey = getKeFromText(originalTxt)
+                content = content.replace("'" + originalTxt + "'", '"main.' + newKey + '"')
 
-            console.log(`[${filename}] Replacing "${originalTxt}" as "main.${newKey}"`)
+                console.log(`[${filename}] Replacing "${originalTxt}" as "main.${newKey}"`)
+            }
         }
         fs.writeFileSync(path, content)
     }
