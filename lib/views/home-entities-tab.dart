@@ -61,7 +61,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
                 children: <Widget>[
                   const Icon(Icons.done, color: Colors.grey),
                   Container(width: 10.0),
-                  Text(getText(context, "Refresh completed"),
+                  Text(getText(context, "main.refreshCompleted"),
                       style: TextStyle(color: Colors.grey))
                 ]),
             failed: Row(
@@ -69,7 +69,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
                 children: <Widget>[
                   const Icon(Icons.close, color: Colors.grey),
                   Container(width: 10.0),
-                  Text(getText(context, "Could not refresh"),
+                  Text(getText(context, "main.couldNotRefresh"),
                       style: TextStyle(color: Colors.grey))
                 ]),
           ),
@@ -83,7 +83,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
                 if (entity.metadata.hasValue)
                   return buildCard(ctx, entity);
                 else if (entity.metadata.isLoading)
-                  return CardLoading(getText(context, "Loading entity..."));
+                  return CardLoading(getText(context, "main.loadingEntity"));
                 return buildEmptyMetadataCard(ctx, entity);
               }),
         );
@@ -147,7 +147,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
         }
 
         return ListItem(
-            mainText: getText(context, "Participation"),
+            mainText: getText(context, "main.participation"),
             icon: FeatherIcons.mail,
             rightText: itemCount.toString(),
             rightTextIsBadge: true,
@@ -165,7 +165,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
       builder: (context, _, __) {
         final feedPostAmount = getFeedPostCount(entity);
         return ListItem(
-            mainText: getText(context, "Feed"),
+            mainText: getText(context, "main.feed"),
             icon: FeatherIcons.rss,
             rightText: feedPostAmount.toString(),
             rightTextIsBadge: true,
@@ -178,7 +178,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   Widget buildNoEntities(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text(getText(context, "No entities")),
+      child: Text(getText(context, "main.noEntities")),
     );
   }
 

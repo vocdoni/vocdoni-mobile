@@ -62,14 +62,14 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   try {
     switch (allSegments[0]) {
       case "entities":
-        indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
+        indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
             context: scaffoldBodyContext);
         await handleEntityLink(allSegments.skip(1).toList(),
             context: scaffoldBodyContext);
         indicator.close();
         break;
       case "validation":
-        indicator = showLoading(getText(scaffoldBodyContext, "Please, wait..."),
+        indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
             context: scaffoldBodyContext);
         await handleValidationLink(allSegments.skip(1).toList(),
             context: scaffoldBodyContext);
@@ -124,9 +124,9 @@ Future handleEntityLink(List<String> paramSegments,
     await currentAccount.subscribe(entityModel);
     Navigator.pushNamed(context, "/entity", arguments: entityModel);
   } catch (err) {
-    // showMessage("Could not fetch the entity details",
+    // showMessage("error.couldNotFetchTheEntityDetails",
     //     context: context, purpose: Purpose.DANGER);
-    throw Exception(getText(context, "Could not fetch the entity details"));
+    throw Exception(getText(context, "error.couldNotFetchTheEntityDetails"));
   }
 }
 
@@ -178,7 +178,7 @@ Future handleValidationLink(List<String> paramSegments,
                 backendUri: uri,
                 validationToken: validationToken)));
   } catch (err) {
-    throw Exception(getText(context, "Could not fetch the entity details"));
+    throw Exception(getText(context, "error.couldNotFetchTheEntityDetails"));
   }
 }
 

@@ -36,7 +36,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
         Navigator.pop(context);
       },
       child: Text(
-        getText(context, "I wrote them down"),
+        getText(context, "main.iWroteThemDown"),
         style: TextStyle(fontSize: 20.0),
       ),
     ).withPadding(16).withTopPadding(8);
@@ -49,7 +49,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
 
     final List<Widget> items = [
       Text(getText(context,
-              "Please, take a sheet of paper, write down the following words in order and keep them in a safe place."))
+              "main.pleaseTakeASheetOfPaperWriteDownTheFollowingWordsInOrderAndKeepThemInASafePlace"))
           .withPadding(16)
     ];
     final words = args.mnemonic.split(" ");
@@ -77,7 +77,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
 
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(context, "Identity"),
+        title: getText(context, "main.identity"),
       ),
       body: ListView(children: items),
     );

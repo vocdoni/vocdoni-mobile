@@ -100,7 +100,8 @@ class _PollPageState extends State<PollPage> {
 
   Future<void> onCheckCensus(BuildContext context) async {
     if (globalAppState.currentAccount == null) {
-      process.isInCensus.setError(getText(context, "Cannot check the census"));
+      process.isInCensus
+          .setError(getText(context, "main.cannotCheckTheCensus"));
       return;
     }
     final account = globalAppState.currentAccount;
@@ -117,7 +118,7 @@ class _PollPageState extends State<PollPage> {
       if (patternEncryptionKey == null)
         return;
       else if (patternEncryptionKey is InvalidPatternError) {
-        showMessage(getText(context, "The pattern you entered is not valid"),
+        showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
             context: context, purpose: Purpose.DANGER);
         return;
       }
@@ -128,7 +129,7 @@ class _PollPageState extends State<PollPage> {
           patternEncryptionKey);
       if (mnemonic == null) {
         process.isInCensus
-            .setError(getText(context, "Cannot access the wallet"));
+            .setError(getText(context, "main.cannotAccessTheWallet"));
         return;
       }
 
@@ -169,7 +170,7 @@ class _PollPageState extends State<PollPage> {
           avatarText:
               entity.metadata.value.name[globalAppState.currentLanguage],
           avatarHexSource: process.processId,
-          appBarTitle: getText(context, "Vote"),
+          appBarTitle: getText(context, "main.vote"),
           actionsBuilder: (context) => [
             buildShareButton(context, process.processId),
           ],
@@ -252,17 +253,17 @@ class _PollPageState extends State<PollPage> {
             .hasPublicKeyForEntity(entity.reference.entityId)) {
           // We don't have the user's public key, probably because the entity was unknown when all
           // public keys were precomputed. Ask for the pattern.
-          text = getText(context, "Check the census");
+          text = getText(context, "main.checkTheCensus");
         } else if (process.isInCensus.isLoading) {
-          text = getText(context, "Checking the census");
+          text = getText(context, "main.checkingTheCensus");
           purpose = Purpose.GUIDE;
         } else if (process.isInCensus.hasValue) {
           if (process.isInCensus.value) {
-            text = getText(context, "You are in the census");
+            text = getText(context, "main.youAreInTheCensus");
             purpose = Purpose.GOOD;
             icon = FeatherIcons.check;
           } else {
-            text = getText(context, "You are not in the census");
+            text = getText(context, "main.youAreNotInTheCensus");
             purpose = Purpose.DANGER;
             icon = FeatherIcons.x;
           }
@@ -271,7 +272,7 @@ class _PollPageState extends State<PollPage> {
           purpose = Purpose.DANGER;
           icon = FeatherIcons.alertTriangle;
         } else {
-          text = getText(context, "Check census state");
+          text = getText(context, "main.checkCensusState");
         }
 
         return ListItem(
@@ -290,7 +291,7 @@ class _PollPageState extends State<PollPage> {
   buildPollItem(BuildContext context) {
     return ListItem(
       icon: FeatherIcons.barChart2,
-      mainText: getText(context, "Public vote"),
+      mainText: getText(context, "main.publicVote"),
       rightIcon: null,
       disabled: false,
     );
@@ -310,7 +311,7 @@ class _PollPageState extends State<PollPage> {
           // TODO: Localize date formats
           final formattedTime =
               DateFormat("dd/MM HH:mm").format(process.startDate.value) + "h";
-          rowText = getText(context, "Starting on {{DATE}}")
+          rowText = getText(context, "main.startingOnDate")
               .replaceFirst("{{DATE}}", formattedTime);
           purpose = Purpose.WARNING;
         } else if (process.endDate.hasValue) {
@@ -319,11 +320,11 @@ class _PollPageState extends State<PollPage> {
               DateFormat("dd/MM HH:mm").format(process.endDate.value) + "h";
 
           if (process.endDate.value.isBefore(now)) {
-            rowText = getText(context, "Ended on {{DATE}}")
+            rowText = getText(context, "main.endedOnDate")
                 .replaceFirst(("{{DATE}}"), formattedTime);
             purpose = Purpose.WARNING;
           } else {
-            rowText = getText(context, "Ending on {{DATE}}")
+            rowText = getText(context, "main.endingOnDate")
                 .replaceFirst(("{{DATE}}"), formattedTime);
             purpose = Purpose.GOOD;
           }
@@ -388,7 +389,7 @@ class _PollPageState extends State<PollPage> {
         return Padding(
           padding: EdgeInsets.all(paddingPage),
           child: BaseButton(
-              text: getText(context, "Submit"),
+              text: getText(context, "main.submit"),
               purpose: Purpose.HIGHLIGHT,
               // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
               // isDisabled: cannotVote,
@@ -415,34 +416,34 @@ class _PollPageState extends State<PollPage> {
 
         if (process.hasVoted.hasValue && process.hasVoted.value) {
           return ListItem(
-            mainText: getText(context, 'Your vote is already registered'),
+            mainText: getText(context, "main.yourVoteIsAlreadyRegistered"),
             purpose: Purpose.GOOD,
             rightIcon: null,
           );
         } else if (!process.startDate.hasValue || !process.endDate.hasValue) {
           return ListItem(
             mainText:
-                getText(context, "The process dates cannot be determined"),
+                getText(context, "main.theProcessDatesCannotBeDetermined"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.startDate.value.isAfter(DateTime.now())) {
           return ListItem(
-            mainText: getText(context, "The process is not active yet"),
+            mainText: getText(context, "main.theProcessIsNotActiveYet"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.endDate.value.isBefore(DateTime.now())) {
           return ListItem(
-            mainText: getText(context, "The process has already ended"),
+            mainText: getText(context, "main.theProcessHasAlreadyEnded"),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (!process.isInCensus.value) {
           return ListItem(
-            mainText: getText(context, "You are not in the census"),
+            mainText: getText(context, "main.youAreNotInTheCensus"),
             secondaryText: getText(context,
-                "Register to this organization to participate in the future"),
+                "main.registerToThisOrganizationToParticipateInTheFuture"),
             secondaryTextMultiline: 5,
             purpose: Purpose.DANGER,
             rightIcon: null,
@@ -450,7 +451,7 @@ class _PollPageState extends State<PollPage> {
         } else if (process.isInCensus.hasError) {
           return ListItem(
             mainText: getText(
-                context, "Your identity cannot be checked within the census"),
+                context, "main.yourIdentityCannotBeCheckedWithinTheCensus"),
             mainTextMultiline: 3,
             secondaryText: process.isInCensus.errorMessage,
             purpose: Purpose.WARNING,
@@ -458,24 +459,23 @@ class _PollPageState extends State<PollPage> {
           );
         } else if (!process.isInCensus.hasValue) {
           return ListItem(
-            mainText: getText(context, "The census cannot be checked"),
-            secondaryText: getText(
-                context, "Tap above on 'Check the census' and try again"),
+            mainText: getText(context, "main.theCensusCannotBeChecked"),
+            secondaryText:
+                getText(context, "main.tapAboveOnCheckTheCensusAndTryAgain"),
             secondaryTextMultiline: 5,
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (nextPendingChoice >= 0) {
           return ListItem(
-            mainText: getText(
-                    context, "Select your choice for question #{{NUM}}")
+            mainText: getText(context, "main.selectYourChoiceForQuestionNum")
                 .replaceFirst("{{NUM}}", (nextPendingChoice + 1).toString()),
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
         } else if (process.hasVoted.hasError) {
           return ListItem(
-            mainText: getText(context, "Your vote status cannot be checked"),
+            mainText: getText(context, "main.yourVoteStatusCannotBeChecked"),
             mainTextMultiline: 3,
             secondaryText: process.hasVoted.errorMessage,
             purpose: Purpose.WARNING,
@@ -483,13 +483,13 @@ class _PollPageState extends State<PollPage> {
           );
         } else if (process.isInCensus.isLoading) {
           return ListItem(
-            mainText: getText(context, "Checking the census"),
+            mainText: getText(context, "main.checkingTheCensus"),
             purpose: Purpose.GUIDE,
             rightIcon: null,
           );
         } else if (process.hasVoted.isLoading) {
           return ListItem(
-            mainText: getText(context, "Checking your vote"),
+            mainText: getText(context, "main.checkingYourVote"),
             purpose: Purpose.GUIDE,
             rightIcon: null,
           );
@@ -507,7 +507,7 @@ class _PollPageState extends State<PollPage> {
         style: BaseButtonStyle.NO_BACKGROUND_WHITE,
         onTap: () {
           Clipboard.setData(ClipboardData(text: processId));
-          showMessage(getText(context, "Poll ID copied on the clipboard"),
+          showMessage(getText(context, "main.pollIdCopiedOnTheClipboard"),
               context: context, purpose: Purpose.GOOD);
         });
   }
@@ -518,7 +518,7 @@ class _PollPageState extends State<PollPage> {
           title: "",
         ),
         body: Center(
-          child: Text(getText(context, "(No poll)")),
+          child: Text(getText(context, "main.noPoll")),
         ));
   }
 
@@ -585,14 +585,14 @@ class _PollPageState extends State<PollPage> {
       );
     } else {
       print("ERROR: Question type not supported: " + question.type);
-      buildError(getText(context, "Question type not supported"));
+      buildError(getText(context, "main.questionTypeNotSupported"));
     }
     return items;
   }
 
   buildError(String error) {
     return ListItem(
-      mainText: getText(context, "Error") + " " + error,
+      mainText: getText(context, "main.error") + " " + error,
       rightIcon: null,
       icon: FeatherIcons.alertCircle,
       purpose: Purpose.DANGER,
@@ -603,7 +603,7 @@ class _PollPageState extends State<PollPage> {
     return Scaffold(
       body: Center(
         child: Text(
-          getText(context, "Error") + ":\n" + error,
+          getText(context, "main.error") + ":\n" + error,
           style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
           textAlign: TextAlign.center,
         ),

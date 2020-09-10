@@ -19,13 +19,13 @@ class QrShowModal extends StatelessWidget {
   onCopy(BuildContext context) {
     Clipboard.setData(ClipboardData(text: content))
         .then((_) => showMessage(
-            getText(context, "Content copied to the clipboard"),
+            getText(context, "main.contentCopiedToTheClipboard"),
             context: context,
             purpose: Purpose.GOOD))
         .catchError((err) {
       devPrint(err);
 
-      showMessage(getText(context, "Could not copy the Entity ID"),
+      showMessage(getText(context, "main.couldNotCopyTheEntityId"),
           context: context, purpose: Purpose.DANGER);
     });
   }
@@ -34,7 +34,7 @@ class QrShowModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: title ?? "Vocdoni", // getText(context, "Scan")
+        title: title ?? "Vocdoni", // getText(context, "main.scan")
         showBackButton: true,
         onBackButton: () => Navigator.of(context).pop(),
       ),
@@ -59,7 +59,7 @@ class QrShowModal extends StatelessWidget {
                 splashColor: Colors.blueAccent,
                 onPressed: () => onCopy(context),
                 child: Text(
-                  getText(context, "Copy to the clipboard"),
+                  getText(context, "main.copyToTheClipboard"),
                   style: TextStyle(fontSize: 20.0),
                 ).withHPadding(16).withVPadding(8),
               ).withPadding(32).withTopPadding(8),

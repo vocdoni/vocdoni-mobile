@@ -91,7 +91,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                     children: <Widget>[
                       const Icon(Icons.done, color: Colors.grey),
                       Container(width: 10.0),
-                      Text(getText(context, "Refresh completed"),
+                      Text(getText(context, "main.refreshCompleted"),
                           style: TextStyle(color: Colors.grey))
                     ]),
                 failed: Row(
@@ -99,7 +99,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                     children: <Widget>[
                       const Icon(Icons.close, color: Colors.grey),
                       Container(width: 10.0),
-                      Text(getText(context, "Could not refresh"),
+                      Text(getText(context, "main.couldNotRefresh"),
                           style: TextStyle(color: Colors.grey))
                     ]),
               ),
@@ -122,24 +122,24 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
   Widget buildNoProcessesess() {
     return Scaffold(
         body: Center(
-      child: Text(getText(context, "No participation processess")),
+      child: Text(getText(context, "main.noParticipationProcessess")),
     ));
   }
 
   Widget buildLoading() {
     return Scaffold(
-        appBar: TopNavigation(title: getText(context, "Participation")),
+        appBar: TopNavigation(title: getText(context, "main.participation")),
         body: Center(
           child: SizedBox(
               height: 140.0,
-              child: CardLoading(getText(context, "Loading processes..."))),
+              child: CardLoading(getText(context, "main.loadingProcesses"))),
         ));
   }
 
   Widget buildError(String message) {
     return Scaffold(
         body: Center(
-      child: Text(getText(context, "Error") + ": " + message),
+      child: Text(getText(context, "main.error") + ": " + message),
     ));
   }
 }

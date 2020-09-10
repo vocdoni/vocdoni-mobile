@@ -65,7 +65,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       return;
     } else if (patternLockKey is InvalidPatternError) {
       setState(() => _currentStep = Steps.READY);
-      showMessage(getText(context, "The pattern you entered is not valid"),
+      showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
           context: context, purpose: Purpose.DANGER);
     } else {
       stepSendRequest(context, patternLockKey);
@@ -97,7 +97,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       final status =
           await registrationStatus(widget.entityId, dvoteGw, privateKey);
       if (status["registered"] == true) {
-        showMessage(getText(context, "You are already registered"),
+        showMessage(getText(context, "main.youAreAlreadyRegistered"),
             purpose: Purpose.HIGHLIGHT, context: context);
 
         setState(() => _currentStep = Steps.DONE);
@@ -114,7 +114,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       setState(() => _currentStep = Steps.DONE);
 
-      showMessage(getText(context, "Your registration has been confirmed"),
+      showMessage(getText(context, "main.yourRegistrationHasBeenConfirmed"),
           context: context, purpose: Purpose.GOOD);
     } catch (error) {
       if (!mounted) return;
@@ -123,14 +123,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       // Already registered?
       if (error.toString().contains("duplicate user") ||
           error.toString().contains("already registered")) {
-        showMessage(getText(context, "You are already registered"),
+        showMessage(getText(context, "main.youAreAlreadyRegistered"),
             purpose: Purpose.HIGHLIGHT, context: context);
 
         setState(() => _currentStep = Steps.DONE);
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
-        showMessage(getText(context, "The registration could not be completed"),
+        showMessage(getText(context, "main.theRegistrationCouldNotBeCompleted"),
             purpose: Purpose.DANGER, context: context);
       }
     }
@@ -139,7 +139,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
   @override
   Widget build(BuildContext c) {
     return Scaffold(
-      appBar: TopNavigation(title: getText(context, "Registration")),
+      appBar: TopNavigation(title: getText(context, "main.registration")),
       body: SafeArea(
         child: Builder(
           builder: (BuildContext context) => Center(
@@ -156,18 +156,18 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
                   Summary(
                       maxLines: 10,
                       text: getText(context,
-                          "You are about to validate your digital identity. Do you want to continue?")),
-                  buildStep(getText(context, "Authorizing"),
-                      getText(context, "Authorized"), Steps.AUTHORIZE_ACTION),
-                  buildStep(getText(context, "Confirming"),
-                      getText(context, "Confirmed"), Steps.CONFIRM_TOKEN),
+                          "main.youAreAboutToValidateYourDigitalIdentityDoYouWantToContinue")),
+                  buildStep(getText(context, "main.authorizing"),
+                      getText(context, "main.authorized"), Steps.AUTHORIZE_ACTION),
+                  buildStep(getText(context, "main.confirming"),
+                      getText(context, "main.confirmed"), Steps.CONFIRM_TOKEN),
                   Spacer(),
                   _currentStep != Steps.READY
                       ? Container()
                       : Padding(
                           padding: EdgeInsets.all(paddingPage),
                           child: BaseButton(
-                              text: getText(context, "Confirm"),
+                              text: getText(context, "main.confirm"),
                               isSmall: false,
                               style: BaseButtonStyle.FILLED,
                               purpose: Purpose.HIGHLIGHT,
@@ -178,7 +178,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
                       : Padding(
                           padding: EdgeInsets.all(paddingPage),
                           child: BaseButton(
-                              text: getText(context, "Close"),
+                              text: getText(context, "main.close"),
                               isSmall: false,
                               style: BaseButtonStyle.FILLED,
                               purpose: Purpose.HIGHLIGHT,

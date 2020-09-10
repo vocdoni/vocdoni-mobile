@@ -37,7 +37,7 @@ void mainCommon() async {
   // RUN THE APP
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    title: 'Vocdoni',
+    title: "Vocdoni",
     supportedLocales:
         SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
     localizationsDelegates: [
@@ -45,7 +45,7 @@ void mainCommon() async {
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
     ],
-    onGenerateTitle: (BuildContext context) => getText(context, "Vocdoni"),
+    onGenerateTitle: (BuildContext context) => "Vocdoni",
     home: StartupPage(),
     onGenerateRoute: generateRoute,
     routes: {

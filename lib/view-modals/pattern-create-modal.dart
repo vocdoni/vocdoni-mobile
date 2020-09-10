@@ -49,19 +49,19 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
     switch (patternStep) {
       case PatternStep.READY:
         message =
-            getText(context, "Draw a pattern to lock your identity") + ". ";
+            getText(context, "main.drawAPatternToLockYourIdentity") + ". ";
         message += getText(context,
-                    "Your pattern should include at least {{NUM}} dots")
+                    "main.yourPatternShouldIncludeAtLeastNumDots")
                 .replaceAll("{{NUM}}", minPatternDots.toString()) +
             ".";
         break;
       case PatternStep.CONFIRMING:
         message = getText(context,
-            "Confirm the lock pattern you entered to create your identity");
+            "main.confirmTheLockPatternYouEnteredToCreateYourIdentity");
         break;
       case PatternStep.DONE:
         message = getText(context,
-            "Your pattern has been set, you will need it to unlock your identity");
+            "main.yourPatternHasBeenSetYouWillNeedItToUnlockYourIdentity");
         break;
     }
 
@@ -77,7 +77,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Spacer(flex: 3),
-            Section(text: getText(context, "Lock pattern")),
+            Section(text: getText(context, "main.lockPattern")),
             SizedBox(height: 20),
             Text(
               message,
@@ -100,7 +100,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
             //           ? null
             //           : BaseButton(
             //               maxWidth: buttonDefaultWidth,
-            //               text: getText(context, "Continue"),
+            //               text: getText(context, "main.continue"),
             //               // isDisabled:patternState != SetPatternState.waitingConfirmation,
             //               onTap: () => onApprovePattern(),
             //             ),
@@ -178,7 +178,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   void onFirstPassDone(BuildContext context, List<int> newPattern) {
     if (newPattern.length < minPatternDots) {
       final err =
-          getText(context, "The pattern needs to have at least {{NUM}} dots")
+          getText(context, "main.thePatternNeedsToHaveAtLeastNumDots")
               .replaceFirst("{{NUM}}", minPatternDots.toString());
       showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
@@ -188,7 +188,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       return;
     } else if (newPattern.length >= maxPatternDots) {
       final err =
-          getText(context, "The pattern should not have more than {{NUM}} dots")
+          getText(context, "main.thePatternShouldNotHaveMoreThanNumDots")
               .replaceFirst("{{NUM}}", maxPatternDots.toString());
       showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
@@ -216,7 +216,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
         patternColor = colorRed;
       });
 
-      final msg = getText(context, "The patterns you entered do not match");
+      final msg = getText(context, "main.thePatternsYouEnteredDoNotMatch");
       showMessage(msg,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       return;
@@ -226,7 +226,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       patternStep = PatternStep.DONE;
       patternColor = colorGreen;
     });
-    showMessage(getText(context, "Your pattern has been set"),
+    showMessage(getText(context, "main.yourPatternHasBeenSet"),
         context: context, duration: toasterDuration, purpose: Purpose.GOOD);
 
     Future.delayed(Duration(seconds: 2)).then((_) {

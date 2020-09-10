@@ -55,7 +55,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
               Spacer(flex: 3),
               Section(
                 withDectoration: false,
-                text: getText(context, "Unlock {{NAME}}").replaceFirst(
+                text: getText(context, "main.unlockName").replaceFirst(
                     "{{NAME}}", widget.account.identity.value.alias),
               ),
               Spacer(),
@@ -124,7 +124,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
       });
 
       Navigator.pop(
-          context, InvalidPatternError("The pattern you entered is not valid"));
+          context, InvalidPatternError("main.thePatternYouEnteredIsNotValid"));
     }
   }
 }

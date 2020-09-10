@@ -61,7 +61,7 @@ class _CardPollState extends State<CardPoll> {
   Widget buildCard(BuildContext context) {
     if (!this.widget.process.metadata.hasValue) return Container();
 
-    String timeLabel = getText(context, "Starting");
+    String timeLabel = getText(context, "main.starting");
     String timeLeft = "-";
     final now = DateTime.now();
     final startDate = this.widget.process.startDate.value;
@@ -71,13 +71,13 @@ class _CardPollState extends State<CardPoll> {
     if (startDate is DateTime && endDate is DateTime) {
       // TODO: CHECK IF CANCELED
       if (now.isAfter(endDate)) {
-        timeLabel = getText(context, "Ended");
+        timeLabel = getText(context, "main.ended");
         timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
       } else if (now.isAfter(startDate)) {
-        timeLabel = getText(context, "Time left");
+        timeLabel = getText(context, "main.timeLeft");
         timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
       } else {
-        timeLabel = getText(context, "Starting in");
+        timeLabel = getText(context, "main.startingIn");
         timeLeft =
             getFriendlyTimeDifference(this.widget.process.startDate.value);
       }
@@ -85,18 +85,18 @@ class _CardPollState extends State<CardPoll> {
     } else if (endDate is DateTime) {
       // Refer to endDate
       if (now.isBefore(endDate))
-        timeLabel = getText(context, "Ending");
+        timeLabel = getText(context, "main.ending");
       else
-        timeLabel = getText(context, "Ended");
+        timeLabel = getText(context, "main.ended");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
       dateLoaded = true;
     } else if (startDate is DateTime) {
       // Refer to startDate
       if (now.isBefore(startDate))
-        timeLabel = getText(context, "Starting");
+        timeLabel = getText(context, "main.starting");
       else
-        timeLabel = getText(context, "Started");
+        timeLabel = getText(context, "main.started");
 
       timeLeft = getFriendlyTimeDifference(this.widget.process.startDate.value);
       dateLoaded = true;
@@ -122,14 +122,14 @@ class _CardPollState extends State<CardPoll> {
         DashboardRow(
           children: <Widget>[
             DashboardItem(
-              label: getText(context, "Vote"),
+              label: getText(context, "main.vote"),
               item: Icon(
                 FeatherIcons.barChart2,
                 size: iconSizeMedium,
               ),
             ),
             DashboardItem(
-              label: getText(context, "Voted"),
+              label: getText(context, "main.voted"),
               item: DashboardText(
                   mainText: participation,
                   secondaryText: '%',
@@ -179,24 +179,24 @@ class _CardPollState extends State<CardPoll> {
     if (diff.isNegative) diff = DateTime.now().difference(date);
 
     if (diff.inSeconds <= 0)
-      return getText(context, "now");
+      return getText(context, "main.now");
     else if (diff.inDays >= 365)
-      return getText(context, "{{NUM}} y")
+      return getText(context, "main.numY")
           .replaceFirst("{{NUM}}", (diff.inDays / 365).floor().toString());
     else if (diff.inDays >= 30)
-      return getText(context, "{{NUM}} mo")
+      return getText(context, "main.numMo")
           .replaceFirst("{{NUM}}", (diff.inDays / 28).floor().toString());
     else if (diff.inDays >= 1)
-      return getText(context, "{{NUM}} d")
+      return getText(context, "main.numD")
           .replaceFirst("{{NUM}}", diff.inDays.toString());
     else if (diff.inHours >= 1)
-      return getText(context, "{{NUM}} h")
+      return getText(context, "main.numH")
           .replaceFirst("{{NUM}}", diff.inHours.toString());
     else if (diff.inMinutes >= 1)
-      return getText(context, "{{NUM}} min")
+      return getText(context, "main.numMin")
           .replaceFirst("{{NUM}}", diff.inMinutes.toString());
     else
-      return getText(context, "{{NUM}} s")
+      return getText(context, "main.numS")
           .replaceFirst("{{NUM}}", diff.inSeconds.toString());
   }
 

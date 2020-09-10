@@ -48,11 +48,11 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
     String err;
     if (alias.length == 0)
-      err = getText(context, "Enter a name for the account");
+      err = getText(context, "main.enterANameForTheAccount");
     else if (mnemonic.length == 0)
-      err = getText(context, "Enter the mnemonic words to recover");
+      err = getText(context, "main.enterTheMnemonicWordsToRecover");
     else if (!RegExp(r"^([a-zA-Z]+ )+[a-zA-Z]+$").hasMatch(mnemonic))
-      err = getText(context, "The mnemonic words you entered is not valid");
+      err = getText(context, "main.theMnemonicWordsYouEnteredIsNotValid");
     if (err is String) {
       showMessage(err, context: context, purpose: Purpose.WARNING);
       return;
@@ -68,7 +68,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
         break;
       default:
         showMessage(
-            getText(context, "The number of words you entered is not valid"),
+            getText(context, "main.theNumberOfWordsYouEnteredIsNotValid"),
             context: context,
             purpose: Purpose.WARNING);
         return;
@@ -79,7 +79,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           await EthereumNativeWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
-      showMessage(getText(context, "The words you entered are not valid"),
+      showMessage(getText(context, "main.theWordsYouEnteredAreNotValid"),
           context: context, purpose: Purpose.WARNING);
       return;
     }
@@ -127,13 +127,13 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
       if (err.toString() ==
           "Exception: An account with this name already exists") {
-        text = getText(context, "An account with this name already exists");
+        text = getText(context, "main.anAccountWithThisNameAlreadyExists");
       } else {
         text =
-            getText(context, "An error occurred while restoring the identity");
+            getText(context, "main.anErrorOccurredWhileRestoringTheIdentity");
       }
 
-      showAlert(text, title: getText(context, "Error"), context: context);
+      showAlert(text, title: getText(context, "main.error"), context: context);
     }
   }
 
@@ -148,7 +148,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(getText(context, "Restoring identity..."),
+              Text(getText(context, "main.restoringIdentity"),
                   style: TextStyle(fontSize: 18)),
               SizedBox(height: 20),
               LoadingSpinner(),
@@ -163,7 +163,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
     return BaseButton(
       maxWidth: double.infinity,
       purpose: Purpose.HIGHLIGHT,
-      text: getText(context, "Restore identity"),
+      text: getText(context, "main.restoreIdentity"),
       onTap: () => onSubmit(context),
     ).withPadding(16);
   }
@@ -172,7 +172,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   Widget build(context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(context, "Identity"),
+        title: getText(context, "main.identity"),
       ),
       body: Builder(
         builder: (context) {
@@ -181,7 +181,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           return ListView(children: <Widget>[
             Text(
               getText(context,
-                  "To restore your user keys enter the mnemonic words you saved during the back up."),
+                  "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp"),
               style: TextStyle(color: Colors.black45),
             ).withPadding(16),
             TextField(
@@ -191,7 +191,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 // border: InputBorder.none,
-                hintText: getText(context, "What's your name?"),
+                hintText: getText(context, "main.whatsYourName"),
               ),
             ).withHPadding(16),
             TextField(
@@ -203,7 +203,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
               maxLines: 4,
               decoration: InputDecoration(
                 // border: InputBorder.none,
-                hintText: getText(context, 'Mnemonic words'),
+                hintText: getText(context, "main.mnemonicWords"),
               ),
             ).withPadding(16).withTopPadding(8),
             SizedBox(height: 16),

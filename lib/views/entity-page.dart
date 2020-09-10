@@ -63,7 +63,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         headerImageUrl: null,
         headerTag: null,
         forceHeader: true,
-        appBarTitle: getText(context, "Loading"),
+        appBarTitle: getText(context, "main.loading"),
         avatarText: "",
         avatarHexSource: widget.entityModel.reference.entityId,
         builder: Builder(
@@ -89,19 +89,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       builder: (context, _, __) {
         if (widget.entityModel.metadata.isLoading)
           return ListItem(
-            mainText: getText(context, "Fetching details..."),
+            mainText: getText(context, "main.fetchingDetails"),
             rightIcon: null,
             isSpinning: true,
           );
         else if (widget.entityModel.processes.isLoading)
           return ListItem(
-            mainText: getText(context, "Fetching participation..."),
+            mainText: getText(context, "main.fetchingParticipation"),
             rightIcon: null,
             isSpinning: true,
           );
         else if (widget.entityModel.feed.isLoading)
           return ListItem(
-            mainText: getText(context, "Fetching news..."),
+            mainText: getText(context, "main.fetchingNews"),
             rightIcon: null,
             isSpinning: true,
           );
@@ -170,7 +170,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildParticipationRow(context));
     // TODO: show back?
     // children.add(buildActionList(context));
-    children.add(Section(text: getText(context, "Details")));
+    children.add(Section(text: getText(context, "main.details")));
     children.add(summary.Summary(
       text: widget.entityModel.metadata.value
               .description[globalAppState.currentLanguage] +
@@ -179,7 +179,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           widget.entityModel.reference.entityId,
       maxLines: 5,
     ));
-    children.add(Section(text: getText(context, "Manage")));
+    children.add(Section(text: getText(context, "main.manage")));
     children.add(buildShareItem(context));
     children.add(buildSubscribeItem(context));
 
@@ -222,7 +222,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
           return ListItem(
             icon: FeatherIcons.rss,
-            mainText: getText(context, "Feed"),
+            mainText: getText(context, "main.feed"),
             rightText: postCount.toString(),
             rightTextIsBadge: true,
             rightTextPurpose:
@@ -254,7 +254,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
         return ListItem(
             icon: FeatherIcons.mail,
-            mainText: getText(context, "Participation"),
+            mainText: getText(context, "main.participation"),
             rightText: processCount.toString(),
             rightTextIsBadge: true,
             rightTextPurpose:
@@ -280,8 +280,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     bool isSubscribed =
         currentAccount.isSubscribed(widget.entityModel.reference);
     String subscribeText = isSubscribed
-        ? getText(context, "Following")
-        : getText(context, "Follow");
+        ? getText(context, "main.following")
+        : getText(context, "main.follow");
 
     // Rebuild when the selected account's identity updates
     return EventualBuilder(
@@ -310,7 +310,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   //   bool isSubscribed =
   //       currentAccount.isSubscribed(widget.entityModel.reference);
-  //   String subscribeText = isSubscribed ? "Following" : "Follow";
+  //   String subscribeText = isSubscribed ? "main.following" : "main.follow";
 
   //   return BaseButton(
   //       text: subscribeText,
@@ -328,7 +328,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   buildShareItem(BuildContext context) {
     return ListItem(
-        mainText: getText(context, "Share organization"),
+        mainText: getText(context, "main.shareOrganization"),
         icon: FeatherIcons.share2,
         rightIcon: null,
         onTap: () => onShare(context));
@@ -362,7 +362,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
           return BaseButton(
             purpose: Purpose.HIGHLIGHT,
             leftIconData: FeatherIcons.feather,
-            text: getText(context, "Register"),
+            text: getText(context, "main.register"),
             // isSmall: true,
             onTap: () => onTapRegister(context),
           );
@@ -372,7 +372,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         return BaseButton(
           purpose: Purpose.HIGHLIGHT,
           leftIconData: FeatherIcons.check,
-          text: getText(context, "Registered"),
+          text: getText(context, "main.registered"),
           // isSmall: true,
           style: BaseButtonStyle.FILLED,
           isDisabled: true,
@@ -388,11 +388,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //     builder: (context, _, __) {
   //       final List<Widget> actionsToShow = [];
 
-  //       actionsToShow.add(Section(text: getText(context, "Actions")));
+  //       actionsToShow.add(Section(text: getText(context, "main.actions")));
 
   //       if (widget.entityModel.visibleActions.hasError) {
   //         return ListItem(
-  //           mainText: widget.entityModel.visibleActions.errorMessage,
+  //           mainText: getText(context, widget.entityModel.visibleActions.errorMessage),
   //           purpose: Purpose.DANGER,
   //           rightIcon: null,
   //           rightTextPurpose: Purpose.DANGER,
@@ -400,7 +400,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //       } else if (!widget.entityModel.visibleActions.hasValue ||
   //           widget.entityModel.visibleActions.value.length == 0) {
   //         return ListItem(
-  //           mainText: getText(context, "No actions defined"),
+  //           mainText: getText(context, "main.noActionsDefined"),
   //           disabled: true,
   //           rightIcon: null,
   //           icon: FeatherIcons.helpCircle,
@@ -412,7 +412,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //         final entityName = widget
   //             .entityModel.metadata.value.name[globalAppState.currentLanguage];
   //         ListItem noticeItem = ListItem(
-  //           mainText: getText(context, "Register to {{NAME}} first")
+  //           mainText: getText(context, "main.registerToNameFirst")
   //               .replaceFirst("{{NAME}}", entityName),
   //           // secondaryText: null,
   //           // rightIcon: null,
@@ -441,7 +441,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //         } else {
   //           item = ListItem(
   //             mainText: action.name[globalAppState.currentLanguage],
-  //             secondaryText: getText(context, "Action not supported"),
+  //             secondaryText: getText(context, "main.actionNotSupported"),
   //             icon: FeatherIcons.helpCircle,
   //             disabled: true,
   //           );
@@ -469,7 +469,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
                 widget.entityModel.metadata.hasValue
                     ? widget.entityModel.metadata.value
                         .name[globalAppState.currentLanguage]
-                    : getText(context, "Entity"),
+                    : getText(context, "main.entity"),
                 link)));
   }
 
@@ -516,34 +516,31 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       await currentAccount.subscribe(widget.entityModel);
       setState(() => _processingSubscription = false);
 
-      showMessage(getText(ctx, "Organization successfully added"),
+      showMessage(getText(ctx, "main.organizationSuccessfullyAdded"),
           context: ctx, purpose: Purpose.GOOD);
     } on Exception catch (err) {
       if (!mounted) return;
       setState(() => _processingSubscription = false);
 
       if (err.toString() == "Exception: Already subscribed") {
-        showMessage(
-            getText(
-              ctx,
-              "You are already subscribed to this entity",
-            ),
-            context: ctx,
-            purpose: Purpose.DANGER);
+        final msg = getText(ctx, "main.youAreAlreadySubscribedToThisEntity");
+        showMessage(msg, context: ctx, purpose: Purpose.DANGER);
       } else {
-        showMessage(getText(ctx, "The subscription could not be registered"),
+        showMessage(getText(ctx, "main.theSubscriptionCouldNotBeRegistered"),
             context: ctx, purpose: Purpose.DANGER);
       }
     }
   }
 
   unsubscribeFromEntity(BuildContext ctx) async {
-    final confirmUnsubscribe = await showPrompt(
-        getText(ctx,
-            "You are about to stop following the entity.\nDo you want to continue?"),
-        title: getText(ctx, "Unsubscribe"),
-        okButton: getText(ctx, "OK"),
-        cancelButton: getText(ctx, "Cancel"),
+    final msg = getText(ctx, "main.youAreAboutToStopFollowingTheEntity") +
+        "\n" +
+        getText(ctx, "main.doYouWantToContinue");
+
+    final confirmUnsubscribe = await showPrompt(msg,
+        title: getText(ctx, "main.unsubscribe"),
+        okButton: getText(ctx, "main.ok"),
+        cancelButton: getText(ctx, "main.cancel"),
         context: ctx);
     if (confirmUnsubscribe != true) return;
 
@@ -559,13 +556,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       setState(() => _processingSubscription = false);
 
       showMessage(
-          getText(ctx, "You will no longer see this organization in your feed"),
+          getText(ctx, "main.youWillNoLongerSeeThisOrganizationInYourFeed"),
           context: ctx,
           purpose: Purpose.NONE);
     } catch (err) {
       if (!mounted) return;
       setState(() => _processingSubscription = false);
-      showMessage(getText(ctx, "The subscription could not be canceled"),
+      showMessage(getText(ctx, "main.theSubscriptionCouldNotBeCanceled"),
           context: ctx, purpose: Purpose.DANGER);
     }
   }

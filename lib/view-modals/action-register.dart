@@ -46,7 +46,7 @@ class ActionRegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopNavigation(title: getText(context, "Register")),
+      appBar: TopNavigation(title: getText(context, "main.register")),
       body: Builder(
           builder: (context) => ListView.builder(
                 itemCount: 1,
@@ -63,18 +63,18 @@ class ActionRegisterPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                getText(context, "Personal details"),
+                getText(context, "main.personalDetails"),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23),
               ).withBottomPadding(8),
               Text(
                       getText(context,
-                          "Please, fill in the fields below to complete your registration"),
+                          "main.pleaseFillInTheFieldsBelowToCompleteYourRegistration"),
                       style: TextStyle(color: Colors.black45))
                   .withBottomPadding(20),
               TextFormField(
                 validator: (value) => nameValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "What's your name?"),
+                    hintText: getText(context, "main.whatsYourName"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
@@ -86,7 +86,7 @@ class ActionRegisterPage extends StatelessWidget {
               TextFormField(
                 validator: (value) => nameValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "What's your last name?"),
+                    hintText: getText(context, "main.whatsYourLastName"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
@@ -97,7 +97,7 @@ class ActionRegisterPage extends StatelessWidget {
               TextFormField(
                 validator: (value) => dateValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "What is your birthday?"),
+                    hintText: getText(context, "main.whatIsYourBirthday"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.datetime,
                 textInputAction: TextInputAction.next,
@@ -111,7 +111,7 @@ class ActionRegisterPage extends StatelessWidget {
               TextFormField(
                 validator: (value) => emailValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "What's your e-mail address?"),
+                    hintText: getText(context, "main.whatsYourEmailAddress"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -123,7 +123,7 @@ class ActionRegisterPage extends StatelessWidget {
               TextFormField(
                 validator: (value) => phoneValidator(value, context),
                 decoration: InputDecoration(
-                    hintText: getText(context, "Phone number"),
+                    hintText: getText(context, "main.phoneNumber"),
                     hintStyle: TextStyle(color: Colors.black38)),
                 keyboardType: TextInputType.phone,
                 focusNode: phoneNode,
@@ -134,36 +134,36 @@ class ActionRegisterPage extends StatelessWidget {
           )).withPadding(20.0),
       RaisedButton(
         onPressed: () => onSubmit(context),
-        child: Text(getText(context, 'Register')),
+        child: Text(getText(context, "main.register")),
       ).withBottomPadding(20).centered()
     ]);
   }
 
   String nameValidator(String value, BuildContext ctx) {
-    if (value.isEmpty) return getText(ctx, 'Please, enter your name');
+    if (value.isEmpty) return getText(ctx, "main.pleaseEnterYourName");
     return null;
   }
 
   String dateValidator(String value, BuildContext ctx) {
-    if (value.isEmpty) return getText(ctx, 'Please, enter your birth date');
+    if (value.isEmpty) return getText(ctx, "main.pleaseEnterYourBirthDate");
 
     if (dateRegExp.hasMatch(value)) return null;
-    return getText(ctx, "Please, select a valid date");
+    return getText(ctx, "main.pleaseSelectAValidDate");
   }
 
   String emailValidator(String value, BuildContext ctx) {
-    if (value.isEmpty) return getText(ctx, 'Please, enter your email');
+    if (value.isEmpty) return getText(ctx, "main.pleaseEnterYourEmail");
 
     if (emailRegExp.hasMatch(value)) return null;
-    return getText(ctx, "Please, enter a valid email");
+    return getText(ctx, "main.pleaseEnterAValidEmail");
   }
 
   String phoneValidator(String value, BuildContext ctx) {
     if (value.isEmpty)
-      return getText(ctx, 'Please, enter a valid phone number');
+      return getText(ctx, "main.pleaseEnterAValidPhoneNumber");
 
     if (phoneRegExp.hasMatch(value)) return null;
-    return getText(ctx, "Please, enter a valid phone number");
+    return getText(ctx, "main.pleaseEnterAValidPhoneNumber");
   }
 
   Future<void> showBirthDatePicker(BuildContext context) async {
@@ -230,7 +230,7 @@ class ActionRegisterPage extends StatelessWidget {
     if (patternStr == null) {
       return;
     } else if (patternStr is InvalidPatternError) {
-      showMessage(getText(context, "The pattern you entered is not valid"),
+      showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
           purpose: Purpose.DANGER, context: context);
     }
 
@@ -244,7 +244,7 @@ class ActionRegisterPage extends StatelessWidget {
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
     if (dateItems.length != 3) {
-      showMessage(getText(context, "Please, select a valid date"),
+      showMessage(getText(context, "main.pleaseSelectAValidDate"),
           purpose: Purpose.DANGER, context: context);
       return;
     }
@@ -275,7 +275,7 @@ class ActionRegisterPage extends StatelessWidget {
     };
 
     final loadingCtrl =
-        showLoading(getText(context, "Please, wait..."), context: context);
+        showLoading(getText(context, "main.pleaseWait"), context: context);
 
     return http
         .post(action.url, body: jsonEncode(payload), headers: headers)
@@ -295,14 +295,14 @@ class ActionRegisterPage extends StatelessWidget {
 
       // SUCCESS
       loadingCtrl.close();
-      showMessage(getText(context, "Your registration has been handled"),
+      showMessage(getText(context, "main.yourRegistrationHasBeenHandled"),
           purpose: Purpose.GOOD, context: context);
 
       Future.delayed(Duration(seconds: 4))
           .then((_) => Navigator.of(context).pop());
     }).catchError((err) {
       loadingCtrl.close();
-      showMessage(getText(context, "The registration process failed"),
+      showMessage(getText(context, "main.theRegistrationProcessFailed"),
           purpose: Purpose.DANGER, context: context);
 
       devPrint("Register error: $err");

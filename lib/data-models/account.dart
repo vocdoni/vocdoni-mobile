@@ -137,7 +137,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
             .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
             .length >
         0) {
-      throw Exception("An account with this name already exists");
+      throw Exception("main.anAccountWithThisNameAlreadyExists");
     }
 
     // Prevent duplicates

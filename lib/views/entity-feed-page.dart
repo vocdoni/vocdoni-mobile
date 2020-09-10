@@ -90,7 +90,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                       children: <Widget>[
                         const Icon(Icons.done, color: Colors.grey),
                         Container(width: 10.0),
-                        Text(getText(context, "Refresh completed"),
+                        Text(getText(context, "main.refreshCompleted"),
                             style: TextStyle(color: Colors.grey))
                       ]),
                   failed: Row(
@@ -98,7 +98,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                       children: <Widget>[
                         const Icon(Icons.close, color: Colors.grey),
                         Container(width: 10.0),
-                        Text(getText(context, "Could not refresh"),
+                        Text(getText(context, "main.couldNotRefresh"),
                             style: TextStyle(color: Colors.grey))
                       ]),
                 ),
@@ -120,35 +120,35 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
 
   Widget buildEmptyEntity() {
     return Scaffold(
-        appBar: TopNavigation(title: getText(context, "News feed")),
+        appBar: TopNavigation(title: getText(context, "main.newsFeed")),
         body: Center(
-          child: Text(getText(context, "(No entity)")),
+          child: Text(getText(context, "main.noEntity")),
         ));
   }
 
   Widget buildEmptyPosts() {
     return Scaffold(
-        appBar: TopNavigation(title: getText(context, "News feed")),
+        appBar: TopNavigation(title: getText(context, "main.newsFeed")),
         body: Center(
-          child: Text(getText(context, "(No posts)")),
+          child: Text(getText(context, "main.noPosts")),
         ));
   }
 
   Widget buildLoading() {
     return Scaffold(
-        appBar: TopNavigation(title: getText(context, "News feed")),
+        appBar: TopNavigation(title: getText(context, "main.newsFeed")),
         body: Center(
           child: SizedBox(
               height: 140.0,
-              child: CardLoading(getText(context, "Loading posts..."))),
+              child: CardLoading(getText(context, "main.loadingPosts"))),
         ));
   }
 
   Widget buildError(String message) {
     return Scaffold(
-        appBar: TopNavigation(title: getText(context, "News feed")),
+        appBar: TopNavigation(title: getText(context, "main.newsFeed")),
         body: Center(
-          child: Text(getText(context, "Error") + ": " + message),
+          child: Text(getText(context, "main.error") + ": " + message),
         ));
   }
 }

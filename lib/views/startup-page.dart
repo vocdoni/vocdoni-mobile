@@ -92,7 +92,7 @@ class _StartupPageState extends State<StartupPage> {
 
       setState(() {
         loading = false;
-        error = getText(context, "Could not connect to the network");
+        error = getText(context, "main.couldNotConnectToTheNetwork");
       });
 
       // RETRY ITSELF
@@ -112,7 +112,7 @@ class _StartupPageState extends State<StartupPage> {
         ).withBottomPadding(10),
         Text("Vocdoni").withBottomPadding(60),
         Text(
-          error ?? getText(context, "Could not connect"),
+          error ?? getText(context, "main.couldNotConnect"),
           style: new TextStyle(fontSize: 18, color: Color(0xff888888)),
           textAlign: TextAlign.center,
         ).withBottomPadding(10),
@@ -121,7 +121,7 @@ class _StartupPageState extends State<StartupPage> {
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 child: Text(
-                  getText(context, "Tap to retry"),
+                  getText(context, "main.tapToRetry"),
                   style: TextStyle(fontSize: 16, color: Colors.black45),
                   textAlign: TextAlign.center,
                 )))

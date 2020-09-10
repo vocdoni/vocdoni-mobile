@@ -54,18 +54,18 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                   Clipboard.setData(ClipboardData(
                       text: currentAccount.identity.value.identityId));
                   showMessage(
-                      getText(context, "Identity ID copied on the clipboard"),
+                      getText(context, "main.identityIdCopiedOnTheClipboard"),
                       context: ctx,
                       purpose: Purpose.GOOD);
                 }),
-            Section(text: getText(context, "Your identity")),
+            Section(text: getText(context, "main.yourIdentity")),
             ListItem(
-              mainText: getText(context, "Back up my identity"),
+              mainText: getText(context, "main.backUpMyIdentity"),
               onTap: () => showIdentityBackup(ctx),
               icon: FeatherIcons.archive,
             ),
             ListItem(
-                mainText: getText(context, "Help"),
+                mainText: getText(context, "main.help"),
                 icon: FeatherIcons.lifeBuoy,
                 onTap: () {
                   canLaunch(HELP_URL).then((ok) {
@@ -73,7 +73,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                   });
                 }),
             ListItem(
-                mainText: getText(context, "Log out"),
+                mainText: getText(context, "main.logOut"),
                 icon: FeatherIcons.logOut,
                 onTap: () {
                   onLogOut(ctx);
@@ -81,7 +81,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
             kReleaseMode // TODO: DEV BUTTON OUT
                 ? Container()
                 : ListItem(
-                    mainText: getText(context, "Development testing"),
+                    mainText: getText(context, "main.developmentTesting"),
                     icon: FeatherIcons.info,
                     onTap: () {
                       onDevelopmentTesting(ctx);
@@ -94,7 +94,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   Widget buildEmpty(BuildContext ctx) {
     return Center(
-      child: Text(getText(context, "(No identity)")),
+      child: Text(getText(context, "main.noIdentity")),
     );
   }
 
@@ -112,7 +112,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
     if (patternEncryptionKey == null)
       return;
     else if (patternEncryptionKey is InvalidPatternError) {
-      showMessage(getText(context, "The pattern you entered is not valid"),
+      showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }

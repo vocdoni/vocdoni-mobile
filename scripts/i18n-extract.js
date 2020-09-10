@@ -22,29 +22,23 @@ function main() {
     languages.forEach(lang => {
         const targetFile = `${__dirname}/../assets/i18n/${lang}.json`
 
-        // Write the default file
-        if (lang == defaultLanguage) {
-            fs.writeFileSync(targetFile, JSON.stringify(stringsTemplate, null, 2))
+        var existingStrings = {}
+        if (fs.existsSync(targetFile)) {
+            existingStrings = JSON.parse(fs.readFileSync(targetFile).toString())
         }
-        else {
-            var existingStrings = {}
-            if (fs.existsSync(targetFile)) {
-                existingStrings = JSON.parse(fs.readFileSync(targetFile).toString())
-            }
 
-            // merge
-            const newStrings = {}
-            for (var k in stringsTemplate) {
-                if (typeof existingStrings[k] == "string") {
-                    if (existingStrings[k].trim().length > 0) {
-                        newStrings[k] = existingStrings[k]  // keep current
-                        continue
-                    }
+        // merge
+        const newStrings = {}
+        for (var k in stringsTemplate) {
+            if (typeof existingStrings[k] == "string") {
+                if (existingStrings[k].trim().length > 0) {
+                    newStrings[k] = existingStrings[k]  // keep current
+                    continue
                 }
-                newStrings[k] = ""
             }
-            fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2))
+            newStrings[k] = ""
         }
+        fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2))
     })
 
     console.log("Extracted", Object.keys(stringsTemplate).length, "strings for", languages)

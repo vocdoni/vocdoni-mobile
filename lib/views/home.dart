@@ -49,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       linkChangeStream = getUriLinksStream()
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
     } catch (err) {
-      showAlert(getText(context, "The link you followed appears to be invalid"),
-          title: getText(context, "Error"), context: context);
+      showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
+          title: getText(context, "main.error"), context: context);
     }
 
     // APP EVENT LISTENER
@@ -82,8 +82,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   handleIncomingLinkError(err) {
     devPrint(err);
     final ctx = scaffoldBodyContext ?? context;
-    showAlert(getText(ctx, "There was a problem handling the link"),
-        title: getText(scaffoldBodyContext ?? context, "Error"),
+    showAlert(getText(ctx, "main.thereWasAProblemHandlingTheLink"),
+        title: getText(scaffoldBodyContext ?? context, "main.error"),
         context: scaffoldBodyContext ?? context);
   }
 
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       showMessage(
           getText(context,
-              "The QR code does not contain a valid link or the details cannot be retrieved"),
+              "main.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
           context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }
@@ -263,11 +263,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String getTabName(int idx) {
     if (idx == 0)
-      return getText(context, "Home");
+      return getText(context, "main.home");
     else if (idx == 1)
-      return getText(context, "Your entities");
+      return getText(context, "main.yourEntities");
     else if (idx == 2)
-      return getText(context, "Your identity");
+      return getText(context, "main.yourIdentity");
     else
       return "";
   }

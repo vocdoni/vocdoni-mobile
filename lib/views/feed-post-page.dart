@@ -59,7 +59,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
         avatarUrl: entity.metadata.value.media.avatar,
         avatarText: entity.metadata.value.name[globalAppState.currentLanguage],
         avatarHexSource: post.id,
-        appBarTitle: getText(context, "Post"),
+        appBarTitle: getText(context, "main.post"),
         //actionsBuilder: actionsBuilder,
         builder: Builder(
           builder: (ctx) {
@@ -122,7 +122,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
   Widget buildNoPost(BuildContext ctx) {
     // TODO: UI
     return Center(
-      child: Text(getText(context, "(No posts)")),
+      child: Text(getText(context, "main.noPosts")),
     );
   }
 

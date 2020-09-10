@@ -44,7 +44,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         child: Scaffold(
           appBar: widget.cangoBack
               ? TopNavigation(
-                  title: getText(context, "Identity"),
+                  title: getText(context, "main.identity"),
                 )
               : null,
           body: Builder(builder: (BuildContext context) {
@@ -67,7 +67,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
-            child: Text(getText(context, "Welcome!"),
+            child: Text(getText(context, "main.welcome"),
                 style: new TextStyle(fontSize: 30, color: Color(0xff888888)))),
         SizedBox(height: 50),
         Center(
@@ -78,7 +78,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                   hintStyle: TextStyle(color: Colors.black38),
-                  hintText: getText(context, "What's your name?")),
+                  hintText: getText(context, "main.whatsYourName")),
               onSubmitted: (alias) => createIdentity(context, alias)),
         ),
         SizedBox(height: 50),
@@ -96,12 +96,12 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
               // maxLines: 2,
               text: TextSpan(text: '', children: [
                 TextSpan(
-                    text: getText(context, "I accept") + " ",
+                    text: getText(context, "main.iAccept") + " ",
                     style: TextStyle(
                         color:
                             termsAccepted ? Colors.black54 : Colors.black38)),
                 TextSpan(
-                  text: getText(context, "the Privacy Policy"),
+                  text: getText(context, "main.thePrivacyPolicy"),
                   style: TextStyle(
                       color: termsAccepted ? Colors.black54 : Colors.black38,
                       decoration: TextDecoration.underline),
@@ -110,12 +110,12 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
                         () => launch("https://vocdoni.io/privacy-policy/)"),
                 ),
                 TextSpan(
-                    text: " " + getText(context, "and") + " ",
+                    text: " " + getText(context, "main.and") + " ",
                     style: TextStyle(
                         color:
                             termsAccepted ? Colors.black54 : Colors.black38)),
                 TextSpan(
-                  text: getText(context, "the Terms of Service"),
+                  text: getText(context, "main.theTermsOfService"),
                   style: TextStyle(
                       color: termsAccepted ? Colors.black54 : Colors.black38,
                       decoration: TextDecoration.underline),
@@ -131,7 +131,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
         BaseButton(
           maxWidth: double.infinity,
           purpose: Purpose.HIGHLIGHT,
-          text: getText(context, "Continue"),
+          text: getText(context, "main.continue"),
           isDisabled: !termsAccepted,
           onTap: () => createIdentity(context, nameTextFieldController.text),
         ),
@@ -140,7 +140,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
           style: BaseButtonStyle.OUTLINE,
           maxWidth: double.infinity,
           purpose: Purpose.GUIDE,
-          text: getText(context, "I have an account"),
+          text: getText(context, "main.iHaveAnAccount"),
           onTap: () => showRestoreIdentity(context),
         ).withTopPadding(10).when(widget.showRestoreIdentityAction),
       ],
@@ -152,7 +152,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(getText(context, "Generating identity..."),
+        Text(getText(context, "main.generatingIdentity"),
             style: TextStyle(fontSize: 18)),
         SizedBox(height: 20),
         LoadingSpinner(),
@@ -167,11 +167,11 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     if (!(alias is String) || alias == "")
       return;
     else if (alias.length < 2) {
-      showMessage(getText(context, "The name is too short"),
+      showMessage(getText(context, "main.theNameIsTooShort"),
           context: context, purpose: Purpose.WARNING);
       return;
     } else if (RegExp(r"[<>/\\|%=^*`´]").hasMatch(alias)) {
-      showMessage(getText(context, "The name contains invalid symbols"),
+      showMessage(getText(context, "main.theNameContainsInvalidSymbols"),
           context: context, purpose: Purpose.WARNING);
       return;
     }
@@ -182,7 +182,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     });
     if (repeated) {
       showMessage(
-          getText(context, "You already have an account with this name"),
+          getText(context, "main.youAlreadyHaveAnAccountWithThisName"),
           context: context,
           purpose: Purpose.WARNING);
       return;
@@ -235,13 +235,13 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       if (err.toString() ==
           "Exception: An account with this name already exists") {
-        text = getText(context, "An account with this name already exists");
+        text = getText(context, "main.anAccountWithThisNameAlreadyExists");
       } else {
         text =
-            getText(context, "An error occurred while generating the identity");
+            getText(context, "main.anErrorOccurredWhileGeneratingTheIdentity");
       }
 
-      showAlert(text, title: getText(context, "Error"), context: context);
+      showAlert(text, title: getText(context, "main.error"), context: context);
     }
   }
 

@@ -78,8 +78,8 @@
 //                     Navigator.of(context).pop();
 
 //                     await showAlert(
-//                         getText(context, "The page cannot be loaded"),
-//                         title: getText(context, "Error"),
+//                         getText(context, "main.thePageCannotBeLoaded"),
+//                         title: getText(context, "main.error"),
 //                         context: context);
 //                   }
 //                 },
@@ -165,7 +165,7 @@
 //           hasPublicReadPermission = await showPrompt(
 //               getText(context,
 //                   "The current service is requesting access to your public information.\nDo you want to continue?"),
-//               title: getText(context, "Permission"),
+//               title: getText(context, "main.permission"),
 //               context: context);
 //         }
 

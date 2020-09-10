@@ -25,19 +25,19 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: getText(context, "Sign"),
+        title: getText(context, "main.sign"),
       ),
       body: Center(
         child: Column(children: <Widget>[
-          Text(getText(context, "Do you want to sign:") + " " + args.payload),
+          Text(getText(context, "main.doYouWantToSign") + " " + args.payload),
           SizedBox(
             height: 20,
           ),
-          Text(getText(context, "To:") + " " + args.returnUri.toString()),
+          Text(getText(context, "main.to") + " " + args.returnUri.toString()),
           SizedBox(
             height: 20,
           ),
-          Text(getText(context, "Using:") +
+          Text(getText(context, "main.using") +
               " " +
               globalAppState.currentAccount.identity.value.alias +
               "?")
@@ -50,10 +50,10 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: getText(context, "Sign"),
+        title: getText(context, "main.sign"),
       ),
       body: Center(
-        child: Text(getText(context, "(No data)")),
+        child: Text(getText(context, "main.noData")),
       ),
     );
   }
@@ -62,10 +62,10 @@ class SignModal extends StatelessWidget {
     return Scaffold(
       appBar: TopNavigation(
         showBackButton: true,
-        title: getText(context, "Sign"),
+        title: getText(context, "main.sign"),
       ),
       body: Center(
-        child: Text(getText(context, "(No data)")),
+        child: Text(getText(context, "main.noData")),
       ),
     );
   }

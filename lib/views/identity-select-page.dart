@@ -33,17 +33,17 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                     // use this context within Scaffold for Toast's to work
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Section(text: getText(context, "Select an identity")),
+                      Section(text: getText(context, "main.selectAnIdentity")),
                       buildExistingIdentities(context, globalAccountPool.value),
                       SizedBox(height: 50),
-                      Section(text: getText(context, "Add an identity")),
+                      Section(text: getText(context, "main.addAnIdentity")),
                       ListItem(
-                          mainText: getText(context, "Create a new identity"),
+                          mainText: getText(context, "main.createANewIdentity"),
                           icon: FeatherIcons.plusCircle,
                           onTap: () => createNew(context)),
                       ListItem(
                           mainText:
-                              getText(context, "Restore an existing identity"),
+                              getText(context, "main.restoreAnExistingIdentity"),
                           icon: FeatherIcons.rotateCw,
                           onTap: () => restorePreviousIdentity(context)),
                     ],
@@ -93,7 +93,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
     if (lockPattern == null)
       return;
     else if (lockPattern is InvalidPatternError) {
-      showMessage(getText(context, "The pattern you entered is not valid"),
+      showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }

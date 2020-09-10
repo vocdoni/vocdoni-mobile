@@ -71,20 +71,20 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Vocdoni", // getText(context, "Scan")
+        title: "Vocdoni", // getText(context, "main.scan")
         showBackButton: true,
         onBackButton: onCancel,
       ),
       body: Builder(builder: (_) {
         if (!(availableCameras is List) || availableCameras.length == 0)
           return _buildMessage(
-              context, getText(context, "No cameras are available"));
+              context, getText(context, "main.noCamerasAreAvailable"));
         else if (_controller == null || !_controller.value.isInitialized)
           return _buildMessage(
-              context, getText(context, "Please, allow access to the camera"));
+              context, getText(context, "main.pleaseAllowAccessToTheCamera"));
         else if (!hasScanPermissions)
           return _buildMessage(
-              context, getText(context, "Please, allow access to the camera"));
+              context, getText(context, "main.pleaseAllowAccessToTheCamera"));
         else if (!scanning) return _buildLoading(context);
 
         // FUTURE: Preserve aspect ratio
@@ -122,7 +122,7 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget _buildMessage(BuildContext context, String message) {
     return Container(
       child: Center(
-        child: Text(message ?? getText(context, "The camera is not available")),
+        child: Text(message ?? getText(context, "main.theCameraIsNotAvailable")),
       ),
     ).withBottomPadding(100);
   }
@@ -132,7 +132,7 @@ class _QrScanModalState extends State<QrScanModal> {
         child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text(getText(context, "Processing the code...")),
+        Text(getText(context, "main.processingTheCode")),
         LoadingSpinner().withLeftPadding(30),
       ],
     )).withBottomPadding(100);

@@ -61,7 +61,7 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
       this.setValue(entityModelList);
     } catch (err) {
       devPrint(err);
-      this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
+      this.setError("Cannot read the persisted data", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
   }
@@ -514,14 +514,19 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       devPrint(
           "- [Entity actions] Loading [ERROR: $err] [${reference.entityId}]");
 
-      this.visibleActions.setError("Could not fetch the entity details");
+      // NOTE: leave the comment to force parsing the i18n string
+      // The Widget painting this string will need to use getText() with it
+      // getText(ctx, "error.couldNotFetchTheEntityDetails")
+      this.visibleActions.setError("error.couldNotFetchTheEntityDetails");
 
       // The request fails entirely. Keep values if already present
       if (this.registerAction.isLoading) {
-        this.registerAction.setError("Could not load the register status");
+        // getText(ctx, "error.couldNotFetchTheEntityDetails")
+        this.registerAction.setError("error.couldNotLoadTheRegistrationEtatus");
       }
       if (this.isRegistered.isLoading) {
-        this.isRegistered.setError("Could not load the register status");
+        // getText(ctx, "error.couldNotFetchTheEntityDetails")
+        this.isRegistered.setError("error.couldNotLoadTheRegistrationEtatus");
       }
       throw err;
     }

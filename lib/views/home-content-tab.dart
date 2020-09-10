@@ -71,7 +71,7 @@ class _HomeContentTabState extends State<HomeContentTab> {
                 children: <Widget>[
                   const Icon(Icons.done, color: Colors.grey),
                   Container(width: 10.0),
-                  Text(getText(context, "Refresh completed"),
+                  Text(getText(context, "main.refreshCompleted"),
                       style: TextStyle(color: Colors.grey))
                 ]),
             failed: Row(
@@ -79,7 +79,7 @@ class _HomeContentTabState extends State<HomeContentTab> {
                 children: <Widget>[
                   const Icon(Icons.close, color: Colors.grey),
                   Container(width: 10.0),
-                  Text(getText(context, "Could not refresh"),
+                  Text(getText(context, "main.couldNotRefresh"),
                       style: TextStyle(color: Colors.grey))
                 ]),
           ),
@@ -97,7 +97,7 @@ class _HomeContentTabState extends State<HomeContentTab> {
   Widget buildNoEntries(BuildContext ctx) {
     return Center(
       child:
-          Text(getText(context, "Pretty lonley in here...") + "   ¯\\_(ツ)_/¯"),
+          Text(getText(context, "main.prettyLonleyInHere") + "   ¯\\_(ツ)_/¯"),
     );
   }
 
