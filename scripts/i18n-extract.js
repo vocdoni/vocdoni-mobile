@@ -5,11 +5,11 @@ const dqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"[^"\\]*(?:\\.
 const sqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*'[^'\\]*(?:\\.[^'\\]*)*'\)/gm
 const tqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"""[^"]*(?:(?:"?"?)[^"])*"""\)/gm
 
-const languages = ["en", "fr", "es", "ca"]
+const languages = ["en", "fr", "es", "ca", "eo", "eu", "nb", "zh"]
 const defaultLanguage = languages[0]
 
 function main() {
-    var files = glob.sync(__dirname + "/../lib/**/*.dart")
+    const files = glob.sync(__dirname + "/../lib/**/*.dart")
     const strings = files.reduce((prev, cur) => prev.concat(processFile(cur)), [])
 
     const uniqueStrings = sortUnique(strings)
