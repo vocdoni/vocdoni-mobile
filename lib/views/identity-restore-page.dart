@@ -52,7 +52,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
     else if (mnemonic.length == 0)
       err = getText(context, "main.enterTheMnemonicWordsToRecover");
     else if (!RegExp(r"^([a-zA-Z]+ )+[a-zA-Z]+$").hasMatch(mnemonic))
-      err = getText(context, "main.theMnemonicWordsYouEnteredIsNotValid");
+      err = getText(context, "main.theMnemonicWordsYouEnteredAreNotValid");
     if (err is String) {
       showMessage(err, context: context, purpose: Purpose.WARNING);
       return;

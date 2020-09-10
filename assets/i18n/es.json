@@ -140,7 +140,7 @@
   "main.theCameraIsNotAvailable": "La cámara no está disponible",
   "main.theCensusCouldNotBeChecked": "No se puede consultar el censo",
   "main.theLinkYouFollowedAppearsToBeInvalid": "Parece que el enlace que no es válido",
-  "main.theMnemonicWordsYouEnteredIsNotValid": "",
+  "main.theMnemonicWordsYouEnteredAreNotValid": "",
   "main.theNameContainsInvalidSymbols": "El nombre contiene símbolos inválidos",
   "main.theNameIsTooShort": "Demasiado corto",
   "main.theNumberOfWordsYouEnteredIsNotValid": "El número de palabras no es válido",

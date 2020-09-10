@@ -140,7 +140,7 @@
   "main.theCameraIsNotAvailable": "The camera is not available",
   "main.theCensusCouldNotBeChecked": "The census could not be checked",
   "main.theLinkYouFollowedAppearsToBeInvalid": "The link you followed appears to be invalid",
-  "main.theMnemonicWordsYouEnteredIsNotValid": "The mnemonic words you entered is not valid",
+  "main.theMnemonicWordsYouEnteredAreNotValid": "The mnemonic words you entered are not valid",
   "main.theNameContainsInvalidSymbols": "The name contains invalid symbols",
   "main.theNameIsTooShort": "The name is too short",
   "main.theNumberOfWordsYouEnteredIsNotValid": "The number of words you entered is not valid",

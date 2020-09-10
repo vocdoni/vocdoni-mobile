@@ -140,7 +140,7 @@
   "main.theCameraIsNotAvailable": "La càmera no està disponible",
   "main.theCensusCouldNotBeChecked": "No s'ha pogut consultar el cens",
   "main.theLinkYouFollowedAppearsToBeInvalid": "Sembla que l'enllaç que has seguit no és vàlid",
-  "main.theMnemonicWordsYouEnteredIsNotValid": "",
+  "main.theMnemonicWordsYouEnteredAreNotValid": "",
   "main.theNameContainsInvalidSymbols": "El nom conté símbols invàlids",
   "main.theNameIsTooShort": "El nom és massa curt",
   "main.theNumberOfWordsYouEnteredIsNotValid": "El nombre de paraules que has introduït no és vàlid",

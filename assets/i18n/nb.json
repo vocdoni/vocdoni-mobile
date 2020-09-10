@@ -140,7 +140,7 @@
   "main.theCameraIsNotAvailable": "Kameraet er ikke tilgjengelig",
   "main.theCensusCouldNotBeChecked": "",
   "main.theLinkYouFollowedAppearsToBeInvalid": "Lenken du har fulgt ser ikke ut til å være gyldig",
-  "main.theMnemonicWordsYouEnteredIsNotValid": "",
+  "main.theMnemonicWordsYouEnteredAreNotValid": "",
   "main.theNameContainsInvalidSymbols": "Navnet inneholder ugyldige symboler",
   "main.theNameIsTooShort": "Navnet er for kort",
   "main.theNumberOfWordsYouEnteredIsNotValid": "Antall ord du har skrevet inn er ugyldig",
