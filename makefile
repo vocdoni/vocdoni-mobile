@@ -29,10 +29,23 @@ init:
 # # RECIPES
 # ##############################################################################
 
-## lang-extract: Parse the string literals and extract them into lib/lang
-.PHONY: lang-extract
-lang-extract: scripts/node_modules
-	node scripts/i18n-extract.js
+## lang-parse: Extract the string keys into assets/i18n for translation
+.PHONY: lang-parse
+lang-parse: scripts/node_modules
+	node scripts/i18n-parse.js
+
+## lang-import: Import the translated strings from Weblate into assets/i18n
+.PHONY: lang-import
+lang-import: 
+	DIR=$$(mktemp -d) && \
+		cd $$DIR && \
+		curl "https://hosted.weblate.org/download/vocdoni/mobile-client/?format=zip" > strings.zip && \
+		unzip strings.zip && \
+		cd - && \
+		mv $$DIR/vocdoni/mobile-client/assets/i18n/*.json $$PWD/assets/i18n && \
+		rm -Rf $$DIR
+	for file in $$(ls $$PWD/assets/i18n/*.json) ; do node -e "require(\"fs\").writeFileSync(process.argv[1], JSON.stringify(require(process.argv[1]), null, 2) + \"\n\")" $$file ; done
+
 
 scripts/node_modules: scripts/package.json
 	npm install
@@ -61,24 +74,6 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 # ##############################################################################
 # # HELPER TASKS
 # ##############################################################################
-
-## launch-ios-org: Launch a URI pointing to an Entity on iOS
-launch-ios-org:
-	/usr/bin/xcrun simctl openurl booted "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"
-
-## launch-android-org: Launch a URI pointing to an Entity on Android
-launch-android-org:
-	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"'
-
-# ## launch-ios-sign: Launch a URI requesting to sign a payload on iOS
-# launch-ios-sign:
-# 	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"
-
-# ## launch-android-sign: Launch a URI requesting to sign a payload on Android
-# launch-android-sign:
-# 	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"'
-
-## :
 
 ## run: Run the app on the active (Android) device or simulator  [DEV]
 .PHONY: run
@@ -127,6 +122,24 @@ ios:
 	rm -Rf ios/Flutter/App.framework
 	open ios/Runner.xcworkspace/
 	#flutter build ios -t lib/main-production.dart
+
+## :
+
+## launch-ios-org: Launch a URI pointing to an Entity on iOS
+launch-ios-org:
+	/usr/bin/xcrun simctl openurl booted "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"
+
+## launch-android-org: Launch a URI pointing to an Entity on Android
+launch-android-org:
+	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://dev.vocdoni.link/entities/0x180dd5765d9f7ecef810b565a2e5bd14a3ccd536c442b3de74867df552855e85"'
+
+# ## launch-ios-sign: Launch a URI requesting to sign a payload on iOS
+# launch-ios-sign:
+# 	/usr/bin/xcrun simctl openurl booted "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"
+
+# ## launch-android-sign: Launch a URI requesting to sign a payload on Android
+# launch-android-sign:
+# 	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"'
 
 ## :
 ## clean: Clean build artifacts
