@@ -173,7 +173,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(Section(text: getText(context, "Details")));
     children.add(summary.Summary(
       text: widget.entityModel.metadata.value
-          .description[globalAppState.currentLanguage],
+              .description[globalAppState.currentLanguage] +
+          getText(context, "Unique identifier:") +
+          " " +
+          widget.entityModel.reference.entityId,
       maxLines: 5,
     ));
     children.add(Section(text: getText(context, "Manage")));
@@ -190,7 +193,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       heroTag: widget.entityModel.reference.entityId + title,
       mainText: title,
       mainTextMultiline: 2,
-      secondaryText: widget.entityModel.reference.entityId,
+      // secondaryText: widget.entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,
@@ -200,7 +203,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   buildTitleWithoutMetadata(BuildContext context) {
     return ListItem(
       mainText: "...",
-      secondaryText: widget.entityModel.reference.entityId,
+      // secondaryText: widget.entityModel.reference.entityId,
       isTitle: true,
       rightIcon: null,
       isBold: true,

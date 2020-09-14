@@ -56,6 +56,8 @@ class _FeedPostPageState extends State<FeedPostPage> {
     return ScaffoldWithImage(
         headerImageUrl: post.image,
         headerTag: makeElementTag(entity.reference.entityId, post.id, index),
+        avatarUrl: entity.metadata.value.media.avatar,
+        avatarText: entity.metadata.value.name[globalAppState.currentLanguage],
         avatarHexSource: post.id,
         appBarTitle: getText(context, "Post"),
         //actionsBuilder: actionsBuilder,

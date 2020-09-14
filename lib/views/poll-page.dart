@@ -165,6 +165,9 @@ class _PollPageState extends State<PollPage> {
               ? null
               : makeElementTag(
                   entity.reference.entityId, process.processId, index),
+          avatarUrl: entity.metadata.value.media.avatar,
+          avatarText:
+              entity.metadata.value.name[globalAppState.currentLanguage],
           avatarHexSource: process.processId,
           appBarTitle: getText(context, "Vote"),
           actionsBuilder: (context) => [
@@ -360,22 +363,25 @@ class _PollPageState extends State<PollPage> {
     return -1; // ALL GOOD
   }
 
+  bool canNotVote() {
+    final nextPendingChoice = getNextPendingChoice();
+    final cannotVote = nextPendingChoice >= 0 ||
+        !process.isInCensus.hasValue ||
+        !process.isInCensus.value ||
+        process.hasVoted.value == true ||
+        !process.startDate.hasValue ||
+        !process.endDate.hasValue ||
+        process.startDate.value.isAfter(DateTime.now()) ||
+        process.endDate.value.isBefore(DateTime.now());
+    return cannotVote;
+  }
+
   buildSubmitVoteButton(BuildContext ctx) {
     // rebuild when isInCensus or hasVoted change
     return EventualBuilder(
       notifiers: [process.hasVoted, process.isInCensus],
       builder: (ctx, _, __) {
-        final nextPendingChoice = getNextPendingChoice();
-        final cannotVote = nextPendingChoice >= 0 ||
-            !process.isInCensus.hasValue ||
-            !process.isInCensus.value ||
-            process.hasVoted.value == true ||
-            !process.startDate.hasValue ||
-            !process.endDate.hasValue ||
-            process.startDate.value.isAfter(DateTime.now()) ||
-            process.endDate.value.isBefore(DateTime.now());
-
-        if (cannotVote) {
+        if (canNotVote()) {
           return Container();
         }
 
@@ -383,8 +389,9 @@ class _PollPageState extends State<PollPage> {
           padding: EdgeInsets.all(paddingPage),
           child: BaseButton(
               text: getText(context, "Submit"),
-              purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
-              isDisabled: cannotVote,
+              purpose: Purpose.HIGHLIGHT,
+              // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
+              // isDisabled: cannotVote,
               onTap: () => onSubmit(ctx, process.metadata)),
         );
       },
