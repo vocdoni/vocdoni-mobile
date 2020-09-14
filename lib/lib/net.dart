@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dvote/dvote.dart';
-import 'package:dvote_common/flavors/config.dart';
-// import 'package:dvote_common/flavors/config.dart';
+import 'package:vocdoni/app-config.dart';
 // import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/util.dart';
 
@@ -32,9 +31,8 @@ class AppNetworking {
     }
 
     // Fetch gateways
-    _discoveryFuture = GatewayPool.discover(
-            FlavorConfig.instance.constants.networkId,
-            bootnodeUri: FlavorConfig.instance.constants.gatewayBootNodesUrl)
+    _discoveryFuture = GatewayPool.discover(AppConfig.NETWORK_ID,
+            bootnodeUri: AppConfig.GATEWAY_BOOTNODES_URL)
         .then((gwPool) {
       if (gwPool is! GatewayPool)
         throw Exception("Could not initialize a pool of gateways");
@@ -70,14 +68,14 @@ class AppNetworking {
     }
 
     _discoveryFuture = discoverGatewaysFromBootnodeInfo(gwInfo,
-            networkId: FlavorConfig.instance.constants.networkId)
+            networkId: AppConfig.NETWORK_ID)
         .then((gateways) {
       if (gateways is! List || gateways.length == 0)
         throw Exception("There are no active gateways");
 
       // OK
-      _gwPool = GatewayPool(gateways, FlavorConfig.instance.constants.networkId,
-          bootnodeUri: FlavorConfig.instance.constants.gatewayBootNodesUrl);
+      _gwPool = GatewayPool(gateways, AppConfig.NETWORK_ID,
+          bootnodeUri: AppConfig.GATEWAY_BOOTNODES_URL);
 
       devPrint("[App] GW Pool ready");
       devPrint("- DVote Gateway: ${pool.current.dvote.uri}");

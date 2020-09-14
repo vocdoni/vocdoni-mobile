@@ -1,6 +1,6 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote_common/flavors/config.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -207,6 +207,6 @@ Future handleValidationLink(List<String> paramSegments,
 // /////////////////////////////////////////////////////////////////////////////
 
 String generateEntityLink(String entityId) {
-  final domain = FlavorConfig.instance.constants.linkingDomain;
+  final domain = AppConfig.LINKING_DOMAIN;
   return "https://$domain/entities/$entityId";
 }
