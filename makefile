@@ -122,6 +122,7 @@ apk:
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
 		--dart-define=NETWORK_ID=xdai \
+		--dart-define=LINKING_DOMAIN=vocdoni.link \
 		--flavor production \
 		--target-platform android-arm,android-arm64,android-x64 \
 		--split-per-abi
