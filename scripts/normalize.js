@@ -1,5 +1,6 @@
 const glob = require("glob")
 const fs = require("fs")
+// const { languages, validPrefixes } = require("./common")
 
 function main() {
     const srcFiles = glob.sync(__dirname + "/../lib/**/*.dart")

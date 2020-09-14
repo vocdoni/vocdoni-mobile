@@ -1,12 +1,10 @@
 const glob = require("glob")
 const fs = require("fs")
+const { languages, validPrefixes } = require("./common")
 
 const dqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"[^"\\]*(?:\\.[^"\\]*)*"\)/gm
 const sqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*'[^'\\]*(?:\\.[^'\\]*)*'\)/gm
 const tqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"""[^"]*(?:(?:"?"?)[^"])*"""\)/gm
-
-const languages = ["en", "fr", "es", "ca", "eo", "eu", "nb", "zh"]
-const defaultLanguage = languages[0]
 
 function main() {
     const files = glob.sync(__dirname + "/../lib/**/*.dart")
@@ -38,7 +36,7 @@ function main() {
             }
             newStrings[k] = ""
         }
-        fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2))
+        fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2) + "\n")
     })
 
     console.log("Extracted", Object.keys(stringsTemplate).length, "strings for", languages)
@@ -52,7 +50,10 @@ function processFile(path) {
             .replace(/\\n/g, "\n")
             .replace(/\\r/g, "\r")
             .replace(/\\t/g, "\t")
-        return txt.slice(0, txt.length - 2)
+
+        txt = txt.slice(0, txt.length - 2)
+        checkValidStringKey(txt)
+        return txt
     })
     var sqMatches = text.match(sqRegExp) || []
     sqMatches = sqMatches.map(txt => {
@@ -61,7 +62,10 @@ function processFile(path) {
             .replace(/\\r/g, "\r")
             .replace(/\\'/g, "'")
             .replace(/\\t/g, "\t")
-        return txt.slice(0, txt.length - 2)
+
+        txt = txt.slice(0, txt.length - 2)
+        checkValidStringKey(txt)
+        return txt
     })
     var tqMatches = text.match(tqRegExp) || []
     tqMatches = tqMatches.map(txt => {
@@ -69,7 +73,10 @@ function processFile(path) {
             .replace(/\\n/g, "\n")
             .replace(/\\r/g, "\r")
             .replace(/\\t/g, "\t")
-        return txt.slice(0, txt.length - 4)
+
+        txt = txt.slice(0, txt.length - 4)
+        checkValidStringKey(txt)
+        return txt
     })
     return dqMatches.concat(sqMatches).concat(tqMatches)
 }
@@ -86,5 +93,12 @@ function sortUnique(arr) {
     return ret;
 }
 
+function checkValidStringKey(key) {
+    if (!validPrefixes.some(prefix => key.startsWith(prefix + "."))) {
+        console.warn(`Warning: "${key}" does not have a valid prefix`)
+    } else if (key.indexOf(" ") >= 0) {
+        console.warn(`Warning: "${key}" is not a valid string key (unexpected spaces)`)
+    }
+}
 
 main()
