@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
@@ -17,6 +16,7 @@ import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
+// import 'package:vocdoni/lib/extensions.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -148,19 +148,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             title: getTabName(selectedTab),
             showBackButton: false,
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-          floatingActionButton: selectedTab == 1
-              ? Builder(
-                  // Toast context descending from Scaffold
-                  builder: (floatingBtnContext) => FloatingActionButton(
-                      onPressed: () => onScanQrCode(floatingBtnContext),
-                      backgroundColor: colorDescription,
-                      child: Icon(
-                        FeatherIcons.plus,
-                      ),
-                      elevation: 5.0))
-              : null,
+          // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          // floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+          floatingActionButton: selectedTab == 1 ? buildFab(context) : null,
           body: Builder(builder: (ctx) {
             // Store the build context from the scaffold, so that deep links can show
             // snackbars on top of this scaffold
@@ -175,6 +165,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  buildFab(BuildContext context) {
+    // Force the toast context to descend from Scaffold and not from the widget
+    return Builder(builder: (floatingBtnContext) {
+      // final entitiesCount =
+      //     globalAppState.currentAccount?.entities?.value?.length ?? 0;
+
+      // if (entitiesCount == 0) {
+      //   return FloatingActionButton.extended(
+      //       onPressed: () => onScanQrCode(floatingBtnContext),
+      //       backgroundColor: colorDescription,
+      //       label: Row(children: [
+      //         Text(getText(context, "Scan QR code")),
+      //         Icon(Icons.camera_alt).withLeftPadding(15)
+      //       ]));
+      // }
+
+      return FloatingActionButton(
+        onPressed: () => onScanQrCode(floatingBtnContext),
+        backgroundColor: colorDescription,
+        child: Icon(Icons.camera_alt),
+        elevation: 5.0,
+        tooltip: getText(context, "Scan a QR code"),
+      );
+    });
   }
 
   buildBody(BuildContext ctx) {
