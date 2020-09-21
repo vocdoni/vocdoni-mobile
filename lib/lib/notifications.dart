@@ -1,10 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/globals.dart';
 
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
+
+  static Map<String, dynamic> _unhandledMessage;
+  static get unhandledMessage => _unhandledMessage;
+  static get hasUnhandledMessage => _unhandledMessage != null;
 
   static void init() {
     _firebaseMessaging = FirebaseMessaging();
@@ -25,21 +29,29 @@ class Notifications {
 
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
     log("[App] onMessage: $message");
-    // _showItemDialog(message);
 
-    // Globals.navigatorKey.currentState.pushNamed("/entities");
+    if (Globals.appState.currentAccount != null) {
+      // TODO: Show top banner
+    } else {
+      setUnhandled(message);
+    }
   }
 
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
     log("[App] onLaunch: $message");
-    // _navigateToItemDetail(message);
 
-    // Globals.navigatorKey.currentState.pushNamed("/entities");
+    setUnhandled(message);
   }
 
   static Future<dynamic> onResume(Map<String, dynamic> message) async {
     log("[App] onResume: $message");
-    // _navigateToItemDetail(message);
+
+    if (Globals.appState.currentAccount != null) {
+      // TODO: Detect ans show the view
+      // Globals.navigatorKey.currentState.pushNamed("/...", arguments: ...);
+    } else {
+      setUnhandled(message);
+    }
   }
 
   // static Future<dynamic> onBackgroundMessageHandler(Map<String, dynamic> message) async {
@@ -57,6 +69,18 @@ class Notifications {
   //     log("[App] [onBackgroundMessageHandler] Notification: $notification");
   //   }
   // }
+
+  // UNHANDLED MESSAGES
+
+  static void setUnhandled(Map<String, dynamic> newMessage) {
+    _unhandledMessage = newMessage;
+  }
+
+  static void cleanUnhandled() {
+    _unhandledMessage = null;
+  }
+
+  // TOPICS
 
   static void subscribe(String topic) {
     if (_firebaseMessaging == null) init();
