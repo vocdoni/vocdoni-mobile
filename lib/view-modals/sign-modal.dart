@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 // import 'package:vocdoni/widgets/ScaffoldWithImage.dart';
 // import 'package:vocdoni/widgets/alerts.dart';
 // import 'package:vocdoni/widgets/toast.dart';
@@ -18,8 +18,8 @@ class SignModal extends StatelessWidget {
     final SignModalArguments args = ModalRoute.of(context).settings.arguments;
     if (args == null || !(args is SignModalArguments))
       return buildEmptyData(context);
-    else if (globalAppState.currentAccount == null ||
-        !globalAppState.currentAccount.identity.hasValue)
+    else if (Globals.appState.currentAccount == null ||
+        !Globals.appState.currentAccount.identity.hasValue)
       return buildEmptyAccount(context);
 
     return Scaffold(
@@ -39,7 +39,7 @@ class SignModal extends StatelessWidget {
           ),
           Text(getText(context, "main.using") +
               " " +
-              globalAppState.currentAccount.identity.value.alias +
+              Globals.appState.currentAccount.identity.value.alias +
               "?")
         ]),
       ),

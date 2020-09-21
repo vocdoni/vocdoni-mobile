@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -47,6 +48,8 @@ void main() async {
     ],
     onGenerateTitle: (BuildContext context) => "Vocdoni",
     home: StartupPage(),
+    navigatorKey: Globals
+        .navigatorKey, // Allows the logic to navigate without a build context
     onGenerateRoute: generateRoute,
     routes: {
       // NO ACCOUNT SELECTED YET

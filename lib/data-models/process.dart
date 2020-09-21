@@ -6,7 +6,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:convert/convert.dart';
 // import 'dart:convert';
 import "dart:developer";
@@ -35,7 +35,7 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
 
     try {
       this.setToLoading();
-      final processList = globalProcessesPersistence.get();
+      final processList = Globals.processesPersistence.get();
       final processModelList = processList
           .where((processMeta) =>
               processMeta.meta[META_PROCESS_ID] is String &&
@@ -87,7 +87,7 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
           })
           .cast<ProcessMetadata>()
           .toList();
-      await globalProcessesPersistence.writeAll(processList);
+      await Globals.processesPersistence.writeAll(processList);
     } catch (err) {
       log(err);
       throw PersistError("Cannot store the current state");
@@ -97,14 +97,14 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
   @override
   Future<void> refresh({bool force = false}) async {
     if (!hasValue ||
-        globalAppState.currentAccount == null ||
-        !globalAppState.currentAccount.entities.hasValue) return;
+        Globals.appState.currentAccount == null ||
+        !Globals.appState.currentAccount.entities.hasValue) return;
 
     log("Refreshing related user's processes");
 
     try {
       // Get a filtered list of the Entities of the current user
-      final entityIds = globalAppState.currentAccount.entities.value
+      final entityIds = Globals.appState.currentAccount.entities.value
           .map((entity) => entity.reference.entityId)
           .toList();
 
@@ -304,7 +304,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (this.isInCensus.value == true)
       return; // we should never be excluded from a census once within
 
-    final account = globalAppState.currentAccount;
+    final account = Globals.appState.currentAccount;
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
@@ -371,7 +371,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!this.hasVoted.hasError && this.hasVoted.value == true)
       return; // If you already voted, you can't un-vote
 
-    final account = globalAppState.currentAccount;
+    final account = Globals.appState.currentAccount;
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
@@ -513,9 +513,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
   /// Returns the entity model that corresponds to the current process. Returns null if not found.
   EntityModel get entity {
-    if (!globalEntityPool.hasValue) return null;
+    if (!Globals.entityPool.hasValue) return null;
 
-    return globalEntityPool.value.firstWhere((entity) {
+    return Globals.entityPool.value.firstWhere((entity) {
       if (!(entity is EntityModel) || !entity.metadata.hasValue) return false;
 
       return entity.reference.entityId == entityId;

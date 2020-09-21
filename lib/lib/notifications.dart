@@ -1,7 +1,7 @@
-// import 'dart:io';
 import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:vocdoni/lib/globals.dart';
 
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
@@ -26,11 +26,15 @@ class Notifications {
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
     log("[App] onMessage: $message");
     // _showItemDialog(message);
+
+    // Globals.navigatorKey.currentState.pushNamed("/entities");
   }
 
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
     log("[App] onLaunch: $message");
     // _navigateToItemDetail(message);
+
+    // Globals.navigatorKey.currentState.pushNamed("/entities");
   }
 
   static Future<dynamic> onResume(Map<String, dynamic> message) async {

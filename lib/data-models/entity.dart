@@ -12,7 +12,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 
 // POOL
 
@@ -40,7 +40,7 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
     try {
       this.setToLoading();
       // Identities
-      final entityMetadataList = globalEntitiesPersistence.get();
+      final entityMetadataList = Globals.entitiesPersistence.get();
       final entityModelList = entityMetadataList
           .map((entityMeta) {
             // READ INDIRECT MODELS
@@ -85,11 +85,11 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
           })
           .cast<EntityMetadata>()
           .toList();
-      await globalEntitiesPersistence.writeAll(entitiesMeta);
+      await Globals.entitiesPersistence.writeAll(entitiesMeta);
 
       // Cascade the write request for the process ad feed pools
-      await globalProcessPool.writeToStorage();
-      await globalFeedPool.writeToStorage();
+      await Globals.processPool.writeToStorage();
+      await Globals.feedPool.writeToStorage();
     } catch (err) {
       log(err);
       throw PersistError("Cannot store the current state");
@@ -99,12 +99,12 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
   @override
   Future<void> refresh({bool force = false, String derivedPrivateKey}) async {
     if (!hasValue ||
-        globalAppState.currentAccount == null ||
-        !globalAppState.currentAccount.entities.hasValue) return;
+        Globals.appState.currentAccount == null ||
+        !Globals.appState.currentAccount.entities.hasValue) return;
 
     try {
       // Get a filtered list of the Entities of the current user
-      final entityIds = globalAppState.currentAccount.entities.value
+      final entityIds = Globals.appState.currentAccount.entities.value
           .map((entity) => entity.reference.entityId)
           .toList();
 
@@ -154,12 +154,12 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
 
     // Remove the entity voting processes
     if (modelToRemove.processes.hasValue) {
-      await globalProcessPool.remove(modelToRemove.processes.value);
+      await Globals.processPool.remove(modelToRemove.processes.value);
     }
 
     // Remove the entity feed if not used elsewhere
     if (modelToRemove.feed.hasValue) {
-      await globalFeedPool.remove(modelToRemove.feed.value);
+      await Globals.feedPool.remove(modelToRemove.feed.value);
     }
   }
 }
@@ -291,10 +291,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       if (!oldEntityMetadata.hasValue)
         needsFeedReload = true;
       else if (oldEntityMetadata.hasValue) {
-        if (!(oldEntityMetadata.value.newsFeed[globalAppState.currentLanguage]
+        if (!(oldEntityMetadata.value.newsFeed[Globals.appState.currentLanguage]
                 is String) ||
-            oldEntityMetadata.value.newsFeed[globalAppState.currentLanguage] !=
-                freshEntityMetadata.newsFeed[globalAppState.currentLanguage])
+            oldEntityMetadata
+                    .value.newsFeed[Globals.appState.currentLanguage] !=
+                freshEntityMetadata.newsFeed[Globals.appState.currentLanguage])
           needsFeedReload = true;
       }
 
@@ -324,7 +325,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
     try {
       final newGlobalProcessPoolList = List<ProcessModel>();
-      newGlobalProcessPoolList.addAll(globalProcessPool.value.where((item) =>
+      newGlobalProcessPoolList.addAll(Globals.processPool.value.where((item) =>
           item.entityId != this.reference.entityId)); // clone without ours
 
       // make new processes list
@@ -361,8 +362,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       // global update
       newGlobalProcessPoolList.addAll(myFreshProcessModels); // merge
-      globalProcessPool.setValue(newGlobalProcessPoolList);
-      await globalProcessPool.writeToStorage();
+      Globals.processPool.setValue(newGlobalProcessPoolList);
+      await Globals.processPool.writeToStorage();
     } catch (err) {
       log("- [Entity procs] Loading [ERROR: $err] [${reference.entityId}]");
 
@@ -377,12 +378,12 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       return;
     else if (!force && this.feed.isLoading && this.feed.isLoadingFresh) return;
 
-    if (!(this.metadata.value.newsFeed[globalAppState.currentLanguage]
+    if (!(this.metadata.value.newsFeed[Globals.appState.currentLanguage]
         is String)) return;
 
     try {
       final currentContentUri =
-          this.metadata.value.newsFeed[globalAppState.currentLanguage];
+          this.metadata.value.newsFeed[Globals.appState.currentLanguage];
 
       if (this.feed.hasValue &&
           this.feed.value.meta[META_FEED_CONTENT_URI] == currentContentUri) {
@@ -403,22 +404,22 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       final Feed feed = parseFeed(result);
       feed.meta[META_FEED_CONTENT_URI] = currentContentUri;
       feed.meta[META_ENTITY_ID] = this.reference.entityId;
-      feed.meta[META_LANGUAGE] = globalAppState.currentLanguage;
+      feed.meta[META_LANGUAGE] = Globals.appState.currentLanguage;
 
       this.feed.setValue(feed);
 
       log("- [Entity feed] Loading [DONE] [${this.reference.entityId}]");
 
-      final idx = globalFeedPool.value.indexWhere(
+      final idx = Globals.feedPool.value.indexWhere(
           (feed) => feed.meta[META_ENTITY_ID] == this.reference.entityId);
       if (idx < 0) {
-        globalFeedPool.value.add(this.feed.value);
+        Globals.feedPool.value.add(this.feed.value);
       } else {
-        globalFeedPool.value[idx] = this.feed.value;
+        Globals.feedPool.value[idx] = this.feed.value;
       }
-      globalFeedPool.notifyChange();
+      Globals.feedPool.notifyChange();
 
-      await globalFeedPool.writeToStorage();
+      await Globals.feedPool.writeToStorage();
     } catch (err) {
       log("- [Entity feed] Loading [ERROR: $err] [${reference.entityId}]");
 
@@ -606,15 +607,15 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// Returns the EntityModel instance corresponding to the given reference
   /// only if it already belongs to the pool. You need to fetch it otherwise.
   static getFromPool(EntityReference entityRef) {
-    if (!globalEntityPool.hasValue) return null;
-    return globalEntityPool.value.firstWhere((entityModel) {
+    if (!Globals.entityPool.hasValue) return null;
+    return Globals.entityPool.value.firstWhere((entityModel) {
       return entityModel.reference.entityId == entityRef.entityId;
     }, orElse: () => null);
   }
 
   /// Gets a filtered list of current process models belonging to the given entity
   static List<ProcessModel> getProcessesForEntity(String entityId) {
-    return globalProcessPool.value
+    return Globals.processPool.value
         .where((processModel) =>
             processModel.metadata.hasValue &&
             processModel.metadata.value.meta[META_ENTITY_ID] == entityId)
@@ -625,7 +626,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// Creates a list of Process Model's from the metadata currently persisted that
   /// belongs to the given entity
   static List<ProcessModel> getProcessesPersistedForEntity(String entityId) {
-    return globalProcessesPersistence
+    return Globals.processesPersistence
         .get()
         .where((procMeta) => procMeta.meta[META_ENTITY_ID] == entityId)
         .map((procMeta) {
@@ -637,7 +638,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   }
 
   static Feed getFeedForEntity(String entityId) {
-    return globalFeedPool.value.firstWhere(
+    return Globals.feedPool.value.firstWhere(
         (feed) => feed.meta[META_ENTITY_ID] == entityId,
         orElse: () => null);
   }

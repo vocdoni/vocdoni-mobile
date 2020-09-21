@@ -6,7 +6,7 @@
 // import 'package:vocdoni/data-models/account.dart';
 // import 'package:vocdoni/lib/errors.dart';
 // import 'package:vocdoni/lib/i18n.dart';
-// import 'package:vocdoni/lib/singletons.dart';
+// import 'package:vocdoni/lib/globals.dart';
 // import 'package:dvote_common/widgets/alerts.dart';
 // import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 // import 'package:dvote_common/widgets/loading-spinner.dart';
@@ -174,7 +174,7 @@
 //         if (hasPublicReadPermission != true) // may be null as well
 //           return respondError(id, "Permission declined");
 
-//         final selectedAccount = globalAppState.currentAccount;
+//         final selectedAccount = Globals.appState.currentAccount;
 //         if (!(selectedAccount is AccountModel))
 //           return respondError(id, "The current account cannot be accessed");
 //         else if (!selectedAccount.identity.hasValue ||
@@ -190,7 +190,7 @@
 //         ''');
 
 //       case "signPayload":
-//         final selectedAccount = globalAppState.currentAccount;
+//         final selectedAccount = Globals.appState.currentAccount;
 //         if (!(selectedAccount is AccountModel))
 //           return respondError(id, "The current account cannot be accessed");
 //         else if (!selectedAccount.identity.hasValue ||

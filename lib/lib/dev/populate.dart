@@ -2,7 +2,7 @@
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import "package:vocdoni/lib/singletons.dart";
+import "package:vocdoni/lib/globals.dart";
 import "package:vocdoni/constants/meta-keys.dart";
 import "package:dvote/dvote.dart";
 import 'package:dvote/util/parsers.dart';
@@ -32,11 +32,11 @@ Future populateSampleData() async {
     });
   });
 
-  globalEntityPool.setValue(entityModels);
-  globalFeedPool.setValue(feeds);
-  globalProcessPool.setValue(processess);
+  Globals.entityPool.setValue(entityModels);
+  Globals.feedPool.setValue(feeds);
+  Globals.processPool.setValue(processess);
 
-  final currentAccount = globalAppState.currentAccount;
+  final currentAccount = Globals.appState.currentAccount;
   if (!(currentAccount is AccountModel))
     throw Exception("No account is currently selected");
 
@@ -45,9 +45,9 @@ Future populateSampleData() async {
       currentAccount.subscribe(entityModel);
   });
 
-  await globalEntityPool.writeToStorage();
-  await globalFeedPool.writeToStorage();
-  await globalProcessPool.writeToStorage();
+  await Globals.entityPool.writeToStorage();
+  await Globals.feedPool.writeToStorage();
+  await Globals.processPool.writeToStorage();
 }
 
 List<EntityReference> makeEntitySummaries() {

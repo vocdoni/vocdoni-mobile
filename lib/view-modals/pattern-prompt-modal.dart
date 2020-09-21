@@ -4,7 +4,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/unlockPattern/drawPattern.dart';
@@ -36,7 +36,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("PatternPrompModal");
+    Globals.analytics.trackPage("PatternPrompModal");
   }
 
   @override

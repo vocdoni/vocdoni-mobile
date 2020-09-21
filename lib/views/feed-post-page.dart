@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -36,7 +36,7 @@ class _FeedPostPageState extends State<FeedPostPage> {
       this.args = ModalRoute.of(super.context).settings.arguments;
 
       if (args != null) {
-        globalAnalytics.trackPage("FeedPostPage",
+        Globals.analytics.trackPage("FeedPostPage",
             entityId: args.entity.reference.entityId,
             postTitle: args.post.title);
       }
@@ -57,7 +57,8 @@ class _FeedPostPageState extends State<FeedPostPage> {
         headerImageUrl: post.image,
         headerTag: makeElementTag(entity.reference.entityId, post.id, index),
         avatarUrl: entity.metadata.value.media.avatar,
-        avatarText: entity.metadata.value.name[globalAppState.currentLanguage],
+        avatarText:
+            entity.metadata.value.name[Globals.appState.currentLanguage],
         avatarHexSource: post.id,
         appBarTitle: getText(context, "main.post"),
         //actionsBuilder: actionsBuilder,

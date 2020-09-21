@@ -4,7 +4,7 @@ import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 
 /// This class should be used exclusively as a global singleton.
 /// FeedPool tracks all the registered account's feeds and provides individual instances.
@@ -26,7 +26,7 @@ class FeedPool extends EventualNotifier<List<Feed>>
 
     try {
       this.setToLoading();
-      final feedList = globalFeedPersistence
+      final feedList = Globals.feedPersistence
           .get()
           .where((feed) =>
               feed.meta[META_ENTITY_ID] is String &&
@@ -59,7 +59,7 @@ class FeedPool extends EventualNotifier<List<Feed>>
           })
           .cast<Feed>()
           .toList();
-      await globalFeedPersistence.writeAll(feedList);
+      await Globals.feedPersistence.writeAll(feedList);
     } catch (err) {
       log(err);
       throw PersistError("Cannot store the current state");

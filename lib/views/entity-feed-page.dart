@@ -3,7 +3,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -30,7 +30,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     try {
       entityModel = ModalRoute.of(context).settings.arguments;
       if (entityModel is EntityModel) {
-        globalAnalytics.trackPage("EntityFeedPage",
+        Globals.analytics.trackPage("EntityFeedPage",
             entityId: entityModel.reference.entityId);
       }
     } catch (err) {
@@ -76,7 +76,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 getText(context, "error.theMetadataIsNotAvailable"));
 
           final lang = entityModel.metadata.value.languages[0] ??
-              globalAppState.currentLanguage;
+              Globals.appState.currentLanguage;
 
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),

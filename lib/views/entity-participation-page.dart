@@ -4,7 +4,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -27,7 +27,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
     try {
       if (entityModel is EntityModel) {
-        globalAnalytics.trackPage("EntityParticipationPage",
+        Globals.analytics.trackPage("EntityParticipationPage",
             entityId: entityModel.reference.entityId);
       } else {
         entityModel = ModalRoute.of(context).settings.arguments;
@@ -71,7 +71,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
           }
 
           final lang = entityModel.metadata.value.languages[0] ??
-              globalAppState.currentLanguage;
+              Globals.appState.currentLanguage;
 
           final availableProcesses = List<ProcessModel>();
           if (entityModel.processes.hasValue) {

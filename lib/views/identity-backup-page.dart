@@ -2,7 +2,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
 class IdentityBackupArguments {
@@ -21,7 +21,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("IdentityBackupPage");
+    Globals.analytics.trackPage("IdentityBackupPage");
   }
 
   Widget renderOkButton() {

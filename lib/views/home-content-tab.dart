@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote/dvote.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
@@ -34,11 +34,11 @@ class _HomeContentTabState extends State<HomeContentTab> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("HomeContentTab");
+    Globals.analytics.trackPage("HomeContentTab");
   }
 
   void _onRefresh() {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
 
     currentAccount.refresh().then((_) {
       _refreshController.refreshCompleted();
@@ -49,11 +49,11 @@ class _HomeContentTabState extends State<HomeContentTab> {
 
   @override
   Widget build(ctx) {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) return buildNoEntries(ctx);
 
     return EventualBuilder(
-      notifiers: [currentAccount.entities, globalProcessPool, globalFeedPool],
+      notifiers: [currentAccount.entities, Globals.processPool, Globals.feedPool],
       builder: (context, _, __) {
         if (!currentAccount.entities.hasValue ||
             currentAccount.entities.value.length == 0)
@@ -104,10 +104,10 @@ class _HomeContentTabState extends State<HomeContentTab> {
   // INERNAL
 
   List<Widget> _digestCardList() {
-    if (!globalAccountPool.hasValue || globalAccountPool.value.length == 0)
+    if (!Globals.accountPool.hasValue || Globals.accountPool.value.length == 0)
       return [];
 
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null ||
         !currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) return [];

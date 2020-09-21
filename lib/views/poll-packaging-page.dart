@@ -7,7 +7,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -37,14 +37,14 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void initState() {
     super.initState();
 
-    globalAnalytics.trackPage("PollPackagingPage",
+    Globals.analytics.trackPage("PollPackagingPage",
         entityId: widget.process.entityId, processId: widget.process.processId);
 
     _currentStep = 0;
   }
 
   void stepMakeEnvelope(BuildContext context) async {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     final patternLockKey = await Navigator.push(

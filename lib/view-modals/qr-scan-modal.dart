@@ -7,7 +7,7 @@ import 'package:r_scan/r_scan.dart';
 
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
 class QrScanModal extends StatefulWidget {
@@ -48,7 +48,7 @@ class _QrScanModalState extends State<QrScanModal> {
 
     setState(() {});
 
-    globalAnalytics.trackPage("QrScanModal");
+    Globals.analytics.trackPage("QrScanModal");
   }
 
   @override

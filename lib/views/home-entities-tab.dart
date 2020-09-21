@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/entity-page.dart';
 import 'package:dvote_common/widgets/baseCard.dart';
@@ -25,11 +25,11 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("HomeEntitiesTab");
+    Globals.analytics.trackPage("HomeEntitiesTab");
   }
 
   void _onRefresh() {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
 
     currentAccount.refresh().then((_) {
       _refreshController.refreshCompleted();
@@ -40,7 +40,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
 
   @override
   Widget build(ctx) {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
 
     if (currentAccount == null) return buildNoEntities(ctx);
 

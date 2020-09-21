@@ -4,7 +4,7 @@ import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
@@ -117,7 +117,7 @@ Future handleEntityLink(List<String> paramSegments,
     // fetch metadata from the reference. The view will fetch the rest.
     await entityModel.refreshMetadata();
 
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     // subscribe if not already
@@ -156,7 +156,7 @@ Future handleValidationLink(List<String> paramSegments,
     // fetch metadata from the reference. The view will fetch the rest.
     await entityModel.refreshMetadata();
 
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     // subscribe if not already

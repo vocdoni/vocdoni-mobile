@@ -8,7 +8,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 
 /// This class should be used exclusively as a global singleton.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
@@ -35,14 +35,14 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
 
     try {
       this.setToLoading();
-      final identitiesList = globalIdentitiesPersistence.get();
+      final identitiesList = Globals.identitiesPersistence.get();
       final accountModelList = identitiesList
           .where((identity) => identity.meta[META_ACCOUNT_ID] is String)
           .map((identity) {
             final result = AccountModel.fromIdentity(identity);
 
             final entities = identity.peers.entities
-                .map((entityRef) => globalEntityPool.value.firstWhere(
+                .map((entityRef) => Globals.entityPool.value.firstWhere(
                     (entity) => entity.reference.entityId == entityRef.entityId,
                     orElse: () => null))
                 .where((item) => item != null)
@@ -108,10 +108,10 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
           })
           .cast<Identity>()
           .toList();
-      await globalIdentitiesPersistence.writeAll(identitiesList);
+      await Globals.identitiesPersistence.writeAll(identitiesList);
 
       // Cascade the write request for the peer entities
-      await globalEntityPool.writeToStorage();
+      await Globals.entityPool.writeToStorage();
     } catch (err) {
       log(err);
       throw PersistError("Cannot store the current state");
@@ -129,7 +129,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
         newAccount.identity.value.keys.length == 0)
       throw Exception("The account needs to have an identity set");
 
-    final currentIdentities = globalIdentitiesPersistence.get();
+    final currentIdentities = Globals.identitiesPersistence.get();
     final alias = newAccount.identity.value.alias.trim();
     final reducedAlias = alias.toLowerCase().trim();
     if (currentIdentities
@@ -181,7 +181,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   AccountModel.fromIdentity(Identity idt) {
     this.identity.setDefaultValue(idt);
 
-    if (!globalEntityPool.hasValue) return;
+    if (!Globals.entityPool.hasValue) return;
 
     final entityList = this
         .identity
@@ -208,7 +208,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     if (patternEncryptionKey is String) {
       // Refresh with private key available
 
-      final currentAccount = globalAppState.currentAccount;
+      final currentAccount = Globals.appState.currentAccount;
       if (currentAccount is! AccountModel) return;
 
       final mnemonic = SymmetricNative.decryptString(
@@ -245,7 +245,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     this.failedAuthAttempts.setValue(0);
     this.authThresholdDate.setValue(newThreshold);
     return Future.delayed(Duration(milliseconds: 50))
-        .then((_) => globalAccountPool.writeToStorage());
+        .then((_) => Globals.accountPool.writeToStorage());
   }
 
   Future<void> trackFailedAuth() {
@@ -253,7 +253,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final seconds = pow(2, this.failedAuthAttempts.value);
     var newThreshold = DateTime.now().add(Duration(seconds: seconds));
     this.authThresholdDate.setValue(newThreshold);
-    return globalAccountPool.writeToStorage();
+    return Globals.accountPool.writeToStorage();
   }
 
   bool isSubscribed(EntityReference entityReference) {
@@ -287,14 +287,14 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     }
 
     // Add also the new model to the entities pool
-    if (!globalEntityPool.value.any(
+    if (!Globals.entityPool.value.any(
         (item) => item.reference.entityId == entityModel.reference.entityId)) {
-      final newEntityPool = globalEntityPool.value;
+      final newEntityPool = Globals.entityPool.value;
       newEntityPool.add(entityModel);
-      globalEntityPool.setValue(newEntityPool);
+      Globals.entityPool.setValue(newEntityPool);
     }
 
-    await globalAccountPool.writeToStorage();
+    await Globals.accountPool.writeToStorage();
   }
 
   /// Remove the given entity from the currently selected account's identity subscriptions
@@ -324,7 +324,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
     // Check if other identities are also subscribed
     bool subscribedFromOtherAccounts = false;
-    for (final existingAccount in globalAccountPool.value) {
+    for (final existingAccount in Globals.accountPool.value) {
       if (!existingAccount.identity.hasValue ||
           !existingAccount.entities.hasValue)
         continue;
@@ -342,10 +342,10 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
     // Clean the entity otherwise
     if (!subscribedFromOtherAccounts) {
-      await globalEntityPool.remove(entityReference);
+      await Globals.entityPool.remove(entityReference);
     }
 
-    await globalAccountPool.writeToStorage();
+    await Globals.accountPool.writeToStorage();
   }
 
   // addEntityPeerToAccount(EntityReference entitySummary, Identity account) {

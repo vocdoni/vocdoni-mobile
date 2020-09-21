@@ -1,15 +1,15 @@
 import 'dart:developer';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'net.dart';
 
 Future<void> restorePersistence() {
   // READ PERSISTED DATA (protobuf)
   return Future.wait(<Future>[
-    globalBootnodesPersistence.read(),
-    globalIdentitiesPersistence.readAll(),
-    globalEntitiesPersistence.readAll(),
-    globalProcessesPersistence.readAll(),
-    globalFeedPersistence.readAll(),
+    Globals.bootnodesPersistence.read(),
+    Globals.identitiesPersistence.readAll(),
+    Globals.entitiesPersistence.readAll(),
+    Globals.processesPersistence.readAll(),
+    Globals.feedPersistence.readAll(),
   ]);
 }
 
@@ -18,12 +18,12 @@ Future<void> restoreDataPools() {
   return Future.wait([
     // NOTE: Read's should be done first on the models that
     // don't depend on others to be restored
-    globalProcessPool.readFromStorage(),
-    globalFeedPool.readFromStorage(),
-    globalAppState.readFromStorage(),
+    Globals.processPool.readFromStorage(),
+    Globals.feedPool.readFromStorage(),
+    Globals.appState.readFromStorage(),
   ])
-      .then((_) => globalEntityPool.readFromStorage())
-      .then((_) => globalAccountPool.readFromStorage());
+      .then((_) => Globals.entityPool.readFromStorage())
+      .then((_) => Globals.accountPool.readFromStorage());
 }
 
 Future<void> startNetworking() {
@@ -37,6 +37,6 @@ Future<void> startNetworking() {
     log("[App] Trying to use the local gateway cache");
 
     // Retry with the existing cached gateways
-    return AppNetworking.useFromGatewayInfo(globalAppState.bootnodeInfo.value);
+    return AppNetworking.useFromGatewayInfo(Globals.appState.bootnodeInfo.value);
   });
 }

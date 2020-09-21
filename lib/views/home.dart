@@ -6,7 +6,7 @@ import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // DETERMINE INITIAL TAB
     final currentAccount =
-        globalAppState.currentAccount; // It is expected to be non-null
+        Globals.appState.currentAccount; // It is expected to be non-null
 
     // No organizations => identity
     if (!currentAccount.entities.hasValue ||

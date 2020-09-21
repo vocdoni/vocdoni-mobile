@@ -36,23 +36,23 @@ This separation allows for efficient and granular widget tree rebuilds whenever 
 
 #### Usage
 
-**Initialize and read Global Model's data from the Persistence helpers**
+**Initialize and read Global Model's data in `globals.dart`**
 
 ```dart
-final globalEntitiesPersistence = EntitiesPersistence();
-await globalEntitiesPersistence.readAll();
+// entitiesPersistence = EntitiesPersistence();
+await Global.entitiesPersistence.readAll();
 
 // ...
-final globalEntityPool = EntityPoolModel();
-await globalEntityPool.readFromStorage();  // will import and arrange the persisted data
+// entityPool = EntityPoolModel();
+await Globals.entityPool.readFromStorage();  // will import and arrange the persisted data
 ```
 
 **Consume Models in specific places**
 
-Typically, you will have a `globalEntityPool` with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. 
+Typically, a Pool with all the EntityModel's known to the app and then, individual `EntityModel` instances when the user selects one. 
 
 ```dart
-final globalEntityPool = EntityPoolModel();
+// Globals.entityPool
 
 // ...
 
@@ -60,7 +60,7 @@ final globalEntityPool = EntityPoolModel();
 @override
 Widget build(BuildContext context) {
 	// From the pool, we grab the first entity model
-	final myEntity = globalEntityPool.value.first;
+	final myEntity = Globals.entityPool.value.first;
 
 	// Consume many values (EventualNotifier) locally
 	return EventualBuilder(

@@ -6,7 +6,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
 // import 'package:vocdoni/lib/extensions.dart';
-import '../lib/singletons.dart';
+import '../lib/globals.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
@@ -27,7 +27,7 @@ class _StartupPageState extends State<StartupPage> {
   }
 
   Future<void> initApplication() {
-    globalAnalytics.init();
+    Globals.analytics.init();
 
     if (!mounted) return Future.value();
     setState(() {
@@ -43,7 +43,7 @@ class _StartupPageState extends State<StartupPage> {
       showNextScreen();
 
       // Detached update of the cached bootnodes
-      globalAppState.refresh(force: true).catchError(
+      Globals.appState.refresh(force: true).catchError(
           (err) => log("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;
@@ -61,7 +61,7 @@ class _StartupPageState extends State<StartupPage> {
   void showNextScreen() {
     // Determine the next screen and go there
     String nextRoutePath;
-    if (globalAccountPool.hasValue && globalAccountPool.value.length > 0) {
+    if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 0) {
       nextRoutePath = "/identity/select";
     } else {
       nextRoutePath = "/identity/create";

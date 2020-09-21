@@ -7,7 +7,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import "dart:developer";
 // import 'package:vocdoni/widgets/alerts.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
@@ -206,7 +206,7 @@ class ActionRegisterPage extends StatelessWidget {
 
     if (!_formKey.currentState.validate()) return;
 
-    final selectedAccount = globalAppState.currentAccount;
+    final selectedAccount = Globals.appState.currentAccount;
     if (!(selectedAccount is AccountModel))
       throw Exception("The current account cannot be accessed");
     else if (!selectedAccount.identity.hasValue ||

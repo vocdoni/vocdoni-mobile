@@ -7,7 +7,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -27,7 +27,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("IdentityRestorePage");
+    Globals.analytics.trackPage("IdentityRestorePage");
 
     Future.delayed(Duration(milliseconds: 100)).then((_) {
       FocusScope.of(context).requestFocus(nameNode);
@@ -100,14 +100,14 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
       final newAccount = await AccountModel.fromMnemonic(
           mnemonic, alias, patternEncryptionKey);
-      await globalAccountPool.addAccount(newAccount);
+      await Globals.accountPool.addAccount(newAccount);
 
       int newIndex = -1;
-      for (int i = 0; i < globalAccountPool.value.length; i++) {
+      for (int i = 0; i < Globals.accountPool.value.length; i++) {
         // TODO: Compare by identityId instead of rootPublicKey
-        if (!globalAccountPool.value[i].identity.hasValue)
+        if (!Globals.accountPool.value[i].identity.hasValue)
           continue;
-        else if (globalAccountPool
+        else if (Globals.accountPool
                 .value[i].identity.value.keys[0].rootPublicKey !=
             newAccount.identity.value.keys[0].rootPublicKey) continue;
         newIndex = i;
@@ -116,9 +116,9 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 
-      globalAppState.selectAccount(newIndex);
-      // globalAppState.currentAccount?.cleanEphemeral();
-      // globalAccountPool.writeToStorage();   not needed => addAccount() does it
+      Globals.appState.selectAccount(newIndex);
+      // Globals.appState.currentAccount?.cleanEphemeral();
+      // Globals.accountPool.writeToStorage();   not needed => addAccount() does it
 
       showHomePage(context);
     } catch (err) {
