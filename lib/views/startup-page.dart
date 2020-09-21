@@ -38,7 +38,7 @@ class _StartupPageState extends State<StartupPage> {
     return restorePersistence()
         .then((_) => restoreDataPools()) // Depends on restorePersistence()
         .then((_) => startNetworking())
-        .then((_) => initNotifications())
+        .then((_) => Notifications.init())
         .then((_) {
       showNextScreen();
 

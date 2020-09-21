@@ -168,6 +168,19 @@ launch-android-org:
 # launch-android-sign:
 # 	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"'
 
+
+# Firebase config files by environment
+
+.PHONY: config
+config:
+	cp notifications/production/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
+	cp notifications/production/google-services.json android/app/google-services.json
+
+.PHONY: config-dev
+config-dev:
+	cp notifications/dev/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
+	cp notifications/dev/google-services.json android/app/google-services.json
+
 ## :
 ## clean: Clean build artifacts
 clean:
