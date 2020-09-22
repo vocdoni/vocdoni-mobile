@@ -34,7 +34,6 @@ class Globals {
   static final feedPool = FeedPool();
 
   // UI HELPER INSTANCES
-  // static final scaffoldKey = GlobalKey<ScaffoldState>();
   static final navigatorKey = GlobalKey<NavigatorState>();
 
   static final analytics = Analytics();
