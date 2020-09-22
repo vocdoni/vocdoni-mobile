@@ -53,7 +53,11 @@ class _HomeContentTabState extends State<HomeContentTab> {
     if (currentAccount == null) return buildNoEntries(ctx);
 
     return EventualBuilder(
-      notifiers: [currentAccount.entities, Globals.processPool, Globals.feedPool],
+      notifiers: [
+        currentAccount.entities,
+        Globals.processPool,
+        Globals.feedPool
+      ],
       builder: (context, _, __) {
         if (!currentAccount.entities.hasValue ||
             currentAccount.entities.value.length == 0)
@@ -145,14 +149,13 @@ class _HomeContentTabState extends State<HomeContentTab> {
       return b.date.compareTo(a.date);
     });
 
-    int idx = 0;
+    int listIdx = 0;
     final result = availableItems
         .map((item) {
           if (item.process != null)
-            return CardPoll(
-                entity: item.entity, process: item.process, index: idx++);
+            return CardPoll(item.process, item.entity, listIdx++);
           else if (item.post != null)
-            return CardPost(item.entity, item.post, idx++);
+            return CardPost(item.post, item.entity, listIdx++);
           return Container();
         })
         .cast<Widget>()

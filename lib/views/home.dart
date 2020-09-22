@@ -8,6 +8,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
+import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
@@ -49,6 +50,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // HANDLE RUNTIME LINKS
       linkChangeStream = getUriLinksStream()
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
+
+      // Display the screen for a notification (if one is pending)
+      Future.delayed(Duration(seconds: 1))
+          .then((_) => Notifications.handlePendingNotification());
     } catch (err) {
       showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
           title: getText(context, "main.error"), context: context);

@@ -26,9 +26,9 @@ import 'package:intl/intl.dart';
 class PollPageArgs {
   EntityModel entity;
   ProcessModel process;
-  final int index;
+  final int listIdx;
   PollPageArgs(
-      {@required this.entity, @required this.process, @required this.index});
+      {@required this.entity, @required this.process, this.listIdx = 0});
 }
 
 class PollPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _PollPageState extends State<PollPage> {
   Timer refreshCheck;
   EntityModel entity;
   ProcessModel process;
-  int index;
+  int listIdx;
   List<int> choices = [];
 
   @override
@@ -73,11 +73,11 @@ class _PollPageState extends State<PollPage> {
       return;
     } else if (entity == args.entity &&
         process == args.process &&
-        index == args.index) return;
+        listIdx == args.listIdx) return;
 
     entity = args.entity;
     process = args.process;
-    index = args.index;
+    listIdx = args.listIdx;
 
     choices = process.metadata.value.details.questions
         .map((question) => null)
@@ -168,7 +168,7 @@ class _PollPageState extends State<PollPage> {
           headerTag: headerUrl == null
               ? null
               : makeElementTag(
-                  entity.reference.entityId, process.processId, index),
+                  entity.reference.entityId, process.processId, listIdx),
           avatarUrl: entity.metadata.value.media.avatar,
           avatarText:
               entity.metadata.value.name[Globals.appState.currentLanguage],

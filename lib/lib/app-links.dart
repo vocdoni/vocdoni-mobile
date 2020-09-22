@@ -1,12 +1,16 @@
+import 'dart:developer';
 import 'package:dvote/dvote.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
+import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/views/feed-post-page.dart';
+import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -14,65 +18,25 @@ import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMod
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
-  if (!(newLink is Uri)) throw Exception();
-
-  // DEEP LINKS
-  // - app.vocdoni.net, app.dev.vocdoni.net => Use as they are
-  //    - https://<domain>/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
-  //    - https://<domain>/validation/#/0x-entity-id/0x-token
-  // - vocdoni.page.link, vocdonidev.page.link => Extract the `link` parameter
-
-  // QR SCAN LINKS
-  // - vocdoni.link, dev.vocdoni.link
-  //    - https://vocdoni.link/entities/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
-  //    - https://vocdoni.link/validation/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46/token-1234
-
-  if (newLink.host == "vocdoni.page.link" ||
-      newLink.host == "vocdonidev.page.link") {
-    final extractedUrl = newLink.queryParameters["link"];
-    newLink = Uri.parse(extractedUrl);
-  }
-
-  if (newLink.pathSegments.length < 1) {
-    if (kReleaseMode)
-      throw Exception();
-    else
-      return;
-  }
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
 
-  // Merge path and hash segments
-  final pathSegments = newLink.pathSegments
-      .where((str) => str.length > 0)
-      .cast<String>()
-      .toList();
-  final hashSegments = newLink.fragment
-      .split("/")
-      .where((str) => str.length > 0)
-      .cast<String>()
-      .toList();
-
-  final allSegments = <String>[];
-  allSegments.addAll(pathSegments);
-  allSegments.addAll(hashSegments);
+  final uriSegments = extractLinkSegments(newLink);
 
   // Just open the app, do nothing
-  if (allSegments.length == 0) return;
+  if (uriSegments == null || uriSegments.length == 0) return;
 
   try {
-    switch (allSegments[0]) {
+    switch (uriSegments[0]) {
       case "entities":
         indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
             context: scaffoldBodyContext);
-        await handleEntityLink(allSegments.skip(1).toList(),
-            context: scaffoldBodyContext);
+        await handleEntityLink(uriSegments, context: scaffoldBodyContext);
         indicator.close();
         break;
       case "validation":
         indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
             context: scaffoldBodyContext);
-        await handleValidationLink(allSegments.skip(1).toList(),
-            context: scaffoldBodyContext);
+        await handleValidationLink(uriSegments, context: scaffoldBodyContext);
         indicator.close();
         break;
       // case "signature":
@@ -94,8 +58,9 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // / HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleEntityLink(List<String> paramSegments,
+Future handleEntityLink(List<String> linkSegments,
     {@required BuildContext context}) async {
+  final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46" ]
 
   String entityId;
@@ -104,7 +69,7 @@ Future handleEntityLink(List<String> paramSegments,
     entityId = paramSegments[0];
   }
 
-  if (!(entityId is String)) {
+  if (entityId is! String) {
     throw LinkingError("Invalid entityId");
   }
 
@@ -130,8 +95,100 @@ Future handleEntityLink(List<String> paramSegments,
   }
 }
 
-Future handleValidationLink(List<String> paramSegments,
+Future handleNewsLink(List<String> linkSegments,
     {@required BuildContext context}) async {
+  final paramSegments = linkSegments.skip(2).toList();
+  // paramSegments => [ "0x-entity-id", "0x-post-id" ]
+
+  final entityId = paramSegments[0];
+  final postId = paramSegments[1];
+
+  if (entityId is! String ||
+      !RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(entityId))
+    throw LinkingError("Invalid entityId");
+
+  final entityModel = Globals.entityPool.value.firstWhere(
+    (entityModel) => entityModel.reference.entityId == entityId,
+    orElse: () {
+      // If we don't have it, initialize it locally
+      EntityReference entityRef = EntityReference();
+      entityRef.entityId = entityId;
+
+      return EntityModel(entityRef);
+    },
+  );
+
+  try {
+    final currentAccount = Globals.appState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    // fetch metadata from the reference. The view will fetch the rest.
+    await entityModel.refreshMetadata();
+    await entityModel.refreshFeed();
+
+    // Navigate
+    final post = entityModel.feed.value.items
+        .firstWhere((post) => post.id == postId, orElse: () => null);
+    if (post == null) throw Exception();
+    Navigator.of(context).pushNamed("/entity/feed/post",
+        arguments: FeedPostArgs(entity: entityModel, post: post));
+  } catch (err) {
+    // showMessage("Could not fetch the entity details",
+    //     context: context, purpose: Purpose.DANGER);
+    throw Exception(getText(context, "Could not find the post"));
+  }
+}
+
+Future handleProcessLink(List<String> linkSegments,
+    {@required BuildContext context}) async {
+  final paramSegments = linkSegments.skip(1).toList();
+  // paramSegments => [ "0x-entity-id", "0x-process-id" ]
+
+  final entityId = paramSegments[0];
+  final processId = paramSegments[1];
+
+  if (entityId is! String ||
+      !RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(entityId))
+    throw LinkingError("Invalid entityId");
+
+  final entityModel = Globals.entityPool.value.firstWhere(
+    (entityModel) => entityModel.reference.entityId == entityId,
+    orElse: () {
+      // If we don't have it, initialize it locally
+      EntityReference entityRef = EntityReference();
+      entityRef.entityId = entityId;
+
+      return EntityModel(entityRef);
+    },
+  );
+
+  try {
+    final currentAccount = Globals.appState.currentAccount;
+    if (currentAccount == null) throw Exception("Internal error");
+
+    // fetch metadata from the reference. The view will fetch the rest.
+    await entityModel.refreshMetadata();
+
+    final processModel = entityModel.processes.value.firstWhere(
+      (processModel) => processModel.processId == processId,
+      orElse: () => ProcessModel(processId, entityId),
+    );
+    // Detached refresh so we can navigate now
+    processModel.refresh().catchError((err) => log(err));
+
+    // Navigate
+    Navigator.pushNamed(context, "/entity/participation/poll",
+        arguments: PollPageArgs(entity: entityModel, process: processModel));
+  } catch (err) {
+    // showMessage("Could not fetch the entity details",
+    //     context: context, purpose: Purpose.DANGER);
+    throw Exception(getText(context, "Could not fetch the process details"));
+  }
+}
+
+Future handleValidationLink(List<String> linkSegments,
+    {@required BuildContext context}) async {
+  final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46", "token-1234" ]
 
   if (paramSegments.length < 2 ||
@@ -201,6 +258,52 @@ Future handleValidationLink(List<String> paramSegments,
 
 //   Navigator.pushNamed(context, "/signature", arguments: args);
 // }
+
+// /////////////////////////////////////////////////////////////////////////////
+// / HELPERS
+// /////////////////////////////////////////////////////////////////////////////
+
+List<String> extractLinkSegments(Uri link) {
+  if (!(link is Uri)) throw Exception();
+
+  // DEEP LINKS
+  // - app.vocdoni.net, app.dev.vocdoni.net => Use as they are
+  //    - https://<domain>/entities/#/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  //    - https://<domain>/validation/#/0x-entity-id/0x-token
+  // - vocdoni.page.link, vocdonidev.page.link => Extract the `link` parameter
+
+  // QR SCAN LINKS
+  // - vocdoni.link, dev.vocdoni.link
+  //    - https://vocdoni.link/entities/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46
+  //    - https://vocdoni.link/validation/0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46/token-1234
+
+  if (link.host == "vocdoni.page.link" || link.host == "vocdonidev.page.link") {
+    final extractedUrl = link.queryParameters["link"];
+    link = Uri.parse(extractedUrl);
+  }
+
+  if (link.pathSegments.length < 1) {
+    if (kReleaseMode)
+      throw Exception();
+    else
+      return [];
+  }
+
+  // Merge path and hash segments
+  final pathSegments =
+      link.pathSegments.where((str) => str.length > 0).cast<String>().toList();
+  final hashSegments = link.fragment
+      .split("/")
+      .where((str) => str.length > 0)
+      .cast<String>()
+      .toList();
+
+  final allSegments = <String>[];
+  allSegments.addAll(pathSegments);
+  allSegments.addAll(hashSegments);
+
+  return allSegments;
+}
 
 // /////////////////////////////////////////////////////////////////////////////
 // / GENERATORS

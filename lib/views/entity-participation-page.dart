@@ -106,11 +106,10 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
               onRefresh: _onRefresh,
               child: ListView.builder(
                 itemCount: availableProcesses.length ?? 0,
-                itemBuilder: (BuildContext ctx, int index) {
-                  final process = availableProcesses[index];
+                itemBuilder: (BuildContext ctx, int idx) {
+                  final process = availableProcesses[idx];
 
-                  return CardPoll(
-                      entity: entityModel, process: process, index: index);
+                  return CardPoll(process, entityModel, idx);
                 },
               ),
             ),

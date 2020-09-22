@@ -106,10 +106,10 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 onRefresh: _onRefresh,
                 child: ListView.builder(
                   itemCount: entityModel.feed.value.items.length ?? 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    final post = entityModel.feed.value.items[index];
+                  itemBuilder: (BuildContext context, int idx) {
+                    final post = entityModel.feed.value.items[idx];
 
-                    return CardPost(entityModel, post, index);
+                    return CardPost(post, entityModel, idx);
                   },
                 ),
               );

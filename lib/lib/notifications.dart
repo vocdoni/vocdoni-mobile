@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
 
 class Notifications {
@@ -30,6 +31,11 @@ class Notifications {
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
     log("[App] onMessage: $message");
 
+    if (!message.containsKey('data')) {
+      log("[App] onResume: Received a message with no data");
+      return;
+    }
+
     if (Globals.appState.currentAccount != null) {
       // TODO: Show top banner
     } else {
@@ -40,15 +46,27 @@ class Notifications {
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
     log("[App] onLaunch: $message");
 
+    // TODO: In future versions, handle immediately, without waiting for the user to unlock an account
+
+    if (!message.containsKey('data')) {
+      log("[App] onResume: Received a message with no data");
+      return;
+    }
+
     setUnhandled(message);
   }
 
   static Future<dynamic> onResume(Map<String, dynamic> message) async {
     log("[App] onResume: $message");
 
+    if (!message.containsKey('data')) {
+      log("[App] onResume: Received a message with no data");
+      return;
+    }
+
+    // TODO: In future versions, handle immediately, without waiting for the user to unlock an account
     if (Globals.appState.currentAccount != null) {
-      // TODO: Detect ans show the view
-      // Globals.navigatorKey.currentState.pushNamed("/...", arguments: ...);
+      _showTargetView(message);
     } else {
       setUnhandled(message);
     }
@@ -69,6 +87,52 @@ class Notifications {
   //     log("[App] [onBackgroundMessageHandler] Notification: $notification");
   //   }
   // }
+
+  /// If there is a pending notification, it navigates to the
+  static void handlePendingNotification() {
+    if (_unhandledMessage == null) return;
+
+    _showTargetView(_unhandledMessage);
+    _unhandledMessage = null;
+  }
+
+  /// Displays the appropriate view to visualize the relevant data
+  static void _showTargetView(Map<String, dynamic> message) {
+    final messageData = message['data'];
+    if (messageData["uri"] is! String) {
+      log("[App] Notification body Error: uri is not a String");
+      return;
+    } else if (messageData["event"] is! String) {
+      log("[App] Notification body Error: event is not a String");
+      return;
+    } else if (messageData["message"] is! String) {
+      log("[App] Notification body Error: message is not a String");
+      return;
+    }
+
+    final linkSegments = extractLinkSegments(Uri.parse(messageData['uri']));
+
+    switch (messageData["event"]) {
+      case "entity-updated":
+        handleEntityLink(linkSegments,
+            context: Globals.navigatorKey.currentContext);
+        break;
+      case "new-post":
+        handleNewsLink(linkSegments,
+            context: Globals.navigatorKey.currentContext);
+        break;
+      case "new-process":
+      case "process-ended":
+        handleProcessLink(linkSegments,
+            context: Globals.navigatorKey.currentContext);
+        break;
+      // case "process-results":
+      //   break;
+      default:
+        log("[App] Notification body Error: unsupported event: " +
+            messageData["event"]);
+    }
+  }
 
   // UNHANDLED MESSAGES
 

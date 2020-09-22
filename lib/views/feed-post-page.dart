@@ -14,10 +14,9 @@ import 'package:url_launcher/url_launcher.dart';
 class FeedPostArgs {
   final EntityModel entity;
   final FeedPost post;
-  final int index;
+  final int listIdx;
 
-  FeedPostArgs(
-      {@required this.entity, @required this.post, @required this.index});
+  FeedPostArgs({@required this.entity, @required this.post, this.listIdx = 0});
 }
 
 class FeedPostPage extends StatefulWidget {
@@ -49,13 +48,13 @@ class _FeedPostPageState extends State<FeedPostPage> {
   Widget build(ctx) {
     FeedPost post = args.post;
     EntityModel entity = args.entity;
-    int index = args.index ?? 0;
+    final listIdx = args.listIdx ?? 0;
 
     if (post == null) return buildNoPost(ctx);
 
     return ScaffoldWithImage(
         headerImageUrl: post.image,
-        headerTag: makeElementTag(entity.reference.entityId, post.id, index),
+        headerTag: makeElementTag(entity.reference.entityId, post.id, listIdx),
         avatarUrl: entity.metadata.value.media.avatar,
         avatarText:
             entity.metadata.value.name[Globals.appState.currentLanguage],
