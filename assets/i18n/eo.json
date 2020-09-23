@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "Konstatu la elektantaron",
   "action.checkTheCensus": "Konstatu la elektantaron",
+  "action.scanQrCode": "",
   "action.submit": "Sendi",
   "error.couldNotCheckTheProcessStatus": "",
   "error.couldNotCheckTheVoteStatus": "",
@@ -165,6 +166,7 @@
   "main.timeLeft": "Restanta tempo",
   "main.to": "Al:",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "",
+  "main.uniqueIdentifierColon": "",
   "main.unlockName": "",
   "main.unsubscribe": "Malaboni",
   "main.using": "Uzanta:",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "La procezo jam finiĝis",
   "status.theProcessIsNotActiveYet": "La procezo ankoraŭ ne estas aktiva",
   "status.youAreInTheCensus": "Vi estas membro de la elektantaro",
-  "status.yourVoteIsAlreadyRegistered": "Via voĉdonado estas jam registrita"
+  "status.yourVoteIsAlreadyRegistered": "Via voĉdonado estas jam registrita",
+  "tooltip.scanaQrCode": ""
 }

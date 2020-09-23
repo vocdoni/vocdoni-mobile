@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       //       onPressed: () => onScanQrCode(floatingBtnContext),
       //       backgroundColor: colorDescription,
       //       label: Row(children: [
-      //         Text(getText(context, "Scan QR code")),
+      //         Text(getText(context, "action.scanQrCode")),
       //         Icon(Icons.camera_alt).withLeftPadding(15)
       //       ]));
       // }
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         backgroundColor: colorDescription,
         child: Icon(Icons.camera_alt),
         elevation: 5.0,
-        tooltip: getText(context, "Scan a QR code"),
+        tooltip: getText(context, "tooltip.scanaQrCode"),
       );
     });
   }

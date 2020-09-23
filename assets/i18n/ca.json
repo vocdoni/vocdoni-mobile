@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "Comprova l'estat del cens",
   "action.checkTheCensus": "Comprova el cens",
+  "action.scanQrCode": "",
   "action.submit": "Envia",
   "error.couldNotCheckTheProcessStatus": "No s'ha pogut comprovar l'estat del procés",
   "error.couldNotCheckTheVoteStatus": "No s'ha pogut comprovar el vot",
@@ -165,6 +166,7 @@
   "main.timeLeft": "Temps restant",
   "main.to": "Per a:",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "Per a recuperar les claus d'usuari, introdueix les paraules mnemotècniques que vas copiar durant la còpia de seguretat.",
+  "main.uniqueIdentifierColon": "",
   "main.unlockName": "Desbloca {{NAME}}",
   "main.unsubscribe": "Cancel·la la subscripció",
   "main.using": "Fent servir:",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "El procés ja ha finalitzat",
   "status.theProcessIsNotActiveYet": "El procés encara no està actiu",
   "status.youAreInTheCensus": "Formes part del cens",
-  "status.yourVoteIsAlreadyRegistered": "El teu vot ja està registrat"
+  "status.yourVoteIsAlreadyRegistered": "El teu vot ja està registrat",
+  "tooltip.scanaQrCode": ""
 }

@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "",
   "action.checkTheCensus": "",
+  "action.scanQrCode": "",
   "action.submit": "Send inn",
   "error.couldNotCheckTheProcessStatus": "",
   "error.couldNotCheckTheVoteStatus": "",
@@ -165,6 +166,7 @@
   "main.timeLeft": "Gjenstående tid",
   "main.to": "Til:",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "",
+  "main.uniqueIdentifierColon": "",
   "main.unlockName": "Lås opp {{NAME}}",
   "main.unsubscribe": "Opphev abonnement",
   "main.using": "Bruker:",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "Prosessen er allerede over",
   "status.theProcessIsNotActiveYet": "Prosessen er ikke aktiv enda",
   "status.youAreInTheCensus": "",
-  "status.yourVoteIsAlreadyRegistered": "Stemmen din er allerede registrert"
+  "status.yourVoteIsAlreadyRegistered": "Stemmen din er allerede registrert",
+  "tooltip.scanaQrCode": ""
 }

@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "Check census state",
   "action.checkTheCensus": "Check the census",
+  "action.scanQrCode": "Scan QR code",
   "action.submit": "Submit",
   "error.couldNotCheckTheProcessStatus": "Could not check the process status",
   "error.couldNotCheckTheVoteStatus": "Could not check the vote status",
@@ -165,6 +166,7 @@
   "main.timeLeft": "Time left",
   "main.to": "To:",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "To restore your user keys enter the mnemonic words you saved during the back up.",
+  "main.uniqueIdentifierColon": "Unique identifier:",
   "main.unlockName": "Unlock {{NAME}}",
   "main.unsubscribe": "Unsubscribe",
   "main.using": "Using:",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "The process has already ended",
   "status.theProcessIsNotActiveYet": "The process is not active yet",
   "status.youAreInTheCensus": "You are in the census",
-  "status.yourVoteIsAlreadyRegistered": "Your vote is already registered"
+  "status.yourVoteIsAlreadyRegistered": "Your vote is already registered",
+  "tooltip.scanaQrCode": "Scan a QR code"
 }

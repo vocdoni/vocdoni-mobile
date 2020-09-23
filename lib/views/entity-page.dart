@@ -174,7 +174,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(summary.Summary(
       text: widget.entityModel.metadata.value
               .description[globalAppState.currentLanguage] +
-          getText(context, "Unique identifier:") +
+          getText(context, "main.uniqueIdentifierColon") +
           " " +
           widget.entityModel.reference.entityId,
       maxLines: 5,

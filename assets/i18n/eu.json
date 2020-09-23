@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "",
   "action.checkTheCensus": "",
+  "action.scanQrCode": "",
   "action.submit": "",
   "error.couldNotCheckTheProcessStatus": "",
   "error.couldNotCheckTheVoteStatus": "",
@@ -165,6 +166,7 @@
   "main.timeLeft": "",
   "main.to": "",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "",
+  "main.uniqueIdentifierColon": "",
   "main.unlockName": "",
   "main.unsubscribe": "",
   "main.using": "",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "",
   "status.theProcessIsNotActiveYet": "",
   "status.youAreInTheCensus": "",
-  "status.yourVoteIsAlreadyRegistered": ""
+  "status.yourVoteIsAlreadyRegistered": "",
+  "tooltip.scanaQrCode": ""
 }

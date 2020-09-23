@@ -1,6 +1,7 @@
 {
   "action.checkCensusState": "Vérifier l'état du recensement",
   "action.checkTheCensus": "Vérifier le recensement",
+  "action.scanQrCode": "",
   "action.submit": "Soumettre",
   "error.couldNotCheckTheProcessStatus": "",
   "error.couldNotCheckTheVoteStatus": "",
@@ -165,6 +166,7 @@
   "main.timeLeft": "Temps restant",
   "main.to": "À :",
   "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp": "",
+  "main.uniqueIdentifierColon": "",
   "main.unlockName": "",
   "main.unsubscribe": "Se désabonner",
   "main.using": "",
@@ -196,5 +198,6 @@
   "status.theProcessHasAlreadyEnded": "",
   "status.theProcessIsNotActiveYet": "",
   "status.youAreInTheCensus": "Vous êtes dans le recensement",
-  "status.yourVoteIsAlreadyRegistered": "Votre vote est déjà enregistré"
+  "status.yourVoteIsAlreadyRegistered": "Votre vote est déjà enregistré",
+  "tooltip.scanaQrCode": ""
 }
