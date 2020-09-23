@@ -144,6 +144,31 @@ The app also accepts URI's using the `vocdoni:` schema, with the same paths and 
 
 On developoment, you can test it by running `make launch-ios-org` or `make launch-android-org`
 
+
+### Push notifications
+
+The `data` field of incoming push notifications [is expected to contain](https://gitlab.com/vocdoni/client-mobile/-/issues/197) three keys: 
+
+```
+{
+   notification: { ... },
+   data: {
+      uri: "https://vocdoni.link/processes/0x1234.../0x2345...",
+      event: "new-process", // enum, see below
+      message: "..." // same as notification > body
+   }
+}
+```
+
+- The `uri` field will be used the same as a deep link and will determine where the app navigates to.
+- The `event` can be one of:
+  - `entity-updated`: The metadata of the entity has changed (but not the process list or the news feed)
+  - `new-post`: A new post has been added to the Feed
+  - `new-process`: A process has been created
+  - `process-ended`: The end block has been reached
+  <!-- - `process-results`:  -->
+- The `message` is a copy of the relevant text contained within `notification` (not always present)
+
 <!--
 #### Prompt to sign a payload
 
@@ -293,7 +318,7 @@ sendHostRequest({ method: "closeWindow" })
 ```
 -->
 
-## Rtoubleshooting
+## Troubleshooting
 
 - Can't compile iOS because `App.framework` is built for another architecture
 	- Run `rm -Rf ios/Flutter/App.framework` and try again
