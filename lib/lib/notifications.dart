@@ -4,6 +4,21 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
 
+/// Example to simulate notifications locally
+/// 
+/// onResume({
+///   "notification": {},
+///   "data": {
+///     // "uri": "https://vocdoni.link/entities/0xed3d915bc2181286635a802e5e0e133cc3baed2234ca7a68a5649f95a38aed96",
+///     // "event": "entity-updated",
+///     // "uri": "https://vocdoni.link/posts/view/0xe030cbdcf1c6d67ca78b5eb3e066a3d594486330c66ae29250d2e9fc577c51b2/1598862833292",
+///     // "event": "new-post",
+///     "uri": "https://vocdoni.link/processes/0xed3d915bc2181286635a802e5e0e133cc3baed2234ca7a68a5649f95a38aed96/0xef0642cbcd83a3cb27bc05c0576251b65a0416a40b6ad7e22ce48c822761806a",
+///     "event": "new-process",
+///     "message": "This is a replica of the message",
+///   }
+/// });
+/// 
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
 
