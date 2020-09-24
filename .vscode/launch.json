@@ -10,10 +10,9 @@
       "type": "dart",
       "flutterMode": "debug",
       "args": [
-        "-t",
-        "lib/main-dev.dart",
         "--flavor",
-        "dev"
+        "dev",
+        "--dart-define=APP_MODE=dev"
       ]
     },
     {
@@ -22,10 +21,12 @@
       "type": "dart",
       "flutterMode": "debug",
       "args": [
-        "-t",
-        "lib/main-production.dart",
         "--flavor",
-        "production"
+        "production",
+        "--dart-define=APP_MODE=production",
+        "--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json",
+        "--dart-define=NETWORK_ID=xdai",
+        "--dart-define=LINKING_DOMAIN=vocdoni.link"
       ]
     },
     {
@@ -34,8 +35,7 @@
       "type": "dart",
       "flutterMode": "debug",
       "args": [
-        "-t",
-        "lib/main-dev.dart"
+        "--dart-define=APP_MODE=dev",
       ]
     },
     {
@@ -44,8 +44,10 @@
       "type": "dart",
       "flutterMode": "debug",
       "args": [
-        "-t",
-        "lib/main-production.dart"
+        "--dart-define=APP_MODE=production",
+        "--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json",
+        "--dart-define=NETWORK_ID=xdai",
+        "--dart-define=LINKING_DOMAIN=vocdoni.link"
       ]
     },
     {
@@ -54,10 +56,9 @@
       "type": "dart",
       "flutterMode": "profile",
       "args": [
-        "-t",
-        "lib/main-dev.dart",
         "--flavor",
-        "dev"
+        "dev",
+        "--dart-define=APP_MODE=dev",
       ]
     }
   ]

@@ -1,6 +1,7 @@
 import 'package:dvote/util/dev.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/identity-create-page.dart';
@@ -148,6 +149,7 @@ class _StartupPageState extends State<StartupPage> {
   @override
   Widget build(BuildContext context) {
     return FlavorBanner(
+      mode: AppConfig.APP_MODE,
       child: Scaffold(
         body: Builder(
           builder: (context) => Center(

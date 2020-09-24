@@ -78,27 +78,39 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 ## run: Run the app on the active (Android) device or simulator  [DEV]
 .PHONY: run
 run: 
-	flutter run --flavor dev -t lib/main-dev.dart
+	flutter run \
+		--flavor dev \
+		--dart-define=APP_MODE=dev
 
 ## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
 .PHONY: run-ios
 run-ios: 
-	rm -Rf ios/Flutter/App.framework
-	flutter run -t lib/main-dev.dart
+	flutter run \
+		--dart-define=APP_MODE=dev
 
 ## :
 
 ## apk-beta: Compile the Android APK  [BETA]
 .PHONY: apk-beta
 apk-beta:
-	#flutter build apk -t lib/main-beta.dart --flavor beta
-	flutter build apk -t lib/main-beta.dart --flavor beta --target-platform android-arm,android-arm64,android-x64 --split-per-abi
+	flutter build apk \
+		--dart-define=APP_MODE=beta \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=NETWORK_ID=xdai \
+		--flavor beta \
+		--target-platform android-arm,android-arm64,android-x64 \
+		--split-per-abi
 	@open build/app/outputs/apk/beta/release 2>/dev/null || xdg-open build/app/outputs/apk/beta/release 2>/dev/null || true
 
 ## appbundle-beta: Compile the app bundle for Google Play  [BETA]
 .PHONY: appbundle-beta
 appbundle-beta:
-	flutter build appbundle -t lib/main-beta.dart --target-platform android-arm,android-arm64,android-x64 --flavor beta
+	flutter build appbundle \
+		--dart-define=APP_MODE=beta \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=NETWORK_ID=xdai \
+		--flavor beta \
+		--target-platform android-arm,android-arm64,android-x64
 	@open build/app/outputs/bundle/betaRelease 2>/dev/null || xdg-open build/app/outputs/bundle/betaRelease 2>/dev/null || true
 
 ## :
@@ -106,22 +118,37 @@ appbundle-beta:
 ## apk: Compile the Android APK  [PROD]
 .PHONY: apk
 apk:
-	#flutter build apk -t lib/main-production.dart --flavor production
-	flutter build apk -t lib/main-production.dart --flavor production --target-platform android-arm,android-arm64,android-x64 --split-per-abi
+	flutter build apk \
+		--dart-define=APP_MODE=production \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=NETWORK_ID=xdai \
+		--dart-define=LINKING_DOMAIN=vocdoni.link \
+		--flavor production \
+		--target-platform android-arm,android-arm64,android-x64 \
+		--split-per-abi
 	@open build/app/outputs/apk/production/release 2>/dev/null || xdg-open build/app/outputs/apk/production/release 2>/dev/null || true
 
 ## appbundle: Compile the app bundle for Google Play  [PROD]
 .PHONY: appbundle
 appbundle:
-	flutter build appbundle -t lib/main-production.dart --target-platform android-arm,android-arm64,android-x64 --flavor production
+	flutter build appbundle \
+		--dart-define=APP_MODE=production \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=NETWORK_ID=xdai \
+		--dart-define=LINKING_DOMAIN=vocdoni.link \
+		--flavor production \
+		--target-platform android-arm,android-arm64,android-x64
 	@open build/app/outputs/bundle/productionRelease 2>/dev/null || xdg-open build/app/outputs/bundle/productionRelease 2>/dev/null || true
 
 ## ios: Open the iOS Runner.app for archiving  [PROD]
 .PHONY: ios
 ios:
-	rm -Rf ios/Flutter/App.framework
+	flutter build ios \
+		--dart-define=APP_MODE=production \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=NETWORK_ID=xdai \
+		--dart-define=LINKING_DOMAIN=vocdoni.link
 	open ios/Runner.xcworkspace/
-	#flutter build ios -t lib/main-production.dart
 
 ## :
 

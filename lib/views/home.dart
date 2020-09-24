@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/util.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
@@ -143,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return WillPopScope(
       onWillPop: handleWillPop,
       child: FlavorBanner(
+        mode: AppConfig.APP_MODE,
         child: Scaffold(
           appBar: TopNavigation(
             title: getTabName(selectedTab),

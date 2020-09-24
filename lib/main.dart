@@ -25,7 +25,7 @@ import "views/home.dart";
 
 /// The actual main function is defined on main-dev.dart and main-production.dart.
 /// These are expected to call mainCommon() when done
-void mainCommon() async {
+void main() async {
   // If you're running an application and need to access the binary messenger before `runApp()`
   // has been called (for example, during plugin initialization), then you need to explicitly
   // call the `WidgetsFlutterBinding.ensureInitialized()` first.

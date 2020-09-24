@@ -3,15 +3,13 @@ Official implementation of the Vocdoni core features.
 
 ## Flavors
 
-The app can run in three diferent targets:
+The app can run in three diferent modes:
 * Development
 	- Uses the development blockchain
-* Beta
+* Beta (Android only)
 	- Uses the development blockchain
 * Production
 	- Uses the production blockchain
-
-Targets correspond to `lib/main-dev.dart`, `lib/main-beta.dart` and `lib/main-production.dart`.
 
 Flavors are available on Android. The iOS project uses `dev` and `production` depending on the XCode target.
 

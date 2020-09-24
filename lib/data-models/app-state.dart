@@ -1,5 +1,5 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote_common/flavors/config.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/singletons.dart';
@@ -92,18 +92,16 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      devPrint("[App] Fetching " +
-          FlavorConfig.instance.constants.gatewayBootNodesUrl);
-      final bnGatewayInfo = await fetchBootnodeInfo(
-          FlavorConfig.instance.constants.gatewayBootNodesUrl);
+      devPrint("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
+      final bnGatewayInfo =
+          await fetchBootnodeInfo(AppConfig.GATEWAY_BOOTNODES_URL);
 
       devPrint("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
-          networkId: FlavorConfig.instance.constants.networkId);
+          networkId: AppConfig.NETWORK_ID);
 
       devPrint("[App] Gateway Pool ready");
-      AppNetworking.setGateways(
-          gateways, FlavorConfig.instance.constants.networkId);
+      AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);
 
       this.bootnodeInfo.setValue(bnGatewayInfo);
     } catch (err) {
