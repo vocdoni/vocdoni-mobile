@@ -527,7 +527,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       showMessage(msg, context: context, purpose: Purpose.GOOD);
     } catch (err) {
       final msg = getText(
-          context, "error.theNotificationsSubscriptionCouldNotBeUpdated");
+          context, "error.theNotificationSettingsCouldNotBeUpdated");
       showMessage(msg, context: context, purpose: Purpose.WARNING);
     }
   }
