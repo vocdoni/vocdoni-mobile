@@ -548,10 +548,10 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       final accountAddr =
           Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
-      final elements = <String>["process", "feed"];
 
       String key, topic;
-      await Future.wait(elements.map((element) {
+      await Future.wait(
+          Notifications.supportedNotificationEvents.map((element) {
         key = Notifications.getMetaKeyForAccount(accountAddr, element);
         topic = Notifications.getTopicForEntity(reference.entityId, element);
 
@@ -581,10 +581,10 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       final accountAddr =
           Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
-      final elements = <String>["process", "feed"];
 
       String key, topic;
-      await Future.wait(elements.map((element) {
+      await Future.wait(
+          Notifications.supportedNotificationEvents.map((element) {
         key = Notifications.getMetaKeyForAccount(accountAddr, element);
         topic = Notifications.getTopicForEntity(reference.entityId, element);
 
@@ -608,13 +608,12 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       return false;
     else if (Globals.appState.currentAccount == null) return false;
 
-    // Since users subscribe to everything (by now), we only need
-    // to check for `process` as the element name
-    const ELEMENT_NAME = "process";
-
     final accountAddr =
         Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
-    final key = Notifications.getMetaKeyForAccount(accountAddr, ELEMENT_NAME);
+    final key = Notifications.getMetaKeyForAccount(
+      accountAddr,
+      Notifications.supportedNotificationEvents[0],
+    );
 
     return metadata.value.meta[key] == "yes";
   }

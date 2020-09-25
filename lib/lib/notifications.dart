@@ -22,6 +22,12 @@ import 'package:vocdoni/lib/globals.dart';
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
 
+  static const supportedNotificationEvents = [
+    "post-new",
+    "process-new",
+    "process-results"
+  ];
+
   static Map<String, dynamic> _unhandledMessage;
   static get unhandledMessage => _unhandledMessage;
   static get hasUnhandledMessage => _unhandledMessage != null;
@@ -195,13 +201,19 @@ class Notifications {
   }
 
   /// Returns the topic string to which the app should subscribe
-  static getTopicForEntity(String entityId, String contentName) {
-    return "$entityId-default-$contentName";
+  static getTopicForEntity(String entityId, String elementName) {
+    if (!supportedNotificationEvents.contains(elementName))
+      throw Exception("Invalid element name");
+
+    return "${entityId}_default_$elementName";
   }
 
   /// Returns a canonical string to use as a key for annotating subscriptions
   /// on the `meta` field of an entity model > metadata
-  static getMetaKeyForAccount(String address, String contentName) {
-    return "push/$address/default/$contentName";
+  static getMetaKeyForAccount(String address, String elementName) {
+    if (!supportedNotificationEvents.contains(elementName))
+      throw Exception("Invalid element name");
+
+    return "push/$address/default/$elementName";
   }
 }
