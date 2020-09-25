@@ -290,7 +290,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     } catch (err) {
       log("- [Process meta] Refreshing ERROR: $err [${this.processId}]");
 
-      this.metadata.setError("Could not fetch the process details");
+      this.metadata.setError("error.couldNotFetchTheProcessDetails");
     }
   }
 

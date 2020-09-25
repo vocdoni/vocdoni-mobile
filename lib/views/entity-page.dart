@@ -1,3 +1,4 @@
+import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
@@ -34,6 +35,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   bool _processingSubscription = false;
+  final notificationsEnabledNotifier = EventualNotifier<bool>(false);
 
   @override
   void initState() {
@@ -168,6 +170,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildLoadingStatus());
     children.add(buildFeedRow(context));
     children.add(buildParticipationRow(context));
+    children.add(buildNotificationsRow(context));
     // TODO: show back?
     // children.add(buildActionList(context));
     children.add(Section(text: getText(context, "main.details")));
@@ -270,6 +273,32 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             onTap: () {
               onShowParticipation(context);
             });
+      },
+    );
+  }
+
+  buildNotificationsRow(BuildContext context) {
+    // Rebuild when the process list updates (not the items)
+    return EventualBuilder(
+      notifiers: [
+        widget.entityModel.metadata,
+        widget.entityModel.notificationTopics
+      ],
+      builder: (context, _, __) {
+        widget.entityModel.metadata.value.meta;
+        final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+
+        return ListItem(
+            icon: isSubscribed ? FeatherIcons.bell : FeatherIcons.bellOff,
+            mainText: isSubscribed
+                ? getText(context, "main.notifyActivity")
+                : getText(context, "main.ignoreActivity"),
+            rightText: "",
+            // rightTextIsBadge: true,
+            // rightTextPurpose:
+            //     widget.entityModel.processes.hasError ? Purpose.DANGER : null,
+            isSpinning: widget.entityModel.notificationTopics.isLoading,
+            onTap: () => toggleNotificationsSubscription(context));
       },
     );
   }
@@ -481,6 +510,26 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   onShowParticipation(BuildContext context) {
     Navigator.pushNamed(context, "/entity/participation",
         arguments: widget.entityModel);
+  }
+
+  toggleNotificationsSubscription(BuildContext context) async {
+    final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+
+    try {
+      if (isSubscribed)
+        await widget.entityModel.notificationsUnsubscribe();
+      else
+        await widget.entityModel.notificationsSubscribe();
+
+      final msg = isSubscribed
+          ? getText(context, "main.notificationsHaveBeenDisabledForTheEntity")
+          : getText(context, "main.notificationsHaveBeenEnabledForTheEntity");
+      showMessage(msg, context: context, purpose: Purpose.GOOD);
+    } catch (err) {
+      final msg = getText(
+          context, "error.theNotificationsSubscriptionCouldNotBeUpdated");
+      showMessage(msg, context: context, purpose: Purpose.WARNING);
+    }
   }
 
   onTapRegister(BuildContext context) {

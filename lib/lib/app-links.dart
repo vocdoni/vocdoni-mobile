@@ -135,7 +135,7 @@ Future handleNewsLink(List<String> linkSegments,
   } catch (err) {
     // showMessage("Could not fetch the entity details",
     //     context: context, purpose: Purpose.DANGER);
-    throw Exception(getText(context, "Could not find the post"));
+    throw Exception(getText(context, "error.couldNotFindThePost"));
   }
 }
 
@@ -182,7 +182,7 @@ Future handleProcessLink(List<String> linkSegments,
   } catch (err) {
     // showMessage("Could not fetch the entity details",
     //     context: context, purpose: Purpose.DANGER);
-    throw Exception(getText(context, "Could not fetch the process details"));
+    throw Exception(getText(context, "error.couldNotFetchTheProcessDetails"));
   }
 }
 

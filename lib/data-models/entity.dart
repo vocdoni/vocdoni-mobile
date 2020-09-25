@@ -13,6 +13,7 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/notifications.dart';
 
 // POOL
 
@@ -184,6 +185,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 30 : 1));
   final isRegistered = EventualNotifier<bool>(false)
       .withFreshnessTimeout(Duration(minutes: kReleaseMode ? 30 : 1));
+  final notificationTopics = EventualNotifier<bool>();
 
   /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
   int actionVisibilityTimestampUsed;
@@ -257,6 +259,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
         freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
+
+        // Preserve old `meta` key/values
+        for (var k in metadata.value.meta.keys) {
+          freshEntityMetadata.meta[k] = metadata.value.meta[k];
+        }
 
         log("- [Entity meta] Refreshing [DONE] [${reference.entityId}]");
 
@@ -526,6 +533,90 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       }
       throw err;
     }
+  }
+
+  /// Sends a request to receive notifications for the given entity.
+  /// It also stores a key/value to remember the active subscription.
+  Future<void> notificationsSubscribe() async {
+    if (!metadata.hasValue)
+      throw Exception("The model has no metadata yet");
+    else if (Globals.appState.currentAccount == null)
+      throw Exception("No account selected yet");
+
+    try {
+      notificationTopics.loading = true;
+
+      final accountAddr =
+          Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
+      final elements = <String>["process", "feed"];
+
+      String key, topic;
+      await Future.wait(elements.map((element) {
+        key = Notifications.getMetaKeyForAccount(accountAddr, element);
+        topic = Notifications.getTopicForEntity(reference.entityId, element);
+
+        metadata.value.meta[key] = "yes";
+        return Notifications.subscribe(topic);
+      }));
+
+      notificationTopics.value = null;
+      metadata.notifyChange();
+      Globals.entityPool.writeToStorage();
+    } catch (err) {
+      notificationTopics.error = err.toString();
+      throw Exception("Could not subscribe to the entity's topic");
+    }
+  }
+
+  /// Sends a request to stop receiving notifications for the given entity.
+  /// It also updates the key/value of the entity model to remove the subscription.
+  Future<void> notificationsUnsubscribe() async {
+    if (!metadata.hasValue)
+      throw Exception("The model has no metadata yet");
+    else if (Globals.appState.currentAccount == null)
+      throw Exception("No account selected yet");
+
+    try {
+      notificationTopics.loading = true;
+
+      final accountAddr =
+          Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
+      final elements = <String>["process", "feed"];
+
+      String key, topic;
+      await Future.wait(elements.map((element) {
+        key = Notifications.getMetaKeyForAccount(accountAddr, element);
+        topic = Notifications.getTopicForEntity(reference.entityId, element);
+
+        metadata.value.meta[key] = "";
+        return Notifications.unsubscribe(topic);
+      }));
+
+      notificationTopics.value = null;
+      metadata.notifyChange();
+      Globals.entityPool.writeToStorage();
+    } catch (err) {
+      print(err);
+      notificationTopics.error = err.toString();
+      throw Exception("Could not unsubscribe from the entity's topic");
+    }
+  }
+
+  /// Determines whether an active subscription to the entity's notifications exists
+  bool isSubscribedToNotifications() {
+    if (!metadata.hasValue)
+      return false;
+    else if (Globals.appState.currentAccount == null) return false;
+
+    // Since users subscribe to everything (by now), we only need
+    // to check for `process` as the element name
+    const ELEMENT_NAME = "process";
+
+    final accountAddr =
+        Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
+    final key = Notifications.getMetaKeyForAccount(accountAddr, ELEMENT_NAME);
+
+    return metadata.value.meta[key] == "yes";
   }
 
   /// Cleans the ephemeral state of the entity related to an account

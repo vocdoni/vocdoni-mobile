@@ -5,7 +5,7 @@ import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
 
 /// Example to simulate notifications locally
-/// 
+///
 /// onResume({
 ///   "notification": {},
 ///   "data": {
@@ -18,7 +18,7 @@ import 'package:vocdoni/lib/globals.dart';
 ///     "message": "This is a replica of the message",
 ///   }
 /// });
-/// 
+///
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
 
@@ -161,16 +161,16 @@ class Notifications {
 
   // TOPICS
 
-  static void subscribe(String topic) {
+  static Future<void> subscribe(String topic) {
     if (_firebaseMessaging == null) init();
 
-    _firebaseMessaging.subscribeToTopic(topic);
+    return _firebaseMessaging.subscribeToTopic(topic);
   }
 
-  static void unsubscribe(String topic) {
+  static Future<void> unsubscribe(String topic) {
     if (_firebaseMessaging == null) init();
 
-    _firebaseMessaging.unsubscribeFromTopic(topic);
+    return _firebaseMessaging.unsubscribeFromTopic(topic);
   }
 
   // GETTERS
@@ -192,5 +192,16 @@ class Notifications {
 
     return requestNotificationPermissions()
         .then((_) => _firebaseMessaging.getToken());
+  }
+
+  /// Returns the topic string to which the app should subscribe
+  static getTopicForEntity(String entityId, String contentName) {
+    return "$entityId-default-$contentName";
+  }
+
+  /// Returns a canonical string to use as a key for annotating subscriptions
+  /// on the `meta` field of an entity model > metadata
+  static getMetaKeyForAccount(String address, String contentName) {
+    return "push/$address/default/$contentName";
   }
 }
