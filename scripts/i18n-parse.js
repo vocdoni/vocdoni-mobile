@@ -2,11 +2,16 @@ const glob = require("glob")
 const fs = require("fs")
 const { languages, validPrefixes } = require("./common")
 
+const defaultLanguage = languages[0]
+
 const dqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"[^"\\]*(?:\\.[^"\\]*)*"\)/gm
 const sqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*'[^'\\]*(?:\\.[^'\\]*)*'\)/gm
 const tqRegExp = /getText[\s]*\([\s]*[a-zA-Z_]+[a-zA-Z0-9_]*,[\s]*"""[^"]*(?:(?:"?"?)[^"])*"""\)/gm
 
 function main() {
+    console.log("Scanning getText strings")
+    console.log("The default language is '" + defaultLanguage + "'")
+    console.log()
     const files = glob.sync(__dirname + "/../lib/**/*.dart")
     const strings = files.reduce((prev, cur) => prev.concat(processFile(cur)), [])
 
@@ -35,11 +40,14 @@ function main() {
                 }
             }
             newStrings[k] = ""
+            if (lang == defaultLanguage) {
+                console.log("[WARNING] > The default language does not contain: '" + k + "'")
+            }
         }
         fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2) + "\n")
     })
 
-    console.log("Extracted", Object.keys(stringsTemplate).length, "strings for", languages)
+    console.log("Done\nExtracted", Object.keys(stringsTemplate).length, "strings for", languages)
 }
 
 function processFile(path) {
@@ -95,9 +103,9 @@ function sortUnique(arr) {
 
 function checkValidStringKey(key) {
     if (!validPrefixes.some(prefix => key.startsWith(prefix + "."))) {
-        console.warn(`Warning: "${key}" does not have a valid prefix`)
+        console.warn(`[WARNING] > "${key}" does not have a valid prefix`)
     } else if (key.indexOf(" ") >= 0) {
-        console.warn(`Warning: "${key}" is not a valid string key (unexpected spaces)`)
+        console.warn(`[WARNING] > "${key}" is not a valid string key (unexpected spaces)`)
     }
 }
 
