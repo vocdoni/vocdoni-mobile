@@ -9,7 +9,7 @@ import "package:flutter/material.dart";
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -34,7 +34,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("IdentityCreatePage");
+    Globals.analytics.trackPage("IdentityCreatePage");
   }
 
   @override
@@ -176,7 +176,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       return;
     }
 
-    final repeated = globalAccountPool.value.any((item) {
+    final repeated = Globals.accountPool.value.any((item) {
       if (!item.identity.hasValue) return false;
       return item.identity.value.alias == alias;
     });
@@ -209,18 +209,18 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       final newAccount =
           await AccountModel.makeNew(alias, patternEncryptionKey);
-      await globalAccountPool.addAccount(newAccount);
+      await Globals.accountPool.addAccount(newAccount);
 
-      final newIndex = globalAccountPool.value.indexWhere((account) =>
+      final newIndex = Globals.accountPool.value.indexWhere((account) =>
           account.identity.hasValue &&
           account.identity.value.identityId ==
               newAccount.identity.value.identityId);
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 
-      globalAppState.selectAccount(newIndex);
-      // globalAppState.currentAccount?.cleanEphemeral();
-      // globalAccountPool.writeToStorage();   not needed => addAccount() does it
+      Globals.appState.selectAccount(newIndex);
+      // Globals.appState.currentAccount?.cleanEphemeral();
+      // Globals.accountPool.writeToStorage();   not needed => addAccount() does it
 
       setState(() {
         generating = false;

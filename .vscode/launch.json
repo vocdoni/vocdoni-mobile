@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Vocdoni Dev (Android)",
+      "name": "App Dev (Android)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "name": "Vocdoni Prod (Android)",
+      "name": "App Prod (Android)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "name": "Vocdoni Dev (iOS)",
+      "name": "App Dev (iOS)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
@@ -39,7 +39,7 @@
       ]
     },
     {
-      "name": "Vocdoni Prod (iOS)",
+      "name": "App Prod (iOS)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
@@ -51,13 +51,13 @@
       ]
     },
     {
-      "name": "Vocdoni Profile",
+      "name": "App Profile (Android)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile",
       "args": [
         "--flavor",
-        "dev",
+        "production",
         "--dart-define=APP_MODE=dev",
       ]
     }

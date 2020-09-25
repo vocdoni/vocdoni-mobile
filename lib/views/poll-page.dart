@@ -7,9 +7,9 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'dart:async';
 import 'package:dvote/dvote.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
@@ -26,9 +26,9 @@ import 'package:intl/intl.dart';
 class PollPageArgs {
   EntityModel entity;
   ProcessModel process;
-  final int index;
+  final int listIdx;
   PollPageArgs(
-      {@required this.entity, @required this.process, @required this.index});
+      {@required this.entity, @required this.process, this.listIdx = 0});
 }
 
 class PollPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _PollPageState extends State<PollPage> {
   Timer refreshCheck;
   EntityModel entity;
   ProcessModel process;
-  int index;
+  int listIdx;
   List<int> choices = [];
 
   @override
@@ -65,26 +65,26 @@ class _PollPageState extends State<PollPage> {
     final PollPageArgs args = ModalRoute.of(context).settings.arguments;
     if (args == null) {
       Navigator.of(context).pop();
-      devPrint("Invalid parameters");
+      log("Invalid parameters");
       return;
     } else if (!args.process.metadata.hasValue) {
       Navigator.of(context).pop();
-      devPrint("Empty process metadata");
+      log("Empty process metadata");
       return;
     } else if (entity == args.entity &&
         process == args.process &&
-        index == args.index) return;
+        listIdx == args.listIdx) return;
 
     entity = args.entity;
     process = args.process;
-    index = args.index;
+    listIdx = args.listIdx;
 
     choices = process.metadata.value.details.questions
         .map((question) => null)
         .cast<int>()
         .toList();
 
-    globalAnalytics.trackPage("PollPage",
+    Globals.analytics.trackPage("PollPage",
         entityId: entity.reference.entityId, processId: process.processId);
 
     await onRefresh();
@@ -95,20 +95,20 @@ class _PollPageState extends State<PollPage> {
         .refreshHasVoted()
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshDates())
-        .catchError((err) => devPrint(err)); // Values will refresh if needed
+        .catchError((err) => log(err)); // Values will refresh if needed
   }
 
   Future<void> onCheckCensus(BuildContext context) async {
-    if (globalAppState.currentAccount == null) {
+    if (Globals.appState.currentAccount == null) {
       // NOTE: Keep the comment to force i18n key parsing
       // getText(context, "main.cannotCheckTheCensus")
       process.isInCensus.setError("main.cannotCheckTheCensus");
       return;
     }
-    final account = globalAppState.currentAccount;
+    final account = Globals.appState.currentAccount;
 
     // Ensure that we have the public key
-    if (!globalAppState.currentAccount
+    if (!Globals.appState.currentAccount
         .hasPublicKeyForEntity(entity.reference.entityId)) {
       // Ask the pattern
       final route = MaterialPageRoute(
@@ -168,10 +168,10 @@ class _PollPageState extends State<PollPage> {
           headerTag: headerUrl == null
               ? null
               : makeElementTag(
-                  entity.reference.entityId, process.processId, index),
+                  entity.reference.entityId, process.processId, listIdx),
           avatarUrl: entity.metadata.value.media.avatar,
           avatarText:
-              entity.metadata.value.name[globalAppState.currentLanguage],
+              entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
           appBarTitle: getText(context, "main.vote"),
           actionsBuilder: (context) => [
@@ -210,7 +210,7 @@ class _PollPageState extends State<PollPage> {
     if (process.metadata.value == null) return Container();
 
     final title =
-        process.metadata.value.details.title[globalAppState.currentLanguage];
+        process.metadata.value.details.title[Globals.appState.currentLanguage];
 
     return EventualBuilder(
       notifier: entity.metadata,
@@ -219,7 +219,7 @@ class _PollPageState extends State<PollPage> {
         mainText: title,
         mainTextMultiline: 3,
         secondaryText: entity.metadata.hasValue
-            ? entity.metadata.value.name[globalAppState.currentLanguage]
+            ? entity.metadata.value.name[Globals.appState.currentLanguage]
             : "",
         isTitle: true,
         rightIcon: null,
@@ -227,7 +227,7 @@ class _PollPageState extends State<PollPage> {
         avatarUrl:
             entity.metadata.hasValue ? entity.metadata.value.media.avatar : "",
         avatarText: entity.metadata.hasValue
-            ? entity.metadata.value.name[globalAppState.currentLanguage]
+            ? entity.metadata.value.name[Globals.appState.currentLanguage]
             : "",
         avatarHexSource: entity.reference.entityId,
         //avatarHexSource: entity.entitySummary.entityId,
@@ -239,7 +239,7 @@ class _PollPageState extends State<PollPage> {
   Widget buildSummary() {
     return Summary(
       text: process
-          .metadata.value.details.description[globalAppState.currentLanguage],
+          .metadata.value.details.description[Globals.appState.currentLanguage],
       maxLines: 5,
     );
   }
@@ -252,7 +252,7 @@ class _PollPageState extends State<PollPage> {
         Purpose purpose;
         IconData icon;
 
-        if (!globalAppState.currentAccount
+        if (!Globals.appState.currentAccount
             .hasPublicKeyForEntity(entity.reference.entityId)) {
           // We don't have the user's public key, probably because the entity was unknown when all
           // public keys were precomputed. Ask for the pattern.

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 // import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
@@ -40,7 +40,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("PatternCreateModal");
+    Globals.analytics.trackPage("PatternCreateModal");
   }
 
   @override
@@ -209,7 +209,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   }
 
   void onSecondPassDone(BuildContext context, List<int> pattern) {
-    // devPrint(pattern.toString() + "==" + setPattern.toString());
+    // log(pattern.toString() + "==" + setPattern.toString());
 
     if (!listEquals(setPattern, pattern)) {
       setState(() {

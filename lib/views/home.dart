@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
+import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
@@ -49,6 +50,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // HANDLE RUNTIME LINKS
       linkChangeStream = getUriLinksStream()
           .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
+
+      // Display the screen for a notification (if one is pending)
+      Future.delayed(Duration(seconds: 1))
+          .then((_) => Notifications.handlePendingNotification());
     } catch (err) {
       showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
           title: getText(context, "main.error"), context: context);
@@ -59,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // DETERMINE INITIAL TAB
     final currentAccount =
-        globalAppState.currentAccount; // It is expected to be non-null
+        Globals.appState.currentAccount; // It is expected to be non-null
 
     // No organizations => identity
     if (!currentAccount.entities.hasValue ||
@@ -81,9 +86,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    devPrint(err);
+    log(err);
     final ctx = scaffoldBodyContext ?? context;
-    showAlert(getText(ctx, "main.thereWasAProblemHandlingTheLink"),
+    showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
         title: getText(scaffoldBodyContext ?? context, "main.error"),
         context: scaffoldBodyContext ?? context);
   }
@@ -105,17 +110,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        devPrint("Inactive");
+        log("Inactive");
         break;
       case AppLifecycleState.paused:
-        devPrint("Paused");
+        log("Paused");
         break;
       case AppLifecycleState.resumed:
-        devPrint("Resumed");
+        log("Resumed");
         if (!AppNetworking.isReady) AppNetworking.init(forceReload: true);
         break;
       case AppLifecycleState.detached:
-        devPrint("Detached");
+        log("Detached");
         break;
     }
   }
@@ -257,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       showMessage(
           getText(context,
-              "main.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
+              "error.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
           context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }

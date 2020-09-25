@@ -1,10 +1,11 @@
+import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/action-register.dart';
 import 'package:vocdoni/view-modals/qr-show-modal.dart';
@@ -24,8 +25,8 @@ class EntityInfoPage extends StatefulWidget {
   final EntityModel entityModel;
 
   EntityInfoPage(this.entityModel) {
-    globalAnalytics.trackPage("EntityInfoPage",
-        entityId: entityModel.reference.entityId);
+    Globals.analytics
+        .trackPage("EntityInfoPage", entityId: entityModel.reference.entityId);
   }
 
   @override
@@ -34,6 +35,7 @@ class EntityInfoPage extends StatefulWidget {
 
 class _EntityInfoPageState extends State<EntityInfoPage> {
   bool _processingSubscription = false;
+  final notificationsEnabledNotifier = EventualNotifier<bool>(false);
 
   @override
   void initState() {
@@ -41,7 +43,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     // detached async
     widget.entityModel.refresh().catchError((err) {
-      devPrint(err);
+      log(err);
     });
   }
 
@@ -135,10 +137,10 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             widget.entityModel.metadata.value.media.header,
         forceHeader: true,
         appBarTitle: widget
-            .entityModel.metadata.value.name[globalAppState.currentLanguage],
+            .entityModel.metadata.value.name[Globals.appState.currentLanguage],
         avatarUrl: widget.entityModel.metadata.value.media.avatar,
         avatarText: widget
-            .entityModel.metadata.value.name[globalAppState.currentLanguage],
+            .entityModel.metadata.value.name[Globals.appState.currentLanguage],
         avatarHexSource: widget.entityModel.reference.entityId,
         leftElement: buildRegisterButton(context),
         actionsBuilder: actionsBuilder,
@@ -168,12 +170,13 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     children.add(buildLoadingStatus());
     children.add(buildFeedRow(context));
     children.add(buildParticipationRow(context));
+    children.add(buildNotificationsRow(context));
     // TODO: show back?
     // children.add(buildActionList(context));
     children.add(Section(text: getText(context, "main.details")));
     children.add(summary.Summary(
       text: widget.entityModel.metadata.value
-              .description[globalAppState.currentLanguage] +
+              .description[Globals.appState.currentLanguage] +
           "\n\n" +
           getText(context, "main.uniqueIdentifierColon") +
           " " +
@@ -188,8 +191,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   buildTitle(BuildContext context) {
-    String title =
-        widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
+    String title = widget
+        .entityModel.metadata.value.name[Globals.appState.currentLanguage];
     return ListItem(
       heroTag: widget.entityModel.reference.entityId + title,
       mainText: title,
@@ -274,8 +277,34 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     );
   }
 
+  buildNotificationsRow(BuildContext context) {
+    // Rebuild when the process list updates (not the items)
+    return EventualBuilder(
+      notifiers: [
+        widget.entityModel.metadata,
+        widget.entityModel.notificationTopics
+      ],
+      builder: (context, _, __) {
+        widget.entityModel.metadata.value.meta;
+        final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+
+        return ListItem(
+            icon: isSubscribed ? FeatherIcons.bell : FeatherIcons.bellOff,
+            mainText: isSubscribed
+                ? getText(context, "main.notifyActivity")
+                : getText(context, "main.ignoreActivity"),
+            rightText: "",
+            // rightTextIsBadge: true,
+            // rightTextPurpose:
+            //     widget.entityModel.processes.hasError ? Purpose.DANGER : null,
+            isSpinning: widget.entityModel.notificationTopics.isLoading,
+            onTap: () => toggleNotificationsSubscription(context));
+      },
+    );
+  }
+
   buildSubscribeItem(BuildContext context) {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     bool isSubscribed =
@@ -303,7 +332,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   // buildSubscribeButton(BuildContext context) {
-  //   final currentAccount = globalAppState.currentAccount;
+  //   final currentAccount = Globals.appState.currentAccount;
   //   if (currentAccount == null) throw Exception("Internal error");
 
   //   // No need to use EventualBuilder here, since the only place that can change the subscription status is here.
@@ -411,7 +440,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //       // Unregistered warning
   //       if (!widget.entityModel.isRegistered.value) {
   //         final entityName = widget
-  //             .entityModel.metadata.value.name[globalAppState.currentLanguage];
+  //             .entityModel.metadata.value.name[Globals.appState.currentLanguage];
   //         ListItem noticeItem = ListItem(
   //           mainText: getText(context, "main.registerToNameFirst")
   //               .replaceFirst("{{NAME}}", entityName),
@@ -429,19 +458,19 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   //         ListItem item;
   //         if (action.type == "browser") {
   //           if (action.name == null ||
-  //               !(action.name[globalAppState.currentLanguage] is String))
+  //               !(action.name[Globals.appState.currentLanguage] is String))
   //             return Container();
 
   //           item = ListItem(
   //             icon: FeatherIcons.arrowRightCircle,
-  //             mainText: action.name[globalAppState.currentLanguage],
+  //             mainText: action.name[Globals.appState.currentLanguage],
   //             secondaryText: action.visible,
   //             disabled: !widget.entityModel.isRegistered.value,
   //             onTap: () => onBrowserAction(ctx, action),
   //           );
   //         } else {
   //           item = ListItem(
-  //             mainText: action.name[globalAppState.currentLanguage],
+  //             mainText: action.name[Globals.appState.currentLanguage],
   //             secondaryText: getText(context, "main.actionNotSupported"),
   //             icon: FeatherIcons.helpCircle,
   //             disabled: true,
@@ -469,7 +498,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
             builder: (context) => QrShowModal(
                 widget.entityModel.metadata.hasValue
                     ? widget.entityModel.metadata.value
-                        .name[globalAppState.currentLanguage]
+                        .name[Globals.appState.currentLanguage]
                     : getText(context, "main.entity"),
                 link)));
   }
@@ -483,6 +512,26 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         arguments: widget.entityModel);
   }
 
+  toggleNotificationsSubscription(BuildContext context) async {
+    final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+
+    try {
+      if (isSubscribed)
+        await widget.entityModel.notificationsUnsubscribe();
+      else
+        await widget.entityModel.notificationsSubscribe();
+
+      final msg = isSubscribed
+          ? getText(context, "main.notificationsHaveBeenDisabledForTheEntity")
+          : getText(context, "main.notificationsHaveBeenEnabledForTheEntity");
+      showMessage(msg, context: context, purpose: Purpose.GOOD);
+    } catch (err) {
+      final msg = getText(
+          context, "error.theNotificationSettingsCouldNotBeUpdated");
+      showMessage(msg, context: context, purpose: Purpose.WARNING);
+    }
+  }
+
   onTapRegister(BuildContext context) {
     final action = widget.entityModel.metadata.value.actions.first;
     final route = MaterialPageRoute(
@@ -494,8 +543,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   // onBrowserAction(BuildContext ctx, EntityMetadata_Action action) {
   //   final url = action.url;
-  //   final title = action.name[globalAppState.currentLanguage] ??
-  //       widget.entityModel.metadata.value.name[globalAppState.currentLanguage];
+  //   final title = action.name[Globals.appState.currentLanguage] ??
+  //       widget.entityModel.metadata.value.name[Globals.appState.currentLanguage];
 
   //   final route = MaterialPageRoute(
   //       builder: (context) => WebAction(
@@ -510,7 +559,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     setState(() => _processingSubscription = true);
 
     try {
-      final currentAccount = globalAppState.currentAccount;
+      final currentAccount = Globals.appState.currentAccount;
       if (currentAccount == null)
         throw Exception("Internal error: null account");
 
@@ -527,7 +576,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         final msg = getText(ctx, "main.youAreAlreadySubscribedToThisEntity");
         showMessage(msg, context: ctx, purpose: Purpose.DANGER);
       } else {
-        showMessage(getText(ctx, "main.theSubscriptionCouldNotBeRegistered"),
+        showMessage(getText(ctx, "error.theSubscriptionCouldNotBeRegistered"),
             context: ctx, purpose: Purpose.DANGER);
       }
     }
@@ -547,7 +596,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
     setState(() => _processingSubscription = true);
     try {
-      final currentAccount = globalAppState.currentAccount;
+      final currentAccount = Globals.appState.currentAccount;
       if (currentAccount == null)
         throw Exception("Internal error: null account");
 
@@ -563,7 +612,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     } catch (err) {
       if (!mounted) return;
       setState(() => _processingSubscription = false);
-      showMessage(getText(ctx, "main.theSubscriptionCouldNotBeCanceled"),
+      showMessage(getText(ctx, "error.theSubscriptionCouldNotBeCanceled"),
           context: ctx, purpose: Purpose.DANGER);
     }
   }

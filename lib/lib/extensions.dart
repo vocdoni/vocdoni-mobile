@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-extension DisplayHelpers on Widget {
+extension UIHelpers on Widget {
   /// Returns the current widget wrapped with the given padding
   Widget withPadding(double padding) {
     return Padding(padding: EdgeInsets.all(padding), child: this);

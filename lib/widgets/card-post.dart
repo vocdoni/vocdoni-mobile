@@ -11,9 +11,9 @@ import 'package:intl/intl.dart';
 class CardPost extends StatelessWidget {
   final EntityModel entity;
   final FeedPost post;
-  final int index;
+  final int listIdx;
 
-  CardPost(this.entity, this.post, [this.index = 0]);
+  CardPost(this.post, this.entity, [int listIdx]) : this.listIdx = listIdx ?? 0;
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +21,9 @@ class CardPost extends StatelessWidget {
     return EventualBuilder(
       notifiers: [entity.metadata, entity.feed],
       builder: (context, _, __) => BaseCard(
-          onTap: () => onPostCardTap(context, post, entity, index),
+          onTap: () => onPostCardTap(context, post, entity),
           image: post.image,
-          imageTag: makeElementTag(entity.reference.entityId, post.id, index),
+          imageTag: makeElementTag(entity.reference.entityId, post.id, listIdx),
           children: <Widget>[
             ListItem(
               mainText: post.title,
@@ -42,9 +42,8 @@ class CardPost extends StatelessWidget {
     );
   }
 
-  onPostCardTap(
-      BuildContext context, FeedPost post, EntityModel entity, int index) {
+  onPostCardTap(BuildContext context, FeedPost post, EntityModel entity) {
     Navigator.of(context).pushNamed("/entity/feed/post",
-        arguments: FeedPostArgs(entity: entity, post: post, index: index));
+        arguments: FeedPostArgs(entity: entity, post: post, listIdx: listIdx));
   }
 }

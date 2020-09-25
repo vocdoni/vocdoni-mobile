@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 
 class Analytics {
   final _user$ = StreamController<String>.broadcast();
@@ -34,7 +34,7 @@ class Analytics {
   }
 
   getUserId() {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (!(currentAccount is AccountModel))
       return null;
     else if (!currentAccount.identity.hasValue)

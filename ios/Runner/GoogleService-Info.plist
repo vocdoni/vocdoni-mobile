@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>589578635815-hu1e8mfuhstffhropjedtt9v9miukjjm.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.589578635815-hu1e8mfuhstffhropjedtt9v9miukjjm</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>589578635815-jdn0lajsnrjgv7o4pl6sb5deq7ssrk25.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBEGHag_Qzfhd2FDNGyiWbokBKaXr4vyBg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>589578635815</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.vocdoni.app</string>
+	<key>PROJECT_ID</key>
+	<string>vocdoni-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vocdoni-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:589578635815:ios:732b5153570205eba7dc02</string>
+	<key>DATABASE_URL</key>
+	<string>https://vocdoni-app.firebaseio.com</string>
+</dict>
+</plist>

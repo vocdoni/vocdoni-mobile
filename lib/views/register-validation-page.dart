@@ -6,7 +6,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -40,14 +40,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
   void initState() {
     super.initState();
 
-    globalAnalytics.trackPage("RegisterValidationPage");
+    Globals.analytics.trackPage("RegisterValidationPage");
 
     _currentStep = Steps.READY;
   }
 
   // STEP 1
   void stepConfirmToken(BuildContext context) async {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     setState(() => _currentStep = Steps.AUTHORIZE_ACTION);
@@ -74,7 +74,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
   // STEP 2
   void stepSendRequest(BuildContext context, String patternLockKey) async {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     setState(() => _currentStep = Steps.CONFIRM_TOKEN);
 
     try {
@@ -130,7 +130,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
-        showMessage(getText(context, "main.theRegistrationCouldNotBeCompleted"),
+        showMessage(getText(context, "error.theRegistrationCouldNotBeCompleted"),
             purpose: Purpose.DANGER, context: context);
       }
     }

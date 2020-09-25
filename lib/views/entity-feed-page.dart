@@ -1,9 +1,9 @@
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -30,11 +30,11 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     try {
       entityModel = ModalRoute.of(context).settings.arguments;
       if (entityModel is EntityModel) {
-        globalAnalytics.trackPage("EntityFeedPage",
+        Globals.analytics.trackPage("EntityFeedPage",
             entityId: entityModel.reference.entityId);
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 
@@ -76,7 +76,7 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 getText(context, "error.theMetadataIsNotAvailable"));
 
           final lang = entityModel.metadata.value.languages[0] ??
-              globalAppState.currentLanguage;
+              Globals.appState.currentLanguage;
 
           return Scaffold(
             appBar: TopNavigation(title: entityModel.metadata.value.name[lang]),
@@ -106,10 +106,10 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
                 onRefresh: _onRefresh,
                 child: ListView.builder(
                   itemCount: entityModel.feed.value.items.length ?? 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    final post = entityModel.feed.value.items[index];
+                  itemBuilder: (BuildContext context, int idx) {
+                    final post = entityModel.feed.value.items[idx];
 
-                    return CardPost(entityModel, post, index);
+                    return CardPost(post, entityModel, idx);
                   },
                 ),
               );

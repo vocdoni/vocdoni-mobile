@@ -5,7 +5,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
@@ -27,12 +27,12 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("HomeIdentityTab");
+    Globals.analytics.trackPage("HomeIdentityTab");
   }
 
   @override
   Widget build(ctx) {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) return buildEmpty(ctx);
 
     // Rebuild whenever the identity is updated
@@ -100,14 +100,14 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   showIdentityBackup(BuildContext ctx) async {
     final encryptedMnemonic =
-        globalAppState.currentAccount.identity.value.keys[0].encryptedMnemonic;
+        Globals.appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
 
     var patternEncryptionKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) =>
-                PatternPromptModal(globalAppState.currentAccount)));
+                PatternPromptModal(Globals.appState.currentAccount)));
 
     if (patternEncryptionKey == null)
       return;
@@ -122,11 +122,11 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
     Navigator.pushNamed(ctx, "/identity/backup",
         arguments: IdentityBackupArguments(
-            globalAppState.currentAccount.identity.value.alias, mnemonic));
+            Globals.appState.currentAccount.identity.value.alias, mnemonic));
   }
 
   onLogOut(BuildContext ctx) async {
-    globalAppState.currentAccount?.cleanEphemeral();
+    Globals.appState.currentAccount?.cleanEphemeral();
 
     Navigator.pushNamedAndRemoveUntil(
         ctx, "/identity/select", (Route _) => false);

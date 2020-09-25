@@ -8,8 +8,8 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/toast.dart';
-import '../lib/singletons.dart';
 import 'identity-create-page.dart';
+import '../lib/globals.dart';
 
 class IdentitySelectPage extends StatefulWidget {
   @override
@@ -20,7 +20,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   @override
   void initState() {
     super.initState();
-    globalAnalytics.trackPage("IdentitySelectPage");
+    Globals.analytics.trackPage("IdentitySelectPage");
   }
 
   @override
@@ -34,7 +34,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Section(text: getText(context, "main.selectAnIdentity")),
-                      buildExistingIdentities(context, globalAccountPool.value),
+                      buildExistingIdentities(
+                          context, Globals.accountPool.value),
                       SizedBox(height: 50),
                       Section(text: getText(context, "main.addAnIdentity")),
                       ListItem(
@@ -42,8 +43,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                           icon: FeatherIcons.plusCircle,
                           onTap: () => createNew(context)),
                       ListItem(
-                          mainText:
-                              getText(context, "main.restoreAnExistingIdentity"),
+                          mainText: getText(
+                              context, "main.restoreAnExistingIdentity"),
                           icon: FeatherIcons.rotateCw,
                           onTap: () => restorePreviousIdentity(context)),
                     ],
@@ -97,12 +98,12 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
-    globalAppState.selectAccount(accountIdx);
-    if (globalAppState.currentAccount is! AccountModel)
+    Globals.appState.selectAccount(accountIdx);
+    if (Globals.appState.currentAccount is! AccountModel)
       throw Exception("No account available");
 
-    globalAppState.currentAccount.cleanEphemeral();
-    globalAppState.currentAccount.refresh(
+    Globals.appState.currentAccount.cleanEphemeral();
+    Globals.appState.currentAccount.refresh(
         force: false, patternEncryptionKey: lockPattern); // detached async
 
     // Replace all routes with /home on top

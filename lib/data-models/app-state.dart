@@ -2,11 +2,11 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 
 /// AppStateModel handles the global state of the application.
 ///
@@ -24,13 +24,13 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   // INTERNAL DATA HANDLERS
 
   selectAccount(int accountIdx) {
-    if (!globalAccountPool.hasValue || globalAccountPool.value.length == 0)
+    if (!Globals.accountPool.hasValue || Globals.accountPool.value.length == 0)
       throw Exception("No account is ready to be used");
     else if (accountIdx == selectedAccount.value) return;
 
     if (!(accountIdx is int) ||
         accountIdx < 0 ||
-        accountIdx >= globalAccountPool.value.length) {
+        accountIdx >= Globals.accountPool.value.length) {
       throw Exception("Index out of bounds");
     }
     this.selectedAccount.setValue(accountIdx);
@@ -44,10 +44,10 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     // Gateway boot nodes
     try {
       this.bootnodeInfo.setToLoading();
-      final gwList = globalBootnodesPersistence.get();
+      final gwList = Globals.bootnodesPersistence.get();
       this.bootnodeInfo.setValue(gwList);
     } catch (err) {
-      devPrint(err);
+      log(err);
       this
           .bootnodeInfo
           .setError("Cannot read the app state", keepPreviousValue: true);
@@ -61,12 +61,12 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     try {
       // Gateway boot nodes
       if (this.bootnodeInfo.hasValue)
-        await globalBootnodesPersistence.write(this.bootnodeInfo.value);
+        await Globals.bootnodesPersistence.write(this.bootnodeInfo.value);
       else
-        await globalBootnodesPersistence
+        await Globals.bootnodesPersistence
             .write(BootNodeGateways()); // empty data
     } catch (err) {
-      devPrint(err);
+      log(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -80,7 +80,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       await this.writeToStorage();
     } catch (err) {
-      devPrint("ERR: $err");
+      log("ERR: $err");
       throw err;
     }
   }
@@ -92,15 +92,15 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      devPrint("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
+      log("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
       final bnGatewayInfo =
           await fetchBootnodeInfo(AppConfig.GATEWAY_BOOTNODES_URL);
 
-      devPrint("[App] Gateway discovery");
+      log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
           networkId: AppConfig.NETWORK_ID);
 
-      devPrint("[App] Gateway Pool ready");
+      log("[App] Gateway Pool ready");
       AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);
 
       this.bootnodeInfo.setValue(bnGatewayInfo);
@@ -116,11 +116,11 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   get currentLanguage => "default";
 
   AccountModel get currentAccount {
-    if (!globalAccountPool.hasValue)
+    if (!Globals.accountPool.hasValue)
       return null;
-    else if (globalAccountPool.value.length <= selectedAccount.value ||
+    else if (Globals.accountPool.value.length <= selectedAccount.value ||
         selectedAccount.value < 0) return null;
 
-    return globalAccountPool.value[selectedAccount.value];
+    return Globals.accountPool.value[selectedAccount.value];
   }
 }

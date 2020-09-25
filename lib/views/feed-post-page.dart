@@ -1,11 +1,11 @@
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -14,10 +14,9 @@ import 'package:url_launcher/url_launcher.dart';
 class FeedPostArgs {
   final EntityModel entity;
   final FeedPost post;
-  final int index;
+  final int listIdx;
 
-  FeedPostArgs(
-      {@required this.entity, @required this.post, @required this.index});
+  FeedPostArgs({@required this.entity, @required this.post, this.listIdx = 0});
 }
 
 class FeedPostPage extends StatefulWidget {
@@ -36,12 +35,12 @@ class _FeedPostPageState extends State<FeedPostPage> {
       this.args = ModalRoute.of(super.context).settings.arguments;
 
       if (args != null) {
-        globalAnalytics.trackPage("FeedPostPage",
+        Globals.analytics.trackPage("FeedPostPage",
             entityId: args.entity.reference.entityId,
             postTitle: args.post.title);
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 
@@ -49,15 +48,16 @@ class _FeedPostPageState extends State<FeedPostPage> {
   Widget build(ctx) {
     FeedPost post = args.post;
     EntityModel entity = args.entity;
-    int index = args.index ?? 0;
+    final listIdx = args.listIdx ?? 0;
 
     if (post == null) return buildNoPost(ctx);
 
     return ScaffoldWithImage(
         headerImageUrl: post.image,
-        headerTag: makeElementTag(entity.reference.entityId, post.id, index),
+        headerTag: makeElementTag(entity.reference.entityId, post.id, listIdx),
         avatarUrl: entity.metadata.value.media.avatar,
-        avatarText: entity.metadata.value.name[globalAppState.currentLanguage],
+        avatarText:
+            entity.metadata.value.name[Globals.appState.currentLanguage],
         avatarHexSource: post.id,
         appBarTitle: getText(context, "main.post"),
         //actionsBuilder: actionsBuilder,

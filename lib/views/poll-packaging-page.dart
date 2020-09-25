@@ -4,10 +4,10 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -37,14 +37,14 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void initState() {
     super.initState();
 
-    globalAnalytics.trackPage("PollPackagingPage",
+    Globals.analytics.trackPage("PollPackagingPage",
         entityId: widget.process.entityId, processId: widget.process.processId);
 
     _currentStep = 0;
   }
 
   void stepMakeEnvelope(BuildContext context) async {
-    final currentAccount = globalAppState.currentAccount;
+    final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
     final patternLockKey = await Navigator.push(
@@ -103,7 +103,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
         return;
       else if (!(merkleProof is String)) throw Exception("Empty census proof");
     } catch (err) {
-      devPrint(err);
+      log(err);
 
       showMessage(getText(context, "main.theCensusCouldNotBeChecked"),
           context: context);
@@ -150,8 +150,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       stepSendVote(context);
     } catch (err) {
-      devPrint("stepMakeEnvelope error: $err");
-      showMessage(getText(context, "main.theVoteDataCouldNotBePrepared"),
+      log("stepMakeEnvelope error: $err");
+      showMessage(getText(context, "error.theVoteDataCouldNotBePrepared"),
           context: context);
       setState(() {
         _currentStep = 0;
@@ -173,7 +173,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       if (!mounted) return;
 
       setState(() => _currentStep = 0);
-      showMessage(getText(context, "main.theVoteCouldNotBeDelivered"),
+      showMessage(getText(context, "error.theVoteCouldNotBeDelivered"),
           purpose: Purpose.DANGER, context: context);
     }
   }
@@ -197,8 +197,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
           widget.process.hasVoted.value == false) {
         setState(() => _currentStep = 0);
         showMessage(
-            getText(
-                context, "main.theStatusOfTheEnvelopeCouldNotBeValidated"),
+            getText(context, "error.theStatusOfTheEnvelopeCouldNotBeValidated"),
             context: context,
             purpose: Purpose.WARNING);
         return;
@@ -207,7 +206,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // DONE!
       setState(() => _currentStep = 4);
     } catch (err) {
-      showMessage(getText(context, "main.theVoteDeliveryCouldNotBeChecked"),
+      showMessage(getText(context, "error.theVoteDeliveryCouldNotBeChecked"),
           purpose: Purpose.DANGER, context: context);
 
       if (mounted) setState(() => _currentStep = 0);

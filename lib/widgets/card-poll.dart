@@ -5,7 +5,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -19,10 +19,9 @@ import 'package:dvote_common/widgets/spinner.dart';
 class CardPoll extends StatefulWidget {
   final ProcessModel process;
   final EntityModel entity;
-  final int index;
+  final int listIdx;
 
-  CardPoll(
-      {@required this.process, @required this.entity, @required this.index});
+  CardPoll(this.process, this.entity, [this.listIdx = 0]);
 
   @override
   _CardPollState createState() => _CardPollState();
@@ -39,7 +38,7 @@ class _CardPollState extends State<CardPoll> {
         .refreshCurrentParticipants()
         .then((_) => this.widget.process.refreshCensusSize())
         .then((_) => this.widget.process.refreshDates())
-        .catchError((err) => devPrint(err));
+        .catchError((err) => log(err));
   }
 
   @override
@@ -117,7 +116,7 @@ class _CardPollState extends State<CardPoll> {
       imageTag: makeElementTag(
           this.widget.entity.reference.entityId,
           this.widget.process.metadata.value?.meta[META_PROCESS_ID],
-          this.widget.index),
+          this.widget.listIdx),
       children: <Widget>[
         DashboardRow(
           children: <Widget>[
@@ -205,6 +204,6 @@ class _CardPollState extends State<CardPoll> {
         arguments: PollPageArgs(
             entity: this.widget.entity,
             process: this.widget.process,
-            index: this.widget.index));
+            listIdx: this.widget.listIdx));
   }
 }

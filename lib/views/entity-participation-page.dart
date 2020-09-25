@@ -1,10 +1,10 @@
 import 'package:vocdoni/data-models/process.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/util.dart';
+import "dart:developer";
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/singletons.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -27,13 +27,13 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
     try {
       if (entityModel is EntityModel) {
-        globalAnalytics.trackPage("EntityParticipationPage",
+        Globals.analytics.trackPage("EntityParticipationPage",
             entityId: entityModel.reference.entityId);
       } else {
         entityModel = ModalRoute.of(context).settings.arguments;
       }
     } catch (err) {
-      devPrint(err);
+      log(err);
     }
   }
 
@@ -71,7 +71,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
           }
 
           final lang = entityModel.metadata.value.languages[0] ??
-              globalAppState.currentLanguage;
+              Globals.appState.currentLanguage;
 
           final availableProcesses = List<ProcessModel>();
           if (entityModel.processes.hasValue) {
@@ -106,11 +106,10 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
               onRefresh: _onRefresh,
               child: ListView.builder(
                 itemCount: availableProcesses.length ?? 0,
-                itemBuilder: (BuildContext ctx, int index) {
-                  final process = availableProcesses[index];
+                itemBuilder: (BuildContext ctx, int idx) {
+                  final process = availableProcesses[idx];
 
-                  return CardPoll(
-                      entity: entityModel, process: process, index: index);
+                  return CardPoll(process, entityModel, idx);
                 },
               ),
             ),

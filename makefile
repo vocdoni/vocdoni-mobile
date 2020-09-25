@@ -77,14 +77,14 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 
 ## run: Run the app on the active (Android) device or simulator  [DEV]
 .PHONY: run
-run: 
+run: config-dev
 	flutter run \
 		--flavor dev \
 		--dart-define=APP_MODE=dev
 
 ## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
 .PHONY: run-ios
-run-ios: 
+run-ios: config-dev
 	flutter run \
 		--dart-define=APP_MODE=dev
 
@@ -92,7 +92,7 @@ run-ios:
 
 ## apk-beta: Compile the Android APK  [BETA]
 .PHONY: apk-beta
-apk-beta:
+apk-beta: config
 	flutter build apk \
 		--dart-define=APP_MODE=beta \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -104,7 +104,7 @@ apk-beta:
 
 ## appbundle-beta: Compile the app bundle for Google Play  [BETA]
 .PHONY: appbundle-beta
-appbundle-beta:
+appbundle-beta: config
 	flutter build appbundle \
 		--dart-define=APP_MODE=beta \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -117,7 +117,7 @@ appbundle-beta:
 
 ## apk: Compile the Android APK  [PROD]
 .PHONY: apk
-apk:
+apk: config
 	flutter build apk \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -130,7 +130,7 @@ apk:
 
 ## appbundle: Compile the app bundle for Google Play  [PROD]
 .PHONY: appbundle
-appbundle:
+appbundle: config
 	flutter build appbundle \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -142,13 +142,17 @@ appbundle:
 
 ## ios: Open the iOS Runner.app for archiving  [PROD]
 .PHONY: ios
-ios:
+ios: config
 	flutter build ios \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
 		--dart-define=NETWORK_ID=xdai \
 		--dart-define=LINKING_DOMAIN=vocdoni.link
+	#FLUTTER_BUILD_MODE=release make ios/Flutter/Generated.xcconfig
 	open ios/Runner.xcworkspace/
+
+#ios/Flutter/Generated.xcconfig: pubspec.yaml pubspec.lock
+#	$$(which flutter | sed 's/bin\/flutter/packages\/flutter_tools\/bin\/xcode_backend.sh/g')
 
 ## :
 
@@ -167,6 +171,18 @@ launch-android-org:
 # ## launch-android-sign: Launch a URI requesting to sign a payload on Android
 # launch-android-sign:
 # 	adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "vocdoni://vocdoni.app/signature?payload=Hello%20World&returnUri=https%3A%2F%2Fvocdoni.io%2F"'
+
+# Firebase config files by environment
+
+.PHONY: config
+config:
+	cp notifications/production/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
+	cp notifications/production/google-services.json android/app/google-services.json
+
+.PHONY: config-dev
+config-dev:
+	cp notifications/dev/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
+	cp notifications/dev/google-services.json android/app/google-services.json
 
 ## :
 ## clean: Clean build artifacts
