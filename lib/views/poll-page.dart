@@ -41,6 +41,7 @@ class _PollPageState extends State<PollPage> {
   EntityModel entity;
   ProcessModel process;
   int listIdx;
+  int selectedTab = 0;
   List<int> choices = [];
 
   @override
@@ -146,6 +147,12 @@ class _PollPageState extends State<PollPage> {
     process.refreshIsInCensus(force: true);
   }
 
+  onTabSelect(int idx) {
+    setState(() {
+      selectedTab = idx;
+    });
+  }
+
   @override
   Widget build(context) {
     if (entity == null) return buildEmptyPoll(context);
@@ -173,7 +180,7 @@ class _PollPageState extends State<PollPage> {
           avatarText:
               entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
-          appBarTitle: getText(context, "main.vote"),
+          appBarTitle: getTabName(selectedTab),
           actionsBuilder: (context) => [
             buildShareButton(context, process.processId),
           ],
@@ -242,6 +249,11 @@ class _PollPageState extends State<PollPage> {
           .metadata.value.details.description[Globals.appState.currentLanguage],
       maxLines: 5,
     );
+  }
+
+  Widget buildTabSelect(BuildContext context) {
+    return ProcessNavigation(
+        onTabSelect: onTabSelect, selectedTab: selectedTab);
   }
 
   buildCensusItem(BuildContext context) {
@@ -552,6 +564,7 @@ class _PollPageState extends State<PollPage> {
 
     if (question.type == "single-choice") {
       items.add(Section(text: (questionIndex + 1).toString()));
+      items.add(buildTabSelect(context));
       items.add(buildQuestionTitle(question, questionIndex));
 
       List<Widget> options = new List<Widget>();
@@ -629,5 +642,43 @@ class _PollPageState extends State<PollPage> {
 
   goBack(BuildContext ctx) {
     Navigator.pop(ctx, false);
+  }
+
+  String getTabName(int idx) {
+    if (idx == 0)
+      return getText(context, "main.vote");
+    else if (idx == 1)
+      return getText(context, "main.pollResults");
+    else
+      return "";
+  }
+}
+
+class ProcessNavigation extends StatelessWidget {
+  final int selectedTab;
+  final Function onTabSelect;
+
+  ProcessNavigation({this.selectedTab, this.onTabSelect});
+
+  @override
+  Widget build(context) {
+    return BottomNavigationBar(
+      elevation: .2,
+      backgroundColor: colorBaseBackground,
+      onTap: (index) {
+        if (onTabSelect is Function) onTabSelect(index);
+      },
+      currentIndex: selectedTab,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          title: Text(''),
+          icon: Icon(FeatherIcons.clipboard),
+        ),
+        BottomNavigationBarItem(
+          title: Text(''),
+          icon: Icon(FeatherIcons.pieChart),
+        ),
+      ],
+    );
   }
 }
