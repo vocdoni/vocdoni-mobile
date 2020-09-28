@@ -443,7 +443,7 @@ class _PollPageState extends State<PollPage> {
             purpose: Purpose.WARNING,
             rightIcon: null,
           );
-        } else if (!process.isInCensus.value) {
+        } else if (process.isInCensus.hasValue && !process.isInCensus.value) {
           return ListItem(
             mainText: getText(context, "error.youAreNotInTheCensus"),
             secondaryText: getText(context,
