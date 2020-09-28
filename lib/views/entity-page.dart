@@ -286,11 +286,11 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
       ],
       builder: (context, _, __) {
         widget.entityModel.metadata.value.meta;
-        final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+        final wantsNotifications = widget.entityModel.hasNotificationsEnabled();
 
         return ListItem(
-            icon: isSubscribed ? FeatherIcons.bell : FeatherIcons.bellOff,
-            mainText: isSubscribed
+            icon: wantsNotifications ? FeatherIcons.bell : FeatherIcons.bellOff,
+            mainText: wantsNotifications
                 ? getText(context, "main.notifyActivity")
                 : getText(context, "main.ignoreActivity"),
             rightText: "",
@@ -513,21 +513,21 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   toggleNotificationsSubscription(BuildContext context) async {
-    final isSubscribed = widget.entityModel.isSubscribedToNotifications();
+    final isSubscribed = widget.entityModel.hasNotificationsEnabled();
 
     try {
       if (isSubscribed)
-        await widget.entityModel.notificationsUnsubscribe();
+        await widget.entityModel.disableNotifications();
       else
-        await widget.entityModel.notificationsSubscribe();
+        await widget.entityModel.enableNotifications();
 
       final msg = isSubscribed
           ? getText(context, "main.notificationsHaveBeenDisabledForTheEntity")
           : getText(context, "main.notificationsHaveBeenEnabledForTheEntity");
       showMessage(msg, context: context, purpose: Purpose.GOOD);
     } catch (err) {
-      final msg = getText(
-          context, "error.theNotificationSettingsCouldNotBeUpdated");
+      final msg =
+          getText(context, "error.theNotificationSettingsCouldNotBeUpdated");
       showMessage(msg, context: context, purpose: Purpose.WARNING);
     }
   }

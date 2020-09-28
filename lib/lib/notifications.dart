@@ -167,12 +167,14 @@ class Notifications {
 
   // TOPICS
 
+  /// Instructs the notifications service to notify about the given topic
   static Future<void> subscribe(String topic) {
     if (_firebaseMessaging == null) init();
 
     return _firebaseMessaging.subscribeToTopic(topic);
   }
 
+  /// Instructs the notifications service to stop notifying about the given topic
   static Future<void> unsubscribe(String topic) {
     if (_firebaseMessaging == null) init();
 

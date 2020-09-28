@@ -537,7 +537,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
   /// Sends a request to receive notifications for the given entity.
   /// It also stores a key/value to remember the active subscription.
-  Future<void> notificationsSubscribe() async {
+  Future<void> enableNotifications() async {
     if (!metadata.hasValue)
       throw Exception("The model has no metadata yet");
     else if (Globals.appState.currentAccount == null)
@@ -568,9 +568,9 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  /// Sends a request to stop receiving notifications for the given entity.
-  /// It also updates the key/value of the entity model to remove the subscription.
-  Future<void> notificationsUnsubscribe() async {
+  /// Removes the active account from the entity's notification subscribers.
+  /// If no other account wants notifications from the entity, a request is made to stop receiving them at all.
+  Future<void> disableNotifications() async {
     if (!metadata.hasValue)
       throw Exception("The model has no metadata yet");
     else if (Globals.appState.currentAccount == null)
@@ -582,18 +582,44 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       final accountAddr =
           Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
 
+      // Check if other identities are also registered
       String key, topic;
-      await Future.wait(
-          Notifications.supportedNotificationEvents.map((element) {
-        key = Notifications.getMetaKeyForAccount(accountAddr, element);
-        topic = Notifications.getTopicForEntity(reference.entityId, element);
+      final topicsToPreserve = <String>[];
+      for (final existingAccount in Globals.accountPool.value) {
+        if (!existingAccount.identity.hasValue ||
+            !existingAccount.entities.hasValue ||
+            existingAccount.identity.value.keys.length == 0)
+          continue;
+        // skip ourselves
+        else if (existingAccount.identity.value.keys[0].rootAddress ==
+            accountAddr) continue;
 
-        metadata.value.meta[key] = "";
+        // does he/she has notifications enabled?
+        Notifications.supportedNotificationEvents.forEach((event) {
+          key = Notifications.getMetaKeyForAccount(accountAddr, event);
+          if (metadata.value.meta.containsKey(key)) {
+            topic = Notifications.getTopicForEntity(reference.entityId, event);
+            topicsToPreserve.add(topic);
+          }
+        });
+      }
+
+      // Remove notifications for the entity topics that nobody else wants
+      await Future.wait(Notifications.supportedNotificationEvents.map((event) {
+        // Remove the topic annotation for the user
+        key = Notifications.getMetaKeyForAccount(accountAddr, event);
+        metadata.value.meta.remove(key);
+
+        // Skip if someone else still wants to be notified
+        topic = Notifications.getTopicForEntity(reference.entityId, event);
+        if (topicsToPreserve.contains(topic)) return Future.value(); // keep
+
         return Notifications.unsubscribe(topic);
       }));
 
-      notificationTopics.value = null;
-      metadata.notifyChange();
+      notificationTopics.value = null; // repaint the UI
+      metadata.notifyChange(); // repaint the UI
+
       Globals.entityPool.writeToStorage();
     } catch (err) {
       print(err);
@@ -602,8 +628,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
-  /// Determines whether an active subscription to the entity's notifications exists
-  bool isSubscribedToNotifications() {
+  /// Determines whether the current account has push notifications enabled for the entity
+  bool hasNotificationsEnabled() {
     if (!metadata.hasValue)
       return false;
     else if (Globals.appState.currentAccount == null) return false;
