@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "277423936337",
+    "firebase_url": "https://vocdoni-app-beta.firebaseio.com",
+    "project_id": "vocdoni-app-beta",
+    "storage_bucket": "vocdoni-app-beta.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:277423936337:android:93b844aff921c139fcf970",
+        "android_client_info": {
+          "package_name": "org.vocdoni.app.beta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "277423936337-tnmb4fc395age8psmal3n8gsn4kt4egb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2HJ9-Fv6-aB3kHvCUvzvlE3wkM-MIKr8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "277423936337-tnmb4fc395age8psmal3n8gsn4kt4egb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "277423936337-5qnsqeio48m0o1q1p4nj24lk6nrdifa1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vocdoni.app.beta"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

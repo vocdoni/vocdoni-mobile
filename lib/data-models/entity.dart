@@ -260,9 +260,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
-        // Preserve old `meta` key/values
-        for (var k in metadata.value.meta.keys) {
-          freshEntityMetadata.meta[k] = metadata.value.meta[k];
+        if (this.metadata.hasValue) {
+          // Preserve old `meta` key/values
+          for (var k in metadata.value.meta.keys) {
+            freshEntityMetadata.meta[k] = metadata.value.meta[k];
+          }
         }
 
         log("- [Entity meta] Refreshing [DONE] [${reference.entityId}]");
