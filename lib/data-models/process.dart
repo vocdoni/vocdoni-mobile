@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote/wrappers/process-results.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -179,6 +180,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   final String lang = "default";
 
   final metadata = EventualNotifier<ProcessMetadata>();
+  final results = EventualNotifier<ProcessResultsDigested>()
+      .withFreshnessTimeout(Duration(minutes: 1));
   final isInCensus =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
   final hasVoted =
@@ -205,6 +208,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       metadata.meta[META_ENTITY_ID] = this.entityId;
       this.metadata.setDefaultValue(metadata);
     }
+
     if (isInCensus is bool) this.isInCensus.setDefaultValue(isInCensus);
     if (hasVoted is bool) this.hasVoted.setDefaultValue(hasVoted);
     if (currentParticipants is int)
@@ -251,6 +255,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     return refreshMetadata(force: force)
         .catchError((_) {}) // update what we can
+        .then((_) => refreshResults(force: force))
+        .catchError((_) {}) // update what we can
         .then((_) => refreshIsInCensus(force: force))
         .catchError((_) {})
         .then((_) => refreshHasVoted(force: force))
@@ -294,6 +300,33 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     }
   }
 
+  Future<void> refreshResults({bool force = false}) async {
+    if (!this.metadata.hasValue)
+      return;
+    else if (!force && this.results.isFresh)
+      return;
+    else if (!force && this.results.isLoading) return;
+
+    log("- [Process results] Refreshing [${this.processId}]");
+
+    try {
+      this.results.setToLoading();
+      final newResults = await getResultsDigest(
+          this.processId, AppNetworking.pool,
+          meta: this.metadata.value);
+      if (!(newResults is ProcessResultsDigested))
+        throw Exception("The process cannot be found");
+
+      log("- [Process results] Refreshing DONE [${this.processId}]");
+
+      this.results.setValue(newResults);
+    } catch (err) {
+      log("- [Process results] Refreshing ERROR: $err [${this.processId}]");
+
+      this.results.setError("error.couldNotFetchTheProcessResults");
+    }
+  }
+
   Future<void> refreshIsInCensus({bool force = false}) async {
     if (!this.metadata.hasValue)
       return;
@@ -308,8 +341,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
-      log(
-          "The public key is not loaded yet for the entity " + this.entityId);
+      log("The public key is not loaded yet for the entity " + this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
@@ -349,13 +381,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final valid = await checkProof(this.metadata.value.census.merkleRoot,
           censusPublicKeyClaim, alreadyDigested, proof, AppNetworking.pool);
 
-      log(
-          "- [Process census presence] Refreshing DONE [${this.processId}]");
+      log("- [Process census presence] Refreshing DONE [${this.processId}]");
 
       this.isInCensus.setValue(valid);
     } catch (err) {
-      log(
-          "- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
+      log("- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
 
       // NOTE: Leave the comment to enforce i18n parsing
       // getText(context, "error.theCensusIsNotAvailable")
@@ -375,8 +405,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
-      log(
-          "The public key is not loaded yet for the entity " + this.entityId);
+      log("The public key is not loaded yet for the entity " + this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
@@ -435,8 +464,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     return getCensusSize(
             this.metadata.value.census.merkleRoot, AppNetworking.pool)
         .then((size) {
-      log(
-          "- [Process census] Refreshing DONE: size $size [${this.processId}]");
+      log("- [Process census] Refreshing DONE: size $size [${this.processId}]");
 
       return this.censusSize.setValue(size);
     }).catchError((err) {
@@ -463,8 +491,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
       return this.currentParticipants.setValue(numVotes);
     }).catchError((err) {
-      log(
-          "- [Process participants] Refreshing ERROR: $err [${this.processId}]");
+      log("- [Process participants] Refreshing ERROR: $err [${this.processId}]");
 
       this.currentParticipants.setError("The process info is not available");
     });

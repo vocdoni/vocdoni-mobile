@@ -1,3 +1,4 @@
+import 'package:dvote/wrappers/process-results.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -11,11 +12,13 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import "dart:developer";
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
+import 'package:rainbow_color/rainbow_color.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:dvote_common/widgets/summary.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -41,7 +44,6 @@ class _PollPageState extends State<PollPage> {
   EntityModel entity;
   ProcessModel process;
   int listIdx;
-  int selectedTab = 0;
   List<int> choices = [];
 
   @override
@@ -94,6 +96,7 @@ class _PollPageState extends State<PollPage> {
   Future<void> onRefresh() {
     return process
         .refreshHasVoted()
+        .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshDates())
         .catchError((err) => log(err)); // Values will refresh if needed
@@ -147,12 +150,6 @@ class _PollPageState extends State<PollPage> {
     process.refreshIsInCensus(force: true);
   }
 
-  onTabSelect(int idx) {
-    setState(() {
-      selectedTab = idx;
-    });
-  }
-
   @override
   Widget build(context) {
     if (entity == null) return buildEmptyPoll(context);
@@ -180,7 +177,7 @@ class _PollPageState extends State<PollPage> {
           avatarText:
               entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
-          appBarTitle: getTabName(selectedTab),
+          appBarTitle: getText(context, "main.vote"),
           actionsBuilder: (context) => [
             buildShareButton(context, process.processId),
           ],
@@ -249,11 +246,6 @@ class _PollPageState extends State<PollPage> {
           .metadata.value.details.description[Globals.appState.currentLanguage],
       maxLines: 5,
     );
-  }
-
-  Widget buildTabSelect(BuildContext context) {
-    return ProcessNavigation(
-        onTabSelect: onTabSelect, selectedTab: selectedTab);
   }
 
   buildCensusItem(BuildContext context) {
@@ -358,12 +350,6 @@ class _PollPageState extends State<PollPage> {
         );
       },
     );
-  }
-
-  setChoice(int questionIndex, int value) {
-    setState(() {
-      choices[questionIndex] = value;
-    });
   }
 
   /// Returns the 0-based index of the next unanswered question.
@@ -551,62 +537,26 @@ class _PollPageState extends State<PollPage> {
 
     for (ProcessMetadata_Details_Question question
         in process.metadata.value.details.questions) {
-      items.addAll(buildQuestion(question, questionIndex));
+      items.add(PollQuestion(
+          question, questionIndex, choices, process, process.isInCensus.value));
       questionIndex++;
     }
 
     return items;
   }
 
-  List<Widget> buildQuestion(
-      ProcessMetadata_Details_Question question, int questionIndex) {
-    List<Widget> items = new List<Widget>();
+  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
+    return ListItem(
+      mainText: question.question['default'],
+      mainTextMultiline: 3,
+      secondaryText: question.description['default'],
+      secondaryTextMultiline: 100,
+      rightIcon: null,
+    );
+  }
 
-    if (question.type == "single-choice") {
-      items.add(Section(text: (questionIndex + 1).toString()));
-      items.add(buildTabSelect(context));
-      items.add(buildQuestionTitle(question, questionIndex));
-
-      List<Widget> options = new List<Widget>();
-      question.voteOptions.forEach((voteOption) {
-        options.add(Padding(
-          padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-          child: ChoiceChip(
-            backgroundColor: colorLightGuide,
-            selectedColor: colorBlue,
-            padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-            label: Text(
-              voteOption.title['default'],
-              overflow: TextOverflow.ellipsis,
-              maxLines: 5,
-              style: TextStyle(
-                  fontSize: fontSizeSecondary,
-                  fontWeight: fontWeightRegular,
-                  color: choices[questionIndex] == voteOption.value
-                      ? Colors.white
-                      : colorDescription),
-            ),
-            selected: choices[questionIndex] == voteOption.value,
-            onSelected: (bool selected) {
-              if (selected) {
-                setChoice(questionIndex, voteOption.value);
-              }
-            },
-          ),
-        ));
-      });
-
-      items.add(
-        Column(
-          children: options,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-      );
-    } else {
-      print("ERROR: Question type not supported: " + question.type);
-      buildError(getText(context, "main.questionTypeNotSupported"));
-    }
-    return items;
+  goBack(BuildContext ctx) {
+    Navigator.pop(ctx, false);
   }
 
   buildError(String error) {
@@ -629,6 +579,256 @@ class _PollPageState extends State<PollPage> {
       ),
     );
   }
+}
+
+class PollQuestion extends StatefulWidget {
+  final ProcessMetadata_Details_Question question;
+  final ProcessModel process;
+  final List<int> choices;
+  final int questionIndex;
+  final bool isInCensus;
+  final rb = Rainbow(spectrum: [
+    colorRedPale.withOpacity(0.6),
+    colorBluePale.withOpacity(0.7),
+    colorGreenPale.withOpacity(0.9)
+  ], rangeStart: 0, rangeEnd: 1);
+
+  PollQuestion(this.question, this.questionIndex, this.choices, this.process,
+      this.isInCensus);
+
+  @override
+  _PollQuestionState createState() => _PollQuestionState();
+}
+
+class _PollQuestionState extends State<PollQuestion> {
+  ProcessResultsDigested results;
+  Timer refreshCheck;
+  int selectedTab = 0;
+  int totalVotes = 0;
+  bool canVote;
+  bool canSeeResults;
+
+  @override
+  void initState() {
+    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
+    super.initState();
+    widget.process.refreshResults();
+    results = widget.process.results.value;
+    // If results are available, process must be decrypted or unencrypted, so results can be displayed
+    if (results?.questions?.isEmpty ?? true) {
+      canSeeResults = false;
+    } else {
+      canSeeResults = true;
+    }
+    // If poll is open, and voter is in census, canVote is true
+    if ((results?.state?.contains("open") ?? false) && widget.isInCensus) {
+      canVote = true;
+    } else {
+      canVote = false;
+    }
+    if (!canVote) {
+      selectedTab = 1;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (refreshCheck is Timer) refreshCheck.cancel();
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    await onRefresh();
+  }
+
+  Future<void> onRefresh() {
+    return widget.process
+        .refreshResults()
+        .catchError((err) => log(err)); // Values will refresh if needed
+  }
+
+  @override
+  Widget build(context) {
+    return EventualBuilder(
+        notifiers: [widget.process.metadata, widget.process.results],
+        builder: (context, _, __) {
+          List<Widget> items = new List<Widget>();
+
+          if (widget.question.type == "single-choice") {
+            items.add(Section(text: (widget.questionIndex + 1).toString()));
+            items
+                .add(buildQuestionTitle(widget.question, widget.questionIndex));
+            items.add(buildTabSelect(context));
+
+            List<Widget> options = new List<Widget>();
+            if (!canVote && !canSeeResults) {
+              widget.question.voteOptions.forEach((voteOption) {
+                options.add(buildDisabledPollOption(voteOption));
+              });
+            } else if (selectedTab > 1) {
+              print("ERROR: Tab index not supported: $selectedTab");
+              buildError(getText(context, "main.questionTypeNotSupported"));
+            } else if (selectedTab == 0) {
+              widget.question.voteOptions.forEach((voteOption) {
+                options.add(buildPollOption(voteOption));
+              });
+            } else if (selectedTab == 1) {
+              totalVotes = 0;
+              results.questions[widget.questionIndex].voteResults
+                  .forEach((element) {
+                totalVotes += element.votes;
+              });
+              widget.question.voteOptions.asMap().forEach((index, voteOption) {
+                options.add(buildPollResultsOption(index, voteOption));
+              });
+            }
+
+            items.add(
+              Column(
+                children: options,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            );
+          } else {
+            print(
+                "ERROR: Question type not supported: " + widget.question.type);
+            buildError(getText(context, "main.questionTypeNotSupported"));
+          }
+          return Column(
+            children: items,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          );
+        });
+  }
+
+  onTabSelect(int idx) {
+    setState(() {
+      selectedTab = idx;
+    });
+  }
+
+  Widget buildTabSelect(BuildContext context) {
+    return ProcessNavigation(
+      canVote,
+      canSeeResults,
+      onTabSelect: onTabSelect,
+      selectedTab: selectedTab,
+    );
+  }
+
+  String getTabName(int idx) {
+    if (idx == 0)
+      return getText(context, "main.vote");
+    else if (idx == 1)
+      return getText(context, "main.pollResults");
+    else
+      return "";
+  }
+
+  Widget buildDisabledPollOption(
+      ProcessMetadata_Details_Question_VoteOption voteOption) {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+        child: Chip(
+          backgroundColor: colorLightGuide,
+          padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+          label: Text(
+            voteOption.title['default'],
+            overflow: TextOverflow.ellipsis,
+            maxLines: 5,
+            style: TextStyle(
+              fontSize: fontSizeSecondary,
+              fontWeight: fontWeightRegular,
+              color: colorDescription,
+            ),
+          ),
+        ));
+  }
+
+  Widget buildPollOption(
+      ProcessMetadata_Details_Question_VoteOption voteOption) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+      child: ChoiceChip(
+        backgroundColor: colorLightGuide,
+        selectedColor: colorBlue,
+        padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+        label: Text(
+          voteOption.title['default'],
+          overflow: TextOverflow.ellipsis,
+          maxLines: 5,
+          style: TextStyle(
+              fontSize: fontSizeSecondary,
+              fontWeight: fontWeightRegular,
+              color: widget.choices[widget.questionIndex] == voteOption.value
+                  ? Colors.white
+                  : colorDescription),
+        ),
+        selected: widget.choices[widget.questionIndex] == voteOption.value,
+        onSelected: (bool selected) {
+          if (selected) {
+            setChoice(widget.questionIndex, voteOption.value);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildPollResultsOption(
+      int index, ProcessMetadata_Details_Question_VoteOption voteOption) {
+    // final myVotes =
+    //     results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
+    final myVotes =
+        (results.questions[widget.questionIndex]?.voteResults[index]?.votes ??
+                0) +
+            9;
+    final myPerc = myVotes > 0 ? myVotes / (totalVotes + 36) : 0.0;
+    // final myPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
+    final myColor = totalVotes > 0 ? widget.rb[myPerc] : colorBaseBackground;
+
+    return
+        // return Padding(
+        //   // padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+        //   // child: Row(children: <Widget>[
+        //   // child: Padding(
+        //   //   padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+        //   child: LinearPercentIndicator(
+        LinearPercentIndicator(
+      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+      center: Text(
+        voteOption.title['default'],
+        textAlign: TextAlign.left,
+        // overflow: TextOverflow.ellipsis,
+        // maxLines: 5,
+        style: TextStyle(
+            fontSize: fontSizeSecondary,
+            fontWeight: fontWeightRegular,
+            color: colorDescription),
+      ),
+      animation: false,
+      trailing: Padding(
+        padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+        child: Text(
+          "$myVotes " + getText(context, "main.votes"),
+          textAlign: TextAlign.right,
+        ),
+      ),
+      alignment: MainAxisAlignment.start,
+      backgroundColor: myColor.withOpacity(0.2),
+      // fillColor: myColor.withOpacity(0.2),
+      // fillColor: colorBaseBackground,
+      fillColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
+      progressColor: myColor,
+      lineHeight: 30.0,
+      percent: myPerc,
+      linearStrokeCap: LinearStrokeCap.butt,
+    );
+    // );
+  }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
     return ListItem(
@@ -640,43 +840,68 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  goBack(BuildContext ctx) {
-    Navigator.pop(ctx, false);
+  setChoice(int questionIndex, int value) {
+    setState(() {
+      widget.choices[questionIndex] = value;
+    });
   }
 
-  String getTabName(int idx) {
-    if (idx == 0)
-      return getText(context, "main.vote");
-    else if (idx == 1)
-      return getText(context, "main.pollResults");
-    else
-      return "";
+  buildError(String error) {
+    return ListItem(
+      mainText: getText(context, "main.error") + " " + error,
+      rightIcon: null,
+      icon: FeatherIcons.alertCircle,
+      purpose: Purpose.DANGER,
+    );
+  }
+
+  Widget buildErrorScaffold(String error) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          getText(context, "main.error") + ":\n" + error,
+          style: new TextStyle(fontSize: 26, color: Color(0xff888888)),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 }
 
 class ProcessNavigation extends StatelessWidget {
   final int selectedTab;
   final Function onTabSelect;
+  final bool canVote;
+  final bool canSeeResults;
 
-  ProcessNavigation({this.selectedTab, this.onTabSelect});
+  ProcessNavigation(this.canVote, this.canSeeResults,
+      {this.selectedTab, this.onTabSelect});
 
   @override
   Widget build(context) {
     return BottomNavigationBar(
       elevation: .2,
       backgroundColor: colorBaseBackground,
-      onTap: (index) {
-        if (onTabSelect is Function) onTabSelect(index);
-      },
+      onTap: (canVote && canSeeResults)
+          ? (index) {
+              if (onTabSelect is Function) onTabSelect(index);
+            }
+          : null,
       currentIndex: selectedTab,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           title: Text(''),
-          icon: Icon(FeatherIcons.clipboard),
+          icon: Icon(
+            FeatherIcons.clipboard,
+            color: canVote ? null : Colors.grey[400],
+          ),
         ),
         BottomNavigationBarItem(
           title: Text(''),
-          icon: Icon(FeatherIcons.pieChart),
+          icon: Icon(
+            FeatherIcons.pieChart,
+            color: canSeeResults ? null : Colors.grey[400],
+          ),
         ),
       ],
     );

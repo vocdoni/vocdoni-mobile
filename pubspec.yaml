@@ -45,6 +45,8 @@ dependencies:
   pull_to_refresh: ^1.6.2
   mixpanel_analytics: ^1.2.1
   cupertino_icons: ^1.0.0
+  rainbow_color: ^0.1.1
+  percent_indicator: "^2.1.7+2"
 
   # WORKAROUND
   # TODO: Investigate why Flutter does not find the dependencies below
