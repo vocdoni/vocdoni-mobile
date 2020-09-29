@@ -21,7 +21,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  dvote: ^0.17.3
+  dvote: ^0.17.5
   dvote_common:
     git:
       url: https://gitlab.com/vocdoni/dvote-flutter-common.git

@@ -76,15 +76,13 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 run:
 	make config target=dev
 	flutter run \
-		--flavor dev \
-		--dart-define=APP_MODE=dev
+		--flavor dev
 
 ## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
 .PHONY: run-ios
 run-ios:
 	make config target=dev
-	flutter run \
-		--dart-define=APP_MODE=dev
+	flutter run
 
 ## :
 

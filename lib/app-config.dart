@@ -13,6 +13,8 @@ class AppConfig {
   static bool isBeta() => _appMode == "beta";
   static bool isProduction() => _appMode == "production";
 
+  static bool useTestingContracts() => AppConfig.isBeta();
+
   // CONFIG VARS
   static const GATEWAY_BOOTNODES_URL = String.fromEnvironment(
     "GATEWAY_BOOTNODES_URL",
