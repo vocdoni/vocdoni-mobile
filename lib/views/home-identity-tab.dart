@@ -7,6 +7,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
+import 'package:vocdoni/view-modals/language-select.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -65,6 +66,11 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
               icon: FeatherIcons.archive,
             ),
             ListItem(
+              mainText: getText(context, "main.selectLanguage"),
+              onTap: () => showLanguageSelector(ctx),
+              icon: FeatherIcons.globe,
+            ),
+            ListItem(
                 mainText: getText(context, "main.help"),
                 icon: FeatherIcons.lifeBuoy,
                 onTap: () {
@@ -98,9 +104,20 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
     );
   }
 
+  showLanguageSelector(BuildContext ctx) async {
+    bool success = await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+            fullscreenDialog: true, builder: (context) => LanguageSelect()));
+
+    if (success == null) return;
+    showMessage(getText(ctx, "main.theLanguageHasBeenDefined"),
+        context: ctx, purpose: Purpose.GOOD);
+  }
+
   showIdentityBackup(BuildContext ctx) async {
-    final encryptedMnemonic =
-        Globals.appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
+    final encryptedMnemonic = Globals
+        .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
 
     var patternEncryptionKey = await Navigator.push(
         ctx,

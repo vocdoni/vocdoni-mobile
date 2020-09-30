@@ -67,8 +67,11 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
-            child: Text(getText(context, "main.welcome"),
-                style: new TextStyle(fontSize: 30, color: Color(0xff888888)))),
+            child: Text(
+          getText(context, "main.welcome"),
+          style: TextStyle(fontSize: 30, color: Color(0xff888888)),
+          textAlign: TextAlign.center,
+        )),
         SizedBox(height: 50),
         Center(
           child: TextField(
@@ -181,10 +184,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       return item.identity.value.alias == alias;
     });
     if (repeated) {
-      showMessage(
-          getText(context, "main.youAlreadyHaveAnAccountWithThisName"),
-          context: context,
-          purpose: Purpose.WARNING);
+      showMessage(getText(context, "main.youAlreadyHaveAnAccountWithThisName"),
+          context: context, purpose: Purpose.WARNING);
       return;
     }
 
