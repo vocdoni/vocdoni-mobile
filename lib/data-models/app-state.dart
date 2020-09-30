@@ -151,6 +151,16 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// Used to determine the language to read the content from.
   /// Currently, everything is using "default".
   get currentLanguage => "default";
+  get materialLocale {
+    switch (locale.value?.languageCode ?? "") {
+      case "":
+        return null;
+      case "eo":
+        return Locale("eo");
+      default:
+        return locale.value;
+    }
+  }
 
   AccountModel get currentAccount {
     if (!Globals.accountPool.hasValue)

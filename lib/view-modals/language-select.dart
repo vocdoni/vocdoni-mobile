@@ -16,52 +16,28 @@ class LanguageSelect extends StatelessWidget {
           builder: (BuildContext context) => ListView(
                 children: <Widget>[
                   // Section(text: getText(context, "main.availableLanguages")),
-                  ListItem(
-                      mainText: getText(context, "main.english"),
-                      rightIcon:
-                          Globals.appState.locale.value.languageCode == "en"
-                              ? FeatherIcons.check
-                              : FeatherIcons.globe,
-                      onTap: () {
-                        Globals.appState
-                            .selectLocale(Locale("en"))
-                            .then((_) => Navigator.of(context).pop(true));
-                      }),
-                  ListItem(
-                      mainText: getText(context, "main.french"),
-                      rightIcon:
-                          Globals.appState.locale.value.languageCode == "fr"
-                              ? FeatherIcons.check
-                              : FeatherIcons.globe,
-                      onTap: () {
-                        Globals.appState
-                            .selectLocale(Locale("fr"))
-                            .then((_) => Navigator.of(context).pop(true));
-                      }),
-                  ListItem(
-                      mainText: getText(context, "main.spanish"),
-                      rightIcon:
-                          Globals.appState.locale.value.languageCode == "es"
-                              ? FeatherIcons.check
-                              : FeatherIcons.globe,
-                      onTap: () {
-                        Globals.appState
-                            .selectLocale(Locale("es"))
-                            .then((_) => Navigator.of(context).pop(true));
-                      }),
-                  ListItem(
-                      mainText: getText(context, "main.catalan"),
-                      rightIcon:
-                          Globals.appState.locale.value.languageCode == "ca"
-                              ? FeatherIcons.check
-                              : FeatherIcons.globe,
-                      onTap: () {
-                        Globals.appState
-                            .selectLocale(Locale("ca"))
-                            .then((_) => Navigator.of(context).pop(true));
-                      })
+                  bulidLanguageItem(context, "English", "en"),
+                  bulidLanguageItem(context, "French", "fr"),
+                  bulidLanguageItem(context, "Español", "es"),
+                  bulidLanguageItem(context, "Català", "ca"),
+                  bulidLanguageItem(context, "Norsk", "nb"),
+                  // bulidLanguageItem(context, "Esperanto", "eo"),
                 ],
               )),
     );
+  }
+
+  Widget bulidLanguageItem(
+      BuildContext context, String langName, String langCode) {
+    return ListItem(
+        mainText: langName,
+        rightIcon: Globals.appState.locale.value.languageCode == langCode
+            ? FeatherIcons.check
+            : FeatherIcons.globe,
+        onTap: () {
+          Globals.appState
+              .selectLocale(Locale(langCode))
+              .then((_) => Navigator.of(context).pop(true));
+        });
   }
 }

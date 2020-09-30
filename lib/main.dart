@@ -53,7 +53,7 @@ Widget buildMainApp() {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     title: "Vocdoni",
-    locale: Globals.appState.locale.value,
+    locale: Globals.appState.materialLocale,
     supportedLocales:
         SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
     localizationsDelegates: [

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
-const SUPPORTED_LANGUAGES = <String>["en", "fr", "es", "ca"];
+// eo is supported by the app but not supported by Flutter
+const SUPPORTED_LANGUAGES = <String>["en", "fr", "es", "ca", "nb"];
 const DEFAULT_LANGUAGE = "en";
 
 class AppLocalization {
