@@ -588,9 +588,9 @@ class PollQuestion extends StatefulWidget {
   final int questionIndex;
   final bool isInCensus;
   final rb = Rainbow(spectrum: [
-    colorRedPale.withOpacity(0.6),
-    colorBluePale.withOpacity(0.7),
-    colorGreenPale.withOpacity(0.9)
+    colorRedPale.withOpacity(0.7),
+    colorBluePale.withOpacity(0.9),
+    colorGreenPale,
   ], rangeStart: 0, rangeEnd: 1);
 
   PollQuestion(this.question, this.questionIndex, this.choices, this.process,
@@ -605,6 +605,8 @@ class _PollQuestionState extends State<PollQuestion> {
   Timer refreshCheck;
   int selectedTab = 0;
   int totalVotes = 0;
+  int maxVotes = 0;
+  int minVotes = 0;
   bool canVote;
   bool canSeeResults;
 
@@ -677,9 +679,15 @@ class _PollQuestionState extends State<PollQuestion> {
               });
             } else if (selectedTab == 1) {
               totalVotes = 0;
+              maxVotes = 0;
+              minVotes = results
+                      .questions[widget.questionIndex].voteResults[0]?.votes ??
+                  0;
               results.questions[widget.questionIndex].voteResults
                   .forEach((element) {
                 totalVotes += element.votes;
+                maxVotes = element.votes > maxVotes ? element.votes : maxVotes;
+                minVotes = element.votes < minVotes ? element.votes : minVotes;
               });
               widget.question.voteOptions.asMap().forEach((index, voteOption) {
                 options.add(buildPollResultsOption(index, voteOption));
@@ -779,55 +787,58 @@ class _PollQuestionState extends State<PollQuestion> {
 
   Widget buildPollResultsOption(
       int index, ProcessMetadata_Details_Question_VoteOption voteOption) {
-    // final myVotes =
-    //     results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
-    final myVotes =
-        (results.questions[widget.questionIndex]?.voteResults[index]?.votes ??
-                0) +
-            9;
-    final myPerc = myVotes > 0 ? myVotes / (totalVotes + 36) : 0.0;
-    // final myPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
-    final myColor = totalVotes > 0 ? widget.rb[myPerc] : colorBaseBackground;
-
-    return
-        // return Padding(
-        //   // padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-        //   // child: Row(children: <Widget>[
-        //   // child: Padding(
-        //   //   padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-        //   child: LinearPercentIndicator(
-        LinearPercentIndicator(
-      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-      center: Text(
-        voteOption.title['default'],
-        textAlign: TextAlign.left,
-        // overflow: TextOverflow.ellipsis,
-        // maxLines: 5,
-        style: TextStyle(
-            fontSize: fontSizeSecondary,
-            fontWeight: fontWeightRegular,
-            color: colorDescription),
-      ),
-      animation: false,
-      trailing: Padding(
-        padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-        child: Text(
-          "$myVotes " + getText(context, "main.votes"),
-          textAlign: TextAlign.right,
-        ),
-      ),
-      alignment: MainAxisAlignment.start,
-      backgroundColor: myColor.withOpacity(0.2),
-      // fillColor: myColor.withOpacity(0.2),
-      // fillColor: colorBaseBackground,
-      fillColor: Colors.transparent,
-      // backgroundColor: Colors.transparent,
-      progressColor: myColor,
-      lineHeight: 30.0,
-      percent: myPerc,
-      linearStrokeCap: LinearStrokeCap.butt,
-    );
-    // );
+    return EventualBuilder(
+        notifiers: [widget.process.metadata, widget.process.results],
+        builder: (context, _, __) {
+          final myVotes = results
+                  .questions[widget.questionIndex]?.voteResults[index]?.votes ??
+              0;
+          final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
+          double relativePerc = myVotes - minVotes > 0
+              ? myVotes - minVotes / maxVotes - minVotes
+              : 0.0;
+          // Weight relative win/loss ratio between options based on max share of total votes
+          relativePerc += maxVotes > 0
+              ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc)
+              : 0;
+          final myColor =
+              totalVotes > 0 ? widget.rb[relativePerc] : colorBaseBackground;
+          return Padding(
+            padding: EdgeInsets.fromLTRB(paddingPage, 1, paddingPage, 0),
+            child: LinearPercentIndicator(
+              padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+              center: Text(
+                voteOption.title['default'],
+                textAlign: TextAlign.left,
+                // overflow: TextOverflow.ellipsis,
+                // maxLines: 5,
+                style: TextStyle(
+                    fontSize: fontSizeSecondary,
+                    fontWeight: fontWeightRegular,
+                    color: colorDescription),
+              ),
+              animation: false,
+              trailing: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child: Text(
+                  (totalPerc * 100).toStringAsFixed(0) + "%",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              alignment: MainAxisAlignment.start,
+              backgroundColor: myColor.withOpacity(0.2),
+              fillColor: Colors.transparent,
+              linearGradient: LinearGradient(
+                  colors: [myColor, myColor.withOpacity(0.3)],
+                  begin: Alignment.topLeft),
+              lineHeight: 30.0,
+              percent: totalPerc,
+              width: MediaQuery.of(context).size.width * 0.8,
+              linearStrokeCap: LinearStrokeCap.butt,
+            ),
+          );
+        });
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
@@ -880,7 +891,7 @@ class ProcessNavigation extends StatelessWidget {
   @override
   Widget build(context) {
     return BottomNavigationBar(
-      elevation: .2,
+      elevation: 0,
       backgroundColor: colorBaseBackground,
       onTap: (canVote && canSeeResults)
           ? (index) {
