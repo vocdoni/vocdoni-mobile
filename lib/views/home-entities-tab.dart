@@ -10,6 +10,7 @@ import 'package:dvote_common/widgets/baseCard.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import "package:vocdoni/lib/extensions.dart";
 
 class HomeEntitiesTab extends StatefulWidget {
   HomeEntitiesTab();
@@ -176,10 +177,20 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   }
 
   Widget buildNoEntities(BuildContext ctx) {
-    // TODO: UI
-    return Center(
-      child: Text(getText(context, "main.noEntities")),
-    );
+    return Container(
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.home,
+              size: 50.0,
+              color: Colors.black38,
+            ),
+            Text(getText(context, "main.noEntities")).withTopPadding(20),
+          ],
+        ));
   }
 
   onTapEntity(BuildContext ctx, EntityModel entity) {

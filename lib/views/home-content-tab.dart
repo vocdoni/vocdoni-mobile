@@ -8,6 +8,7 @@ import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/widgets/card-poll.dart';
 import 'package:vocdoni/widgets/card-post.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import "package:vocdoni/lib/extensions.dart";
 
 // Used to merge and sort feed items
 class CardItem {
@@ -99,10 +100,21 @@ class _HomeContentTabState extends State<HomeContentTab> {
   }
 
   Widget buildNoEntries(BuildContext ctx) {
-    return Center(
-      child:
-          Text(getText(context, "main.prettyLonleyInHere") + "   ¯\\_(ツ)_/¯"),
-    );
+    return Container(
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.rss_feed,
+              size: 50.0,
+              color: Colors.black38,
+            ),
+            Text(getText(context, "main.prettyLonleyInHere") + "   ¯\\_(ツ)_/¯")
+                .withTopPadding(20),
+          ],
+        ));
   }
 
   // INERNAL
