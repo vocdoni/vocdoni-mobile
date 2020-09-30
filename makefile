@@ -34,17 +34,19 @@ init:
 lang-parse: scripts/node_modules
 	node scripts/lang-parse.js
 
-## lang-import: Import the translated strings from Weblate into assets/i18n
-.PHONY: lang-import
-lang-import: 
-	DIR=$$(mktemp -d) && \
-		cd $$DIR && \
-		curl "https://hosted.weblate.org/download/vocdoni/mobile-client/?format=zip" > strings.zip && \
-		unzip strings.zip && \
-		cd - && \
-		mv $$DIR/vocdoni/mobile-client/assets/i18n/*.json $$PWD/assets/i18n && \
-		rm -Rf $$DIR
-	for file in $$(ls $$PWD/assets/i18n/*.json) ; do node -e "require(\"fs\").writeFileSync(process.argv[1], JSON.stringify(require(process.argv[1]), null, 2) + \"\n\")" $$file ; done
+## lang-pull: Pull the translated strings from Weblate
+.PHONY: lang-pull
+lang-pull: 
+	git checkout i18n
+	git pull weblate i18n
+	#DIR=$$(mktemp -d) && \
+	#	cd $$DIR && \
+	#	curl "https://hosted.weblate.org/download/vocdoni/mobile-client/?format=zip" > strings.zip && \
+	#	unzip strings.zip && \
+	#	cd - && \
+	#	mv $$DIR/vocdoni/mobile-client/assets/i18n/*.json $$PWD/assets/i18n && \
+	#	rm -Rf $$DIR
+	#for file in $$(ls $$PWD/assets/i18n/*.json) ; do node -e "require(\"fs\").writeFileSync(process.argv[1], JSON.stringify(require(process.argv[1]), null, 4) + \"\n\")" $$file ; done
 
 
 scripts/node_modules: scripts/package.json
