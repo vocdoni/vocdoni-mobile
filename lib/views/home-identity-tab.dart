@@ -59,7 +59,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                       context: ctx,
                       purpose: Purpose.GOOD);
                 }),
-            Section(text: getText(context, "main.yourIdentity")),
+            Section(text: getText(context, "main.general")),
             ListItem(
               mainText: getText(context, "main.backUpMyIdentity"),
               onTap: () => showIdentityBackup(ctx),

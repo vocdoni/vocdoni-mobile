@@ -49,6 +49,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     return AppLocalization.load(newLocale).then((_) {
       log("[App] Switched to ${newLocale.languageCode}");
       locale.value = newLocale;
+
+      return this.writeToStorage();
     }).catchError((err) {
       log("[App] Could not change the locale: $err");
     });
@@ -64,6 +66,13 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       this.bootnodeInfo.setToLoading();
       final gwList = Globals.bootnodesPersistence.get();
       this.bootnodeInfo.setValue(gwList);
+
+      // Settings
+      final settings = Globals.settingsPersistence.get();
+      if (settings is Map && settings["locale"] is String) {
+        if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
+          await selectLocale(Locale(settings["locale"]));
+      }
     } catch (err) {
       log(err);
       this
@@ -78,11 +87,18 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   Future<void> writeToStorage() async {
     try {
       // Gateway boot nodes
-      if (this.bootnodeInfo.hasValue)
+      if (this.bootnodeInfo.hasValue) {
         await Globals.bootnodesPersistence.write(this.bootnodeInfo.value);
-      else
+      } else {
         await Globals.bootnodesPersistence
             .write(BootNodeGateways()); // empty data
+      }
+
+      // Settings
+      final settings = {
+        "locale": locale.value.languageCode,
+      };
+      await Globals.settingsPersistence.write(settings);
     } catch (err) {
       log(err);
       throw PersistError("Cannot store the current state");
@@ -132,6 +148,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
   // CUSTOM METHODS
 
+  /// Used to determine the language to read the content from.
+  /// Currently, everything is using "default".
   get currentLanguage => "default";
 
   AccountModel get currentAccount {
