@@ -1,3 +1,7 @@
+# 0.8.6
+
+- Adding push notification support
+
 # 0.8.5
 
 - Using native symmetric encryption

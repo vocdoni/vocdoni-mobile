@@ -71,28 +71,25 @@ $(SQUARE_ICONS): assets/icon/icon-square.png assets/icon/icon.png
 
 ## : 
 
-# ##############################################################################
-# # HELPER TASKS
-# ##############################################################################
-
 ## run: Run the app on the active (Android) device or simulator  [DEV]
 .PHONY: run
-run: config-dev
+run:
+	make config target=dev
 	flutter run \
-		--flavor dev \
-		--dart-define=APP_MODE=dev
+		--flavor dev
 
 ## run-ios: Run the app on the active (iOS) device or simulator  [DEV]
 .PHONY: run-ios
-run-ios: config-dev
-	flutter run \
-		--dart-define=APP_MODE=dev
+run-ios:
+	make config target=dev
+	flutter run
 
 ## :
 
 ## apk-beta: Compile the Android APK  [BETA]
 .PHONY: apk-beta
-apk-beta: config
+apk-beta:
+	make config target=beta
 	flutter build apk \
 		--dart-define=APP_MODE=beta \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -104,7 +101,8 @@ apk-beta: config
 
 ## appbundle-beta: Compile the app bundle for Google Play  [BETA]
 .PHONY: appbundle-beta
-appbundle-beta: config
+appbundle-beta:
+	make config target=beta
 	flutter build appbundle \
 		--dart-define=APP_MODE=beta \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -117,7 +115,8 @@ appbundle-beta: config
 
 ## apk: Compile the Android APK  [PROD]
 .PHONY: apk
-apk: config
+apk:
+	make config target=production
 	flutter build apk \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -130,7 +129,8 @@ apk: config
 
 ## appbundle: Compile the app bundle for Google Play  [PROD]
 .PHONY: appbundle
-appbundle: config
+appbundle:
+	make config target=production
 	flutter build appbundle \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -142,7 +142,8 @@ appbundle: config
 
 ## ios: Open the iOS Runner.app for archiving  [PROD]
 .PHONY: ios
-ios: config
+ios:
+	make config target=production
 	flutter build ios \
 		--dart-define=APP_MODE=production \
 		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
@@ -174,15 +175,26 @@ launch-android-org:
 
 # Firebase config files by environment
 
-.PHONY: config
-config:
-	cp notifications/production/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
-	cp notifications/production/google-services.json android/app/google-services.json
+config: ios/Runner/GoogleService-Info.plist android/app/google-services.json
 
-.PHONY: config-dev
-config-dev:
-	cp notifications/dev/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
-	cp notifications/dev/google-services.json android/app/google-services.json
+.PHONY: ios/Runner/GoogleService-Info.plist
+ios/Runner/GoogleService-Info.plist:
+	@case "$$target" in \
+		production) rm $@ && ln -s ../../notifications/production/GoogleService-Info.plist $@ ;; \
+		beta) rm $@ && ln -s ../../notifications/beta/GoogleService-Info.plist $@ ;; \
+		dev) rm $@ && ln -s ../../notifications/dev/GoogleService-Info.plist $@ ;; \
+		*) echo "Invalid config target" 1>&2 ; false ;; \
+	esac
+
+
+.PHONY: android/app/google-services.json
+android/app/google-services.json:
+	@case "$$target" in \
+		production) rm $@ && ln -s ../../notifications/production/google-services.json $@ ;; \
+		beta) rm $@ && ln -s ../../notifications/beta/google-services.json $@ ;; \
+		dev) rm $@ && ln -s ../../notifications/dev/google-services.json $@ ;; \
+		*) echo "Invalid config target" 1>&2 ; false ;; \
+	esac
 
 ## :
 ## clean: Clean build artifacts

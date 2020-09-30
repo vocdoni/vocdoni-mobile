@@ -21,6 +21,7 @@ import "package:vocdoni/views/identity-create-page.dart";
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/views/entity-page.dart';
 import 'package:vocdoni/views/dev/dev-menu.dart';
+import 'package:eventual/eventual-builder.dart';
 // import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
@@ -36,13 +37,27 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   // RUN THE APP
-  runApp(MaterialApp(
+  runApp(buildMainContainer());
+}
+
+Widget buildMainContainer() {
+  return EventualBuilder(
+    notifier: Globals.appState.locale,
+    builder: (BuildContext ctx, _, __) {
+      return buildMainApp();
+    },
+  );
+}
+
+Widget buildMainApp() {
+  return MaterialApp(
     debugShowCheckedModeBanner: false,
     title: "Vocdoni",
+    locale: Globals.appState.locale.value,
     supportedLocales:
         SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
     localizationsDelegates: [
-      AppLocalizations.delegate,
+      AppLocalization.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
     ],
@@ -82,7 +97,7 @@ void main() async {
       fontFamily: "Open Sans",
       scaffoldBackgroundColor: colorBaseBackground,
     ),
-  ));
+  );
 }
 
 // generateRoute is called when nothing is found on `routes`

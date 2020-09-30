@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/net.dart';
@@ -15,6 +17,7 @@ import "dart:developer";
 class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// Index of the currently active identity
   final selectedAccount = EventualNotifier<int>(-1);
+  final locale = EventualNotifier<Locale>();
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
@@ -34,6 +37,21 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       throw Exception("Index out of bounds");
     }
     this.selectedAccount.setValue(accountIdx);
+  }
+
+  /// Defines the new locale to use for the app
+  Future<void> selectLocale(Locale newLocale) {
+    if (newLocale == locale.value)
+      return Future.value();
+    else if (!SUPPORTED_LANGUAGES.contains(newLocale.languageCode))
+      return Future.error(Exception("Unsupported locale"));
+
+    return AppLocalization.load(newLocale).then((_) {
+      log("[App] Switched to ${newLocale.languageCode}");
+      locale.value = newLocale;
+    }).catchError((err) {
+      log("[App] Could not change the locale: $err");
+    });
   }
 
   // EXTERNAL DATA HANDLERS
@@ -98,7 +116,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
-          networkId: AppConfig.NETWORK_ID);
+          networkId: AppConfig.NETWORK_ID,
+          useTestingContracts: AppConfig.useTestingContracts());
 
       log("[App] Gateway Pool ready");
       AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);

@@ -302,6 +302,11 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     if (!this.identity.hasValue || !this.entities.hasValue)
       throw Exception("The current identity is not properly initialized");
 
+    final entityModel = Globals.entityPool.value.firstWhere(
+        (item) => item.reference.entityId == entityReference.entityId,
+        orElse: () => null);
+    if (entityModel == null) throw Exception("Entity not found");
+
     // Update identity subscriptions
     Identity_Peers peers = Identity_Peers();
     peers.entities.addAll(this.identity.value.peers.entities);
@@ -322,25 +327,28 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         .toList();
     this.entities.setValue(newEntityList);
 
-    // Check if other identities are also subscribed
+    // Unregister push notifications for the current account
+    await entityModel.disableNotifications();
+
+    // Check if other identities are also following the entity
+    final currentAddress = this.identity.value.keys[0].rootAddress;
     bool subscribedFromOtherAccounts = false;
     for (final existingAccount in Globals.accountPool.value) {
       if (!existingAccount.identity.hasValue ||
-          !existingAccount.entities.hasValue)
-        continue;
-      else if (existingAccount.identity.value.keys.length == 0)
+          !existingAccount.entities.hasValue ||
+          existingAccount.identity.value.keys.length == 0)
         continue;
       // skip ourselves
-      else if (existingAccount.identity.value.keys[0].rootPublicKey ==
-          this.identity.value.keys[0].rootPublicKey) continue;
+      else if (existingAccount.identity.value.keys[0].rootAddress ==
+          currentAddress)
+        continue;
+      else if (!existingAccount.isSubscribed(entityReference)) continue;
 
-      if (existingAccount.isSubscribed(entityReference)) {
-        subscribedFromOtherAccounts = true;
-        break;
-      }
+      subscribedFromOtherAccounts = true;
+      break;
     }
 
-    // Clean the entity otherwise
+    // Wipe the entity
     if (!subscribedFromOtherAccounts) {
       await Globals.entityPool.remove(entityReference);
     }

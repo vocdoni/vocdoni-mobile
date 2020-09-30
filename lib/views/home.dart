@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    log(err);
+    log(err?.toString() ?? "handleIncomingLinkError");
     final ctx = scaffoldBodyContext ?? context;
     showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
         title: getText(scaffoldBodyContext ?? context, "main.error"),

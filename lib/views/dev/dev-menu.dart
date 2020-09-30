@@ -9,7 +9,7 @@ class DevMenu extends StatelessWidget {
   Widget build(ctx) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Post",
+        title: "Developer",
       ),
       body: Builder(
           builder: (BuildContext context) => ListView(
