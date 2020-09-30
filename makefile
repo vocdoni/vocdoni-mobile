@@ -32,7 +32,7 @@ init:
 ## lang-parse: Extract the string keys into assets/i18n for translation
 .PHONY: lang-parse
 lang-parse: scripts/node_modules
-	node scripts/i18n-parse.js
+	node scripts/lang-parse.js
 
 ## lang-import: Import the translated strings from Weblate into assets/i18n
 .PHONY: lang-import

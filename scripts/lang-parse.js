@@ -44,7 +44,7 @@ function main() {
                 console.log("[WARNING] > The default language does not contain: '" + k + "'")
             }
         }
-        fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 2) + "\n")
+        fs.writeFileSync(targetFile, JSON.stringify(newStrings, null, 4) + "\n")
     })
 
     console.log("Done\nExtracted", Object.keys(stringsTemplate).length, "strings for", languages)
