@@ -169,6 +169,12 @@ The `data` field of incoming push notifications [is expected to contain](https:/
   <!-- - `process-results`:  -->
 - The `message` is a copy of the relevant text contained within `notification` (not always present)
 
+### Permissions
+
+In order to drop unused permissions, edit `ios/Podfile` and make sure to uncomment the permissions that are not needed after `target.build_configurations.each`.
+
+
+
 <!--
 #### Prompt to sign a payload
 

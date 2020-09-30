@@ -1,6 +1,8 @@
 # 0.8.6
 
 - Adding push notification support
+- Allowing to choose the UI language
+- Allow to persist UI settings
 
 # 0.8.5
 
