@@ -10,6 +10,7 @@ Future<void> restorePersistence() {
     Globals.entitiesPersistence.readAll(),
     Globals.processesPersistence.readAll(),
     Globals.feedPersistence.readAll(),
+    Globals.settingsPersistence.read(),
   ]);
 }
 
@@ -37,6 +38,7 @@ Future<void> startNetworking() {
     log("[App] Trying to use the local gateway cache");
 
     // Retry with the existing cached gateways
-    return AppNetworking.useFromGatewayInfo(Globals.appState.bootnodeInfo.value);
+    return AppNetworking.useFromGatewayInfo(
+        Globals.appState.bootnodeInfo.value);
   });
 }

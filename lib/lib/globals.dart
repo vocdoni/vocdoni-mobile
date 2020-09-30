@@ -4,6 +4,7 @@ import 'package:vocdoni/data-persistence/entities-persistence.dart';
 import 'package:vocdoni/data-persistence/identities-persistence.dart';
 import 'package:vocdoni/data-persistence/processes-persistence.dart';
 import 'package:vocdoni/data-persistence/feed-persistence.dart';
+import 'package:vocdoni/data-persistence/settings-persistence.dart';
 
 import 'package:vocdoni/data-models/app-state.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -20,6 +21,7 @@ class Globals {
   static final entitiesPersistence = EntitiesPersistence();
   static final processesPersistence = ProcessesPersistence();
   static final feedPersistence = NewsFeedPersistence();
+  static final settingsPersistence = SettingsPersistence();
 
   // MODEL INSTANCES
 

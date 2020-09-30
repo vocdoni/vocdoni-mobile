@@ -18,7 +18,10 @@ class LanguageSelect extends StatelessWidget {
                   // Section(text: getText(context, "main.availableLanguages")),
                   ListItem(
                       mainText: getText(context, "main.english"),
-                      rightIcon: FeatherIcons.globe,
+                      rightIcon:
+                          Globals.appState.locale.value.languageCode == "en"
+                              ? FeatherIcons.check
+                              : FeatherIcons.globe,
                       onTap: () {
                         Globals.appState
                             .selectLocale(Locale("en"))
@@ -26,7 +29,10 @@ class LanguageSelect extends StatelessWidget {
                       }),
                   ListItem(
                       mainText: getText(context, "main.french"),
-                      rightIcon: FeatherIcons.globe,
+                      rightIcon:
+                          Globals.appState.locale.value.languageCode == "fr"
+                              ? FeatherIcons.check
+                              : FeatherIcons.globe,
                       onTap: () {
                         Globals.appState
                             .selectLocale(Locale("fr"))
@@ -34,7 +40,10 @@ class LanguageSelect extends StatelessWidget {
                       }),
                   ListItem(
                       mainText: getText(context, "main.spanish"),
-                      rightIcon: FeatherIcons.globe,
+                      rightIcon:
+                          Globals.appState.locale.value.languageCode == "es"
+                              ? FeatherIcons.check
+                              : FeatherIcons.globe,
                       onTap: () {
                         Globals.appState
                             .selectLocale(Locale("es"))
@@ -42,7 +51,10 @@ class LanguageSelect extends StatelessWidget {
                       }),
                   ListItem(
                       mainText: getText(context, "main.catalan"),
-                      rightIcon: FeatherIcons.globe,
+                      rightIcon:
+                          Globals.appState.locale.value.languageCode == "ca"
+                              ? FeatherIcons.check
+                              : FeatherIcons.globe,
                       onTap: () {
                         Globals.appState
                             .selectLocale(Locale("ca"))
