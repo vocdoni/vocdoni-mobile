@@ -181,7 +181,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
   final metadata = EventualNotifier<ProcessMetadata>();
   final results = EventualNotifier<ProcessResultsDigested>()
-      .withFreshnessTimeout(Duration(minutes: 1));
+      .withFreshnessTimeout(Duration(seconds: 10));
   final isInCensus =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
   final hasVoted =

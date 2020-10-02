@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
+import 'package:vocdoni/lib/extensions.dart';
 import "dart:developer";
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:rainbow_color/rainbow_color.dart';
@@ -588,8 +589,8 @@ class PollQuestion extends StatefulWidget {
   final int questionIndex;
   final bool isInCensus;
   final rb = Rainbow(spectrum: [
-    colorRedPale.withOpacity(0.7),
-    colorBluePale.withOpacity(0.9),
+    colorRedPale.withOpacity(0.9),
+    colorBluePale,
     colorGreenPale,
   ], rangeStart: 0, rangeEnd: 1);
 
@@ -612,9 +613,13 @@ class _PollQuestionState extends State<PollQuestion> {
 
   @override
   void initState() {
+    widget.process.refreshResults();
     refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
     super.initState();
-    widget.process.refreshResults();
+    setResultsState();
+  }
+
+  void setResultsState() {
     results = widget.process.results.value;
     // If results are available, process must be decrypted or unencrypted, so results can be displayed
     if (results?.questions?.isEmpty ?? true) {
@@ -655,9 +660,10 @@ class _PollQuestionState extends State<PollQuestion> {
   @override
   Widget build(context) {
     return EventualBuilder(
-        notifiers: [widget.process.metadata, widget.process.results],
+        notifier: widget.process.results,
         builder: (context, _, __) {
           List<Widget> items = new List<Widget>();
+          setResultsState();
 
           if (widget.question.type == "single-choice") {
             items.add(Section(text: (widget.questionIndex + 1).toString()));
@@ -718,11 +724,18 @@ class _PollQuestionState extends State<PollQuestion> {
     });
   }
 
+  onNullSelect(int idx) {
+    if (idx == 1) {
+      widget.process.refreshResults();
+    }
+  }
+
   Widget buildTabSelect(BuildContext context) {
     return ProcessNavigation(
       canVote,
       canSeeResults,
       onTabSelect: onTabSelect,
+      onNullSelect: onNullSelect,
       selectedTab: selectedTab,
     );
   }
@@ -744,7 +757,7 @@ class _PollQuestionState extends State<PollQuestion> {
           backgroundColor: colorLightGuide,
           padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
           label: Text(
-            voteOption.title['default'],
+            voteOption.title[Globals.appState.currentLanguage],
             overflow: TextOverflow.ellipsis,
             maxLines: 5,
             style: TextStyle(
@@ -787,58 +800,67 @@ class _PollQuestionState extends State<PollQuestion> {
 
   Widget buildPollResultsOption(
       int index, ProcessMetadata_Details_Question_VoteOption voteOption) {
-    return EventualBuilder(
-        notifiers: [widget.process.metadata, widget.process.results],
-        builder: (context, _, __) {
-          final myVotes = results
-                  .questions[widget.questionIndex]?.voteResults[index]?.votes ??
-              0;
-          final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
-          double relativePerc = myVotes - minVotes > 0
-              ? myVotes - minVotes / maxVotes - minVotes
-              : 0.0;
-          // Weight relative win/loss ratio between options based on max share of total votes
-          relativePerc += maxVotes > 0
-              ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc)
-              : 0;
-          final myColor =
-              totalVotes > 0 ? widget.rb[relativePerc] : colorBaseBackground;
-          return Padding(
-            padding: EdgeInsets.fromLTRB(paddingPage, 1, paddingPage, 0),
-            child: LinearPercentIndicator(
-              padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-              center: Text(
+    final myVotes =
+        results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
+    final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
+    double relativePerc =
+        myVotes - minVotes > 0 ? myVotes - minVotes / maxVotes - minVotes : 0.0;
+    // Weight relative win/loss ratio between options based on max share of total votes
+    relativePerc +=
+        maxVotes > 0 ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc) : 0;
+    final myColor =
+        totalVotes > 0 ? widget.rb[relativePerc] : colorBaseBackground;
+    return LinearPercentIndicator(
+      padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+      center: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              child: Text(
                 voteOption.title['default'],
                 textAlign: TextAlign.left,
-                // overflow: TextOverflow.ellipsis,
-                // maxLines: 5,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: TextStyle(
                     fontSize: fontSizeSecondary,
-                    fontWeight: fontWeightRegular,
+                    fontWeight: fontWeightSemiBold,
                     color: colorDescription),
-              ),
-              animation: false,
-              trailing: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                child: Text(
-                  (totalPerc * 100).toStringAsFixed(0) + "%",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              alignment: MainAxisAlignment.start,
-              backgroundColor: myColor.withOpacity(0.2),
-              fillColor: Colors.transparent,
-              linearGradient: LinearGradient(
-                  colors: [myColor, myColor.withOpacity(0.3)],
-                  begin: Alignment.topLeft),
-              lineHeight: 30.0,
-              percent: totalPerc,
-              width: MediaQuery.of(context).size.width * 0.8,
-              linearStrokeCap: LinearStrokeCap.butt,
+              ).withLeftPadding(10),
             ),
-          );
-        });
+            Text(
+              myVotes == 1
+                  ? "$myVotes " + getText(context, "main.vote")
+                  : "$myVotes " + getText(context, "main.votes"),
+              maxLines: 1,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.fade,
+              // style: TextStyle(fontWeight: FontWeight.bold),
+            ).withRightPadding(5).withLeftPadding(20)
+          ]),
+      animation: false,
+      // trailing: Expanded(
+      //   child: Text(
+      //     "$myVotes " + getText(context, "votacions"),
+      //     maxLines: 2,
+      //     textAlign: TextAlign.center,
+      //     overflow: TextOverflow.fade,
+      //     style: TextStyle(fontWeight: FontWeight.bold),
+      //   ).withRightPadding(1),
+      // ),
+      alignment: MainAxisAlignment.start,
+      backgroundColor: myColor.withOpacity(0.1),
+      fillColor: Colors.transparent,
+      linearGradient: LinearGradient(
+          colors: [myColor, myColor.withOpacity(0.3)],
+          begin: Alignment.topLeft),
+      lineHeight: 30.0,
+      percent: totalPerc,
+      // width: MediaQuery.of(context).size.width * 0.7,
+      linearStrokeCap: LinearStrokeCap.butt,
+    )
+        .withTopPadding(1)
+        .withLeftPadding(paddingPage)
+        .withRightPadding(paddingPage);
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
@@ -882,11 +904,12 @@ class _PollQuestionState extends State<PollQuestion> {
 class ProcessNavigation extends StatelessWidget {
   final int selectedTab;
   final Function onTabSelect;
+  final Function onNullSelect;
   final bool canVote;
   final bool canSeeResults;
 
   ProcessNavigation(this.canVote, this.canSeeResults,
-      {this.selectedTab, this.onTabSelect});
+      {this.selectedTab, this.onTabSelect, this.onNullSelect});
 
   @override
   Widget build(context) {
@@ -897,7 +920,9 @@ class ProcessNavigation extends StatelessWidget {
           ? (index) {
               if (onTabSelect is Function) onTabSelect(index);
             }
-          : null,
+          : (index) {
+              if (onNullSelect is Function) onNullSelect(index);
+            },
       currentIndex: selectedTab,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
