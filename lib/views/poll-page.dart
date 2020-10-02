@@ -840,15 +840,6 @@ class _PollQuestionState extends State<PollQuestion> {
             ).withRightPadding(5).withLeftPadding(20)
           ]),
       animation: false,
-      // trailing: Expanded(
-      //   child: Text(
-      //     "$myVotes " + getText(context, "votacions"),
-      //     maxLines: 2,
-      //     textAlign: TextAlign.center,
-      //     overflow: TextOverflow.fade,
-      //     style: TextStyle(fontWeight: FontWeight.bold),
-      //   ).withRightPadding(1),
-      // ),
       alignment: MainAxisAlignment.start,
       backgroundColor: myColor.withOpacity(0.1),
       fillColor: Colors.transparent,
@@ -857,7 +848,6 @@ class _PollQuestionState extends State<PollQuestion> {
           begin: Alignment.topLeft),
       lineHeight: 30.0,
       percent: totalPerc,
-      // width: MediaQuery.of(context).size.width * 0.7,
       linearStrokeCap: LinearStrokeCap.butt,
     )
         .withTopPadding(1)
