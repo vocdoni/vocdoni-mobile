@@ -47,6 +47,8 @@ dependencies:
   cupertino_icons: ^1.0.0
   rainbow_color: ^0.1.1
   percent_indicator: "^2.1.7+2"
+  mdi: ^3.0.0
+
 
   # WORKAROUND
   # TODO: Investigate why Flutter does not find the dependencies below

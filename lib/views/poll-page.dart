@@ -25,6 +25,7 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:mdi/mdi.dart';
 import 'package:intl/intl.dart';
 
 class PollPageArgs {
@@ -808,8 +809,9 @@ class _PollQuestionState extends State<PollQuestion> {
     // Weight relative win/loss ratio between options based on max share of total votes
     relativePerc +=
         maxVotes > 0 ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc) : 0;
-    final myColor =
-        totalVotes > 0 ? widget.rb[relativePerc] : colorBaseBackground;
+    final myColor = totalVotes > 0
+        ? widget.rb[relativePerc]
+        : colorBluePale.withOpacity(0.1);
     return LinearPercentIndicator(
       padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
       center: Row(
@@ -928,7 +930,8 @@ class ProcessNavigation extends StatelessWidget {
         BottomNavigationBarItem(
           title: Text(''),
           icon: Icon(
-            FeatherIcons.clipboard,
+            Mdi.voteOutline,
+            size: 29.0,
             color: canVote ? null : Colors.grey[400],
           ),
         ),
@@ -936,6 +939,7 @@ class ProcessNavigation extends StatelessWidget {
           title: Text(''),
           icon: Icon(
             FeatherIcons.pieChart,
+            size: 24.0,
             color: canSeeResults ? null : Colors.grey[400],
           ),
         ),
