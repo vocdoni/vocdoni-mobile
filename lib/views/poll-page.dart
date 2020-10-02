@@ -813,7 +813,6 @@ class _PollQuestionState extends State<PollQuestion> {
         ? widget.rb[relativePerc]
         : colorBluePale.withOpacity(0.1);
     return LinearPercentIndicator(
-      padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
       center: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -851,8 +850,8 @@ class _PollQuestionState extends State<PollQuestion> {
       linearStrokeCap: LinearStrokeCap.butt,
     )
         .withTopPadding(1)
-        .withLeftPadding(paddingPage)
-        .withRightPadding(paddingPage);
+        .withLeftPadding(paddingBadge)
+        .withRightPadding(paddingBadge);
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
