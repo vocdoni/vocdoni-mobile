@@ -11,7 +11,7 @@ description: Decentralized anonymous E2E verifiable voting system client app
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.8.6+25
+version: 0.8.6+26
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
@@ -21,7 +21,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  dvote: ^0.17.5
+  dvote: ^0.17.8
   dvote_common:
     git:
       url: https://gitlab.com/vocdoni/dvote-flutter-common.git
@@ -29,29 +29,29 @@ dependencies:
   eventual: ^0.10.2
   protobuf: ^1.0.1
   uni_links: ^0.4.0
-  url_launcher: ^5.4.1
-  http: ^0.12.0+4
+  url_launcher: ^5.7.5
+  http: ^0.12.2
   flutter_html: ^0.11.1
   qr_flutter: ^3.2.0
   firebase_messaging: ^7.0.0
   r_scan: ^0.1.4+1
   permission_handler: ^5.0.1+1
   feather_icons_flutter: ^4.7.4
-  path_provider: ^1.6.0
-  pull_to_refresh: ^1.5.8
+  path_provider: ^1.6.21
+  pull_to_refresh: ^1.6.2
   mixpanel_analytics: ^1.2.1
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.0
 
   # WORKAROUND
   # TODO: Investigate why Flutter does not find the dependencies below
   # from dvote_flutter_common unless the dependency itself is on pub.dev
-  flutter_spinkit: ^4.1.1+1
-  cached_network_image: ^2.0.0
+  flutter_spinkit: ^4.1.2+1
+  cached_network_image: ^2.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.7.5"
+  flutter_launcher_icons: ^0.8.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
