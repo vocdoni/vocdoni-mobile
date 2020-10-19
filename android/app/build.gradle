@@ -93,6 +93,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    // Dummy import to prevent Duplicate class com.google.common.util.concurrent.ListenableFuture
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 }
 
 apply plugin: 'com.google.gms.google-services' // for firebase_messaging
