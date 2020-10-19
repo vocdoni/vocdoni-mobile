@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import "dart:developer";
 import "package:flutter/material.dart";
@@ -97,17 +98,9 @@ class _FeedPostPageState extends State<FeedPostPage> {
   renderHtmlBody(String htmlBody) {
     return Html(
       data: htmlBody,
-      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, spaceElement),
       defaultTextStyle: TextStyle(fontSize: 16),
       onLinkTap: (url) => launchUrl(url),
-      /*customRender: (node, children) {
-                      if (node is dom.Element) {
-                        switch (node.localName) {
-                          case "custom_tag": // using this, you can handle custom tags in your HTML
-                            return Column(children: children);
-                        }
-                    },*/
-    );
+    ).withHPadding(paddingPage).withBottomPadding(spaceElement);
   }
 
   launchUrl(String url) async {
