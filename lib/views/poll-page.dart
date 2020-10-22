@@ -583,13 +583,16 @@ class _PollPageState extends State<PollPage> {
   }
 }
 
+// TODO: Move to a specifig file for these widgets
+enum PollQuestionRowTabs { SELECTION, RESULTS }
+
 class PollQuestion extends StatefulWidget {
   final ProcessMetadata_Details_Question question;
   final ProcessModel process;
   final List<int> choices;
   final int questionIndex;
   final bool isInCensus;
-  final rb = Rainbow(spectrum: [
+  final gradient = Rainbow(spectrum: [
     colorRedPale.withOpacity(0.9),
     colorBluePale,
     colorGreenPale,
@@ -605,7 +608,7 @@ class PollQuestion extends StatefulWidget {
 class _PollQuestionState extends State<PollQuestion> {
   ProcessResultsDigested results;
   Timer refreshCheck;
-  int selectedTab = 0;
+  PollQuestionRowTabs selectedTab = PollQuestionRowTabs.SELECTION;
   int totalVotes = 0;
   int maxVotes = 0;
   int minVotes = 0;
@@ -635,7 +638,7 @@ class _PollQuestionState extends State<PollQuestion> {
       canVote = false;
     }
     if (!canVote) {
-      selectedTab = 1;
+      selectedTab = PollQuestionRowTabs.RESULTS;
     }
   }
 
@@ -663,78 +666,41 @@ class _PollQuestionState extends State<PollQuestion> {
     return EventualBuilder(
         notifier: widget.process.results,
         builder: (context, _, __) {
-          List<Widget> items = new List<Widget>();
-
           // TODO: The state should never be mutated by `build` or descendants. Only events should.
           // TODO: Refactor into a function returning a digest of the current state that can be used here.
           setResultsState();
 
-          // TODO: Rewrite the else clause into an early return function
-          if (widget.question.type == "single-choice") {
-            items.add(Section(text: (widget.questionIndex + 1).toString()));
-            items
-                .add(buildQuestionTitle(widget.question, widget.questionIndex));
-            items.add(buildTabSelect(context));
-
-            // TODO: Refactor into buildQuestionRaw() and buildQuestionWithResults()
-            List<Widget> options = new List<Widget>();
-            if (!canVote && !canSeeResults) {
-              widget.question.voteOptions.forEach((voteOption) {
-                options.add(buildDisabledPollOption(voteOption));
-              });
-            } else if (selectedTab > 1) {
-              // TODO: Write as an early return
-              print("ERROR: Tab index not supported: $selectedTab");
-              // TODO: the buildError result should be returned
-              buildError(getText(context, "main.questionTypeNotSupported"));
-            } else if (selectedTab == 0) {
-              widget.question.voteOptions.forEach((voteOption) {
-                options.add(buildPollOption(voteOption));
-              });
-            } else if (selectedTab == 1) {
-              totalVotes = 0;
-              maxVotes = 0;
-              minVotes = results
-                      .questions[widget.questionIndex].voteResults[0]?.votes ??
-                  0;
-              results.questions[widget.questionIndex].voteResults
-                  .forEach((element) {
-                totalVotes += element.votes;
-                maxVotes = element.votes > maxVotes ? element.votes : maxVotes;
-                minVotes = element.votes < minVotes ? element.votes : minVotes;
-              });
-              widget.question.voteOptions.asMap().forEach((index, voteOption) {
-                options.add(buildPollResultsOption(index, voteOption));
-              });
-            }
-
-            items.add(
-              Column(
-                children: options,
-                crossAxisAlignment: CrossAxisAlignment.start,
-              ),
-            );
-          } else {
+          if (widget.question.type != "single-choice") {
             print(
                 "ERROR: Question type not supported: " + widget.question.type);
-            // TODO: the buildError result should be returned
-            buildError(getText(context, "main.questionTypeNotSupported"));
+            return buildError(
+                getText(context, "main.questionTypeNotSupported"));
           }
+
           return Column(
-            children: items,
+            children: <Widget>[
+              Section(text: (widget.questionIndex + 1).toString()),
+              buildQuestionTitle(widget.question, widget.questionIndex),
+              buildTabSelect(context),
+              Column(
+                children: buildQuestionOptions(context),
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ],
             crossAxisAlignment: CrossAxisAlignment.start,
           );
         });
   }
 
-  onTabSelect(int idx) {
+  onTabSelect(PollQuestionRowTabs tab) {
     setState(() {
-      selectedTab = idx;
+      selectedTab = tab;
     });
   }
 
-  onNullSelect(int idx) {
-    if (idx == 1) {
+  // TODO: What does onNullSelect mean?
+  onNullSelect(PollQuestionRowTabs tab) {
+    if (tab == PollQuestionRowTabs.RESULTS) {
       widget.process.refreshResults();
     }
   }
@@ -749,62 +715,78 @@ class _PollQuestionState extends State<PollQuestion> {
     );
   }
 
-  String getTabName(int idx) {
-    if (idx == 0)
-      return getText(context, "main.vote");
-    else if (idx == 1)
-      return getText(context, "main.pollResults");
-    else
-      return "";
+  List<Widget> buildQuestionOptions(BuildContext context) {
+    List<Widget> options = List<Widget>();
+    if (!canVote && !canSeeResults) {
+      return widget.question.voteOptions
+          .map((voteOption) => buildPollOption(voteOption, disabled: true))
+          .toList();
+    } else if (selectedTab == PollQuestionRowTabs.SELECTION) {
+      return widget.question.voteOptions
+          .map((voteOption) => buildPollOption(voteOption))
+          .toList();
+    } else // => (selectedTab == PollQuestionRowTabs.RESULTS)
+    {
+      // TODO: The state should never be mutated by `build` or descendants. Only events should.
+      // TODO: Build methods should only compute local variables derivating from the widget's status.
+      // TODO: totalVotes is a global variable that will count the votes for every question of every option around. This can easily suffer from race conditions and similar.
+      totalVotes = 0;
+      maxVotes = 0;
+      minVotes =
+          results.questions[widget.questionIndex].voteResults[0]?.votes ?? 0;
+      results.questions[widget.questionIndex].voteResults.forEach((element) {
+        totalVotes += element.votes;
+        maxVotes = element.votes > maxVotes ? element.votes : maxVotes;
+        minVotes = element.votes < minVotes ? element.votes : minVotes;
+      });
+      widget.question.voteOptions.asMap().forEach((index, voteOption) {
+        options.add(buildPollResultsOption(index, voteOption));
+      });
+    }
+    return options;
   }
 
-  Widget buildDisabledPollOption(
-      ProcessMetadata_Details_Question_VoteOption voteOption) {
-    return Padding(
-        padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-        child: Chip(
-          backgroundColor: colorLightGuide,
-          padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-          label: Text(
-            voteOption.title[Globals.appState.currentLanguage],
-            overflow: TextOverflow.ellipsis,
-            maxLines: 5,
-            style: TextStyle(
-              fontSize: fontSizeSecondary,
-              fontWeight: fontWeightRegular,
-              color: colorDescription,
-            ),
-          ),
-        ));
-  }
-
-  Widget buildPollOption(
-      ProcessMetadata_Details_Question_VoteOption voteOption) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-      child: ChoiceChip(
+  Widget buildPollOption(ProcessMetadata_Details_Question_VoteOption voteOption,
+      {bool disabled = false}) {
+    if (disabled) {
+      return Chip(
         backgroundColor: colorLightGuide,
-        selectedColor: colorBlue,
         padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
         label: Text(
-          voteOption.title['default'],
+          voteOption.title[Globals.appState.currentLanguage],
           overflow: TextOverflow.ellipsis,
           maxLines: 5,
           style: TextStyle(
-              fontSize: fontSizeSecondary,
-              fontWeight: fontWeightRegular,
-              color: widget.choices[widget.questionIndex] == voteOption.value
-                  ? Colors.white
-                  : colorDescription),
+            fontSize: fontSizeSecondary,
+            fontWeight: fontWeightRegular,
+            color: colorDescription,
+          ),
         ),
-        selected: widget.choices[widget.questionIndex] == voteOption.value,
-        onSelected: (bool selected) {
-          if (selected) {
-            setChoice(widget.questionIndex, voteOption.value);
-          }
-        },
+      ).withHPadding(paddingPage);
+    }
+
+    return ChoiceChip(
+      backgroundColor: colorLightGuide,
+      selectedColor: colorBlue,
+      padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+      label: Text(
+        voteOption.title['default'],
+        overflow: TextOverflow.ellipsis,
+        maxLines: 5,
+        style: TextStyle(
+            fontSize: fontSizeSecondary,
+            fontWeight: fontWeightRegular,
+            color: widget.choices[widget.questionIndex] == voteOption.value
+                ? Colors.white
+                : colorDescription),
       ),
-    );
+      selected: widget.choices[widget.questionIndex] == voteOption.value,
+      onSelected: (bool selected) {
+        if (selected) {
+          setChoice(widget.questionIndex, voteOption.value);
+        }
+      },
+    ).withHPadding(paddingPage);
   }
 
   Widget buildPollResultsOption(
@@ -814,12 +796,14 @@ class _PollQuestionState extends State<PollQuestion> {
     final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
     double relativePerc =
         myVotes - minVotes > 0 ? myVotes - minVotes / maxVotes - minVotes : 0.0;
+
     // Weight relative win/loss ratio between options based on max share of total votes
     relativePerc +=
         maxVotes > 0 ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc) : 0;
     final myColor = totalVotes > 0
-        ? widget.rb[relativePerc]
+        ? widget.gradient[relativePerc]
         : colorBluePale.withOpacity(0.1);
+
     return LinearPercentIndicator(
       center: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -838,13 +822,13 @@ class _PollQuestionState extends State<PollQuestion> {
             ),
             Text(
               myVotes == 1
-                  ? "$myVotes " + getText(context, "main.vote")
-                  : "$myVotes " + getText(context, "main.votes"),
+                  ? "$myVotes " + getText(context, "main.vote").toLowerCase()
+                  : "$myVotes " + getText(context, "main.votes").toLowerCase(),
               maxLines: 1,
               textAlign: TextAlign.right,
               overflow: TextOverflow.fade,
               // style: TextStyle(fontWeight: FontWeight.bold),
-            ).withRightPadding(5).withLeftPadding(20)
+            ).withHPadding(20)
           ]),
       animation: false,
       alignment: MainAxisAlignment.start,
@@ -856,10 +840,7 @@ class _PollQuestionState extends State<PollQuestion> {
       lineHeight: 30.0,
       percent: totalPerc,
       linearStrokeCap: LinearStrokeCap.butt,
-    )
-        .withTopPadding(1)
-        .withLeftPadding(paddingBadge)
-        .withRightPadding(paddingBadge);
+    ).withVPadding(4).withHPadding(paddingBadge);
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
@@ -901,9 +882,9 @@ class _PollQuestionState extends State<PollQuestion> {
 }
 
 class ProcessNavigation extends StatelessWidget {
-  final int selectedTab;
-  final Function onTabSelect;
-  final Function onNullSelect;
+  final PollQuestionRowTabs selectedTab;
+  final Function(PollQuestionRowTabs) onTabSelect;
+  final Function(PollQuestionRowTabs) onNullSelect;
   final bool canVote;
   final bool canSeeResults;
 
@@ -917,12 +898,16 @@ class ProcessNavigation extends StatelessWidget {
       backgroundColor: colorBaseBackground,
       onTap: (canVote && canSeeResults)
           ? (index) {
-              if (onTabSelect is Function) onTabSelect(index);
+              if (index >= PollQuestionRowTabs.values.length)
+                return;
+              else if (onTabSelect is! Function) return;
+              onTabSelect(PollQuestionRowTabs.values[index]);
             }
           : (index) {
-              if (onNullSelect is Function) onNullSelect(index);
+              if (onNullSelect is! Function) return;
+              onNullSelect(PollQuestionRowTabs.values[index]);
             },
-      currentIndex: selectedTab,
+      currentIndex: selectedTab.index,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           title: SizedBox.shrink(),
