@@ -615,7 +615,7 @@ class _PollQuestionState extends State<PollQuestion> {
   @override
   void initState() {
     widget.process.refreshResults();
-    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
+    refreshCheck = Timer.periodic(Duration(minutes: 1), (_) {});
     super.initState();
     setResultsState();
   }
@@ -664,21 +664,28 @@ class _PollQuestionState extends State<PollQuestion> {
         notifier: widget.process.results,
         builder: (context, _, __) {
           List<Widget> items = new List<Widget>();
+
+          // TODO: The state should never be mutated by `build` or descendants. Only events should.
+          // TODO: Refactor into a function returning a digest of the current state that can be used here.
           setResultsState();
 
+          // TODO: Rewrite the else clause into an early return function
           if (widget.question.type == "single-choice") {
             items.add(Section(text: (widget.questionIndex + 1).toString()));
             items
                 .add(buildQuestionTitle(widget.question, widget.questionIndex));
             items.add(buildTabSelect(context));
 
+            // TODO: Refactor into buildQuestionRaw() and buildQuestionWithResults()
             List<Widget> options = new List<Widget>();
             if (!canVote && !canSeeResults) {
               widget.question.voteOptions.forEach((voteOption) {
                 options.add(buildDisabledPollOption(voteOption));
               });
             } else if (selectedTab > 1) {
+              // TODO: Write as an early return
               print("ERROR: Tab index not supported: $selectedTab");
+              // TODO: the buildError result should be returned
               buildError(getText(context, "main.questionTypeNotSupported"));
             } else if (selectedTab == 0) {
               widget.question.voteOptions.forEach((voteOption) {
@@ -710,6 +717,7 @@ class _PollQuestionState extends State<PollQuestion> {
           } else {
             print(
                 "ERROR: Question type not supported: " + widget.question.type);
+            // TODO: the buildError result should be returned
             buildError(getText(context, "main.questionTypeNotSupported"));
           }
           return Column(
@@ -917,7 +925,7 @@ class ProcessNavigation extends StatelessWidget {
       currentIndex: selectedTab,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          title: Text(''),
+          title: SizedBox.shrink(),
           icon: Icon(
             Mdi.voteOutline,
             size: 29.0,
@@ -925,7 +933,7 @@ class ProcessNavigation extends StatelessWidget {
           ),
         ),
         BottomNavigationBarItem(
-          title: Text(''),
+          title: SizedBox.shrink(),
           icon: Icon(
             FeatherIcons.pieChart,
             size: 24.0,
