@@ -1,4 +1,5 @@
 import 'package:dvote/wrappers/process-results.dart';
+import 'package:dvote_common/widgets/spinner.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -116,8 +117,7 @@ class _PollQuestionState extends State<PollQuestion> {
     });
   }
 
-  // TODO: What does onNullSelect mean?
-  onNullSelect(PollQuestionRowTabs tab) {
+  refreshResultsOnSelect(PollQuestionRowTabs tab) {
     if (tab == PollQuestionRowTabs.RESULTS) {
       widget.process.refreshResults();
     }
@@ -127,8 +127,9 @@ class _PollQuestionState extends State<PollQuestion> {
     return ProcessNavigation(
       canVote,
       canSeeResults,
+      widget.process.results.isLoading,
       onTabSelect: onTabSelect,
-      onNullSelect: onNullSelect,
+      refreshResultsOnSelect: refreshResultsOnSelect,
       selectedTab: selectedTab,
     );
   }
@@ -305,12 +306,13 @@ class _PollQuestionState extends State<PollQuestion> {
 class ProcessNavigation extends StatelessWidget {
   final PollQuestionRowTabs selectedTab;
   final Function(PollQuestionRowTabs) onTabSelect;
-  final Function(PollQuestionRowTabs) onNullSelect;
+  final Function(PollQuestionRowTabs) refreshResultsOnSelect;
   final bool canVote;
   final bool canSeeResults;
+  final bool refreshingResults;
 
-  ProcessNavigation(this.canVote, this.canSeeResults,
-      {this.selectedTab, this.onTabSelect, this.onNullSelect});
+  ProcessNavigation(this.canVote, this.canSeeResults, this.refreshingResults,
+      {this.selectedTab, this.onTabSelect, this.refreshResultsOnSelect});
 
   @override
   Widget build(context) {
@@ -325,10 +327,12 @@ class ProcessNavigation extends StatelessWidget {
               onTabSelect(PollQuestionRowTabs.values[index]);
             }
           : (index) {
-              if (onNullSelect is! Function) return;
-              onNullSelect(PollQuestionRowTabs.values[index]);
+              // if results are disabled, selecting results tab refreshes results, checks for new ones
+              if (refreshResultsOnSelect is! Function) return;
+              refreshResultsOnSelect(PollQuestionRowTabs.values[index]);
             },
-      currentIndex: selectedTab.index,
+      currentIndex:
+          canVote ? selectedTab.index : PollQuestionRowTabs.RESULTS.index,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           title: SizedBox.shrink(),
@@ -340,11 +344,13 @@ class ProcessNavigation extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           title: SizedBox.shrink(),
-          icon: Icon(
-            FeatherIcons.pieChart,
-            size: 24.0,
-            color: canSeeResults ? null : Colors.grey[400],
-          ),
+          icon: refreshingResults
+              ? SpinnerCircular()
+              : Icon(
+                  FeatherIcons.pieChart,
+                  size: 24.0,
+                  color: canSeeResults ? null : Colors.grey[400],
+                ),
         ),
       ],
     );
