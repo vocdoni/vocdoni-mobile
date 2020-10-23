@@ -326,5 +326,7 @@ sendHostRequest({ method: "closeWindow" })
 
 ## Troubleshooting
 
-- Can't compile iOS because `App.framework` is built for another architecture
-	- Run `rm -Rf ios/Flutter/App.framework` and try again
+- The `r_scan` plugin breaks the build on iOS and/or is rejected by Google Play
+	- Edit `pubspec.yaml` and comment/uncomment the dependencies accordingly
+- ~~Can't compile iOS because `App.framework` is built for another architecture~~
+	- ~~Run `rm -Rf ios/Flutter/App.framework` and try again~~

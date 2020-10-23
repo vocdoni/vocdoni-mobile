@@ -80,5 +80,11 @@ post_install do |installer|
         'PERMISSION_SENSORS=0'
       ]
     end
+
+    ## WORKAROUND available in case app store submissions fail because of minimum target versions 
+    target.build_configurations.each do |config|
+      config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+    end
+    
   end
 end
