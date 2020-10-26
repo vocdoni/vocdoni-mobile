@@ -22,6 +22,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:vocdoni/widgets/poll-question.dart';
 
 class PollPageArgs {
   EntityModel entity;
@@ -93,6 +94,7 @@ class _PollPageState extends State<PollPage> {
   Future<void> onRefresh() {
     return process
         .refreshHasVoted()
+        .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshDates())
         .catchError((err) => log(err)); // Values will refresh if needed
@@ -348,12 +350,6 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  setChoice(int questionIndex, int value) {
-    setState(() {
-      choices[questionIndex] = value;
-    });
-  }
-
   /// Returns the 0-based index of the next unanswered question.
   /// Returns -1 if all questions have a valid choice
   int getNextPendingChoice() {
@@ -539,61 +535,26 @@ class _PollPageState extends State<PollPage> {
 
     for (ProcessMetadata_Details_Question question
         in process.metadata.value.details.questions) {
-      items.addAll(buildQuestion(question, questionIndex));
+      items.add(PollQuestion(
+          question, questionIndex, choices, process, process.isInCensus.value));
       questionIndex++;
     }
 
     return items;
   }
 
-  List<Widget> buildQuestion(
-      ProcessMetadata_Details_Question question, int questionIndex) {
-    List<Widget> items = new List<Widget>();
+  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
+    return ListItem(
+      mainText: question.question['default'],
+      mainTextMultiline: 3,
+      secondaryText: question.description['default'],
+      secondaryTextMultiline: 100,
+      rightIcon: null,
+    );
+  }
 
-    if (question.type == "single-choice") {
-      items.add(Section(text: (questionIndex + 1).toString()));
-      items.add(buildQuestionTitle(question, questionIndex));
-
-      List<Widget> options = new List<Widget>();
-      question.voteOptions.forEach((voteOption) {
-        options.add(Padding(
-          padding: EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-          child: ChoiceChip(
-            backgroundColor: colorLightGuide,
-            selectedColor: colorBlue,
-            padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-            label: Text(
-              voteOption.title['default'],
-              overflow: TextOverflow.ellipsis,
-              maxLines: 5,
-              style: TextStyle(
-                  fontSize: fontSizeSecondary,
-                  fontWeight: fontWeightRegular,
-                  color: choices[questionIndex] == voteOption.value
-                      ? Colors.white
-                      : colorDescription),
-            ),
-            selected: choices[questionIndex] == voteOption.value,
-            onSelected: (bool selected) {
-              if (selected) {
-                setChoice(questionIndex, voteOption.value);
-              }
-            },
-          ),
-        ));
-      });
-
-      items.add(
-        Column(
-          children: options,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-      );
-    } else {
-      print("ERROR: Question type not supported: " + question.type);
-      buildError(getText(context, "main.questionTypeNotSupported"));
-    }
-    return items;
+  goBack(BuildContext ctx) {
+    Navigator.pop(ctx, false);
   }
 
   buildError(String error) {
@@ -615,19 +576,5 @@ class _PollPageState extends State<PollPage> {
         ),
       ),
     );
-  }
-
-  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
-    return ListItem(
-      mainText: question.question['default'],
-      mainTextMultiline: 3,
-      secondaryText: question.description['default'],
-      secondaryTextMultiline: 100,
-      rightIcon: null,
-    );
-  }
-
-  goBack(BuildContext ctx) {
-    Navigator.pop(ctx, false);
   }
 }
