@@ -51,14 +51,14 @@ class _PollQuestionState extends State<PollQuestion> {
   }
 
 // Determines if the user can vote
-  bool digestVotingAbility() {
+  bool getCanVote() {
     results = widget.process.results.value;
     // If poll is open, and voter is in census, canVote is true
     return ((results?.state?.contains("open") ?? false) && widget.isInCensus);
   }
 
   // Determines if the user can see results
-  bool digestResultsAbility() {
+  bool getResultsAvailable() {
     results = widget.process.results.value;
     // If results are available, process must be decrypted or unencrypted, so results can be displayed
     return !(results?.questions?.isEmpty ?? true);
@@ -94,15 +94,16 @@ class _PollQuestionState extends State<PollQuestion> {
             return buildError(
                 getText(context, "main.questionTypeNotSupported"));
           }
+          final resultsAvailable = getResultsAvailable();
+          final canVote = getCanVote();
 
           return Column(
             children: <Widget>[
               Section(text: (widget.questionIndex + 1).toString()),
               buildQuestionTitle(widget.question, widget.questionIndex),
-              buildTabSelect(
-                  context, digestResultsAbility(), digestVotingAbility()),
+              buildTabSelect(resultsAvailable, canVote),
               Column(
-                children: buildQuestionOptions(context),
+                children: buildQuestionOptions(resultsAvailable, canVote),
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
             ],
@@ -123,44 +124,46 @@ class _PollQuestionState extends State<PollQuestion> {
     }
   }
 
-  Widget buildTabSelect(BuildContext context, bool canSeeResults, canVote) {
+  Widget buildTabSelect(bool canSeeResults, canVote) {
     return ProcessNavigation(
       canVote,
       canSeeResults,
       widget.process.results.isLoading,
       onTabSelect: onTabSelect,
-      refreshResultsOnSelect: refreshResultsOnSelect,
+      onRefreshResults: refreshResultsOnSelect,
       selectedTab: selectedTab,
     );
   }
 
-  List<Widget> buildQuestionOptions(BuildContext context) {
-    List<Widget> options = List<Widget>();
-    if (!digestVotingAbility() && !digestResultsAbility()) {
+  List<Widget> buildQuestionOptions(bool resultsAvailable, bool canVote) {
+    if (!resultsAvailable && !canVote) {
       return widget.question.voteOptions
           .map((voteOption) => buildPollOption(voteOption, disabled: true))
           .toList();
-    } else if (selectedTab == PollQuestionRowTabs.SELECTION &&
-        digestVotingAbility()) {
+    } else if (selectedTab == PollQuestionRowTabs.SELECTION && getCanVote()) {
       return widget.question.voteOptions
           .map((voteOption) => buildPollOption(voteOption))
           .toList();
-    } else // => (selectedTab == PollQuestionRowTabs.RESULTS)
-    {
-      int totalVotes = 0;
-      int maxVotes = 0;
-      int minVotes =
-          results.questions[widget.questionIndex].voteResults[0]?.votes ?? 0;
-      results.questions[widget.questionIndex].voteResults.forEach((element) {
-        totalVotes += element.votes;
-        maxVotes = element.votes > maxVotes ? element.votes : maxVotes;
-        minVotes = element.votes < minVotes ? element.votes : minVotes;
-      });
-      widget.question.voteOptions.asMap().forEach((index, voteOption) {
-        options.add(buildPollResultsOption(
-            index, voteOption, totalVotes, maxVotes, minVotes));
-      });
     }
+
+    // => (selectedTab == PollQuestionRowTabs.RESULTS)
+
+    List<Widget> options = List<Widget>();
+    int totalVotes = 0;
+    int mostVotedCount = 0;
+    int leastVotedCount =
+        results.questions[widget.questionIndex].voteResults[0]?.votes ?? 0;
+    results.questions[widget.questionIndex].voteResults.forEach((element) {
+      totalVotes += element.votes;
+      mostVotedCount =
+          element.votes > mostVotedCount ? element.votes : mostVotedCount;
+      leastVotedCount =
+          element.votes < leastVotedCount ? element.votes : leastVotedCount;
+    });
+    widget.question.voteOptions.asMap().forEach((index, voteOption) {
+      options.add(buildPollResultsOption(
+          index, voteOption, totalVotes, mostVotedCount, leastVotedCount));
+    });
     return options;
   }
 
@@ -306,13 +309,13 @@ class _PollQuestionState extends State<PollQuestion> {
 class ProcessNavigation extends StatelessWidget {
   final PollQuestionRowTabs selectedTab;
   final Function(PollQuestionRowTabs) onTabSelect;
-  final Function(PollQuestionRowTabs) refreshResultsOnSelect;
+  final Function(PollQuestionRowTabs) onRefreshResults;
   final bool canVote;
   final bool canSeeResults;
   final bool refreshingResults;
 
   ProcessNavigation(this.canVote, this.canSeeResults, this.refreshingResults,
-      {this.selectedTab, this.onTabSelect, this.refreshResultsOnSelect});
+      {this.selectedTab, this.onTabSelect, this.onRefreshResults});
 
   @override
   Widget build(context) {
@@ -328,8 +331,8 @@ class ProcessNavigation extends StatelessWidget {
             }
           : (index) {
               // if results are disabled, selecting results tab refreshes results, checks for new ones
-              if (refreshResultsOnSelect is! Function) return;
-              refreshResultsOnSelect(PollQuestionRowTabs.values[index]);
+              if (onRefreshResults is! Function) return;
+              onRefreshResults(PollQuestionRowTabs.values[index]);
             },
       currentIndex:
           canVote ? selectedTab.index : PollQuestionRowTabs.RESULTS.index,
