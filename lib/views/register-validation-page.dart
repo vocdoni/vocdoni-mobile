@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/widgets/summary.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -79,14 +80,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     try {
       // PREPARE THE REQUEST
-      final mnemonic = await SymmetricNative.decryptStringAsync(
+      final mnemonic = await Symmetric.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternLockKey);
 
       if (!mounted) return;
 
       // Derive per-entity key
-      final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
+      final wallet = EthereumWallet.fromMnemonic(mnemonic,
           entityAddressHash: widget.entityId);
 
       final dvoteGw =

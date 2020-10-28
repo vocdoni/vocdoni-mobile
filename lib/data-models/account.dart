@@ -1,7 +1,7 @@
 import 'dart:math' hide log;
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
-import 'package:dvote/crypto/encryption-native.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import "dart:developer";
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -211,13 +211,13 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       final currentAccount = Globals.appState.currentAccount;
       if (currentAccount is! AccountModel) return;
 
-      final mnemonic = SymmetricNative.decryptString(
+      final mnemonic = Symmetric.decryptString(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) return;
 
       for (final entity in this.entities.value) {
-        final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
+        final wallet = EthereumWallet.fromMnemonic(mnemonic,
             entityAddressHash: entity.reference.entityId);
 
         // Store the public key within the map for future use
@@ -405,14 +405,14 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = EthereumNativeWallet.fromMnemonic(mnemonic);
+    final wallet = EthereumWallet.fromMnemonic(mnemonic);
 
     final rootPrivateKey = await wallet.privateKeyAsync;
     final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic = await SymmetricNative.encryptStringAsync(
-        mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await SymmetricNative.encryptStringAsync(
+    final encryptedMenmonic =
+        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
+    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
         rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();
@@ -442,15 +442,15 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = await EthereumNativeWallet.randomAsync(size: 192);
+    final wallet = await EthereumWallet.randomAsync(size: 192);
 
     final mnemonic = wallet.mnemonic;
     final rootPrivateKey = await wallet.privateKeyAsync;
     final rootPublicKey = await wallet.publicKeyAsync(uncompressed: true);
     final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic = await SymmetricNative.encryptStringAsync(
-        mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await SymmetricNative.encryptStringAsync(
+    final encryptedMenmonic =
+        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
+    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
         rootPrivateKey, patternEncryptionKey);
 
     Identity newIdentity = Identity();

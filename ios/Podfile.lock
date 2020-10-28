@@ -1,5 +1,5 @@
 PODS:
-  - dvote_native (0.0.1):
+  - dvote_crypto (0.0.1):
     - Flutter
   - Firebase/CoreOnly (6.26.0):
     - FirebaseCore (= 6.7.2)
@@ -92,7 +92,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - dvote_native (from `.symlinks/plugins/dvote_native/ios`)
+  - dvote_crypto (from `.symlinks/plugins/dvote_crypto/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
@@ -122,8 +122,8 @@ SPEC REPOS:
     - Protobuf
 
 EXTERNAL SOURCES:
-  dvote_native:
-    :path: ".symlinks/plugins/dvote_native/ios"
+  dvote_crypto:
+    :path: ".symlinks/plugins/dvote_crypto/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_messaging:
@@ -146,7 +146,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher/ios"
 
 SPEC CHECKSUMS:
-  dvote_native: 794d62db96e0655cbec911fda31c4db37aba9017
+  dvote_crypto: 7ee34f0ed452ffe78b2905eaa7879a5d77f39c23
   Firebase: 7cf5f9c67f03cb3b606d1d6535286e1080e57eb6
   firebase_core: 00e54a4744164a6b5a250b96dd1ad5afaba7a342
   firebase_messaging: 666d9994651b1ecf8c582b52dd913f3fa58c17ef

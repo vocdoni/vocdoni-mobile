@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:dvote/util/json-signature-native.dart';
+import 'package:dvote/util/json-signature.dart';
 import 'package:dvote/util/parsers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -447,7 +447,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     final ts = DateTime.now().millisecondsSinceEpoch;
     final body = {"method": "getVisibility", "timestamp": ts};
     final signature =
-        await JSONSignatureNative.signJsonPayloadAsync(body, derivedPrivateKey);
+        await JSONSignature.signJsonPayloadAsync(body, derivedPrivateKey);
 
     if (signature.startsWith("0x"))
       this.actionVisibilityCheckSignature = signature;

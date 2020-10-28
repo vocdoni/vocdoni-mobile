@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:dvote/dvote.dart';
+// import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote/wrappers/process-results.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -9,7 +11,6 @@ import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:convert/convert.dart';
-// import 'dart:convert';
 import "dart:developer";
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/credentials.dart';
@@ -351,20 +352,24 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     try {
       this.isInCensus.setToLoading();
 
-      // Undigested
-      // final pubKey = account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
-      // final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
-      // final proof = await generateProof(this.metadata.value.census.merkleRoot,
-      //     censusPublicKeyClaim, false, dvoteGw);
+      // TODO: Revert back to digested
 
-      // Digested
+      // Undigested
       final pubKey =
           account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
-      final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
-      final alreadyDigested = true;
-
+      final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
+      final alreadyDigested = false;
       final proof = await generateProof(this.metadata.value.census.merkleRoot,
           censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
+
+      // // Digested
+      // final pubKey =
+      //     account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
+      // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
+      // final alreadyDigested = true;
+
+      // final proof = await generateProof(this.metadata.value.census.merkleRoot,
+      //     censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;

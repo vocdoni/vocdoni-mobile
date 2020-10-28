@@ -1,4 +1,4 @@
-import 'package:dvote/dvote.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
@@ -76,7 +76,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
     try {
       final w =
-          await EthereumNativeWallet.fromMnemonic(mnemonic).privateKeyAsync;
+          await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
       showMessage(getText(context, "error.theWordsYouEnteredAreNotValid"),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:convert/convert.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/wrappers/process-keys.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -15,7 +17,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:dvote/crypto/encryption-native.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 // import 'package:convert/convert.dart';
 // import 'dart:convert';
 
@@ -69,33 +71,37 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     // PREPARE DATA
     String merkleProof;
-    EthereumNativeWallet wallet;
+    EthereumWallet wallet;
 
     try {
       // Derive per-entity key
       final entityAddressHash = widget.process.metadata.value.details.entityId;
 
-      final mnemonic = await SymmetricNative.decryptStringAsync(
+      final mnemonic = await Symmetric.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
           patternLockKey);
 
       if (!mounted) return;
 
-      wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
+      wallet = EthereumWallet.fromMnemonic(mnemonic,
           entityAddressHash: entityAddressHash);
 
       // Merkle Proof
 
-      // final publicKey = (await wallet.publicKeyAsync(uncompressed: true)).replaceAll("0x", "");
-      // final base64Claim = base64.encode(hex.decode(publicKey));
+      final publicKey = (await wallet.publicKeyAsync(uncompressed: true))
+          .replaceAll("0x", "");
+      final base64RawClaim = base64.encode(hex.decode(publicKey));
+      final alreadyDigested = false;
 
-      final publicKey = await wallet.publicKeyAsync(uncompressed: true);
-      final b64DigestedClaim = Hashing.digestHexClaim(publicKey);
-      final alreadyDigested = true;
+      // TODO: Revert back to digested
+      
+      // final publicKey = await wallet.publicKeyAsync(uncompressed: true);
+      // final b64DigestedClaim = Hashing.digestHexClaim(publicKey);
+      // final alreadyDigested = true;
 
       merkleProof = await generateProof(
           widget.process.metadata.value.census.merkleRoot,
-          b64DigestedClaim,
+          base64RawClaim, // b64DigestedClaim,
           alreadyDigested,
           AppNetworking.pool);
 
@@ -112,7 +118,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     }
 
     assert(merkleProof is String);
-    assert(wallet is EthereumNativeWallet);
+    assert(wallet is EthereumWallet);
 
     try {
       // CHECK IF THE VOTE IS ALREADY REGISTERED

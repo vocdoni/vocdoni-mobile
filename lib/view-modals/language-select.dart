@@ -1,3 +1,4 @@
+import 'package:eventual/eventual.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -29,15 +30,21 @@ class LanguageSelect extends StatelessWidget {
 
   Widget bulidLanguageItem(
       BuildContext context, String langName, String langCode) {
-    return ListItem(
-        mainText: langName,
-        rightIcon: Globals.appState.locale.value.languageCode == langCode
-            ? FeatherIcons.check
-            : FeatherIcons.globe,
-        onTap: () {
-          Globals.appState
-              .selectLocale(Locale(langCode))
-              .then((_) => Navigator.of(context).pop(true));
+    return EventualBuilder(
+        notifier: Globals.appState.locale,
+        builder: (context, notifiers, widget) {
+          final currentLanguageCode =
+              Globals.appState.locale.value?.languageCode ?? DEFAULT_LANGUAGE;
+          return ListItem(
+              mainText: langName,
+              rightIcon: currentLanguageCode == langCode
+                  ? FeatherIcons.check
+                  : FeatherIcons.globe,
+              onTap: () {
+                Globals.appState
+                    .selectLocale(Locale(langCode))
+                    .then((_) => Navigator.of(context).pop(true));
+              });
         });
   }
 }

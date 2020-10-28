@@ -14,7 +14,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
-import 'package:dvote/crypto/encryption-native.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeIdentityTab extends StatefulWidget {
@@ -134,7 +134,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
       return;
     }
 
-    final mnemonic = await SymmetricNative.decryptStringAsync(
+    final mnemonic = await Symmetric.decryptStringAsync(
         encryptedMnemonic, patternEncryptionKey);
 
     Navigator.pushNamed(ctx, "/identity/backup",

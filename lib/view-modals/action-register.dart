@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dvote/dvote.dart';
-import 'package:dvote/util/json-signature-native.dart';
-import 'package:dvote/crypto/encryption-native.dart';
+import 'package:dvote/util/json-signature.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -159,8 +159,7 @@ class ActionRegisterPage extends StatelessWidget {
   }
 
   String phoneValidator(String value, BuildContext ctx) {
-    if (value.isEmpty)
-      return getText(ctx, "main.pleaseEnterAValidPhoneNumber");
+    if (value.isEmpty) return getText(ctx, "main.pleaseEnterAValidPhoneNumber");
 
     if (phoneRegExp.hasMatch(value)) return null;
     return getText(ctx, "main.pleaseEnterAValidPhoneNumber");
@@ -237,9 +236,9 @@ class ActionRegisterPage extends StatelessWidget {
     // Derive the key for the entity
 
     final mnemonic =
-        await SymmetricNative.decryptStringAsync(encryptedMnemonic, patternStr);
-    final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
-        entityAddressHash: entityId);
+        await Symmetric.decryptStringAsync(encryptedMnemonic, patternStr);
+    final wallet =
+        EthereumWallet.fromMnemonic(mnemonic, entityAddressHash: entityId);
 
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
@@ -266,7 +265,7 @@ class ActionRegisterPage extends StatelessWidget {
       "signature": "" // set right after
     };
 
-    payload["signature"] = await JSONSignatureNative.signJsonPayloadAsync(
+    payload["signature"] = await JSONSignature.signJsonPayloadAsync(
         payload["request"], await wallet.privateKeyAsync);
 
     final Map<String, String> headers = {

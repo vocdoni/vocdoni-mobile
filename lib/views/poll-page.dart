@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import "dart:developer";
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
@@ -127,7 +128,7 @@ class _PollPageState extends State<PollPage> {
       }
 
       // Good
-      final mnemonic = SymmetricNative.decryptString(
+      final mnemonic = Symmetric.decryptString(
           account.identity.value.keys[0].encryptedMnemonic,
           patternEncryptionKey);
       if (mnemonic == null) {
@@ -137,7 +138,7 @@ class _PollPageState extends State<PollPage> {
         return;
       }
 
-      final wallet = EthereumNativeWallet.fromMnemonic(mnemonic,
+      final wallet = EthereumWallet.fromMnemonic(mnemonic,
           entityAddressHash: entity.reference.entityId);
 
       account.setPublicKeyForEntity(
