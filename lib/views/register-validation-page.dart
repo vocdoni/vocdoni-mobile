@@ -131,8 +131,10 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
-        showMessage(getText(context, "error.theRegistrationCouldNotBeCompleted"),
-            purpose: Purpose.DANGER, context: context);
+        showMessage(
+            getText(context, "error.theRegistrationCouldNotBeCompleted"),
+            purpose: Purpose.DANGER,
+            context: context);
       }
     }
   }
@@ -158,8 +160,10 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
                       maxLines: 10,
                       text: getText(context,
                           "main.youAreAboutToValidateYourDigitalIdentityDoYouWantToContinue")),
-                  buildStep(getText(context, "main.authorizing"),
-                      getText(context, "main.authorized"), Steps.AUTHORIZE_ACTION),
+                  buildStep(
+                      getText(context, "main.authorizing"),
+                      getText(context, "main.authorized"),
+                      Steps.AUTHORIZE_ACTION),
                   buildStep(getText(context, "main.confirming"),
                       getText(context, "main.confirmed"), Steps.CONFIRM_TOKEN),
                   Spacer(),

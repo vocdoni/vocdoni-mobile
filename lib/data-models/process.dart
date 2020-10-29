@@ -352,24 +352,21 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     try {
       this.isInCensus.setToLoading();
 
+      final pubKey =
+          account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
+
       // TODO: Revert back to digested
 
       // Undigested
-      final pubKey =
-          account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
       final censusPublicKeyClaim = base64.encode(hex.decode(pubKey));
       final alreadyDigested = false;
-      final proof = await generateProof(this.metadata.value.census.merkleRoot,
-          censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
 
       // // Digested
-      // final pubKey =
-      //     account.getPublicKeyForEntity(this.entityId).replaceAll("0x", "");
       // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
       // final alreadyDigested = true;
 
-      // final proof = await generateProof(this.metadata.value.census.merkleRoot,
-      //     censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
+      final proof = await generateProof(this.metadata.value.census.merkleRoot,
+          censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !proof.startsWith("0x")) {
         this.isInCensus.setValue(false);
         return;

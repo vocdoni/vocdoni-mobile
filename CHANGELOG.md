@@ -1,3 +1,11 @@
+# 0.8.9
+
+- Importing an updated version of dvote, ensuring that JSON messages are sent exactly as they are signed
+
+# 0.8.8
+
+- Temporary backoff from using native crypto methods (iOS)
+
 # 0.8.7
 
 - Using Flutter 1.22
