@@ -52,9 +52,12 @@ class _PollQuestionState extends State<PollQuestion> {
 
 // Determines if the user can vote
   bool getCanVote() {
-    results = widget.process.results.value;
     // If poll is open, and voter is in census, canVote is true
-    return ((results?.state?.contains("open") ?? false) && widget.isInCensus);
+    final notOpen = !widget.process.startDate.hasValue ||
+        !widget.process.endDate.hasValue ||
+        widget.process.startDate.value.isAfter(DateTime.now()) ||
+        widget.process.endDate.value.isBefore(DateTime.now());
+    return (!notOpen && widget.isInCensus);
   }
 
   // Determines if the user can see results
@@ -86,7 +89,11 @@ class _PollQuestionState extends State<PollQuestion> {
   @override
   Widget build(context) {
     return EventualBuilder(
-        notifier: widget.process.results,
+        notifiers: [
+          widget.process.results,
+          widget.process.startDate,
+          widget.process.endDate
+        ],
         builder: (context, _, __) {
           if (widget.question.type != "single-choice") {
             print(
@@ -140,7 +147,7 @@ class _PollQuestionState extends State<PollQuestion> {
       return widget.question.voteOptions
           .map((voteOption) => buildPollOption(voteOption, disabled: true))
           .toList();
-    } else if (selectedTab == PollQuestionRowTabs.SELECTION && getCanVote()) {
+    } else if (selectedTab == PollQuestionRowTabs.SELECTION && canVote) {
       return widget.question.voteOptions
           .map((voteOption) => buildPollOption(voteOption))
           .toList();
