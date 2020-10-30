@@ -49,7 +49,7 @@ class _PollQuestionState extends State<PollQuestion> {
   }
 
   bool get canVote {
-    if (widget.process.hasVoted.value != true)
+    if (widget.process.hasVoted.value == true)
       return false;
     else if (!widget.process.startDate.hasValue)
       return false;
@@ -59,7 +59,12 @@ class _PollQuestionState extends State<PollQuestion> {
       return false;
     else if (widget.process.endDate.value.isBefore(DateTime.now()))
       return false;
-    return widget.isInCensus;
+    else if (widget.isInCensus != true) {
+      // Allows widget.isInCensus to be null without breaking
+      return false;
+    }
+    // return widget.isInCensus ? widget.isInCensus : false;
+    return true;
   }
 
   bool get resultsAvailable {
