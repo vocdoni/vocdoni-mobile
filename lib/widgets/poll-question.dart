@@ -1,4 +1,3 @@
-import 'package:dvote/wrappers/process-results.dart';
 import 'package:dvote_common/widgets/spinner.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/process.dart';
@@ -39,7 +38,6 @@ class PollQuestion extends StatefulWidget {
 }
 
 class _PollQuestionState extends State<PollQuestion> {
-  ProcessResultsDigested results;
   Timer refreshCheck;
   PollQuestionRowTabs selectedTab = PollQuestionRowTabs.SELECTION;
 
@@ -50,21 +48,26 @@ class _PollQuestionState extends State<PollQuestion> {
     super.initState();
   }
 
-// Determines if the user can vote
-  bool getCanVote() {
-    // If poll is open, and voter is in census, canVote is true
-    final notOpen = !widget.process.startDate.hasValue ||
-        !widget.process.endDate.hasValue ||
-        widget.process.startDate.value.isAfter(DateTime.now()) ||
-        widget.process.endDate.value.isBefore(DateTime.now());
-    return (!notOpen && widget.isInCensus);
+  bool get canVote {
+    if (widget.process.hasVoted.value != true)
+      return false;
+    else if (!widget.process.startDate.hasValue)
+      return false;
+    else if (!widget.process.endDate.hasValue)
+      return false;
+    else if (widget.process.startDate.value.isAfter(DateTime.now()))
+      return false;
+    else if (widget.process.endDate.value.isBefore(DateTime.now()))
+      return false;
+    return widget.isInCensus;
   }
 
-  // Determines if the user can see results
-  bool getResultsAvailable() {
-    results = widget.process.results.value;
-    // If results are available, process must be decrypted or unencrypted, so results can be displayed
-    return !(results?.questions?.isEmpty ?? true);
+  bool get resultsAvailable {
+    if (!widget.process.results.hasValue)
+      return false;
+    else if (widget.process.results.value?.questions?.isEmpty ?? true)
+      return false;
+    return true;
   }
 
   @override
@@ -90,6 +93,7 @@ class _PollQuestionState extends State<PollQuestion> {
   Widget build(context) {
     return EventualBuilder(
         notifiers: [
+          widget.process.hasVoted,
           widget.process.results,
           widget.process.startDate,
           widget.process.endDate
@@ -101,16 +105,16 @@ class _PollQuestionState extends State<PollQuestion> {
             return buildError(
                 getText(context, "main.questionTypeNotSupported"));
           }
-          final resultsAvailable = getResultsAvailable();
-          final canVote = getCanVote();
+          final resultsOk = resultsAvailable;
+          final voteOk = canVote;
 
           return Column(
             children: <Widget>[
               Section(text: (widget.questionIndex + 1).toString()),
               buildQuestionTitle(widget.question, widget.questionIndex),
-              buildTabSelect(resultsAvailable, canVote),
+              buildTabSelect(resultsOk, voteOk),
               Column(
-                children: buildQuestionOptions(resultsAvailable, canVote),
+                children: buildQuestionOptions(resultsOk, voteOk),
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
             ],
@@ -155,6 +159,7 @@ class _PollQuestionState extends State<PollQuestion> {
 
     // => (selectedTab == PollQuestionRowTabs.RESULTS)
 
+    final results = widget.process.results.value;
     List<Widget> options = List<Widget>();
     int totalVotes = 0;
     int mostVotedCount = 0;
@@ -223,6 +228,7 @@ class _PollQuestionState extends State<PollQuestion> {
       int totalVotes,
       maxVotes,
       minVotes) {
+    final results = widget.process.results.value;
     final myVotes =
         results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
     final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
