@@ -94,7 +94,7 @@ apk-beta:
 	make config target=beta
 	flutter build apk \
 		--dart-define=APP_MODE=beta \
-		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.stg.json \
 		--dart-define=NETWORK_ID=xdai \
 		--flavor beta \
 		--target-platform android-arm,android-arm64,android-x64 \
@@ -107,7 +107,7 @@ appbundle-beta:
 	make config target=beta
 	flutter build appbundle \
 		--dart-define=APP_MODE=beta \
-		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.json \
+		--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.stg.json \
 		--dart-define=NETWORK_ID=xdai \
 		--flavor beta \
 		--target-platform android-arm,android-arm64,android-x64
