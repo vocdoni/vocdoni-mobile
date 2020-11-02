@@ -50,10 +50,10 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       case PatternStep.READY:
         message =
             getText(context, "main.drawAPatternToLockYourIdentity") + ". ";
-        message += getText(context,
-                    "main.yourPatternShouldIncludeAtLeastNumDots")
-                .replaceAll("{{NUM}}", minPatternDots.toString()) +
-            ".";
+        message +=
+            getText(context, "main.yourPatternShouldIncludeAtLeastNumDots")
+                    .replaceAll("{{NUM}}", minPatternDots.toString()) +
+                ".";
         break;
       case PatternStep.CONFIRMING:
         message = getText(context,
@@ -177,9 +177,8 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
   void onFirstPassDone(BuildContext context, List<int> newPattern) {
     if (newPattern.length < minPatternDots) {
-      final err =
-          getText(context, "main.thePatternNeedsToHaveAtLeastNumDots")
-              .replaceFirst("{{NUM}}", minPatternDots.toString());
+      final err = getText(context, "main.thePatternNeedsToHaveAtLeastNumDots")
+          .replaceFirst("{{NUM}}", minPatternDots.toString());
       showMessage(err,
           context: context, duration: toasterDuration, purpose: Purpose.DANGER);
       setState(() {
@@ -231,7 +230,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
 
     Future.delayed(Duration(seconds: 2)).then((_) {
       final strPattern = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
-      Navigator.pop(context, strPattern);
+      Navigator.pop(this.context, strPattern);
     });
   }
 }
