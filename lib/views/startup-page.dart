@@ -1,9 +1,8 @@
-import 'dart:developer';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 import '../lib/globals.dart';
@@ -37,37 +36,32 @@ class _StartupPageState extends State<StartupPage> {
 
     return restorePersistence()
         .then((_) => restoreDataPools()) // Depends on restorePersistence()
-        .then((_) => startNetworking())
-        .then((_) => Notifications.init())
-        .then((_) {
-      showNextScreen();
-
-      // Detached update of the cached bootnodes
-      Globals.appState.refresh(force: true).catchError(
-          (err) => log("[App] Detached bootnode update failed: $err"));
-    }).catchError((err) {
+        .then((_) => showNextScreen(context))
+        .catchError((err) {
+      print("Startup error: $err");
       if (!mounted) return;
 
       setState(() {
         loading = false;
-        error = getText(context, "main.couldNotConnectToTheNetwork");
+        error = getText(context, "main.couldNotRefresh");
       });
-
-      // RETRY ITSELF
-      Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
     });
   }
 
-  void showNextScreen() {
+  void showNextScreen(BuildContext context) {
     // Determine the next screen and go there
     String nextRoutePath;
     if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 0) {
-      nextRoutePath = "/identity/select";
+      Globals.appState.selectAccount(0);
+      if (Globals.appState.currentAccount is! AccountModel)
+        throw Exception("No account available");
+
+      nextRoutePath = "/home";
     } else {
       nextRoutePath = "/identity/create";
     }
 
-    // Replace all routes with /identity/select on top
+    // Replace all routes nextRoutePath on top
     Navigator.pushNamedAndRemoveUntil(
         context, nextRoutePath, (Route _) => false);
   }

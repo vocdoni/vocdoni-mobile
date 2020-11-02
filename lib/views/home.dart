@@ -9,6 +9,7 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/notifications.dart';
+import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
@@ -41,41 +42,59 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    try {
-      // HANDLE APP LAUNCH LINK
-      getInitialUri()
-          .then((initialUri) => handleLink(initialUri))
-          .catchError((err) => handleIncomingLinkError(err));
+    initNetworking().then((_) {
+      try {
+        Globals.appState.currentAccount.refresh();
+        // HANDLE APP LAUNCH LINK
+        getInitialUri()
+            .then((initialUri) => handleLink(initialUri))
+            .catchError((err) => handleIncomingLinkError(err));
 
-      // HANDLE RUNTIME LINKS
-      linkChangeStream = getUriLinksStream()
-          .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
+        // HANDLE RUNTIME LINKS
+        linkChangeStream = getUriLinksStream()
+            .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
 
-      // Display the screen for a notification (if one is pending)
-      Future.delayed(Duration(seconds: 1))
-          .then((_) => Notifications.handlePendingNotification());
-    } catch (err) {
-      showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
-          title: getText(context, "main.error"), context: context);
-    }
+        // Display the screen for a notification (if one is pending)
+        Future.delayed(Duration(seconds: 1))
+            .then((_) => Notifications.handlePendingNotification());
+      } catch (err) {
+        showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
+            title: getText(context, "main.error"), context: context);
+      }
 
-    // APP EVENT LISTENER
-    WidgetsBinding.instance.addObserver(this);
+      // APP EVENT LISTENER
+      WidgetsBinding.instance.addObserver(this);
 
-    // DETERMINE INITIAL TAB
-    final currentAccount =
-        Globals.appState.currentAccount; // It is expected to be non-null
+      // DETERMINE INITIAL TAB
+      final currentAccount =
+          Globals.appState.currentAccount; // It is expected to be non-null
 
-    // No organizations => identity
-    if (!currentAccount.entities.hasValue ||
-        currentAccount.entities.value.length == 0) {
-      selectedTab = 2;
-    } else {
-      // internally, this will only refresh outdated individual elements
-      currentAccount.refresh(); // detached from async
-    }
+      // No organizations => identity
+      if (!currentAccount.entities.hasValue ||
+          currentAccount.entities.value.length == 0) {
+        selectedTab = 2;
+      } else {
+        // internally, this will only refresh outdated individual elements
+        currentAccount.refresh(); // detached from async
+      }
 
-    super.initState();
+      super.initState();
+    });
+  }
+
+  Future<void> initNetworking() {
+    return startNetworking()
+        .then((_) => Notifications.init())
+        .then((_) => Globals.appState.refresh(force: true).catchError(
+            (err) => log("[App] Detached bootnode update failed: $err")))
+        .catchError((err) {
+      log("[App] Network initialization failed: $err");
+      // showAlert(getText(context, "main.couldNotConnectToTheNetwork"),
+      // title: getText(context, "main.error"), context: context);
+
+      // RETRY ITSELF
+      // Future.delayed(Duration(seconds: 10)).then((_) => initNetworking());
+    });
   }
 
   handleLink(Uri givenUri) {
