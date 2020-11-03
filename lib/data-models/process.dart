@@ -15,6 +15,11 @@ import "dart:developer";
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/credentials.dart';
 
+final hexRegexp =
+    RegExp(r"^0?x?[0-9a-f]+$", caseSensitive: false, multiLine: false);
+final emptyProofRegexp =
+    RegExp(r"^0?x?[0]+$", caseSensitive: false, multiLine: false);
+
 /// This class should be used exclusively as a global singleton.
 /// ProcessPoolModel tracks all the registered accounts and provides individual models that
 /// can be listened to as well.
@@ -367,13 +372,10 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
       final proof = await generateProof(this.metadata.value.census.merkleRoot,
           censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
-      if (proof is! String || !proof.startsWith("0x")) {
+      if (proof is! String || !hexRegexp.hasMatch(proof)) {
         this.isInCensus.setValue(false);
         return;
       }
-
-      final emptyProofRegexp =
-          RegExp(r"^0x[0]+$", caseSensitive: false, multiLine: false);
 
       if (emptyProofRegexp.hasMatch(proof)) {
         this.isInCensus.setValue(false); // 0x0000000000.....
