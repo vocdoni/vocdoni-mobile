@@ -39,6 +39,18 @@
       ]
     },
     {
+      "name": "App Beta (iOS)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "--dart-define=APP_MODE=beta",
+        "--dart-define=GATEWAY_BOOTNODES_URL=https://bootnodes.vocdoni.net/gateways.stg.json",
+        "--dart-define=NETWORK_ID=xdai",
+        "--dart-define=LINKING_DOMAIN=vocdonistg.link"
+      ]
+    },
+    {
       "name": "App Prod (iOS)",
       "request": "launch",
       "type": "dart",
