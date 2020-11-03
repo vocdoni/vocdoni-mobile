@@ -406,6 +406,7 @@ class _PollPageState extends State<PollPage> {
         builder: (context) =>
             PollPackagingPage(process: process, choices: choices));
     await Navigator.push(ctx, newRoute);
+    process.refreshResults(force: true);
   }
 
   onSetChoice(int questionIndex, int value) {

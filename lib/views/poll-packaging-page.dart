@@ -94,7 +94,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       final alreadyDigested = false;
 
       // TODO: Revert back to digested
-      
+
       // final publicKey = await wallet.publicKeyAsync(uncompressed: true);
       // final b64DigestedClaim = Hashing.digestHexClaim(publicKey);
       // final alreadyDigested = true;
