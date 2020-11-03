@@ -408,6 +408,12 @@ class _PollPageState extends State<PollPage> {
     await Navigator.push(ctx, newRoute);
   }
 
+  onSetChoice(int questionIndex, int value) {
+    setState(() {
+      choices[questionIndex] = value;
+    });
+  }
+
   Widget buildSubmitInfo() {
     // rebuild when isInCensus or hasVoted change
     return EventualBuilder(
@@ -536,8 +542,8 @@ class _PollPageState extends State<PollPage> {
 
     for (ProcessMetadata_Details_Question question
         in process.metadata.value.details.questions) {
-      items.add(PollQuestion(
-          question, questionIndex, choices, process, process.isInCensus.value));
+      items.add(PollQuestion(question, questionIndex, choices[questionIndex],
+          process, onSetChoice));
       questionIndex++;
     }
 

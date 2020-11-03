@@ -21,17 +21,17 @@ enum PollQuestionRowTabs { SELECTION, RESULTS }
 class PollQuestion extends StatefulWidget {
   final ProcessMetadata_Details_Question question;
   final ProcessModel process;
-  final List<int> choices;
+  final Function(int, int) onSetChoice;
+  final int choice;
   final int questionIndex;
-  final bool isInCensus;
   final gradient = Rainbow(spectrum: [
     colorRedPale.withOpacity(0.9),
     colorBluePale,
     colorGreenPale,
   ], rangeStart: 0, rangeEnd: 1);
 
-  PollQuestion(this.question, this.questionIndex, this.choices, this.process,
-      this.isInCensus);
+  PollQuestion(this.question, this.questionIndex, this.choice, this.process,
+      this.onSetChoice);
 
   @override
   _PollQuestionState createState() => _PollQuestionState();
@@ -59,11 +59,10 @@ class _PollQuestionState extends State<PollQuestion> {
       return false;
     else if (widget.process.endDate.value.isBefore(DateTime.now()))
       return false;
-    else if (widget.isInCensus != true) {
+    else if (widget.process.isInCensus.value != true) {
       // Allows widget.isInCensus to be null without breaking
       return false;
     }
-    // return widget.isInCensus ? widget.isInCensus : false;
     return true;
   }
 
@@ -99,6 +98,7 @@ class _PollQuestionState extends State<PollQuestion> {
     return EventualBuilder(
         notifiers: [
           widget.process.hasVoted,
+          widget.process.isInCensus,
           widget.process.results,
           widget.process.startDate,
           widget.process.endDate
@@ -214,14 +214,14 @@ class _PollQuestionState extends State<PollQuestion> {
         style: TextStyle(
             fontSize: fontSizeSecondary,
             fontWeight: fontWeightRegular,
-            color: widget.choices[widget.questionIndex] == voteOption.value
+            color: widget.choice == voteOption.value
                 ? Colors.white
                 : colorDescription),
       ),
-      selected: widget.choices[widget.questionIndex] == voteOption.value,
+      selected: widget.choice == voteOption.value,
       onSelected: (bool selected) {
         if (selected) {
-          setChoice(widget.questionIndex, voteOption.value);
+          widget.onSetChoice(widget.questionIndex, voteOption.value);
         }
       },
     ).withHPadding(paddingPage);
@@ -294,12 +294,6 @@ class _PollQuestionState extends State<PollQuestion> {
       secondaryTextMultiline: 100,
       rightIcon: null,
     );
-  }
-
-  setChoice(int questionIndex, int value) {
-    setState(() {
-      widget.choices[questionIndex] = value;
-    });
   }
 
   buildError(String error) {
