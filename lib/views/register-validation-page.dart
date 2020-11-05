@@ -129,7 +129,9 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
           title: getText(context, "main.enableEntityNotifications"),
           okButton: getText(context, "main.yes"),
           cancelButton: getText(context, "main.no"));
-      if (notify) Notifications.getPushToken();
+      if (notify) {
+        Notifications.getPushToken();
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _currentStep = Steps.READY);

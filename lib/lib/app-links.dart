@@ -223,7 +223,13 @@ Future handleValidationLink(List<String> linkSegments,
     if (currentAccount == null) throw Exception("Internal error");
 
     // subscribe if not already
-    await currentAccount.subscribe(entityModel);
+    if (!currentAccount.isSubscribed(entityRef)) {
+      await currentAccount.subscribe(entityModel);
+      // Set notifications on if not already subscribed
+      if (!entityModel.hasNotificationsEnabled()) {
+        await entityModel.enableNotifications();
+      }
+    }
 
     final name = entityModel.metadata.value?.name["default"];
     if (!(name is String)) throw Exception("Invalid entity data");
