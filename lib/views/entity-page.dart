@@ -291,8 +291,8 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
         return ListItem(
             icon: wantsNotifications ? FeatherIcons.bell : FeatherIcons.bellOff,
             mainText: wantsNotifications
-                ? getText(context, "main.notifyActivity")
-                : getText(context, "main.ignoreActivity"),
+                ? getText(context, "main.notificationsEnabled")
+                : getText(context, "main.notificationsDisabled"),
             rightText: "",
             // rightTextIsBadge: true,
             // rightTextPurpose:
@@ -533,6 +533,7 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   onTapRegister(BuildContext context) {
+    // TODO send push token
     final action = widget.entityModel.metadata.value.actions.first;
     final route = MaterialPageRoute(
         builder: (context) =>
