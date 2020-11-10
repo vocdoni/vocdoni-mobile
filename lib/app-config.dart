@@ -1,3 +1,5 @@
+import 'package:vocdoni/lib/globals.dart';
+
 /// Contains the compile-time defined config variables:
 /// - `APP_MODE`: dev, beta, production
 /// - `GATEWAY_BOOTNODES_URL`
@@ -5,6 +7,7 @@
 /// - `LINKING_DOMAIN`
 
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
+String _bootnodesUriOverride;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -14,6 +17,14 @@ class AppConfig {
   static bool isProduction() => _appMode == "production";
 
   static bool useTestingContracts() => AppConfig.isBeta();
+
+  static setBootnodesUriOverride(String uri) {
+    _bootnodesUriOverride = uri;
+    Globals.appState.refresh(force: true);
+  }
+
+  static String get bootnodesUri =>
+      _bootnodesUriOverride ?? GATEWAY_BOOTNODES_URL;
 
   // CONFIG VARS
   static const GATEWAY_BOOTNODES_URL = String.fromEnvironment(

@@ -3,6 +3,7 @@ import 'package:vocdoni/lib/app-links.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
+import 'package:vocdoni/lib/i18n.dart';
 
 class DevMenu extends StatelessWidget {
   @override
@@ -14,6 +15,12 @@ class DevMenu extends StatelessWidget {
       body: Builder(
           builder: (BuildContext context) => ListView(
                 children: <Widget>[
+                  ListItem(
+                    mainText: getText(context, "main.setBootnodesUri"),
+                    onTap: () {
+                      Navigator.pushNamed(ctx, "/dev/boot");
+                    },
+                  ),
                   ListItem(
                       mainText: "Add fake organizations",
                       onTap: () {

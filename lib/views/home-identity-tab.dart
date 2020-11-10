@@ -84,8 +84,13 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                 onTap: () {
                   onLogOut(ctx);
                 }),
-            kReleaseMode // TODO: DEV BUTTON OUT
-                ? Container()
+            !kReleaseMode // TODO: DEV BUTTON OUT
+                ? ListItem(
+                    mainText: getText(context, "main.advancedSettings"),
+                    icon: FeatherIcons.info,
+                    onTap: () {
+                      onAdvancedSettings(ctx);
+                    })
                 : ListItem(
                     mainText: getText(context, "main.developmentTesting"),
                     icon: FeatherIcons.info,
@@ -152,5 +157,9 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   onDevelopmentTesting(BuildContext ctx) async {
     Navigator.pushNamed(ctx, "/dev");
+  }
+
+  onAdvancedSettings(BuildContext ctx) async {
+    Navigator.pushNamed(ctx, "/settings");
   }
 }

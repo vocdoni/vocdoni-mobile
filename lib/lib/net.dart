@@ -31,7 +31,7 @@ class AppNetworking {
 
     // Fetch gateways
     _discoveryFuture = GatewayPool.discover(AppConfig.NETWORK_ID,
-            bootnodeUri: AppConfig.GATEWAY_BOOTNODES_URL)
+            bootnodeUri: AppConfig.bootnodesUri)
         .then((gwPool) {
       if (gwPool is! GatewayPool)
         throw Exception("Could not initialize a pool of gateways");
@@ -75,7 +75,7 @@ class AppNetworking {
 
       // OK
       _gwPool = GatewayPool(gateways, AppConfig.NETWORK_ID,
-          bootnodeUri: AppConfig.GATEWAY_BOOTNODES_URL);
+          bootnodeUri: AppConfig.bootnodesUri);
 
       log("[App] GW Pool ready");
       log("- DVote Gateway: ${pool.current.dvote.uri}");
@@ -91,8 +91,8 @@ class AppNetworking {
 
   /// Manually set the gateway pool
   static void setGateways(List<Gateway> gateways, String networkId) {
-    if (gateways is! List || gateways.length == 0)
-      throw Exception("Empty list");
+    // if (gateways is! List || gateways.length == 0)
+    //   throw Exception("Empty list");
 
     _gwPool = GatewayPool(gateways, networkId);
   }

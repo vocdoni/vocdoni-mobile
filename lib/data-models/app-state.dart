@@ -73,6 +73,9 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
           await selectLocale(Locale(settings["locale"]));
       }
+      if (settings is Map && settings["bootnodeUriOverride"] is String) {
+        AppConfig.setBootnodesUriOverride(settings["bootnodeUriOverride"]);
+      }
     } catch (err) {
       log(err);
       this
@@ -97,6 +100,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       // Settings
       final settings = {
         "locale": locale.value.languageCode,
+        "bootnodeUriOverride": AppConfig.bootnodesUri,
       };
       await Globals.settingsPersistence.write(settings);
     } catch (err) {
@@ -126,9 +130,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      log("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
-      final bnGatewayInfo =
-          await fetchBootnodeInfo(AppConfig.GATEWAY_BOOTNODES_URL);
+      log("[App] Fetching " + AppConfig.bootnodesUri);
+      final bnGatewayInfo = await fetchBootnodeInfo(AppConfig.bootnodesUri);
 
       log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
