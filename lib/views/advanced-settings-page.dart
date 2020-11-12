@@ -8,13 +8,13 @@ class SettingsMenu extends StatelessWidget {
   Widget build(ctx) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Advanced Settings",
+        title: getText(ctx, "main.advancedSettings"),
       ),
       body: Builder(
           builder: (BuildContext context) => ListView(
                 children: <Widget>[
                   ListItem(
-                    mainText: getText(context, "main.setBootnodesUri"),
+                    mainText: getText(context, "main.setbootnodesUrl"),
                     onTap: () {
                       Navigator.pushNamed(ctx, "/settings/boot");
                     },

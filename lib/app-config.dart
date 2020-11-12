@@ -7,7 +7,7 @@ import 'package:vocdoni/lib/globals.dart';
 /// - `LINKING_DOMAIN`
 
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
-String _bootnodesUriOverride;
+String _bootnodesUrlOverride;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -18,13 +18,13 @@ class AppConfig {
 
   static bool useTestingContracts() => AppConfig.isBeta();
 
-  static setBootnodesUriOverride(String uri) {
-    _bootnodesUriOverride = uri;
+  static setBootnodesUrlOverride(String url) {
+    _bootnodesUrlOverride = url;
     Globals.appState.refresh(force: true);
   }
 
-  static String get bootnodesUri =>
-      _bootnodesUriOverride ?? GATEWAY_BOOTNODES_URL;
+  static String get bootnodesUrl =>
+      _bootnodesUrlOverride ?? GATEWAY_BOOTNODES_URL;
 
   // CONFIG VARS
   static const GATEWAY_BOOTNODES_URL = String.fromEnvironment(

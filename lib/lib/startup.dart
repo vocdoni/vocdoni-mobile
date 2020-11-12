@@ -21,7 +21,6 @@ Future<void> restoreDataPools() {
     // don't depend on others to be restored
     Globals.processPool.readFromStorage(),
     Globals.feedPool.readFromStorage(),
-    // print("read from storage"),
     Globals.appState.readFromStorage(),
   ])
       .then((_) => Globals.entityPool.readFromStorage())

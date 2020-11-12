@@ -9,7 +9,6 @@ import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/extensions.dart';
-import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/startup-page.dart';
 
 EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
@@ -21,34 +20,35 @@ EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
 class BootnodeSelectPage extends StatelessWidget {
   @override
   Widget build(ctx) {
-    if (!availableBootnodes.value.contains(AppConfig.bootnodesUri)) {
-      List<String> uriList = availableBootnodes.value;
-      uriList.add(AppConfig.bootnodesUri);
-      availableBootnodes.setValue(uriList);
-    }
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(ctx, "title.bootnodeUri"),
+        title: getText(ctx, "title.bootnodeUrl"),
       ),
       body: EventualBuilder(
         notifier: availableBootnodes,
-        builder: (BuildContext context, _, __) => Column(
-          children: [
-            Expanded(
-                child: ListView(
-              children: availableBootnodes.value
-                  .map((uri) => buildBootnodeItem(ctx, uri))
-                  .toList(),
-            )),
-            FloatingActionButton(
-              onPressed: () => onAddUri(ctx),
-              backgroundColor: colorBlue,
-              child: Icon(FeatherIcons.plusCircle),
-              elevation: 5.0,
-              tooltip: getText(ctx, "main.addBootnodeUri"),
-            ).withBottomPadding(15),
-          ],
-        ),
+        builder: (BuildContext context, _, __) {
+          List<Widget> urlList = availableBootnodes.value
+              .map((uri) => buildBootnodeItem(ctx, uri))
+              .toList();
+          if (!availableBootnodes.value.contains(AppConfig.bootnodesUrl)) {
+            urlList.add(buildBootnodeItem(ctx, AppConfig.bootnodesUrl));
+          }
+          return Column(
+            children: [
+              Expanded(
+                  child: ListView(
+                children: urlList,
+              )),
+              FloatingActionButton(
+                onPressed: () => onAddUri(ctx),
+                backgroundColor: colorBlue,
+                child: Icon(FeatherIcons.plusCircle),
+                elevation: 5.0,
+                tooltip: getText(ctx, "main.addbootnodeUrl"),
+              ).withBottomPadding(15),
+            ],
+          );
+        },
       ),
     );
   }
@@ -57,11 +57,11 @@ class BootnodeSelectPage extends StatelessWidget {
     return ListItem(
         mainText: uri,
         mainTextMultiline: 3,
-        rightIcon: AppConfig.bootnodesUri == uri
+        rightIcon: AppConfig.bootnodesUrl == uri
             ? FeatherIcons.check
             : FeatherIcons.target,
         onTap: () {
-          AppConfig.setBootnodesUriOverride(uri);
+          AppConfig.setBootnodesUrlOverride(uri);
           Globals.appState.bootnodeInfo.setValue(null);
           // AppNetworking.setGateways(null, "");
           Globals.appState.writeToStorage();
@@ -81,14 +81,12 @@ class BootnodeSelectPage extends StatelessWidget {
       builder: (context) {
         String newUri;
         return AlertDialog(
-          title: Text(getText(context, "main.addBootnodeUri")),
+          title: Text(getText(context, "main.addbootnodeUrl")),
           content: TextField(
             onChanged: (value) => newUri = value,
             style: TextStyle(fontSize: 18),
             textCapitalization: TextCapitalization.none,
-            decoration: InputDecoration(
-                // hintText: getText(context, "main.addBootnodeUri"),
-                ),
+            decoration: InputDecoration(),
           ),
           actions: [
             FlatButton(

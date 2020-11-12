@@ -5,7 +5,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
-import 'package:vocdoni/views/dev/advanced-settings-page.dart';
+import 'package:vocdoni/views/advanced-settings-page.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
