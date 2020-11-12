@@ -24,10 +24,10 @@ class AppConfig {
   }
 
   static String get bootnodesUrl =>
-      _bootnodesUrlOverride ?? GATEWAY_BOOTNODES_URL;
+      _bootnodesUrlOverride ?? _GATEWAY_BOOTNODES_URL;
 
   // CONFIG VARS
-  static const GATEWAY_BOOTNODES_URL = String.fromEnvironment(
+  static const _GATEWAY_BOOTNODES_URL = String.fromEnvironment(
     "GATEWAY_BOOTNODES_URL",
     defaultValue: _appMode == "dev"
         ? "https://bootnodes.vocdoni.net/gateways.dev.json"
