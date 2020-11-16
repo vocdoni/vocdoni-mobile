@@ -53,7 +53,7 @@ class Notifications {
     log("[App] onMessage: $message");
 
     if (!message.containsKey('data')) {
-      log("[App] onResume: Received a message with no data");
+      log("[App] onMessage: Received a message with no data");
       return;
     }
 
@@ -70,7 +70,7 @@ class Notifications {
     // TODO: In future versions, handle immediately, without waiting for the user to unlock an account
 
     if (!message.containsKey('data')) {
-      log("[App] onResume: Received a message with no data");
+      log("[App] onLaunch: Received a message with no data");
       return;
     }
 
