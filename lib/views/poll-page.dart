@@ -1,3 +1,4 @@
+import 'package:dvote_common/dvote_common.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -201,6 +202,9 @@ class _PollPageState extends State<PollPage> {
     children.add(buildPollItem(context));
     children.add(buildCensusItem(context));
     children.add(buildTimeItem(context));
+    if (process.metadata.value.type.contains("encrypted")) {
+      children.add(buildEncryptedItem(context));
+    }
     children.addAll(buildQuestions(context));
     children.add(Section(withDectoration: false));
     children.add(buildSubmitInfo());
@@ -298,7 +302,9 @@ class _PollPageState extends State<PollPage> {
   buildPollItem(BuildContext context) {
     return ListItem(
       icon: FeatherIcons.barChart2,
-      mainText: getText(context, "main.publicVote"),
+      mainText: process.metadata.value.type.contains("encrypted")
+          ? getText(context, "main.encryptedVote")
+          : getText(context, "main.publicVote"),
       rightIcon: null,
       disabled: false,
     );
@@ -341,6 +347,45 @@ class _PollPageState extends State<PollPage> {
 
         return ListItem(
           icon: FeatherIcons.clock,
+          purpose: purpose,
+          mainText: rowText,
+          //secondaryText: "18/09/2019 at 19:00",
+          rightIcon: null,
+          disabled: false,
+        );
+      },
+    );
+  }
+
+  buildEncryptedItem(BuildContext context) {
+    // Rebuild when the reference block changes
+    return EventualBuilder(
+      notifiers: [process.metadata, process.startDate, process.endDate],
+      builder: (context, _, __) {
+        String rowText;
+        Purpose purpose;
+        final now = DateTime.now();
+
+        if (process.startDate.hasValue) {
+          if (process.startDate.value.isAfter(now)) {
+            return SizedBox.shrink();
+          }
+        }
+
+        if (process.endDate.hasValue) {
+          if (process.endDate.value.isBefore(now)) {
+            return SizedBox.shrink();
+          }
+        } else {
+          return SizedBox.shrink();
+        }
+
+        rowText = getText(context, "main.resultsAvailableOnceProcessEnds");
+        purpose = Purpose.WARNING;
+        if (rowText is! String) return Container();
+
+        return ListItem(
+          icon: FeatherIcons.lock,
           purpose: purpose,
           mainText: rowText,
           //secondaryText: "18/09/2019 at 19:00",
