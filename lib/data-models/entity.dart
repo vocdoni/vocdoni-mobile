@@ -599,7 +599,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         // does he/she has notifications enabled?
         Notifications.supportedNotificationEvents.forEach((event) {
           key = Notifications.getMetaKeyForAccount(accountAddr, event);
-          if (metadata.value.meta.containsKey(key)) {
+          if (metadata.value.meta.containsKey(key) &&
+              metadata.value.meta[key] == "yes") {
             topic = Notifications.getTopicForEntity(reference.entityId, event);
             topicsToPreserve.add(topic);
           }
@@ -610,7 +611,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       await Future.wait(Notifications.supportedNotificationEvents.map((event) {
         // Remove the topic annotation for the user
         key = Notifications.getMetaKeyForAccount(accountAddr, event);
-        metadata.value.meta.remove(key);
+        metadata.value.meta[key] = "no";
 
         // Skip if someone else still wants to be notified
         topic = Notifications.getTopicForEntity(reference.entityId, event);
@@ -642,7 +643,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       accountAddr,
       Notifications.supportedNotificationEvents[0],
     );
-
+    if (!metadata.value.meta.containsKey(key)) metadata.value.meta[key] = "yes";
     return metadata.value.meta[key] == "yes";
   }
 
