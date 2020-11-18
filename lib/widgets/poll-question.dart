@@ -25,9 +25,12 @@ class PollQuestion extends StatefulWidget {
   final int choice;
   final int questionIndex;
   final gradient = Rainbow(spectrum: [
-    colorRedPale.withOpacity(0.9),
-    colorBluePale,
-    colorGreenPale,
+    // lighten non-leading colors
+    HSLColor.fromColor(colorRedPale).withLightness(0.8).toColor(),
+    HSLColor.fromColor(colorBluePale).withLightness(0.9).toColor(),
+    HSLColor.fromColor(colorBluePale).withLightness(0.9).toColor(),
+    HSLColor.fromColor(colorBluePale).withLightness(0.9).toColor(),
+    colorGreen,
   ], rangeStart: 0, rangeEnd: 1);
 
   PollQuestion(this.question, this.questionIndex, this.choice, this.process,
@@ -237,12 +240,17 @@ class _PollQuestionState extends State<PollQuestion> {
     final myVotes =
         results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
     final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
-    double relativePerc =
-        myVotes - minVotes > 0 ? myVotes - minVotes / maxVotes - minVotes : 0.0;
+    double relativePerc = myVotes - minVotes > 0
+        ? (myVotes - minVotes) / (maxVotes - minVotes)
+        : 0.0;
 
     // Weight relative win/loss ratio between options based on max share of total votes
-    relativePerc +=
-        maxVotes > 0 ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc) : 0;
+    relativePerc += myVotes > 0
+        ? (1 - (maxVotes / totalVotes)) * (1 - relativePerc) * 0.5
+        : 0;
+    if (relativePerc > 0 && myVotes == maxVotes) {
+      relativePerc = 1;
+    }
     final myColor = totalVotes > 0
         ? widget.gradient[relativePerc]
         : colorBluePale.withOpacity(0.1);
@@ -278,7 +286,7 @@ class _PollQuestionState extends State<PollQuestion> {
       backgroundColor: myColor.withOpacity(0.1),
       fillColor: Colors.transparent,
       linearGradient: LinearGradient(
-          colors: [myColor, myColor.withOpacity(0.3)],
+          colors: [myColor, myColor.withOpacity(0.5)],
           begin: Alignment.topLeft),
       lineHeight: 30.0,
       percent: totalPerc,
