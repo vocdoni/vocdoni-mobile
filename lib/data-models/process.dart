@@ -17,8 +17,6 @@ import 'package:web3dart/credentials.dart';
 
 final hexRegexp =
     RegExp(r"^0?x?[0-9a-f]+$", caseSensitive: false, multiLine: false);
-final emptyProofRegexp =
-    RegExp(r"^0?x?[0]+$", caseSensitive: false, multiLine: false);
 
 /// This class should be used exclusively as a global singleton.
 /// ProcessPoolModel tracks all the registered accounts and provides individual models that
@@ -374,11 +372,6 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !hexRegexp.hasMatch(proof)) {
         this.isInCensus.setValue(false);
-        return;
-      }
-
-      if (emptyProofRegexp.hasMatch(proof)) {
-        this.isInCensus.setValue(false); // 0x0000000000.....
         return;
       }
 
