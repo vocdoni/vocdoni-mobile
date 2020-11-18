@@ -111,6 +111,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
             fullscreenDialog: true, builder: (context) => LanguageSelect()));
 
     if (success == null) return;
+    await Future.delayed(Duration(milliseconds: 200));
     showMessage(getText(ctx, "main.theLanguageHasBeenDefined"),
         context: ctx, purpose: Purpose.GOOD);
   }
