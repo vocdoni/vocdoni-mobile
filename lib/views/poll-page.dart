@@ -1,4 +1,5 @@
 import 'package:dvote_common/dvote_common.dart';
+import 'package:dvote_common/widgets/htmlSummary.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -244,11 +245,9 @@ class _PollPageState extends State<PollPage> {
   }
 
   Widget buildSummary() {
-    return Summary(
-      text: process
-          .metadata.value.details.description[Globals.appState.currentLanguage],
-      maxLines: 5,
-    );
+    return HtmlSummary(
+        htmlString: process.metadata.value.details
+            .description[Globals.appState.currentLanguage]);
   }
 
   buildCensusItem(BuildContext context) {
