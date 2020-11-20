@@ -1,6 +1,7 @@
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -88,6 +89,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
       canDraw: true,
       onPatternStarted: onPatternStart,
       onPatternStopped: (_, dots) => onPatternStop(context, dots),
+      onDotHaptic: HapticFeedback.mediumImpact,
     );
   }
 

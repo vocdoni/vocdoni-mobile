@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/lib/globals.dart';
@@ -136,18 +137,20 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   /// Builds the UI of a lock pattern that is entered for the first time
   DrawPattern buildFirstPass() {
     return DrawPattern(
-        key: Key("SetPattern"),
-        gridSize: PATTERN_GRID_SIZE,
-        widthSize: widthSize,
-        dotRadius: dotRadius,
-        hitRadius: hitRadius,
-        hitColor: hitColor,
-        canRepeatDot: false,
-        patternColor: patternColor,
-        dotColor: colorDescription,
-        canDraw: true,
-        onPatternStarted: onFirstPassStart,
-        onPatternStopped: onFirstPassDone);
+      key: Key("SetPattern"),
+      gridSize: PATTERN_GRID_SIZE,
+      widthSize: widthSize,
+      dotRadius: dotRadius,
+      hitRadius: hitRadius,
+      hitColor: hitColor,
+      canRepeatDot: false,
+      patternColor: patternColor,
+      dotColor: colorDescription,
+      canDraw: true,
+      onPatternStarted: onFirstPassStart,
+      onPatternStopped: onFirstPassDone,
+      onDotHaptic: HapticFeedback.mediumImpact,
+    );
   }
 
   /// Builds the UI of a lock pattern that is entered for the second time
@@ -165,6 +168,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
       canDraw: true,
       onPatternStarted: onSecondPassStart,
       onPatternStopped: onSecondPassDone,
+      onDotHaptic: HapticFeedback.mediumImpact,
     );
   }
 

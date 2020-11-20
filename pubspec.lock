@@ -131,8 +131,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "565d438"
-      resolved-ref: "565d43869a1754007ee85e85dfaf626ef5079e89"
+      ref: "83aa6583a0c289134b675eebcfd8208ce9b58d95"
+      resolved-ref: "83aa6583a0c289134b675eebcfd8208ce9b58d95"
       url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
     source: git
     version: "0.1.0"
