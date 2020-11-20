@@ -1,3 +1,4 @@
+import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:dvote_common/widgets/spinner.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/process.dart';
@@ -115,7 +116,6 @@ class _PollQuestionState extends State<PollQuestion> {
           }
           final resultsOk = resultsAvailable;
           final voteOk = canVote;
-
           return Column(
             children: <Widget>[
               Section(text: (widget.questionIndex + 1).toString()),
@@ -295,13 +295,27 @@ class _PollQuestionState extends State<PollQuestion> {
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
-    return ListItem(
-      mainText: question.question['default'],
-      mainTextMultiline: 3,
-      secondaryText: question.description['default'],
-      secondaryTextMultiline: 100,
-      rightIcon: null,
-    );
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
+            child: Text(question.question['default'],
+                textAlign: TextAlign.left,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: new TextStyle(
+                    fontSize: fontSizeBase,
+                    color: colorDescription,
+                    fontWeight: fontWeightRegular)),
+          ),
+          question.description['default'] == null
+              ? SizedBox.shrink()
+              : HtmlSummary(
+                  htmlString: question.description['default'],
+                  isSecondary: true,
+                ),
+        ]);
   }
 
   buildError(String error) {
