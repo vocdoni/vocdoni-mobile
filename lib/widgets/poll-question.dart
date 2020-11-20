@@ -295,7 +295,6 @@ class _PollQuestionState extends State<PollQuestion> {
   }
 
   buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
-    question.description.remove('default');
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
