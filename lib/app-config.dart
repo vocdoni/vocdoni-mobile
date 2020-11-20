@@ -18,9 +18,13 @@ class AppConfig {
 
   static bool useTestingContracts() => AppConfig.isBeta();
 
-  static setBootnodesUrlOverride(String url) {
-    _bootnodesUrlOverride = url;
-    Globals.appState.refresh(force: true);
+  static setBootnodesUrlOverride(String url) async {
+    try {
+      _bootnodesUrlOverride = url;
+      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
   }
 
   static String get bootnodesUrl =>

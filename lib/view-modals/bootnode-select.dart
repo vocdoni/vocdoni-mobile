@@ -1,5 +1,10 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/listItem.dart';
+import 'package:dvote_common/widgets/spinner.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:eventual/eventual-notifier.dart';
@@ -17,7 +22,22 @@ EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
   "https://bootnodes.vocdoni.net/gateways.dev.json",
 ]);
 
-class BootnodeSelectPage extends StatelessWidget {
+class BootnodeSelectPage extends StatefulWidget {
+  @override
+  _BootnodeSelectPageState createState() => _BootnodeSelectPageState();
+}
+
+class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
+  bool isLoadingBootnode;
+  String currentUrl;
+
+  @override
+  void initState() {
+    isLoadingBootnode = false;
+    currentUrl = AppConfig.bootnodesUrl;
+    super.initState();
+  }
+
   @override
   Widget build(ctx) {
     return Scaffold(
@@ -28,10 +48,10 @@ class BootnodeSelectPage extends StatelessWidget {
         notifier: availableBootnodes,
         builder: (BuildContext context, _, __) {
           List<Widget> urlList = availableBootnodes.value
-              .map((uri) => buildBootnodeItem(ctx, uri))
+              .map((url) => buildBootnodeItem(ctx, url))
               .toList();
-          if (!availableBootnodes.value.contains(AppConfig.bootnodesUrl)) {
-            urlList.add(buildBootnodeItem(ctx, AppConfig.bootnodesUrl));
+          if (!availableBootnodes.value.contains(currentUrl)) {
+            urlList.add(buildBootnodeItem(ctx, currentUrl));
           }
           return Column(
             children: [
@@ -40,7 +60,7 @@ class BootnodeSelectPage extends StatelessWidget {
                 children: urlList,
               )),
               FloatingActionButton(
-                onPressed: () => onAddUri(ctx),
+                onPressed: () => onAddUrl(ctx),
                 backgroundColor: colorBlue,
                 child: Icon(FeatherIcons.plusCircle),
                 elevation: 5.0,
@@ -53,37 +73,66 @@ class BootnodeSelectPage extends StatelessWidget {
     );
   }
 
-  Widget buildBootnodeItem(BuildContext context, String uri) {
+  Widget buildBootnodeItem(BuildContext context, String url) {
     return ListItem(
-        mainText: uri,
+        mainText: url,
         mainTextMultiline: 3,
-        rightIcon: AppConfig.bootnodesUrl == uri
-            ? FeatherIcons.check
+        isSpinning: currentUrl == url && isLoadingBootnode,
+        rightIcon: currentUrl == url
+            ? Globals.appState.bootnodeInfo.hasError
+                ? FeatherIcons.x
+                : FeatherIcons.check
             : FeatherIcons.target,
-        onTap: () {
-          AppConfig.setBootnodesUrlOverride(uri);
-          Globals.appState.bootnodeInfo.setValue(null);
-          // AppNetworking.setGateways(null, "");
-          Globals.appState.writeToStorage();
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StartupPage(),
-                fullscreenDialog: true,
-              ),
-              (Route _) => false);
-        });
+        onTap: buildOnTap(context, url));
   }
 
-  onAddUri(BuildContext context) {
+  Function() buildOnTap(BuildContext context, String url) {
+    return () async {
+      setState(() {
+        currentUrl = url;
+        isLoadingBootnode = true;
+      });
+      try {
+        await AppConfig.setBootnodesUrlOverride(url);
+      } catch (err) {
+        log("$err");
+        showAlert(
+            getText(context, "main.bootnodeUrl") +
+                " " +
+                url +
+                " " +
+                getText(context, "main.mayBeInvalid"),
+            title: getText(context, "main.unableToFetchBootnodeGateways"),
+            context: context);
+        setState(() {
+          isLoadingBootnode = false;
+        });
+        return;
+      }
+      setState(() {
+        isLoadingBootnode = false;
+      });
+      Globals.appState.bootnodeInfo.setValue(null);
+      Globals.appState.writeToStorage();
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StartupPage(),
+            fullscreenDialog: true,
+          ),
+          (Route _) => false);
+    };
+  }
+
+  onAddUrl(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) {
-        String newUri;
+        String newUrl;
         return AlertDialog(
           title: Text(getText(context, "main.addbootnodeUrl")),
           content: TextField(
-            onChanged: (value) => newUri = value,
+            onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
             textCapitalization: TextCapitalization.none,
             decoration: InputDecoration(),
@@ -98,9 +147,17 @@ class BootnodeSelectPage extends StatelessWidget {
             FlatButton(
               child: Text(getText(context, "main.ok")),
               onPressed: () {
-                List<String> uriList = availableBootnodes.value;
-                uriList.add(newUri);
-                availableBootnodes.setValue(uriList);
+                if (!Uri.parse(newUrl).isAbsolute) {
+                  Navigator.of(context).pop(true);
+                  showAlert(getText(context, "main.pleaseEnterAValidUrl"),
+                      title:
+                          getText(context, "main.invalidUrl") + ": " + newUrl,
+                      context: context);
+                  return;
+                }
+                List<String> urlList = availableBootnodes.value;
+                urlList.add(newUrl);
+                availableBootnodes.setValue(urlList);
                 Navigator.of(context).pop(true);
               },
             )

@@ -91,8 +91,8 @@ class AppNetworking {
 
   /// Manually set the gateway pool
   static void setGateways(List<Gateway> gateways, String networkId) {
-    // if (gateways is! List || gateways.length == 0)
-    //   throw Exception("Empty list");
+    if (gateways is! List || gateways.length == 0)
+      throw Exception("Empty list");
 
     _gwPool = GatewayPool(gateways, networkId);
   }

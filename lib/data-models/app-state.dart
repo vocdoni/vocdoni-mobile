@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/dvote_common.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -119,7 +120,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       await this.writeToStorage();
     } catch (err) {
       log("ERR: $err");
-      throw err;
+      throw Exception("Unable to update bootnodes: $err");
     }
   }
 
