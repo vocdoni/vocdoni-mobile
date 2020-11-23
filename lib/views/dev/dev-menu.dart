@@ -4,6 +4,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/view-modals/bootnode-select.dart';
 
 class DevMenu extends StatelessWidget {
   @override
@@ -18,7 +19,11 @@ class DevMenu extends StatelessWidget {
                   ListItem(
                     mainText: getText(context, "main.setbootnodesUrl"),
                     onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/boot");
+                      Navigator.push(
+                          ctx,
+                          MaterialPageRoute(
+                              fullscreenDialog: true,
+                              builder: (context) => BootnodeSelectPage()));
                     },
                   ),
                   ListItem(

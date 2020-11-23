@@ -5,7 +5,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
-import 'package:vocdoni/views/advanced-settings-page.dart';
+import 'package:vocdoni/views/settings-page.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -85,8 +85,8 @@ Widget buildMainApp() {
       // GLOBAL
       // "/web/viewer": (context) => WebViewer(),
       // "/signature": (context) => SignModal(),
+
       "/settings": (context) => SettingsMenu(),
-      "/settings/boot": (context) => BootnodeSelectPage(),
 
       // DEV
       "/dev": (context) => DevMenu(),
@@ -95,7 +95,6 @@ Widget buildMainApp() {
       "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
       "/dev/analytics-tests": (context) => AnalyticsTests(),
       "/dev/pager": (context) => DevPager(),
-      "/dev/boot": (context) => BootnodeSelectPage(),
     },
     theme: ThemeData(
       primarySwatch: Colors.blue,
