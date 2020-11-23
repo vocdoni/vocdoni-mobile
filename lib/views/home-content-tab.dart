@@ -50,16 +50,16 @@ class _HomeContentTabState extends State<HomeContentTab> {
 
   @override
   Widget build(ctx) {
-    final currentAccount = Globals.appState.currentAccount;
-    if (currentAccount == null) return buildNoEntries(ctx);
-
     return EventualBuilder(
       notifiers: [
-        currentAccount.entities,
+        Globals.appState.currentAccount.identity,
+        Globals.appState.selectedAccount,
         Globals.processPool,
         Globals.feedPool
       ],
       builder: (context, _, __) {
+        final currentAccount = Globals.appState.currentAccount;
+        if (currentAccount == null) return buildNoEntries(ctx);
         if (!currentAccount.entities.hasValue ||
             currentAccount.entities.value.length == 0)
           return buildNoEntries(ctx);

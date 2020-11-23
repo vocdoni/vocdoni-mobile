@@ -11,6 +11,7 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
+import 'package:vocdoni/view-modals/action-account-select.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
 import 'package:vocdoni/views/home-identity-tab.dart';
@@ -19,6 +20,7 @@ import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:vocdoni/views/identity-select-page.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -81,9 +83,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   handleLink(Uri givenUri) {
     if (givenUri == null) return;
-
-    handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
-        .catchError(handleIncomingLinkError);
+    if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 1) {
+      Navigator.push(context,
+              MaterialPageRoute(builder: (context) => LinkAccountSelect()))
+          .then((result) {
+        if (result) {
+          handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
+              .catchError(handleIncomingLinkError);
+        }
+      });
+    } else {
+      handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
+          .catchError(handleIncomingLinkError);
+    }
   }
 
   handleIncomingLinkError(err) {

@@ -32,13 +32,15 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   @override
   Widget build(ctx) {
-    final currentAccount = Globals.appState.currentAccount;
-    if (currentAccount == null) return buildEmpty(ctx);
-
     // Rebuild whenever the identity is updated
     return EventualBuilder(
-      notifier: currentAccount.identity,
+      notifiers: [
+        Globals.appState.currentAccount.identity,
+        Globals.appState.selectedAccount
+      ],
       builder: (ctx, _, __) {
+        final currentAccount = Globals.appState.currentAccount;
+        if (currentAccount == null) return buildEmpty(ctx);
         if (currentAccount.identity.hasError ||
             !currentAccount.identity.hasValue) return buildEmpty(ctx);
 
