@@ -29,7 +29,6 @@ Future<void> restoreDataPools() {
 
 Future<void> startNetworking() {
   // Try to fetch bootnodes from the well-known URI
-
   return AppNetworking.init(forceReload: true).then((_) {
     if (!AppNetworking.isReady)
       throw Exception("No DVote Gateway is available");

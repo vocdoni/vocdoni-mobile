@@ -42,59 +42,45 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    initNetworking().then((_) {
-      try {
+    try {
+      if (AppNetworking.isReady) {
+        // Only refresh if networking is available
         Globals.appState.currentAccount.refresh();
-        // HANDLE APP LAUNCH LINK
-        getInitialUri()
-            .then((initialUri) => handleLink(initialUri))
-            .catchError((err) => handleIncomingLinkError(err));
-
-        // HANDLE RUNTIME LINKS
-        linkChangeStream = getUriLinksStream()
-            .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
-
-        // Display the screen for a notification (if one is pending)
-        Future.delayed(Duration(seconds: 1))
-            .then((_) => Notifications.handlePendingNotification());
-      } catch (err) {
-        showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
-            title: getText(context, "main.error"), context: context);
       }
+      // HANDLE APP LAUNCH LINK
+      getInitialUri()
+          .then((initialUri) => handleLink(initialUri))
+          .catchError((err) => handleIncomingLinkError(err));
 
-      // APP EVENT LISTENER
-      WidgetsBinding.instance.addObserver(this);
+      // HANDLE RUNTIME LINKS
+      linkChangeStream = getUriLinksStream()
+          .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
 
-      // DETERMINE INITIAL TAB
-      final currentAccount =
-          Globals.appState.currentAccount; // It is expected to be non-null
+      // Display the screen for a notification (if one is pending)
+      Future.delayed(Duration(seconds: 1))
+          .then((_) => Notifications.handlePendingNotification());
+    } catch (err) {
+      showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
+          title: getText(context, "main.error"), context: context);
+    }
 
-      // No organizations => identity
-      if (!currentAccount.entities.hasValue ||
-          currentAccount.entities.value.length == 0) {
-        selectedTab = 2;
-      } else {
-        // internally, this will only refresh outdated individual elements
-        currentAccount.refresh(); // detached from async
-      }
+    // APP EVENT LISTENER
+    WidgetsBinding.instance.addObserver(this);
 
-      super.initState();
-    });
-  }
+    // DETERMINE INITIAL TAB
+    final currentAccount =
+        Globals.appState.currentAccount; // It is expected to be non-null
 
-  Future<void> initNetworking() {
-    return startNetworking()
-        .then((_) => Notifications.init())
-        .then((_) => Globals.appState.refresh(force: true).catchError(
-            (err) => log("[App] Detached bootnode update failed: $err")))
-        .catchError((err) {
-      log("[App] Network initialization failed: $err");
-      // showAlert(getText(context, "main.couldNotConnectToTheNetwork"),
-      // title: getText(context, "main.error"), context: context);
+    // No organizations => identity
+    if (!currentAccount.entities.hasValue ||
+        currentAccount.entities.value.length == 0) {
+      selectedTab = 2;
+    } else {
+      // internally, this will only refresh outdated individual elements
+      currentAccount.refresh(); // detached from async
+    }
 
-      // RETRY ITSELF
-      // Future.delayed(Duration(seconds: 10)).then((_) => initNetworking());
-    });
+    super.initState();
   }
 
   handleLink(Uri givenUri) {

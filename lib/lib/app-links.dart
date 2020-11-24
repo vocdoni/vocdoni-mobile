@@ -9,6 +9,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
@@ -18,7 +19,16 @@ import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMod
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator =
+      showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
+          context: scaffoldBodyContext);
+
+  int retries = 20; // try for 10 seconds
+  while (AppNetworking.pool is! GatewayPool) {
+    if (retries == 0) throw LinkingError("Networking unavailable");
+    retries--;
+    await Future.delayed(Duration(milliseconds: 500));
+  }
 
   final uriSegments = extractLinkSegments(newLink);
 
@@ -28,14 +38,10 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   try {
     switch (uriSegments[0]) {
       case "entities":
-        indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
-            context: scaffoldBodyContext);
         await handleEntityLink(uriSegments, context: scaffoldBodyContext);
         indicator.close();
         break;
       case "validation":
-        indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
-            context: scaffoldBodyContext);
         await handleValidationLink(uriSegments, context: scaffoldBodyContext);
         indicator.close();
         break;
@@ -46,6 +52,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
       //       context: scaffoldBodyContext);
       //   break;
       default:
+        indicator.close();
         throw LinkingError("Invalid path");
     }
   } catch (err) {
