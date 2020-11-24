@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/app-config.dart';
 import "dart:developer";
 import "package:flutter/material.dart";
@@ -191,9 +192,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // }
 
       return FloatingActionButton(
-        onPressed: () => onScanQrCode(floatingBtnContext),
+        onPressed: () => onScanQrCodeOrInput(floatingBtnContext),
         backgroundColor: colorDescription,
-        child: Icon(Icons.camera_alt),
+        child: Icon(FeatherIcons.plus),
         elevation: 5.0,
         tooltip: getText(context, "tooltip.scanaQrCode"),
       );
@@ -233,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  onScanQrCode(BuildContext floatingBtnContext) async {
+  onScanQrCodeOrInput(BuildContext floatingBtnContext) async {
     if (scanning) return;
     scanning = true;
 
@@ -247,7 +248,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         scanning = false;
         return;
       }
-      // await Future.delayed(Duration(milliseconds: 50));
 
       final link = Uri.tryParse(result);
       if (!(link is Uri) || !link.hasScheme || link.hasEmptyPath)
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       showMessage(
           getText(context,
-              "error.theQrCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
+              "error.theCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
           context: scaffoldBodyContext,
           purpose: Purpose.DANGER);
     }

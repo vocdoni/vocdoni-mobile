@@ -136,6 +136,7 @@ class _QrScanModalState extends State<QrScanModal> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         hintText: getText(context, "main.pasteLinkOrCodeHere")),
+                    onSubmitted: onSubmitLink,
                   ),
                 ).withBottomPadding(8),
                 Text(
@@ -223,9 +224,20 @@ class _QrScanModalState extends State<QrScanModal> {
     else if (!(result.message is String)) return;
 
     this.setState(() => scanning = false);
-
+    print(result.message);
     Future.delayed(Duration(milliseconds: 5))
         .then((_) => Navigator.of(context).pop(result.message));
+  }
+
+  onSubmitLink(String input) {
+    if (input == null)
+      return;
+    else if (input is! String) return;
+
+    this.setState(() => scanning = false);
+
+    Future.delayed(Duration(milliseconds: 5))
+        .then((_) => Navigator.of(context).pop(input));
   }
 
   Widget _buildMessage(BuildContext context, String message) {
