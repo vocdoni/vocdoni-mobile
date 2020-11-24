@@ -119,19 +119,19 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       showMessage(getText(context, "main.yourRegistrationHasBeenConfirmed"),
           context: context, purpose: Purpose.GOOD);
-      final notify = await showPrompt(
-          getText(context,
-                  "main.wouldYouLikeToReceivePersonalNotificationsFromThisEntity") +
-              " (" +
-              getText(context, "main.recommended").toLowerCase() +
-              ")",
-          context: context,
-          title: getText(context, "main.enableEntityNotifications"),
-          okButton: getText(context, "main.yes"),
-          cancelButton: getText(context, "main.no"));
-      if (notify) {
-        Notifications.getPushToken();
-      }
+      // final notify = await showPrompt(
+      //     getText(context,
+      //             "main.wouldYouLikeToReceivePersonalNotificationsFromThisEntity") +
+      //         " (" +
+      //         getText(context, "main.recommended").toLowerCase() +
+      //         ")",
+      //     context: context,
+      //     title: getText(context, "main.enableEntityNotifications"),
+      //     okButton: getText(context, "main.yes"),
+      //     cancelButton: getText(context, "main.no"));
+      // if (notify) {
+      //   Notifications.getPushToken();
+      // }
     } catch (error) {
       if (!mounted) return;
       setState(() => _currentStep = Steps.READY);
