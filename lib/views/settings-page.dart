@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
@@ -48,6 +51,14 @@ class _SettingsMenuState extends State<SettingsMenu> {
                     },
                     icon: FeatherIcons.radio,
                   ),
+                  ListItem(
+                      mainText: getText(context, "main.removeAccount"),
+                      purpose: Purpose.DANGER,
+                      rightIcon: null,
+                      icon: FeatherIcons.trash2,
+                      onTap: () {
+                        onRemoveAccount(ctx);
+                      }),
                 ],
               )),
     );
@@ -63,5 +74,36 @@ class _SettingsMenuState extends State<SettingsMenu> {
     await Future.delayed(Duration(milliseconds: 200));
     showMessage(getText(ctx, "main.theLanguageHasBeenDefined"),
         context: ctx, purpose: Purpose.GOOD);
+  }
+
+  onRemoveAccount(BuildContext ctx) async {
+    final confirm = await showPrompt(
+        getText(ctx,
+            "main.thisActionWillPermanentlyEraseYourAccountFromThisDevice"),
+        context: ctx,
+        title: getText(ctx, "main.areYouSureYouWantToDelete") +
+            " ${Globals.appState.currentAccount.identity.value.alias}",
+        okButton: getText(ctx, "main.ok"),
+        cancelButton: getText(ctx, "main.cancel"));
+    if (confirm) {
+      ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator =
+          showLoading(getText(ctx, "main.removingAccountData"), context: ctx);
+      // await Future.delayed(Duration(seconds: 5));
+      try {
+        await Globals.accountPool.removeCurrentAccount();
+      } catch (err) {
+        log("Error removing account: $err");
+        indicator.close();
+        showMessage(getText(context, "main.couldNotRemoveAccount"),
+            purpose: Purpose.DANGER, context: context);
+      }
+      indicator.close();
+      Navigator.pushNamedAndRemoveUntil(
+          ctx, "/identity/select", (Route _) => false);
+    }
+    // final accountIndex = Globals.appState.selectedAccount.value;
+    // Globals.accountPool.value.removeAt(accountIndex);
+
+    // Globals.accountPool.value
   }
 }
