@@ -214,5 +214,6 @@
     "status.youAreInTheCensus": "Estás en el censo",
     "status.yourVoteIsAlreadyRegistered": "Tu voto ya está registrado",
     "title.language": "Idioma",
-    "tooltip.scanaQrCode": "Escanear un código QR"
+    "tooltip.scanaQrCode": "Escanear un código QR",
+    "main.general": "General"
 }
