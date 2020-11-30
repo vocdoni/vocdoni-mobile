@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/alerts.dart';
+import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
@@ -40,6 +41,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                     onTap: () => showLanguageSelector(context),
                     icon: FeatherIcons.globe,
                   ),
+                  Section(text: getText(context, "main.advanced")),
                   ListItem(
                     mainText: getText(context, "main.setbootnodesUrl"),
                     onTap: () {
@@ -57,7 +59,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                       rightIcon: null,
                       icon: FeatherIcons.trash2,
                       onTap: () {
-                        onRemoveAccount(ctx);
+                        onRemoveAccount(context);
                       }),
                 ],
               )),
@@ -101,9 +103,5 @@ class _SettingsMenuState extends State<SettingsMenu> {
       Navigator.pushNamedAndRemoveUntil(
           ctx, "/identity/select", (Route _) => false);
     }
-    // final accountIndex = Globals.appState.selectedAccount.value;
-    // Globals.accountPool.value.removeAt(accountIndex);
-
-    // Globals.accountPool.value
   }
 }
