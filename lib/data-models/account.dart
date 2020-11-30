@@ -168,11 +168,6 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       throw Exception("The current account is not set");
     else if (Globals.appState.selectedAccount.value > this.value.length)
       throw Exception("The current account does not exist");
-    final currentIdentities = Globals.identitiesPersistence.get();
-    final alias = Globals.appState.currentAccount.identity.value.alias.trim();
-    final reducedAlias = alias.toLowerCase().trim();
-    currentIdentities
-        .removeWhere((item) => item.alias.toLowerCase().trim() == reducedAlias);
 
     // Remove identity from global identities and persist
     final newAccountList = this.value;
