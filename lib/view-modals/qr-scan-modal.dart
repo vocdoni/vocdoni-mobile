@@ -115,26 +115,11 @@ class _QrScanModalState extends State<QrScanModal> {
                         fontSize: 17),
                     decoration: InputDecoration(
                         filled: true,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorBaseBackground),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorBaseBackground),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorBaseBackground),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorBaseBackground),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorBaseBackground),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        border: _emptyTextInputBorder(),
+                        focusedBorder: _emptyTextInputBorder(),
+                        enabledBorder: _emptyTextInputBorder(),
+                        disabledBorder: _emptyTextInputBorder(),
+                        errorBorder: _emptyTextInputBorder(),
                         hintText: getText(context, "main.pasteLinkOrCodeHere")),
                     onSubmitted: onSubmitLink,
                   ),
@@ -258,5 +243,12 @@ class _QrScanModalState extends State<QrScanModal> {
         LoadingSpinner().withLeftPadding(30),
       ],
     )).withBottomPadding(100);
+  }
+
+  OutlineInputBorder _emptyTextInputBorder() {
+    return OutlineInputBorder(
+      borderSide: BorderSide(color: colorBaseBackground),
+      borderRadius: BorderRadius.circular(10),
+    );
   }
 }

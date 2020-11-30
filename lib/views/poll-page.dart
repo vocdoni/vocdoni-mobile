@@ -1,4 +1,3 @@
-import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
@@ -19,7 +18,6 @@ import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
-import 'package:dvote_common/widgets/summary.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
