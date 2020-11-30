@@ -1,5 +1,9 @@
+import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 // import 'package:qr_mobile_vision/qr_camera.dart';
 // import 'package:qr_mobile_vision/qr_mobile_vision.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -71,7 +75,7 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: "Vocdoni", // getText(context, "main.scan")
+        title: getText(context, "main.add"), // getText(context, "main.scan")
         showBackButton: true,
         onBackButton: onCancel,
       ),
@@ -87,16 +91,122 @@ class _QrScanModalState extends State<QrScanModal> {
               context, getText(context, "main.pleaseAllowAccessToTheCamera"));
         else if (!scanning) return _buildLoading(context);
 
-        // FUTURE: Preserve aspect ratio
-
-        // return Container(
-        //   child: AspectRatio(
-        //     aspectRatio: _controller.value.aspectRatio,
-        //     child: RScanCamera(_controller),
-        //   ),
-        // );
-        return Container(
-          child: RScanCamera(_controller),
+        return SingleChildScrollView(
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: paddingPage, vertical: paddingPage),
+                  child: TextField(
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp('[ \t]'))
+                    ],
+                    autocorrect: false,
+                    autofocus: false,
+                    textCapitalization: TextCapitalization.none,
+                    style: TextStyle(
+                        fontWeight: fontWeightLight,
+                        color: colorDescription,
+                        fontSize: 17),
+                    decoration: InputDecoration(
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorBaseBackground),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorBaseBackground),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorBaseBackground),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorBaseBackground),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorBaseBackground),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        hintText: getText(context, "main.pasteLinkOrCodeHere")),
+                    onSubmitted: onSubmitLink,
+                  ),
+                ).withBottomPadding(8),
+                Text(
+                  getText(context, "main.orScanQrCode"),
+                  style: TextStyle(
+                      fontWeight: fontWeightLight, color: colorDescription),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      vertical: paddingPage, horizontal: paddingPage),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.width,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40.0),
+                    child: OverflowBox(
+                      maxHeight: double.infinity,
+                      alignment: Alignment.center,
+                      child: AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
+                        child: RScanCamera(_controller),
+                        // ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(paddingPage),
+                  padding: EdgeInsets.all(paddingPage + 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15.0),
+                    color: colorDescriptionPale
+                        .withOpacity(opacityBackgroundColor),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        FeatherIcons.plus,
+                        size: 36,
+                        color: colorDescriptionPale,
+                      ),
+                      Flexible(
+                        child: Text(
+                          getText(context, "main.theAddPageAllowsYouToAddLinks,CodesAndQRCodesInOrderTo") +
+                              ":\n" +
+                              "• " +
+                              getText(context,
+                                  "main.joinAnOrganizationWithAnInviteLink") +
+                              "\n" +
+                              "• " +
+                              getText(context,
+                                  "main.findAVotingProcessOrOrganization") +
+                              "\n" +
+                              "• " +
+                              getText(context, "main.restoreABackupAccount"),
+                          overflow: TextOverflow.clip,
+                          textAlign: TextAlign.left,
+                          softWrap: true,
+                          maxLines: 80,
+                          style: TextStyle(
+                            color: colorDescription.withOpacity(0.7),
+                          ),
+                        ).withLeftPadding(10),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       }),
     );
@@ -114,15 +224,27 @@ class _QrScanModalState extends State<QrScanModal> {
     else if (!(result.message is String)) return;
 
     this.setState(() => scanning = false);
-
+    print(result.message);
     Future.delayed(Duration(milliseconds: 5))
         .then((_) => Navigator.of(context).pop(result.message));
+  }
+
+  onSubmitLink(String input) {
+    if (input == null)
+      return;
+    else if (input is! String) return;
+
+    this.setState(() => scanning = false);
+
+    Future.delayed(Duration(milliseconds: 5))
+        .then((_) => Navigator.of(context).pop(input));
   }
 
   Widget _buildMessage(BuildContext context, String message) {
     return Container(
       child: Center(
-        child: Text(message ?? getText(context, "main.theCameraIsNotAvailable")),
+        child:
+            Text(message ?? getText(context, "main.theCameraIsNotAvailable")),
       ),
     ).withBottomPadding(100);
   }
