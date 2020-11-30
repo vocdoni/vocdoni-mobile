@@ -24,7 +24,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
           context: scaffoldBodyContext);
 
   int retries = 20; // try for 10 seconds
-  while (AppNetworking.pool is! GatewayPool) {
+  while (!AppNetworking.isReady) {
     if (retries == 0) throw LinkingError("Networking unavailable");
     retries--;
     await Future.delayed(Duration(milliseconds: 500));
