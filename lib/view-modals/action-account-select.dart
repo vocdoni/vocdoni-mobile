@@ -24,7 +24,7 @@ class _LinkAccountSelectState extends State<LinkAccountSelect> {
         child: Scaffold(
           appBar: TopNavigation(
             title: getText(context, "main.selectAnIdentity"),
-            onBackButton: () => Navigator.pop(context, false),
+            onBackButton: () => Navigator.pop(context, null),
           ),
           body: Builder(
               builder: (context) => ListView(
@@ -69,13 +69,6 @@ class _LinkAccountSelectState extends State<LinkAccountSelect> {
 
   onAccountSelected(
       BuildContext ctx, AccountModel account, int accountIdx) async {
-    Globals.appState.selectAccount(accountIdx);
-    if (Globals.appState.currentAccount is! AccountModel)
-      throw Exception("No account available");
-
-    Globals.appState.currentAccount.cleanEphemeral();
-    Globals.appState.currentAccount.refresh(force: false); // detached async
-
-    Navigator.pop(ctx, true);
+    Navigator.pop(ctx, accountIdx);
   }
 }

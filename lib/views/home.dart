@@ -20,7 +20,6 @@ import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
-import 'package:vocdoni/views/identity-select-page.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -82,19 +81,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleLink(Uri givenUri) {
-    if (givenUri == null) return;
-    if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 1) {
+    if (givenUri == null || !Globals.accountPool.hasValue) return;
+    if (Globals.accountPool.value.length == 1) {
+      handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
+          .catchError(handleIncomingLinkError);
+    } else {
       Navigator.push(context,
               MaterialPageRoute(builder: (context) => LinkAccountSelect()))
           .then((result) {
-        if (result) {
+        if (result != null && result is int) {
+          Globals.appState.selectAccount(result);
           handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
               .catchError(handleIncomingLinkError);
         }
       });
-    } else {
-      handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
-          .catchError(handleIncomingLinkError);
     }
   }
 
