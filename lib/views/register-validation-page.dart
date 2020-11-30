@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/widgets/summary.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -8,6 +9,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -117,6 +119,19 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       showMessage(getText(context, "main.yourRegistrationHasBeenConfirmed"),
           context: context, purpose: Purpose.GOOD);
+      // final notify = await showPrompt(
+      //     getText(context,
+      //             "main.wouldYouLikeToReceivePersonalNotificationsFromThisEntity") +
+      //         " (" +
+      //         getText(context, "main.recommended").toLowerCase() +
+      //         ")",
+      //     context: context,
+      //     title: getText(context, "main.enableEntityNotifications"),
+      //     okButton: getText(context, "main.yes"),
+      //     cancelButton: getText(context, "main.no"));
+      // if (notify) {
+      //   Notifications.getPushToken();
+      // }
     } catch (error) {
       if (!mounted) return;
       setState(() => _currentStep = Steps.READY);
