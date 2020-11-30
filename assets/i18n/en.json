@@ -29,6 +29,8 @@
     "main.actionNotSupported": "Action not supported",
     "main.actions": "Actions",
     "main.addAnIdentity": "Add an identity",
+    "main.addbootnodeUrl": "Add a bootnode URL",
+    "main.advancedSettings": "Advanced settings",
     "main.anAccountWithThisNameAlreadyExists": "An account with this name already exists",
     "main.anErrorOccurredWhileGeneratingTheIdentity": "An error occurred while generating the identity",
     "main.anErrorOccurredWhileRestoringTheIdentity": "An error occurred while restoring the identity",
@@ -151,6 +153,7 @@
     "main.selectLanguage": "Select language",
     "main.selectYourChoiceForQuestionNum": "Select your choice for question #{{NUM}}",
     "main.sent": "Sent",
+    "main.setBootnodesUrl": "Set bootnode URL",
     "main.shareOrganization": "Share organization",
     "main.sigining": "Sigining",
     "main.sign": "Sign",
@@ -213,6 +216,7 @@
     "status.theProcessIsNotActiveYet": "The process is not active yet",
     "status.youAreInTheCensus": "You are in the census",
     "status.yourVoteIsAlreadyRegistered": "Your vote is already registered",
+    "title.bootnodeUrl": "Bootnode URL",
     "title.language": "Language",
     "tooltip.scanaQrCode": "Scan a QR code"
 }

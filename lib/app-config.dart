@@ -1,3 +1,5 @@
+import 'package:vocdoni/lib/globals.dart';
+
 /// Contains the compile-time defined config variables:
 /// - `APP_MODE`: dev, beta, production
 /// - `GATEWAY_BOOTNODES_URL`
@@ -5,6 +7,7 @@
 /// - `LINKING_DOMAIN`
 
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
+String _bootnodesUrlOverride;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -15,8 +18,20 @@ class AppConfig {
 
   static bool useTestingContracts() => AppConfig.isBeta();
 
+  static setBootnodesUrlOverride(String url) async {
+    try {
+      _bootnodesUrlOverride = url;
+      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static String get bootnodesUrl =>
+      _bootnodesUrlOverride ?? _GATEWAY_BOOTNODES_URL;
+
   // CONFIG VARS
-  static const GATEWAY_BOOTNODES_URL = String.fromEnvironment(
+  static const _GATEWAY_BOOTNODES_URL = String.fromEnvironment(
     "GATEWAY_BOOTNODES_URL",
     defaultValue: _appMode == "dev"
         ? "https://bootnodes.vocdoni.net/gateways.dev.json"

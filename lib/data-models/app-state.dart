@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/dvote_common.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -73,6 +74,9 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
           await selectLocale(Locale(settings["locale"]));
       }
+      if (settings is Map && settings["bootnodeUrlOverride"] is String) {
+        AppConfig.setBootnodesUrlOverride(settings["bootnodeUrlOverride"]);
+      }
     } catch (err) {
       log(err);
       this
@@ -97,6 +101,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       // Settings
       final settings = {
         "locale": locale.value.languageCode,
+        "bootnodeUrlOverride": AppConfig.bootnodesUrl,
       };
       await Globals.settingsPersistence.write(settings);
     } catch (err) {
@@ -115,7 +120,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       await this.writeToStorage();
     } catch (err) {
       log("ERR: $err");
-      throw err;
+      throw Exception("Unable to update bootnodes: $err");
     }
   }
 
@@ -126,9 +131,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      log("[App] Fetching " + AppConfig.GATEWAY_BOOTNODES_URL);
-      final bnGatewayInfo =
-          await fetchBootnodeInfo(AppConfig.GATEWAY_BOOTNODES_URL);
+      log("[App] Fetching " + AppConfig.bootnodesUrl);
+      final bnGatewayInfo = await fetchBootnodeInfo(AppConfig.bootnodesUrl);
 
       log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
