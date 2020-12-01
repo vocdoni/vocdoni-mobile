@@ -47,7 +47,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // Only refresh if networking is available
         Globals.appState.currentAccount.refresh();
       } else {
-        startNetworking();
+        startNetworking()
+            .then((_) => Globals.appState.currentAccount.refresh());
       }
       // HANDLE APP LAUNCH LINK
       getInitialUri()
