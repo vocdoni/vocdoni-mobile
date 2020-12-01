@@ -10,6 +10,7 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/notifications.dart';
+import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
@@ -43,6 +44,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     try {
+      if (AppNetworking.isReady) {
+        // Only refresh if networking is available
+        Globals.appState.currentAccount.refresh();
+      } else {
+        startNetworking()
+            .then((_) => Globals.appState.currentAccount.refresh());
+      }
       // HANDLE APP LAUNCH LINK
       getInitialUri()
           .then((initialUri) => handleLink(initialUri))

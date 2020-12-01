@@ -37,7 +37,6 @@ class _StartupPageState extends State<StartupPage> {
 
     return restorePersistence()
         .then((_) => restoreDataPools()) // Depends on restorePersistence()
-        .then((_) => startNetworking())
         .then((_) => Notifications.init())
         .then((_) {
       showNextScreen();
@@ -50,7 +49,7 @@ class _StartupPageState extends State<StartupPage> {
 
       setState(() {
         loading = false;
-        error = getText(context, "main.couldNotConnectToTheNetwork");
+        error = getText(context, "main.couldNotReadInternalData");
       });
 
       // RETRY ITSELF
@@ -61,10 +60,14 @@ class _StartupPageState extends State<StartupPage> {
   void showNextScreen() {
     // Determine the next screen and go there
     String nextRoutePath;
-    if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 0) {
-      nextRoutePath = "/identity/select";
-    } else {
+    if (!Globals.accountPool.hasValue ||
+        Globals.accountPool.value.length == 0) {
       nextRoutePath = "/identity/create";
+    } else if (Globals.accountPool.value.length == 1) {
+      Globals.appState.selectAccount(0);
+      nextRoutePath = "/home";
+    } else {
+      nextRoutePath = "/identity/select";
     }
 
     // Replace all routes with /identity/select on top
