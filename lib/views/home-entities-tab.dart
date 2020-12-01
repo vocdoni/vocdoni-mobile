@@ -42,54 +42,58 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   @override
   Widget build(ctx) {
     return EventualBuilder(
-      notifiers: [
-        Globals.appState.currentAccount.entities,
-        Globals.appState.currentAccount.identity,
-        Globals.appState.selectedAccount
-      ],
+      notifier: Globals.appState.selectedAccount,
       builder: (context, _, __) {
         final currentAccount = Globals.appState.currentAccount;
-
         if (currentAccount == null) return buildNoEntities(ctx);
-        if (!currentAccount.entities.hasValue ||
-            currentAccount.entities.value.length == 0) {
-          return buildNoEntities(ctx);
-        }
+        return EventualBuilder(
+          notifiers: [
+            currentAccount.entities,
+            currentAccount.identity,
+          ],
+          builder: (context, _, __) {
+            if (!currentAccount.entities.hasValue ||
+                currentAccount.entities.value.length == 0) {
+              return buildNoEntities(ctx);
+            }
 
-        return SmartRefresher(
-          enablePullDown: true,
-          enablePullUp: false,
-          header: WaterDropHeader(
-            complete: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Icon(Icons.done, color: Colors.grey),
-                  Container(width: 10.0),
-                  Text(getText(context, "main.refreshCompleted"),
-                      style: TextStyle(color: Colors.grey))
-                ]),
-            failed: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Icon(Icons.close, color: Colors.grey),
-                  Container(width: 10.0),
-                  Text(getText(context, "main.couldNotRefresh"),
-                      style: TextStyle(color: Colors.grey))
-                ]),
-          ),
-          controller: _refreshController,
-          onRefresh: _onRefresh,
-          child: ListView.builder(
-              itemCount: currentAccount.entities.value.length,
-              itemBuilder: (BuildContext context, int index) {
-                final entity = currentAccount.entities.value[index];
+            return SmartRefresher(
+              enablePullDown: true,
+              enablePullUp: false,
+              header: WaterDropHeader(
+                complete: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.done, color: Colors.grey),
+                      Container(width: 10.0),
+                      Text(getText(context, "main.refreshCompleted"),
+                          style: TextStyle(color: Colors.grey))
+                    ]),
+                failed: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.close, color: Colors.grey),
+                      Container(width: 10.0),
+                      Text(getText(context, "main.couldNotRefresh"),
+                          style: TextStyle(color: Colors.grey))
+                    ]),
+              ),
+              controller: _refreshController,
+              onRefresh: _onRefresh,
+              child: ListView.builder(
+                  itemCount: currentAccount.entities.value.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final entity = currentAccount.entities.value[index];
 
-                if (entity.metadata.hasValue)
-                  return buildCard(ctx, entity);
-                else if (entity.metadata.isLoading)
-                  return CardLoading(getText(context, "main.loadingEntity"));
-                return buildEmptyMetadataCard(ctx, entity);
-              }),
+                    if (entity.metadata.hasValue)
+                      return buildCard(ctx, entity);
+                    else if (entity.metadata.isLoading)
+                      return CardLoading(
+                          getText(context, "main.loadingEntity"));
+                    return buildEmptyMetadataCard(ctx, entity);
+                  }),
+            );
+          },
         );
       },
     );
