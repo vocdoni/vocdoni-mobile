@@ -60,10 +60,14 @@ class _StartupPageState extends State<StartupPage> {
   void showNextScreen() {
     // Determine the next screen and go there
     String nextRoutePath;
-    if (Globals.accountPool.hasValue && Globals.accountPool.value.length > 0) {
-      nextRoutePath = "/identity/select";
-    } else {
+    if (!Globals.accountPool.hasValue ||
+        Globals.accountPool.value.length == 0) {
       nextRoutePath = "/identity/create";
+    } else if (Globals.accountPool.value.length == 1) {
+      Globals.appState.selectAccount(0);
+      nextRoutePath = "/home";
+    } else {
+      nextRoutePath = "/identity/select";
     }
 
     // Replace all routes with /identity/select on top
