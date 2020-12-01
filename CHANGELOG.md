@@ -1,3 +1,16 @@
+# 0.8.13
+
+- Fix wrong-language feedback message when selecting new language
+- Implement rich text process + question descriptions
+- Fix single-user census
+- Tweak tab bar UI
+- Implement non-blocking startup
+- Add registration with manual link input
+- Add account selection when following deeplinks
+- Add settings view
+- Add bootnode URL configuration from app
+- Enable account removal
+
 # 0.8.9
 
 - Importing an updated version of dvote, ensuring that JSON messages are sent exactly as they are signed
