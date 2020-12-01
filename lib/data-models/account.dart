@@ -157,6 +157,25 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
 
     await this.writeToStorage();
   }
+
+  /// Removes the current account from the account pool
+  /// Persists the new account pool.
+  removeCurrentAccount() async {
+    log("[Account] Removing current account");
+    if (!this.hasValue)
+      throw Exception("The pool has no accounts loaded yet");
+    else if (!Globals.appState.selectedAccount.hasValue)
+      throw Exception("The current account is not set");
+    else if (Globals.appState.selectedAccount.value > this.value.length)
+      throw Exception("The current account does not exist");
+
+    // Remove identity from global identities and persist
+    final newAccountList = this.value;
+    newAccountList.removeAt(Globals.appState.selectedAccount.value);
+    this.setValue(newAccountList);
+
+    await this.writeToStorage();
+  }
 }
 
 /// AccountModel encapsulates the relevant information of a Vocdoni account.
