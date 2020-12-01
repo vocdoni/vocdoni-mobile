@@ -38,6 +38,11 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       throw Exception("Index out of bounds");
     }
     this.selectedAccount.setValue(accountIdx);
+    if (this.currentAccount is! AccountModel)
+      throw Exception("No account available");
+
+    Globals.appState.currentAccount.cleanEphemeral();
+    Globals.appState.currentAccount.refresh(force: false);
   }
 
   /// Defines the new locale to use for the app

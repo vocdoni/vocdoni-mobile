@@ -99,13 +99,6 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       return;
     }
     Globals.appState.selectAccount(accountIdx);
-    if (Globals.appState.currentAccount is! AccountModel)
-      throw Exception("No account available");
-
-    Globals.appState.currentAccount.cleanEphemeral();
-    Globals.appState.currentAccount.refresh(
-        force: false, patternEncryptionKey: lockPattern); // detached async
-
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
   }

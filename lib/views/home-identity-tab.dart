@@ -32,67 +32,72 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   @override
   Widget build(ctx) {
-    final currentAccount = Globals.appState.currentAccount;
-    if (currentAccount == null) return buildEmpty(ctx);
-
     // Rebuild whenever the identity is updated
     return EventualBuilder(
-      notifier: currentAccount.identity,
+      notifier: Globals.appState.selectedAccount,
       builder: (ctx, _, __) {
-        if (currentAccount.identity.hasError ||
-            !currentAccount.identity.hasValue) return buildEmpty(ctx);
+        final currentAccount = Globals.appState.currentAccount;
+        if (currentAccount == null) return buildEmpty(ctx);
+        return EventualBuilder(
+          notifier: currentAccount.identity,
+          builder: (context, _, __) {
+            if (currentAccount.identity.hasError ||
+                !currentAccount.identity.hasValue) return buildEmpty(ctx);
 
-        return ListView(
-          children: <Widget>[
-            ListItem(
-                mainText: currentAccount.identity.value.alias,
-                secondaryText: currentAccount.identity.value.identityId,
-                isTitle: true,
-                isBold: true,
-                rightIcon: FeatherIcons.copy,
-                onTap: () {
-                  Clipboard.setData(ClipboardData(
-                      text: currentAccount.identity.value.identityId));
-                  showMessage(
-                      getText(context, "main.identityIdCopiedOnTheClipboard"),
-                      context: ctx,
-                      purpose: Purpose.GOOD);
-                }),
-            Section(text: getText(context, "main.general")),
-            ListItem(
-              mainText: getText(context, "main.backUpMyIdentity"),
-              onTap: () => showIdentityBackup(ctx),
-              icon: FeatherIcons.archive,
-            ),
-            ListItem(
-                mainText: getText(context, "main.help"),
-                icon: FeatherIcons.lifeBuoy,
-                onTap: () {
-                  canLaunch(HELP_URL).then((ok) {
-                    if (ok) launch(HELP_URL);
-                  });
-                }),
-            ListItem(
-                mainText: getText(context, "main.logOut"),
-                icon: FeatherIcons.logOut,
-                onTap: () {
-                  onLogOut(ctx);
-                }),
-            ListItem(
-                mainText: getText(context, "main.settings"),
-                icon: FeatherIcons.settings,
-                onTap: () {
-                  onSettings(ctx);
-                }),
-            !kReleaseMode // TODO: DEV BUTTON OUT
-                ? Container()
-                : ListItem(
-                    mainText: getText(context, "main.developmentTesting"),
-                    icon: FeatherIcons.info,
+            return ListView(
+              children: <Widget>[
+                ListItem(
+                    mainText: currentAccount.identity.value.alias,
+                    secondaryText: currentAccount.identity.value.identityId,
+                    isTitle: true,
+                    isBold: true,
+                    rightIcon: FeatherIcons.copy,
                     onTap: () {
-                      onDevelopmentTesting(ctx);
-                    })
-          ],
+                      Clipboard.setData(ClipboardData(
+                          text: currentAccount.identity.value.identityId));
+                      showMessage(
+                          getText(
+                              context, "main.identityIdCopiedOnTheClipboard"),
+                          context: ctx,
+                          purpose: Purpose.GOOD);
+                    }),
+                Section(text: getText(context, "main.general")),
+                ListItem(
+                  mainText: getText(context, "main.backUpMyIdentity"),
+                  onTap: () => showIdentityBackup(ctx),
+                  icon: FeatherIcons.archive,
+                ),
+                ListItem(
+                    mainText: getText(context, "main.help"),
+                    icon: FeatherIcons.lifeBuoy,
+                    onTap: () {
+                      canLaunch(HELP_URL).then((ok) {
+                        if (ok) launch(HELP_URL);
+                      });
+                    }),
+                ListItem(
+                    mainText: getText(context, "main.logOut"),
+                    icon: FeatherIcons.logOut,
+                    onTap: () {
+                      onLogOut(ctx);
+                    }),
+                ListItem(
+                    mainText: getText(context, "main.settings"),
+                    icon: FeatherIcons.settings,
+                    onTap: () {
+                      onSettings(ctx);
+                    }),
+                kReleaseMode // TODO: DEV BUTTON OUT
+                    ? Container()
+                    : ListItem(
+                        mainText: getText(context, "main.developmentTesting"),
+                        icon: FeatherIcons.info,
+                        onTap: () {
+                          onDevelopmentTesting(ctx);
+                        })
+              ],
+            );
+          },
         );
       },
     );
