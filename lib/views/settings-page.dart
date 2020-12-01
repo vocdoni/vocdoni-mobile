@@ -98,6 +98,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         indicator.close();
         showMessage(getText(context, "main.couldNotRemoveAccount"),
             purpose: Purpose.DANGER, context: context);
+        return;
       }
       indicator.close();
       Navigator.pushNamedAndRemoveUntil(
