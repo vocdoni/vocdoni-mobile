@@ -185,7 +185,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
   final metadata = EventualNotifier<ProcessMetadata>();
   final results = EventualNotifier<ProcessResultsDigested>()
-      .withFreshnessTimeout(Duration(seconds: 10));
+      .withFreshnessTimeout(Duration(minutes: 1));
   final isInCensus =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
   final hasVoted =
@@ -502,6 +502,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.startDate.isLoading) return null;
 
     log("- [Process dates] Refreshing [${this.processId}]");
+    this.startDate.setToLoading();
+    this.endDate.setToLoading();
 
     final startBlock = this.metadata.value.startBlock;
     final endBlock =

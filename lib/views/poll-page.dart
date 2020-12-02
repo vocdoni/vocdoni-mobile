@@ -48,7 +48,9 @@ class _PollPageState extends State<PollPage> {
   @override
   void initState() {
     // Try to update every 10 seconds (only if needed)
-    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
+    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {
+      onRefresh();
+    });
 
     super.initState();
   }
@@ -97,8 +99,9 @@ class _PollPageState extends State<PollPage> {
         .refreshHasVoted()
         .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
-        .then((_) => process.refreshDates())
         .then((_) => process.refreshCurrentParticipants())
+        .then((_) => process.refreshDates(
+            force: process.endDate.value.isAfter(DateTime.now())))
         .catchError((err) => log(err)); // Values will refresh if needed
   }
 
@@ -157,7 +160,10 @@ class _PollPageState extends State<PollPage> {
     // By the constructor, this.process.metadata is guaranteed to exist
 
     return EventualBuilder(
-      notifiers: [process.metadata, entity.metadata],
+      notifiers: [
+        process.metadata,
+        entity.metadata,
+      ],
       builder: (context, _, __) {
         if (process.metadata.hasError && !process.metadata.hasValue)
           return buildErrorScaffold(
@@ -345,6 +351,7 @@ class _PollPageState extends State<PollPage> {
 
         return ListItem(
           icon: FeatherIcons.clock,
+          isSpinning: process.startDate.isLoading || process.endDate.isLoading,
           purpose: purpose,
           mainText: rowText,
           //secondaryText: "18/09/2019 at 19:00",
