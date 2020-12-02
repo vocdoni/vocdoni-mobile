@@ -216,5 +216,6 @@
     "status.youAreInTheCensus": "Formes part del cens",
     "status.yourVoteIsAlreadyRegistered": "El teu vot ja està registrat",
     "title.language": "Idioma",
-    "tooltip.scanaQrCode": "Escaneja un codi QR"
+    "tooltip.scanaQrCode": "Escaneja un codi QR",
+    "main.general": "General"
 }

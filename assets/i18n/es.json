@@ -135,7 +135,7 @@
     "main.post": "Publicación",
     "main.prettyLonleyInHere": "No hay información a mostrar…",
     "main.processingTheCode": "Procesando el código…",
-    "main.publicVote": "Votació pública",
+    "main.publicVote": "Votación pública",
     "main.questionTypeNotSupported": "Tipo de pregunta no soportado",
     "main.readyWhenYouAre": "A punto",
     "main.refreshCompleted": "Actualizado",
@@ -216,5 +216,6 @@
     "status.youAreInTheCensus": "Estás en el censo",
     "status.yourVoteIsAlreadyRegistered": "Tu voto ya está registrado",
     "title.language": "Idioma",
-    "tooltip.scanaQrCode": "Escanear un código QR"
+    "tooltip.scanaQrCode": "Escanear un código QR",
+    "main.general": "General"
 }

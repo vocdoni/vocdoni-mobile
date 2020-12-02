@@ -1,0 +1,15 @@
+{
+    "error.couldNotCheckTheVoteStatus": "Não foi possível verificar o estado do voto",
+    "error.couldNotCheckTheProcessStatus": "Não foi possível verificar o estado do processo",
+    "action.submit": "Enviar",
+    "action.scanQrCode": "Escanear QR code",
+    "action.checkTheCensus": "Verificar o censo",
+    "action.checkCensusState": "Verificar o estado do censo",
+    "error.theNotificationSettingsCouldNotBeUpdated": "Não foi possível atualizar as preferências de notificação",
+    "error.theMetadataIsNotAvailable": "Os metadados não estão desponíveis",
+    "error.theCensusIsNotAvailable": "O censo não está disponível",
+    "error.theCensusCannotBeChecked": "O censo não pode ser consultado",
+    "error.couldNotFindThePost": "Não foi possível encontrar o artigo",
+    "error.couldNotFetchTheProcessDetails": "Não foi possível carregar os detalhes do processo",
+    "error.couldNotFetchTheEntityDetails": "Não foi possível obter os detalhes da entidade"
+}
