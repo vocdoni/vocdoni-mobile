@@ -20,6 +20,7 @@ class LanguageSelect extends StatelessWidget {
                   bulidLanguageItem(context, "English", "en"),
                   bulidLanguageItem(context, "French", "fr"),
                   bulidLanguageItem(context, "Español", "es"),
+                  // bulidLanguageItem(context, "Portugues", "pt"),
                   bulidLanguageItem(context, "Català", "ca"),
                   bulidLanguageItem(context, "Norsk", "nb"),
                   // bulidLanguageItem(context, "Esperanto", "eo"),

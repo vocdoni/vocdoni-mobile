@@ -169,14 +169,14 @@ class _QrScanModalState extends State<QrScanModal> {
                               ":\n" +
                               "• " +
                               getText(context,
-                                  "main.joinAnOrganizationWithAnInviteLink") +
+                                  "main.to__joinAnOrganizationWithAnInviteLink") +
                               "\n" +
                               "• " +
                               getText(context,
-                                  "main.findAVotingProcessOrOrganization") +
+                                  "main.to__findAVotingProcessOrOrganization") +
                               "\n" +
                               "• " +
-                              getText(context, "main.restoreABackupAccount"),
+                              getText(context, "main.to__restoreABackupAccount"),
                           overflow: TextOverflow.clip,
                           textAlign: TextAlign.left,
                           softWrap: true,
