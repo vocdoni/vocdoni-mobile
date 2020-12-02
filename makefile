@@ -22,6 +22,7 @@ help: makefile
 .PHONY: init
 init:
 	flutter pub get
+	(git remote | grep weblate > /dev/null) || git remote add weblate https://hosted.weblate.org/git/vocdoni/mobile-client/
 
 ## :
 
