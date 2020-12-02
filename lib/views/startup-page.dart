@@ -49,7 +49,7 @@ class _StartupPageState extends State<StartupPage> {
 
       setState(() {
         loading = false;
-        error = getText(context, "main.couldNotReadInternalData");
+        error = getText(context, "error.couldNotReadInternalData");
       });
 
       // RETRY ITSELF

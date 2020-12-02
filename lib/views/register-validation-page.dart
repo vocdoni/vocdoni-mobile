@@ -126,7 +126,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       //         getText(context, "main.recommended").toLowerCase() +
       //         ")",
       //     context: context,
-      //     title: getText(context, "main.enableEntityNotifications"),
+      //     title: getText(context, "action.enableEntityNotifications"),
       //     okButton: getText(context, "main.yes"),
       //     cancelButton: getText(context, "main.no"));
       // if (notify) {

@@ -37,9 +37,9 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                       buildExistingIdentities(
                           context, Globals.accountPool.value),
                       SizedBox(height: 50),
-                      Section(text: getText(context, "main.addAnIdentity")),
+                      Section(text: getText(context, "action.addAnIdentity")),
                       ListItem(
-                          mainText: getText(context, "main.createANewIdentity"),
+                          mainText: getText(context, "action.createANewIdentity"),
                           icon: FeatherIcons.plusCircle,
                           onTap: () => createNew(context)),
                       ListItem(

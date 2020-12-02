@@ -43,7 +43,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   ),
                   Section(text: getText(context, "main.advanced")),
                   ListItem(
-                    mainText: getText(context, "main.setbootnodesUrl"),
+                    mainText: getText(context, "main.setBootnodesUrl"),
                     onTap: () {
                       Navigator.push(
                           ctx,
@@ -54,7 +54,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                     icon: FeatherIcons.radio,
                   ),
                   ListItem(
-                      mainText: getText(context, "main.removeAccount"),
+                      mainText: getText(context, "action.removeAccount"),
                       purpose: Purpose.DANGER,
                       rightIcon: null,
                       icon: FeatherIcons.trash2,
@@ -83,8 +83,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
         getText(ctx,
             "main.thisActionWillPermanentlyEraseYourAccountFromThisDevice"),
         context: ctx,
-        title: getText(ctx, "main.areYouSureYouWantToDelete") +
-            " ${Globals.appState.currentAccount.identity.value.alias}",
+        title: getText(ctx, "main.areYouSureYouWantToDeleteName").replaceFirst(
+            "{{NAME}}", Globals.appState.currentAccount.identity.value.alias),
         okButton: getText(ctx, "main.ok"),
         cancelButton: getText(ctx, "main.cancel"));
     if (confirm) {
@@ -96,7 +96,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       } catch (err) {
         log("Error removing account: $err");
         indicator.close();
-        showMessage(getText(context, "main.couldNotRemoveAccount"),
+        showMessage(getText(context, "error.couldNotRemoveAccount"),
             purpose: Purpose.DANGER, context: context);
         return;
       }

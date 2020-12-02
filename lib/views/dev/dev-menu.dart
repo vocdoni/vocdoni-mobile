@@ -17,7 +17,7 @@ class DevMenu extends StatelessWidget {
           builder: (BuildContext context) => ListView(
                 children: <Widget>[
                   ListItem(
-                    mainText: getText(context, "main.setbootnodesUrl"),
+                    mainText: getText(context, "main.setBootnodesUrl"),
                     onTap: () {
                       Navigator.push(
                           ctx,

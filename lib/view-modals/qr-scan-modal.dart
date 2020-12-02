@@ -75,7 +75,7 @@ class _QrScanModalState extends State<QrScanModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(context, "main.add"), // getText(context, "main.scan")
+        title: getText(context, "action.add"), // getText(context, "main.scan")
         showBackButton: true,
         onBackButton: onCancel,
       ),
@@ -165,7 +165,7 @@ class _QrScanModalState extends State<QrScanModal> {
                       ),
                       Flexible(
                         child: Text(
-                          getText(context, "main.theAddPageAllowsYouToAddLinks,CodesAndQRCodesInOrderTo") +
+                          getText(context, "main.theAddPageAllowsYouToAddLinksCodesAndQRCodesInOrderTo") +
                               ":\n" +
                               "• " +
                               getText(context,

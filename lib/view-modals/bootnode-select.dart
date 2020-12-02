@@ -64,7 +64,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
                 backgroundColor: colorBlue,
                 child: Icon(FeatherIcons.plusCircle),
                 elevation: 5.0,
-                tooltip: getText(ctx, "main.addbootnodeUrl"),
+                tooltip: getText(ctx, "action.addbootnodeUrl"),
               ).withBottomPadding(15),
             ],
           );
@@ -130,7 +130,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
       builder: (context) {
         String newUrl;
         return AlertDialog(
-          title: Text(getText(context, "main.addbootnodeUrl")),
+          title: Text(getText(context, "action.addbootnodeUrl")),
           content: TextField(
             onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
@@ -151,7 +151,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
                   Navigator.of(context).pop(true);
                   showAlert(getText(context, "main.pleaseEnterAValidUrl"),
                       title:
-                          getText(context, "main.invalidUrl") + ": " + newUrl,
+                          getText(context, "error.invalidUrl") + ": " + newUrl,
                       context: context);
                   return;
                 }
