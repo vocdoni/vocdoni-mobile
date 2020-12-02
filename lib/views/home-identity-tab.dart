@@ -68,6 +68,12 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                   icon: FeatherIcons.archive,
                 ),
                 ListItem(
+                    mainText: getText(context, "main.settings"),
+                    icon: FeatherIcons.settings,
+                    onTap: () {
+                      onSettings(ctx);
+                    }),
+                ListItem(
                     mainText: getText(context, "main.help"),
                     icon: FeatherIcons.lifeBuoy,
                     onTap: () {
@@ -80,12 +86,6 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                     icon: FeatherIcons.logOut,
                     onTap: () {
                       onLogOut(ctx);
-                    }),
-                ListItem(
-                    mainText: getText(context, "main.settings"),
-                    icon: FeatherIcons.settings,
-                    onTap: () {
-                      onSettings(ctx);
                     }),
                 kReleaseMode // TODO: DEV BUTTON OUT
                     ? Container()
