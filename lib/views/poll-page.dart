@@ -98,6 +98,7 @@ class _PollPageState extends State<PollPage> {
         .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshDates())
+        .then((_) => process.refreshCurrentParticipants())
         .catchError((err) => log(err)); // Values will refresh if needed
   }
 
