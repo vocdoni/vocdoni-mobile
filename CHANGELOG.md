@@ -1,4 +1,6 @@
 - Fix poll option padding
+- Cache BlockStatus for date estimations
+
 
 # 0.8.14
 - Fix network initialization error

@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
-import 'package:dvote_common/dvote_common.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -19,6 +18,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// Index of the currently active identity
   final selectedAccount = EventualNotifier<int>(-1);
   final locale = EventualNotifier<Locale>();
+  final blockStatus =
+      EventualValue<BlockStatus>().withFreshnessTimeout(Duration(seconds: 12));
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
@@ -151,6 +152,25 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     } catch (err) {
       this.bootnodeInfo.setError("Cannot fetch the boot nodes list",
           keepPreviousValue: true);
+      throw err;
+    }
+  }
+
+  Future<void> refreshBlockStatus([bool force = false]) async {
+    if (!force && this.blockStatus.isFresh)
+      return;
+    else if (!force && this.blockStatus.isLoading) return;
+
+    this.blockStatus.setToLoading();
+    try {
+      log("[App] Fetching block status");
+      final status = await getBlockStatus(AppNetworking.pool);
+
+      this.blockStatus.setValue(status);
+    } catch (err) {
+      this
+          .blockStatus
+          .setError("Cannot fetch the block status", keepPreviousValue: true);
       throw err;
     }
   }

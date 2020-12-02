@@ -22,7 +22,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   # dvote: ^0.18.0  # Ok on Android (native crypto)
-  dvote: ^0.18.3  # Needed for iOS (dart crypto)
+  dvote: ^0.18.5  # Needed for iOS (dart crypto)
   dvote_common:
     git:
       url: https://gitlab.com/vocdoni/dvote-flutter-common.git

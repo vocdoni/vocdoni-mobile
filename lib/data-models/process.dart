@@ -506,10 +506,13 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     final startBlock = this.metadata.value.startBlock;
     final endBlock =
         this.metadata.value.startBlock + this.metadata.value.blockCount;
-
-    return estimateDateAtBlock(startBlock, AppNetworking.pool)
+    return Globals.appState
+        .refreshBlockStatus()
+        .then((_) => estimateDateAtBlock(startBlock, AppNetworking.pool,
+            status: Globals.appState.blockStatus.value))
         .then((startDate) => this.startDate.setValue(startDate))
-        .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool))
+        .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool,
+            status: Globals.appState.blockStatus.value))
         .then((endDate) {
       log("- [Process dates] Refreshing [DONE ${this.processId}]");
 
