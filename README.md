@@ -99,6 +99,36 @@ Models can contain both data which is persisted (entity metadata, process metada
 
 The app's strings translation can be found on [Weblate](https://hosted.weblate.org/projects/vocdoni/mobile-client/).
 
+#### Translation management
+
+Weblate monitors `origin/i18n` and pulls from it as new strings are available. After a new translation is added, Weblate compiles the new JSON files in a git remote of its own.
+
+To pull from it, run `make init`. This will add a `weblate` git remote besides `origin`. This way:
+- `weblate/i18n` has the translated strings to integrate into the app
+- `origin/i18n` contains the empty strings that Weblate will show to translators
+
+The translation flow is an iterative loop that looks like:
+- Lock the weblate repository
+- `git checkout i18n`
+- `git pull weblate i18n`   (update our local repo)
+- `git push origin i18n`    (update the GitHub branch)
+- `git checkout master`     (check out the latest code)
+- `git merge i18n`          (integrate the latest translations)
+- `git push origin master`  (update the GitHub branch)
+- `git checkout i18n`
+- `git merge master`        (integrate the latest code into i18n)
+- `make lang-parse`         (extract the new strings)
+- `git commit -m "New strings"`
+- `git push origin i18n`    (push the new strings for Weblate)
+- Unlock the Weblate repository
+
+**Important**:
+- Make sure to use the right key prefixes:
+  - `action.createIdentity` instead of `main.createIdentity`
+- Use no symbols beyond the dot separator
+- Use placeholders for data replacement instead of concatenating it later
+	- `question.doYouWantToRemoveName => Do you want to remove {{NAME}}?`
+
 ### Dependencies
 
 The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 
