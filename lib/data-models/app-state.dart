@@ -19,7 +19,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   final selectedAccount = EventualNotifier<int>(-1);
   final locale = EventualNotifier<Locale>();
   final blockStatus =
-      EventualValue<BlockStatus>().withFreshnessTimeout(Duration(seconds: 12));
+      EventualValue<BlockStatus>().withFreshnessTimeout(Duration(seconds: 30));
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.

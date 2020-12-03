@@ -48,8 +48,17 @@ class _PollPageState extends State<PollPage> {
   @override
   void initState() {
     // Try to update every 10 seconds (only if needed)
-    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {
-      onRefresh();
+    refreshCheck = Timer.periodic(Duration(seconds: 1), (_) {
+      // Force date refresh if now < startDate < now + 2
+      final isActive = process.startDate.value.isAfter(DateTime.now()) &&
+          process.startDate.value
+              .isBefore(DateTime.now().add(Duration(minutes: 2)));
+      process
+          .refreshHasVoted()
+          .then((_) => process.refreshResults())
+          .then((_) => process.refreshCurrentParticipants())
+          .then((_) => process.refreshDates(force: isActive))
+          .catchError((err) => log(err));
     });
 
     super.initState();
@@ -95,16 +104,12 @@ class _PollPageState extends State<PollPage> {
   }
 
   Future<void> onRefresh() {
-    // Force date refresh if startDate < now + 2 < endDate. Widget will therefore check dates + refresh periodically during the voting period.
-    final isActive = process.endDate.value.isAfter(DateTime.now()) &&
-        process.startDate.value
-            .isBefore(DateTime.now().add(Duration(minutes: 2)));
     return process
         .refreshHasVoted()
         .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
-        .then((_) => process.refreshCurrentParticipants(force: isActive))
-        .then((_) => process.refreshDates(force: isActive))
+        .then((_) => process.refreshCurrentParticipants())
+        .then((_) => process.refreshDates())
         .catchError((err) => log(err)); // Values will refresh if needed
   }
 
@@ -462,6 +467,7 @@ class _PollPageState extends State<PollPage> {
             PollPackagingPage(process: process, choices: choices));
     await Navigator.push(ctx, newRoute);
     process.refreshResults(force: true);
+    process.refreshCurrentParticipants(force: true); // Refresh percentage
   }
 
   onSetChoice(int questionIndex, int value) {
