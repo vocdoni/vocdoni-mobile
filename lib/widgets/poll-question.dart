@@ -9,7 +9,6 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import "dart:developer";
-import 'package:rainbow_color/rainbow_color.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:percent_indicator/percent_indicator.dart';
