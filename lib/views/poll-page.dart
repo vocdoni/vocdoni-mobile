@@ -95,13 +95,16 @@ class _PollPageState extends State<PollPage> {
   }
 
   Future<void> onRefresh() {
+    // Force date refresh if startDate < now + 2 < endDate. Widget will therefore check dates + refresh periodically during the voting period.
+    final isActive = process.endDate.value.isAfter(DateTime.now()) &&
+        process.startDate.value
+            .isBefore(DateTime.now().add(Duration(minutes: 2)));
     return process
         .refreshHasVoted()
         .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
-        .then((_) => process.refreshCurrentParticipants())
-        .then((_) => process.refreshDates(
-            force: process.endDate.value.isAfter(DateTime.now())))
+        .then((_) => process.refreshCurrentParticipants(force: isActive))
+        .then((_) => process.refreshDates(force: isActive))
         .catchError((err) => log(err)); // Values will refresh if needed
   }
 
@@ -161,8 +164,10 @@ class _PollPageState extends State<PollPage> {
 
     return EventualBuilder(
       notifiers: [
-        process.metadata,
         entity.metadata,
+        process.metadata,
+        process.startDate,
+        process.endDate,
       ],
       builder: (context, _, __) {
         if (process.metadata.hasError && !process.metadata.hasValue)
