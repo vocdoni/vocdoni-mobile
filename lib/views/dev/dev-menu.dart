@@ -4,6 +4,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 
 class DevMenu extends StatelessWidget {
@@ -66,13 +67,49 @@ class DevMenu extends StatelessWidget {
                     },
                   ),
                   ListItem(
-                    mainText: "Handle deeplink (A new world)",
+                    mainText: "Handle deeplink (Validation)",
                     onTap: () {
                       String link =
-                          'https://app.vocdoni.net/entities/#/0xf6a97d2ec8bb9fabde28b9e377edbd31e92bef3b44040f0752e28896f4baed90';
+                          'https://vocdoni.link/validation/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/b0558fb8-9852-4fe1-807b-931cf171f7cd';
                       handleIncomingLink(Uri.parse(link), context);
                     },
                   ),
+                  ListItem(
+                      mainText: "Handle post notification",
+                      onTap: () {
+                        Notifications.onResume({
+                          "gcm.message_id": "1607027839009912",
+                          "message": "MA Coop posted: noties",
+                          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                          "google.c.a.e": 1,
+                          "uri":
+                              "https://app.vocdoni.link/posts/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/1607025505147",
+                          "aps": {
+                            "alert": {
+                              "title": "New post created",
+                              "body": "MA Coop posted: noties"
+                            }
+                          }
+                        });
+                      }),
+                  ListItem(
+                      mainText: "Handle process notification",
+                      onTap: () {
+                        Notifications.onResume({
+                          "gcm.message_id": "1607027839009912",
+                          "message": " created a new voting process",
+                          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                          "google.c.a.e": 1,
+                          "uri":
+                              "https://app.vocdoni.link/processes/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/0x1a2b8b62f45ad3dc9cc3d51f3edbc8cc6490820c8224c780153528b39768c6c6",
+                          "aps": {
+                            "alert": {
+                              "title": "New process created",
+                              "body": "Entity created a new voting process"
+                            }
+                          }
+                        });
+                      }),
                   ListItem(
                     mainText: "Analytics",
                     onTap: () {

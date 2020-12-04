@@ -1,24 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:dvote_common/widgets/alerts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/view-modals/action-account-select.dart';
 
-/// Example to simulate notifications locally
-///
-/// onResume({
-///   "notification": {},
-///   "data": {
-///     // "uri": "https://vocdoni.link/entities/0xed3d915bc2181286635a802e5e0e133cc3baed2234ca7a68a5649f95a38aed96",
-///     // "event": "entity-updated",
-///     // "uri": "https://vocdoni.link/posts/view/0xe030cbdcf1c6d67ca78b5eb3e066a3d594486330c66ae29250d2e9fc577c51b2/1598862833292",
-///     // "event": "new-post",
-///     "uri": "https://vocdoni.link/processes/0xed3d915bc2181286635a802e5e0e133cc3baed2234ca7a68a5649f95a38aed96/0xef0642cbcd83a3cb27bc05c0576251b65a0416a40b6ad7e22ce48c822761806a",
-///     "event": "new-process",
-///     "message": "This is a replica of the message",
-///   }
-/// });
-///
+import 'i18n.dart';
+
 class Notifications {
   static FirebaseMessaging _firebaseMessaging;
 
@@ -52,8 +42,8 @@ class Notifications {
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
     log("[App] onMessage: $message");
 
-    if (!message.containsKey('data')) {
-      log("[App] onMessage: Received a message with no data");
+    if (!message.containsKey('uri')) {
+      log("[App] onMessage: Received a message with no link");
       return;
     }
 
@@ -67,10 +57,8 @@ class Notifications {
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
     log("[App] onLaunch: $message");
 
-    // TODO: In future versions, handle immediately, without waiting for the user to unlock an account
-
-    if (!message.containsKey('data')) {
-      log("[App] onLaunch: Received a message with no data");
+    if (!message.containsKey('uri')) {
+      log("[App] onLaunch: Received a message with no link");
       return;
     }
 
@@ -80,34 +68,17 @@ class Notifications {
   static Future<dynamic> onResume(Map<String, dynamic> message) async {
     log("[App] onResume: $message");
 
-    if (!message.containsKey('data')) {
-      log("[App] onResume: Received a message with no data");
+    if (!message.containsKey('uri')) {
+      log("[App] onResume: Received a message with no link");
       return;
     }
 
-    // TODO: In future versions, handle immediately, without waiting for the user to unlock an account
     if (Globals.appState.currentAccount != null) {
       _showTargetView(message);
     } else {
       setUnhandled(message);
     }
   }
-
-  // static Future<dynamic> onBackgroundMessageHandler(Map<String, dynamic> message) async {
-  //   log("[App] onBackgroundMessageHandler: $message");
-
-  //   if (message.containsKey('data')) {
-  //     // Handle data message
-  //     final dynamic data = message['data'];
-  //     log("[App] [onBackgroundMessageHandler] Data: $data");
-  //   }
-
-  //   if (message.containsKey('notification')) {
-  //     // Handle notification message
-  //     final dynamic notification = message['notification'];
-  //     log("[App] [onBackgroundMessageHandler] Notification: $notification");
-  //   }
-  // }
 
   /// If there is a pending notification, it navigates to the
   static void handlePendingNotification() {
@@ -119,39 +90,38 @@ class Notifications {
 
   /// Displays the appropriate view to visualize the relevant data
   static void _showTargetView(Map<String, dynamic> message) {
-    final messageData = message['data'];
-    if (messageData["uri"] is! String) {
+    final context = Globals.navigatorKey.currentContext;
+    // final messageData = message['data'];
+    if (message["uri"] is! String) {
       log("[App] Notification body Error: uri is not a String");
       return;
-    } else if (messageData["event"] is! String) {
-      log("[App] Notification body Error: event is not a String");
-      return;
-    } else if (messageData["message"] is! String) {
-      log("[App] Notification body Error: message is not a String");
-      return;
     }
-
-    final linkSegments = extractLinkSegments(Uri.parse(messageData['uri']));
-
-    switch (messageData["event"]) {
-      case "entity-updated":
-        handleEntityLink(linkSegments,
-            context: Globals.navigatorKey.currentContext);
-        break;
-      case "new-post":
-        handleNewsLink(linkSegments,
-            context: Globals.navigatorKey.currentContext);
-        break;
-      case "new-process":
-      case "process-ended":
-        handleProcessLink(linkSegments,
-            context: Globals.navigatorKey.currentContext);
-        break;
-      // case "process-results":
-      //   break;
-      default:
-        log("[App] Notification body Error: unsupported event: " +
-            messageData["event"]);
+    try {
+      final uri = Uri.parse(message["uri"]);
+      if (uri == null || !Globals.accountPool.hasValue) return;
+      if (Globals.accountPool.value.length == 1) {
+        handleIncomingLink(uri, context, isInScaffold: false).catchError((err) {
+          showAlert(getText(context, "error.thereWasAProblemHandlingTheLink"),
+              title: getText(context, "main.error"), context: context);
+        });
+      } else {
+        Navigator.push(context,
+                MaterialPageRoute(builder: (context) => LinkAccountSelect()))
+            .then((result) {
+          if (result != null && result is int) {
+            Globals.appState.selectAccount(result);
+            handleIncomingLink(uri, context, isInScaffold: false)
+                .catchError((err) {
+              showAlert(
+                  getText(context, "error.thereWasAProblemHandlingTheLink"),
+                  title: getText(context, "main.error"),
+                  context: context);
+            });
+          }
+        });
+      }
+    } catch (err) {
+      log("ERR: $err");
     }
   }
 

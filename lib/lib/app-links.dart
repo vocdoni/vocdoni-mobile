@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -14,15 +16,38 @@ import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
 
+const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
+
 // /////////////////////////////////////////////////////////////////////////////
 // / MAIN
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator =
-      showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
-          context: scaffoldBodyContext);
-
+Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
+    {bool isInScaffold = true}) async {
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
+  if (isInScaffold) {
+    indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
+        context: scaffoldBodyContext);
+  } else {
+    showDialog(
+      context: scaffoldBodyContext,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(paddingPage),
+            child: Row(
+              children: [
+                SpinnerCircular(),
+                Padding(padding: EdgeInsets.symmetric(horizontal: 10.0)),
+                Text(getText(context, "main.Loading")),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   int retries = 20; // try for 10 seconds
   while (!AppNetworking.isReady) {
     if (retries == 0) throw LinkingError("Networking unavailable");
@@ -38,12 +63,24 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
   try {
     switch (uriSegments[0]) {
       case "entities":
-        await handleEntityLink(uriSegments, context: scaffoldBodyContext);
-        indicator.close();
+        await handleEntityLink(uriSegments,
+            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        if (indicator != null) indicator.close();
         break;
       case "validation":
-        await handleValidationLink(uriSegments, context: scaffoldBodyContext);
-        indicator.close();
+        await handleValidationLink(uriSegments,
+            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        if (indicator != null) indicator.close();
+        break;
+      case "posts":
+        await handleNewsLink(uriSegments,
+            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        if (indicator != null) indicator.close();
+        break;
+      case "processes":
+        await handleProcessLink(uriSegments,
+            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        if (indicator != null) indicator.close();
         break;
       // case "signature":
       //   await showSignatureScreen(
@@ -52,11 +89,13 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
       //       context: scaffoldBodyContext);
       //   break;
       default:
-        indicator.close();
+        if (indicator != null) indicator.close();
         throw LinkingError("Invalid path");
     }
   } catch (err) {
+    if (!isInScaffold) Navigator.pop(scaffoldBodyContext);
     if (indicator != null) indicator.close();
+    log("ERR: $err");
     throw err;
   }
 }
@@ -66,13 +105,13 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext) async {
 // /////////////////////////////////////////////////////////////////////////////
 
 Future handleEntityLink(List<String> linkSegments,
-    {@required BuildContext context}) async {
+    {@required BuildContext context, closeDialog = false}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46" ]
 
   String entityId;
   if (paramSegments[0] is String &&
-      RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(paramSegments[0])) {
+      RegExp(entityRegex).hasMatch(paramSegments[0])) {
     entityId = paramSegments[0];
   }
 
@@ -100,6 +139,7 @@ Future handleEntityLink(List<String> linkSegments,
         await entityModel.enableNotifications();
       }
     }
+    if (closeDialog) Navigator.pop(context);
     Navigator.pushNamed(context, "/entity", arguments: entityModel);
   } catch (err) {
     // showMessage("error.couldNotFetchTheEntityDetails",
@@ -109,15 +149,14 @@ Future handleEntityLink(List<String> linkSegments,
 }
 
 Future handleNewsLink(List<String> linkSegments,
-    {@required BuildContext context}) async {
-  final paramSegments = linkSegments.skip(2).toList();
+    {@required BuildContext context, closeDialog = false}) async {
+  final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x-entity-id", "0x-post-id" ]
 
   final entityId = paramSegments[0];
   final postId = paramSegments[1];
 
-  if (entityId is! String ||
-      !RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(entityId))
+  if (entityId is! String || !RegExp(entityRegex).hasMatch(entityId))
     throw LinkingError("Invalid entityId");
 
   final entityModel = Globals.entityPool.value.firstWhere(
@@ -143,6 +182,7 @@ Future handleNewsLink(List<String> linkSegments,
     final post = entityModel.feed.value.items
         .firstWhere((post) => post.id == postId, orElse: () => null);
     if (post == null) throw Exception();
+    if (closeDialog) Navigator.pop(context);
     Navigator.of(context).pushNamed("/entity/feed/post",
         arguments: FeedPostArgs(entity: entityModel, post: post));
   } catch (err) {
@@ -153,15 +193,14 @@ Future handleNewsLink(List<String> linkSegments,
 }
 
 Future handleProcessLink(List<String> linkSegments,
-    {@required BuildContext context}) async {
+    {@required BuildContext context, closeDialog = false}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x-entity-id", "0x-process-id" ]
 
   final entityId = paramSegments[0];
   final processId = paramSegments[1];
 
-  if (entityId is! String ||
-      !RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(entityId))
+  if (entityId is! String || !RegExp(entityRegex).hasMatch(entityId))
     throw LinkingError("Invalid entityId");
 
   final entityModel = Globals.entityPool.value.firstWhere(
@@ -186,21 +225,28 @@ Future handleProcessLink(List<String> linkSegments,
       (processModel) => processModel.processId == processId,
       orElse: () => ProcessModel(processId, entityId),
     );
-    // Detached refresh so we can navigate now
-    processModel.refresh().catchError((err) => log(err));
+    if (processModel.metadata.hasValue) {
+      // Detached refresh so we can navigate now
+      processModel.refresh().catchError((err) => log(err));
+    } else {
+      // Await refresh so pollPage doesn't return
+      await processModel.refresh().catchError((err) => log(err));
+    }
 
     // Navigate
+    if (closeDialog) Navigator.pop(context);
     Navigator.pushNamed(context, "/entity/participation/poll",
         arguments: PollPageArgs(entity: entityModel, process: processModel));
   } catch (err) {
     // showMessage("Could not fetch the entity details",
     //     context: context, purpose: Purpose.DANGER);
+    print(err);
     throw Exception(getText(context, "error.couldNotFetchTheProcessDetails"));
   }
 }
 
 Future handleValidationLink(List<String> linkSegments,
-    {@required BuildContext context}) async {
+    {@required BuildContext context, closeDialog = false}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46", "token-1234" ]
 
@@ -208,7 +254,7 @@ Future handleValidationLink(List<String> linkSegments,
       !(paramSegments[0] is String) ||
       !(paramSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
-  } else if (!RegExp(r"^0x[a-zA-Z0-9]{40,64}$").hasMatch(paramSegments[0]) ||
+  } else if (!RegExp(entityRegex).hasMatch(paramSegments[0]) ||
       !RegExp(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
           .hasMatch(paramSegments[1])) {
     throw LinkingError("Invalid validation link");
