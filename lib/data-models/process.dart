@@ -319,10 +319,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final newResults = await getResultsDigest(
           this.processId, AppNetworking.pool,
           meta: this.metadata.value);
-      if (!(newResults is ProcessResultsDigested)) {
-        // TODO set freshness
+      if (!(newResults is ProcessResultsDigested))
         throw Exception("The process cannot be found");
-      }
 
       log("- [Process results] Refreshing DONE [${this.processId}]");
 
@@ -330,7 +328,6 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     } catch (err) {
       log("- [Process results] Refreshing ERROR: $err [${this.processId}]");
 
-// TODO Set freshness
       this.results.setError("error.couldNotFetchTheProcessResults",
           keepPreviousValue: true);
     }
@@ -405,14 +402,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       return; // If you already voted, you can't un-vote
 
     final account = Globals.appState.currentAccount;
-    if (account is! AccountModel) {
-      // this.hasVoted.setValue(false);
-      // TODO set freshness
+    if (account is! AccountModel)
       throw Exception("No current account selected");
-    } else if (!account.hasPublicKeyForEntity(this.entityId)) {
+    else if (!account.hasPublicKeyForEntity(this.entityId)) {
       log("- [Has voted] The public key is not loaded yet for the entity " +
           this.entityId);
-      this.hasVoted.setValue(false);
       this.isInCensus.setValue(null);
       return;
     }

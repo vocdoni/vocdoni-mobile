@@ -44,21 +44,26 @@ class _PollPageState extends State<PollPage> {
   ProcessModel process;
   int listIdx;
   List<int> choices = [];
+  int refreshCounter = 0;
 
   @override
   void initState() {
-    // Try to update every 10 seconds (only if needed)
-    refreshCheck = Timer.periodic(Duration(seconds: 1), (_) {
-      // Force date refresh if now < startDate < now + 2
-      final isActive = process.startDate.value.isAfter(DateTime.now()) &&
+    refreshCheck = Timer.periodic(Duration(seconds: 1), (_) async {
+      refreshCounter++;
+      // Force date refresh if now < startDate < now + 1
+      final isStarting = process.startDate.value.isAfter(DateTime.now()) &&
           process.startDate.value
-              .isBefore(DateTime.now().add(Duration(minutes: 2)));
-      process
-          .refreshHasVoted()
-          .then((_) => process.refreshResults())
-          .then((_) => process.refreshCurrentParticipants())
-          .then((_) => process.refreshDates(force: isActive))
-          .catchError((err) => log(err));
+              .isBefore(DateTime.now().add(Duration(minutes: 1)));
+      // Refresh dates every second when process is near to starting time
+      await process.refreshDates(force: isStarting);
+      // Refresh everything else every 30 seconds
+      if (refreshCounter % 30 == 0) {
+        await process
+            .refreshHasVoted()
+            .then((_) => process.refreshResults())
+            .then((_) => process.refreshCurrentParticipants())
+            .catchError((err) => log(err));
+      }
     });
 
     super.initState();

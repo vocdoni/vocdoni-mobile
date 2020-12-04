@@ -1,4 +1,6 @@
 - Fix poll option padding
+- Periodically update process dates + info
+- Display spinner when refreshing dates
 - Cache BlockStatus for date estimations
 
 
