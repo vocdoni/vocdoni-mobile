@@ -237,10 +237,10 @@ class _CardPollState extends State<CardPoll> {
           .replaceFirst("{{NUM}}", diff.inHours.toString());
     else if (diff.inMinutes >= 1)
       return getText(context, "main.numMin")
-          .replaceFirst("{{NUM}}", diff.inMinutes.toString());
+          .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
     else
       return getText(context, "main.numS")
-          .replaceFirst("{{NUM}}", diff.inSeconds.toString());
+          .replaceFirst("{{NUM}}", "~" + diff.inSeconds.toString());
   }
 
   onCardTapped(BuildContext context) {
