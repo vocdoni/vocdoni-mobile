@@ -1,3 +1,5 @@
+- Fix poll option padding
+
 # 0.8.13
 
 - Fix wrong-language feedback message when selecting new language

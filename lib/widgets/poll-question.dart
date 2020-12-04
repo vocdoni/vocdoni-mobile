@@ -182,6 +182,7 @@ class _PollQuestionState extends State<PollQuestion> {
       {bool disabled = false}) {
     if (disabled) {
       return Chip(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20))),
         backgroundColor: colorLightGuide,
@@ -196,10 +197,11 @@ class _PollQuestionState extends State<PollQuestion> {
             color: colorDescription,
           ),
         ),
-      ).withHPadding(paddingPage);
+      ).withHPadding(paddingPage).withVPadding(6.0);
     }
 
     return ChoiceChip(
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(20))),
       backgroundColor: colorLightGuide,
@@ -222,7 +224,7 @@ class _PollQuestionState extends State<PollQuestion> {
           widget.onSetChoice(widget.questionIndex, voteOption.value);
         }
       },
-    ).withHPadding(paddingPage);
+    ).withHPadding(paddingPage).withVPadding(6.0);
   }
 
   Widget buildPollResultsOption(
