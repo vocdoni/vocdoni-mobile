@@ -182,6 +182,8 @@ class _PollQuestionState extends State<PollQuestion> {
       {bool disabled = false}) {
     if (disabled) {
       return Chip(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20))),
         backgroundColor: colorLightGuide,
         padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
         label: Text(
@@ -198,6 +200,8 @@ class _PollQuestionState extends State<PollQuestion> {
     }
 
     return ChoiceChip(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20))),
       backgroundColor: colorLightGuide,
       selectedColor: colorBlue,
       padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
