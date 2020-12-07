@@ -50,7 +50,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
   }
   try {
     int retries = 20; // try for 10 seconds
-    while (!AppNetworking.gatewayIsReady) {
+    while (!AppNetworking.dvoteIsReady()) {
       if (retries == 0) throw LinkingError("Networking unavailable");
       retries--;
       await Future.delayed(Duration(milliseconds: 500));
@@ -65,22 +65,18 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
       case "entities":
         await handleEntityLink(uriSegments,
             context: scaffoldBodyContext, closeDialog: !isInScaffold);
-        if (indicator != null) indicator.close();
         break;
       case "validation":
         await handleValidationLink(uriSegments,
             context: scaffoldBodyContext, closeDialog: !isInScaffold);
-        if (indicator != null) indicator.close();
         break;
       case "posts":
         await handleNewsLink(uriSegments,
             context: scaffoldBodyContext, closeDialog: !isInScaffold);
-        if (indicator != null) indicator.close();
         break;
       case "processes":
         await handleProcessLink(uriSegments,
             context: scaffoldBodyContext, closeDialog: !isInScaffold);
-        if (indicator != null) indicator.close();
         break;
       // case "signature":
       //   await showSignatureScreen(
@@ -92,6 +88,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
         if (indicator != null) indicator.close();
         throw LinkingError("Invalid path");
     }
+    if (indicator != null) indicator.close();
   } catch (err) {
     if (!isInScaffold) Navigator.pop(scaffoldBodyContext);
     if (indicator != null) indicator.close();
@@ -230,7 +227,7 @@ Future handleProcessLink(List<String> linkSegments,
       processModel.refresh().catchError((err) => log(err));
     } else {
       // Await refresh so pollPage doesn't return
-      await processModel.refresh().catchError((err) => log(err));
+      await processModel.refresh();
     }
 
     // Navigate

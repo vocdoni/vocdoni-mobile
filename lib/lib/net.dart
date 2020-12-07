@@ -11,18 +11,20 @@ class AppNetworking {
   static Future<void> _discoveryFuture;
 
   static GatewayPool get pool => _gwPool;
-  static bool get isReady =>
-      _discoveryFuture == null &&
-      pool is GatewayPool &&
-      pool.current is Gateway &&
-      pool.current.dvote is DVoteGateway &&
-      pool.current.web3.isReady;
 
-  static bool get gatewayIsReady =>
-      _discoveryFuture == null &&
-      pool is GatewayPool &&
-      pool.current is Gateway &&
-      pool.current.dvote is DVoteGateway;
+  static bool isReady() {
+    return dvoteIsReady() && web3IsReady();
+  }
+
+  static bool dvoteIsReady() {
+    return pool is GatewayPool &&
+        pool.current is Gateway &&
+        pool.current.dvote is DVoteGateway;
+  }
+
+  static bool web3IsReady() {
+    return pool.current.web3.isReady;
+  }
 
   /// Fetch the list of gateways from a well-known URI and initialize a new Gateway Pool from scratch
   static Future<void> init({bool forceReload = false}) {
@@ -30,7 +32,7 @@ class AppNetworking {
       // Skip reload if already doing so
       if (_discoveryFuture is Future) {
         return _discoveryFuture;
-      } else if (isReady) {
+      } else if (isReady()) {
         return Future.value();
       }
     }
@@ -67,7 +69,7 @@ class AppNetworking {
       // Skip reload if already doing so
       if (_discoveryFuture is Future) {
         return _discoveryFuture;
-      } else if (isReady) {
+      } else if (dvoteIsReady()) {
         return Future.value();
       }
     }
