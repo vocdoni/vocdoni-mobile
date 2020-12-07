@@ -31,7 +31,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
   } else {
     showDialog(
       context: scaffoldBodyContext,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           child: Padding(
@@ -48,19 +48,19 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
       },
     );
   }
-  int retries = 20; // try for 10 seconds
-  while (!AppNetworking.isReady) {
-    if (retries == 0) throw LinkingError("Networking unavailable");
-    retries--;
-    await Future.delayed(Duration(milliseconds: 500));
-  }
-
-  final uriSegments = extractLinkSegments(newLink);
-
-  // Just open the app, do nothing
-  if (uriSegments == null || uriSegments.length == 0) return;
-
   try {
+    int retries = 20; // try for 10 seconds
+    while (!AppNetworking.gatewayIsReady) {
+      if (retries == 0) throw LinkingError("Networking unavailable");
+      retries--;
+      await Future.delayed(Duration(milliseconds: 500));
+    }
+
+    final uriSegments = extractLinkSegments(newLink);
+
+    // Just open the app, do nothing
+    if (uriSegments == null || uriSegments.length == 0) return;
+
     switch (uriSegments[0]) {
       case "entities":
         await handleEntityLink(uriSegments,

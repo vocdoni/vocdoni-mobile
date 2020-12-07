@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/view-modals/action-account-select.dart';
@@ -42,13 +43,17 @@ class Notifications {
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
     log("[App] onMessage: $message");
 
+    // If contents is enclosed in `data` field, unpack this field
+    if (message.containsKey('data') && message['data'] is Map)
+      message = message['data'];
+
     if (!message.containsKey('uri')) {
       log("[App] onMessage: Received a message with no link");
       return;
     }
 
     if (Globals.appState.currentAccount != null) {
-      // TODO: Show top banner
+      _showInAppNotification(message);
     } else {
       setUnhandled(message);
     }
@@ -56,6 +61,10 @@ class Notifications {
 
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
     log("[App] onLaunch: $message");
+
+    // If contents is enclosed in `data` field, unpack this field
+    if (message.containsKey('data') && message['data'] is Map)
+      message = message['data'];
 
     if (!message.containsKey('uri')) {
       log("[App] onLaunch: Received a message with no link");
@@ -67,6 +76,10 @@ class Notifications {
 
   static Future<dynamic> onResume(Map<String, dynamic> message) async {
     log("[App] onResume: $message");
+
+    // If contents is enclosed in `data` field, unpack this field
+    if (message.containsKey('data') && message['data'] is Map)
+      message = message['data'];
 
     if (!message.containsKey('uri')) {
       log("[App] onResume: Received a message with no link");
@@ -91,7 +104,6 @@ class Notifications {
   /// Displays the appropriate view to visualize the relevant data
   static void _showTargetView(Map<String, dynamic> message) {
     final context = Globals.navigatorKey.currentContext;
-    // final messageData = message['data'];
     if (message["uri"] is! String) {
       log("[App] Notification body Error: uri is not a String");
       return;
@@ -123,6 +135,63 @@ class Notifications {
     } catch (err) {
       log("ERR: $err");
     }
+  }
+
+  static void _showInAppNotification(Map<String, dynamic> message) {
+    if (message["uri"] is! String) {
+      log("[App] Notification body Error: uri is not a String");
+      return;
+    }
+    String title = "Title not found";
+    String body = "";
+    if (message.containsKey('aps')) {
+      final aps = message['aps'];
+      if (aps.containsKey('alert')) {
+        final alert = aps['alert'];
+        if (alert.containsKey('title')) {
+          title = alert['title'];
+        }
+        if (alert.containsKey('body')) {
+          body = alert['body'];
+        }
+      }
+    }
+    showOverlayNotification((context) {
+      return Dismissible(
+        direction: DismissDirection.up,
+        dismissThresholds: {DismissDirection.up: .1},
+        onDismissed: (_) {
+          OverlaySupportEntry.of(context).dismiss(animate: false);
+        },
+        key: UniqueKey(),
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: SafeArea(
+            child: ListTile(
+              leading: SizedBox.fromSize(
+                  size: const Size(40, 40),
+                  child: ClipOval(
+                    child: Image(
+                      image: AssetImage('assets/icon/icon-sm.png'),
+                      width: 40,
+                    ),
+                  )),
+              title: Text(title),
+              subtitle: Text(body),
+              onTap: () {
+                OverlaySupportEntry.of(context).dismiss(animate: false);
+                _showTargetView(message);
+              },
+              trailing: IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    OverlaySupportEntry.of(context).dismiss();
+                  }),
+            ),
+          ),
+        ),
+      );
+    }, duration: Duration(milliseconds: 3000));
   }
 
   // UNHANDLED MESSAGES

@@ -48,6 +48,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   percent_indicator: "^2.1.7+2"
   mdi: ^3.0.0
+  overlay_support: ^1.0.0
   #rainbow_color: ^0.1.1
 
 

@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     try {
-      if (AppNetworking.isReady) {
+      if (AppNetworking.gatewayIsReady) {
         // Only refresh if networking is available
         Globals.appState.currentAccount.refresh();
       } else {

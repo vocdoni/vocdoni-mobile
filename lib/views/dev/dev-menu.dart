@@ -15,115 +15,136 @@ class DevMenu extends StatelessWidget {
         title: "Developer",
       ),
       body: Builder(
-          builder: (BuildContext context) => ListView(
-                children: <Widget>[
-                  ListItem(
-                    mainText: getText(context, "main.setBootnodesUrl"),
-                    onTap: () {
-                      Navigator.push(
-                          ctx,
-                          MaterialPageRoute(
-                              fullscreenDialog: true,
-                              builder: (context) => BootnodeSelectPage()));
-                    },
-                  ),
-                  ListItem(
-                      mainText: "Add fake organizations",
-                      onTap: () {
-                        populateSampleData();
-                      }),
-                  ListItem(
-                    mainText: "ListItem variations (UI)",
-                    onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/ui-listItem");
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Cards variations (UI)",
-                    onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/ui-card");
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Avatar color generation (UI)",
-                    onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/ui-avatar-colors");
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Handle deeplink (Esqueixada)",
-                    onTap: () {
-                      String link =
-                          'https://app.vocdoni.net/entities/#/0x8dfbc9c552338427b13ae755758bb5fd7df4fce0f98ceff56c791e5b74fcffba';
-                      handleIncomingLink(Uri.parse(link), context);
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Handle deeplink (VocdoniTest)",
-                    onTap: () {
-                      String link =
-                          'https://app.vocdoni.net/entities/#/0x33e9ee1a35cc74dee64e13b46db4f52d61bb450a71cfcb810a3175d1f308f658';
-                      handleIncomingLink(Uri.parse(link), context);
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Handle deeplink (Validation)",
-                    onTap: () {
-                      String link =
-                          'https://vocdoni.link/validation/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/b0558fb8-9852-4fe1-807b-931cf171f7cd';
-                      handleIncomingLink(Uri.parse(link), context);
-                    },
-                  ),
-                  ListItem(
-                      mainText: "Handle post notification",
-                      onTap: () {
-                        Notifications.onResume({
-                          "gcm.message_id": "1607027839009912",
-                          "message": "MA Coop posted: noties",
-                          "click_action": "FLUTTER_NOTIFICATION_CLICK",
-                          "google.c.a.e": 1,
-                          "uri":
-                              "https://app.vocdoni.link/posts/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/1607025505147",
-                          "aps": {
-                            "alert": {
-                              "title": "New post created",
-                              "body": "MA Coop posted: noties"
-                            }
-                          }
-                        });
-                      }),
-                  ListItem(
-                      mainText: "Handle process notification",
-                      onTap: () {
-                        Notifications.onResume({
-                          "gcm.message_id": "1607027839009912",
-                          "message": " created a new voting process",
-                          "click_action": "FLUTTER_NOTIFICATION_CLICK",
-                          "google.c.a.e": 1,
-                          "uri":
-                              "https://app.vocdoni.link/processes/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/0x1a2b8b62f45ad3dc9cc3d51f3edbc8cc6490820c8224c780153528b39768c6c6",
-                          "aps": {
-                            "alert": {
-                              "title": "New process created",
-                              "body": "Entity created a new voting process"
-                            }
-                          }
-                        });
-                      }),
-                  ListItem(
-                    mainText: "Analytics",
-                    onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/analytics-tests");
-                    },
-                  ),
-                  ListItem(
-                    mainText: "Pager test",
-                    onTap: () {
-                      Navigator.pushNamed(ctx, "/dev/pager");
-                    },
-                  ),
-                ],
-              )),
+        builder: (BuildContext context) => ListView(
+          children: <Widget>[
+            ListItem(
+              mainText: getText(context, "main.setBootnodesUrl"),
+              onTap: () {
+                Navigator.push(
+                    ctx,
+                    MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => BootnodeSelectPage()));
+              },
+            ),
+            ListItem(
+                mainText: "Add fake organizations",
+                onTap: () {
+                  populateSampleData();
+                }),
+            ListItem(
+              mainText: "ListItem variations (UI)",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/ui-listItem");
+              },
+            ),
+            ListItem(
+              mainText: "Cards variations (UI)",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/ui-card");
+              },
+            ),
+            ListItem(
+              mainText: "Avatar color generation (UI)",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/ui-avatar-colors");
+              },
+            ),
+            ListItem(
+              mainText: "Handle deeplink (Esqueixada)",
+              onTap: () {
+                String link =
+                    'https://app.vocdoni.net/entities/#/0x8dfbc9c552338427b13ae755758bb5fd7df4fce0f98ceff56c791e5b74fcffba';
+                handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
+              mainText: "Handle deeplink (VocdoniTest)",
+              onTap: () {
+                String link =
+                    'https://app.vocdoni.net/entities/#/0x33e9ee1a35cc74dee64e13b46db4f52d61bb450a71cfcb810a3175d1f308f658';
+                handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
+              mainText: "Handle deeplink (Validation)",
+              onTap: () {
+                String link =
+                    'https://vocdoni.link/validation/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/b0558fb8-9852-4fe1-807b-931cf171f7cd';
+                handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
+                mainText: "Handle post notification",
+                onTap: () {
+                  Notifications.onResume({
+                    "gcm.message_id": "1607027839009912",
+                    "message": "MA Coop posted: noties",
+                    "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                    "google.c.a.e": 1,
+                    "uri":
+                        "https://app.vocdoni.link/posts/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/1607025505147",
+                    "aps": {
+                      "alert": {
+                        "title": "New post created",
+                        "body": "MA Coop posted: noties"
+                      }
+                    }
+                  });
+                }),
+            ListItem(
+                mainText: "Handle process notification",
+                onTap: () {
+                  Notifications.onResume({
+                    "gcm.message_id": "1607027839009912",
+                    "message": " created a new voting process",
+                    "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                    "google.c.a.e": 1,
+                    "uri":
+                        "https://app.vocdoni.link/processes/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/0x1a2b8b62f45ad3dc9cc3d51f3edbc8cc6490820c8224c780153528b39768c6c6",
+                    "aps": {
+                      "alert": {
+                        "title": "New process created",
+                        "body": "Entity created a new voting process"
+                      }
+                    }
+                  });
+                }),
+            ListItem(
+              mainText: "Analytics",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/analytics-tests");
+              },
+            ),
+            ListItem(
+              mainText: "Pager test",
+              onTap: () {
+                Navigator.pushNamed(ctx, "/dev/pager");
+              },
+            ),
+            ListItem(
+                mainText: "In-app notif test",
+                onTap: () {
+                  Notifications.onMessage({
+                    "gcm.message_id": "1607027839009912",
+                    "message": " created a new voting process",
+                    "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                    "google.c.a.e": 1,
+                    "data": {
+                      "uri":
+                          "https://app.vocdoni.link/processes/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/0x1a2b8b62f45ad3dc9cc3d51f3edbc8cc6490820c8224c780153528b39768c6c6",
+                      "aps": {
+                        "alert": {
+                          "title": "New process created",
+                          "body": "Entity created a new voting process"
+                        }
+                      }
+                    }
+                  });
+                }),
+          ],
+        ),
+      ),
     );
   }
 }

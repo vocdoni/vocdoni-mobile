@@ -42,7 +42,7 @@ class _StartupPageState extends State<StartupPage> {
       showNextScreen();
 
       // Detached update of the cached bootnodes
-      Globals.appState.refresh(force: true).catchError(
+      Globals.appState.refresh().catchError(
           (err) => log("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;

@@ -18,6 +18,12 @@ class AppNetworking {
       pool.current.dvote is DVoteGateway &&
       pool.current.web3.isReady;
 
+  static bool get gatewayIsReady =>
+      _discoveryFuture == null &&
+      pool is GatewayPool &&
+      pool.current is Gateway &&
+      pool.current.dvote is DVoteGateway;
+
   /// Fetch the list of gateways from a well-known URI and initialize a new Gateway Pool from scratch
   static Future<void> init({bool forceReload = false}) {
     if (!forceReload) {
