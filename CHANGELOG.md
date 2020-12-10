@@ -1,3 +1,8 @@
+# 0.8.14
+- Fix network initialization error
+- Fix notification linking
+- Enable in-app notifications
+
 # 0.8.13
 
 - Fix wrong-language feedback message when selecting new language
