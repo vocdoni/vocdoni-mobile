@@ -69,7 +69,7 @@ class _StartupPageState extends State<StartupPage> {
     String nextRoutePath;
     if (!Globals.accountPool.hasValue ||
         Globals.accountPool.value.length == 0) {
-      nextRoutePath = "/identity/create";
+      nextRoutePath = "/onboarding-welcome";
     } else if (Globals.accountPool.value.length == 1) {
       Globals.appState.selectAccount(0);
       nextRoutePath = "/home";
