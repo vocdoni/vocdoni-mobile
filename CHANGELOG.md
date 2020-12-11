@@ -1,3 +1,5 @@
+- Fix poll option padding
+
 # 0.8.14
 - Fix network initialization error
 - Fix notification linking
