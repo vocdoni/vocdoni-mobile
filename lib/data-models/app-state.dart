@@ -105,12 +105,12 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       // Settings
       final settings = {
-        "locale": locale.value.languageCode,
+        "locale": locale?.value?.languageCode ?? DEFAULT_LANGUAGE,
         "bootnodeUrlOverride": AppConfig.bootnodesUrl,
       };
       await Globals.settingsPersistence.write(settings);
     } catch (err) {
-      log(err);
+      log("ERR storing app state: $err");
       throw PersistError("Cannot store the current state");
     }
   }

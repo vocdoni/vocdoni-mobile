@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
-import 'package:vocdoni/view-modals/bootnode-select.dart';
 import 'package:vocdoni/views/settings-page.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
@@ -52,54 +52,56 @@ Widget buildMainContainer() {
 }
 
 Widget buildMainApp() {
-  return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: "Vocdoni",
-    locale: Globals.appState.materialLocale,
-    supportedLocales:
-        SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
-    localizationsDelegates: [
-      AppLocalization.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-    ],
-    onGenerateTitle: (BuildContext context) => "Vocdoni",
-    home: StartupPage(),
-    navigatorKey: Globals
-        .navigatorKey, // Allows the logic to navigate without a build context
-    onGenerateRoute: generateRoute,
-    routes: {
-      // NO ACCOUNT SELECTED YET
-      "/identity/create": (context) => IdentityCreatePage(),
-      "/identity/restore": (context) => IdentityRestorePage(),
-      "/identity/select": (context) => IdentitySelectPage(),
+  return OverlaySupport(
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "Vocdoni",
+      locale: Globals.appState.materialLocale,
+      supportedLocales:
+          SUPPORTED_LANGUAGES.map((loc) => Locale(loc)).cast<Locale>().toList(),
+      localizationsDelegates: [
+        AppLocalization.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      onGenerateTitle: (BuildContext context) => "Vocdoni",
+      home: StartupPage(),
+      navigatorKey: Globals
+          .navigatorKey, // Allows the logic to navigate without a build context
+      onGenerateRoute: generateRoute,
+      routes: {
+        // NO ACCOUNT SELECTED YET
+        "/identity/create": (context) => IdentityCreatePage(),
+        "/identity/restore": (context) => IdentityRestorePage(),
+        "/identity/select": (context) => IdentitySelectPage(),
 
-      // WHEN THERE IS AN ACCOUNT
-      "/home": (context) => HomeScreen(),
-      "/entity/feed": (context) => EntityFeedPage(),
-      "/entity/feed/post": (context) => FeedPostPage(),
-      "/entity/participation": (context) => EntityParticipationPage(),
-      "/entity/participation/poll": (context) => PollPage(),
-      "/identity/backup": (context) => IdentityBackupPage(),
+        // WHEN THERE IS AN ACCOUNT
+        "/home": (context) => HomeScreen(),
+        "/entity/feed": (context) => EntityFeedPage(),
+        "/entity/feed/post": (context) => FeedPostPage(),
+        "/entity/participation": (context) => EntityParticipationPage(),
+        "/entity/participation/poll": (context) => PollPage(),
+        "/identity/backup": (context) => IdentityBackupPage(),
 
-      // GLOBAL
-      // "/web/viewer": (context) => WebViewer(),
-      // "/signature": (context) => SignModal(),
+        // GLOBAL
+        // "/web/viewer": (context) => WebViewer(),
+        // "/signature": (context) => SignModal(),
 
-      "/settings": (context) => SettingsMenu(),
+        "/settings": (context) => SettingsMenu(),
 
-      // DEV
-      "/dev": (context) => DevMenu(),
-      "/dev/ui-listItem": (context) => DevUiListItem(),
-      "/dev/ui-card": (context) => DevUiCard(),
-      "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
-      "/dev/analytics-tests": (context) => AnalyticsTests(),
-      "/dev/pager": (context) => DevPager(),
-    },
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-      fontFamily: "Open Sans",
-      scaffoldBackgroundColor: colorBaseBackground,
+        // DEV
+        "/dev": (context) => DevMenu(),
+        "/dev/ui-listItem": (context) => DevUiListItem(),
+        "/dev/ui-card": (context) => DevUiCard(),
+        "/dev/ui-avatar-colors": (context) => DevUiAvatarColor(),
+        "/dev/analytics-tests": (context) => AnalyticsTests(),
+        "/dev/pager": (context) => DevPager(),
+      },
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: "Open Sans",
+        scaffoldBackgroundColor: colorBaseBackground,
+      ),
     ),
   );
 }
