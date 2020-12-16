@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
@@ -28,8 +30,43 @@ class CardPoll extends StatefulWidget {
 }
 
 class _CardPollState extends State<CardPoll> {
+  Timer refreshCheck;
+  int refreshCounter = 0;
+
   @override
   void initState() {
+    refreshCheck = Timer.periodic(Duration(seconds: 1), (_) async {
+      refreshCounter++;
+      final isStartingOrEnding =
+          this.widget.process.startDate.value.isAfter(DateTime.now()) &&
+                  this
+                      .widget
+                      .process
+                      .startDate
+                      .value
+                      .isBefore(DateTime.now().add(Duration(minutes: 1))) ||
+              this.widget.process.endDate.value.isAfter(DateTime.now()) &&
+                  this
+                      .widget
+                      .process
+                      .endDate
+                      .value
+                      .isBefore(DateTime.now().add(Duration(minutes: 1)));
+      // Refresh dates every second when process is near to starting or ending time
+      await this.widget.process.refreshDates(force: isStartingOrEnding);
+      // Refresh everything else every 30 seconds, if process is active
+      if (refreshCounter % 30 == 0 &&
+          this.widget.process.startDate.value.isBefore(DateTime.now()) &&
+          this
+              .widget
+              .process
+              .endDate
+              .value
+              .isAfter(DateTime.now().add(Duration(minutes: -1)))) {
+        await this.widget.process.refreshCurrentParticipants();
+      }
+    });
+
     super.initState();
 
     this
@@ -39,6 +76,13 @@ class _CardPollState extends State<CardPoll> {
         .then((_) => this.widget.process.refreshCensusSize())
         .then((_) => this.widget.process.refreshDates())
         .catchError((err) => log(err));
+  }
+
+  @override
+  void dispose() {
+    if (refreshCheck is Timer) refreshCheck.cancel();
+
+    super.dispose();
   }
 
   @override
@@ -193,10 +237,10 @@ class _CardPollState extends State<CardPoll> {
           .replaceFirst("{{NUM}}", diff.inHours.toString());
     else if (diff.inMinutes >= 1)
       return getText(context, "main.numMin")
-          .replaceFirst("{{NUM}}", diff.inMinutes.toString());
+          .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
     else
       return getText(context, "main.numS")
-          .replaceFirst("{{NUM}}", diff.inSeconds.toString());
+          .replaceFirst("{{NUM}}", "~" + diff.inSeconds.toString());
   }
 
   onCardTapped(BuildContext context) {

@@ -44,11 +44,27 @@ class _PollPageState extends State<PollPage> {
   ProcessModel process;
   int listIdx;
   List<int> choices = [];
+  int refreshCounter = 0;
 
   @override
   void initState() {
-    // Try to update every 10 seconds (only if needed)
-    refreshCheck = Timer.periodic(Duration(seconds: 10), (_) {});
+    refreshCheck = Timer.periodic(Duration(seconds: 1), (_) async {
+      refreshCounter++;
+      // Force date refresh if now < startDate < now + 1
+      final isStarting = process.startDate.value.isAfter(DateTime.now()) &&
+          process.startDate.value
+              .isBefore(DateTime.now().add(Duration(minutes: 1)));
+      // Refresh dates every second when process is near to starting time
+      await process.refreshDates(force: isStarting);
+      // Refresh everything else every 30 seconds
+      if (refreshCounter % 30 == 0) {
+        await process
+            .refreshHasVoted()
+            .then((_) => process.refreshResults())
+            .then((_) => process.refreshCurrentParticipants())
+            .catchError((err) => log(err));
+      }
+    });
 
     super.initState();
   }
@@ -97,6 +113,7 @@ class _PollPageState extends State<PollPage> {
         .refreshHasVoted()
         .then((_) => process.refreshResults())
         .then((_) => process.refreshIsInCensus())
+        .then((_) => process.refreshCurrentParticipants())
         .then((_) => process.refreshDates())
         .catchError((err) => log(err)); // Values will refresh if needed
   }
@@ -156,7 +173,12 @@ class _PollPageState extends State<PollPage> {
     // By the constructor, this.process.metadata is guaranteed to exist
 
     return EventualBuilder(
-      notifiers: [process.metadata, entity.metadata],
+      notifiers: [
+        entity.metadata,
+        process.metadata,
+        process.startDate,
+        process.endDate,
+      ],
       builder: (context, _, __) {
         if (process.metadata.hasError && !process.metadata.hasValue)
           return buildErrorScaffold(
@@ -344,6 +366,7 @@ class _PollPageState extends State<PollPage> {
 
         return ListItem(
           icon: FeatherIcons.clock,
+          isSpinning: process.startDate.isLoading || process.endDate.isLoading,
           purpose: purpose,
           mainText: rowText,
           //secondaryText: "18/09/2019 at 19:00",
@@ -449,6 +472,7 @@ class _PollPageState extends State<PollPage> {
             PollPackagingPage(process: process, choices: choices));
     await Navigator.push(ctx, newRoute);
     process.refreshResults(force: true);
+    process.refreshCurrentParticipants(force: true); // Refresh percentage
   }
 
   onSetChoice(int questionIndex, int value) {

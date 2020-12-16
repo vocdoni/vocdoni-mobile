@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dvote/constants.dart';
 import 'package:dvote/dvote.dart';
 // import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote/wrappers/process-results.dart';
@@ -185,19 +186,19 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
   final metadata = EventualNotifier<ProcessMetadata>();
   final results = EventualNotifier<ProcessResultsDigested>()
-      .withFreshnessTimeout(Duration(seconds: 10));
+      .withFreshnessTimeout(Duration(seconds: 30));
   final isInCensus =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
   final hasVoted =
       EventualNotifier<bool>().withFreshnessTimeout(Duration(minutes: 5));
   final currentParticipants =
-      EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 5));
+      EventualNotifier<int>().withFreshnessTimeout(Duration(seconds: 45));
   final censusSize =
       EventualNotifier<int>().withFreshnessTimeout(Duration(minutes: 30));
-  final startDate =
-      EventualNotifier<DateTime>().withFreshnessTimeout(Duration(minutes: 1));
-  final endDate =
-      EventualNotifier<DateTime>().withFreshnessTimeout(Duration(minutes: 1));
+  final startDate = EventualNotifier<DateTime>()
+      .withFreshnessTimeout(Duration(seconds: VOCHAIN_BLOCK_TIME + 1));
+  final endDate = EventualNotifier<DateTime>()
+      .withFreshnessTimeout(Duration(seconds: VOCHAIN_BLOCK_TIME + 1));
 
   List<dynamic> choices = [];
 
@@ -327,7 +328,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     } catch (err) {
       log("- [Process results] Refreshing ERROR: $err [${this.processId}]");
 
-      this.results.setError("error.couldNotFetchTheProcessResults");
+      this.results.setError("error.couldNotFetchTheProcessResults",
+          keepPreviousValue: true);
     }
   }
 
@@ -345,7 +347,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
-      log("The public key is not loaded yet for the entity " + this.entityId);
+      log("- [Is in census] The public key is not loaded yet for the entity " +
+          this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
@@ -402,7 +405,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     if (account is! AccountModel)
       throw Exception("No current account selected");
     else if (!account.hasPublicKeyForEntity(this.entityId)) {
-      log("The public key is not loaded yet for the entity " + this.entityId);
+      log("- [Has voted] The public key is not loaded yet for the entity " +
+          this.entityId);
       this.isInCensus.setValue(null);
       return;
     }
@@ -502,14 +506,19 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     else if (!force && this.startDate.isLoading) return null;
 
     log("- [Process dates] Refreshing [${this.processId}]");
+    this.startDate.setToLoading();
+    this.endDate.setToLoading();
 
     final startBlock = this.metadata.value.startBlock;
     final endBlock =
         this.metadata.value.startBlock + this.metadata.value.blockCount;
-
-    return estimateDateAtBlock(startBlock, AppNetworking.pool)
+    return Globals.appState
+        .refreshBlockStatus()
+        .then((_) => estimateDateAtBlock(startBlock, AppNetworking.pool,
+            status: Globals.appState.blockStatus.value))
         .then((startDate) => this.startDate.setValue(startDate))
-        .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool))
+        .then((_) => estimateDateAtBlock(endBlock, AppNetworking.pool,
+            status: Globals.appState.blockStatus.value))
         .then((endDate) {
       log("- [Process dates] Refreshing [DONE ${this.processId}]");
 

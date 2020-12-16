@@ -33,13 +33,11 @@ class PollQuestion extends StatefulWidget {
 }
 
 class _PollQuestionState extends State<PollQuestion> {
-  Timer refreshCheck;
   PollQuestionRowTabs selectedTab = PollQuestionRowTabs.SELECTION;
 
   @override
   void initState() {
     widget.process.refreshResults();
-    refreshCheck = Timer.periodic(Duration(minutes: 1), (_) {});
     super.initState();
   }
 
@@ -71,8 +69,6 @@ class _PollQuestionState extends State<PollQuestion> {
 
   @override
   void dispose() {
-    if (refreshCheck is Timer) refreshCheck.cancel();
-
     super.dispose();
   }
 
