@@ -1,4 +1,5 @@
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/navButton.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -29,54 +30,31 @@ class OnboardingWelcomePage extends StatelessWidget {
                   Spacer(),
                   Row(
                     children: [
-                      FlatButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => {},
-                        child: Text(
-                          getText(context, "action.recoverAccount"),
-                          style: TextStyle(
-                              fontWeight: fontWeightSemiBold,
-                              fontSize: fontSizeBase),
-                        ),
+                      NavButton(
+                        style: NavButtonStyle.BASIC,
+                        text: getText(context, "action.recoverAccount"),
+                        onTap: () => showRestoreIdentity(context),
                       ),
                       Spacer(),
-                      RaisedButton(
-                        onPressed: () => {
+                      NavButton(
+                        style: NavButtonStyle.NEXT_FILLED,
+                        text: getText(context, "main.letsGo"),
+                        onTap: () => {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => OnboardingFeaturesPage()),
                           )
                         },
-                        color: colorBlue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.arrow_forward_sharp,
-                              color: colorCardBackround,
-                            ).withRightPadding(5),
-                            Text(
-                              getText(context, "main.letsGo"),
-                              style: TextStyle(
-                                fontWeight: fontWeightSemiBold,
-                                fontSize: fontSizeBase,
-                                color: colorCardBackround,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ).withPadding(spaceCard),
                 ],
               )),
     );
+  }
+
+  void showRestoreIdentity(BuildContext context) {
+    Navigator.pushNamed(context, "/identity/restore");
   }
 }
