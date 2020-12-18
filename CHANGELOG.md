@@ -11,6 +11,8 @@
 - Change processMetadata filename (don't try to load legacy processes)
 - Enable different ENS & Process domains
 - Enable MultipleChoice voting widget
+- Implement pin authentication & authentication versioning
+- Implement onboarding flow
 
 # 0.8.16
 - Fix green border for some android versions

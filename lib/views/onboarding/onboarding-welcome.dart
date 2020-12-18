@@ -3,7 +3,7 @@ import 'package:dvote_common/widgets/navButton.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/views/onboarding/onboarding-features.dart';
+import 'package:vocdoni/views/onboarding/onboarding-features%20copy.dart';
 
 class OnboardingWelcomePage extends StatelessWidget {
   @override
