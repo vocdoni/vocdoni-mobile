@@ -149,6 +149,7 @@ class _SetPinPageState extends State<SetPinPage> {
     try {
       final newAccount =
           await AccountModel.makeNew(widget.alias, pinEncryptionKey);
+      newAccount.identity.value.version = AppConfig.identityVersion;
       await Globals.accountPool.addAccount(newAccount);
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>

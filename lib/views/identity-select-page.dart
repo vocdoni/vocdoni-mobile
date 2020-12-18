@@ -13,6 +13,8 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
+import 'package:vocdoni/views/onboarding/pin-transfer.dart';
+import '../app-config.dart';
 import '../lib/globals.dart';
 import 'onboarding/set-pin.dart';
 
@@ -120,11 +122,33 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       if (oldLockPattern == null) {
         return;
       } else if (oldLockPattern is InvalidPatternError) {
+        log("Pattern is incorrect.");
+        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
+            purpose: Purpose.DANGER, context: ctx);
+        return;
+      }
+      log("Key decrypted correctly");
+
+      final newLockPattern = await Navigator.push(
+        ctx,
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (ctx) => PinTransferPage(
+            account.identity.value.alias,
+          ),
+        ),
+      );
+
+      if (newLockPattern == null) {
+        return;
+      } else if (newLockPattern is InvalidPatternError) {
         showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
             purpose: Purpose.DANGER, context: context);
         return;
       }
-      log("Key decrypted correctly");
+      final loading = showLoading(getText(context, "main.generatingIdentity"),
+          context: ctx);
+
       final oldEncryptedMnemonic =
           account.identity.value.keys[0].encryptedMnemonic;
       final oldEncryptedRootPrivateKey =
@@ -135,23 +159,6 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       final privateKey = await Symmetric.decryptStringAsync(
           oldEncryptedRootPrivateKey, oldLockPattern);
 
-      final newLockPattern = await Navigator.push(
-          ctx,
-          MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => SetPinPage(
-                    account.identity.value.alias,
-                    generateIdentity: false,
-                  )));
-
-      if (newLockPattern == null) {
-        return;
-      } else if (newLockPattern is InvalidPatternError) {
-        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-            purpose: Purpose.DANGER, context: context);
-        return;
-      }
-
       final encryptedMenmonic =
           await Symmetric.encryptStringAsync(mnemonic, newLockPattern);
       final encryptedRootPrivateKey =
@@ -160,7 +167,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       account.identity.value.keys[0].encryptedMnemonic = encryptedMenmonic;
       account.identity.value.keys[0].encryptedRootPrivateKey =
           encryptedRootPrivateKey;
-      account.identity.value.version = "38";
+      account.identity.value.version = AppConfig.identityVersion;
+      loading.close();
     }
     Globals.appState.selectAccount(accountIdx);
     // Replace all routes with /home on top
