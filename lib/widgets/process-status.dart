@@ -298,13 +298,13 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
       // Ask the pattern
       final route = MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => PatternPromptModal(account));
+          builder: (context) => PinPromptModal(account));
       final patternEncryptionKey = await Navigator.push(context, route);
 
       if (patternEncryptionKey == null)
         return;
       else if (patternEncryptionKey is InvalidPatternError) {
-        showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
+        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
             context: context, purpose: Purpose.DANGER);
         return;
       }
