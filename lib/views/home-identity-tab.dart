@@ -7,7 +7,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
@@ -118,12 +118,12 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) =>
-                PatternPromptModal(Globals.appState.currentAccount)));
+                PinPromptModal(Globals.appState.currentAccount)));
 
     if (patternEncryptionKey == null)
       return;
     else if (patternEncryptionKey is InvalidPatternError) {
-      showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
+      showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }

@@ -201,8 +201,6 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
     if (patternEncryptionKey == null) {
       return;
     }
-    // showSuccessMessage("Pattern has been set!", context: context);
-
     // READY, now create the identity
 
     try {

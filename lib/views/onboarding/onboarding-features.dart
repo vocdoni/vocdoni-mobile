@@ -1,8 +1,10 @@
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/navButton.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
 
 class OnboardingFeaturesPage extends StatelessWidget {
   @override
@@ -26,28 +28,17 @@ class OnboardingFeaturesPage extends StatelessWidget {
                   Row(
                     children: [
                       Spacer(),
-                      FlatButton(
-                        onPressed: () => {},
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.arrow_forward_sharp,
-                              color: colorBlue,
-                            ).withRightPadding(5),
-                            Text(
-                              getText(context, "main.next"),
-                              style: TextStyle(
-                                fontWeight: fontWeightSemiBold,
-                                fontSize: fontSizeBase,
-                                color: colorBlue,
-                              ),
-                            ),
-                          ],
-                        ),
+                      NavButton(
+                        text: getText(context, "main.next"),
+                        style: NavButtonStyle.NEXT,
+                        onTap: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    OnboardingAccountNamingPage()),
+                          )
+                        },
                       ),
                     ],
                   ).withPadding(spaceCard),

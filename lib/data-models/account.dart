@@ -53,7 +53,6 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
                 .cast<EntityModel>()
                 .toList();
             result.entities.setValue(entities);
-
             // Decode extra fields
             final failedAttempts = int.tryParse(
                     identity.meta[META_ACCOUNT_FAILED_ATTEMPTS] ?? "0") ??
