@@ -118,6 +118,7 @@ The translation flow is an iterative loop that looks like:
 - `git checkout i18n`
 - `git merge master`        (integrate the latest code into i18n)
 - `make lang-parse`         (extract the new strings)
+- `git add assets/i18n/*`   (stage the language files for commit)
 - `git commit -m "New strings"`
 - `git push origin i18n`    (push the new strings for Weblate)
 - Unlock the Weblate repository
