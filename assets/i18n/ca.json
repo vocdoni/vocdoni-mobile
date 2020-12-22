@@ -35,6 +35,7 @@
     "error.thereWasAProblemHandlingTheLink": "Hi ha hagut un problema en gestionar l'enllaç",
     "error.youAreNotInTheCensus": "No formes part del cens",
     "error.yourVoteStatusCannotBeChecked": "No es pot comprovar l'estat del vot",
+    "main.Loading": "",
     "main.actionNotSupported": "Acció no suportada",
     "main.actions": "Accions",
     "main.advanced": "Avançat",

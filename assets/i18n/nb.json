@@ -35,6 +35,7 @@
     "error.thereWasAProblemHandlingTheLink": "Kunne ikke håndtere lenken",
     "error.youAreNotInTheCensus": "Du er ikke i alternativene",
     "error.yourVoteStatusCannotBeChecked": "Din avstemningsstatus kan ikke sjekkes",
+    "main.Loading": "",
     "main.actionNotSupported": "Handlingen støttes ikke",
     "main.actions": "Handlinger",
     "main.advanced": "Avansert",
