@@ -90,14 +90,14 @@ Models can contain both data which is persisted (entity metadata, process metada
 
 ### Internationalization
 
-![Translations](https://hosted.weblate.org/widgets/vocdoni/-/mobile-client/svg-badge.svg)
+![Translations](https://hosted.weblate.org/widgets/vocdoni/-/mobile/svg-badge.svg)
 
 - Add `import 'package:vocdoni/lib/i18n.dart';` on your widget file
 - Access the new string with `getText(context, "My new string to translate")`
 - Parse the new strings with `make lang-extract`
 - Translate the files on `assets/i18n/*.json`
 
-The app's strings translation can be found on [Weblate](https://hosted.weblate.org/projects/vocdoni/mobile-client/).
+The app's strings translation can be found on [Weblate](https://hosted.weblate.org/projects/vocdoni/mobile/).
 
 #### Translation management
 
@@ -112,24 +112,24 @@ The translation flow is an iterative loop that looks like:
 - `git checkout i18n`
 - `git pull weblate i18n`   (update our local repo)
 - `git push origin i18n`    (update the GitHub branch)
-- `git checkout master`     (check out the latest code)
+- `git checkout main`       (check out the latest code)
 - `git merge i18n`          (integrate the latest translations)
-- `git push origin master`  (update the GitHub branch)
+- `git push origin main`    (update the GitHub branch)
 - `git checkout i18n`
-- `git merge master`        (integrate the latest code into i18n)
+- `git merge main`          (integrate the latest code into i18n)
 - `make lang-parse`         (extract the new strings)
 - `git add assets/i18n/*`   (stage the language files for commit)
-- `git commit -m "New strings"`
+- `git commit -m "Updated strings"`
 - `git push origin i18n`    (push the new strings for Weblate)
-- `git checkout master`
+- `git checkout main`
 - Unlock the Weblate repository
 
 **Important**:
 - Make sure to use the right key prefixes:
-  - `action.createIdentity` instead of `main.createIdentity`
+  - `"action.createIdentity"` instead of `"main.createIdentity"`
 - Use no symbols beyond the dot separator
 - Use placeholders for data replacement instead of concatenating it later
-	- `question.doYouWantToRemoveName => Do you want to remove {{NAME}}?`
+	- `"question.doYouWantToRemoveName"` => `"Do you want to remove {{NAME}}?"`
 
 ### Dependencies
 
