@@ -127,13 +127,13 @@ The translation flow is an iterative loop that looks like:
 **Important**:
 - Make sure to use the right key prefixes:
   - `"action.createIdentity"` instead of `"main.createIdentity"`
-- Use no symbols beyond the dot separator
+- In the keys, use no symbols beyond the dot separator
 - Use placeholders for data replacement instead of concatenating it later
 	- `"question.doYouWantToRemoveName"` => `"Do you want to remove {{NAME}}?"`
 
 ### Dependencies
 
-The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, refer to [Git Lab](https://gitlab.com/vocdoni/dvote-flutter) for more details. 
+The project makes use of the [DVote Flutter](https://pub.dev/packages/dvote) plugin. Please, [see the repository](https://github.com/vocdoni/dvote-flutter) for more details. 
 
 ## Integration
 
