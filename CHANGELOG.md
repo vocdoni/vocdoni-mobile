@@ -1,8 +1,8 @@
+# 0.8.15
 - Fix poll option padding
 - Periodically update process dates + info
 - Display spinner when refreshing dates
 - Cache BlockStatus for date estimations
-
 
 # 0.8.14
 - Fix network initialization error
