@@ -3,6 +3,7 @@
 - Periodically update process dates + info
 - Display spinner when refreshing dates
 - Cache BlockStatus for date estimations
+- Fix hidden process bug
 
 # 0.8.14
 - Fix network initialization error
