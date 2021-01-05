@@ -39,4 +39,6 @@ class Globals {
   static final navigatorKey = GlobalKey<NavigatorState>();
 
   static final analytics = Analytics();
+
+  static final oldProcessFeed = OldProcessFeed();
 }

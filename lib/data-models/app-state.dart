@@ -44,7 +44,6 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       throw Exception("No account available");
 
     Globals.appState.currentAccount.cleanEphemeral();
-    Globals.appState.currentAccount.refresh(force: false);
 
     // if no analytics ID (new account or account from old app version) set analytics ID and write to storage
     if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
@@ -66,6 +65,9 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       Globals.accountPool.writeToStorage();
     }
     Globals.analytics.setUser();
+    Globals.oldProcessFeed
+        .loadFromProcessPool()
+        .then((_) => Globals.appState.currentAccount.refresh(force: false));
   }
 
   /// Defines the new locale to use for the app

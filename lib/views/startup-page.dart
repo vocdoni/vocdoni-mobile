@@ -57,6 +57,7 @@ class _StartupPageState extends State<StartupPage> {
           (err) => logger.log("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;
+      log(err);
 
       setState(() {
         loading = false;

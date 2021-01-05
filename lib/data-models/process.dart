@@ -180,6 +180,63 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
   }
 }
 
+class OldProcessFeed {
+  final processes = EventualNotifier<List<ProcessModel>>()
+      .setDefaultValue(List<ProcessModel>());
+  int _nextProcessIndex = 0;
+  loadFromProcessPool() async {
+    try {
+      // Get a filtered list of the Entities of the current user
+      final entityIds = Globals.appState.currentAccount.entities.value
+          .map((entity) => entity.reference.entityId)
+          .toList();
+
+      // This will get all processes for the current user which are in the process pool
+      final storedProcesses = Globals.processPool.value
+          .where((processModel) => entityIds.contains(processModel.entityId))
+          .toList();
+      storedProcesses.sort((a, b) {
+        if (!(a?.startDate?.value is DateTime) &&
+            !(b?.startDate?.value is DateTime))
+          return 0;
+        else if (!(a?.startDate?.value is DateTime))
+          return -1;
+        else if (!(b?.startDate?.value is DateTime)) return 1;
+        return b.startDate.value.compareTo(a.startDate.value);
+      });
+      print(storedProcesses);
+      processes.setValue(storedProcesses);
+    } catch (err) {
+      print(err);
+      log(err);
+      throw RestoreError("There was an error loading processes from the pool");
+    }
+  }
+
+  resetIndex() => _nextProcessIndex = 0;
+
+  bool get hasNextItem =>
+      processes != null &&
+      processes.hasValue &&
+      processes.value.length > _nextProcessIndex &&
+      processes.value[_nextProcessIndex] != null;
+
+  DateTime getNextDate() {
+    if (!processes.hasValue || processes.value.length <= _nextProcessIndex)
+      return null;
+    if (!processes.value[_nextProcessIndex].startDate.hasValue)
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    return processes.value[_nextProcessIndex].startDate.value;
+  }
+
+  ProcessModel getNextProcess() {
+    print("proces index $_nextProcessIndex");
+    if (!processes.hasValue || processes.value.length <= _nextProcessIndex)
+      return null;
+    return processes.value[_nextProcessIndex++];
+  }
+}
+
 /// ProcessModel encapsulates the relevant information of a Vocdoni Process.
 /// This includes its metadata and the participation processes.
 ///
