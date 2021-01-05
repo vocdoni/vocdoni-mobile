@@ -80,15 +80,13 @@ class _QrScanModalState extends State<QrScanModal> {
         onBackButton: onCancel,
       ),
       body: Builder(builder: (_) {
+        String cameraError;
         if (!(availableCameras is List) || availableCameras.length == 0)
-          return _buildMessage(
-              context, getText(context, "main.noCamerasAreAvailable"));
+          cameraError = getText(context, "main.noCamerasAreAvailable");
         else if (_controller == null || !_controller.value.isInitialized)
-          return _buildMessage(
-              context, getText(context, "main.pleaseAllowAccessToTheCamera"));
+          cameraError = getText(context, "main.pleaseAllowAccessToTheCamera");
         else if (!hasScanPermissions)
-          return _buildMessage(
-              context, getText(context, "main.pleaseAllowAccessToTheCamera"));
+          cameraError = getText(context, "main.pleaseAllowAccessToTheCamera");
         else if (!scanning) return _buildLoading(context);
 
         return SingleChildScrollView(
@@ -129,24 +127,27 @@ class _QrScanModalState extends State<QrScanModal> {
                   style: TextStyle(
                       fontWeight: fontWeightLight, color: colorDescription),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      vertical: paddingPage, horizontal: paddingPage),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.width,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(40.0),
-                    child: OverflowBox(
-                      maxHeight: double.infinity,
-                      alignment: Alignment.center,
-                      child: AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: RScanCamera(_controller),
-                        // ),
-                      ),
-                    ),
-                  ),
-                ),
+                cameraError == null
+                    ? Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: paddingPage, horizontal: paddingPage),
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.width,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(40.0),
+                          child: OverflowBox(
+                            maxHeight: double.infinity,
+                            alignment: Alignment.center,
+                            child: AspectRatio(
+                              aspectRatio: _controller.value.aspectRatio,
+                              child: RScanCamera(_controller),
+                              // ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : _buildMessage(context, cameraError)
+                        .withTopPadding(spaceCard),
                 Container(
                   margin: EdgeInsets.all(paddingPage),
                   padding: EdgeInsets.all(paddingPage + 4),
@@ -165,7 +166,8 @@ class _QrScanModalState extends State<QrScanModal> {
                       ),
                       Flexible(
                         child: Text(
-                          getText(context, "main.theAddPageAllowsYouToAddLinksCodesAndQRCodesInOrderTo") +
+                          getText(context,
+                                  "main.theAddPageAllowsYouToAddLinksCodesAndQRCodesInOrderTo") +
                               ":\n" +
                               "• " +
                               getText(context,
@@ -176,7 +178,8 @@ class _QrScanModalState extends State<QrScanModal> {
                                   "main.to__findAVotingProcessOrOrganization") +
                               "\n" +
                               "• " +
-                              getText(context, "main.to__restoreABackupAccount"),
+                              getText(
+                                  context, "main.to__restoreABackupAccount"),
                           overflow: TextOverflow.clip,
                           textAlign: TextAlign.left,
                           softWrap: true,
