@@ -1,3 +1,6 @@
+# In progress
+- Fix green border for some android versions
+
 # 0.8.15
 - Fix poll option padding
 - Periodically update process dates + info
