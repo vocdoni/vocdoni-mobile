@@ -21,55 +21,53 @@ class PinTransferPage extends StatelessWidget {
         onBackButton: () => Navigator.pop(context, null),
       ),
       body: Builder(
-          builder: (context) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Spacer(),
-                  Text(
-                    getText(context,
-                        "main.theVocdoniAppIsSwitchingFromPatternBasedToPinBasedAuthentication"),
-                    style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
-                  ).withPadding(spaceCard),
-                  Text(
-                    getText(context,
-                        "main.pleaseEnterYourNewPinThisWillReplaceTheCurrentPatternYouUseToAccessYourAccount"),
-                    style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
-                  ).withPadding(spaceCard),
-                  Spacer(),
-                  Row(
-                    children: [
-                      Spacer(),
-                      NavButton(
-                        text: getText(context, "main.next"),
-                        style: NavButtonStyle.NEXT,
-                        onTap: () async {
-                          final newLockPattern = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              fullscreenDialog: true,
-                              builder: (context) => SetPinPage(
-                                alias,
-                                generateIdentity: false,
-                              ),
-                            ),
-                          );
-                          if (newLockPattern == null) {
-                            return;
-                          } else if (newLockPattern is InvalidPatternError) {
-                            showMessage(
-                                getText(
-                                    context, "main.thePinYouEnteredIsNotValid"),
-                                purpose: Purpose.DANGER,
-                                context: context);
-                            return;
-                          }
-                          Navigator.pop(context, newLockPattern);
-                        },
-                      ),
-                    ],
-                  ).withPadding(spaceCard),
-                ],
-              )),
+        builder: (context) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Spacer(),
+            Text(
+              getText(context,
+                  "main.theVocdoniAppIsSwitchingFromPatternBasedToPinBasedAuthentication"),
+              style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
+            ).withPadding(spaceCard),
+            Text(
+              getText(context,
+                  "main.pleaseEnterYourNewPinThisWillReplaceTheCurrentPatternYouUseToAccessYourAccount"),
+              style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
+            ).withPadding(spaceCard),
+            Spacer(),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Row(
+        children: [
+          Spacer(),
+          NavButton(
+            text: getText(context, "main.next"),
+            style: NavButtonStyle.NEXT,
+            onTap: () async {
+              final newLockPattern = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => SetPinPage(
+                    alias,
+                    generateIdentity: false,
+                  ),
+                ),
+              );
+              if (newLockPattern == null) {
+                return;
+              } else if (newLockPattern is InvalidPatternError) {
+                showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
+                    purpose: Purpose.DANGER, context: context);
+                return;
+              }
+              Navigator.pop(context, newLockPattern);
+            },
+          ),
+        ],
+      ).withPadding(spaceCard),
     );
   }
 }

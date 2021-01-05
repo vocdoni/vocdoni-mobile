@@ -1,30 +1,27 @@
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/navButton.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/views/onboarding/onboarding-features.dart';
+import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
 
-class OnboardingWelcomePage extends StatelessWidget {
+class OnboardingFeaturesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: TopNavigation(
+        title: "",
+        onBackButton: () => Navigator.pop(context, null),
+      ),
       body: Builder(
         builder: (context) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Spacer(),
             Text(
-              getText(context, "main.welcome"),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 30,
-                color: colorDescription,
-              ),
-            ),
-            Text(
               getText(context,
-                  "main.vocdoniAllowsYouToStayConnectedToYourCollectivesByParticipatingInSecureVotingProcessesAndFollowingTheirActivity"),
+                  "main.thisAppGuaranteesThatYourVoteIsAnonymousAndYourPersonalInformationIsKeptSecured"),
               style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
             ).withPadding(spaceCard),
             Spacer(),
@@ -33,29 +30,20 @@ class OnboardingWelcomePage extends StatelessWidget {
       ),
       bottomNavigationBar: Row(
         children: [
-          NavButton(
-            style: NavButtonStyle.BASIC,
-            text: getText(context, "action.recoverAccount"),
-            onTap: () => showRestoreIdentity(context),
-          ),
           Spacer(),
           NavButton(
-            style: NavButtonStyle.NEXT_FILLED,
-            text: getText(context, "main.letsGo"),
+            text: getText(context, "main.next"),
+            style: NavButtonStyle.NEXT,
             onTap: () => {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => OnboardingFeaturesPage()),
+                    builder: (context) => OnboardingAccountNamingPage()),
               )
             },
           ),
         ],
       ).withPadding(spaceCard),
     );
-  }
-
-  void showRestoreIdentity(BuildContext context) {
-    Navigator.pushNamed(context, "/identity/restore");
   }
 }

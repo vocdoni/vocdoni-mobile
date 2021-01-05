@@ -77,6 +77,8 @@ class _StartupPageState extends State<StartupPage> {
       nextRoutePath = "/identity/select";
     }
 
+    nextRoutePath = "/onboarding-welcome"; //TODO remove
+
     // Replace all routes with /identity/select on top
     Navigator.pushNamedAndRemoveUntil(
         context, nextRoutePath, (Route _) => false);
