@@ -16,7 +16,6 @@ import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
 import 'package:vocdoni/views/onboarding/pin-transfer.dart';
 import '../app-config.dart';
 import '../lib/globals.dart';
-import 'onboarding/set-pin.dart';
 
 class IdentitySelectPage extends StatefulWidget {
   @override
@@ -171,6 +170,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       loading.close();
     }
     Globals.appState.selectAccount(accountIdx);
+    Globals.accountPool.writeToStorage();
     // Replace all routes with /home on top
     Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
   }
