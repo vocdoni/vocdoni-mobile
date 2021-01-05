@@ -71,6 +71,13 @@ class DevMenu extends StatelessWidget {
               },
             ),
             ListItem(
+              mainText: "Handle deeplink (Account Recovery)",
+              onTap: () {
+                String link = 'https://app.vocdoni.net/recovery/';
+                handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
               mainText: "Handle deeplink (Validation)",
               onTap: () {
                 String link =

@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
+import 'package:vocdoni/views/onboarding/onboarding-backup-input.dart';
 
 import '../../app-config.dart';
 
@@ -205,6 +206,11 @@ class _SetPinPageState extends State<SetPinPage> {
   }
 
   showNextPage(BuildContext ctx) {
-    Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OnboardingBackupInput(),
+        ),
+        (Route _) => false);
   }
 }
