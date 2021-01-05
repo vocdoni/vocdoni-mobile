@@ -563,9 +563,11 @@ packages:
   r_scan:
     dependency: "direct main"
     description:
-      name: r_scan
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: f91ebf9032c63d235782b663752afb7947359c22
+      resolved-ref: f91ebf9032c63d235782b663752afb7947359c22
+      url: "git://github.com/masewo/r_scan.git"
+    source: git
     version: "0.1.4+1"
   rxdart:
     dependency: transitive
@@ -704,7 +706,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.7.5"
+    version: "5.7.10"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -725,14 +727,14 @@ packages:
       name: url_launcher_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.8"
+    version: "1.0.9"
   url_launcher_web:
     dependency: transitive
     description:
       name: url_launcher_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.4+1"
+    version: "0.1.5+1"
   url_launcher_windows:
     dependency: transitive
     description:
@@ -791,4 +793,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.10.0-110 <2.11.0"
-  flutter: ">=1.20.0 <2.0.0"
+  flutter: ">=1.22.0 <2.0.0"

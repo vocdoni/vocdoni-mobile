@@ -7,6 +7,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/views/account-advanced.dart';
 import 'package:vocdoni/views/onboarding/onboarding-welcome.dart';
+import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
 import 'package:vocdoni/views/settings-page.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
@@ -26,7 +27,6 @@ import 'package:vocdoni/views/identity-backup-page.dart';
 import 'package:vocdoni/views/org-details.dart';
 import 'package:vocdoni/views/dev/dev-menu.dart';
 import 'package:eventual/eventual-builder.dart';
-// import 'package:vocdoni/view-modals/sign-modal.dart';
 import "views/home.dart";
 
 /// The actual main function is defined on main-dev.dart and main-production.dart.
@@ -77,6 +77,7 @@ Widget buildMainApp() {
         "/identity/restore": (context) => IdentityRestorePage(),
         "/identity/select": (context) => IdentitySelectPage(),
         "/onboarding-welcome": (context) => OnboardingWelcomePage(),
+        "/recovery": (context) => RecoveryVerificationInput(),
 
         // WHEN THERE IS AN ACCOUNT
         "/home": (context) => HomeScreen(),

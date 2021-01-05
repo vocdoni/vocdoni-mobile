@@ -15,6 +15,7 @@ import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/register-validation-page.dart';
+import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
 
 const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
 
@@ -76,6 +77,10 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
         break;
       case "processes":
         await handleProcessLink(uriSegments,
+            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        break;
+      case "recovery":
+        await handleRecoveryLink(uriSegments,
             context: scaffoldBodyContext, closeDialog: !isInScaffold);
         break;
       // case "signature":
@@ -237,6 +242,25 @@ Future handleProcessLink(List<String> linkSegments,
     //     context: context, purpose: Purpose.DANGER);
     print(err);
     throw Exception(getText(context, "error.couldNotFetchTheProcessDetails"));
+  }
+}
+
+Future handleRecoveryLink(List<String> linkSegments,
+    {@required BuildContext context, closeDialog = false}) async {
+  // final paramSegments = linkSegments
+  //     .skip(1)
+  //     .toList(); // TODO define link schema, implement parsing
+  // paramSegments => [ TBD ]
+
+  try {
+    // Navigate
+    if (closeDialog) Navigator.pop(context);
+    Navigator.pushNamed(context, "/recovery",
+        arguments: RecoveryVerificationArgs(
+            questionIndexes: [1, 2], accountName: "bart"));
+  } catch (err) {
+    print(err);
+    throw Exception(getText(context, "error.invalidUrl"));
   }
 }
 

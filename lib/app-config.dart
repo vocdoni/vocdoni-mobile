@@ -126,4 +126,12 @@ class AppConfig {
       logger.log(err);
     }
   }
+
+  static const backupQuestionTexts = [
+    "selectQuestion",
+    "nameOfYourFirstDog",
+    "yourFavoriteAnimationMovie",
+    "nameOfYourFirstBoss",
+    "nameOfTheStreetYouLivedOnAsAChild",
+  ];
 }
