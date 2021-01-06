@@ -1,13 +1,20 @@
+import 'dart:developer';
+
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
 import 'package:dvote_common/widgets/text-input.dart' as TextInput;
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/services.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/util.dart';
+import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-email-send.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-question-selection.dart';
 
@@ -100,34 +107,41 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
             ],
           ),
         ),
-        bottomNavigationBar: Row(
-          children: [
-            NavButton(
-              style: NavButtonStyle.BASIC,
-              text: getText(context, "action.illDoItLater"),
-              onTap: () => Navigator.pushNamedAndRemoveUntil(
-                  context, "/home", (route) => false),
-            ),
-            Spacer(),
-            NavButton(
-              isDisabled: questionIndexes.any((index) => index == 0) ||
-                  questionAnswers.any((answer) => answer.length == 0) ||
-                  !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
-                      .hasMatch(email),
-              style: NavButtonStyle.NEXT,
-              text: getText(context, "action.verifyBackup"),
-              onTap: () {
-                final backupLink = _generateLink();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          OnboardingBackupEmailSendPage(backupLink, email)),
-                );
-              },
-            ),
-          ],
-        ).withPadding(spaceCard),
+        bottomNavigationBar: Builder(
+          builder: (context) => Row(
+            children: [
+              NavButton(
+                  style: NavButtonStyle.BASIC,
+                  text: getText(context, "action.illDoItLater"),
+                  onTap: () {
+                    Globals.appState.pinCache = "";
+                    Globals.appState.currentAccount?.identity?.value?.backedUp =
+                        false;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/home", (route) => false);
+                  }),
+              Spacer(),
+              NavButton(
+                isDisabled: questionIndexes.any((index) => index == 0) ||
+                    questionAnswers.any((answer) => answer.length == 0) ||
+                    !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
+                        .hasMatch(email),
+                style: NavButtonStyle.NEXT,
+                text: getText(context, "action.verifyBackup"),
+                onTap: () async {
+                  final backupLink = await _generateLink(context);
+                  if (backupLink == null || backupLink.length == 0) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            OnboardingBackupEmailSendPage(backupLink, email)),
+                  );
+                },
+              ),
+            ],
+          ).withPadding(spaceCard),
+        ),
       ),
     );
   }
@@ -172,7 +186,38 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     ).withHPadding(8);
   }
 
-  String _generateLink() {
-    return "link"; // TODO generate backup link
+  Future<String> _generateLink(BuildContext ctx) async {
+    String mnemonic;
+    try {
+      if (Globals.appState.pinCache.length > 0) {
+        final loading = showLoading(getText(context, "main.generatingIdentity"),
+            context: ctx);
+        final encryptedMnemonic = Globals
+            .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
+        mnemonic = await Symmetric.decryptStringAsync(
+            encryptedMnemonic, Globals.appState.pinCache);
+        loading.close();
+      } else {
+        final result = await Navigator.push(
+            ctx,
+            MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (context) =>
+                    PinPromptModal(Globals.appState.currentAccount)));
+        if (result is InvalidPatternError) {
+          showMessage(getText(ctx, "main.thePinYouEnteredIsNotValid"),
+              context: ctx, purpose: Purpose.DANGER);
+          return Future.value();
+        }
+        mnemonic = result;
+      }
+    } catch (err) {
+      log(err.toString());
+      showMessage(getText(ctx, "main.thereWasAProblemDecryptingYourPrivateKey"),
+          context: ctx);
+      return Future.value();
+    }
+    Globals.appState.currentAccount.identity.value.backedUp = true;
+    return mnemonic; // TODO generate backup link
   }
 }

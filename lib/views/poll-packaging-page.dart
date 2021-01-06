@@ -51,7 +51,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     final currentAccount = Globals.appState.currentAccount;
     if (currentAccount == null) throw Exception("Internal error");
 
-    final patternLockKey = await Navigator.push(
+    final mnemonic = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
@@ -59,10 +59,10 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     if (!mounted)
       return;
-    else if (patternLockKey == null) {
+    else if (mnemonic == null) {
       setState(() => _currentStep = 0);
       return;
-    } else if (patternLockKey is InvalidPatternError) {
+    } else if (mnemonic is InvalidPatternError) {
       setState(() => _currentStep = 0);
       showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           context: context, purpose: Purpose.DANGER);
@@ -79,10 +79,6 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // Derive per-entity key
       final entityAddress =
           widget.process.processData.value.getEntityAddress.hexNo0x;
-
-      final mnemonic = await Symmetric.decryptStringAsync(
-          currentAccount.identity.value.keys[0].encryptedMnemonic,
-          patternLockKey);
 
       if (!mounted) return;
 

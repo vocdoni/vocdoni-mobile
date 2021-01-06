@@ -13,8 +13,9 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
-import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'onboarding/onboarding-backup-input.dart';
 
 class HomeIdentityTab extends StatefulWidget {
   HomeIdentityTab();
@@ -62,8 +63,17 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                           purpose: Purpose.GOOD);
                     }),
                 Section(text: getText(context, "main.general")),
+                (currentAccount.identity.value.hasBackedUp() &&
+                        currentAccount.identity.value.backedUp)
+                    ? Container()
+                    : ListItem(
+                        mainText: getText(context, "main.backUpMyIdentity"),
+                        onTap: () => backupIdentity(ctx),
+                        icon: FeatherIcons.alertCircle,
+                        purpose: Purpose.DANGER,
+                      ),
                 ListItem(
-                  mainText: getText(context, "main.backUpMyIdentity"),
+                  mainText: getText(context, "main.backUpMyMnemonic"),
                   onTap: () => showIdentityBackup(ctx),
                   icon: FeatherIcons.archive,
                 ),
@@ -110,26 +120,20 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
   }
 
   showIdentityBackup(BuildContext ctx) async {
-    final encryptedMnemonic = Globals
-        .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
-
-    var patternEncryptionKey = await Navigator.push(
+    var mnemonic = await Navigator.push(
         ctx,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) =>
                 PinPromptModal(Globals.appState.currentAccount)));
 
-    if (patternEncryptionKey == null)
+    if (mnemonic == null)
       return;
-    else if (patternEncryptionKey is InvalidPatternError) {
+    else if (mnemonic is InvalidPatternError) {
       showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           context: ctx, purpose: Purpose.DANGER);
       return;
     }
-
-    final mnemonic = await Symmetric.decryptStringAsync(
-        encryptedMnemonic, patternEncryptionKey);
 
     Navigator.pushNamed(ctx, "/identity/backup",
         arguments: IdentityBackupArguments(
@@ -149,5 +153,14 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
   onSettings(BuildContext ctx) async {
     Navigator.pushNamed(ctx, "/settings");
+  }
+
+  backupIdentity(BuildContext ctx) async {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OnboardingBackupInput(),
+        ),
+        (Route _) => false);
   }
 }

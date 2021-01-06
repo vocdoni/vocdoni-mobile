@@ -54,7 +54,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     setState(() => _currentStep = Steps.AUTHORIZE_ACTION);
 
-    var patternLockKey = await Navigator.push(
+    var mnemonic = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
@@ -62,28 +62,24 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
     if (!mounted)
       return;
-    else if (patternLockKey == null) {
+    else if (mnemonic == null) {
       setState(() => _currentStep = Steps.READY);
       return;
-    } else if (patternLockKey is InvalidPatternError) {
+    } else if (mnemonic is InvalidPatternError) {
       setState(() => _currentStep = Steps.READY);
       showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           context: context, purpose: Purpose.DANGER);
     } else {
-      stepSendRequest(context, patternLockKey);
+      stepSendRequest(context, mnemonic);
     }
   }
 
   // STEP 2
-  void stepSendRequest(BuildContext context, String patternLockKey) async {
-    final currentAccount = Globals.appState.currentAccount;
+  void stepSendRequest(BuildContext context, String mnemonic) async {
     setState(() => _currentStep = Steps.CONFIRM_TOKEN);
 
     try {
       // PREPARE THE REQUEST
-      final mnemonic = await Symmetric.decryptStringAsync(
-          currentAccount.identity.value.keys[0].encryptedMnemonic,
-          patternLockKey);
 
       if (!mounted) return;
 

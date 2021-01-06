@@ -299,24 +299,15 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
       final route = MaterialPageRoute(
           fullscreenDialog: true,
           builder: (context) => PinPromptModal(account));
-      final patternEncryptionKey = await Navigator.push(context, route);
-
-      if (patternEncryptionKey == null)
-        return;
-      else if (patternEncryptionKey is InvalidPatternError) {
-        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-            context: context, purpose: Purpose.DANGER);
-        return;
-      }
-
-      // Good
-      final mnemonic = Symmetric.decryptString(
-          account.identity.value.keys[0].encryptedMnemonic,
-          patternEncryptionKey);
+      final mnemonic = await Navigator.push(context, route);
       if (mnemonic == null) {
         // NOTE: Keep the comment to force i18n key parsing
         // getText(context, "main.cannotAccessTheWallet")
         widget.process.isInCensus.setError("main.cannotAccessTheWallet");
+        return;
+      } else if (mnemonic is InvalidPatternError) {
+        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
+            context: context, purpose: Purpose.DANGER);
         return;
       }
 

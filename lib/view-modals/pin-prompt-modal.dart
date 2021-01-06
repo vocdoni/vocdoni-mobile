@@ -1,4 +1,5 @@
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/unlockPattern/enterPin.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,10 @@ import '../app-config.dart';
 /// passphrase will be returned via the router as a string.
 class PinPromptModal extends StatefulWidget {
   final AccountModel account; // to unlock
+  final bool decryptMnemonic;
+  final String accountName;
 
-  PinPromptModal(this.account);
+  PinPromptModal(this.account, {this.decryptMnemonic = true, this.accountName});
 
   @override
   _PinPromptModalState createState() => _PinPromptModalState();
@@ -51,7 +54,10 @@ class _PinPromptModalState extends State<PinPromptModal> {
               Section(
                 withDectoration: false,
                 text: getText(context, "main.unlockName").replaceFirst(
-                    "{{NAME}}", widget.account.identity.value.alias),
+                    "{{NAME}}",
+                    widget.accountName == null
+                        ? widget.account.identity.value.alias
+                        : widget.accountName),
               ),
               Spacer(),
               EnterPin(
@@ -72,22 +78,27 @@ class _PinPromptModalState extends State<PinPromptModal> {
   }
 
   onPinEntered(BuildContext context, List<int> pin) async {
+    final passphrase = pinToString(pin);
+    if (!widget.decryptMnemonic) {
+      Navigator.pop(context, passphrase);
+      return;
+    }
     try {
       final encryptedText =
           widget.account.identity.value.keys[0].encryptedMnemonic;
       // check if we can decrypt it
+      final loading = showLoading(getText(context, "main.generatingIdentity"),
+          context: context);
 
-      final passphrase = pinToString(pin);
       final decryptedPayload =
           await Symmetric.decryptStringAsync(encryptedText, passphrase);
+      loading.close();
 
       if (decryptedPayload == null)
         throw InvalidPatternError("The decryption key is invalid");
 
-      // if (!mounted) return;
-
       // OK
-      Navigator.pop(context, passphrase);
+      Navigator.pop(context, decryptedPayload);
       widget.account.trackSuccessfulAuth().catchError((_) {});
     } catch (err) {
       await widget.account.trackFailedAuth();

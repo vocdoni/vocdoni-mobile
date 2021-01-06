@@ -28,22 +28,24 @@ class OnboardingFeaturesPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Row(
-        children: [
-          Spacer(),
-          NavButton(
-            text: getText(context, "main.next"),
-            style: NavButtonStyle.NEXT,
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OnboardingAccountNamingPage()),
-              )
-            },
-          ),
-        ],
-      ).withPadding(spaceCard),
+      bottomNavigationBar: Builder(
+        builder: (context) => Row(
+          children: [
+            Spacer(),
+            NavButton(
+              text: getText(context, "main.next"),
+              style: NavButtonStyle.NEXT,
+              onTap: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => OnboardingAccountNamingPage()),
+                )
+              },
+            ),
+          ],
+        ).withPadding(spaceCard),
+      ),
     );
   }
 }
