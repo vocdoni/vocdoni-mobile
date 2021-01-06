@@ -16,6 +16,7 @@ import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
 import 'package:vocdoni/views/onboarding/pin-transfer.dart';
 import '../app-config.dart';
 import '../lib/globals.dart';
+import 'onboarding/onboarding-backup-input.dart';
 
 class IdentitySelectPage extends StatefulWidget {
   @override
@@ -172,8 +173,17 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
     }
     Globals.appState.selectAccount(accountIdx);
     Globals.accountPool.writeToStorage();
-    // Replace all routes with /home on top
-    Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
+    if (Globals.appState.currentAccount?.identity?.value?.backedUp == true) {
+      // Replace all routes with /home on top
+      Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
+    } else {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OnboardingBackupInput(),
+          ),
+          (Route _) => false);
+    }
   }
 
   createNew(BuildContext ctx) {
