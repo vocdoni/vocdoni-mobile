@@ -37,11 +37,11 @@ dependencies:
   flutter_html: ^0.11.1
   qr_flutter: ^3.2.0
   firebase_messaging: ^7.0.0
-  # r_scan: ^0.1.4+1  # Fails on Android
-  r_scan:         # Fails on iOS
-    git:
-      url: git://github.com/masewo/r_scan.git
-      ref: f91ebf9032c63d235782b663752afb7947359c22
+  r_scan: ^0.1.4+1  # Fails on Android
+  # r_scan:         # Fails on iOS
+  #   git:
+  #     url: git://github.com/masewo/r_scan.git
+  #     ref: f91ebf9032c63d235782b663752afb7947359c22
   permission_handler: ^5.0.1+1
   feather_icons_flutter: ^4.7.4
   path_provider: ^1.6.21

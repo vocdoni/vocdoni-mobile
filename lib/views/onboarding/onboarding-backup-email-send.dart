@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/widgets/issues-button.dart';
 
 class OnboardingBackupEmailSendPage extends StatelessWidget {
   final String backupLink;
@@ -25,7 +26,7 @@ class OnboardingBackupEmailSendPage extends StatelessWidget {
             Spacer(),
             Text(
               getText(context,
-                  'main.tapSendEmailToSendYourselfABackupLinkForYourRecordsThenClickTheLinkToContinue'),
+                  'main.tapSendEmailToSendYourselfABackupLinkForYourRecordsThenClickTheLinkToVerifyThatTheBackupWorks'),
               style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
             ).withVPadding(spaceCard),
             ListItem(
@@ -37,6 +38,14 @@ class OnboardingBackupEmailSendPage extends StatelessWidget {
             Spacer(),
           ],
         ).withHPadding(spaceCard),
+      ),
+      bottomNavigationBar: Builder(
+        builder: (context) => Row(
+          children: [
+            IssuesButton(),
+            Spacer(),
+          ],
+        ).withPadding(spaceCard),
       ),
     );
   }
