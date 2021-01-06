@@ -1,6 +1,7 @@
 # In progress
 - Improve user logs scroll view
 - Display results by option value, not index
+- Use 12-word mnemonics for identity backups
 
 # 0.8.16
 - Fix green border for some android versions

@@ -462,7 +462,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = await EthereumWallet.randomAsync(size: 192);
+    final wallet = await EthereumWallet.randomAsync(size: 128); // 12 words
 
     final mnemonic = wallet.mnemonic;
     final rootPrivateKey = await wallet.privateKeyAsync;
