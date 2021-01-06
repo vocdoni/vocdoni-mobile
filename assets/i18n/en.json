@@ -122,12 +122,9 @@
     "main.iWroteThemDown": "I wrote them down",
     "main.identity": "Identity",
     "main.identityIdCopiedOnTheClipboard": "Identity ID copied on the clipboard",
-<<<<<<< HEAD
     "main.identifierCopiedToTheClipboard": "Identifier copied to the clipboard",
-=======
     "main.ifYouLoseYourPhoneOrUninstallTheAppYouWontBeAbleToVoteLetsCreateASecureBackup": "If you lose your phone or uninstall the app, {{you won't be able to vote.}} Let's create a secure backup.",
     "main.keepInMindThatYouWillStillNeedToCorrectlyInputYourPinAndRecoveryPhrasesToRestoreYourAccount": "Keep in mind that you will still need to correctly input your {{pin}} and {{recovery phrases}} to restore your account",
->>>>>>> c601143 (Implement backup and restoration ux)
     "main.letsGo": "Let's go!",
     "main.letsVerifyTheSecurityQuestions": "Let's verify the security questions.",
     "main.loading": "Loading",
