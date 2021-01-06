@@ -39,35 +39,39 @@ class PinTransferPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Row(
-        children: [
-          Spacer(),
-          NavButton(
-            text: getText(context, "main.next"),
-            style: NavButtonStyle.NEXT,
-            onTap: () async {
-              final newLockPattern = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) => SetPinPage(
-                    alias,
-                    generateIdentity: false,
+      bottomNavigationBar: Builder(
+        builder: (context) => Row(
+          children: [
+            Spacer(),
+            NavButton(
+              text: getText(context, "main.next"),
+              style: NavButtonStyle.NEXT,
+              onTap: () async {
+                final newLockPattern = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => SetPinPage(
+                      alias,
+                      generateIdentity: false,
+                    ),
                   ),
-                ),
-              );
-              if (newLockPattern == null) {
-                return;
-              } else if (newLockPattern is InvalidPatternError) {
-                showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-                    purpose: Purpose.DANGER, context: context);
-                return;
-              }
-              Navigator.pop(context, newLockPattern);
-            },
-          ),
-        ],
-      ).withPadding(spaceCard),
+                );
+                if (newLockPattern == null) {
+                  return;
+                } else if (newLockPattern is InvalidPatternError) {
+                  showMessage(
+                      getText(context, "main.thePinYouEnteredIsNotValid"),
+                      purpose: Purpose.DANGER,
+                      context: context);
+                  return;
+                }
+                Navigator.pop(context, newLockPattern);
+              },
+            ),
+          ],
+        ).withPadding(spaceCard),
+      ),
     );
   }
 }

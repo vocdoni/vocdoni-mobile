@@ -97,19 +97,20 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         account.identity.value.version.length > 0;
 
     if (accountHasPin) {
-      final lockPattern = await Navigator.push(
+      var privKey = await Navigator.push(
           ctx,
           MaterialPageRoute(
               fullscreenDialog: true,
               builder: (context) => PinPromptModal(account)));
 
-      if (lockPattern == null)
+      if (privKey == null)
         return;
-      else if (lockPattern is InvalidPatternError) {
+      else if (privKey is InvalidPatternError) {
         showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
             context: ctx, purpose: Purpose.DANGER);
         return;
       }
+      privKey = "";
     } else {
       log("Account has no pin.");
       final oldLockPattern = await Navigator.push(

@@ -206,6 +206,7 @@ class _SetPinPageState extends State<SetPinPage> {
   }
 
   showNextPage(BuildContext ctx) {
+    Globals.appState.pinCache = pinToString(setPin);
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

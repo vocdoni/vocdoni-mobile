@@ -8,7 +8,7 @@ String patternToString(List<int> pattern, {int gridSize = 5}) {
 
 String pinToString(List<int> pattern) {
   String stringPattern = "";
-  for (int i = 0; i < pattern.length - 1; i++) {
+  for (int i = 0; i < pattern.length; i++) {
     stringPattern += (pattern[i].toRadixString(10));
   }
   return stringPattern;

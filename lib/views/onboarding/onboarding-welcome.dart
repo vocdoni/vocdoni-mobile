@@ -31,27 +31,29 @@ class OnboardingWelcomePage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Row(
-        children: [
-          NavButton(
-            style: NavButtonStyle.BASIC,
-            text: getText(context, "action.recoverAccount"),
-            onTap: () => showRestoreIdentity(context),
-          ),
-          Spacer(),
-          NavButton(
-            style: NavButtonStyle.NEXT_FILLED,
-            text: getText(context, "main.letsGo"),
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OnboardingFeaturesPage()),
-              )
-            },
-          ),
-        ],
-      ).withPadding(spaceCard),
+      bottomNavigationBar: Builder(
+        builder: (context) => Row(
+          children: [
+            NavButton(
+              style: NavButtonStyle.BASIC,
+              text: getText(context, "action.recoverAccount"),
+              onTap: () => showRestoreIdentity(context),
+            ),
+            Spacer(),
+            NavButton(
+              style: NavButtonStyle.NEXT_FILLED,
+              text: getText(context, "main.letsGo"),
+              onTap: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => OnboardingFeaturesPage()),
+                )
+              },
+            ),
+          ],
+        ).withPadding(spaceCard),
+      ),
     );
   }
 

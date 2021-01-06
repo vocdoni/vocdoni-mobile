@@ -220,25 +220,21 @@ class ActionRegisterPage extends StatelessWidget {
     // if (confirm != true) return;
 
     // SIGN
-    final identity = selectedAccount.identity.value;
-    final encryptedMnemonic = identity.keys[0].encryptedMnemonic;
 
-    var patternStr = await Navigator.push(
+    var mnemonic = await Navigator.push(
         context,
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => PinPromptModal(selectedAccount)));
-    if (patternStr == null) {
+    if (mnemonic == null) {
       return;
-    } else if (patternStr is InvalidPatternError) {
+    } else if (mnemonic is InvalidPatternError) {
       showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           purpose: Purpose.DANGER, context: context);
     }
 
     // Derive the key for the entity
 
-    final mnemonic =
-        await Symmetric.decryptStringAsync(encryptedMnemonic, patternStr);
     final wallet = EthereumWallet.fromMnemonic(mnemonic,
         entityAddressHash: ensHashAddress(
             Uint8List.fromList(hex.decode(entityId.replaceFirst("0x", "")))));
