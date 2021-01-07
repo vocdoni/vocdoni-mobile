@@ -24,19 +24,19 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/constants/colors.dart';
 
-class EntityInfoPage extends StatefulWidget {
+class OrgDetails extends StatefulWidget {
   final EntityModel entityModel;
 
-  EntityInfoPage(this.entityModel) {
+  OrgDetails(this.entityModel) {
     Globals.analytics
-        .trackPage("EntityInfoPage", entityId: entityModel.reference.entityId);
+        .trackPage("OrgDetails", entityId: entityModel.reference.entityId);
   }
 
   @override
-  _EntityInfoPageState createState() => _EntityInfoPageState();
+  _OrgDetailsState createState() => _OrgDetailsState();
 }
 
-class _EntityInfoPageState extends State<EntityInfoPage> {
+class _OrgDetailsState extends State<OrgDetails> {
   bool _processingSubscription = false;
   final notificationsEnabledNotifier = EventualNotifier<bool>(false);
 

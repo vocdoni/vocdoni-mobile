@@ -226,8 +226,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   }
 
   onTapEntity(BuildContext ctx, EntityModel entity) {
-    final route =
-        MaterialPageRoute(builder: (context) => EntityInfoPage(entity));
+    final route = MaterialPageRoute(builder: (context) => OrgDetails(entity));
     Navigator.push(ctx, route);
   }
 

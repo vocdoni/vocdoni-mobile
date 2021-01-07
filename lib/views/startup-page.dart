@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/lib/analtyics.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
@@ -28,6 +30,7 @@ class _StartupPageState extends State<StartupPage> {
 
   Future<void> initApplication() {
     Globals.analytics.init();
+    Globals.analytics.trackEvent(Events.APP_START);
 
     if (!mounted) return Future.value();
     setState(() {
@@ -38,6 +41,8 @@ class _StartupPageState extends State<StartupPage> {
     return restorePersistence()
         .then((_) => restoreDataPools()) // Depends on restorePersistence()
         .then((_) => Notifications.init())
+        .then((_) => AppConfig.setPackageInfo())
+        .then((_) => AppConfig.setDeviceInfo())
         .then((_) {
       showNextScreen();
 

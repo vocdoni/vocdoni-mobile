@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/lib/analtyics.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -44,6 +45,15 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     Globals.appState.currentAccount.cleanEphemeral();
     Globals.appState.currentAccount.refresh(force: false);
+
+    // if no analytics ID (old account) set analytics ID and write to storage
+    if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
+        Globals.appState.currentAccount.identity.value.analyticsID == "") {
+      Globals.appState.currentAccount.identity.value.analyticsID =
+          generateAnalyticsKey();
+      Globals.accountPool.writeToStorage();
+    }
+    Globals.analytics.setUser();
   }
 
   /// Defines the new locale to use for the app

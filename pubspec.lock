@@ -120,13 +120,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  device_info:
+    dependency: "direct main"
+    description:
+      name: device_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  device_info_platform_interface:
+    dependency: transitive
+    description:
+      name: device_info_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   dvote:
     dependency: "direct main"
     description:
       name: dvote
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.18.5"
+    version: "0.18.8"
   dvote_common:
     dependency: "direct main"
     description:
@@ -380,6 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  package_info:
+    dependency: "direct main"
+    description:
+      name: package_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.3+2"
   path:
     dependency: transitive
     description:
