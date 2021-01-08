@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:vocdoni/data-models/content-cache.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -27,6 +28,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       .withFreshnessTimeout(Duration(minutes: 2));
   String analyticsKey = "";
 
+  final contentCache = StoredContent();
+
   // INTERNAL DATA HANDLERS
 
   selectAccount(int accountIdx) {
@@ -43,7 +46,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     if (this.currentAccount is! AccountModel)
       throw Exception("No account available");
 
-    Globals.appState.currentAccount.cleanEphemeral();
+    this.currentAccount.cleanEphemeral();
 
     // if no analytics ID (new account or account from old app version) set analytics ID and write to storage
     if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
@@ -65,9 +68,13 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       Globals.accountPool.writeToStorage();
     }
     Globals.analytics.setUser();
-    Globals.oldProcessFeed
-        .loadFromProcessPool()
-        .then((_) => Globals.appState.currentAccount.refresh(force: false));
+
+    this.contentCache.loadBlocsFromStorage();
+    this.currentAccount.refresh(force: false);
+    // this
+    //     .currentAccount
+    //     .refresh(force: false)
+    //     .then((_) => this.contentCache.loadBlocsFromStorage());
   }
 
   /// Defines the new locale to use for the app
