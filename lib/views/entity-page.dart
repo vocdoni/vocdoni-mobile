@@ -1,6 +1,8 @@
+import 'package:dvote_common/lib/common.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import "dart:developer";
@@ -132,14 +134,22 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
   }
 
   Widget buildScaffold(BuildContext context) {
+    String headerUrl = widget.entityModel.metadata.value.media.header;
+    if (headerUrl.startsWith("ipfs"))
+      headerUrl =
+          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+    String avatarUrl = widget.entityModel.metadata.value.media.avatar;
+    if (avatarUrl.startsWith("ipfs"))
+      avatarUrl =
+          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
     return ScaffoldWithImage(
-        headerImageUrl: widget.entityModel.metadata.value.media.header,
+        headerImageUrl: headerUrl,
         headerTag: widget.entityModel.reference.entityId +
             widget.entityModel.metadata.value.media.header,
         forceHeader: true,
         appBarTitle: widget
             .entityModel.metadata.value.name[Globals.appState.currentLanguage],
-        avatarUrl: widget.entityModel.metadata.value.media.avatar,
+        avatarUrl: avatarUrl,
         avatarText: widget
             .entityModel.metadata.value.name[Globals.appState.currentLanguage],
         avatarHexSource: widget.entityModel.reference.entityId,

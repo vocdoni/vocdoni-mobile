@@ -2,6 +2,7 @@
 - Fix green border for some android versions
 - Display html entity descriptions
 - Enable link input without camera permission for qr scan
+- Enable ipfs image urls
 
 # 0.8.15
 - Fix poll option padding

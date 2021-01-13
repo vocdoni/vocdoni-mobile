@@ -26,7 +26,7 @@ dependencies:
   dvote_common:
     git:
       url: https://gitlab.com/vocdoni/dvote-flutter-common.git
-      ref: 7f00db9022cd85494fb273633d4876d7bccc8d1c
+      ref: f0856b492aeda7b998aa9afe6d892e2441aff67d
   eventual: ^0.10.2
   protobuf: ^1.0.1
   uni_links: ^0.4.0

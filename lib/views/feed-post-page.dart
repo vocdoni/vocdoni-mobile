@@ -1,4 +1,5 @@
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/lib/common.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import "dart:developer";
@@ -11,6 +12,8 @@ import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../app-config.dart';
 
 class FeedPostArgs {
   final EntityModel entity;
@@ -52,11 +55,20 @@ class _FeedPostPageState extends State<FeedPostPage> {
     final listIdx = args.listIdx ?? 0;
 
     if (post == null) return buildNoPost(ctx);
+    String headerUrl = post.image;
+    if (headerUrl.startsWith("ipfs"))
+      headerUrl =
+          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+
+    String avatarUrl = entity.metadata.value.media.avatar;
+    if (avatarUrl.startsWith("ipfs"))
+      avatarUrl =
+          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
 
     return ScaffoldWithImage(
-        headerImageUrl: post.image,
+        headerImageUrl: headerUrl,
         headerTag: makeElementTag(entity.reference.entityId, post.id, listIdx),
-        avatarUrl: entity.metadata.value.media.avatar,
+        avatarUrl: avatarUrl,
         avatarText:
             entity.metadata.value.name[Globals.appState.currentLanguage],
         avatarHexSource: post.id,

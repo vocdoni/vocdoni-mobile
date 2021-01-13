@@ -47,4 +47,6 @@ class AppConfig {
     "LINKING_DOMAIN",
     defaultValue: _appMode == "dev" ? "dev.vocdoni.link" : "vocdoni.link",
   );
+
+  static const IPFS_DOMAIN = "https://ipfs.io/ipfs/";
 }
