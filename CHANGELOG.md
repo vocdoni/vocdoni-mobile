@@ -1,5 +1,6 @@
 # In progress
 - Fix green border for some android versions
+- Display html entity descriptions
 
 # 0.8.15
 - Fix poll option padding

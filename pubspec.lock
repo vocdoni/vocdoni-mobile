@@ -131,11 +131,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "488e1fd"
-      resolved-ref: "488e1fd02ae9e291b4f96f469e2562bc341e32ac"
+      ref: "7f00db9022cd85494fb273633d4876d7bccc8d1c"
+      resolved-ref: "7f00db9022cd85494fb273633d4876d7bccc8d1c"
       url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
     source: git
-    version: "0.1.1"
+    version: "0.1.2"
   dvote_crypto:
     dependency: transitive
     description:

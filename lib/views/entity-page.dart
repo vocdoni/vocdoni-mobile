@@ -1,3 +1,4 @@
+import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/data-models/process.dart';
@@ -165,7 +166,6 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
 
   getScaffoldChildren(BuildContext context) {
     List<Widget> children = [];
-
     children.add(buildTitle(context));
     children.add(buildLoadingStatus());
     children.add(buildFeedRow(context));
@@ -174,14 +174,14 @@ class _EntityInfoPageState extends State<EntityInfoPage> {
     // TODO: show back?
     // children.add(buildActionList(context));
     children.add(Section(text: getText(context, "main.details")));
-    children.add(summary.Summary(
-      text: widget.entityModel.metadata.value
+    children.add(HtmlSummary(
+      htmlString: widget.entityModel.metadata.value
               .description[Globals.appState.currentLanguage] +
-          "\n\n" +
+          "<br><br>" +
           getText(context, "main.uniqueIdentifierColon") +
           " " +
           widget.entityModel.reference.entityId,
-      maxLines: 5,
+      isSecondary: false,
     ));
     children.add(Section(text: getText(context, "main.manage")));
     children.add(buildShareItem(context));
