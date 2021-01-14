@@ -1,6 +1,8 @@
+import 'package:dvote_common/lib/common.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -184,9 +186,16 @@ class _PollPageState extends State<PollPage> {
           return buildErrorScaffold(
               getText(context, "error.theMetadataIsNotAvailable"));
 
-        final headerUrl =
-            Uri.tryParse(process.metadata.value.details?.headerImage ?? "")
-                ?.toString();
+        String headerUrl = process.metadata.value.details.headerImage;
+        if (headerUrl.startsWith("ipfs"))
+          headerUrl =
+              processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+        else
+          headerUrl = Uri.tryParse(headerUrl).toString();
+        String avatarUrl = entity.metadata.value.media.avatar;
+        if (avatarUrl.startsWith("ipfs"))
+          avatarUrl =
+              processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
 
         return ScaffoldWithImage(
           headerImageUrl: headerUrl ?? "",
@@ -194,7 +203,7 @@ class _PollPageState extends State<PollPage> {
               ? null
               : makeElementTag(
                   entity.reference.entityId, process.processId, listIdx),
-          avatarUrl: entity.metadata.value.media.avatar,
+          avatarUrl: avatarUrl,
           avatarText:
               entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
@@ -239,7 +248,11 @@ class _PollPageState extends State<PollPage> {
 
     final title =
         process.metadata.value.details.title[Globals.appState.currentLanguage];
-
+    String avatarUrl =
+        entity.metadata.hasValue ? entity.metadata.value.media.avatar : "";
+    if (avatarUrl.startsWith("ipfs"))
+      avatarUrl =
+          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
     return EventualBuilder(
       notifier: entity.metadata,
       builder: (context, _, __) => ListItem(
@@ -252,8 +265,7 @@ class _PollPageState extends State<PollPage> {
         isTitle: true,
         rightIcon: null,
         isBold: true,
-        avatarUrl:
-            entity.metadata.hasValue ? entity.metadata.value.media.avatar : "",
+        avatarUrl: avatarUrl,
         avatarText: entity.metadata.hasValue
             ? entity.metadata.value.name[Globals.appState.currentLanguage]
             : "",

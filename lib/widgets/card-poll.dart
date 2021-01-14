@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:dvote_common/lib/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -157,12 +159,15 @@ class _CardPollState extends State<CardPoll> {
       participation =
           getFriendlyParticipation(this.widget.process.currentParticipation);
     }
-
+    String headerUrl = this.widget.process.metadata.value.details.headerImage;
+    if (headerUrl.startsWith("ipfs"))
+      headerUrl =
+          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+    else
+      headerUrl = Uri.tryParse(headerUrl).toString();
     return BaseCard(
       onTap: () => this.onCardTapped(context),
-      image: Uri.tryParse(
-              this.widget.process.metadata.value?.details?.headerImage ?? "")
-          ?.toString(),
+      image: headerUrl,
       imageTag: makeElementTag(
           this.widget.entity.reference.entityId,
           this.widget.process.metadata.value?.meta[META_PROCESS_ID],
@@ -201,6 +206,10 @@ class _CardPollState extends State<CardPoll> {
   }
 
   Widget buildProcessTitle() {
+        String avatarUrl =this.widget.entity.metadata.value.media.avatar;
+    if (avatarUrl.startsWith("ipfs"))
+      avatarUrl =
+          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
     String title =
         this.widget.process.metadata.value.details.title.values.first;
     return ListItem(
@@ -209,7 +218,7 @@ class _CardPollState extends State<CardPoll> {
       mainTextMultiline: 2,
       mainTextFullWidth: true,
       secondaryText: this.widget.entity.metadata.value.name.values.first,
-      avatarUrl: this.widget.entity.metadata.value.media.avatar,
+      avatarUrl: avatarUrl,
       avatarHexSource: this.widget.entity.reference.entityId,
       avatarText: this.widget.entity.metadata.value.name.values.first,
       rightIcon: null,
