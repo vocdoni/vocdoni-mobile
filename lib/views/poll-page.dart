@@ -13,7 +13,7 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
@@ -64,7 +64,7 @@ class _PollPageState extends State<PollPage> {
             .refreshHasVoted()
             .then((_) => process.refreshResults())
             .then((_) => process.refreshCurrentParticipants())
-            .catchError((err) => log(err));
+            .catchError((err) => logger.log(err));
       }
     });
 
@@ -85,11 +85,11 @@ class _PollPageState extends State<PollPage> {
     final PollPageArgs args = ModalRoute.of(context).settings.arguments;
     if (args == null) {
       Navigator.of(context).pop();
-      log("Invalid parameters");
+      logger.log("Invalid parameters");
       return;
     } else if (!args.process.metadata.hasValue) {
       Navigator.of(context).pop();
-      log("Empty process metadata");
+      logger.log("Empty process metadata");
       return;
     } else if (entity == args.entity &&
         process == args.process &&
@@ -117,7 +117,7 @@ class _PollPageState extends State<PollPage> {
         .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshCurrentParticipants())
         .then((_) => process.refreshDates())
-        .catchError((err) => log(err)); // Values will refresh if needed
+        .catchError((err) => logger.log(err)); // Values will refresh if needed
   }
 
   Future<void> onCheckCensus(BuildContext context) async {

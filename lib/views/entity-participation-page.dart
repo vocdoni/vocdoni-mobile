@@ -1,7 +1,7 @@
 import 'package:vocdoni/data-models/process.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
@@ -33,7 +33,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
         entityModel = ModalRoute.of(context).settings.arguments;
       }
     } catch (err) {
-      log(err);
+      logger.log(err);
     }
   }
 
@@ -67,7 +67,8 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
                   entityModel.metadata.hasError) ||
               (!entityModel.processes.hasValue &&
                   entityModel.processes.hasError)) {
-            return buildError(getText(context, "error.theMetadataIsNotAvailable"));
+            return buildError(
+                getText(context, "error.theMetadataIsNotAvailable"));
           }
 
           final lang = entityModel.metadata.value.languages[0] ??

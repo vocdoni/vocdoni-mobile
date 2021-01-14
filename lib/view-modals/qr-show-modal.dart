@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/extensions.dart';
 
 class QrShowModal extends StatelessWidget {
@@ -23,7 +23,7 @@ class QrShowModal extends StatelessWidget {
             context: context,
             purpose: Purpose.GOOD))
         .catchError((err) {
-      log(err);
+      logger.log(err);
 
       showMessage(getText(context, "main.couldNotCopyTheEntityId"),
           context: context, purpose: Purpose.DANGER);

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/spinner.dart';
@@ -11,10 +10,11 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
-import 'package:vocdoni/views/register-validation-page.dart'; // for kReleaseMode
+import 'package:vocdoni/views/register-validation-page.dart';
 
 const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
 
@@ -92,7 +92,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
   } catch (err) {
     if (!isInScaffold) Navigator.pop(scaffoldBodyContext);
     if (indicator != null) indicator.close();
-    log("ERR: $err");
+    logger.log("ERR: $err");
     throw err;
   }
 }
@@ -224,7 +224,7 @@ Future handleProcessLink(List<String> linkSegments,
     );
     if (processModel.metadata.hasValue) {
       // Detached refresh so we can navigate now
-      processModel.refresh().catchError((err) => log(err));
+      processModel.refresh().catchError((err) => logger.log(err));
     } else {
       // Await refresh so pollPage doesn't return
       await processModel.refresh();

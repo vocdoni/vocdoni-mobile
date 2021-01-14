@@ -2,9 +2,9 @@ import 'dart:math' hide log;
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote_crypto/dvote_crypto.dart';
-import "dart:developer";
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/entity.dart';
@@ -67,7 +67,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
           .toList();
       this.setValue(accountModelList);
     } catch (err) {
-      log(err);
+      logger.log(err);
       this.setError("Cannot read the account list", keepPreviousValue: true);
       throw RestoreError("There was an error while accessing the local data");
     }
@@ -114,7 +114,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       // Cascade the write request for the peer entities
       await Globals.entityPool.writeToStorage();
     } catch (err) {
-      log(err);
+      logger.log(err);
       throw PersistError("Cannot store the current state");
     }
   }
@@ -147,7 +147,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
             newAccount.identity.value.keys[0].rootPublicKey);
 
     if (duplicate) {
-      log("WARNING: Attempting to add a duplicate identity. Skipping.");
+      logger.log("WARNING: Attempting to add a duplicate identity. Skipping.");
       return;
     }
 
@@ -162,7 +162,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
   /// Removes the current account from the account pool
   /// Persists the new account pool.
   removeCurrentAccount() async {
-    log("[Account] Removing current account");
+    logger.log("[Account] Removing current account");
     if (!this.hasValue)
       throw Exception("The pool has no accounts loaded yet");
     else if (!Globals.appState.selectedAccount.hasValue)

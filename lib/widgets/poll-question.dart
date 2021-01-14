@@ -8,7 +8,7 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/extensions.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -81,7 +81,7 @@ class _PollQuestionState extends State<PollQuestion> {
   Future<void> onRefresh() {
     return widget.process
         .refreshResults()
-        .catchError((err) => log(err)); // Values will refresh if needed
+        .catchError((err) => logger.log(err)); // Values will refresh if needed
   }
 
   @override

@@ -3,12 +3,12 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/model-base.dart';
 import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/account.dart';
-import "dart:developer";
 
 /// AppStateModel handles the global state of the application.
 ///
@@ -71,12 +71,12 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       return Future.error(Exception("Unsupported locale"));
 
     return AppLocalization.load(newLocale).then((_) {
-      log("[App] Switched to ${newLocale.languageCode}");
+      logger.log("[App] Switched to ${newLocale.languageCode}");
       locale.value = newLocale;
 
       return this.writeToStorage();
     }).catchError((err) {
-      log("[App] Could not change the locale: $err");
+      logger.log("[App] Could not change the locale: $err");
     });
   }
 
@@ -104,7 +104,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         this.analyticsKey = settings["analyticsKey"];
       }
     } catch (err) {
-      log(err);
+      logger.log(err);
       this
           .bootnodeInfo
           .setError("Cannot read the app state", keepPreviousValue: true);
@@ -132,7 +132,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       };
       await Globals.settingsPersistence.write(settings);
     } catch (err) {
-      log("ERR storing app state: $err");
+      logger.log("ERR storing app state: $err");
       throw PersistError("Cannot store the current state");
     }
   }
@@ -146,7 +146,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       await this.writeToStorage();
     } catch (err) {
-      log("ERR: $err");
+      logger.log("ERR: $err");
       throw Exception("Unable to update bootnodes: $err");
     }
   }
@@ -158,15 +158,15 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.bootnodeInfo.setToLoading();
     try {
-      log("[App] Fetching " + AppConfig.bootnodesUrl);
+      logger.log("[App] Fetching " + AppConfig.bootnodesUrl);
       final bnGatewayInfo = await fetchBootnodeInfo(AppConfig.bootnodesUrl);
 
-      log("[App] Gateway discovery");
+      logger.log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
           networkId: AppConfig.NETWORK_ID,
           useTestingContracts: AppConfig.useTestingContracts());
 
-      log("[App] Gateway Pool ready");
+      logger.log("[App] Gateway Pool ready");
       AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);
 
       this.bootnodeInfo.setValue(bnGatewayInfo);
@@ -184,7 +184,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.blockStatus.setToLoading();
     try {
-      log("[App] Fetching block status");
+      logger.log("[App] Fetching block status");
       final status = await getBlockStatus(AppNetworking.pool);
 
       this.blockStatus.setValue(status);

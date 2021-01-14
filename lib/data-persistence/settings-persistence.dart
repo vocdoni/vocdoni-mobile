@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
 import "package:vocdoni/constants/storage-names.dart";
@@ -22,7 +22,8 @@ class SettingsPersistence extends BasePersistenceSingle<Map<String, dynamic>> {
       final strSettings = await fd.readAsString();
       Map<String, dynamic> settings = jsonDecode(strSettings);
       if (settings is! Map) {
-        log("[App] Settings error: $_storageFile does not contain a JSON object. Using an empty one.");
+        logger.log(
+            "[App] Settings error: $_storageFile does not contain a JSON object. Using an empty one.");
         settings = {};
       }
 
@@ -31,7 +32,7 @@ class SettingsPersistence extends BasePersistenceSingle<Map<String, dynamic>> {
 
       return settings;
     } catch (err) {
-      log("[App] Settings error: $err");
+      logger.log("[App] Settings error: $err");
       throw RestoreError("There was an error while reading the local data");
     }
   }
@@ -47,7 +48,7 @@ class SettingsPersistence extends BasePersistenceSingle<Map<String, dynamic>> {
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      log("[App] Settings error: $err");
+      logger.log("[App] Settings error: $err");
       throw PersistError("There was an error while storing the changes");
     }
   }

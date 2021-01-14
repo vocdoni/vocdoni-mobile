@@ -5,6 +5,7 @@ import 'package:package_info/package_info.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/analtyics.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
 // import 'package:vocdoni/lib/extensions.dart';
@@ -48,7 +49,7 @@ class _StartupPageState extends State<StartupPage> {
 
       // Detached update of the cached bootnodes
       Globals.appState.refresh().catchError(
-          (err) => log("[App] Detached bootnode update failed: $err"));
+          (err) => logger.log("[App] Detached bootnode update failed: $err"));
     }).catchError((err) {
       if (!mounted) return;
 

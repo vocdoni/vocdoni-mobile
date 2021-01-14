@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/section.dart';
@@ -10,6 +8,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 import 'package:vocdoni/view-modals/language-select.dart';
 
@@ -94,7 +93,7 @@ class _AccountAdvancedState extends State<AccountAdvanced> {
       try {
         await Globals.accountPool.removeCurrentAccount();
       } catch (err) {
-        log("Error removing account: $err");
+        logger.log("Error removing account: $err");
         indicator.close();
         showMessage(getText(context, "error.couldNotRemoveAccount"),
             purpose: Purpose.DANGER, context: context);

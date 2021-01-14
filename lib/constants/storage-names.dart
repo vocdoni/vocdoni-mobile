@@ -4,3 +4,4 @@ const BOOTNODES_STORE_FILE = "bootnodes.dat";
 const PROCESSES_STORE_FILE = "processes.dat";
 const NEWSFEED_STORE_FILE = "feed.dat";
 const SETTINGS_STORE_FILE = "bootnodes.json";
+const LOG_STORE_FILE = "session-logs.txt";

@@ -1,5 +1,4 @@
 // import 'package:dvote_common/constants/colors.dart';
-import 'dart:developer';
 
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -10,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/alerts.dart';
@@ -232,7 +232,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       showHomePage(context);
       // } on Exception catch (err) {
     } catch (err) {
-      log(err.toString());
+      logger.log(err.toString());
       String text;
       setState(() {
         generating = false;

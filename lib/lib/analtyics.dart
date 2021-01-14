@@ -5,6 +5,8 @@ import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/globals.dart';
 
+import 'logger.dart';
+
 class Events {
   static const PAGE_VIEW = "pageView";
   static const APP_START = "appStart";
@@ -36,7 +38,7 @@ class Analytics {
       shouldAnonymize: true,
       shaFn: (value) => value,
       useIp: false,
-      onError: (e) => log(e.toString()),
+      onError: (e) => logger.log(e.toString()),
     );
 
     _mixpanelBatch = MixpanelAnalytics.batch(
@@ -47,7 +49,7 @@ class Analytics {
       shaFn: (value) => value,
       ip: false,
       verbose: true,
-      onError: (e) => log(e.toString()),
+      onError: (e) => logger.log(e.toString()),
     );
 
 // Set pre-login profile
@@ -65,7 +67,7 @@ class Analytics {
       ip: getTruncatedIp(),
       time: getDateTime(),
     );
-    log("[Analytics] added user ${getUserId()}: " +
+    logger.log("[Analytics] added user ${getUserId()}: " +
         {
           "AppVersion": getAppVersion(),
           "OsVersion": getOsVersion(),
@@ -96,7 +98,7 @@ class Analytics {
       ip: getTruncatedIp(),
       time: getDateTime(),
     );
-    log("[Analytics] added user ${getUserId()}: " +
+    logger.log("[Analytics] added user ${getUserId()}: " +
         {
           "AppVersion": getAppVersion(),
           "OsVersion": getOsVersion(),

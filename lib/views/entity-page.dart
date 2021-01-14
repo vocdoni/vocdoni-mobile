@@ -5,7 +5,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
@@ -46,7 +46,7 @@ class _OrgDetailsState extends State<OrgDetails> {
 
     // detached async
     widget.entityModel.refresh().catchError((err) {
-      log(err);
+      logger.log(err);
     });
   }
 
