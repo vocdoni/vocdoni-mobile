@@ -477,7 +477,14 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     newIdentity.alias = alias;
     newIdentity.identityId = rootPublicKey;
     newIdentity.type = Identity_Type.ECDSA;
+
+// If this is the first identity, set its analytics ID to the default one
+    if (((Globals?.accountPool?.value?.length ?? 100) > 0) &&
+        ((Globals?.appState?.analyticsKey?.length ?? 0) > 0))
+      newIdentity.analyticsID = Globals.appState.analyticsKey;
     newIdentity.analyticsID = generateAnalyticsKey();
+    Globals.appState.currentAccount.identity.value.analyticsID =
+        generateAnalyticsKey();
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;

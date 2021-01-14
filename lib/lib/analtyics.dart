@@ -26,6 +26,11 @@ class Analytics {
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
   void init() {
+    // If there's no default analytics key, generate one. The first identity created should have this key.
+    if (Globals.appState.analyticsKey == "")
+      Globals.appState.analyticsKey = generateAnalyticsKey();
+    _user$.add(getUserId());
+    print("init user id: ${getUserId()}");
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
       userId$: _user$.stream,
@@ -49,6 +54,9 @@ class Analytics {
   }
 
   void setUser() {
+    Globals.appState.analyticsKey = getUserId();
+    Globals.appState.writeToStorage();
+    print("set user id: ${getUserId()}, ${Globals.appState.analyticsKey}");
     _user$.add(getUserId());
     _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
@@ -80,7 +88,7 @@ class Analytics {
         }.toString());
   }
 
-  trackError(Error error) {}
+  trackError(String error) {}
 
   trackPage(String pageId,
       {String entityId, String processId, String postTitle}) {
@@ -88,7 +96,7 @@ class Analytics {
     if (entityId is String) properties['entityId'] = entityId;
     if (postTitle is String) properties['blocId'] = postTitle;
     if (processId is String) properties['blocId'] = processId;
-
+    print("user id: ${getUserId()} page $pageId");
     _mixpanelBatch.track(event: Events.PAGE_VIEW, properties: properties);
   }
 
@@ -101,11 +109,19 @@ class Analytics {
   getUserId() {
     final currentAccount = Globals.appState.currentAccount;
     if (!(currentAccount is AccountModel))
-      return null;
+      return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)
+          ? Globals.appState.analyticsKey
+          : null;
+    // If current account is not set, use default analytics key in app state
     else if (!currentAccount.identity.hasValue)
-      return null;
+      return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)
+          ? Globals.appState.analyticsKey
+          : null;
     else if (currentAccount.identity.value.analyticsID == null ||
-        currentAccount.identity.value.analyticsID == "") return null;
+        currentAccount.identity.value.analyticsID == "")
+      return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)
+          ? Globals.appState.analyticsKey
+          : null;
 
     return currentAccount.identity.value.analyticsID;
   }
