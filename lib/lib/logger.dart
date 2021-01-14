@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'dart:io';
-
+import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vocdoni/constants/storage-names.dart';
 
@@ -11,15 +11,21 @@ class Logger {
   String _sessionLogs;
   File _logFile;
   bool _init = false;
+  Mutex _m = Mutex();
 
   Logger(this._filePath);
 
   init() async {
+    if (_logFile?.existsSync() ?? false) return;
     final dir = await getApplicationDocumentsDirectory();
     _filePath = "${dir.path}/$_filePath";
     _sessionLogs = "";
-    _logFile = new File(_filePath);
-    _readLogFile();
+    try {
+      _logFile = new File(_filePath);
+      _readLogFile();
+    } catch (err) {
+      log(err);
+    }
     _init = true;
   }
 
@@ -27,17 +33,19 @@ class Logger {
     try {
       if (_logFile.existsSync()) {
         _logFile.readAsString().then((String contents) {
-          print("Log contents: $contents");
           if (contents.length > 0) {
             _sessionLogs = contents + "\n" + _sessionLogs;
             // Erase contents of file, begin writing new log messages for this session
-            _logFile.writeAsString("", mode: FileMode.write);
-            this.log("Restored previous session logs");
+            _m
+                .acquire()
+                .then((_) => _logFile.writeAsString("", mode: FileMode.write))
+                .then((_) => _m.release());
+            log("Restored previous session logs, starting new session");
           }
         });
       }
     } catch (err) {
-      this.log("Error restoring session logs: $err");
+      log("Error restoring session logs: $err");
     }
   }
 
@@ -52,7 +60,14 @@ class Logger {
       developer.log(stringContents);
     } else {
       developer.log(stringContents);
-      _logFile.writeAsString(stringContents + "\n", mode: FileMode.append);
+      // Save to log cache
+      _sessionLogs = _sessionLogs + "\n" + stringContents;
+      // Acquire lock to prevent concurrent file access
+      _m
+          .acquire()
+          .then((_) => _logFile.writeAsString(stringContents + "\n",
+              mode: FileMode.append))
+          .then((_) => _m.release());
     }
   }
 

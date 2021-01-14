@@ -51,6 +51,7 @@ dependencies:
   overlay_support: ^1.0.0
   package_info: ^0.4.3+2
   device_info: ^1.0.0
+  mutex: ^1.1.0
   #rainbow_color: ^0.1.1
 
 

@@ -11,6 +11,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 import 'package:vocdoni/view-modals/language-select.dart';
+import 'package:vocdoni/views/app-logs.dart';
 
 class AccountAdvanced extends StatefulWidget {
   AccountAdvanced();
@@ -45,21 +46,36 @@ class _AccountAdvancedState extends State<AccountAdvanced> {
                     mainText: getText(context, "main.setBootnodesUrl"),
                     onTap: () {
                       Navigator.push(
-                          ctx,
-                          MaterialPageRoute(
-                              fullscreenDialog: true,
-                              builder: (context) => BootnodeSelectPage()));
+                        ctx,
+                        MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => BootnodeSelectPage()),
+                      );
                     },
                     icon: FeatherIcons.radio,
                   ),
                   ListItem(
-                      mainText: getText(context, "action.removeAccount"),
-                      purpose: Purpose.DANGER,
-                      rightIcon: null,
-                      icon: FeatherIcons.trash2,
-                      onTap: () {
-                        onRemoveAccount(context);
-                      }),
+                    mainText: getText(context, "action.viewAppLogs"),
+                    // rightIcon: null,
+                    icon: FeatherIcons.book,
+                    onTap: () {
+                      Navigator.push(
+                        ctx,
+                        MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => AppLogs()),
+                      );
+                    },
+                  ),
+                  ListItem(
+                    mainText: getText(context, "action.removeAccount"),
+                    purpose: Purpose.DANGER,
+                    rightIcon: null,
+                    icon: FeatherIcons.trash2,
+                    onTap: () {
+                      onRemoveAccount(context);
+                    },
+                  ),
                 ],
               )),
     );
