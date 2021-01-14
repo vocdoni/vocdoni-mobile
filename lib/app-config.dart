@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:device_info/device_info.dart';
+import 'package:package_info/package_info.dart';
 import 'package:vocdoni/lib/globals.dart';
 
 /// Contains the compile-time defined config variables:
@@ -8,6 +12,9 @@ import 'package:vocdoni/lib/globals.dart';
 
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
 String _bootnodesUrlOverride;
+PackageInfo _packageInfo;
+AndroidDeviceInfo _androidInfo;
+IosDeviceInfo _iosInfo;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -49,4 +56,26 @@ class AppConfig {
   );
 
   static const IPFS_DOMAIN = "https://ipfs.io/ipfs/";
+
+  static setPackageInfo() async {
+    _packageInfo = await PackageInfo.fromPlatform();
+  }
+
+  static PackageInfo get packageInfo => _packageInfo;
+
+  static setDeviceInfo() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      _androidInfo = await deviceInfo.androidInfo;
+    }
+    if (Platform.isIOS) {
+      _iosInfo = await deviceInfo.iosInfo;
+    }
+  }
+
+  static String osVersion() {
+    if (_androidInfo != null) return "Andriod " + _androidInfo.version.baseOS;
+    if (_iosInfo != null) return "iOS " + _iosInfo.systemVersion;
+    return "";
+  }
 }

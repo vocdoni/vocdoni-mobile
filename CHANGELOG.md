@@ -3,6 +3,7 @@
 - Display html entity descriptions
 - Enable link input without camera permission for qr scan
 - Enable ipfs image urls
+- Implement app telemetry
 
 # 0.8.15
 - Fix poll option padding

@@ -13,18 +13,18 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 import 'package:vocdoni/view-modals/language-select.dart';
 
-class SettingsMenu extends StatefulWidget {
-  SettingsMenu();
+class AccountAdvanced extends StatefulWidget {
+  AccountAdvanced();
 
   @override
-  _SettingsMenuState createState() => _SettingsMenuState();
+  _AccountAdvancedState createState() => _AccountAdvancedState();
 }
 
-class _SettingsMenuState extends State<SettingsMenu> {
+class _AccountAdvancedState extends State<AccountAdvanced> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("SettingsPage");
+    Globals.analytics.trackPage("AccountAdvanced");
   }
 
   @override

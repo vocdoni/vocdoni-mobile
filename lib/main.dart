@@ -5,7 +5,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
-import 'package:vocdoni/views/settings-page.dart';
+import 'package:vocdoni/views/account-advanced.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';
@@ -87,7 +87,7 @@ Widget buildMainApp() {
         // "/web/viewer": (context) => WebViewer(),
         // "/signature": (context) => SignModal(),
 
-        "/settings": (context) => SettingsMenu(),
+        "/settings": (context) => AccountAdvanced(),
 
         // DEV
         "/dev": (context) => DevMenu(),
@@ -114,7 +114,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       case '/entity':
         if (settings.arguments is! EntityModel)
           throw Exception("settings.arguments must be of type EntityModel");
-        return EntityInfoPage(settings.arguments);
+        return OrgDetails(settings.arguments);
       default:
         return null;
     }

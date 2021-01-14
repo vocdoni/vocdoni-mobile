@@ -1,4 +1,6 @@
 // import 'package:dvote_common/constants/colors.dart';
+import 'dart:developer';
+
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
@@ -228,7 +230,9 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
       });
 
       showHomePage(context);
-    } on Exception catch (err) {
+      // } on Exception catch (err) {
+    } catch (err) {
+      log(err.toString());
       String text;
       setState(() {
         generating = false;

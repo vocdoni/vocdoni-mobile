@@ -25,6 +25,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   /// This value can't be directly set. Use `setValue` instead.
   final bootnodeInfo = EventualNotifier<BootNodeGateways>()
       .withFreshnessTimeout(Duration(minutes: 2));
+  String analyticsKey = "";
 
   // INTERNAL DATA HANDLERS
 
@@ -44,6 +45,22 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     Globals.appState.currentAccount.cleanEphemeral();
     Globals.appState.currentAccount.refresh(force: false);
+
+    // if no analytics ID (new account or account from old app version) set analytics ID and write to storage
+    if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
+        Globals.appState.currentAccount.identity.value.analyticsID == "") {
+      if ((Globals.accountPool.hasValue &&
+              Globals.accountPool.value.length > 0) ||
+          Globals.appState.analyticsKey.length ==
+              0) // If there are already accounts, or the default analytics key is not set, generate a new key for this user
+        Globals.appState.currentAccount.identity.value.analyticsID =
+            generateAnalyticsKey();
+      else
+        Globals.appState.currentAccount.identity.value.analyticsID =
+            Globals.appState.analyticsKey;
+      Globals.accountPool.writeToStorage();
+    }
+    Globals.analytics.setUser();
   }
 
   /// Defines the new locale to use for the app
@@ -83,6 +100,9 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       if (settings is Map && settings["bootnodeUrlOverride"] is String) {
         AppConfig.setBootnodesUrlOverride(settings["bootnodeUrlOverride"]);
       }
+      if (settings is Map && settings["analyticsKey"] is String) {
+        this.analyticsKey = settings["analyticsKey"];
+      }
     } catch (err) {
       log(err);
       this
@@ -108,6 +128,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       final settings = {
         "locale": locale?.value?.languageCode ?? DEFAULT_LANGUAGE,
         "bootnodeUrlOverride": AppConfig.bootnodesUrl,
+        "analyticsKey": this.analyticsKey,
       };
       await Globals.settingsPersistence.write(settings);
     } catch (err) {
