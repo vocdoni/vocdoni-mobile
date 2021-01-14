@@ -25,12 +25,10 @@ class Analytics {
   MixpanelAnalytics _mixpanelBatch;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  void init() {
+  void init() async {
     // If there's no default analytics key, generate one. The first identity created should have this key.
     if (Globals.appState.analyticsKey == "")
       Globals.appState.analyticsKey = generateAnalyticsKey();
-    _user$.add(getUserId());
-    print("init user id: ${getUserId()}");
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
       userId$: _user$.stream,
@@ -51,12 +49,36 @@ class Analytics {
       verbose: true,
       onError: (e) => log(e.toString()),
     );
+
+// Set pre-login profile
+    _user$.add(getUserId());
+    await _mixpanel.engage(
+      operation: MixpanelUpdateOperations.$set,
+      value: {
+        "AppVersion": getAppVersion(),
+        "OsVersion": getOsVersion(),
+        "Environment": getEnvironment(),
+        "SelectedLanguage": getSelectedLanguage(),
+        "DeviceLanguage": getDeviceLanguage(),
+        "Resolution": getResolution()
+      },
+      ip: getTruncatedIp(),
+      time: getDateTime(),
+    );
+    log("[Analytics] added user ${getUserId()}: " +
+        {
+          "AppVersion": getAppVersion(),
+          "OsVersion": getOsVersion(),
+          "Environment": getEnvironment(),
+          "SelectedLanguage": getSelectedLanguage(),
+          "DeviceLanguage": getDeviceLanguage(),
+          "Resolution": getResolution()
+        }.toString());
   }
 
   void setUser() {
     Globals.appState.analyticsKey = getUserId();
     Globals.appState.writeToStorage();
-    print("set user id: ${getUserId()}, ${Globals.appState.analyticsKey}");
     _user$.add(getUserId());
     _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
@@ -74,7 +96,7 @@ class Analytics {
       ip: getTruncatedIp(),
       time: getDateTime(),
     );
-    log("added user: " +
+    log("[Analytics] added user ${getUserId()}: " +
         {
           "AppVersion": getAppVersion(),
           "OsVersion": getOsVersion(),
@@ -96,7 +118,6 @@ class Analytics {
     if (entityId is String) properties['entityId'] = entityId;
     if (postTitle is String) properties['blocId'] = postTitle;
     if (processId is String) properties['blocId'] = processId;
-    print("user id: ${getUserId()} page $pageId");
     _mixpanelBatch.track(event: Events.PAGE_VIEW, properties: properties);
   }
 

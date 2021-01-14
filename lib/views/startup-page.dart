@@ -37,33 +37,31 @@ class _StartupPageState extends State<StartupPage> {
 
     return restorePersistence()
         .then((_) => restoreDataPools())
-        .then((_) {
-          Globals.analytics.init();
-          Globals.analytics.trackEvent(Events.APP_START);
-        }) // Depends on restorePersistence()
+        // Depends on restorePersistence()
         .then((_) => Notifications.init())
         .then((_) => AppConfig.setPackageInfo())
         .then((_) => AppConfig.setDeviceInfo())
+        .then((_) => Globals.analytics.init())
+        .then((_) => Globals.analytics.trackEvent(Events.APP_START))
         .then((_) {
-          showNextScreen();
+      showNextScreen();
 
-          // Detached update of the cached bootnodes
-          Globals.appState.refresh().catchError(
-              (err) => log("[App] Detached bootnode update failed: $err"));
-        })
-        .catchError((err) {
-          if (!mounted) return;
+      // Detached update of the cached bootnodes
+      Globals.appState.refresh().catchError(
+          (err) => log("[App] Detached bootnode update failed: $err"));
+    }).catchError((err) {
+      if (!mounted) return;
 
-          setState(() {
-            loading = false;
-            error = getText(context, "error.couldNotReadInternalData");
-          });
-          Globals.analytics.init();
-          Globals.analytics.trackError("AppStartupError: $err");
+      setState(() {
+        loading = false;
+        error = getText(context, "error.couldNotReadInternalData");
+      });
+      Globals.analytics.init();
+      Globals.analytics.trackError("AppStartupError: $err");
 
-          // RETRY ITSELF
-          Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
-        });
+      // RETRY ITSELF
+      Future.delayed(Duration(seconds: 10)).then((_) => initApplication());
+    });
   }
 
   void showNextScreen() {
