@@ -1,11 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/action-account-select.dart';
 
 import 'i18n.dart';
@@ -34,21 +36,21 @@ class Notifications {
         onResume: onResume,
       );
     } catch (err) {
-      log("[App] Notifications.init failed: $err");
+      logger.log("[App] Notifications.init failed: $err");
     }
   }
 
   // HANDLERS
 
   static Future<dynamic> onMessage(Map<String, dynamic> message) async {
-    log("[App] onMessage: $message");
+    logger.log("[App] onMessage: $message");
 
     // If contents is enclosed in `data` field, unpack this field
     if (message.containsKey('data') && message['data'] is Map)
       message = message['data'];
 
     if (!message.containsKey('uri')) {
-      log("[App] onMessage: Received a message with no link");
+      logger.log("[App] onMessage: Received a message with no link");
       return;
     }
 
@@ -60,14 +62,14 @@ class Notifications {
   }
 
   static Future<dynamic> onLaunch(Map<String, dynamic> message) async {
-    log("[App] onLaunch: $message");
+    logger.log("[App] onLaunch: $message");
 
     // If contents is enclosed in `data` field, unpack this field
     if (message.containsKey('data') && message['data'] is Map)
       message = message['data'];
 
     if (!message.containsKey('uri')) {
-      log("[App] onLaunch: Received a message with no link");
+      logger.log("[App] onLaunch: Received a message with no link");
       return;
     }
 
@@ -75,14 +77,14 @@ class Notifications {
   }
 
   static Future<dynamic> onResume(Map<String, dynamic> message) async {
-    log("[App] onResume: $message");
+    logger.log("[App] onResume: $message");
 
     // If contents is enclosed in `data` field, unpack this field
     if (message.containsKey('data') && message['data'] is Map)
       message = message['data'];
 
     if (!message.containsKey('uri')) {
-      log("[App] onResume: Received a message with no link");
+      logger.log("[App] onResume: Received a message with no link");
       return;
     }
 
@@ -105,7 +107,7 @@ class Notifications {
   static void _showTargetView(Map<String, dynamic> message) {
     final context = Globals.navigatorKey.currentContext;
     if (message["uri"] is! String) {
-      log("[App] Notification body Error: uri is not a String");
+      logger.log("[App] Notification body Error: uri is not a String");
       return;
     }
     try {
@@ -133,13 +135,13 @@ class Notifications {
         });
       }
     } catch (err) {
-      log("ERR: $err");
+      logger.log("ERR: $err");
     }
   }
 
   static void _showInAppNotification(Map<String, dynamic> message) {
     if (message["uri"] is! String) {
-      log("[App] Notification body Error: uri is not a String");
+      logger.log("[App] Notification body Error: uri is not a String");
       return;
     }
     String title = "Title not found";

@@ -6,7 +6,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/lib/globals.dart';
@@ -109,7 +109,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
         return;
       else if (!(merkleProof is String)) throw Exception("Empty census proof");
     } catch (err) {
-      log(err);
+      logger.log(err);
 
       showMessage(getText(context, "main.theCensusCouldNotBeChecked"),
           context: context);
@@ -156,7 +156,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       stepSendVote(context);
     } catch (err) {
-      log("stepMakeEnvelope error: $err");
+      logger.log("stepMakeEnvelope error: $err");
       showMessage(getText(context, "error.theVoteDataCouldNotBePrepared"),
           context: context);
       setState(() {

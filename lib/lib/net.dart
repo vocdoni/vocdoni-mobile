@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
+
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/lib/logger.dart';
 // import 'package:vocdoni/constants/settings.dart';
 
 class AppNetworking {
@@ -46,15 +47,15 @@ class AppNetworking {
 
       _gwPool = gwPool;
 
-      log("[App] GW Pool ready");
-      log("- DVote Gateway: ${pool.current?.dvote?.uri}");
-      log("- Web3 Gateway: ${pool.current?.web3?.uri}");
+      logger.log("[App] GW Pool ready");
+      logger.log("- DVote Gateway: ${pool.current?.dvote?.uri}");
+      logger.log("- Web3 Gateway: ${pool.current?.web3?.uri}");
       _discoveryFuture = null;
     }).catchError((err) {
-      log("[App] GW discovery failed: $err");
+      logger.log("[App] GW discovery failed: $err");
 
       if (err is SocketException) {
-        log("[App] The network seems to be down");
+        logger.log("[App] The network seems to be down");
       }
       _discoveryFuture = null;
     });
@@ -85,12 +86,12 @@ class AppNetworking {
       _gwPool = GatewayPool(gateways, AppConfig.NETWORK_ID,
           bootnodeUri: AppConfig.bootnodesUrl);
 
-      log("[App] GW Pool ready");
-      log("- DVote Gateway: ${pool.current.dvote.uri}");
-      log("- Web3 Gateway: ${pool.current.web3.uri}");
+      logger.log("[App] GW Pool ready");
+      logger.log("- DVote Gateway: ${pool.current.dvote.uri}");
+      logger.log("- Web3 Gateway: ${pool.current.web3.uri}");
       _discoveryFuture = null;
     }).catchError((err) {
-      log("[App] GW discovery failed: $err");
+      logger.log("[App] GW discovery failed: $err");
       _discoveryFuture = null;
     });
 

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dvote/dvote.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/errors.dart';
 import "package:vocdoni/data-persistence/base-persistence.dart";
 import "package:vocdoni/constants/storage-names.dart";
@@ -27,7 +27,7 @@ class NewsFeedPersistence extends BasePersistenceList<Feed> {
 
       return store.items;
     } catch (err) {
-      log(err);
+      logger.log(err);
       throw RestoreError("There was an error while reading the local data");
     }
   }
@@ -45,7 +45,7 @@ class NewsFeedPersistence extends BasePersistenceList<Feed> {
       // Update the in-memory current value
       set(value);
     } catch (err) {
-      log(err);
+      logger.log(err);
       throw PersistError("There was an error while storing the changes");
     }
   }

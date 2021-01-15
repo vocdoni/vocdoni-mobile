@@ -1,5 +1,5 @@
-import 'dart:developer';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'net.dart';
 
 Future<void> restorePersistence() {
@@ -11,6 +11,7 @@ Future<void> restorePersistence() {
     Globals.processesPersistence.readAll(),
     Globals.feedPersistence.readAll(),
     Globals.settingsPersistence.read(),
+    logger.init(),
   ]);
 }
 
@@ -33,8 +34,8 @@ Future<void> startNetworking() {
     if (!AppNetworking.dvoteIsReady())
       throw Exception("No DVote Gateway is available");
   }).catchError((err) {
-    log("[App] Network initialization failed: $err");
-    log("[App] Trying to use the local gateway cache");
+    logger.log("[App] Network initialization failed: $err");
+    logger.log("[App] Trying to use the local gateway cache");
 
     // Retry with the existing cached gateways
     return AppNetworking.useFromGatewayInfo(

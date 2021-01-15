@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/app-config.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:dvote_common/constants/colors.dart';
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   handleIncomingLinkError(err) {
-    log(err?.toString() ?? "handleIncomingLinkError");
+    logger.log(err?.toString() ?? "handleIncomingLinkError");
     final ctx = scaffoldBodyContext ?? context;
     showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
         title: getText(scaffoldBodyContext ?? context, "main.error"),
@@ -131,17 +131,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        log("Inactive");
+        logger.log("Inactive");
         break;
       case AppLifecycleState.paused:
-        log("Paused");
+        logger.log("Paused");
         break;
       case AppLifecycleState.resumed:
-        log("Resumed");
+        logger.log("Resumed");
         if (!AppNetworking.isReady()) AppNetworking.init(forceReload: true);
         break;
       case AppLifecycleState.detached:
-        log("Detached");
+        logger.log("Detached");
         break;
     }
   }

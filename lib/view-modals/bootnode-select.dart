@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dvote_common/constants/colors.dart';
@@ -14,6 +13,7 @@ import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/extensions.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/views/startup-page.dart';
 
 EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
@@ -95,7 +95,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
       try {
         await AppConfig.setBootnodesUrlOverride(url);
       } catch (err) {
-        log("$err");
+        logger.log("$err");
         showAlert(
             getText(context, "main.bootnodeUrl") +
                 " " +

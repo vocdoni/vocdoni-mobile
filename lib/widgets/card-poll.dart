@@ -9,7 +9,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
-import "dart:developer";
+import 'package:vocdoni/lib/logger.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/views/poll-page.dart';
@@ -83,7 +83,7 @@ class _CardPollState extends State<CardPoll> {
         .refreshCurrentParticipants()
         .then((_) => this.widget.process.refreshCensusSize())
         .then((_) => this.widget.process.refreshDates())
-        .catchError((err) => log(err));
+        .catchError((err) => logger.log(err));
   }
 
   @override
@@ -206,7 +206,7 @@ class _CardPollState extends State<CardPoll> {
   }
 
   Widget buildProcessTitle() {
-        String avatarUrl =this.widget.entity.metadata.value.media.avatar;
+    String avatarUrl = this.widget.entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
       avatarUrl =
           processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
