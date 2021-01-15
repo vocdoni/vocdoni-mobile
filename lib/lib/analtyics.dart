@@ -150,9 +150,15 @@ class Analytics {
   }
 
   String getAppVersion() {
-    return AppConfig.packageInfo.version +
-        "+" +
-        AppConfig.packageInfo.buildNumber;
+    try {
+      return (AppConfig?.packageInfo?.version ?? "") +
+              "+" +
+              AppConfig?.packageInfo?.buildNumber ??
+          "";
+    } catch (err) {
+      log(err.toString());
+      return "";
+    }
   }
 
   String getOsVersion() {
