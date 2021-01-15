@@ -22,12 +22,12 @@ class Events {
 }
 
 class Analytics {
+  bool _initialized = false;
   final _user$ = StreamController<String>.broadcast();
   MixpanelAnalytics _mixpanel;
-  MixpanelAnalytics _mixpanelBatch;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  void init() async {
+  init() async {
     // If there's no default analytics key, generate one. The first identity created should have this key.
     if (Globals.appState.analyticsKey == "")
       Globals.appState.analyticsKey = generateAnalyticsKey();
@@ -41,19 +41,10 @@ class Analytics {
       onError: (e) => logger.log(e.toString()),
     );
 
-    _mixpanelBatch = MixpanelAnalytics.batch(
-      token: _mixpanelToken,
-      userId$: _user$.stream,
-      uploadInterval: Duration(seconds: 30),
-      shouldAnonymize: true,
-      shaFn: (value) => value,
-      ip: false,
-      verbose: true,
-      onError: (e) => logger.log(e.toString()),
-    );
-
 // Set pre-login profile
+    // if (_initialized) return;
     _user$.add(getUserId());
+    await Future.delayed(Duration(milliseconds: 25));
     await _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
       value: {
@@ -76,30 +67,20 @@ class Analytics {
           "DeviceLanguage": getDeviceLanguage(),
           "Resolution": getResolution()
         }.toString());
+    _initialized = true;
   }
 
   void setUser() {
     Globals.appState.analyticsKey = getUserId();
     Globals.appState.writeToStorage();
-    _user$.add(getUserId());
-    _mixpanel.engage(
-      operation: MixpanelUpdateOperations.$set,
-      value: {
-        "AppVersion": getAppVersion(),
-        "OsVersion": getOsVersion(),
-        "Environment": getEnvironment(),
-        "Subscriptions": getSubscriptions(),
-        "BackupDone": getBackupDone(),
-        "SelectedLanguage": getSelectedLanguage(),
-        "AccountIndex": getAccountIndex(),
-        "DeviceLanguage": getDeviceLanguage(),
-        "Resolution": getResolution()
-      },
-      ip: getTruncatedIp(),
-      time: getDateTime(),
-    );
-    logger.log("[Analytics] added user ${getUserId()}: " +
-        {
+    // Right now the api does not generate a new profile unless it's re-initialized. TODO address this
+    this.init().then((_) {
+      _user$.add(getUserId());
+      Future.delayed(Duration(milliseconds: 25));
+    }).then((_) {
+      _mixpanel.engage(
+        operation: MixpanelUpdateOperations.$set,
+        value: {
           "AppVersion": getAppVersion(),
           "OsVersion": getOsVersion(),
           "Environment": getEnvironment(),
@@ -109,7 +90,22 @@ class Analytics {
           "AccountIndex": getAccountIndex(),
           "DeviceLanguage": getDeviceLanguage(),
           "Resolution": getResolution()
-        }.toString());
+        },
+        ip: getTruncatedIp(),
+      );
+      logger.log("[Analytics] added user ${getUserId()}: " +
+          {
+            "AppVersion": getAppVersion(),
+            "OsVersion": getOsVersion(),
+            "Environment": getEnvironment(),
+            "Subscriptions": getSubscriptions(),
+            "BackupDone": getBackupDone(),
+            "SelectedLanguage": getSelectedLanguage(),
+            "AccountIndex": getAccountIndex(),
+            "DeviceLanguage": getDeviceLanguage(),
+            "Resolution": getResolution()
+          }.toString());
+    });
   }
 
   trackError(String error) {}
@@ -120,16 +116,16 @@ class Analytics {
     if (entityId is String) properties['entityId'] = entityId;
     if (postTitle is String) properties['blocId'] = postTitle;
     if (processId is String) properties['blocId'] = processId;
-    _mixpanelBatch.track(event: Events.PAGE_VIEW, properties: properties);
+    _mixpanel.track(event: Events.PAGE_VIEW, properties: properties);
   }
 
   trackAction({String actionId}) {}
 
   trackEvent(String eventId) {
-    _mixpanelBatch.track(event: eventId, properties: {});
+    _mixpanel.track(event: eventId, properties: {});
   }
 
-  getUserId() {
+  String getUserId() {
     final currentAccount = Globals.appState.currentAccount;
     if (!(currentAccount is AccountModel))
       return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)

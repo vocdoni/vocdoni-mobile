@@ -59,6 +59,7 @@ class _StartupPageState extends State<StartupPage> {
       });
       Globals.analytics.init();
       Globals.analytics.trackError("AppStartupError: $err");
+      logger.log("AppStartupError: $err");
 
       // RETRY ITSELF
       Future.delayed(Duration(seconds: 10)).then((_) => initApplication());

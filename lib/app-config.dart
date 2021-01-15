@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:device_info/device_info.dart';
 import 'package:package_info/package_info.dart';
 import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/logger.dart';
 
 /// Contains the compile-time defined config variables:
 /// - `APP_MODE`: dev, beta, production
@@ -58,18 +59,26 @@ class AppConfig {
   static const IPFS_DOMAIN = "https://ipfs.io/ipfs/";
 
   static setPackageInfo() async {
-    _packageInfo = await PackageInfo.fromPlatform();
+    try {
+      _packageInfo = await PackageInfo.fromPlatform();
+    } catch (err) {
+      logger.log(err);
+    }
   }
 
   static PackageInfo get packageInfo => _packageInfo;
 
   static setDeviceInfo() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
-      _androidInfo = await deviceInfo.androidInfo;
-    }
-    if (Platform.isIOS) {
-      _iosInfo = await deviceInfo.iosInfo;
+    try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      if (Platform.isAndroid) {
+        _androidInfo = await deviceInfo.androidInfo;
+      }
+      if (Platform.isIOS) {
+        _iosInfo = await deviceInfo.iosInfo;
+      }
+    } catch (err) {
+      logger.log(err);
     }
   }
 

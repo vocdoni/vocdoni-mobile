@@ -50,14 +50,19 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
         Globals.appState.currentAccount.identity.value.analyticsID == "") {
       if ((Globals.accountPool.hasValue &&
-              Globals.accountPool.value.length > 0) ||
-          Globals.appState.analyticsKey.length ==
-              0) // If there are already accounts, or the default analytics key is not set, generate a new key for this user
+              Globals.accountPool.value.length > 1) ||
+          Globals.appState.analyticsKey.length == 0) {
+        // If there are already accounts, or the default analytics key is not set, generate a new key for this user
         Globals.appState.currentAccount.identity.value.analyticsID =
             generateAnalyticsKey();
-      else
+        print(
+            "Generated key ${Globals.appState.currentAccount.identity.value.analyticsID}");
+      } else {
         Globals.appState.currentAccount.identity.value.analyticsID =
             Globals.appState.analyticsKey;
+        print(
+            "Used existing key ${Globals.appState.currentAccount.identity.value.analyticsID}");
+      }
       Globals.accountPool.writeToStorage();
     }
     Globals.analytics.setUser();

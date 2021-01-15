@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
+import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
@@ -122,6 +124,62 @@ class DevMenu extends StatelessWidget {
                 Navigator.pushNamed(ctx, "/dev/pager");
               },
             ),
+            // ListItem(
+            //   mainText: "Track account a",
+            //   onTap: () async {
+            //     Globals.analytics.user$.add("aaaaaa");
+            //     await Globals.analytics.mixpanelBatch.engage(
+            //       operation: MixpanelUpdateOperations.$set,
+            //       value: {
+            //         "AppVersion": "TestApp",
+            //       },
+            //     );
+            //     Globals.analytics.trackEvent("TESTEVENTB");
+            //   },
+            // ),
+            // ListItem(
+            //   mainText: "Track account b",
+            //   onTap: () async {
+            //     Globals.analytics.user$.add("bbbbbb");
+            //     await Globals.analytics.mixpanelBatch.engage(
+            //       operation: MixpanelUpdateOperations.$set,
+            //       value: {
+            //         "AppVersion": "TestApp",
+            //       },
+            //     );
+            //     Globals.analytics.trackEvent("TESTEVENTA");
+            //   },
+            // ),
+            // ListItem(
+            //   mainText: "Track account c",
+            //   onTap: () async {
+            //     // Globals.analytics.user$.add("cccccc");
+            //     await Globals.analytics.init();
+            //     Globals.analytics.user$.add("cccccc");
+            //     await Globals.analytics.mixpanelBatch.engage(
+            //       operation: MixpanelUpdateOperations.$set,
+            //       value: {
+            //         "AppVersion": "TestApp",
+            //       },
+            //     );
+            //     Globals.analytics.trackEvent("TESTEVENTC");
+            //   },
+            // ),
+            // ListItem(
+            //   mainText: "Track account d",
+            //   onTap: () async {
+            //     // Globals.analytics.user$.add("dddddd");
+            //     await Globals.analytics.init();
+            //     Globals.analytics.user$.add("dddddd");
+            //     await Globals.analytics.mixpanelBatch.engage(
+            //       operation: MixpanelUpdateOperations.$set,
+            //       value: {
+            //         "AppVersion": "TestApp",
+            //       },
+            //     );
+            //     Globals.analytics.trackEvent("TESTEVENTD");
+            //   },
+            // ),
             ListItem(
                 mainText: "In-app notif test",
                 onTap: () {
