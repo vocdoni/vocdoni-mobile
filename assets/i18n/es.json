@@ -35,6 +35,7 @@
     "error.thereWasAProblemHandlingTheLink": "Hubo un problema al gestionar el enlace",
     "error.youAreNotInTheCensus": "No estás en el censo",
     "error.yourVoteStatusCannotBeChecked": "No se puede comprobar el estado del voto",
+    "main.Loading": "",
     "main.actionNotSupported": "Acción no disponible",
     "main.actions": "Acciones",
     "main.advanced": "Avanzado",
