@@ -14,6 +14,7 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/logger.dart';
+import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/views/startup-page.dart';
 
 EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
@@ -114,6 +115,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
       });
       Globals.appState.bootnodeInfo.setValue(null);
       Globals.appState.writeToStorage();
+      startNetworking();
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
