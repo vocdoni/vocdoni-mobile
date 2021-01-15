@@ -40,7 +40,7 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
               children: [
                 SpinnerCircular(),
                 Padding(padding: EdgeInsets.symmetric(horizontal: 10.0)),
-                Text(getText(context, "main.Loading")),
+                Text(getText(context, "main.loading")),
               ],
             ),
           ),

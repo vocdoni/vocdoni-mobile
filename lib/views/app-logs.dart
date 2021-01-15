@@ -59,7 +59,7 @@ class AppLogs extends StatelessWidget {
   _sendEmail(BuildContext ctx) async {
     if (logger.sessionLogs?.isNotEmpty ?? false) {
       final url = Uri.encodeFull(
-          'mailto:?subject=${getText(ctx, "main.VocdoniAppLogs")}&body=${logger.sessionLogs}');
+          'mailto:?subject=${getText(ctx, "main.vocdoniAppLogs")}&body=${logger.sessionLogs}');
       try {
         await launch(url);
       } catch (err) {
