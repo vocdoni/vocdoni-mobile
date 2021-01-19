@@ -240,5 +240,9 @@
     "main.welcome": "Üdvözöljük!",
     "main.vote": "Szavazás",
     "main.to": "Címzett:",
-    "main.timeLeft": "Hátralévő idő"
+    "main.timeLeft": "Hátralévő idő",
+    "main.vocdoniAppLogs": "Vocdoni alkalmazás napló",
+    "main.sendEmail": "E-mail küldése",
+    "main.appLogs": "Alkalmazás Napló",
+    "action.viewAppLogs": "Alkalmazás napló megtekintése"
 }
