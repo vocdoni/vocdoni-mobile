@@ -1,3 +1,6 @@
+# In progress
+- Improve user logs scroll view
+
 # 0.8.16
 - Fix green border for some android versions
 - Display html entity descriptions

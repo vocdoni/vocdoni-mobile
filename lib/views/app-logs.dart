@@ -16,15 +16,20 @@ class AppLogs extends StatelessWidget {
       appBar: TopNavigation(
         title: getText(ctx, "main.appLogs"),
       ),
-      body: ListView(
-        children: (logger?.sessionLogs?.length ?? 0) > 0
-            ? logger.sessionLogs
-                .split("\n")
-                .map((line) => Text(line).withBottomPadding(7))
-                .cast<Widget>()
-                .toList()
-            : [Container()],
-      ).withPadding(paddingPage),
+      body: Scrollbar(
+        child: ListView(
+          children: (logger?.sessionLogs?.length ?? 0) > 0
+              ? logger.sessionLogs
+                  .split("\n")
+                  .map((line) => Text(line).withBottomPadding(7))
+                  .cast<Widget>()
+                  .toList()
+                  .reversed
+                  .toList()
+              : [Container()],
+          reverse: true,
+        ).withPadding(paddingPage),
+      ),
       bottomNavigationBar: Builder(
         builder: (context) => Row(
           children: [
