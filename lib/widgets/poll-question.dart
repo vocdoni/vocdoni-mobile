@@ -168,8 +168,8 @@ class _PollQuestionState extends State<PollQuestion> {
           element.votes < leastVotedCount ? element.votes : leastVotedCount;
     });
     widget.question.voteOptions.asMap().forEach((index, voteOption) {
-      options.add(buildPollResultsOption(
-          index, voteOption, totalVotes, mostVotedCount, leastVotedCount));
+      options.add(buildPollResultsOption(voteOption.value, voteOption,
+          totalVotes, mostVotedCount, leastVotedCount));
     });
     return options;
   }
