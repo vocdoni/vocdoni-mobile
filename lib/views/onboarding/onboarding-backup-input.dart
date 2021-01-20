@@ -32,6 +32,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     questionIndexes = [0, 0];
     questionAnswers = ["", ""];
     email = "";
+    Globals.analytics.trackPage("OnboardingBackupInput");
     super.initState();
   }
 
