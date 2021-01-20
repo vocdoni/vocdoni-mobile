@@ -8,7 +8,6 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/views/account-advanced.dart';
 import 'package:vocdoni/views/onboarding/onboarding-welcome.dart';
 import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
-import 'package:vocdoni/views/settings-page.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
 import 'package:vocdoni/views/dev/dev-ui-avatar-color.dart';

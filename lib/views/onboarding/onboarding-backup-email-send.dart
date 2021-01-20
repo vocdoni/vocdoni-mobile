@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -8,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/widgets/issues-button.dart';
 
 class OnboardingBackupEmailSendPage extends StatelessWidget {
@@ -67,10 +66,10 @@ class OnboardingBackupEmailSendPage extends StatelessWidget {
     try {
       launched = await launch(url);
     } catch (err) {
-      log(err.toString());
+      logger.log(err.toString());
       launched = false;
     }
-    log('Could not launch $url');
+    logger.log('Could not launch $url');
     if (!launched) {
       Clipboard.setData(ClipboardData(text: backupLink));
       showAlert(
