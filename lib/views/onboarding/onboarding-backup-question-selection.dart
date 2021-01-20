@@ -3,6 +3,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 
 class OnboardingBackupQuestionSelection extends StatelessWidget {
@@ -12,6 +13,7 @@ class OnboardingBackupQuestionSelection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Globals.analytics.trackPage("OnboardingBackupQuestionSelection");
     return Scaffold(
       body: ListView(
         children: [

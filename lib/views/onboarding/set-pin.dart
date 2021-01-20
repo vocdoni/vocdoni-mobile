@@ -35,6 +35,12 @@ class _SetPinPageState extends State<SetPinPage> {
   List<int> setPin = [];
 
   @override
+  void initState() {
+    super.initState();
+    Globals.analytics.trackPage("SetPin");
+  }
+
+  @override
   Widget build(BuildContext context) {
     String firstMessage = "";
     String secondMessage = "";
@@ -112,6 +118,7 @@ class _SetPinPageState extends State<SetPinPage> {
     setState(() {
       setPin = newPin;
       pinStep = PinStep.CONFIRMING;
+      Globals.analytics.trackPage("ConfirmPin");
     });
   }
 
