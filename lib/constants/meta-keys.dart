@@ -15,6 +15,8 @@ const META_PROCESS_CENSUS_BELONGS = "processCensusBelongs";
 const META_PROCESS_CENSUS_SIZE = "processCensusSize";
 const META_PROCESS_HAS_VOTED = "processUserHasVoted";
 
+const TEMP_META_DATE = "sortByDate";
+
 const META_FEED_CONTENT_URI = "feedContentUri";
 const META_PROCESS_CONTENT_URI = "processContentUri";
 const META_ENTITY_CONTENT_URI = "entityContentUri";

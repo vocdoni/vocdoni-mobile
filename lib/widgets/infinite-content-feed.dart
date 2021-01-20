@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:vocdoni/data-models/content-cache.dart';
 import 'package:vocdoni/lib/globals.dart';
-import 'package:vocdoni/views/home-content-tab.dart';
 
 class ContentListView extends StatefulWidget {
   @override

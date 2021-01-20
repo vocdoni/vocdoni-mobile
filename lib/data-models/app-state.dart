@@ -21,6 +21,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   final locale = EventualNotifier<Locale>();
   final blockStatus =
       EventualValue<BlockStatus>().withFreshnessTimeout(Duration(seconds: 30));
+  BlockStatus prevBlockStatus;
 
   /// All Gateways known to us, regardless of the entity.
   /// This value can't be directly set. Use `setValue` instead.
@@ -207,6 +208,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       final status = await getBlockStatus(AppNetworking.pool);
 
       this.blockStatus.setValue(status);
+      this.prevBlockStatus =
+          status; // Block status for synchronous date estimations
     } catch (err) {
       this
           .blockStatus

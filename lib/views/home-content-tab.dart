@@ -25,11 +25,12 @@ class _HomeContentTabState extends State<HomeContentTab> {
   }
 
   void _onRefresh() {
+    print("refresh");
     // TODO refresh account + data, store all cached posts
     // final currentAccount = Globals.appState.currentAccount;
-
+    Globals.appState.contentCache.loadBlocsFromStorage();
     // currentAccount.refresh().then((_) {
-    //   _refreshController.refreshCompleted();
+    // _refreshController.refreshCompleted();
     // }).catchError((err) {
     //   _refreshController.refreshFailed();
     // });

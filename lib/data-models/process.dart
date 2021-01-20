@@ -81,6 +81,11 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
             processModel.metadata.value.meta[META_ENTITY_ID] =
                 processModel.entityId;
 
+            processModel.metadata.value.meta[TEMP_META_DATE] =
+                processModel.sortDate.toIso8601String();
+            print(
+                "Storing date: ${processModel.metadata.value.meta[TEMP_META_DATE]}");
+
             if (processModel.isInCensus.hasValue)
               processModel.metadata.value.meta[META_PROCESS_CENSUS_BELONGS] =
                   processModel.isInCensus.value ? "true" : "false";
@@ -627,9 +632,29 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   }
 
   DateTime get sortDate {
-    if (this?.endDate?.value?.isBefore(DateTime.now()) ?? false)
+    if (this.endDate == null || this.startDate == null)
+      return DateTime.fromMicrosecondsSinceEpoch(0);
+    // Fetch end date if not stored
+    if ((!this.endDate.hasValue) && Globals.appState.prevBlockStatus != null) {
+      final endBlock = this.metadata?.value?.startBlock ??
+          0 + this.metadata?.value?.blockCount ??
+          0;
+      this.endDate.setValue(
+          estimateDateAtBlockSync(endBlock, Globals.appState.prevBlockStatus));
+    }
+    if (this.endDate?.value?.isBefore(DateTime.now()) ?? false)
       return this.endDate.value;
-    if (this?.startDate?.hasValue ?? false) return this.startDate.value;
+
+    // Fetch start date if not stored
+    if ((!this.endDate.hasValue) && Globals.appState.prevBlockStatus != null) {
+      final startBlock = this.metadata?.value?.startBlock ?? 0;
+      this.startDate.setValue(estimateDateAtBlockSync(
+          startBlock, Globals.appState.prevBlockStatus));
+    }
+    if (this.startDate.hasValue) return this.startDate.value;
+    // If process dates are not loaded, fall back on the meta date from storage
+    if ((this.metadata?.value?.meta[TEMP_META_DATE]?.length ?? 0) > 0)
+      return DateTime.parse(this.metadata.value.meta[TEMP_META_DATE]);
     return DateTime.fromMicrosecondsSinceEpoch(0);
   }
 }

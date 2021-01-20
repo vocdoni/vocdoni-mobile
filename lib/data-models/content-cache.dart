@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:dvote/models/dart/feed.pb.dart';
+import 'package:dvote/dvote.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/data-models/process.dart';
