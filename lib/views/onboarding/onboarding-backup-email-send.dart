@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/extensions.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/widgets/issues-button.dart';
@@ -17,6 +18,7 @@ class OnboardingBackupEmailSendPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Globals.analytics.trackPage("OnboardingBackupEmailCheck");
     return Scaffold(
       body: Builder(
         builder: (context) => Column(

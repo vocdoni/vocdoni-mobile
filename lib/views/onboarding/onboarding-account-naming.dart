@@ -27,6 +27,7 @@ class _OnboardingAccountNamingPageState
   void initState() {
     confirmsTermsOfService = false;
     super.initState();
+    Globals.analytics.trackPage("OnboardingAccountNaming");
   }
 
   @override

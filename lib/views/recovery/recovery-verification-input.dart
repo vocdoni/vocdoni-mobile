@@ -41,6 +41,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
     questionAnswers = ["", ""];
     accountName = "";
     super.initState();
+    Globals.analytics.trackPage("RecoveryVerificationInput");
   }
 
   @override
@@ -177,12 +178,14 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         if (result is InvalidPatternError) {
           showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
               context: context, purpose: Purpose.DANGER);
+          Globals.analytics.trackPage("RecoveryVerificationFail");
           return Future.value();
         }
         pin = result;
       }
     } catch (err) {
       logger.log(err.toString());
+      Globals.analytics.trackPage("RecoveryVerificationFail");
       showMessage(
           getText(context, "main.thereWasAProblemDecryptingYourPrivateKey"),
           context: context,
@@ -191,6 +194,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
     }
     // TODO decode link and generate key
     if (false) {
+      Globals.analytics.trackPage("RecoveryVerificationFail");
       // if key not decrypted correctly
       showMessage(
           getText(context,
