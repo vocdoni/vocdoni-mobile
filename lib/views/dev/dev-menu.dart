@@ -1,11 +1,9 @@
 import 'package:dvote/api/voting.dart';
 import "package:flutter/material.dart";
-import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
-import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/notifications.dart';

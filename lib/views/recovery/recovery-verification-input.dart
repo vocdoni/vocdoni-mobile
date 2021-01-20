@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:dvote_common/constants/colors.dart';
-import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
 import 'package:dvote_common/widgets/text-input.dart' as TextInput;
@@ -10,10 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/extensions.dart';
-import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/recovery/recovery-success.dart';
@@ -54,7 +51,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         ModalRoute.of(context).settings.arguments;
     if (args == null) {
       Navigator.of(context).pop();
-      log("Invalid parameters");
+      logger.log("Invalid parameters");
       return;
     }
     questionIndexes = args.questionIndexes;
@@ -185,7 +182,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         pin = result;
       }
     } catch (err) {
-      log(err.toString());
+      logger.log(err.toString());
       showMessage(
           getText(context, "main.thereWasAProblemDecryptingYourPrivateKey"),
           context: context,

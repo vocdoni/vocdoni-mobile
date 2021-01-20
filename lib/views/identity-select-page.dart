@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
@@ -10,6 +8,7 @@ import 'package:vocdoni/lib/errors.dart';
 import 'package:dvote_crypto/main/encryption.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
@@ -113,7 +112,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       }
       privKey = "";
     } else {
-      log("Account has no pin.");
+      logger.log("Account has no pin.");
       final oldLockPattern = await Navigator.push(
           ctx,
           MaterialPageRoute(
@@ -123,12 +122,12 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       if (oldLockPattern == null) {
         return;
       } else if (oldLockPattern is InvalidPatternError) {
-        log("Pattern is incorrect.");
+        logger.log("Pattern is incorrect.");
         showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
             purpose: Purpose.DANGER, context: ctx);
         return;
       }
-      log("Key decrypted correctly");
+      logger.log("Key decrypted correctly");
 
       final newLockPattern = await Navigator.push(
         ctx,

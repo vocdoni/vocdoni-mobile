@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
@@ -128,7 +127,7 @@ class Analytics {
               AppConfig?.packageInfo?.buildNumber ??
           "";
     } catch (err) {
-      log(err.toString());
+      logger.log(err.toString());
       return "";
     }
   }
