@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
@@ -13,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/pattern.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-input.dart';
 
@@ -163,7 +162,7 @@ class _SetPinPageState extends State<SetPinPage> {
       Globals.appState.selectAccount(newIndex);
       showNextPage(context);
     } on Exception catch (err) {
-      log("Error: $err");
+      logger.log("Error: $err");
       String text;
       setState(() {
         setPin = [];
