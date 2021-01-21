@@ -632,8 +632,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   }
 
   DateTime get sortDate {
-    if (this.endDate == null || this.startDate == null)
+    if (this.endDate == null || this.startDate == null) {
+      if ((this.metadata?.value?.meta[TEMP_META_DATE]?.length ?? 0) > 0)
+        return DateTime.parse(this.metadata.value.meta[TEMP_META_DATE]);
       return DateTime.fromMicrosecondsSinceEpoch(0);
+    }
     // Fetch end date if not stored
     if ((!this.endDate.hasValue) && Globals.appState.prevBlockStatus != null) {
       final endBlock = this.metadata?.value?.startBlock ??

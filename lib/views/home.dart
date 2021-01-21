@@ -5,6 +5,7 @@ import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/app-config.dart';
@@ -26,12 +27,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  List<Widget> _children;
   int selectedTab = 0;
   bool scanning = false;
+  final EventualNotifier<int> scrollSignal = EventualNotifier<int>();
 
   /// Store it on build, so that external events like deep link handling can display
   /// snackbars on it
   BuildContext scaffoldBodyContext;
+  final pageController = PageController();
 
   /////////////////////////////////////////////////////////////////////////////
   // DEEP LINKS / UNIVERSAL LINKS
@@ -39,6 +43,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    _children = [
+      HomeContentTab(scrollSignal),
+      HomeEntitiesTab(),
+      HomeIdentityTab(),
+      Container(
+        child: Center(
+          child: Text("Vocdoni"),
+        ),
+      ),
+    ];
+
     if (AppNetworking.dvoteIsReady()) {
       // Only refresh if networking is available
       Globals.appState.currentAccount.refresh();
@@ -132,15 +147,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             title: getTabName(selectedTab),
             showBackButton: false,
           ),
-          // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          // floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
           floatingActionButton: selectedTab == 1 ? buildFab(context) : null,
           body: Builder(builder: (ctx) {
-            // Store the build context from the scaffold, so that deep links can show
-            // snackbars on top of this scaffold
+            // Store the build context from the scaffold, so that deep links can show snackbars on top of this scaffold
             scaffoldBodyContext = ctx;
-
-            return buildBody(context);
+            return PageView(
+              children: _children,
+              controller: pageController,
+              onPageChanged: onPageChanged,
+            );
           }),
           bottomNavigationBar: BottomNavigation(
             onTabSelect: (index) => onTabSelect(index),
@@ -177,34 +192,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  buildBody(BuildContext ctx) {
-    Widget body;
-
-    // RENDER THE CURRENT TAB BODY
-    switch (selectedTab) {
-      // VOTES+FEED
-      case 0:
-        body = HomeContentTab();
-        break;
-      // SUBSCRIBED ENTITIES
-      case 1:
-        body = HomeEntitiesTab();
-        break;
-      // IDENTITY INFO
-      case 2:
-        body = HomeIdentityTab();
-        break;
-      default:
-        body = Container(
-          child: Center(
-            child: Text("Vocdoni"),
-          ),
-        );
-    }
-    return body;
+  onTabSelect(int idx) {
+    setState(() {
+      // If setting home tab from home tab, signal the scroll view to reset
+      if (idx == 0 && selectedTab == 0) {
+        scrollSignal.setValue(1);
+      }
+      pageController.jumpToPage(idx);
+    });
   }
 
-  onTabSelect(int idx) {
+  onPageChanged(int idx) {
     setState(() {
       selectedTab = idx;
     });

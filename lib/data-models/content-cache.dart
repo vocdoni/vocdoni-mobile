@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dvote/dvote.dart';
 import 'package:eventual/eventual-notifier.dart';
@@ -54,14 +55,6 @@ class StoredContent {
       storedBlocs.value.length > _nextBlocIndex &&
       storedBlocs.value[_nextBlocIndex] != null;
 
-  // DateTime getNextDate() {
-  //   if (!processes.hasValue || processes.value.length <= _nextProcessIndex)
-  //     return null;
-  //   if (!processes.value[_nextProcessIndex].startDate.hasValue)
-  //     return DateTime.fromMillisecondsSinceEpoch(0);
-  //   return processes.value[_nextProcessIndex].startDate.value;
-  // }
-
   Bloc getNextBloc() {
     print("proces index $_nextBlocIndex");
     if (!storedBlocs.hasValue || storedBlocs.value.length <= _nextBlocIndex)
@@ -69,7 +62,8 @@ class StoredContent {
     return storedBlocs.value[_nextBlocIndex++];
   }
 
-  void loadBlocsFromStorage() {
+  Future<void> loadBlocsFromStorage() async {
+    storedBlocs.setToLoading();
     print("load blocs from storage");
     // Get a filtered list of the Entities of the current user
     final entities = Globals.appState.currentAccount.entities.value;

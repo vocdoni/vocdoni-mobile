@@ -72,10 +72,6 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
     this.contentCache.loadBlocsFromStorage();
     this.currentAccount.refresh(force: false);
-    // this
-    //     .currentAccount
-    //     .refresh(force: false)
-    //     .then((_) => this.contentCache.loadBlocsFromStorage());
   }
 
   /// Defines the new locale to use for the app
