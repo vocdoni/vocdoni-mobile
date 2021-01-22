@@ -22,7 +22,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
+import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 
 class ProcessStatusDigest {
   String mainText;

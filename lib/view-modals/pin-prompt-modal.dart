@@ -4,6 +4,7 @@ import 'package:dvote_common/widgets/unlockPattern/enterPin.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -11,8 +12,6 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:vocdoni/lib/pattern.dart';
-
-import '../app-config.dart';
 
 /// This component prompts for a visual lock patten, which is transformed into a passphrase.
 /// The component will attempt to decrypt `encryptedText`. If it succeeds, the
@@ -29,7 +28,7 @@ class PinPromptModal extends StatefulWidget {
 }
 
 class _PinPromptModalState extends State<PinPromptModal> {
-  int pinLength = AppConfig.pinLength;
+  int pinLength = PIN_LENGTH;
 
   @override
   void initState() {

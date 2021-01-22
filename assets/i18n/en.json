@@ -262,7 +262,7 @@
     "main.startsIn": "Starts in {{DATE}}",
     "main.tapAboveOnCheckTheCensusAndTryAgain": "Tap above on 'Check the census' and try again",
     "main.tapToRetry": "Tap to retry",
-    "main.tapSendEmailToSendYourselfABackupLinkForYourRecordsThenClickTheLinkToVerifyThatTheBackupWorks": "Tap \"Send email\" to send yourself a backup link for your records. Then click the verify that the backup works.",
+    "main.tapSendEmailToSendYourselfABackupLinkForYourRecordsThenClickTheLinkToVerifyThatTheBackupWorks": "Tap \"Send email\" to send yourself a backup link for your records. Then click the link to verify that the backup works.",
     "main.theAddPageAllowsYouToAddLinksCodesAndQRCodesInOrderTo": "The add page allows you to add links, codes and QR codes in order to",
     "main.theCameraIsNotAvailable": "The camera is not available",
     "main.theCensusCouldNotBeChecked": "The census could not be checked",

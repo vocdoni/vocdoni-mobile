@@ -3,6 +3,7 @@ import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -31,7 +32,7 @@ class SetPinPage extends StatefulWidget {
 
 class _SetPinPageState extends State<SetPinPage> {
   PinStep pinStep = PinStep.READY;
-  final int numPinDigits = AppConfig.pinLength;
+  final int numPinDigits = PIN_LENGTH;
   List<int> setPin = [];
 
   @override
@@ -156,7 +157,8 @@ class _SetPinPageState extends State<SetPinPage> {
     try {
       final newAccount =
           await AccountModel.makeNew(widget.alias, pinEncryptionKey);
-      newAccount.identity.value.version = AppConfig.identityVersion;
+      newAccount.identity.value.version =
+          AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
       await Globals.accountPool.addAccount(newAccount);
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>
