@@ -9,4 +9,4 @@ const VOCDONI_FAQ_NOT_IN_CENSUS_URL = "https://vocdoni.io"; // TODO update
 const TERMS_OF_SERVICE_URL = "https://vocdoni.io/terms-of-service/";
 const PRIVACY_POLICY_URL = "https://vocdoni.io/privacy-policy/";
 const PIN_LENGTH = 4;
-const IDENTITY_VERSION = "39"; // TODO update
+const IDENTITY_VERSION = "pin";

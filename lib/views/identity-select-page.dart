@@ -1,6 +1,7 @@
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
@@ -167,7 +168,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       account.identity.value.keys[0].encryptedMnemonic = encryptedMenmonic;
       account.identity.value.keys[0].encryptedRootPrivateKey =
           encryptedRootPrivateKey;
-      account.identity.value.version = AppConfig.identityVersion;
+      account.identity.value.version =
+          AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
       loading.close();
     }
     Globals.appState.selectAccount(accountIdx);

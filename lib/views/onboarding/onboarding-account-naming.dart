@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -137,12 +138,12 @@ class _OnboardingAccountNamingPageState
         getText(context, "main.iAgreeWithTheTermsOfServiceAndThePrivacyPolicy");
     rawText = rawText.replaceFirst(
         "{{TOS}}",
-        "<a href=\"${AppConfig.termsOfServiceURL}\">" +
+        "<a href=\"$TERMS_OF_SERVICE_URL\">" +
             getText(context, "main.theTermsOfService") +
             "</a>");
     rawText = rawText.replaceFirst(
         "{{PRIV}}",
-        "<a href=\"${AppConfig.privacyPolicyURL}\">" +
+        "<a href=\"$PRIVACY_POLICY_URL\">" +
             getText(context, "main.thePrivacyPolicy") +
             "</a>");
     return Html(
