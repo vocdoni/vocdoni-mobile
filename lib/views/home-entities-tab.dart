@@ -9,7 +9,7 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:vocdoni/views/entity-page.dart';
+import 'package:vocdoni/views/org-details.dart';
 import 'package:dvote_common/widgets/baseCard.dart';
 import 'package:dvote_common/widgets/card-loading.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -40,7 +40,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
     });
 
     super.initState();
-    Globals.analytics.trackPage("HomeEntitiesTab");
+    Globals.analytics.trackPage("Orgs");
   }
 
   @override

@@ -30,8 +30,8 @@ class _EntityFeedPageState extends State<EntityFeedPage> {
     try {
       entityModel = ModalRoute.of(context).settings.arguments;
       if (entityModel is EntityModel) {
-        Globals.analytics.trackPage("EntityFeedPage",
-            entityId: entityModel.reference.entityId);
+        Globals.analytics
+            .trackPage("OrgFeed", entityId: entityModel.reference.entityId);
       }
     } catch (err) {
       logger.log(err);

@@ -35,7 +35,7 @@ class _HomeContentTabState extends State<HomeContentTab> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("HomeContentTab");
+    Globals.analytics.trackPage("Home");
   }
 
   void _onRefresh() {

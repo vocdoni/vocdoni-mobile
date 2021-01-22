@@ -42,9 +42,6 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
   @override
   void initState() {
     super.initState();
-
-    Globals.analytics.trackPage("RegisterValidationPage");
-
     _currentStep = Steps.READY;
   }
 
@@ -117,6 +114,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       setState(() => _currentStep = Steps.DONE);
 
+      Globals.analytics.trackPage("RegistrationSuccess");
       showMessage(getText(context, "main.yourRegistrationHasBeenConfirmed"),
           context: context, purpose: Purpose.GOOD);
       // final notify = await showPrompt(
@@ -146,6 +144,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
         await Future.delayed(Duration(seconds: 2));
         Navigator.of(context).pop();
       } else {
+        Globals.analytics.trackPage("RegistrationFail");
         showMessage(
             getText(context, "error.theRegistrationCouldNotBeCompleted"),
             purpose: Purpose.DANGER,

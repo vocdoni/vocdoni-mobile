@@ -37,7 +37,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("PatternPrompModal");
+    Globals.analytics.trackPage("AccountUnlock");
   }
 
   @override

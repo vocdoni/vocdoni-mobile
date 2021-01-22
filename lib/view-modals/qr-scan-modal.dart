@@ -52,7 +52,7 @@ class _QrScanModalState extends State<QrScanModal> {
 
     setState(() {});
 
-    Globals.analytics.trackPage("QrScanModal");
+    Globals.analytics.trackPage("QrScan");
   }
 
   @override

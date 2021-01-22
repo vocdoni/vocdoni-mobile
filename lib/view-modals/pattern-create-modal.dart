@@ -41,7 +41,7 @@ class _PatternCreateModalState extends State<PatternCreateModal> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("PatternCreateModal");
+    Globals.analytics.trackPage("PatternCreate");
   }
 
   @override

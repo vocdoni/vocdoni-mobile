@@ -27,7 +27,7 @@ class _EntityParticipationPageState extends State<EntityParticipationPage> {
 
     try {
       if (entityModel is EntityModel) {
-        Globals.analytics.trackPage("EntityParticipationPage",
+        Globals.analytics.trackPage("OrgParticipation",
             entityId: entityModel.reference.entityId);
       } else {
         entityModel = ModalRoute.of(context).settings.arguments;

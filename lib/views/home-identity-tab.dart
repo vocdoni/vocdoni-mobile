@@ -27,7 +27,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("HomeIdentityTab");
+    Globals.analytics.trackPage("Account");
   }
 
   @override

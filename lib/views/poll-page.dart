@@ -104,7 +104,7 @@ class _PollPageState extends State<PollPage> {
         .cast<int>()
         .toList();
 
-    Globals.analytics.trackPage("PollPage",
+    Globals.analytics.trackPage("Poll",
         entityId: entity.reference.entityId, processId: process.processId);
 
     await onRefresh();

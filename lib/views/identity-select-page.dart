@@ -20,7 +20,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("IdentitySelectPage");
+    Globals.analytics.trackPage("AccountSelect");
   }
 
   @override
@@ -39,7 +39,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
                       SizedBox(height: 50),
                       Section(text: getText(context, "action.addAnIdentity")),
                       ListItem(
-                          mainText: getText(context, "action.createANewIdentity"),
+                          mainText:
+                              getText(context, "action.createANewIdentity"),
                           icon: FeatherIcons.plusCircle,
                           onTap: () => createNew(context)),
                       ListItem(

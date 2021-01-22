@@ -36,7 +36,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("IdentityCreatePage");
+    Globals.analytics.trackPage("IdentityCreate");
   }
 
   @override

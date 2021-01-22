@@ -21,7 +21,7 @@ class _IdentityBackupPageState extends State<IdentityBackupPage> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("IdentityBackupPage");
+    Globals.analytics.trackPage("IdentityMnemonic");
   }
 
   Widget renderOkButton() {

@@ -27,7 +27,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
   @override
   void initState() {
     super.initState();
-    Globals.analytics.trackPage("IdentityRestorePage");
+    Globals.analytics.trackPage("RecoveryMnemonicInput");
 
     Future.delayed(Duration(milliseconds: 100)).then((_) {
       FocusScope.of(context).requestFocus(nameNode);
@@ -75,8 +75,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
     }
 
     try {
-      final w =
-          await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
+      final w = await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
       showMessage(getText(context, "error.theWordsYouEnteredAreNotValid"),
@@ -90,6 +89,7 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
           fullscreenDialog: true,
           builder: (context) => PatternCreateModal(canGoBack: true)),
     );
+    Globals.analytics.trackPage("RecoverySuccess");
 
     if (patternEncryptionKey == null) {
       return;
@@ -107,8 +107,8 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
         // TODO: Compare by identityId instead of rootPublicKey
         if (!Globals.accountPool.value[i].identity.hasValue)
           continue;
-        else if (Globals.accountPool
-                .value[i].identity.value.keys[0].rootPublicKey !=
+        else if (Globals
+                .accountPool.value[i].identity.value.keys[0].rootPublicKey !=
             newAccount.identity.value.keys[0].rootPublicKey) continue;
         newIndex = i;
         break;

@@ -39,7 +39,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void initState() {
     super.initState();
 
-    Globals.analytics.trackPage("PollPackagingPage",
+    Globals.analytics.trackPage("PollVote",
         entityId: widget.process.entityId, processId: widget.process.processId);
 
     _currentStep = 0;
