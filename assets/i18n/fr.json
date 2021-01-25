@@ -9,6 +9,7 @@
     "action.removeAccount": "Supprimer le compte",
     "action.scanQrCode": "Scanner le code QR",
     "action.submit": "Soumettre",
+    "action.viewAppLogs": "",
     "error.couldNotCheckTheProcessStatus": "Impossible de vérifier l'état du processus",
     "error.couldNotCheckTheVoteStatus": "Impossible de vérifier l'état du vote",
     "error.couldNotFetchTheEntityDetails": "Impossible de récupérer les détails de l'entité",
