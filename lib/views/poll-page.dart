@@ -5,16 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
-import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'dart:async';
 import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
-import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:vocdoni/lib/logger.dart';
-import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -26,6 +23,7 @@ import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:vocdoni/widgets/poll-question.dart';
+import 'package:vocdoni/widgets/process-status.dart';
 
 class PollPageArgs {
   EntityModel entity;
@@ -114,58 +112,10 @@ class _PollPageState extends State<PollPage> {
     return process
         .refreshHasVoted()
         .then((_) => process.refreshResults())
-        .then((_) => process.refreshIsInCensus())
+        // .then((_) => process.refreshIsInCensus())
         .then((_) => process.refreshCurrentParticipants())
         .then((_) => process.refreshDates())
         .catchError((err) => logger.log(err)); // Values will refresh if needed
-  }
-
-  Future<void> onCheckCensus(BuildContext context) async {
-    if (Globals.appState.currentAccount == null) {
-      // NOTE: Keep the comment to force i18n key parsing
-      // getText(context, "main.cannotCheckTheCensus")
-      process.isInCensus.setError("main.cannotCheckTheCensus");
-      return;
-    }
-    final account = Globals.appState.currentAccount;
-
-    // Ensure that we have the public key
-    if (!Globals.appState.currentAccount
-        .hasPublicKeyForEntity(entity.reference.entityId)) {
-      // Ask the pattern
-      final route = MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (context) => PatternPromptModal(account));
-      final patternEncryptionKey = await Navigator.push(context, route);
-
-      if (patternEncryptionKey == null)
-        return;
-      else if (patternEncryptionKey is InvalidPatternError) {
-        showMessage(getText(context, "main.thePatternYouEnteredIsNotValid"),
-            context: context, purpose: Purpose.DANGER);
-        return;
-      }
-
-      // Good
-      final mnemonic = Symmetric.decryptString(
-          account.identity.value.keys[0].encryptedMnemonic,
-          patternEncryptionKey);
-      if (mnemonic == null) {
-        // NOTE: Keep the comment to force i18n key parsing
-        // getText(context, "main.cannotAccessTheWallet")
-        process.isInCensus.setError("main.cannotAccessTheWallet");
-        return;
-      }
-
-      final wallet = EthereumWallet.fromMnemonic(mnemonic,
-          entityAddressHash: entity.reference.entityId);
-
-      account.setPublicKeyForEntity(
-          await wallet.publicKeyAsync(uncompressed: true),
-          entity.reference.entityId);
-    }
-
-    process.refreshIsInCensus(force: true);
   }
 
   @override
@@ -229,8 +179,8 @@ class _PollPageState extends State<PollPage> {
 
     children.add(buildTitle(context, entity));
     children.add(buildSummary());
+    children.add(ProcessStatus(process, entity));
     children.add(buildPollItem(context));
-    children.add(buildCensusItem(context));
     children.add(buildTimeItem(context));
     if (process.metadata.value.type.contains("encrypted")) {
       children.add(buildEncryptedItem(context));
@@ -280,54 +230,6 @@ class _PollPageState extends State<PollPage> {
     return HtmlSummary(
         htmlString: process.metadata.value.details
             .description[Globals.appState.currentLanguage]);
-  }
-
-  buildCensusItem(BuildContext context) {
-    return EventualBuilder(
-      notifier: process.isInCensus,
-      builder: (ctx, _, __) {
-        String text;
-        Purpose purpose;
-        IconData icon;
-
-        if (!Globals.appState.currentAccount
-            .hasPublicKeyForEntity(entity.reference.entityId)) {
-          // We don't have the user's public key, probably because the entity was unknown when all
-          // public keys were precomputed. Ask for the pattern.
-          text = getText(context, "action.checkTheCensus");
-        } else if (process.isInCensus.isLoading) {
-          text = getText(context, "status.checkingTheCensus");
-          purpose = Purpose.GUIDE;
-        } else if (process.isInCensus.hasValue) {
-          if (process.isInCensus.value) {
-            text = getText(context, "status.youAreInTheCensus");
-            purpose = Purpose.GOOD;
-            icon = FeatherIcons.check;
-          } else {
-            text = getText(context, "error.youAreNotInTheCensus");
-            purpose = Purpose.DANGER;
-            icon = FeatherIcons.x;
-          }
-        } else if (process.isInCensus.hasError) {
-          // translate the key from setError()
-          text = getText(context, process.isInCensus.errorMessage);
-          purpose = Purpose.DANGER;
-          icon = FeatherIcons.alertTriangle;
-        } else {
-          text = getText(context, "action.checkCensusState");
-        }
-
-        return ListItem(
-          icon: FeatherIcons.users,
-          mainText: text,
-          isSpinning: process.isInCensus.isLoading,
-          onTap: () => onCheckCensus(context),
-          rightTextPurpose: purpose,
-          rightIcon: icon,
-          purpose: purpose ?? Purpose.NONE,
-        );
-      },
-    );
   }
 
   buildPollItem(BuildContext context) {
