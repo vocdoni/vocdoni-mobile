@@ -168,11 +168,11 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
 
       logger.log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
-          networkId: AppConfig.NETWORK_ID,
+          networkId: AppConfig.networkId,
           useTestingContracts: AppConfig.useTestingContracts());
 
       logger.log("[App] Gateway Pool ready");
-      AppNetworking.setGateways(gateways, AppConfig.NETWORK_ID);
+      AppNetworking.setGateways(gateways, AppConfig.networkId);
 
       this.bootnodeInfo.setValue(bnGatewayInfo);
     } catch (err) {

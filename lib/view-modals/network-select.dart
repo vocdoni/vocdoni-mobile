@@ -14,25 +14,25 @@ import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/views/startup-page.dart';
 
-EventualNotifier<List<String>> availableBootnodes = EventualNotifier([
-  "https://bootnodes.vocdoni.net/gateways.json",
-  "https://bootnodes.vocdoni.net/gateways.stg.json",
-  "https://bootnodes.vocdoni.net/gateways.dev.json",
+EventualNotifier<List<String>> availableNetworks = EventualNotifier([
+  "xdai",
+  "goerli",
+  "sokol",
 ]);
 
-class BootnodeSelectPage extends StatefulWidget {
+class NetworkSelectPage extends StatefulWidget {
   @override
-  _BootnodeSelectPageState createState() => _BootnodeSelectPageState();
+  _NetworkSelectPageState createState() => _NetworkSelectPageState();
 }
 
-class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
-  bool isLoadingBootnode;
-  String currentUrl;
+class _NetworkSelectPageState extends State<NetworkSelectPage> {
+  bool isLoadingNetwork;
+  String currentNetworkId;
 
   @override
   void initState() {
-    isLoadingBootnode = false;
-    currentUrl = AppConfig.bootnodesUrl;
+    isLoadingNetwork = false;
+    currentNetworkId = AppConfig.networkId;
     super.initState();
   }
 
@@ -40,29 +40,29 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
   Widget build(ctx) {
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(ctx, "title.bootnodeUrl"),
+        title: getText(ctx, "main.networkId"),
       ),
       body: EventualBuilder(
-        notifier: availableBootnodes,
+        notifier: availableNetworks,
         builder: (BuildContext context, _, __) {
-          List<Widget> urlList = availableBootnodes.value
-              .map((url) => buildBootnodeItem(ctx, url))
+          List<Widget> networkIdList = availableNetworks.value
+              .map((networkId) => buildNetworkItem(ctx, networkId))
               .toList();
-          if (!availableBootnodes.value.contains(currentUrl)) {
-            urlList.add(buildBootnodeItem(ctx, currentUrl));
+          if (!availableNetworks.value.contains(currentNetworkId)) {
+            networkIdList.add(buildNetworkItem(ctx, currentNetworkId));
           }
           return Column(
             children: [
               Expanded(
                   child: ListView(
-                children: urlList,
+                children: networkIdList,
               )),
               FloatingActionButton(
                 onPressed: () => onAddUrl(ctx),
                 backgroundColor: colorBlue,
                 child: Icon(FeatherIcons.plusCircle),
                 elevation: 5.0,
-                tooltip: getText(ctx, "action.addbootnodeUrl"),
+                tooltip: getText(ctx, "action.addNetworkId"),
               ).withBottomPadding(15),
             ],
           );
@@ -71,44 +71,44 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
     );
   }
 
-  Widget buildBootnodeItem(BuildContext context, String url) {
+  Widget buildNetworkItem(BuildContext context, String networkId) {
     return ListItem(
-        mainText: url,
+        mainText: networkId,
         mainTextMultiline: 3,
-        isSpinning: currentUrl == url && isLoadingBootnode,
-        rightIcon: currentUrl == url
+        isSpinning: currentNetworkId == networkId && isLoadingNetwork,
+        rightIcon: currentNetworkId == networkId
             ? Globals.appState.bootnodeInfo.hasError
                 ? FeatherIcons.x
                 : FeatherIcons.check
             : FeatherIcons.target,
-        onTap: buildOnTap(context, url));
+        onTap: buildOnTap(context, networkId));
   }
 
-  Function() buildOnTap(BuildContext context, String url) {
+  Function() buildOnTap(BuildContext context, String networkId) {
     return () async {
       setState(() {
-        currentUrl = url;
-        isLoadingBootnode = true;
+        currentNetworkId = networkId;
+        isLoadingNetwork = true;
       });
       try {
-        await AppConfig.setBootnodesUrlOverride(url);
+        await AppConfig.setNetworkOverride(networkId);
       } catch (err) {
         logger.log("$err");
         showAlert(
-            getText(context, "main.bootnodeUrl") +
+            getText(context, "main.networkId") +
                 " " +
-                url +
+                networkId +
                 " " +
                 getText(context, "main.mayBeInvalid"),
-            title: getText(context, "main.unableToFetchBootnodeGateways"),
+            title: getText(context, "main.unableToConnectToNetwork"),
             context: context);
         setState(() {
-          isLoadingBootnode = false;
+          isLoadingNetwork = false;
         });
         return;
       }
       setState(() {
-        isLoadingBootnode = false;
+        isLoadingNetwork = false;
       });
       Globals.appState.bootnodeInfo.setValue(null);
       Globals.appState.writeToStorage();
@@ -129,7 +129,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
       builder: (context) {
         String newUrl;
         return AlertDialog(
-          title: Text(getText(context, "action.addbootnodeUrl")),
+          title: Text(getText(context, "action.addNetworkId")),
           content: TextField(
             onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
@@ -154,9 +154,9 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
                       context: context);
                   return;
                 }
-                List<String> urlList = availableBootnodes.value;
-                urlList.add(newUrl);
-                availableBootnodes.setValue(urlList);
+                List<String> networkIdList = availableNetworks.value;
+                networkIdList.add(newUrl);
+                availableNetworks.setValue(networkIdList);
                 Navigator.of(context).pop(true);
               },
             )

@@ -13,6 +13,7 @@ import 'package:vocdoni/lib/logger.dart';
 
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
 String _bootnodesUrlOverride;
+String _networkOverride;
 PackageInfo _packageInfo;
 AndroidDeviceInfo _androidInfo;
 IosDeviceInfo _iosInfo;
@@ -35,8 +36,19 @@ class AppConfig {
     }
   }
 
+  static setNetworkOverride(String network) async {
+    try {
+      _networkOverride = network;
+      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static String get bootnodesUrl =>
       _bootnodesUrlOverride ?? _GATEWAY_BOOTNODES_URL;
+
+  static String get networkId => _networkOverride ?? NETWORK_ID;
 
   // CONFIG VARS
   static const _GATEWAY_BOOTNODES_URL = String.fromEnvironment(
@@ -48,7 +60,7 @@ class AppConfig {
 
   static const NETWORK_ID = String.fromEnvironment(
     "NETWORK_ID",
-    defaultValue: _appMode == "dev" ? "sokol" : "xdai",
+    defaultValue: _appMode == "dev" ? "goerli" : "xdai",
   );
 
   static const LINKING_DOMAIN = String.fromEnvironment(

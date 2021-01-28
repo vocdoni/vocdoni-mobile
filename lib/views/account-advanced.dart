@@ -11,6 +11,7 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 import 'package:vocdoni/view-modals/language-select.dart';
+import 'package:vocdoni/view-modals/network-select.dart';
 import 'package:vocdoni/views/app-logs.dart';
 
 class AccountAdvanced extends StatefulWidget {
@@ -50,6 +51,18 @@ class _AccountAdvancedState extends State<AccountAdvanced> {
                         MaterialPageRoute(
                             fullscreenDialog: true,
                             builder: (context) => BootnodeSelectPage()),
+                      );
+                    },
+                    icon: FeatherIcons.radio,
+                  ),
+                  ListItem(
+                    mainText: getText(context, "main.setNetworkId"),
+                    onTap: () {
+                      Navigator.push(
+                        ctx,
+                        MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => NetworkSelectPage()),
                       );
                     },
                     icon: FeatherIcons.radio,
