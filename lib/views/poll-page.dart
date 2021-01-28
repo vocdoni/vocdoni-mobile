@@ -51,9 +51,11 @@ class _PollPageState extends State<PollPage> {
     refreshCheck = Timer.periodic(Duration(seconds: 1), (_) async {
       refreshCounter++;
       // Force date refresh if now < startDate < now + 1
-      final isStarting = process.startDate.value.isAfter(DateTime.now()) &&
-          process.startDate.value
-              .isBefore(DateTime.now().add(Duration(minutes: 1)));
+      final isStarting =
+          (process.startDate?.value?.isAfter(DateTime.now()) ?? false) &&
+              (process.startDate?.value
+                      ?.isBefore(DateTime.now().add(Duration(minutes: 1))) ??
+                  false);
       // Refresh dates every second when process is near to starting time
       await process.refreshDates(force: isStarting);
       // Refresh everything else every 30 seconds

@@ -40,23 +40,24 @@ class _CardPollState extends State<CardPoll> {
     refreshCheck = Timer.periodic(Duration(seconds: 1), (_) async {
       refreshCounter++;
       bool isStartingOrEnding = false;
+      final now = DateTime.now();
       if (this.widget.process.startDate.hasValue &&
-          this.widget.process.startDate.value.isAfter(DateTime.now()) &&
+          this.widget.process.startDate.value.isAfter(now) &&
           this
               .widget
               .process
               .startDate
               .value
-              .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
+              .isBefore(now.add(Duration(minutes: 1)))) {
         isStartingOrEnding = true;
       } else if (this.widget.process.endDate.hasValue &&
-          this.widget.process.endDate.value.isAfter(DateTime.now()) &&
+          this.widget.process.endDate.value.isAfter(now) &&
           this
               .widget
               .process
               .endDate
               .value
-              .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
+              .isBefore(now.add(Duration(minutes: 1)))) {
         isStartingOrEnding = true;
       }
 
@@ -64,7 +65,9 @@ class _CardPollState extends State<CardPoll> {
       await this.widget.process.refreshDates(force: isStartingOrEnding);
       // Refresh everything else every 30 seconds, if process is active
       if (refreshCounter % 30 == 0 &&
+          this.widget.process.startDate.hasValue &&
           this.widget.process.startDate.value.isBefore(DateTime.now()) &&
+          this.widget.process.endDate.hasValue &&
           this
               .widget
               .process

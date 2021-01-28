@@ -258,6 +258,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
         this.metadata.setToLoading();
 
+        print(reference.entityId);
         freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
@@ -278,7 +279,6 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
 
       this.metadata.setError("The entity's data cannot be fetched",
           keepPreviousValue: true);
-      throw err;
     }
     // if at this point there is no metadata, skip
     if (this.metadata.hasError || !this.metadata.hasValue)

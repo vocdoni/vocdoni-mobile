@@ -54,6 +54,8 @@ class _ProcessStatusState extends State<ProcessStatus> {
           rightWidget: processStatus.rightWidget,
           secondaryTextMultiline: 3,
           secondaryTextVerticalSpace: 4,
+          verticalPadding: 5,
+          // purpose: Purpose.DANGER,
         );
       },
     );
@@ -74,7 +76,8 @@ class _ProcessStatusState extends State<ProcessStatus> {
     // TODO implement registration phase
 
 // If census is loading, set status & return
-    if (widget.process.isInCensus.isLoading) {
+    if (widget.process.isInCensus.isLoading &&
+        (!(widget.process.hasVoted?.value ?? false))) {
       processStatus.mainText = getText(context, "status.checkingTheCensus");
       processStatus.loading = true;
       return processStatus;
@@ -138,7 +141,6 @@ class _ProcessStatusState extends State<ProcessStatus> {
         widget.process.startDate.isLoading) {
       // start date is loading: display spinner, but still try using cached dates
       widget.process.refreshDates();
-      processStatus.loading = true;
     }
 
     // If cached start date does not exist, refresh dates & return loading status
@@ -170,7 +172,6 @@ class _ProcessStatusState extends State<ProcessStatus> {
     if (!widget.process.endDate.hasValue || widget.process.endDate.isLoading) {
       // end date is loading: display spinner, but still try using cached dates
       widget.process.refreshDates();
-      processStatus.loading = true;
     }
 
     // If cached end date does not exist, refresh dates & return loading status
