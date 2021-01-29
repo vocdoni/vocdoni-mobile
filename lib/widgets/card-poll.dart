@@ -12,6 +12,7 @@ import 'package:vocdoni/lib/makers.dart';
 import 'package:vocdoni/lib/logger.dart';
 import "package:vocdoni/constants/meta-keys.dart";
 import 'package:eventual/eventual-builder.dart';
+import 'package:vocdoni/lib/util/process-date-text.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:dvote_common/widgets/baseCard.dart';
 import 'package:dvote_common/widgets/dashboardItem.dart';
@@ -126,14 +127,16 @@ class _CardPollState extends State<CardPoll> {
       // TODO: CHECK IF CANCELED
       if (now.isAfter(endDate)) {
         timeLabel = getText(context, "main.ended");
-        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
+        timeLeft = getFriendlyTimeDifference(
+            this.widget.process.endDate.value, context);
       } else if (now.isAfter(startDate)) {
         timeLabel = getText(context, "main.timeLeft");
-        timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
+        timeLeft = getFriendlyTimeDifference(
+            this.widget.process.endDate.value, context);
       } else {
         timeLabel = getText(context, "main.startingIn");
-        timeLeft =
-            getFriendlyTimeDifference(this.widget.process.startDate.value);
+        timeLeft = getFriendlyTimeDifference(
+            this.widget.process.startDate.value, context);
       }
       dateLoaded = true;
     } else if (endDate is DateTime) {
@@ -143,7 +146,8 @@ class _CardPollState extends State<CardPoll> {
       else
         timeLabel = getText(context, "main.ended");
 
-      timeLeft = getFriendlyTimeDifference(this.widget.process.endDate.value);
+      timeLeft =
+          getFriendlyTimeDifference(this.widget.process.endDate.value, context);
       dateLoaded = true;
     } else if (startDate is DateTime) {
       // Refer to startDate
@@ -152,7 +156,8 @@ class _CardPollState extends State<CardPoll> {
       else
         timeLabel = getText(context, "main.started");
 
-      timeLeft = getFriendlyTimeDifference(this.widget.process.startDate.value);
+      timeLeft = getFriendlyTimeDifference(
+          this.widget.process.startDate.value, context);
       dateLoaded = true;
     }
 
@@ -231,34 +236,6 @@ class _CardPollState extends State<CardPoll> {
   String getFriendlyParticipation(double participation) {
     if (participation == 100.0) return "100";
     return participation.toStringAsPrecision(2);
-  }
-
-  String getFriendlyTimeDifference(DateTime date) {
-    if (!(date is DateTime)) return throw Exception("Invalid date");
-
-    Duration diff = date.difference(DateTime.now());
-    if (diff.isNegative) diff = DateTime.now().difference(date);
-
-    if (diff.inSeconds <= 0)
-      return getText(context, "main.now");
-    else if (diff.inDays >= 365)
-      return getText(context, "main.numY")
-          .replaceFirst("{{NUM}}", (diff.inDays / 365).floor().toString());
-    else if (diff.inDays >= 30)
-      return getText(context, "main.numMo")
-          .replaceFirst("{{NUM}}", (diff.inDays / 28).floor().toString());
-    else if (diff.inDays >= 1)
-      return getText(context, "main.numD")
-          .replaceFirst("{{NUM}}", diff.inDays.toString());
-    else if (diff.inHours >= 1)
-      return getText(context, "main.numH")
-          .replaceFirst("{{NUM}}", diff.inHours.toString());
-    else if (diff.inMinutes >= 1)
-      return getText(context, "main.numMin")
-          .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
-    else
-      return getText(context, "main.numS")
-          .replaceFirst("{{NUM}}", "~" + diff.inSeconds.toString());
   }
 
   onCardTapped(BuildContext context) {

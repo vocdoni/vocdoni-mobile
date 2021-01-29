@@ -12,6 +12,7 @@ import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/logger.dart';
+import 'package:vocdoni/lib/util/process-date-text.dart';
 import 'package:vocdoni/views/poll-packaging-page.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -149,15 +150,23 @@ class _PollPageState extends State<PollPage> {
           avatarUrl =
               processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
 
+        String statusText = "";
+        if (process.metadata?.value?.type != null)
+          statusText = process.metadata.value.type.contains("encrypted")
+              ? getText(context, "main.encryptedVote")
+              : getText(context, "main.publicVote");
+        if (statusText.length > 1)
+          statusText = statusText[0].toUpperCase() + statusText.substring(1);
         return ScaffoldWithImage(
           headerImageUrl: headerUrl ?? "",
           headerTag: headerUrl == null
               ? null
               : makeElementTag(
                   entity.reference.entityId, process.processId, listIdx),
-          avatarUrl: avatarUrl,
-          avatarText:
-              entity.metadata.value.name[Globals.appState.currentLanguage],
+          leftOverlayText: statusText,
+          // avatarUrl: avatarUrl,
+          // avatarText:
+          // entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
           appBarTitle: getText(context, "main.vote"),
           actionsBuilder: (context) => [
@@ -178,11 +187,12 @@ class _PollPageState extends State<PollPage> {
   List<Widget> getScaffoldChildren(BuildContext context, EntityModel entity) {
     List<Widget> children = [];
     if (!process.metadata.hasValue) return children;
+    // process.metadata.value.details.description["default"] =
+    // "Folly words widow one downs few age every seven. If miss part by fact he park just shew. Discovered had get considered projection who favourable. Necessary up knowledge it tolerably. Unwilling departure education is be dashwoods or an. Use off agreeable law unwilling sir deficient curiosity instantly. Easy mind life fact with see has bore ten. Parish any chatty can elinor direct for former. Up as meant widow equal an share least. ";
 
     children.add(buildTitle(context, entity));
-    children.add(buildSummary());
     children.add(ProcessStatus(process, entity));
-    children.add(buildPollItem(context));
+    children.add(buildSummary());
     children.add(buildTimeItem(context));
     if (process.metadata.value.type.contains("encrypted")) {
       children.add(buildEncryptedItem(context));
@@ -210,6 +220,7 @@ class _PollPageState extends State<PollPage> {
       builder: (context, _, __) => ListItem(
         // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
         mainText: title,
+        rightText: parseProcessDate(process, context),
         mainTextMultiline: 3,
         secondaryText: entity.metadata.hasValue
             ? entity.metadata.value.name[Globals.appState.currentLanguage]
@@ -232,17 +243,6 @@ class _PollPageState extends State<PollPage> {
     return HtmlSummary(
         htmlString: process.metadata.value.details
             .description[Globals.appState.currentLanguage]);
-  }
-
-  buildPollItem(BuildContext context) {
-    return ListItem(
-      icon: FeatherIcons.barChart2,
-      mainText: process.metadata.value.type.contains("encrypted")
-          ? getText(context, "main.encryptedVote")
-          : getText(context, "main.publicVote"),
-      rightIcon: null,
-      disabled: false,
-    );
   }
 
   buildTimeItem(BuildContext context) {
