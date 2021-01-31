@@ -1,3 +1,8 @@
+import 'package:vocdoni/lib/logger.dart';
+import 'package:web3dart/credentials.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:convert/convert.dart';
+import 'package:dvote/api/voting.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:dvote_common/widgets/toast.dart';
@@ -12,7 +17,6 @@ import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
-import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 
 class ProcessStatusDigest {
@@ -229,7 +233,27 @@ class _ProcessStatusState extends State<ProcessStatus> {
       processStatus.secondaryText =
           getText(context, "main.voteCorrectlyCounted");
       processStatus.rightWidget = FlatButton(
-        onPressed: () => {}, // TODO link to explorer
+        onPressed: () async {
+          try {
+            // final hexPubKey = Globals.appState.currentAccount
+            //     .getPublicKeyForEntity(widget.process.entityId);
+            // final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
+
+            // final addrBytes = publicKeyToAddress(publicKeyBytes);
+            // final userAddress = EthereumAddress(addrBytes).hexEip55;
+            // final pollNullifier = await getSignedVoteNullifier(
+            //     userAddress, widget.process.processId);
+            // launchUrl(
+            //     AppConfig.vochainExplorerUrl + "/envelope/" + pollNullifier);
+            // TODO link to this nullifier. Need explorer envelope by nullifier URL
+            String processId = widget.process.processId;
+            if (processId.startsWith("0x")) processId = processId.substring(2);
+            launchUrl(AppConfig.vochainExplorerUrl + "/process/" + processId);
+          } catch (err) {
+            showMessage(getText(context, "error.invalidUrl"),
+                context: context, purpose: Purpose.DANGER);
+          }
+        },
         child: Icon(
           FeatherIcons.check,
           color: colorGreenPale,

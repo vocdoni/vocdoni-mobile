@@ -74,6 +74,12 @@ class AppConfig {
   static const VOCDONI_FAQ_NOT_IN_CENSUS_URL =
       "https://vocdoni.io"; // TODO update
 
+  static String get vochainExplorerUrl {
+    if (bootnodesUrl.contains("dev")) return "https://explorer.dev.vocdoni.net";
+    if (bootnodesUrl.contains("stg")) return "https://explorer.stg.vocdoni.net";
+    return "https://explorer.vocdoni.net";
+  }
+
   static setPackageInfo() async {
     try {
       _packageInfo = await PackageInfo.fromPlatform();
