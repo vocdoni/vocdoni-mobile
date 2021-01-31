@@ -70,6 +70,10 @@ class AppConfig {
 
   static const IPFS_DOMAIN = "https://ipfs.io/ipfs/";
 
+  static const VOCDONI_FAQ_URL = "https://vocdoni.io"; // TODO update
+  static const VOCDONI_FAQ_NOT_IN_CENSUS_URL =
+      "https://vocdoni.io"; // TODO update
+
   static setPackageInfo() async {
     try {
       _packageInfo = await PackageInfo.fromPlatform();

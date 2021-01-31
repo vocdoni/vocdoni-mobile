@@ -1,15 +1,18 @@
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 
 class ProcessStatusDigest {
@@ -25,8 +28,9 @@ class ProcessStatusDigest {
 class ProcessStatus extends StatefulWidget {
   final ProcessModel process;
   final EntityModel entity;
+  final Function() onScrollToVote;
 
-  ProcessStatus(this.process, this.entity);
+  ProcessStatus(this.process, this.entity, this.onScrollToVote);
 
   @override
   _ProcessStatusState createState() => _ProcessStatusState();
@@ -128,7 +132,14 @@ class _ProcessStatusState extends State<ProcessStatus> {
       processStatus.secondaryText =
           getText(context, "main.youCantVoteInThisProcess");
       processStatus.rightWidget = FlatButton(
-        onPressed: () => {}, // TODO not in census faq page
+        onPressed: () {
+          try {
+            launchUrl(AppConfig.VOCDONI_FAQ_NOT_IN_CENSUS_URL);
+          } catch (err) {
+            showMessage(getText(context, "error.invalidUrl"),
+                context: context, purpose: Purpose.DANGER);
+          }
+        },
         child: Icon(FeatherIcons.xCircle, color: colorRedPale),
       );
       return processStatus;
@@ -185,6 +196,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
     if (!widget.process.hasVoted.hasValue ||
         widget.process.hasVoted.isLoading) {
       widget.process.refreshHasVoted();
+      processStatus.mainText = getText(context, "status.checkingVoteStatus");
       processStatus.loading = true;
       return processStatus;
     }
@@ -194,7 +206,13 @@ class _ProcessStatusState extends State<ProcessStatus> {
       processStatus.mainText = getText(context, "status.notVotedYet");
       processStatus.secondaryText = getText(context, "action.scrollDownToVote");
       processStatus.rightWidget = FlatButton(
-        onPressed: () => {}, // TODO scroll down
+        onPressed: () {
+          try {
+            if (widget.onScrollToVote != null) widget.onScrollToVote();
+          } catch (err) {
+            logger.log(err.toString());
+          }
+        },
         child: Icon(
           FeatherIcons.xCircle,
           color: colorOrangePale,

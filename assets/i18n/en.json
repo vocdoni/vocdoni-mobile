@@ -263,6 +263,7 @@
     "main.yourRegistrationHasBeenHandled": "Your registration has been handled",
     "main.yourVoteHasAlreadyBeenRegistered": "Your vote has already been registered",
     "status.checkingTheCensus": "Checking the census",
+    "status.checkingVoteStatus": "Checking vote status",
     "status.checkingYourVote": "Checking your vote",
     "status.notInTheCensus": "Not in the census",
     "status.notVotedYet": "Not voted yet",

@@ -22,7 +22,6 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:vocdoni/widgets/poll-question.dart';
 import 'package:vocdoni/widgets/process-status.dart';
 
@@ -157,6 +156,9 @@ class _PollPageState extends State<PollPage> {
               : getText(context, "main.publicVote");
         if (statusText.length > 1)
           statusText = statusText[0].toUpperCase() + statusText.substring(1);
+
+        final scaffoldScrollController = ScrollController();
+
         return ScaffoldWithImage(
           headerImageUrl: headerUrl ?? "",
           headerTag: headerUrl == null
@@ -164,18 +166,16 @@ class _PollPageState extends State<PollPage> {
               : makeElementTag(
                   entity.reference.entityId, process.processId, listIdx),
           leftOverlayText: statusText,
-          // avatarUrl: avatarUrl,
-          // avatarText:
-          // entity.metadata.value.name[Globals.appState.currentLanguage],
           avatarHexSource: process.processId,
           appBarTitle: getText(context, "main.vote"),
           actionsBuilder: (context) => [
             buildShareButton(context, process.processId),
           ],
+          customScrollController: scaffoldScrollController,
           builder: Builder(
             builder: (ctx) => SliverList(
               delegate: SliverChildListDelegate(
-                getScaffoldChildren(ctx, entity),
+                getScaffoldChildren(ctx, entity, scaffoldScrollController),
               ),
             ),
           ),
@@ -184,23 +184,22 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  List<Widget> getScaffoldChildren(BuildContext context, EntityModel entity) {
+  List<Widget> getScaffoldChildren(BuildContext ctx, EntityModel entity,
+      ScrollController scaffoldScrollController) {
     List<Widget> children = [];
     if (!process.metadata.hasValue) return children;
-    // process.metadata.value.details.description["default"] =
-    // "Folly words widow one downs few age every seven. If miss part by fact he park just shew. Discovered had get considered projection who favourable. Necessary up knowledge it tolerably. Unwilling departure education is be dashwoods or an. Use off agreeable law unwilling sir deficient curiosity instantly. Easy mind life fact with see has bore ten. Parish any chatty can elinor direct for former. Up as meant widow equal an share least. ";
 
-    children.add(buildTitle(context, entity));
-    children.add(ProcessStatus(process, entity));
+    children.add(buildTitle(ctx, entity));
+    children.add(ProcessStatus(
+        process, entity, onScrollToBottom(scaffoldScrollController, ctx)));
     children.add(buildSummary());
-    children.add(buildTimeItem(context));
-    if (process.metadata.value.type.contains("encrypted")) {
-      children.add(buildEncryptedItem(context));
+    if (process.metadata?.value?.type?.contains("encrypted") ?? false) {
+      children.add(buildEncryptedItem(ctx));
     }
-    children.addAll(buildQuestions(context));
+    children.addAll(buildQuestions(ctx));
     children.add(Section(withDectoration: false));
     children.add(buildSubmitInfo());
-    children.add(buildSubmitVoteButton(context));
+    children.add(buildSubmitVoteButton(ctx));
 
     return children;
   }
@@ -243,54 +242,6 @@ class _PollPageState extends State<PollPage> {
     return HtmlSummary(
         htmlString: process.metadata.value.details
             .description[Globals.appState.currentLanguage]);
-  }
-
-  buildTimeItem(BuildContext context) {
-    // Rebuild when the reference block changes
-    return EventualBuilder(
-      notifiers: [process.metadata, process.startDate, process.endDate],
-      builder: (context, _, __) {
-        String rowText;
-        Purpose purpose;
-        final now = DateTime.now();
-
-        if (process.startDate.hasValue &&
-            now.isBefore(process.startDate.value)) {
-          // TODO: Localize date formats
-          final formattedTime =
-              DateFormat("dd/MM HH:mm").format(process.startDate.value) + "h";
-          rowText = getText(context, "main.startingOnDate")
-              .replaceFirst("{{DATE}}", formattedTime);
-          purpose = Purpose.WARNING;
-        } else if (process.endDate.hasValue) {
-          // TODO: Localize date formats
-          final formattedTime =
-              DateFormat("dd/MM HH:mm").format(process.endDate.value) + "h";
-
-          if (process.endDate.value.isBefore(now)) {
-            rowText = getText(context, "main.endedOnDate")
-                .replaceFirst(("{{DATE}}"), formattedTime);
-            purpose = Purpose.WARNING;
-          } else {
-            rowText = getText(context, "main.endingOnDate")
-                .replaceFirst(("{{DATE}}"), formattedTime);
-            purpose = Purpose.GOOD;
-          }
-        }
-
-        if (rowText is! String) return Container();
-
-        return ListItem(
-          icon: FeatherIcons.clock,
-          isSpinning: process.startDate.isLoading || process.endDate.isLoading,
-          purpose: purpose,
-          mainText: rowText,
-          //secondaryText: "18/09/2019 at 19:00",
-          rightIcon: null,
-          disabled: false,
-        );
-      },
-    );
   }
 
   buildEncryptedItem(BuildContext context) {
@@ -566,5 +517,15 @@ class _PollPageState extends State<PollPage> {
         ),
       ),
     );
+  }
+
+  Function() onScrollToBottom(
+      ScrollController controller, BuildContext context) {
+    return () {
+      if (controller != null) {
+        controller.animateTo(controller.position.maxScrollExtent,
+            duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+      }
+    };
   }
 }
