@@ -59,6 +59,11 @@
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/validation" />
+                
+                <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/entities" />
+                <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/processes" />
+                <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/posts" />
+                <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/validation" />
             </intent-filter>
 
             <!-- Push notifications -->
