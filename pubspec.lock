@@ -144,11 +144,9 @@ packages:
   dvote_common:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "961a5140030869d2f920ab92bec290586da229d0"
-      resolved-ref: "961a5140030869d2f920ab92bec290586da229d0"
-      url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
-    source: git
+      path: "../dvote-flutter-common"
+      relative: true
+    source: path
     version: "0.1.2"
   dvote_crypto:
     dependency: transitive

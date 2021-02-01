@@ -24,9 +24,10 @@ dependencies:
   # dvote: ^0.18.0  # Ok on Android (native crypto)
   dvote: ^0.18.7  # Needed for iOS (dart crypto)
   dvote_common:
-    git:
-      url: https://gitlab.com/vocdoni/dvote-flutter-common.git
-      ref: 961a5140030869d2f920ab92bec290586da229d0
+    path: ../dvote-flutter-common
+  #   git:
+  #     url: https://gitlab.com/vocdoni/dvote-flutter-common.git
+  #     ref: 961a5140030869d2f920ab92bec290586da229d0
   eventual: ^0.10.2
   protobuf: ^1.0.1
   uni_links: ^0.4.0

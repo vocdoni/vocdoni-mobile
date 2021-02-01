@@ -180,18 +180,23 @@ class _PollQuestionState extends State<PollQuestion> {
       return Chip(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20))),
-        backgroundColor: colorLightGuide,
+            borderRadius: BorderRadius.all(Radius.circular(4))),
+        backgroundColor: Colors.black.withOpacity(0.08),
         padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-        label: Text(
-          voteOption.title[Globals.appState.currentLanguage],
-          overflow: TextOverflow.ellipsis,
-          maxLines: 5,
-          style: TextStyle(
-            fontSize: fontSizeSecondary,
-            fontWeight: fontWeightRegular,
-            color: colorDescription,
-          ),
+        label: Row(
+          children: [
+            Text(
+              voteOption.title[Globals.appState.currentLanguage],
+              overflow: TextOverflow.ellipsis,
+              maxLines: 5,
+              style: TextStyle(
+                fontSize: fontSizeSecondary,
+                fontWeight: fontWeightRegular,
+                color: colorDescription,
+              ),
+            ),
+            Spacer(),
+          ],
         ),
       ).withHPadding(paddingPage).withVPadding(6.0);
     }
@@ -199,20 +204,29 @@ class _PollQuestionState extends State<PollQuestion> {
     return ChoiceChip(
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20))),
-      backgroundColor: colorLightGuide,
+          borderRadius: BorderRadius.all(Radius.circular(4))),
+      backgroundColor: colorVoteOption,
       selectedColor: colorBlue,
       padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
-      label: Text(
-        voteOption.title['default'],
-        overflow: TextOverflow.ellipsis,
-        maxLines: 5,
-        style: TextStyle(
-            fontSize: fontSizeSecondary,
-            fontWeight: fontWeightRegular,
-            color: widget.choice == voteOption.value
-                ? Colors.white
-                : colorDescription),
+      label: Row(
+        children: [
+          Container(
+            child: Flexible(
+              child: Text(
+                voteOption.title['default'],
+                overflow: TextOverflow.ellipsis,
+                maxLines: 5,
+                style: TextStyle(
+                    fontSize: fontSizeSecondary,
+                    fontWeight: fontWeightRegular,
+                    color: widget.choice == voteOption.value
+                        ? Colors.white
+                        : colorDescription),
+              ),
+            ),
+          ),
+          // Spacer(),
+        ],
       ),
       selected: widget.choice == voteOption.value,
       onSelected: (bool selected) {
