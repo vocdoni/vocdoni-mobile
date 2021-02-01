@@ -258,7 +258,6 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
         this.metadata.setToLoading();
 
-        print(reference.entityId);
         freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 

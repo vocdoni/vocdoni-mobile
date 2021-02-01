@@ -1,3 +1,4 @@
+import 'package:eventual/eventual-notifier.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
@@ -24,7 +25,7 @@ class ProcessStatusDigest {
   String secondaryText;
   Widget rightWidget;
   IconData leftIcon;
-  bool loading = false;
+  EventualNotifier<bool> loading = EventualNotifier<bool>(false);
 
   ProcessStatusDigest();
 }
@@ -54,16 +55,21 @@ class _ProcessStatusState extends State<ProcessStatus> {
       ],
       builder: (ctx, _, __) {
         final processStatus = _digestProcessStatus(context);
-        return ListItem(
-          icon: processStatus.leftIcon,
-          mainText: processStatus.mainText,
-          secondaryText: processStatus.secondaryText,
-          isSpinning: processStatus.loading,
-          rightWidget: processStatus.rightWidget,
-          secondaryTextMultiline: 3,
-          secondaryTextVerticalSpace: 4,
-          verticalPadding: 5,
-          // purpose: Purpose.DANGER,
+        return EventualBuilder(
+          notifier: processStatus.loading,
+          builder: (ctx, _, __) {
+            return ListItem(
+              icon: processStatus.leftIcon,
+              mainText: processStatus.mainText,
+              secondaryText: processStatus.secondaryText,
+              isSpinning: processStatus.loading.value,
+              rightWidget: processStatus.rightWidget,
+              secondaryTextMultiline: 3,
+              secondaryTextVerticalSpace: 4,
+              verticalPadding: 5,
+              // purpose: Purpose.DANGER,
+            );
+          },
         );
       },
     );
@@ -87,7 +93,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
     if (widget.process.isInCensus.isLoading &&
         (!(widget.process.hasVoted?.value ?? false))) {
       processStatus.mainText = getText(context, "status.checkingTheCensus");
-      processStatus.loading = true;
+      processStatus.loading.setValue(true);
       return processStatus;
     }
 
@@ -161,7 +167,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
     // If cached start date does not exist, refresh dates & return loading status
     if (cachedStartDate == null) {
       widget.process.refreshDates();
-      processStatus.loading = true;
+      processStatus.loading.setValue(true);
       return processStatus;
     }
 
@@ -192,7 +198,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
     // If cached end date does not exist, refresh dates & return loading status
     if (cachedEndDate == null) {
       widget.process.refreshDates();
-      processStatus.loading = true;
+      processStatus.loading.setValue(true);
       return processStatus;
     }
 
@@ -201,7 +207,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
         widget.process.hasVoted.isLoading) {
       widget.process.refreshHasVoted();
       processStatus.mainText = getText(context, "status.checkingVoteStatus");
-      processStatus.loading = true;
+      processStatus.loading.setValue(true);
       return processStatus;
     }
 
@@ -235,21 +241,20 @@ class _ProcessStatusState extends State<ProcessStatus> {
       processStatus.rightWidget = FlatButton(
         onPressed: () async {
           try {
-            // final hexPubKey = Globals.appState.currentAccount
-            //     .getPublicKeyForEntity(widget.process.entityId);
-            // final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
+            processStatus.loading.setValue(true);
+            final hexPubKey = Globals.appState.currentAccount
+                .getPublicKeyForEntity(widget.process.entityId);
+            final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
 
-            // final addrBytes = publicKeyToAddress(publicKeyBytes);
-            // final userAddress = EthereumAddress(addrBytes).hexEip55;
-            // final pollNullifier = await getSignedVoteNullifier(
-            //     userAddress, widget.process.processId);
-            // launchUrl(
-            //     AppConfig.vochainExplorerUrl + "/envelope/" + pollNullifier);
-            // TODO link to this nullifier. Need explorer envelope by nullifier URL
-            String processId = widget.process.processId;
-            if (processId.startsWith("0x")) processId = processId.substring(2);
-            launchUrl(AppConfig.vochainExplorerUrl + "/process/" + processId);
+            final addrBytes = publicKeyToAddress(publicKeyBytes);
+            final userAddress = EthereumAddress(addrBytes).hexEip55;
+            final pollNullifier = await getSignedVoteNullifier(
+                userAddress, widget.process.processId);
+            processStatus.loading.setValue(false);
+            launchUrl(
+                AppConfig.vochainExplorerUrl + "/envelope/" + pollNullifier);
           } catch (err) {
+            processStatus.loading.setValue(false);
             showMessage(getText(context, "error.invalidUrl"),
                 context: context, purpose: Purpose.DANGER);
           }
