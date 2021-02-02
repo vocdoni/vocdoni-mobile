@@ -1,6 +1,7 @@
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:dvote_common/widgets/spinner.dart';
 import "package:flutter/material.dart";
+import 'package:flutter_html/flutter_html.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'dart:async';
@@ -10,7 +11,6 @@ import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:dvote_common/widgets/listItem.dart';
-import 'package:dvote_common/widgets/section.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -34,6 +34,7 @@ class PollQuestion extends StatefulWidget {
 
 class _PollQuestionState extends State<PollQuestion> {
   PollQuestionRowTabs selectedTab = PollQuestionRowTabs.SELECTION;
+  bool displayPercentage = true;
 
   @override
   void initState() {
@@ -103,14 +104,26 @@ class _PollQuestionState extends State<PollQuestion> {
           }
           final resultsOk = resultsAvailable;
           final voteOk = canVote;
+          final contents = <Widget>[
+            buildQuestionSubtitle(widget.question),
+            buildTabSelect(resultsOk, voteOk)
+          ];
+          contents.addAll(buildQuestionOptions(resultsOk, voteOk));
           return Column(
             children: <Widget>[
-              Section(text: (widget.questionIndex + 1).toString()),
-              buildQuestionTitle(widget.question, widget.questionIndex),
-              buildTabSelect(resultsOk, voteOk),
-              Column(
-                children: buildQuestionOptions(resultsOk, voteOk),
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: colorBaseBackground),
+                child: ExpansionTile(
+                  title:
+                      buildQuestionTitle(widget.question, widget.questionIndex),
+                  children: [
+                    Column(
+                      children: contents,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ).withLeftPadding(paddingPage),
+                  ],
+                ),
               ),
             ],
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,7 +238,6 @@ class _PollQuestionState extends State<PollQuestion> {
               ),
             ),
           ),
-          // Spacer(),
         ],
       ),
       selected: widget.choice == voteOption.value,
@@ -247,69 +259,91 @@ class _PollQuestionState extends State<PollQuestion> {
     final myVotes =
         results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
     final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
-    final myColor = colorBluePale;
 
-    return LinearPercentIndicator(
-      center: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                voteOption.title['default'],
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: TextStyle(
-                    fontSize: fontSizeSecondary,
-                    fontWeight: fontWeightSemiBold,
-                    color: colorDescription),
-              ).withLeftPadding(10),
-            ),
-            Text(
-              myVotes == 1
-                  ? "$myVotes " + getText(context, "main.vote").toLowerCase()
-                  : "$myVotes " + getText(context, "main.votes").toLowerCase(),
-              maxLines: 1,
-              textAlign: TextAlign.right,
-              overflow: TextOverflow.fade,
-              // style: TextStyle(fontWeight: FontWeight.bold),
-            ).withHPadding(20)
-          ]),
-      animation: false,
-      alignment: MainAxisAlignment.start,
-      backgroundColor: myColor.withOpacity(0.1),
-      fillColor: Colors.transparent,
-      linearGradient: LinearGradient(
-          colors: [myColor, myColor.withOpacity(0.5)],
-          begin: Alignment.topLeft),
-      lineHeight: 30.0,
-      percent: totalPerc,
-      linearStrokeCap: LinearStrokeCap.butt,
-    ).withVPadding(4).withHPadding(paddingBadge);
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+                fit: FlexFit.tight, child: Text(voteOption.title['default'])),
+            // myVotes > 0
+            myVotes > -1
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: FlatButton(
+                      padding: EdgeInsets.zero,
+                      minWidth: 0,
+                      height: 0,
+                      splashColor: Colors.transparent,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      child: Text(
+                        displayPercentage
+                            ? "${totalPerc * 100}%"
+                            : "$myVotes " +
+                                (myVotes == 1
+                                    ? getText(context, "main.vote")
+                                    : getText(context, "main.votes")),
+                        style: TextStyle(fontWeight: FontWeight.w300),
+                      ),
+                      onPressed: () => setState(() {
+                        displayPercentage = !displayPercentage;
+                      }),
+                    ).withLeftPadding(24),
+                  )
+                : Container().withLeftPadding(48),
+          ],
+        ).withHPadding(8),
+        LinearPercentIndicator(
+          animation: false,
+          alignment: MainAxisAlignment.start,
+          fillColor: colorBaseBackground,
+          backgroundColor: colorVoteOption,
+          progressColor: Colors.blue,
+          lineHeight: 8.0,
+          percent: totalPerc,
+          linearStrokeCap: LinearStrokeCap.roundAll,
+        ).withVPadding(4).withBottomPadding(16),
+      ],
+    ).withHPadding(paddingBadge);
   }
 
-  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(paddingPage, 0, paddingPage, 0),
-            child: Text(question.question['default'],
-                textAlign: TextAlign.left,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: new TextStyle(
-                    fontSize: fontSizeBase,
-                    color: colorDescription,
-                    fontWeight: fontWeightRegular)),
-          ),
-          question.description['default'] == null
-              ? SizedBox.shrink()
-              : HtmlSummary(
-                  htmlString: question.description['default'],
-                  isSecondary: true,
-                ),
-        ]);
+  Widget buildQuestionTitle(
+      ProcessMetadata_Details_Question question, int index) {
+    return Row(
+      children: [
+        Text(
+          "${index + 1}",
+          style: TextStyle(color: colorInactive),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+          child: Text(question.question['default'],
+              textAlign: TextAlign.left,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: new TextStyle(
+                  fontSize: fontSizeBase,
+                  color: colorDescription,
+                  fontWeight: fontWeightRegular)),
+        ),
+      ],
+    );
+  }
+
+  Widget buildQuestionSubtitle(ProcessMetadata_Details_Question question) {
+    if (question.description['default'] == null) return SizedBox.shrink();
+    return Html(
+      data: question.description['default'],
+      useRichText: true,
+      defaultTextStyle: TextStyle(
+        fontSize: 14,
+        color: colorDescription.withOpacity(opacitySecondaryElement),
+        fontWeight: fontWeightRegular,
+      ),
+      onLinkTap: (url) => launchUrl(url),
+    ).withHPadding(paddingPage);
   }
 
   buildError(String error) {
