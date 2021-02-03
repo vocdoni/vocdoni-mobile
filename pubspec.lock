@@ -144,23 +144,25 @@ packages:
   dvote:
     dependency: "direct main"
     description:
-      name: dvote
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.18.8"
+      path: "../dvote-flutter"
+      relative: true
+    source: path
+    version: "0.18.9"
   dvote_common:
     dependency: "direct main"
     description:
-      path: "../dvote-flutter-common"
-      relative: true
-    source: path
+      path: "."
+      ref: f0856b492aeda7b998aa9afe6d892e2441aff67d
+      resolved-ref: f0856b492aeda7b998aa9afe6d892e2441aff67d
+      url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
+    source: git
     version: "0.1.2"
   dvote_crypto:
     dependency: transitive
     description:
-      name: dvote_crypto
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../dvote-flutter-crypto"
+      relative: true
+    source: path
     version: "0.10.1"
   eventual:
     dependency: "direct main"
