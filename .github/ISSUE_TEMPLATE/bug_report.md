@@ -16,7 +16,7 @@ A short summary of what the bug is. Please be clear and concise.
     2. Click on '....'
     3. Scroll down to '....'
     4. See error
-- Output of flutter doctor -v
+- Output of `flutter doctor -v`
 - Copy & paste logs from in-app or debug terminal
 
 **Current behavior**
