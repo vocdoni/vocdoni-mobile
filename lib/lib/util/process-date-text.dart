@@ -23,11 +23,13 @@ String parseProcessDate(ProcessModel process, BuildContext context) {
     return "";
 }
 
-String getFriendlyTimeDifference(DateTime date, BuildContext context) {
+/// getFriendlyTimeDifference prints a friendly difference between two times (eg. 3d) If secondDate is not set, defaults to now
+String getFriendlyTimeDifference(DateTime date, BuildContext context,
+    {DateTime secondDate}) {
   if (!(date is DateTime)) return throw Exception("Invalid date");
-
-  Duration diff = date.difference(DateTime.now());
-  if (diff.isNegative) diff = DateTime.now().difference(date);
+  if (secondDate == null) secondDate = DateTime.now();
+  Duration diff = date.difference(secondDate);
+  if (diff.isNegative) diff = secondDate.difference(date);
 
   if (diff.inSeconds <= 0)
     return getText(context, "main.now");

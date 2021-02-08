@@ -31,18 +31,18 @@ class ProcessStatusDigest {
   ProcessStatusDigest();
 }
 
-class ProcessStatus extends StatefulWidget {
+class ProcessStatusBar extends StatefulWidget {
   final ProcessModel process;
   final EntityModel entity;
   final Function() onScrollToVote;
 
-  ProcessStatus(this.process, this.entity, this.onScrollToVote);
+  ProcessStatusBar(this.process, this.entity, this.onScrollToVote);
 
   @override
   _ProcessStatusState createState() => _ProcessStatusState();
 }
 
-class _ProcessStatusState extends State<ProcessStatus> {
+class _ProcessStatusState extends State<ProcessStatusBar> {
   DateTime cachedStartDate;
   DateTime cachedEndDate;
   @override

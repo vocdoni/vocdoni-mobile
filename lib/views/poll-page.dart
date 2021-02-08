@@ -24,6 +24,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/poll-question.dart';
+import 'package:vocdoni/widgets/process-details.dart';
 import 'package:vocdoni/widgets/process-status.dart';
 
 class PollPageArgs {
@@ -132,6 +133,7 @@ class _PollPageState extends State<PollPage> {
       notifiers: [
         entity.metadata,
         process.metadata,
+        process.processData,
         process.startDate,
         process.endDate,
       ],
@@ -150,10 +152,12 @@ class _PollPageState extends State<PollPage> {
           avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
 
         String statusText = "";
-        if (process.metadata?.value?.type != null)
-          statusText = process.metadata.value.type.contains("encrypted")
-              ? getText(context, "main.encryptedVote")
-              : getText(context, "main.publicVote");
+        if (process.processData?.value?.getEnvelopeType != null)
+          statusText =
+              process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ??
+                      false
+                  ? getText(context, "main.encryptedVote")
+                  : getText(context, "main.publicVote");
         if (statusText.length > 1)
           statusText = statusText[0].toUpperCase() + statusText.substring(1);
 
@@ -190,8 +194,9 @@ class _PollPageState extends State<PollPage> {
     if (!process.metadata.hasValue) return children;
 
     children.add(buildTitle(ctx, entity));
-    children.add(ProcessStatus(
+    children.add(ProcessStatusBar(
         process, entity, onScrollToBottom(scaffoldScrollController, ctx)));
+    children.add(ProcessDetails(process));
     children.add(buildSummary());
     if (process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
