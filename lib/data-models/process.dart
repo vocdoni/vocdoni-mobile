@@ -55,8 +55,9 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
       this.setValue(processModelList);
     } catch (err) {
       logger.log(err);
-      this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
-      throw RestoreError("There was an error while accessing the local data");
+      this.setError("Cannot read the process storage", keepPreviousValue: true);
+      throw RestoreError(
+          "There was an error while accessing the local data: $err");
     }
   }
 
@@ -72,6 +73,12 @@ class ProcessPoolModel extends EventualNotifier<List<ProcessModel>>
               processModel is ProcessModel && processModel.metadata.hasValue)
           .map((processModel) {
             // COPY STATE FIELDS INTO META
+
+            if (processModel.processData.hasValue) {
+              processModel.metadata.value.meta[META_PROCESS_DATA] =
+                  processModel.processData.value.toJsonString();
+            }
+
             processModel.metadata.value.meta[META_PROCESS_ID] =
                 processModel.processId;
             processModel.metadata.value.meta[META_ENTITY_ID] =
@@ -185,6 +192,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   final String lang = "default";
 
   final metadata = EventualNotifier<ProcessMetadata>();
+  final processData = EventualNotifier<ProcessData>()
+      .withFreshnessTimeout(Duration(seconds: 30));
   final results = EventualNotifier<ProcessResultsDigested>()
       .withFreshnessTimeout(Duration(seconds: 30));
   final isInCensus =
@@ -204,6 +213,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
   ProcessModel(this.processId, this.entityId,
       [ProcessMetadata metadata,
+      ProcessData processData,
       bool isInCensus,
       bool hasVoted,
       int currentParticipants]) {
@@ -214,6 +224,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       this.metadata.setDefaultValue(metadata);
     }
 
+    if (processData is ProcessData)
+      this.processData.setDefaultValue(processData);
     if (isInCensus is bool) this.isInCensus.setDefaultValue(isInCensus);
     if (hasVoted is bool) this.hasVoted.setDefaultValue(hasVoted);
     if (currentParticipants is int)
@@ -227,6 +239,11 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     metadata.meta[META_ENTITY_ID] = this.entityId;
 
     this.metadata.setDefaultValue(metadata);
+
+    if (this.metadata.value.meta[META_PROCESS_DATA] is String) {
+      this.processData.setDefaultValue(ProcessData.fromJsonString(
+          this.metadata.value.meta[META_PROCESS_DATA]));
+    }
 
     switch (this.metadata.value.meta[META_PROCESS_CENSUS_BELONGS]) {
       case "true":
@@ -258,7 +275,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   Future<void> refresh({bool force = false}) {
     logger.log("Refreshing process ${this.processId}");
 
-    return refreshMetadata(force: force)
+    return refreshProcessData(force: force)
+        .catchError((_) {}) // update what we can
+        .then((_) => refreshMetadata(force: force))
         .catchError((_) {}) // update what we can
         .then((_) => refreshResults(force: force))
         .catchError((_) {}) // update what we can
@@ -275,6 +294,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
   }
 
   Future<void> refreshMetadata({bool force = false}) async {
+    if (!this.processData.hasValue) return null;
     if (!force && this.metadata.isFresh)
       return;
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
@@ -286,8 +306,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     try {
       this.metadata.setToLoading();
-      final newMetadata =
-          await getProcessMetadata(this.processId, AppNetworking.pool);
+      final newMetadata = await getProcessMetadata(
+          this.processId, AppNetworking.pool,
+          data: this.processData?.value);
       if (!(newMetadata is ProcessMetadata))
         throw Exception("The process cannot be found");
 
@@ -302,6 +323,31 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       logger.log("- [Process meta] Refreshing ERROR: $err [${this.processId}]");
 
       this.metadata.setError("error.couldNotFetchTheProcessDetails");
+    }
+  }
+
+  Future<void> refreshProcessData({bool force = false}) async {
+    if (!force && this.processData.isFresh)
+      return;
+    else if (!force &&
+        this.processData.isLoading &&
+        this.processData.isLoadingFresh) return;
+
+    logger.log("- [Process data] Refreshing [${this.processId}]");
+    try {
+      this.processData.setToLoading();
+      final newProcessData =
+          await getProcess(this.processId, AppNetworking.pool);
+      if (!(newProcessData is ProcessData))
+        throw Exception("The process cannot be found");
+
+      logger.log("- [Process data] Refreshing DONE [${this.processId}]");
+
+      this.processData.setValue(newProcessData);
+    } catch (err) {
+      logger.log("- [Process data] Refreshing ERROR: $err [${this.processId}]");
+
+      this.processData.setError("error.couldNotFetchTheProcessDetails");
     }
   }
 
@@ -373,14 +419,14 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
       // final alreadyDigested = true;
 
-      final proof = await generateProof(this.metadata.value.census.merkleRoot,
+      final proof = await generateProof(this.processData.value.getCensusRoot,
           censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !hexRegexp.hasMatch(proof)) {
         this.isInCensus.setValue(false);
         return;
       }
 
-      final valid = await checkProof(this.metadata.value.census.merkleRoot,
+      final valid = await checkProof(this.processData.value.getCensusRoot,
           censusPublicKeyClaim, alreadyDigested, proof, AppNetworking.pool);
 
       logger.log(
@@ -469,7 +515,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     this.censusSize.setToLoading();
     return getCensusSize(
-            this.metadata.value.census.merkleRoot, AppNetworking.pool)
+            this.processData.value.getCensusRoot, AppNetworking.pool)
         .then((size) {
       logger.log(
           "- [Process census] Refreshing DONE: size $size [${this.processId}]");
@@ -508,8 +554,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     });
   }
 
-  Future<void> refreshDates({bool force = false}) {
-    if (!this.metadata.hasValue)
+  Future<void> refreshDates({bool force = false}) async {
+    if (!this.processData.hasValue)
       return null;
     else if (!force && this.startDate.isFresh)
       return null;
@@ -518,10 +564,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     logger.log("- [Process dates] Refreshing [${this.processId}]");
     this.startDate.setToLoading();
     this.endDate.setToLoading();
-
-    final startBlock = this.metadata.value.startBlock;
-    final endBlock =
-        this.metadata.value.startBlock + this.metadata.value.blockCount;
+    final startBlock = this.processData.value.getStartBlock;
+    final endBlock = this.processData.value.getStartBlock +
+        this.processData.value.getBlockCount;
     return Globals.appState
         .refreshBlockStatus()
         .then((_) => estimateDateAtBlock(startBlock, AppNetworking.pool,

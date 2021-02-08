@@ -1,3 +1,4 @@
+import 'package:dvote/api/voting.dart';
 import "package:flutter/material.dart";
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/lib/app-links.dart';
@@ -6,6 +7,7 @@ import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
 
@@ -74,6 +76,22 @@ class DevMenu extends StatelessWidget {
                 String link =
                     'https://vocdoni.link/validation/0x58574d7e6d07ce0aa68ea7e96f4a7287fe53c56deee7b787fd5f0926d0d80314/b0558fb8-9852-4fe1-807b-931cf171f7cd';
                 handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
+              mainText: "Handle deeplink (dev entity)",
+              onTap: () {
+                String link =
+                    'https://dev.vocdoni.link/entities/0x63c1452CF8F2fEd7ead5e6C222C41E96c6ec1E0F';
+                handleIncomingLink(Uri.parse(link), context);
+              },
+            ),
+            ListItem(
+              mainText: "Parse process data (dev entity)",
+              onTap: () async {
+                await getProcess(
+                    "0x7f490c31177f8e57bedc7817eb12215830fd554d5d9a925525a92aa7408cd690",
+                    AppNetworking.pool);
               },
             ),
             ListItem(

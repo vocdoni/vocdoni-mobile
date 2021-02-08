@@ -116,7 +116,8 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       this
           .bootnodeInfo
           .setError("Cannot read the app state", keepPreviousValue: true);
-      throw RestoreError("There was an error while accessing the local data");
+      throw RestoreError(
+          "There was an error while accessing the local data: $err");
     }
   }
 

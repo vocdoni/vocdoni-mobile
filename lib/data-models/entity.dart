@@ -64,7 +64,8 @@ class EntityPoolModel extends EventualNotifier<List<EntityModel>>
     } catch (err) {
       logger.log(err);
       this.setError("Cannot read the persisted data", keepPreviousValue: true);
-      throw RestoreError("There was an error while accessing the local data");
+      throw RestoreError(
+          "There was an error while accessing the local data: $err");
     }
   }
 
@@ -357,11 +358,13 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
                     orElse: () => null);
 
                 if (prevModel is ProcessModel) {
+                  await prevModel.refreshProcessData().catchError((_) {});
                   await prevModel.refreshMetadata().catchError((_) {});
                   return prevModel;
                 } else {
                   final newModel =
                       ProcessModel(processId, this.reference.entityId);
+                  await newModel.refreshProcessData().catchError((_) {});
                   await newModel.refreshMetadata().catchError((_) {});
                   return newModel;
                 }

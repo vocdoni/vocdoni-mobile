@@ -33,7 +33,7 @@ class PollPackagingPage extends StatefulWidget {
 
 class _PollPackagingPageState extends State<PollPackagingPage> {
   int _currentStep;
-  Map<String, dynamic> _envelope;
+  EnvelopePackage _envelope;
 
   @override
   void initState() {
@@ -75,7 +75,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     try {
       // Derive per-entity key
-      final entityAddressHash = widget.process.metadata.value.details.entityId;
+      final entityAddressHash =
+          widget.process.processData.value.getEntityAddress.toString();
 
       final mnemonic = await Symmetric.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
@@ -99,7 +100,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // final alreadyDigested = true;
 
       merkleProof = await generateProof(
-          widget.process.metadata.value.census.merkleRoot,
+          widget.process.processData.value.getCensusRoot,
           base64RawClaim, // b64DigestedClaim,
           alreadyDigested,
           AppNetworking.pool);
@@ -133,18 +134,19 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       // PREPARE THE VOTE ENVELOPE
       ProcessKeys processKeys;
-      if (widget.process.metadata.value.type == "encrypted-poll") {
+      if (widget.process.processData.value.getEnvelopeType.hasEncryptedVotes) {
         processKeys =
             await getProcessKeys(widget.process.processId, AppNetworking.pool);
       }
 
       if (!mounted) return;
 
-      Map<String, dynamic> envelope = await packageSignedEnvelope(
+      EnvelopePackage envelope = await packageSignedEnvelope(
           widget.choices,
           merkleProof,
           widget.process.processId,
           await wallet.privateKeyAsync,
+          ProcessCensusOrigin(ProcessCensusOrigin.OFF_CHAIN_CA),
           processKeys: processKeys);
 
       if (!mounted) return;
@@ -167,7 +169,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void stepSendVote(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
-      await submitEnvelope(_envelope, AppNetworking.pool);
+      await submitEnvelope(_envelope.envelope, AppNetworking.pool,
+          hexSignature: _envelope.signature);
 
       if (!mounted) return;
 

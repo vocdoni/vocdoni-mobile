@@ -39,7 +39,8 @@ class FeedPool extends EventualNotifier<List<Feed>>
     } catch (err) {
       logger.log(err);
       this.setError("Cannot read the boot nodes list", keepPreviousValue: true);
-      throw RestoreError("There was an error while accessing the local data");
+      throw RestoreError(
+          "There was an error while accessing the local data: $err");
     }
   }
 
