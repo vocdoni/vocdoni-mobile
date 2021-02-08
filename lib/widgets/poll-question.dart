@@ -19,7 +19,7 @@ import 'package:mdi/mdi.dart';
 enum PollQuestionRowTabs { SELECTION, RESULTS }
 
 class PollQuestion extends StatefulWidget {
-  final ProcessMetadata_Details_Question question;
+  final ProcessMetadata_Question question;
   final ProcessModel process;
   final Function(int, int) onSetChoice;
   final int choice;
@@ -96,9 +96,10 @@ class _PollQuestionState extends State<PollQuestion> {
           widget.process.endDate
         ],
         builder: (context, _, __) {
-          if (widget.question.type != "single-choice") {
-            print(
-                "ERROR: Question type not supported: " + widget.question.type);
+          if (widget
+              .process.processData.value.getEnvelopeType.hasSerialVoting) {
+            logger.log("ERROR: Question type not supported: " +
+                widget.process.processData.value.getEnvelopeType.toString());
             return buildError(
                 getText(context, "main.questionTypeNotSupported"));
           }
@@ -156,11 +157,11 @@ class _PollQuestionState extends State<PollQuestion> {
 
   List<Widget> buildQuestionOptions(bool resultsAvailable, bool canVote) {
     if (!resultsAvailable && !canVote) {
-      return widget.question.voteOptions
+      return widget.question.choices
           .map((voteOption) => buildPollOption(voteOption, disabled: true))
           .toList();
     } else if (selectedTab == PollQuestionRowTabs.SELECTION && canVote) {
-      return widget.question.voteOptions
+      return widget.question.choices
           .map((voteOption) => buildPollOption(voteOption))
           .toList();
     }
@@ -171,23 +172,27 @@ class _PollQuestionState extends State<PollQuestion> {
     List<Widget> options = List<Widget>();
     int totalVotes = 0;
     int mostVotedCount = 0;
-    int leastVotedCount =
-        results.questions[widget.questionIndex].voteResults[0]?.votes ?? 0;
+    int leastVotedCount = results
+            .questions[widget.questionIndex].voteResults[0]?.votes
+            ?.toInt() ??
+        0;
     results.questions[widget.questionIndex].voteResults.forEach((element) {
-      totalVotes += element.votes;
-      mostVotedCount =
-          element.votes > mostVotedCount ? element.votes : mostVotedCount;
-      leastVotedCount =
-          element.votes < leastVotedCount ? element.votes : leastVotedCount;
+      totalVotes += element.votes.toInt();
+      mostVotedCount = element.votes.toInt() > mostVotedCount
+          ? element.votes.toInt()
+          : mostVotedCount;
+      leastVotedCount = element.votes.toInt() < leastVotedCount
+          ? element.votes.toInt()
+          : leastVotedCount;
     });
-    widget.question.voteOptions.asMap().forEach((index, voteOption) {
+    widget.question.choices.asMap().forEach((index, voteOption) {
       options.add(buildPollResultsOption(voteOption.value, voteOption,
           totalVotes, mostVotedCount, leastVotedCount));
     });
     return options;
   }
 
-  Widget buildPollOption(ProcessMetadata_Details_Question_VoteOption voteOption,
+  Widget buildPollOption(ProcessMetadata_Question_VoteOption voteOption,
       {bool disabled = false}) {
     if (disabled) {
       return Chip(
@@ -251,13 +256,15 @@ class _PollQuestionState extends State<PollQuestion> {
 
   Widget buildPollResultsOption(
       int index,
-      ProcessMetadata_Details_Question_VoteOption voteOption,
+      ProcessMetadata_Question_VoteOption voteOption,
       int totalVotes,
       maxVotes,
       minVotes) {
     final results = widget.process.results.value;
-    final myVotes =
-        results.questions[widget.questionIndex]?.voteResults[index]?.votes ?? 0;
+    final int myVotes = results
+            .questions[widget.questionIndex]?.voteResults[index]?.votes
+            ?.toInt() ??
+        0;
     final totalPerc = myVotes > 0 ? myVotes / totalVotes : 0.0;
 
     return Column(
@@ -309,8 +316,7 @@ class _PollQuestionState extends State<PollQuestion> {
     ).withHPadding(paddingBadge);
   }
 
-  Widget buildQuestionTitle(
-      ProcessMetadata_Details_Question question, int index) {
+  Widget buildQuestionTitle(ProcessMetadata_Question question, int index) {
     return Row(
       children: [
         Text(
@@ -319,7 +325,7 @@ class _PollQuestionState extends State<PollQuestion> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-          child: Text(question.question['default'],
+          child: Text(question.title['default'],
               textAlign: TextAlign.left,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -332,7 +338,7 @@ class _PollQuestionState extends State<PollQuestion> {
     );
   }
 
-  Widget buildQuestionSubtitle(ProcessMetadata_Details_Question question) {
+  Widget buildQuestionSubtitle(ProcessMetadata_Question question) {
     if (question.description['default'] == null) return SizedBox.shrink();
     return Html(
       data: question.description['default'],

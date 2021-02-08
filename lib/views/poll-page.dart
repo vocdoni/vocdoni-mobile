@@ -58,7 +58,8 @@ class _PollPageState extends State<PollPage> {
                       ?.isBefore(DateTime.now().add(Duration(minutes: 1))) ??
                   false);
       // Refresh dates every second when process is near to starting time
-      await process.refreshDates(force: isStarting);
+      if (!(process.startDate.hasError || process.endDate.hasError))
+        await process.refreshDates(force: isStarting);
       // Refresh everything else every 30 seconds
       if (refreshCounter % 30 == 0) {
         await process
@@ -100,7 +101,7 @@ class _PollPageState extends State<PollPage> {
     process = args.process;
     listIdx = args.listIdx;
 
-    choices = process.metadata.value.details.questions
+    choices = process.metadata.value.questions
         .map((question) => null)
         .cast<int>()
         .toList();
@@ -139,7 +140,7 @@ class _PollPageState extends State<PollPage> {
           return buildErrorScaffold(
               getText(context, "error.theMetadataIsNotAvailable"));
 
-        String headerUrl = process.metadata.value.details.headerImage;
+        String headerUrl = process.metadata.value.media["header"] ?? "";
         if (headerUrl.startsWith("ipfs"))
           headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
         else
@@ -192,9 +193,8 @@ class _PollPageState extends State<PollPage> {
     children.add(ProcessStatus(
         process, entity, onScrollToBottom(scaffoldScrollController, ctx)));
     children.add(buildSummary());
-    if (process.metadata?.value?.type?.contains("encrypted") ?? false) {
+    if (process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
-    }
     children.addAll(buildQuestions(ctx));
     children.add(Section(withDectoration: false));
     children.add(buildSubmitInfo());
@@ -207,7 +207,7 @@ class _PollPageState extends State<PollPage> {
     if (process.metadata.value == null) return Container();
 
     final title =
-        process.metadata.value.details.title[Globals.appState.currentLanguage];
+        process.metadata.value.title[Globals.appState.currentLanguage] ?? "";
     String avatarUrl =
         entity.metadata.hasValue ? entity.metadata.value.media.avatar : "";
     if (avatarUrl.startsWith("ipfs"))
@@ -238,8 +238,8 @@ class _PollPageState extends State<PollPage> {
 
   Widget buildSummary() {
     return HtmlSummary(
-        htmlString: process.metadata.value.details
-            .description[Globals.appState.currentLanguage]);
+        htmlString: process
+            .metadata.value.description[Globals.appState.currentLanguage]);
   }
 
   buildEncryptedItem(BuildContext context) {
@@ -465,15 +465,15 @@ class _PollPageState extends State<PollPage> {
 
   List<Widget> buildQuestions(BuildContext ctx) {
     if (!process.metadata.hasValue ||
-        process.metadata.value.details.questions.length == 0) {
+        process.metadata.value.questions.length == 0) {
       return [];
     }
 
     List<Widget> items = new List<Widget>();
     int questionIndex = 0;
 
-    for (ProcessMetadata_Details_Question question
-        in process.metadata.value.details.questions) {
+    for (ProcessMetadata_Question question
+        in process.metadata.value.questions) {
       items.add(PollQuestion(question, questionIndex, choices[questionIndex],
           process, onSetChoice));
       questionIndex++;
@@ -482,9 +482,9 @@ class _PollPageState extends State<PollPage> {
     return items;
   }
 
-  buildQuestionTitle(ProcessMetadata_Details_Question question, int index) {
+  buildQuestionTitle(ProcessMetadata_Question question, int index) {
     return ListItem(
-      mainText: question.question['default'],
+      mainText: question.title['default'],
       mainTextMultiline: 3,
       secondaryText: question.description['default'],
       secondaryTextMultiline: 100,
