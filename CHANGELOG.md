@@ -3,6 +3,9 @@
 - Display results by option value, not index
 - Use 12-word mnemonics for identity backups
 - Compress public keys when creating new identity
+- Use EnvelopePackage when packaging vote
+- Fetch and store ProcessData
+- Adapt app to use ProcessData flags when applicable
 
 # 0.8.16
 - Fix green border for some android versions

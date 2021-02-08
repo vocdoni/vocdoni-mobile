@@ -69,7 +69,8 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
     } catch (err) {
       logger.log(err);
       this.setError("Cannot read the account list", keepPreviousValue: true);
-      throw RestoreError("There was an error while accessing the local data");
+      throw RestoreError(
+          "There was an error while accessing the local data: $err");
     }
   }
 

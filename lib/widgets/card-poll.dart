@@ -64,10 +64,13 @@ class _CardPollState extends State<CardPoll> {
       }
 
       // Refresh dates every second when process is near to starting or ending time
-      await this.widget.process.refreshDates(force: isStartingOrEnding);
+      if (!(this.widget.process.startDate.hasError ||
+          this.widget.process.endDate.hasError))
+        await this.widget.process.refreshDates(force: isStartingOrEnding);
       // Refresh everything else every 30 seconds, if process is active
       if (refreshCounter % 30 == 0 &&
           this.widget.process.startDate.hasValue &&
+          this.widget.process.endDate.hasValue &&
           this.widget.process.startDate.value.isBefore(DateTime.now()) &&
           this.widget.process.endDate.hasValue &&
           this
@@ -168,7 +171,7 @@ class _CardPollState extends State<CardPoll> {
       participation =
           getFriendlyParticipation(this.widget.process.currentParticipation);
     }
-    String headerUrl = this.widget.process.metadata.value.details.headerImage;
+    String headerUrl = this.widget.process.metadata.value.media["header"];
     if (headerUrl.startsWith("ipfs"))
       headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
     else
@@ -217,17 +220,22 @@ class _CardPollState extends State<CardPoll> {
     String avatarUrl = this.widget.entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
       avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
-    String title =
-        this.widget.process.metadata.value.details.title.values.first;
+    String title = this.widget.process.metadata.value.title.values.isNotEmpty
+        ? this.widget.process.metadata.value.title.values.first
+        : "";
     return ListItem(
       // mainTextTag: process.meta['processId'] + title,
       mainText: title,
       mainTextMultiline: 2,
       mainTextFullWidth: true,
-      secondaryText: this.widget.entity.metadata.value.name.values.first,
+      secondaryText: this.widget.entity.metadata.value.name.values.isNotEmpty
+          ? this.widget.entity.metadata.value.name.values.first
+          : "",
       avatarUrl: avatarUrl,
       avatarHexSource: this.widget.entity.reference.entityId,
-      avatarText: this.widget.entity.metadata.value.name.values.first,
+      avatarText: this.widget.entity.metadata.value.name.values.isNotEmpty
+          ? this.widget.entity.metadata.value.name.values.first
+          : "",
       rightIcon: null,
     );
   }
