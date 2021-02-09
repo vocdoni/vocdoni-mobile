@@ -47,6 +47,7 @@ class _PollPageState extends State<PollPage> {
   int listIdx;
   List<int> choices = [];
   int refreshCounter = 0;
+  GlobalKey voteButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -133,9 +134,6 @@ class _PollPageState extends State<PollPage> {
       notifiers: [
         entity.metadata,
         process.metadata,
-        process.processData,
-        process.startDate,
-        process.endDate,
       ],
       builder: (context, _, __) {
         if (process.metadata.hasError && !process.metadata.hasValue)
@@ -179,7 +177,12 @@ class _PollPageState extends State<PollPage> {
           builder: Builder(
             builder: (ctx) => SliverList(
               delegate: SliverChildListDelegate(
-                getScaffoldChildren(ctx, entity, scaffoldScrollController),
+                [
+                  Column(
+                    children: getScaffoldChildren(
+                        ctx, entity, scaffoldScrollController),
+                  ),
+                ],
               ),
             ),
           ),
@@ -195,12 +198,14 @@ class _PollPageState extends State<PollPage> {
 
     children.add(buildTitle(ctx, entity));
     children.add(ProcessStatusBar(
-        process, entity, onScrollToBottom(scaffoldScrollController, ctx)));
-    children.add(ProcessDetails(process));
+        process, entity, onScrollToBottom(scaffoldScrollController)));
+    children.add(ProcessDetails(
+        process, onScrollToSelectedContent(scaffoldScrollController)));
     children.add(buildSummary());
     if (process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
-    children.addAll(buildQuestions(ctx));
+    children.addAll(buildQuestions(
+        ctx, onScrollToSelectedContent(scaffoldScrollController)));
     children.add(Section(withDectoration: false));
     children.add(buildSubmitInfo());
     children.add(buildSubmitVoteButton(ctx));
@@ -315,23 +320,26 @@ class _PollPageState extends State<PollPage> {
 
   buildSubmitVoteButton(BuildContext ctx) {
     // rebuild when isInCensus or hasVoted change
-    return EventualBuilder(
-      notifiers: [process.hasVoted, process.isInCensus],
-      builder: (ctx, _, __) {
-        if (canNotVote()) {
-          return Container();
-        }
+    return Container(
+      key: voteButtonKey,
+      child: EventualBuilder(
+        notifiers: [process.hasVoted, process.isInCensus],
+        builder: (ctx, _, __) {
+          if (canNotVote()) {
+            return Container();
+          }
 
-        return Padding(
-          padding: EdgeInsets.all(paddingPage),
-          child: BaseButton(
-              text: getText(context, "action.submit"),
-              purpose: Purpose.HIGHLIGHT,
-              // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
-              // isDisabled: cannotVote,
-              onTap: () => onSubmit(ctx, process.metadata)),
-        );
-      },
+          return Padding(
+            padding: EdgeInsets.all(paddingPage),
+            child: BaseButton(
+                text: getText(context, "action.submit"),
+                purpose: Purpose.HIGHLIGHT,
+                // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
+                // isDisabled: cannotVote,
+                onTap: () => onSubmit(ctx, process.metadata)),
+          );
+        },
+      ),
     );
   }
 
@@ -468,7 +476,7 @@ class _PollPageState extends State<PollPage> {
         ));
   }
 
-  List<Widget> buildQuestions(BuildContext ctx) {
+  List<Widget> buildQuestions(BuildContext ctx, Function() onScroll) {
     if (!process.metadata.hasValue ||
         process.metadata.value.questions.length == 0) {
       return [];
@@ -480,7 +488,7 @@ class _PollPageState extends State<PollPage> {
     for (ProcessMetadata_Question question
         in process.metadata.value.questions) {
       items.add(PollQuestion(question, questionIndex, choices[questionIndex],
-          process, onSetChoice));
+          process, onSetChoice, onScroll));
       questionIndex++;
     }
 
@@ -522,13 +530,26 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  Function() onScrollToBottom(
-      ScrollController controller, BuildContext context) {
-    return () {
-      if (controller != null) {
-        controller.animateTo(controller.position.maxScrollExtent,
-            duration: Duration(milliseconds: 500), curve: Curves.easeOut);
-      }
+  Function() onScrollToBottom(ScrollController controller) {
+    return () =>
+        _scrollToSelectedContent(controller, expansionTileKey: voteButtonKey);
+  }
+
+  Function({GlobalKey expansionTileKey}) onScrollToSelectedContent(
+      ScrollController controller) {
+    return ({GlobalKey expansionTileKey}) {
+      _scrollToSelectedContent(controller, expansionTileKey: expansionTileKey);
     };
+  }
+
+  void _scrollToSelectedContent(ScrollController controller,
+      {GlobalKey expansionTileKey}) {
+    final keyContext = expansionTileKey.currentContext;
+    // if (keyContext != null) {
+    Future.delayed(Duration(milliseconds: 200)).then((value) {
+      Scrollable.ensureVisible(keyContext,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+    });
+    // }
   }
 }

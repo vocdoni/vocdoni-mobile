@@ -1,4 +1,7 @@
+import 'package:convert/convert.dart';
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/util/json-signature.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
@@ -237,8 +240,9 @@ class ActionRegisterPage extends StatelessWidget {
 
     final mnemonic =
         await Symmetric.decryptStringAsync(encryptedMnemonic, patternStr);
-    final wallet =
-        EthereumWallet.fromMnemonic(mnemonic, entityAddressHash: entityId);
+    final wallet = EthereumWallet.fromMnemonic(mnemonic,
+        entityAddressHash: ensHashAddress(
+            Uint8List.fromList(hex.decode(entityId.replaceFirst("0x", "")))));
 
     // Birth date in JSON format
     final dateItems = birthDateCtrl.text.split("-");
