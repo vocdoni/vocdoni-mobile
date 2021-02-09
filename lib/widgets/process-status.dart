@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:dvote/blockchain/ens.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/logger.dart';
@@ -321,7 +324,8 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
       }
 
       final wallet = EthereumWallet.fromMnemonic(mnemonic,
-          entityAddressHash: widget.entity.reference.entityId);
+          entityAddressHash: ensHashAddress(Uint8List.fromList(hex.decode(
+              widget.entity.reference.entityId.replaceFirst("0x", "")))));
 
       account.setPublicKeyForEntity(
           await wallet.publicKeyAsync(uncompressed: true),

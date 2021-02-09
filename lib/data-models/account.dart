@@ -1,4 +1,7 @@
+import 'package:convert/convert.dart';
 import 'dart:math' hide log;
+import 'dart:typed_data';
+import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote_crypto/dvote_crypto.dart';
@@ -239,7 +242,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
       for (final entity in this.entities.value) {
         final wallet = EthereumWallet.fromMnemonic(mnemonic,
-            entityAddressHash: entity.reference.entityId);
+            entityAddressHash: ensHashAddress(Uint8List.fromList(
+                hex.decode(entity.reference.entityId.replaceFirst("0x", "")))));
 
         // Store the public key within the map for future use
         // If entity public key is uncompressed, reset with compressed id

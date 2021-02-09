@@ -6,7 +6,9 @@
 - Use EnvelopePackage when packaging vote
 - Fetch and store ProcessData
 - Adapt app to use ProcessData flags when applicable
-- Add ProcessDetails widget
+- Add ProcessDetails, ProcessStatus
+- Hash addresses when generating EthereumWallet
+- Change processMetadata filename (don't try to load legacy processes)
 
 # 0.8.16
 - Fix green border for some android versions
