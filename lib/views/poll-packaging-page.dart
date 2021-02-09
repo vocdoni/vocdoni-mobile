@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:convert/convert.dart';
+import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/wrappers/process-keys.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -75,8 +77,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
     try {
       // Derive per-entity key
-      final entityAddressHash =
-          widget.process.processData.value.getEntityAddress.toString();
+      final entityAddress =
+          widget.process.processData.value.getEntityAddress.hexNo0x;
 
       final mnemonic = await Symmetric.decryptStringAsync(
           currentAccount.identity.value.keys[0].encryptedMnemonic,
@@ -85,7 +87,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       if (!mounted) return;
 
       wallet = EthereumWallet.fromMnemonic(mnemonic,
-          entityAddressHash: entityAddressHash);
+          entityAddressHash:
+              ensHashAddress(Uint8List.fromList(hex.decode(entityAddress))));
 
       // Merkle Proof
 

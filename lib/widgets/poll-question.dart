@@ -19,6 +19,8 @@ import 'package:mdi/mdi.dart';
 enum PollQuestionRowTabs { SELECTION, RESULTS }
 
 class PollQuestion extends StatefulWidget {
+  final GlobalKey expansionKey = GlobalKey();
+  final Function({GlobalKey expansionTileKey}) scrollToSelectedContent;
   final ProcessMetadata_Question question;
   final ProcessModel process;
   final Function(int, int) onSetChoice;
@@ -26,7 +28,7 @@ class PollQuestion extends StatefulWidget {
   final int questionIndex;
 
   PollQuestion(this.question, this.questionIndex, this.choice, this.process,
-      this.onSetChoice);
+      this.onSetChoice, this.scrollToSelectedContent);
 
   @override
   _PollQuestionState createState() => _PollQuestionState();
@@ -116,6 +118,14 @@ class _PollQuestionState extends State<PollQuestion> {
                 data: Theme.of(context)
                     .copyWith(dividerColor: colorBaseBackground),
                 child: ExpansionTile(
+                  maintainState: true,
+                  key: widget.expansionKey,
+                  onExpansionChanged: (value) {
+                    if (value) {
+                      widget.scrollToSelectedContent(
+                          expansionTileKey: widget.expansionKey);
+                    }
+                  },
                   title:
                       buildQuestionTitle(widget.question, widget.questionIndex),
                   children: [

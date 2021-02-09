@@ -15,8 +15,10 @@ import 'package:vocdoni/lib/util/process-date-text.dart';
 
 class ProcessDetails extends StatefulWidget {
   final ProcessModel process;
+  final Function({GlobalKey expansionTileKey}) scrollToSelectedContent;
+  final GlobalKey expansionKey = GlobalKey();
 
-  ProcessDetails(this.process);
+  ProcessDetails(this.process, this.scrollToSelectedContent);
 
   @override
   _ProcessDetailsState createState() => _ProcessDetailsState();
@@ -30,11 +32,9 @@ class _ProcessDetailsState extends State<ProcessDetails> {
   @override
   void initState() {
     widget.process.refreshCensusSize();
-    widget.process.refreshCurrentParticipants();
     refreshCheck = Timer.periodic(Duration(seconds: 30), (_) async {
       await widget.process
           .refreshCensusSize()
-          .then((_) => widget.process.refreshCurrentParticipants())
           .catchError((err) => logger.log(err));
     });
     super.initState();
@@ -49,50 +49,68 @@ class _ProcessDetailsState extends State<ProcessDetails> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = List<Widget>();
+    return EventualBuilder(
+      notifiers: [
+        widget.process.censusSize,
+        widget.process.startDate,
+        widget.process.endDate,
+        widget.process.processData
+      ],
+      builder: (context, _, __) {
+        List<Widget> items = List<Widget>();
 
-    // Setup cached variables (for when dates are loading)
-    if (widget.process.startDate.hasValue)
-      startDateCache = widget.process.startDate.value;
-    if (widget.process.endDate.hasValue)
-      endDateCache = widget.process.endDate.value;
+        // Setup cached variables (for when dates are loading)
+        if (widget.process.startDate.hasValue)
+          startDateCache = widget.process.startDate.value;
+        if (widget.process.endDate.hasValue)
+          endDateCache = widget.process.endDate.value;
 
-    items.add(buildDurationItem());
-    items.add(buildRealTimeResults());
-    items.add(buildAnonymous());
-    items.add(buildParticipants());
-    items.add(buildUniqueIdentifier());
+        items.add(buildDurationItem());
+        items.add(buildRealTimeResults());
+        items.add(buildAnonymous());
+        items.add(buildParticipants());
+        items.add(buildUniqueIdentifier());
 
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: colorBaseBackground),
-      child: ExpansionTile(
-        title: buildDetailsTitle(),
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [
-                    0,
-                    0.006,
-                    0.994,
-                    1
-                  ],
-                  colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.02),
-                    Colors.black.withOpacity(0.02),
-                    Colors.black.withOpacity(0.1)
-                  ]),
-            ),
-            child: Column(
-              children: items,
-              crossAxisAlignment: CrossAxisAlignment.start,
-            ),
+        return Theme(
+          data: Theme.of(context).copyWith(dividerColor: colorBaseBackground),
+          child: ExpansionTile(
+            maintainState: true,
+            key: widget.expansionKey,
+            onExpansionChanged: (value) {
+              if (value) {
+                widget.scrollToSelectedContent(
+                    expansionTileKey: widget.expansionKey);
+              }
+            },
+            title: buildDetailsTitle(),
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [
+                        0,
+                        0.006,
+                        0.994,
+                        1
+                      ],
+                      colors: [
+                        Colors.black.withOpacity(0.1),
+                        Colors.black.withOpacity(0.02),
+                        Colors.black.withOpacity(0.02),
+                        Colors.black.withOpacity(0.1)
+                      ]),
+                ),
+                child: Column(
+                  children: items,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -190,17 +208,16 @@ class _ProcessDetailsState extends State<ProcessDetails> {
   }
 
   buildParticipants() {
-    return EventualBuilder(
-      notifier: widget.process.censusSize,
-      builder: (ctx, _, __) {
-        final loading = !widget.process.censusSize.hasValue;
-        return ListItem(
-          icon: FeatherIcons.users,
-          mainText: getText(context, "main.numberOfParticipants"),
-          isSpinning: loading,
-          rightText: loading ? "" : widget.process.censusSize.value.toString(),
-        );
-      },
+    final loading = !widget.process.censusSize.hasValue;
+    return ListItem(
+      icon: FeatherIcons.users,
+      mainText: getText(context, "main.censusSize"),
+      secondaryText:
+          getText(context, "main.numberOfParticipantsWhoCanVoteInThisProcess"),
+      secondaryTextMultiline: 3,
+      isSpinning: loading,
+      forceSmallIcon: true,
+      rightText: loading ? "" : widget.process.censusSize.value.toString(),
     );
   }
 
@@ -214,6 +231,7 @@ class _ProcessDetailsState extends State<ProcessDetails> {
         showMessage(getText(context, "main.identifierCopiedToTheClipboard"),
             context: context, purpose: Purpose.GOOD);
       },
+      forceSmallIcon: true,
       rightIcon: FeatherIcons.copy,
     );
   }
