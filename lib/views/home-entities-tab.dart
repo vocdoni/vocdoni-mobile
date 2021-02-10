@@ -24,36 +24,29 @@ class HomeEntitiesTab extends StatefulWidget {
 }
 
 class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
-  Timer refreshCheck;
-
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   @override
   void initState() {
-    // refreshCheck = Timer.periodic(Duration(minutes: 1), (_) async {
-    refreshCheck = Timer.periodic(Duration(seconds: 20), (_) async {
-      if (Globals.appState.currentAccount.entities.hasValue) {
-        Globals.appState.currentAccount.entities.value
-            .forEach((entity) => entity.refresh(force: false));
-      }
-    });
+    if (Globals.appState.currentAccount.entities.hasValue) {
+      Globals.appState.currentAccount.entities.value
+          .forEach((entity) => entity.refresh(force: false));
+    }
 
     super.initState();
     Globals.analytics.trackPage("Orgs");
-  }
-
-  @override
-  void dispose() {
-    if (refreshCheck is Timer) refreshCheck.cancel();
-
-    super.dispose();
   }
 
   void _onRefresh() {
     final currentAccount = Globals.appState.currentAccount;
 
     currentAccount.refresh().then((_) {
+      if (Globals.appState.currentAccount.entities.hasValue) {
+        Globals.appState.currentAccount.entities.value
+            .forEach((entity) => entity.refresh(force: false));
+      }
+    }).then((_) {
       _refreshController.refreshCompleted();
     }).catchError((err) {
       _refreshController.refreshFailed();
