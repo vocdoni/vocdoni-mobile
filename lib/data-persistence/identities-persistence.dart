@@ -29,7 +29,8 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
       return store.items;
     } catch (err) {
       logger.log(err);
-      throw RestoreError("There was an error while reading the local data");
+      throw RestoreError(
+          "There was an error while reading the local identity data");
     }
   }
 

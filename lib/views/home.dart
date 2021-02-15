@@ -52,6 +52,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         startNetworking()
             .then((_) => Globals.appState.currentAccount.refresh());
       }
+      Future.delayed(Duration(seconds: 1)).then((_) {
+        if (Globals.appState.bootnodeInfo.hasError)
+          showMessage(
+              getText(scaffoldBodyContext ?? context,
+                  "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+              context: scaffoldBodyContext ?? context,
+              purpose: Purpose.DANGER);
+      });
       // HANDLE APP LAUNCH LINK
       getInitialUri()
           .then((initialUri) => handleLink(initialUri))

@@ -58,7 +58,7 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
                 children: networkIdList,
               )),
               FloatingActionButton(
-                onPressed: () => onAddUrl(ctx),
+                onPressed: () => onAddNetwork(ctx),
                 backgroundColor: colorBlue,
                 child: Icon(FeatherIcons.plusCircle),
                 elevation: 5.0,
@@ -99,7 +99,11 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
                 " " +
                 networkId +
                 " " +
-                getText(context, "main.mayBeInvalid"),
+                getText(context, "main.mayBeInvalid").toLowerCase() +
+                " " +
+                getText(context, "main.orIncompatibleWithBOOTNODE")
+                    .replaceAll("{{BOOTNODE}}", AppConfig.bootnodesUrl)
+                    .toLowerCase(),
             title: getText(context, "main.unableToConnectToNetwork"),
             context: context);
         setState(() {
@@ -123,7 +127,7 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
     };
   }
 
-  onAddUrl(BuildContext context) {
+  onAddNetwork(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) {
@@ -146,14 +150,6 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
             FlatButton(
               child: Text(getText(context, "main.ok")),
               onPressed: () {
-                if (!Uri.parse(newUrl).isAbsolute) {
-                  Navigator.of(context).pop(true);
-                  showAlert(getText(context, "main.pleaseEnterAValidUrl"),
-                      title:
-                          getText(context, "error.invalidUrl") + ": " + newUrl,
-                      context: context);
-                  return;
-                }
                 List<String> networkIdList = availableNetworks.value;
                 networkIdList.add(newUrl);
                 availableNetworks.setValue(networkIdList);

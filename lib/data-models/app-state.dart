@@ -105,6 +105,9 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       if (settings is Map && settings["bootnodeUrlOverride"] is String) {
         AppConfig.setBootnodesUrlOverride(settings["bootnodeUrlOverride"]);
       }
+      if (settings is Map && settings["networkIdOverride"] is String) {
+        AppConfig.setNetworkOverride(settings["networkIdOverride"]);
+      }
       if (settings is Map && settings["analyticsKey"] is String) {
         this.analyticsKey = settings["analyticsKey"];
       }
@@ -133,6 +136,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       final settings = {
         "locale": locale?.value?.languageCode ?? DEFAULT_LANGUAGE,
         "bootnodeUrlOverride": AppConfig.bootnodesUrl,
+        "networkIdOverride": AppConfig.networkId,
         "analyticsKey": this.analyticsKey,
       };
       await Globals.settingsPersistence.write(settings);

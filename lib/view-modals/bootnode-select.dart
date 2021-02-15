@@ -99,7 +99,11 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
                 " " +
                 url +
                 " " +
-                getText(context, "main.mayBeInvalid"),
+                getText(context, "main.mayBeInvalid").toLowerCase() +
+                " " +
+                getText(context, "main.orIncompatibleWithTheNETWORKNetwork")
+                    .replaceAll("{{NETWORK}}", AppConfig.networkId)
+                    .toLowerCase(),
             title: getText(context, "main.unableToFetchBootnodeGateways"),
             context: context);
         setState(() {

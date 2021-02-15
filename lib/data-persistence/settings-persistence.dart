@@ -33,7 +33,8 @@ class SettingsPersistence extends BasePersistenceSingle<Map<String, dynamic>> {
       return settings;
     } catch (err) {
       logger.log("[App] Settings error: $err");
-      throw RestoreError("There was an error while reading the local data");
+      throw RestoreError(
+          "There was an error while reading the local settings data");
     }
   }
 
