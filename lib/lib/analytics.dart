@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/app-config.dart';
@@ -22,30 +21,22 @@ class Events {
 }
 
 class Analytics {
-  bool _initialized = false;
-  final _user$ = StreamController<String>.broadcast();
   MixpanelAnalytics _mixpanel;
   String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
 
-  init() async {
+  init() {
     // If there's no default analytics key, generate one. The first identity created should have this key.
     if (Globals.appState.analyticsKey == "")
       Globals.appState.analyticsKey = generateAnalyticsKey();
     _mixpanel = MixpanelAnalytics(
       token: _mixpanelToken,
-      userId$: _user$.stream,
       verbose: true,
-      shouldAnonymize: true,
       shaFn: (value) => value,
       useIp: false,
       onError: (e) => logger.log(e.toString()),
     );
-
-// Set pre-login profile
-    // if (_initialized) return;
-    _user$.add(getUserId());
-    await Future.delayed(Duration(milliseconds: 25));
-    await _mixpanel.engage(
+    _mixpanel.userId = getUserId();
+    _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
       value: {
         "AppVersion": getAppVersion(),
@@ -67,45 +58,26 @@ class Analytics {
           "DeviceLanguage": getDeviceLanguage(),
           "Resolution": getResolution()
         }.toString());
-    _initialized = true;
   }
 
   void setUser() {
     Globals.appState.analyticsKey = getUserId();
     Globals.appState.writeToStorage();
-    // Right now the api does not generate a new profile unless it's re-initialized. TODO address this
-    this.init().then((_) {
-      _user$.add(getUserId());
-      Future.delayed(Duration(milliseconds: 25));
-    }).then((_) {
-      _mixpanel.engage(
-        operation: MixpanelUpdateOperations.$set,
-        value: {
-          "AppVersion": getAppVersion(),
-          "OsVersion": getOsVersion(),
-          "Environment": getEnvironment(),
-          "Subscriptions": getSubscriptions(),
-          "BackupDone": getBackupDone(),
-          "SelectedLanguage": getSelectedLanguage(),
-          "AccountIndex": getAccountIndex(),
-          "DeviceLanguage": getDeviceLanguage(),
-          "Resolution": getResolution()
-        },
-        ip: getTruncatedIp(),
-      );
-      logger.log("[Analytics] added user ${getUserId()}: " +
-          {
-            "AppVersion": getAppVersion(),
-            "OsVersion": getOsVersion(),
-            "Environment": getEnvironment(),
-            "Subscriptions": getSubscriptions(),
-            "BackupDone": getBackupDone(),
-            "SelectedLanguage": getSelectedLanguage(),
-            "AccountIndex": getAccountIndex(),
-            "DeviceLanguage": getDeviceLanguage(),
-            "Resolution": getResolution()
-          }.toString());
-    });
+    _mixpanel.userId = getUserId();
+    _mixpanel.engage(
+      operation: MixpanelUpdateOperations.$set,
+      value: {
+        "AppVersion": getAppVersion(),
+        "OsVersion": getOsVersion(),
+        "Environment": getEnvironment(),
+        "SelectedLanguage": getSelectedLanguage(),
+        "DeviceLanguage": getDeviceLanguage(),
+        "Resolution": getResolution()
+      },
+      ip: getTruncatedIp(),
+      time: getDateTime(),
+    );
+    logger.log("[Analytics] added user ${getUserId()}");
   }
 
   trackError(String error) {}

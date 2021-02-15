@@ -45,7 +45,7 @@ dependencies:
   feather_icons_flutter: ^4.7.4
   path_provider: ^1.6.21
   pull_to_refresh: ^1.6.2
-  mixpanel_analytics: ^1.2.1
+  mixpanel_analytics: ^1.4.0
   cupertino_icons: ^1.0.0
   percent_indicator: "^2.1.7+2"
   mdi: ^3.0.0

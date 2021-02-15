@@ -105,7 +105,7 @@ class AppConfig {
   }
 
   static String osVersion() {
-    if (_androidInfo != null) return "Andriod " + _androidInfo.version.baseOS;
+    if (_androidInfo != null) return "Android " + _androidInfo.version.baseOS;
     if (_iosInfo != null) return "iOS " + _iosInfo.systemVersion;
     return "";
   }
