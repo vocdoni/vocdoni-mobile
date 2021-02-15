@@ -12,7 +12,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/feed.dart';
 import 'package:vocdoni/data-models/process.dart';
 
-import 'package:vocdoni/lib/analtyics.dart';
+import 'package:vocdoni/lib/analytics.dart';
 
 class Globals {
   // STORAGE INSTANCES

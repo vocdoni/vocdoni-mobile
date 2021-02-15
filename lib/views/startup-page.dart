@@ -1,9 +1,7 @@
-import 'dart:developer';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
 import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/lib/analtyics.dart';
+import 'package:vocdoni/lib/analytics.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/notifications.dart';
