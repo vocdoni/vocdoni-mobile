@@ -5,6 +5,7 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:dvote_common/constants/colors.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -169,8 +170,7 @@ class _CardPollState extends State<CardPoll> {
     }
     String headerUrl = this.widget.process.metadata.value.details.headerImage;
     if (headerUrl.startsWith("ipfs"))
-      headerUrl =
-          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
     else
       headerUrl = Uri.tryParse(headerUrl).toString();
     return BaseCard(
@@ -216,8 +216,7 @@ class _CardPollState extends State<CardPoll> {
   Widget buildProcessTitle() {
     String avatarUrl = this.widget.entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     String title =
         this.widget.process.metadata.value.details.title.values.first;
     return ListItem(

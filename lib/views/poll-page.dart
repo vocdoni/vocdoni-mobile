@@ -3,6 +3,7 @@ import 'package:dvote_common/widgets/htmlSummary.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -140,14 +141,12 @@ class _PollPageState extends State<PollPage> {
 
         String headerUrl = process.metadata.value.details.headerImage;
         if (headerUrl.startsWith("ipfs"))
-          headerUrl =
-              processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+          headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
         else
           headerUrl = Uri.tryParse(headerUrl).toString();
         String avatarUrl = entity.metadata.value.media.avatar;
         if (avatarUrl.startsWith("ipfs"))
-          avatarUrl =
-              processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+          avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
 
         String statusText = "";
         if (process.metadata?.value?.type != null)
@@ -212,8 +211,7 @@ class _PollPageState extends State<PollPage> {
     String avatarUrl =
         entity.metadata.hasValue ? entity.metadata.value.media.avatar : "";
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     return EventualBuilder(
       notifier: entity.metadata,
       builder: (context, _, __) => ListItem(

@@ -1,4 +1,5 @@
 import 'package:eventual/eventual-notifier.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
@@ -144,7 +145,7 @@ class _ProcessStatusState extends State<ProcessStatus> {
       processStatus.rightWidget = FlatButton(
         onPressed: () {
           try {
-            launchUrl(AppConfig.VOCDONI_FAQ_NOT_IN_CENSUS_URL);
+            launchUrl(VOCDONI_FAQ_NOT_IN_CENSUS_URL);
           } catch (err) {
             showMessage(getText(context, "error.invalidUrl"),
                 context: context, purpose: Purpose.DANGER);

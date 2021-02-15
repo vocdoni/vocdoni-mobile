@@ -3,6 +3,7 @@ import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/logger.dart';
@@ -136,12 +137,10 @@ class _OrgDetailsState extends State<OrgDetails> {
   Widget buildScaffold(BuildContext context) {
     String headerUrl = widget.entityModel.metadata.value.media.header;
     if (headerUrl.startsWith("ipfs"))
-      headerUrl =
-          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
     String avatarUrl = widget.entityModel.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,
         headerTag: widget.entityModel.reference.entityId +

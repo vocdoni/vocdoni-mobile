@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/lib/common.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
@@ -57,13 +58,11 @@ class _FeedPostPageState extends State<FeedPostPage> {
     if (post == null) return buildNoPost(ctx);
     String headerUrl = post.image;
     if (headerUrl.startsWith("ipfs"))
-      headerUrl =
-          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
 
     String avatarUrl = entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
 
     return ScaffoldWithImage(
         headerImageUrl: headerUrl,

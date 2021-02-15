@@ -68,12 +68,6 @@ class AppConfig {
     defaultValue: _appMode == "dev" ? "dev.vocdoni.link" : "vocdoni.link",
   );
 
-  static const IPFS_DOMAIN = "https://ipfs.io/ipfs/";
-
-  static const VOCDONI_FAQ_URL = "https://vocdoni.io"; // TODO update
-  static const VOCDONI_FAQ_NOT_IN_CENSUS_URL =
-      "https://vocdoni.io"; // TODO update
-
   static String get vochainExplorerUrl {
     if (bootnodesUrl.contains("dev")) return "https://explorer.dev.vocdoni.net";
     if (bootnodesUrl.contains("stg")) return "https://explorer.stg.vocdoni.net";

@@ -4,6 +4,7 @@ import 'package:dvote_common/lib/common.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -142,8 +143,7 @@ class _HomeEntitiesTabState extends State<HomeEntitiesTab> {
   Widget buildName(BuildContext ctx, EntityModel entity) {
     String avatarUrl = entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     String title =
         entity.metadata.value.name[entity.metadata.value.languages[0]];
     return ListItem(

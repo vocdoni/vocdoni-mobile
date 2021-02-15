@@ -1,7 +1,7 @@
 import 'package:dvote/dvote.dart';
 import 'package:dvote_common/lib/common.dart';
 import 'package:flutter/material.dart';
-import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'package:eventual/eventual-builder.dart';
@@ -21,12 +21,10 @@ class CardPost extends StatelessWidget {
   Widget build(BuildContext context) {
     String headerUrl = post.image;
     if (headerUrl.startsWith("ipfs"))
-      headerUrl =
-          processIpfsImageUrl(headerUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      headerUrl = processIpfsImageUrl(headerUrl, ipfsDomain: IPFS_DOMAIN);
     String avatarUrl = entity.metadata.value.media.avatar;
     if (avatarUrl.startsWith("ipfs"))
-      avatarUrl =
-          processIpfsImageUrl(avatarUrl, ipfsDomain: AppConfig.IPFS_DOMAIN);
+      avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     // Consume individual items that may rebuild only themselves
     return EventualBuilder(
       notifiers: [entity.metadata, entity.feed],
