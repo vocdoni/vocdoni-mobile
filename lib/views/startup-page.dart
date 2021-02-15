@@ -40,6 +40,7 @@ class _StartupPageState extends State<StartupPage> {
         .then((_) => Notifications.init())
         .then((_) => AppConfig.setPackageInfo())
         .then((_) => AppConfig.setDeviceInfo())
+        .then((_) => AppConfig.setDefaultDeviceLanguage())
         .then((_) => Globals.analytics.init())
         .then((_) => Globals.analytics.trackEvent(Events.APP_START))
         .then((_) {

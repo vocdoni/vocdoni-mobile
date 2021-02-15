@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:devicelocale/devicelocale.dart';
 import 'package:package_info/package_info.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/logger.dart';
@@ -17,6 +18,7 @@ String _networkOverride;
 PackageInfo _packageInfo;
 AndroidDeviceInfo _androidInfo;
 IosDeviceInfo _iosInfo;
+String _deviceLanguage;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -102,5 +104,18 @@ class AppConfig {
     if (_androidInfo != null) return "Android " + _androidInfo.version.baseOS;
     if (_iosInfo != null) return "iOS " + _iosInfo.systemVersion;
     return "";
+  }
+
+  /// NOT used in app locale or language settings
+  static String get defaultDeviceLanguage => _deviceLanguage;
+
+  /// NOT used in app locale or language settings
+  static setDefaultDeviceLanguage() async {
+    try {
+      _deviceLanguage = (await Devicelocale.preferredLanguages)[0];
+    } catch (err) {
+      _deviceLanguage = "";
+      logger.log(err);
+    }
   }
 }

@@ -53,6 +53,7 @@ dependencies:
   package_info: ^0.4.3+2
   device_info: ^1.0.0
   mutex: ^1.1.0
+  devicelocale: ^0.3.3
   #rainbow_color: ^0.1.1
 
 

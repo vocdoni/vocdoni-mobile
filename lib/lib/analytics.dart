@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ui';
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -163,13 +164,17 @@ class Analytics {
   }
 
   String getDeviceLanguage() {
-    return "";
-    //TODO implement
+    return AppConfig.defaultDeviceLanguage;
   }
 
   String getResolution() {
-    return "";
-    // TODO implement
+    try {
+      return window.physicalSize.height.toInt().toString() +
+          "x" +
+          window.physicalSize.width.toInt().toString();
+    } catch (_) {
+      return "";
+    }
   }
 
   String getTruncatedIp() {
