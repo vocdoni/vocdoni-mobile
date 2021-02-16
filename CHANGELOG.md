@@ -9,6 +9,7 @@
 - Add ProcessDetails, ProcessStatus
 - Hash addresses when generating EthereumWallet
 - Change processMetadata filename (don't try to load legacy processes)
+- Enable different ENS & Process domains
 
 # 0.8.16
 - Fix green border for some android versions
