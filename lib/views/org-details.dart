@@ -2,7 +2,6 @@ import 'package:dvote_common/lib/common.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import 'package:eventual/eventual-notifier.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/app-links.dart';
@@ -19,7 +18,6 @@ import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
-import 'package:dvote_common/widgets/summary.dart' as summary;
 import 'package:dvote_common/widgets/toast.dart';
 // import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -77,6 +75,7 @@ class _OrgDetailsState extends State<OrgDetails> {
             return SliverList(
                 delegate: SliverChildListDelegate(
               [
+                buildSubscribeItem(ctx),
                 buildTitleWithoutMetadata(ctx),
                 buildLoadingStatus(),
               ],
