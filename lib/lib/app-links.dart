@@ -370,6 +370,6 @@ List<String> extractLinkSegments(Uri link) {
 // /////////////////////////////////////////////////////////////////////////////
 
 String generateEntityLink(String entityId) {
-  final domain = AppConfig.LINKING_DOMAIN;
+  final domain = AppConfig.linkingDomain;
   return "https://$domain/entities/$entityId";
 }
