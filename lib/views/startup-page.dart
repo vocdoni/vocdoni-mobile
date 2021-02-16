@@ -6,7 +6,6 @@ import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
-// import 'package:vocdoni/lib/extensions.dart';
 import '../lib/globals.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:vocdoni/lib/extensions.dart';

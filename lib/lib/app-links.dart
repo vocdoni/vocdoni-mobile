@@ -129,18 +129,16 @@ Future handleEntityLink(List<String> linkSegments,
     if (currentAccount == null) throw Exception("Internal error");
 
     // subscribe if not already
-    if (!currentAccount.isSubscribed(entityRef)) {
-      await currentAccount.subscribe(entityModel);
-      // Set notifications on if not already subscribed
-      if (!entityModel.hasNotificationsEnabled()) {
-        await entityModel.enableNotifications();
-      }
+    await currentAccount.subscribe(entityModel);
+    // Set notifications on if not already subscribed
+    if (!entityModel.hasNotificationsEnabled()) {
+      await entityModel.enableNotifications();
     }
+
+    await Globals.accountPool.writeToStorage();
     if (closeDialog) Navigator.pop(context);
     Navigator.pushNamed(context, "/entity", arguments: entityModel);
   } catch (err) {
-    // showMessage("error.couldNotFetchTheEntityDetails",
-    //     context: context, purpose: Purpose.DANGER);
     throw Exception(getText(context, "error.couldNotFetchTheEntityDetails"));
   }
 }

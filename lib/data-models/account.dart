@@ -308,10 +308,16 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       final updatedIdentity = this.identity.value;
       updatedIdentity.peers = peers;
       this.identity.setValue(updatedIdentity);
-
-      final newPeerEntities = this.entities.value;
-      newPeerEntities.add(entityModel);
-      this.entities.setValue(newPeerEntities);
+    }
+    // Make sure this entity is stored in account entities
+    if (!(this.entities.value?.any((existingEntity) {
+          return existingEntity.reference.entityId ==
+              entityModel.reference.entityId;
+        }) ??
+        false)) {
+      final accountEntities = this.entities.value;
+      accountEntities.add(entityModel);
+      this.entities.setValue(accountEntities);
     }
 
     // Add also the new model to the entities pool
