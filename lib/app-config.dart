@@ -72,9 +72,15 @@ class AppConfig {
     defaultValue: _appMode == "dev" ? "dev.vocdoni.link" : "vocdoni.link",
   );
 
+  static String get linkingDomain {
+    if (bootnodesUrl.contains("dev")) return "dev.vocdoni.link";
+    if (bootnodesUrl.contains("stg")) return "stg.vocdoni.link";
+    return "vocdoni.link";
+  }
+
   static String get vochainExplorerUrl {
     if (bootnodesUrl.contains("dev")) return "https://explorer.dev.vocdoni.net";
-    if (bootnodesUrl.contains("stg")) return "https://explorer.stg.vocdoni.net";
+    if (bootnodesUrl.contains("stg")) return "https://explorer-stg.vocdoni.net";
     return "https://explorer.vocdoni.net";
   }
 
