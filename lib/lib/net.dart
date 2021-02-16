@@ -77,7 +77,7 @@ class AppNetworking {
 
     _discoveryFuture = discoverGatewaysFromBootnodeInfo(gwInfo,
             networkId: AppConfig.NETWORK_ID,
-            useTestingContracts: AppConfig.useTestingContracts())
+            alternateEnvironment: AppConfig.alternateEnvironment)
         .then((gateways) {
       if (gateways is! List || gateways.length == 0)
         throw Exception("There are no active gateways");

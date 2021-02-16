@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:dvote/net/gateway-pool.dart';
 import 'package:devicelocale/devicelocale.dart';
 import 'package:package_info/package_info.dart';
 import 'package:vocdoni/lib/globals.dart';
@@ -27,7 +28,8 @@ class AppConfig {
   static bool isBeta() => _appMode == "beta";
   static bool isProduction() => _appMode == "production";
 
-  static bool useTestingContracts() => AppConfig.isBeta();
+  static String get alternateEnvironment =>
+      parseAlternateEnvironment(AppConfig.bootnodesUrl);
 
   static setBootnodesUrlOverride(String url) async {
     try {
