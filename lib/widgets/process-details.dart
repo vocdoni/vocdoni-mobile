@@ -28,6 +28,7 @@ class _ProcessDetailsState extends State<ProcessDetails> {
   DateTime startDateCache;
   DateTime endDateCache;
   Timer refreshCheck;
+  bool isExpanded = false;
 
   @override
   void initState() {
@@ -75,8 +76,10 @@ class _ProcessDetailsState extends State<ProcessDetails> {
           data: Theme.of(context).copyWith(dividerColor: colorBaseBackground),
           child: ExpansionTile(
             maintainState: true,
+            initiallyExpanded: isExpanded,
             key: widget.expansionKey,
             onExpansionChanged: (value) {
+              isExpanded = value;
               if (value) {
                 widget.scrollToSelectedContent(
                     expansionTileKey: widget.expansionKey);

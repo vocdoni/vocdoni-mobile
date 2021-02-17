@@ -24,11 +24,22 @@ class PollQuestion extends StatefulWidget {
   final ProcessMetadata_Question question;
   final ProcessModel process;
   final Function(int, int) onSetChoice;
-  final int choice;
+  final Function(int, int) onUnsetChoice;
+  final bool Function(int, int) isSelected;
+  final Widget Function() buildPollInstructions;
   final int questionIndex;
+  final bool canVote;
 
-  PollQuestion(this.question, this.questionIndex, this.choice, this.process,
-      this.onSetChoice, this.scrollToSelectedContent);
+  PollQuestion(
+      this.question,
+      this.questionIndex,
+      this.process,
+      this.onSetChoice,
+      this.onUnsetChoice,
+      this.isSelected,
+      this.scrollToSelectedContent,
+      this.canVote,
+      {this.buildPollInstructions});
 
   @override
   _PollQuestionState createState() => _PollQuestionState();
@@ -37,6 +48,7 @@ class PollQuestion extends StatefulWidget {
 class _PollQuestionState extends State<PollQuestion> {
   PollQuestionRowTabs selectedTab = PollQuestionRowTabs.SELECTION;
   bool displayPercentage = true;
+  bool isExpanded = false;
 
   @override
   void initState() {
@@ -44,25 +56,8 @@ class _PollQuestionState extends State<PollQuestion> {
     super.initState();
   }
 
-  bool get canVote {
-    if (widget.process.hasVoted.value == true)
-      return false;
-    else if (!widget.process.startDate.hasValue)
-      return false;
-    else if (!widget.process.endDate.hasValue)
-      return false;
-    else if (widget.process.startDate.value.isAfter(DateTime.now()))
-      return false;
-    else if (widget.process.endDate.value.isBefore(DateTime.now()))
-      return false;
-    else if (widget.process.isInCensus.value != true) {
-      // Allows widget.isInCensus to be null without breaking
-      return false;
-    }
-    return true;
-  }
-
   bool get resultsAvailable {
+    // return true;
     if (!widget.process.results.hasValue)
       return false;
     else if (widget.process.results.value?.questions?.isEmpty ?? true)
@@ -106,10 +101,13 @@ class _PollQuestionState extends State<PollQuestion> {
                 getText(context, "main.questionTypeNotSupported"));
           }
           final resultsOk = resultsAvailable;
-          final voteOk = canVote;
+          final voteOk = widget.canVote;
           final contents = <Widget>[
             buildQuestionSubtitle(widget.question),
-            buildTabSelect(resultsOk, voteOk)
+            buildTabSelect(resultsOk, voteOk),
+            widget.buildPollInstructions != null && widget.canVote
+                ? widget.buildPollInstructions()
+                : Container(),
           ];
           contents.addAll(buildQuestionOptions(resultsOk, voteOk));
           return Column(
@@ -119,8 +117,10 @@ class _PollQuestionState extends State<PollQuestion> {
                     .copyWith(dividerColor: colorBaseBackground),
                 child: ExpansionTile(
                   maintainState: true,
+                  initiallyExpanded: isExpanded,
                   key: widget.expansionKey,
                   onExpansionChanged: (value) {
+                    isExpanded = value;
                     if (value) {
                       widget.scrollToSelectedContent(
                           expansionTileKey: widget.expansionKey);
@@ -180,6 +180,7 @@ class _PollQuestionState extends State<PollQuestion> {
 
     final results = widget.process.results.value;
     List<Widget> options = List<Widget>();
+
     int totalVotes = 0;
     int mostVotedCount = 0;
     int leastVotedCount = results
@@ -247,7 +248,8 @@ class _PollQuestionState extends State<PollQuestion> {
                 style: TextStyle(
                     fontSize: fontSizeSecondary,
                     fontWeight: fontWeightRegular,
-                    color: widget.choice == voteOption.value
+                    color: widget.isSelected(
+                            widget.questionIndex, voteOption.value)
                         ? Colors.white
                         : colorDescription),
               ),
@@ -255,10 +257,12 @@ class _PollQuestionState extends State<PollQuestion> {
           ),
         ],
       ),
-      selected: widget.choice == voteOption.value,
+      selected: widget.isSelected(widget.questionIndex, voteOption.value),
       onSelected: (bool selected) {
         if (selected) {
           widget.onSetChoice(widget.questionIndex, voteOption.value);
+        } else {
+          widget.onUnsetChoice(widget.questionIndex, voteOption.value);
         }
       },
     ).withHPadding(paddingPage).withVPadding(6.0);
