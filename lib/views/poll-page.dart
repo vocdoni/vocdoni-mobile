@@ -2,30 +2,28 @@ import 'package:dvote_common/lib/common.dart';
 import 'package:dvote_common/widgets/htmlSummary.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/makers.dart';
 import 'dart:async';
-import 'package:dvote/dvote.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:eventual/eventual-builder.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util/process-date-text.dart';
-import 'package:vocdoni/views/poll-packaging-page.dart';
+import 'package:vocdoni/lib/util/scroll.dart';
 import 'package:dvote_common/widgets/ScaffoldWithImage.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/listItem.dart';
-import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/widgets/poll-question.dart';
+import 'package:vocdoni/widgets/multiple-choice-poll.dart';
 import 'package:vocdoni/widgets/process-details.dart';
 import 'package:vocdoni/widgets/process-status.dart';
+import 'package:vocdoni/widgets/single-choice-poll.dart';
 
 class PollPageArgs {
   EntityModel entity;
@@ -45,7 +43,6 @@ class _PollPageState extends State<PollPage> {
   EntityModel entity;
   ProcessModel process;
   int listIdx;
-  List<int> choices = [];
   int refreshCounter = 0;
   GlobalKey voteButtonKey = GlobalKey();
 
@@ -102,11 +99,6 @@ class _PollPageState extends State<PollPage> {
     entity = args.entity;
     process = args.process;
     listIdx = args.listIdx;
-
-    choices = process.metadata.value.questions
-        .map((question) => null)
-        .cast<int>()
-        .toList();
 
     Globals.analytics.trackPage("Poll",
         entityId: entity.reference.entityId, processId: process.processId);
@@ -204,11 +196,7 @@ class _PollPageState extends State<PollPage> {
     children.add(buildSummary());
     if (process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
-    children.addAll(buildQuestions(
-        ctx, onScrollToSelectedContent(scaffoldScrollController)));
-    children.add(Section(withDectoration: false));
-    children.add(buildSubmitInfo());
-    children.add(buildSubmitVoteButton(ctx));
+    children.add(buildVoting(ctx, scaffoldScrollController));
 
     return children;
   }
@@ -291,166 +279,50 @@ class _PollPageState extends State<PollPage> {
     );
   }
 
-  /// Returns the 0-based index of the next unanswered question.
-  /// Returns -1 if all questions have a valid choice
-  int getNextPendingChoice() {
-    int idx = 0;
-    for (final choice in choices) {
-      if (choice is int) {
-        idx++;
-        continue; // GOOD
-      }
-      return idx; // PENDING
-    }
-    return -1; // ALL GOOD
+  Widget buildVoting(
+      BuildContext ctx, ScrollController scaffoldScrollController) {
+    if (!process.processData.hasValue)
+      return ListItem(
+        mainText: getText(context, "main.fetchingDetails"),
+        rightIcon: null,
+        isSpinning: true,
+      );
+
+    if (process.processData.value.getEnvelopeType.hasAnonymousVoters)
+      return buildUnsupportedProcess(getText(ctx, "main.anonymousVoting"));
+    if (process.processData.value.getEnvelopeType.hasSerialVoting)
+      return buildUnsupportedProcess(getText(ctx, "main.serialVoting"));
+    if (process.processData.value.getEnvelopeType.hasUniqueValues)
+      return buildUnsupportedProcess(getText(ctx, "main.uniqueValueVoting"));
+    if (process.processData.value.getCensusOrigin.isOffChainCA)
+      return buildUnsupportedProcess(
+          getText(ctx, "main.certificateAuthorityVerification"));
+    if (!(process.processData.value.getCensusOrigin.isOffChain ||
+        process.processData.value.getCensusOrigin.isOffChainWeighted))
+      return buildUnsupportedProcess(getText(ctx, "main.onChainVoting"));
+    if (process.processData.value.getMode.hasDynamicCensus)
+      return buildUnsupportedProcess(getText(ctx, "main.dynamicCensus"));
+    if (process.processData.value.getMode.hasEncryptedMetadata)
+      return buildUnsupportedProcess(getText(ctx, "main.encryptedMetadata"));
+    if (process.processData.value.getCostExponent > 1)
+      return buildUnsupportedProcess(getText(ctx, "main.quadraticVoting"));
+
+    if (process.processData.value.getMaxTotalCost <= 1)
+      return SingleChoicePoll(
+          entity, process, scaffoldScrollController, voteButtonKey);
+    if (process.processData.value.getMaxTotalCost > 1)
+      return MultipleChoicePoll(
+          entity, process, scaffoldScrollController, voteButtonKey);
+    return buildUnsupportedProcess(getText(ctx, "main.thisProcessType"));
   }
 
-  bool canNotVote() {
-    final nextPendingChoice = getNextPendingChoice();
-    final cannotVote = nextPendingChoice >= 0 ||
-        !process.isInCensus.hasValue ||
-        !process.isInCensus.value ||
-        process.hasVoted.value == true ||
-        !process.startDate.hasValue ||
-        !process.endDate.hasValue ||
-        process.startDate.value.isAfter(DateTime.now()) ||
-        process.endDate.value.isBefore(DateTime.now());
-    return cannotVote;
-  }
-
-  buildSubmitVoteButton(BuildContext ctx) {
-    // rebuild when isInCensus or hasVoted change
-    return Container(
-      key: voteButtonKey,
-      child: EventualBuilder(
-        notifiers: [process.hasVoted, process.isInCensus],
-        builder: (ctx, _, __) {
-          if (canNotVote()) {
-            return Container();
-          }
-
-          return Padding(
-            padding: EdgeInsets.all(paddingPage),
-            child: BaseButton(
-                text: getText(context, "action.submit"),
-                purpose: Purpose.HIGHLIGHT,
-                // purpose: cannotVote ? Purpose.DANGER : Purpose.HIGHLIGHT,
-                // isDisabled: cannotVote,
-                onTap: () => onSubmit(ctx, process.metadata)),
-          );
-        },
-      ),
-    );
-  }
-
-  onSubmit(BuildContext ctx, metadata) async {
-    final newRoute = MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) =>
-            PollPackagingPage(process: process, choices: choices));
-    await Navigator.push(ctx, newRoute);
-    process.refreshResults(force: true);
-    process.refreshCurrentParticipants(force: true); // Refresh percentage
-  }
-
-  onSetChoice(int questionIndex, int value) {
-    setState(() {
-      choices[questionIndex] = value;
-    });
-  }
-
-  Widget buildSubmitInfo() {
-    // rebuild when isInCensus or hasVoted change
-    return EventualBuilder(
-      notifiers: [process.hasVoted, process.isInCensus],
-      builder: (ctx, _, __) {
-        final nextPendingChoice = getNextPendingChoice();
-
-        if (process.hasVoted.hasValue && process.hasVoted.value) {
-          return ListItem(
-            mainText: getText(context, "status.yourVoteIsAlreadyRegistered"),
-            purpose: Purpose.GOOD,
-            rightIcon: null,
-          );
-        } else if (!process.startDate.hasValue || !process.endDate.hasValue) {
-          return ListItem(
-            mainText:
-                getText(context, "error.theProcessDatesCannotBeDetermined"),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.startDate.value.isAfter(DateTime.now())) {
-          return ListItem(
-            mainText: getText(context, "status.theProcessIsNotActiveYet"),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.endDate.value.isBefore(DateTime.now())) {
-          return ListItem(
-            mainText: getText(context, "status.theProcessHasAlreadyEnded"),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.isInCensus.hasValue && !process.isInCensus.value) {
-          return ListItem(
-            mainText: getText(context, "error.youAreNotInTheCensus"),
-            secondaryText: getText(context,
-                "main.registerToThisOrganizationToParticipateInTheFuture"),
-            secondaryTextMultiline: 5,
-            purpose: Purpose.DANGER,
-            rightIcon: null,
-          );
-        } else if (process.isInCensus.hasError) {
-          return ListItem(
-            mainText: getText(
-                context, "main.yourIdentityCannotBeCheckedWithinTheCensus"),
-            mainTextMultiline: 3,
-            // translate the key from setError()
-            secondaryText: getText(context, process.isInCensus.errorMessage),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (!process.isInCensus.hasValue) {
-          return ListItem(
-            mainText: getText(context, "error.theCensusCannotBeChecked"),
-            secondaryText:
-                getText(context, "main.tapAboveOnCheckTheCensusAndTryAgain"),
-            secondaryTextMultiline: 5,
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (nextPendingChoice >= 0) {
-          return ListItem(
-            mainText: getText(context, "main.selectYourChoiceForQuestionNum")
-                .replaceFirst("{{NUM}}", (nextPendingChoice + 1).toString()),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.hasVoted.hasError) {
-          return ListItem(
-            mainText: getText(context, "error.yourVoteStatusCannotBeChecked"),
-            mainTextMultiline: 3,
-            // translate the key from setError()
-            secondaryText: getText(context, process.hasVoted.errorMessage),
-            purpose: Purpose.WARNING,
-            rightIcon: null,
-          );
-        } else if (process.isInCensus.isLoading) {
-          return ListItem(
-            mainText: getText(context, "status.checkingTheCensus"),
-            purpose: Purpose.GUIDE,
-            rightIcon: null,
-          );
-        } else if (process.hasVoted.isLoading) {
-          return ListItem(
-            mainText: getText(context, "status.checkingYourVote"),
-            purpose: Purpose.GUIDE,
-            rightIcon: null,
-          );
-        } else {
-          return Container(); // unknown error
-        }
-      },
+  Widget buildUnsupportedProcess(String processType) {
+    return ListItem(
+      mainText: getText(context, "main.TYPEIsNotYetSupported")
+          .replaceAll("{{TYPE}}", processType),
+      mainTextMultiline: 5,
+      rightIcon: null,
+      purpose: Purpose.WARNING,
     );
   }
 
@@ -474,35 +346,6 @@ class _PollPageState extends State<PollPage> {
         body: Center(
           child: Text(getText(context, "main.noPoll")),
         ));
-  }
-
-  List<Widget> buildQuestions(BuildContext ctx, Function() onScroll) {
-    if (!process.metadata.hasValue ||
-        process.metadata.value.questions.length == 0) {
-      return [];
-    }
-
-    List<Widget> items = new List<Widget>();
-    int questionIndex = 0;
-
-    for (ProcessMetadata_Question question
-        in process.metadata.value.questions) {
-      items.add(PollQuestion(question, questionIndex, choices[questionIndex],
-          process, onSetChoice, onScroll));
-      questionIndex++;
-    }
-
-    return items;
-  }
-
-  buildQuestionTitle(ProcessMetadata_Question question, int index) {
-    return ListItem(
-      mainText: question.title['default'],
-      mainTextMultiline: 3,
-      secondaryText: question.description['default'],
-      secondaryTextMultiline: 100,
-      rightIcon: null,
-    );
   }
 
   goBack(BuildContext ctx) {
@@ -532,24 +375,6 @@ class _PollPageState extends State<PollPage> {
 
   Function() onScrollToBottom(ScrollController controller) {
     return () =>
-        _scrollToSelectedContent(controller, expansionTileKey: voteButtonKey);
-  }
-
-  Function({GlobalKey expansionTileKey}) onScrollToSelectedContent(
-      ScrollController controller) {
-    return ({GlobalKey expansionTileKey}) {
-      _scrollToSelectedContent(controller, expansionTileKey: expansionTileKey);
-    };
-  }
-
-  void _scrollToSelectedContent(ScrollController controller,
-      {GlobalKey expansionTileKey}) {
-    final keyContext = expansionTileKey.currentContext;
-    // if (keyContext != null) {
-    Future.delayed(Duration(milliseconds: 200)).then((value) {
-      Scrollable.ensureVisible(keyContext,
-          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
-    });
-    // }
+        scrollToSelectedContent(controller, expansionTileKey: voteButtonKey);
   }
 }
