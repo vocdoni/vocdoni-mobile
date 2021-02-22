@@ -61,7 +61,7 @@ class _SingleChoicePollState extends State<SingleChoicePoll> {
     for (ProcessMetadata_Question question
         in widget.process.metadata.value.questions) {
       items.add(PollQuestion(question, questionIndex, widget.process,
-          onSetChoice, onUnsetChoice, isSelected, onScroll, !canNotVote()));
+          onSetChoice, onUnsetChoice, isSelected, onScroll));
       questionIndex++;
     }
 
@@ -93,6 +93,7 @@ class _SingleChoicePollState extends State<SingleChoicePoll> {
   }
 
   bool canNotVote() {
+    return false;
     final nextPendingChoice = getNextPendingChoice();
     final cannotVote = nextPendingChoice >= 0 ||
         !widget.process.isInCensus.hasValue ||
