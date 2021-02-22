@@ -68,7 +68,6 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
         onUnsetChoice,
         isSelected,
         onScroll,
-        !canNotVote(),
         buildPollInstructions: buildPollInstructions,
       ));
       questionIndex++;

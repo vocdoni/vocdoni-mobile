@@ -8,7 +8,7 @@ String parseProcessDate(ProcessModel process, BuildContext context) {
     return getText(context, "main.startsIn").replaceAll("{{DATE}}",
         getFriendlyWordTimeDifference(process.startDate.value, context));
   else if (process.startDate.hasValue &&
-      process.startDate.value.isAtSameMomentAs(now))
+      process.startDate.value.difference(now).inSeconds == 0)
     return getText(context, "main.starting");
   else if (process.endDate.hasValue && process.endDate.value.isAfter(now))
     return getText(context, "main.endsIn").replaceAll("{{DATE}}",
@@ -85,11 +85,8 @@ String getFriendlyWordTimeDifference(DateTime date, BuildContext context) {
   else if (diff.inHours >= 1)
     return getText(context, "main.numHour")
         .replaceFirst("{{NUM}}", diff.inHours.toString());
-  else if (diff.inMinutes >= 2)
+  else if (diff.inMinutes > 1)
     return getText(context, "main.numMinutes")
-        .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
-  else if (diff.inMinutes >= 1)
-    return getText(context, "main.numMinute")
         .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
   else if (diff.inSeconds > 1)
     return getText(context, "main.numSeconds")

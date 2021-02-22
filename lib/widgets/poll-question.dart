@@ -28,7 +28,6 @@ class PollQuestion extends StatefulWidget {
   final bool Function(int, int) isSelected;
   final Widget Function() buildPollInstructions;
   final int questionIndex;
-  final bool canVote;
 
   PollQuestion(
       this.question,
@@ -38,7 +37,6 @@ class PollQuestion extends StatefulWidget {
       this.onUnsetChoice,
       this.isSelected,
       this.scrollToSelectedContent,
-      this.canVote,
       {this.buildPollInstructions});
 
   @override
@@ -54,6 +52,24 @@ class _PollQuestionState extends State<PollQuestion> {
   void initState() {
     widget.process.refreshResults();
     super.initState();
+  }
+
+  bool get canVote {
+    if (widget.process.hasVoted.value == true)
+      return false;
+    else if (!widget.process.startDate.hasValue)
+      return false;
+    else if (!widget.process.endDate.hasValue)
+      return false;
+    else if (widget.process.startDate.value.isAfter(DateTime.now()))
+      return false;
+    else if (widget.process.endDate.value.isBefore(DateTime.now()))
+      return false;
+    else if (widget.process.isInCensus.value != true) {
+      // Allows widget.isInCensus to be null without breaking
+      return false;
+    }
+    return true;
   }
 
   bool get resultsAvailable {
@@ -101,11 +117,11 @@ class _PollQuestionState extends State<PollQuestion> {
                 getText(context, "main.questionTypeNotSupported"));
           }
           final resultsOk = resultsAvailable;
-          final voteOk = widget.canVote;
+          final voteOk = canVote;
           final contents = <Widget>[
             buildQuestionSubtitle(widget.question),
             buildTabSelect(resultsOk, voteOk),
-            widget.buildPollInstructions != null && widget.canVote
+            widget.buildPollInstructions != null && canVote
                 ? widget.buildPollInstructions()
                 : Container(),
           ];

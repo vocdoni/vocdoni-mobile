@@ -246,12 +246,9 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
         onPressed: () async {
           try {
             processStatus.loading.setValue(true);
-            final hexPubKey = Globals.appState.currentAccount
-                .getPublicKeyForEntity(widget.process.entityId);
-            final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
-
-            final addrBytes = publicKeyToAddress(publicKeyBytes);
-            final userAddress = EthereumAddress(addrBytes).hexEip55;
+            final userAddress = getUserAddressFromPubKey(Globals
+                .appState.currentAccount
+                .getPublicKeyForEntity(widget.process.entityId));
             final pollNullifier = await getSignedVoteNullifier(
                 userAddress, widget.process.processId);
             processStatus.loading.setValue(false);
@@ -328,7 +325,7 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
               widget.entity.reference.entityId.replaceFirst("0x", "")))));
 
       account.setPublicKeyForEntity(
-          await wallet.publicKeyAsync(uncompressed: true),
+          await wallet.publicKeyAsync(uncompressed: false),
           widget.entity.reference.entityId);
     }
 
