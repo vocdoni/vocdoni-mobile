@@ -93,7 +93,6 @@ class _SingleChoicePollState extends State<SingleChoicePoll> {
   }
 
   bool canNotVote() {
-    return false;
     final nextPendingChoice = getNextPendingChoice();
     final cannotVote = nextPendingChoice >= 0 ||
         !widget.process.isInCensus.hasValue ||

@@ -418,7 +418,6 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
       // // Digested
       // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
-      // final censusPublicKeyClaim = Hashing.digestHexClaim();
       // final alreadyDigested = true;
 
       final proof = await generateProof(this.processData.value.getCensusRoot,
@@ -435,9 +434,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           "- [Process census presence] Refreshing DONE [${this.processId}]");
 
       this.isInCensus.setValue(valid);
-    } catch (err, s) {
+    } catch (err) {
       logger.log(
-          "- [Process census presence] Refreshing ERROR: $err [${this.processId}] $s");
+          "- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
 
       // NOTE: Leave the comment to enforce i18n parsing
       // getText(context, "error.theCensusIsNotAvailable")
