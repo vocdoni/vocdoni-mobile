@@ -211,7 +211,7 @@ class _PollPageState extends State<PollPage> {
     if (avatarUrl.startsWith("ipfs"))
       avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
     return EventualBuilder(
-      notifier: entity.metadata,
+      notifiers: [entity.metadata, process.startDate, process.endDate],
       builder: (context, _, __) => ListItem(
         // mainTextTag: makeElementTag(entityId: ent.reference.entityId, cardId: _process.meta[META_PROCESS_ID], elementId: _process.details.headerImage)
         mainText: title,

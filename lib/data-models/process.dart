@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dvote/constants.dart';
 import 'package:dvote/dvote.dart';
 // import 'package:dvote_crypto/dvote_crypto.dart';
@@ -417,6 +418,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
       // // Digested
       // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
+      // final censusPublicKeyClaim = Hashing.digestHexClaim();
       // final alreadyDigested = true;
 
       final proof = await generateProof(this.processData.value.getCensusRoot,
@@ -433,9 +435,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
           "- [Process census presence] Refreshing DONE [${this.processId}]");
 
       this.isInCensus.setValue(valid);
-    } catch (err) {
+    } catch (err, s) {
       logger.log(
-          "- [Process census presence] Refreshing ERROR: $err [${this.processId}]");
+          "- [Process census presence] Refreshing ERROR: $err [${this.processId}] $s");
 
       // NOTE: Leave the comment to enforce i18n parsing
       // getText(context, "error.theCensusIsNotAvailable")
@@ -470,11 +472,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       final entity = this.entity;
       if (entity is! EntityModel) throw Exception("No entity for process");
 
-      final hexPubKey = account.getPublicKeyForEntity(this.entityId);
-      final publicKeyBytes = hex.decode(hexPubKey.replaceAll("0x04", ""));
-
-      final addrBytes = publicKeyToAddress(publicKeyBytes);
-      final userAddress = EthereumAddress(addrBytes).hexEip55;
+      final userAddress = getUserAddressFromPubKey(
+          account.getPublicKeyForEntity(this.entityId));
 
       final pollNullifier =
           await getSignedVoteNullifier(userAddress, this.processId);
