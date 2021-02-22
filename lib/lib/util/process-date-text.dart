@@ -4,13 +4,15 @@ import 'package:vocdoni/lib/i18n.dart';
 
 String parseProcessDate(ProcessModel process, BuildContext context) {
   final now = DateTime.now();
-  if (process.startDate.hasValue && process.startDate.value.isAfter(now))
+
+  if (process.startDate.hasValue && process.startDate.value.isAfter(now)) {
+    Duration diff = process.startDate.value.difference(DateTime.now());
+    if (diff.isNegative)
+      diff = DateTime.now().difference(process.startDate.value);
+    if (diff.inSeconds < 1) return getText(context, "main.starting");
     return getText(context, "main.startsIn").replaceAll("{{DATE}}",
         getFriendlyWordTimeDifference(process.startDate.value, context));
-  else if (process.startDate.hasValue &&
-      process.startDate.value.difference(now).inSeconds == 0)
-    return getText(context, "main.starting");
-  else if (process.endDate.hasValue && process.endDate.value.isAfter(now))
+  } else if (process.endDate.hasValue && process.endDate.value.isAfter(now))
     return getText(context, "main.endsIn").replaceAll("{{DATE}}",
         getFriendlyWordTimeDifference(process.endDate.value, context));
   else if (process.endDate.hasValue &&
@@ -85,10 +87,13 @@ String getFriendlyWordTimeDifference(DateTime date, BuildContext context) {
   else if (diff.inHours >= 1)
     return getText(context, "main.numHour")
         .replaceFirst("{{NUM}}", diff.inHours.toString());
-  else if (diff.inMinutes > 1)
+  else if (diff.inMinutes >= 2)
     return getText(context, "main.numMinutes")
         .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
-  else if (diff.inSeconds > 1)
+  else if (diff.inMinutes >= 1)
+    return getText(context, "main.numMinutes")
+        .replaceFirst("{{NUM}}", (diff.inMinutes + 1).toString());
+  else if (diff.inSeconds >= 1)
     return getText(context, "main.numSeconds")
         .replaceFirst("{{NUM}}", "~" + diff.inSeconds.toString());
   else

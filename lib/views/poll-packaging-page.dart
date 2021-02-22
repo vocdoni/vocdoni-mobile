@@ -90,11 +90,6 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
           entityAddressHash:
               ensHashAddress(Uint8List.fromList(hex.decode(entityAddress))));
 
-      print("EntityAddress: $entityAddress");
-      print(
-          "privkey: ${hex.decode((await wallet.privateKeyAsync).replaceAll("0x", ""))}");
-      print("Pub key ${wallet.publicKey()}");
-
       // Merkle Proof
 
       final publicKey = (await wallet.publicKeyAsync()).replaceAll("0x", "");
