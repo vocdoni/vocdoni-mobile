@@ -317,7 +317,7 @@ class _PollQuestionState extends State<PollQuestion> {
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       child: Text(
                         displayPercentage
-                            ? "${totalPerc * 100}%"
+                            ? "${(totalPerc * 100).toStringAsFixed(2)}%"
                             : "$myVotes " +
                                 (myVotes == 1
                                     ? getText(context, "main.vote")

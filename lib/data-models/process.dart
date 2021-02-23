@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:dvote/constants.dart';
 import 'package:dvote/dvote.dart';
-// import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote/wrappers/process-results.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -14,8 +12,6 @@ import 'package:eventual/eventual.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:convert/convert.dart';
 import 'package:vocdoni/lib/logger.dart';
-import 'package:web3dart/crypto.dart';
-import 'package:web3dart/credentials.dart';
 
 final hexRegexp =
     RegExp(r"^0?x?[0-9a-f]+$", caseSensitive: false, multiLine: false);
@@ -365,7 +361,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       this.results.setToLoading();
       final newResults = await getResultsDigest(
           this.processId, AppNetworking.pool,
-          meta: this.metadata.value);
+          meta: this.metadata.value,
+          processData: this.processData.value ?? null);
       if (!(newResults is ProcessResultsDigested))
         throw Exception("The process cannot be found");
 

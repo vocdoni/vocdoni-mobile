@@ -23,7 +23,6 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/multiple-choice-poll.dart';
 import 'package:vocdoni/widgets/process-details.dart';
 import 'package:vocdoni/widgets/process-status.dart';
-import 'package:vocdoni/widgets/single-choice-poll.dart';
 
 class PollPageArgs {
   EntityModel entity;
@@ -121,7 +120,6 @@ class _PollPageState extends State<PollPage> {
     if (entity == null) return buildEmptyPoll(context);
 
     // By the constructor, this.process.metadata is guaranteed to exist
-
     return EventualBuilder(
       notifiers: [
         entity.metadata,
@@ -304,13 +302,10 @@ class _PollPageState extends State<PollPage> {
       return buildUnsupportedProcess(getText(ctx, "main.dynamicCensus"));
     if (process.processData.value.getMode.hasEncryptedMetadata)
       return buildUnsupportedProcess(getText(ctx, "main.encryptedMetadata"));
-    if (process.processData.value.getCostExponent > 1)
+    if (process.processData.value.getCostExponent != 1)
       return buildUnsupportedProcess(getText(ctx, "main.quadraticVoting"));
 
-    if (process.processData.value.getMaxTotalCost <= 1)
-      return SingleChoicePoll(
-          entity, process, scaffoldScrollController, voteButtonKey);
-    if (process.processData.value.getMaxTotalCost > 1)
+    if (process.processData.value.getMaxTotalCost > 0)
       return MultipleChoicePoll(
           entity, process, scaffoldScrollController, voteButtonKey);
     return buildUnsupportedProcess(getText(ctx, "main.thisProcessType"));
