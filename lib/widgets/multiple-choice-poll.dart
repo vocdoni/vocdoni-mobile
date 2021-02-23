@@ -35,7 +35,6 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
     super.didChangeDependencies();
 
     choices = List<int>.filled(widget.process.processData.value.getMaxCount, 0);
-    // choices = List<int>.filled(4, 0);
   }
 
   @override
@@ -87,12 +86,15 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
   }
 
   Widget buildPollInstructions() {
-    return ListItem(
-      mainText: getText(context, "main.chooseUpToNUMOptions").replaceAll(
-          "{{NUM}}",
-          widget.process.processData.value.getMaxTotalCost.toString()),
-      rightIcon: null,
-    );
+    if (widget.process.processData.value.getMaxTotalCost > 1) {
+      return ListItem(
+        mainText: getText(context, "main.chooseUpToNUMOptions").replaceAll(
+            "{{NUM}}",
+            widget.process.processData.value.getMaxTotalCost.toString()),
+        rightIcon: null,
+      );
+    }
+    return Container();
   }
 
   /// Returns the 0-based index of the next unanswered question.
@@ -159,10 +161,14 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
   }
 
   onSetChoice(int questionIndex, int value) {
-    if (numSelected < widget.process.processData.value.getMaxTotalCost)
+    if (widget.process.processData.value.getMaxTotalCost == 1) {
+      choices.fillRange(0, choices.length, 0);
+    }
+    if (numSelected < widget.process.processData.value.getMaxTotalCost) {
       setState(() {
         choices[value] = 1;
       });
+    }
   }
 
   onUnsetChoice(int questionIndex, int value) {
