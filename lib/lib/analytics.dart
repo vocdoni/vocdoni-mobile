@@ -149,10 +149,9 @@ class Analytics {
   }
 
   bool getBackupDone() {
-    // if (!(Globals.appState?.currentAccount?.backedUp?.hasValue ?? false))
-    //   return "";
+    if (Globals.appState?.currentAccount?.identity?.value?.hasBackedUp() ??
+        false) return true;
     return false;
-    //TODO implement
   }
 
   String getSelectedLanguage() {
