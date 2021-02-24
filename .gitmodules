@@ -1,0 +1,3 @@
+[submodule "lib/common-client-libs"]
+	path = lib/common-client-libs
+	url = https://github.com/vocdoni/common-client-libs
