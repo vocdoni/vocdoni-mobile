@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:ui';
+
 import 'package:mixpanel_analytics/mixpanel_analytics.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/account.dart';
@@ -40,24 +41,24 @@ class Analytics {
     _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
       value: {
-        "AppVersion": getAppVersion(),
-        "OsVersion": getOsVersion(),
-        "Environment": getEnvironment(),
-        "SelectedLanguage": getSelectedLanguage(),
-        "DeviceLanguage": getDeviceLanguage(),
-        "Resolution": getResolution()
+        "appVersion": getAppVersion(),
+        "osVersion": getOsVersion(),
+        "environment": getEnvironment(),
+        "selectedLanguage": getSelectedLanguage(),
+        "deviceLanguage": getDeviceLanguage(),
+        "resolution": getResolution()
       },
       ip: getTruncatedIp(),
       time: getDateTime(),
     );
     logger.log("[Analytics] added user ${getUserId()}: " +
         {
-          "AppVersion": getAppVersion(),
-          "OsVersion": getOsVersion(),
-          "Environment": getEnvironment(),
-          "SelectedLanguage": getSelectedLanguage(),
-          "DeviceLanguage": getDeviceLanguage(),
-          "Resolution": getResolution()
+          "appVersion": getAppVersion(),
+          "osVersion": getOsVersion(),
+          "environment": getEnvironment(),
+          "selectedLanguage": getSelectedLanguage(),
+          "deviceLanguage": getDeviceLanguage(),
+          "resolution": getResolution()
         }.toString());
   }
 
@@ -68,12 +69,14 @@ class Analytics {
     _mixpanel.engage(
       operation: MixpanelUpdateOperations.$set,
       value: {
-        "AppVersion": getAppVersion(),
-        "OsVersion": getOsVersion(),
-        "Environment": getEnvironment(),
-        "SelectedLanguage": getSelectedLanguage(),
-        "DeviceLanguage": getDeviceLanguage(),
-        "Resolution": getResolution()
+        "appVersion": getAppVersion(),
+        "osVersion": getOsVersion(),
+        "environment": getEnvironment(),
+        "selectedLanguage": getSelectedLanguage(),
+        "deviceLanguage": getDeviceLanguage(),
+        "resolution": getResolution(),
+        "subscriptions": getSubscriptions().join(", "),
+        "backupDone": getBackupDone(),
       },
       ip: getTruncatedIp(),
       time: getDateTime(),
