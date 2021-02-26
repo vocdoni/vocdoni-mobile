@@ -1,8 +1,9 @@
+import 'package:dvote/dvote.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/extensions.dart';
@@ -91,7 +92,7 @@ class _SetPinPageState extends State<SetPinPage> {
                   ),
                   Spacer(),
                   EnterPin(
-                    key: Key(pinStep.toString()),
+                    key: foundation.Key(pinStep.toString()),
                     onPinStopped: pinStep == PinStep.READY
                         ? onFirstPassDone
                         : onSecondPassDone,
@@ -124,7 +125,7 @@ class _SetPinPageState extends State<SetPinPage> {
   }
 
   void onSecondPassDone(BuildContext context, List<int> pin) async {
-    if (!listEquals(setPin, pin)) {
+    if (!foundation.listEquals(setPin, pin)) {
       HapticFeedback.vibrate();
       final msg = getText(context, "main.thePinsYouEnteredDoNotMatch");
       showMessage(msg, context: context, duration: 3, purpose: Purpose.DANGER);
@@ -163,8 +164,8 @@ class _SetPinPageState extends State<SetPinPage> {
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>
           account.identity.hasValue &&
-          account.identity.value.identityId ==
-              newAccount.identity.value.identityId);
+          pubKeysAreEqual(account.identity.value.identityId,
+              newAccount.identity.value.identityId));
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 
@@ -214,11 +215,12 @@ class _SetPinPageState extends State<SetPinPage> {
   }
 
   showNextPage(BuildContext ctx) {
-    Globals.appState.pinCache = pinToString(setPin);
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => OnboardingBackupInput(),
+          builder: (context) => OnboardingBackupInput(
+            pinCache: pinToString(setPin),
+          ),
         ),
         (Route _) => false);
   }

@@ -7,6 +7,7 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 
 class OnboardingBackupQuestionSelection extends StatelessWidget {
+  // already chosen questions. Don't display these as options
   final List<int> currentQuestions;
 
   OnboardingBackupQuestionSelection(this.currentQuestions);
@@ -35,11 +36,14 @@ class OnboardingBackupQuestionSelection extends StatelessWidget {
 
   List<Widget> _generateQuestionList(BuildContext ctx) {
     final List<Widget> questions = [];
-    AppConfig.backupQuestionTexts.asMap().forEach((index, question) {
-      if (currentQuestions.contains(index) || index == 0) return;
+    AppConfig.backupQuestionTexts.forEach((key, question) {
+      final index = int.parse(key);
+      if (currentQuestions.contains(index) || index < 0) return;
       questions.add(
         ListItem(
-          mainText: getText(ctx, "main." + question),
+          mainText: index >= 0
+              ? getBackupQuestionText(ctx, "question." + question)
+              : getText(ctx, "main.selectQuestion"),
           onTap: () {
             Navigator.pop(ctx, index);
           },

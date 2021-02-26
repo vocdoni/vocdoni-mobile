@@ -1,5 +1,6 @@
 // import 'package:dvote_common/constants/colors.dart';
 
+import 'package:dvote/dvote.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
@@ -214,8 +215,8 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>
           account.identity.hasValue &&
-          account.identity.value.identityId ==
-              newAccount.identity.value.identityId);
+          pubKeysAreEqual(account.identity.value.identityId,
+              newAccount.identity.value.identityId));
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 
