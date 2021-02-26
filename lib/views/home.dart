@@ -98,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   handleLink(Uri givenUri) {
     if (givenUri == null || !Globals.accountPool.hasValue) return;
-    if (Globals.accountPool.value.length == 1) {
+    if (Globals.accountPool.value.length == 1 ||
+        givenUri.path.contains("recovery")) {
       handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
           .catchError(handleIncomingLinkError);
     } else {

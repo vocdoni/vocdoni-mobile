@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dvote/dvote.dart';
+import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/spinner.dart';
 import 'package:flutter/material.dart';
@@ -240,27 +243,36 @@ Future handleProcessLink(List<String> linkSegments,
   } catch (err) {
     // showMessage("Could not fetch the entity details",
     //     context: context, purpose: Purpose.DANGER);
-    print(err);
+    logger.log(err);
     throw Exception(getText(context, "error.couldNotFetchTheProcessDetails"));
   }
 }
 
 Future handleRecoveryLink(List<String> linkSegments,
     {@required BuildContext context, closeDialog = false}) async {
-  // final paramSegments = linkSegments
-  //     .skip(1)
-  //     .toList(); // TODO define link schema, implement parsing
-  // paramSegments => [ TBD ]
+  if (linkSegments.length < 3 ||
+      !(linkSegments[0] is String) ||
+      !(linkSegments[1] is String) ||
+      !(linkSegments[2] is String) ||
+      !(linkSegments[3] is String)) {
+    throw LinkingError("Invalid validation link");
+  }
 
   try {
+    // Decode & deserialize protobuf recovery model
+    final recoveryBytes = base64Decode(linkSegments.sublist(3).join());
+    AccountRecovery recoveryModel = AccountRecovery.fromBuffer(recoveryBytes);
+
     // Navigate
     if (closeDialog) Navigator.pop(context);
     Navigator.pushNamed(context, "/recovery",
         arguments: RecoveryVerificationArgs(
-            questionIndexes: [1, 2], accountName: "bart"));
+            accountName: linkSegments[1],
+            date: linkSegments[2],
+            recoveryModel: recoveryModel));
   } catch (err) {
-    print(err);
-    throw Exception(getText(context, "error.invalidUrl"));
+    logger.log(err);
+    throw Exception(getText(context, "error.invalidUrl") + " $err");
   }
 }
 

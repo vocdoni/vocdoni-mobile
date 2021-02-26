@@ -27,8 +27,6 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       .withFreshnessTimeout(Duration(minutes: 2));
   String analyticsKey = "";
 
-  String pinCache = "";
-
   // INTERNAL DATA HANDLERS
 
   selectAccount(int accountIdx) {

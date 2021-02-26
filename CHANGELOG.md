@@ -13,6 +13,7 @@
 - Enable MultipleChoice voting widget
 - Implement pin authentication & authentication versioning
 - Implement onboarding flow
+- Add common-client-lib submodule, implement backup link generation
 
 # 0.8.16
 - Fix green border for some android versions

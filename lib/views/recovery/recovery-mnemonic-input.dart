@@ -1,3 +1,4 @@
+import 'package:dvote/dvote.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/baseButton.dart';
@@ -12,12 +13,12 @@ import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/view-modals/pattern-create-modal.dart';
 import 'package:vocdoni/lib/i18n.dart';
 
-class IdentityRestorePage extends StatefulWidget {
+class RecoveryMnemonicInput extends StatefulWidget {
   @override
-  _IdentityRestorePageState createState() => _IdentityRestorePageState();
+  _RecoveryMnemonicInputState createState() => _RecoveryMnemonicInputState();
 }
 
-class _IdentityRestorePageState extends State<IdentityRestorePage> {
+class _RecoveryMnemonicInputState extends State<RecoveryMnemonicInput> {
   final nameController = TextEditingController();
   final mnemonicController = TextEditingController();
   final nameNode = FocusNode();
@@ -107,9 +108,9 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
         // TODO: Compare by identityId instead of rootPublicKey
         if (!Globals.accountPool.value[i].identity.hasValue)
           continue;
-        else if (Globals
-                .accountPool.value[i].identity.value.keys[0].rootPublicKey !=
-            newAccount.identity.value.keys[0].rootPublicKey) continue;
+        else if (!pubKeysAreEqual(
+            Globals.accountPool.value[i].identity.value.keys[0].rootPublicKey,
+            newAccount.identity.value.keys[0].rootPublicKey)) continue;
         newIndex = i;
         break;
       }
@@ -170,46 +171,51 @@ class _IdentityRestorePageState extends State<IdentityRestorePage> {
 
   @override
   Widget build(context) {
-    return Scaffold(
-      appBar: TopNavigation(
-        title: getText(context, "main.identity"),
-      ),
-      body: Builder(
-        builder: (context) {
-          if (restoring) return renderLoading();
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: Scaffold(
+        appBar: TopNavigation(
+          title: getText(context, "main.accountRecovery"),
+        ),
+        body: Builder(
+          builder: (context) {
+            if (restoring) return renderLoading();
 
-          return ListView(children: <Widget>[
-            Text(
-              getText(context,
-                  "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp"),
-              style: TextStyle(color: Colors.black45),
-            ).withPadding(16),
-            TextField(
-              controller: nameController,
-              focusNode: nameNode,
-              style: TextStyle(fontSize: 18),
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                // border: InputBorder.none,
-                hintText: getText(context, "main.whatsYourName"),
-              ),
-            ).withHPadding(16),
-            TextField(
-              controller: mnemonicController,
-              focusNode: mnemonicNode,
-              autocorrect: false,
-              textCapitalization: TextCapitalization.none,
-              minLines: 2,
-              maxLines: 4,
-              decoration: InputDecoration(
-                // border: InputBorder.none,
-                hintText: getText(context, "main.mnemonicWords"),
-              ),
-            ).withPadding(16).withTopPadding(8),
-            SizedBox(height: 16),
-            renderOkButton(context),
-          ]);
-        },
+            return ListView(children: <Widget>[
+              Text(
+                getText(context,
+                    "main.toRestoreYourUserKeysEnterTheMnemonicWordsYouSavedDuringTheBackUp"),
+                style: TextStyle(color: Colors.black45),
+              ).withPadding(16),
+              TextField(
+                controller: nameController,
+                focusNode: nameNode,
+                style: TextStyle(fontSize: 18),
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  // border: InputBorder.none,
+                  hintText: getText(context, "main.whatsYourName"),
+                ),
+              ).withHPadding(16),
+              TextField(
+                controller: mnemonicController,
+                focusNode: mnemonicNode,
+                autocorrect: false,
+                textCapitalization: TextCapitalization.none,
+                minLines: 2,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  // border: InputBorder.none,
+                  hintText: getText(context, "main.mnemonicWords"),
+                ),
+              ).withPadding(16).withTopPadding(8),
+              SizedBox(height: 16),
+              renderOkButton(context),
+            ]);
+          },
+        ),
       ),
     );
   }

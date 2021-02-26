@@ -112,7 +112,8 @@ class Notifications {
     try {
       final uri = Uri.parse(message["uri"]);
       if (uri == null || !Globals.accountPool.hasValue) return;
-      if (Globals.accountPool.value.length == 1) {
+      if (Globals.accountPool.value.length == 1 ||
+          uri.path.contains("recovery")) {
         handleIncomingLink(uri, context, isInScaffold: false).catchError((err) {
           showAlert(getText(context, "error.thereWasAProblemHandlingTheLink"),
               title: getText(context, "main.error"), context: context);

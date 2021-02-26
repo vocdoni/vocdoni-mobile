@@ -7,6 +7,7 @@ import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/views/account-advanced.dart';
 import 'package:vocdoni/views/onboarding/onboarding-welcome.dart';
+import 'package:vocdoni/views/recovery/recovery-menu.dart';
 import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
 import 'package:vocdoni/views/dev/dev-analytics-tests.dart';
 import 'package:vocdoni/views/dev/dev-pager.dart';
@@ -16,7 +17,7 @@ import 'package:vocdoni/views/dev/dev-ui-listItem.dart';
 import 'package:vocdoni/views/org-feed.dart';
 import 'package:vocdoni/views/org-participation.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/views/identity-restore-page.dart';
+import 'package:vocdoni/views/recovery/recovery-mnemonic-input.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/startup-page.dart';
 import 'package:vocdoni/lib/i18n.dart';
@@ -73,7 +74,7 @@ Widget buildMainApp() {
       routes: {
         // NO ACCOUNT SELECTED YET
         "/identity/create": (context) => IdentityCreatePage(),
-        "/identity/restore": (context) => IdentityRestorePage(),
+        "/identity/restore": (context) => RecoveryMenu(),
         "/identity/select": (context) => IdentitySelectPage(),
         "/onboarding-welcome": (context) => OnboardingWelcomePage(),
         "/recovery": (context) => RecoveryVerificationInput(),

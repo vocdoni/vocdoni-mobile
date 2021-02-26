@@ -10,7 +10,8 @@
         android:label="@string/app_name"
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
-        android:fullBackupContent="false"> <!-- Backup flags for Google Play disabled -->
+        android:fullBackupContent="false" >
+        <!-- Backup flags for Google Play disabled -->
 
         <activity
             android:name=".MainActivity"
@@ -44,11 +45,13 @@
                 <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="app.vocdoni.net" android:pathPrefix="/recovery" />
 
                 <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="app.dev.vocdoni.net" android:pathPrefix="/recovery" />
 
                 <data android:scheme="https" android:host="app.stg.vocdoni.net" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="app.stg.vocdoni.net" android:pathPrefix="/processes" />
@@ -59,36 +62,43 @@
                 <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="vocdoni.page.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="vocdonidev.page.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="vocdoni.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="dev.vocdoni.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="dev.vocdoni.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="dev.vocdoni.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="dev.vocdoni.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="dev.vocdoni.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="stg.vocdoni.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="stg.vocdoni.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="stg.vocdoni.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="stg.vocdoni.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="stg.vocdoni.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="vocdonistg.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="vocdonistg.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdonistg.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdonistg.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="vocdonistg.link" android:pathPrefix="/recovery" />
                 
                 <data android:scheme="https" android:host="vocdonidev.link" android:pathPrefix="/entities" />
                 <data android:scheme="https" android:host="vocdonidev.link" android:pathPrefix="/processes" />
                 <data android:scheme="https" android:host="vocdonidev.link" android:pathPrefix="/posts" />
                 <data android:scheme="https" android:host="vocdonidev.link" android:pathPrefix="/validation" />
+                <data android:scheme="https" android:host="vocdonidev.link" android:pathPrefix="/recovery" />
             </intent-filter>
 
             <!-- Push notifications -->

@@ -36,33 +36,39 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         onWillPop: handleWillPop,
         child: Scaffold(
           body: Builder(
-              builder: (context) => Column(
+              builder: (context) => ListView(
                     // use this context within Scaffold for Toast's to work
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    // mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Section(text: getText(context, "main.selectAnIdentity")),
-                      buildExistingIdentities(
-                          context, Globals.accountPool.value),
-                      SizedBox(height: 50),
-                      Section(text: getText(context, "action.addAnIdentity")),
-                      ListItem(
-                          mainText:
-                              getText(context, "action.createANewIdentity"),
-                          icon: FeatherIcons.plusCircle,
-                          onTap: () => createNew(context)),
-                      ListItem(
-                          mainText: getText(
-                              context, "main.restoreAnExistingIdentity"),
-                          icon: FeatherIcons.rotateCw,
-                          onTap: () => restorePreviousIdentity(context)),
-                    ],
+                          Section(
+                              text: getText(context, "main.selectAnIdentity"))
+                        ] +
+                        buildExistingIdentities(
+                            context, Globals.accountPool.value) +
+                        [
+                          SizedBox(height: 50),
+                          Section(
+                              text: getText(context, "action.addAnIdentity")),
+                          ListItem(
+                              mainText:
+                                  getText(context, "action.createANewIdentity"),
+                              icon: FeatherIcons.plusCircle,
+                              onTap: () => createNew(context)),
+                          ListItem(
+                              mainText: getText(
+                                  context, "main.restoreAnExistingIdentity"),
+                              icon: FeatherIcons.rotateCw,
+                              onTap: () => restorePreviousIdentity(context)),
+                          SizedBox(height: 50),
+                        ],
                   )),
         ));
   }
 
-  buildExistingIdentities(BuildContext ctx, List<AccountModel> accounts) {
+  List<Widget> buildExistingIdentities(
+      BuildContext ctx, List<AccountModel> accounts) {
     List<Widget> list = new List<Widget>();
-    if (accounts == null) return Column(children: list);
+    if (accounts == null) return list;
 
     for (var i = 0; i < accounts.length; i++) {
       if (!accounts[i].identity.hasValue) continue;
@@ -73,7 +79,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         onTap: () => onAccountSelected(ctx, accounts[i], i),
       ));
     }
-    return Column(children: list);
+    return list;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -149,6 +155,8 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       }
       final loading = showLoading(getText(context, "main.generatingIdentity"),
           context: ctx);
+
+      // Generate new identity from old one, with pin authentication
 
       final oldEncryptedMnemonic =
           account.identity.value.keys[0].encryptedMnemonic;
