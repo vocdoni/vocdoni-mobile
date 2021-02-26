@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:convert/convert.dart';
 import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -217,7 +216,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     rawLink = rawLink.replaceFirst(
         "{date}", DateFormat('yyyy-MM-dd').format(DateTime.now()));
     rawLink = rawLink.replaceFirst(
-        "{encoded-link}", base64Encode(linkModel.writeToBuffer()));
+        "{encoded-link}", hex.encode(linkModel.writeToBuffer()));
     return rawLink;
   }
 

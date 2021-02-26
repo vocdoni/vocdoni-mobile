@@ -1,24 +1,23 @@
-import 'dart:convert';
-
+import 'package:convert/convert.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/spinner.dart';
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
 import 'package:vocdoni/lib/errors.dart';
-import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
-import 'package:flutter/foundation.dart';
-import 'package:dvote_common/widgets/toast.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
-import 'package:vocdoni/views/register-validation-page.dart';
 import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
+import 'package:vocdoni/views/register-validation-page.dart';
 
 const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
 
@@ -53,14 +52,17 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
     );
   }
   try {
-    int retries = 20; // try for 10 seconds
-    while (!AppNetworking.dvoteIsReady()) {
-      if (retries == 0) throw LinkingError("Networking unavailable");
-      retries--;
-      await Future.delayed(Duration(milliseconds: 500));
-    }
-
     final uriSegments = extractLinkSegments(newLink);
+
+    // If link requires networking, ensure networking is set up
+    if (requiresNetworking(uriSegments[0])) {
+      int retries = 20; // try for 10 seconds
+      while (!AppNetworking.dvoteIsReady()) {
+        if (retries == 0) throw LinkingError("Networking unavailable");
+        retries--;
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+    }
 
     // Just open the app, do nothing
     if (uriSegments == null || uriSegments.length == 0) return;
@@ -103,6 +105,11 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
     logger.log("ERR: $err");
     throw err;
   }
+}
+
+bool requiresNetworking(String path) {
+  if (path.contains("recovery")) return false;
+  return true;
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -260,7 +267,7 @@ Future handleRecoveryLink(List<String> linkSegments,
 
   try {
     // Decode & deserialize protobuf recovery model
-    final recoveryBytes = base64Decode(linkSegments.sublist(3).join());
+    final recoveryBytes = hex.decode(linkSegments.sublist(3).join());
     AccountRecovery recoveryModel = AccountRecovery.fromBuffer(recoveryBytes);
 
     // Navigate
