@@ -6,6 +6,7 @@ import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/model-base.dart';
@@ -13,6 +14,8 @@ import 'package:eventual/eventual.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/random.dart';
+
+import '../app-config.dart';
 
 /// This class should be used exclusively as a global singleton.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
@@ -143,11 +146,14 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       throw Exception("main.anAccountWithThisNameAlreadyExists");
     }
 
+    newAccount.identity.value.version =
+        AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
+
     // Prevent duplicates
     final duplicate = this.value.any((account) =>
         account.identity.value.keys.length > 0 &&
-        account.identity.value.keys[0].rootPublicKey ==
-            newAccount.identity.value.keys[0].rootPublicKey);
+        pubKeysAreEqual(account.identity.value.keys[0].rootPublicKey,
+            newAccount.identity.value.keys[0].rootPublicKey));
 
     if (duplicate) {
       logger.log("WARNING: Attempting to add a duplicate identity. Skipping.");
@@ -452,6 +458,13 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     newIdentity.alias = alias;
     newIdentity.identityId = rootPublicKey;
     newIdentity.type = Identity_Type.ECDSA;
+
+    // If this is the first identity, set its analytics ID to the default one
+    if (((Globals?.accountPool?.value?.length ?? 0) == 0) &&
+        ((Globals?.appState?.analyticsKey?.length ?? 0) > 0))
+      newIdentity.analyticsID = Globals.appState.analyticsKey;
+    else
+      newIdentity.analyticsID = generateAnalyticsKey();
 
     dvote.Key k = dvote.Key();
     k.type = Key_Type.SECP256K1;

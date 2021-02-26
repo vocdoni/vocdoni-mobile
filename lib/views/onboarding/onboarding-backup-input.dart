@@ -1,23 +1,33 @@
+import 'dart:convert';
+
+import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
 import 'package:dvote_common/widgets/text-input.dart' as TextInput;
 import 'package:dvote_common/widgets/toast.dart';
-import 'package:flutter/services.dart';
-import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/lib/errors.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
-import 'package:vocdoni/lib/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/constants/settings.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
+import 'package:vocdoni/lib/util/normalize.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-email-send.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-question-selection.dart';
 
 class OnboardingBackupInput extends StatefulWidget {
+  final String pinCache;
+
+  OnboardingBackupInput({this.pinCache});
+
   @override
   _OnboardingBackupInputState createState() => _OnboardingBackupInputState();
 }
@@ -29,7 +39,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
 
   @override
   void initState() {
-    questionIndexes = [0, 0];
+    questionIndexes = [-1, -1];
     questionAnswers = ["", ""];
     email = "";
     Globals.analytics.trackPage("OnboardingBackupInput");
@@ -114,7 +124,6 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                   style: NavButtonStyle.BASIC,
                   text: getText(context, "action.illDoItLater"),
                   onTap: () {
-                    Globals.appState.pinCache = "";
                     Globals.appState.currentAccount?.identity?.value?.backedUp =
                         false;
                     Navigator.pushNamedAndRemoveUntil(
@@ -122,14 +131,14 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                   }),
               Spacer(),
               NavButton(
-                isDisabled: questionIndexes.any((index) => index == 0) ||
+                isDisabled: questionIndexes.any((index) => index == -1) ||
                     questionAnswers.any((answer) => answer.length == 0) ||
                     !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
                         .hasMatch(email),
                 style: NavButtonStyle.NEXT,
                 text: getText(context, "action.verifyBackup"),
                 onTap: () async {
-                  final backupLink = await _generateLink(context);
+                  final backupLink = await _retrieveBackupLink(context);
                   if (backupLink == null || backupLink.length == 0) return;
                   Navigator.push(
                     context,
@@ -149,16 +158,19 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
   _buildBackupQuestion(int position, BuildContext ctx) {
     if (questionIndexes.length <= position) return Container();
     final usedQuestions = questionIndexes.toList();
+    final index = questionIndexes[position];
     usedQuestions.removeAt(position);
     return Column(
       children: [
         ListItem(
           mainText: (position + 1).toString() +
               ". " +
-              getText(
-                  ctx,
-                  "main." +
-                      AppConfig.backupQuestionTexts[questionIndexes[position]]),
+              (index >= 0
+                  ? getBackupQuestionText(
+                      ctx,
+                      "question." +
+                          AppConfig.backupQuestionTexts[index.toString()])
+                  : getText(ctx, "main.selectQuestion")),
           onTap: () async {
             final newIndex = await Navigator.push(
                 context,
@@ -175,7 +187,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
         TextInput.TextInput(
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
-          inputFormatter: questionIndexes[position] == 0
+          inputFormatter: questionIndexes[position] == -1
               ? FilteringTextInputFormatter.allow("")
               : null,
           onChanged: (answer) {
@@ -186,31 +198,70 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     ).withHPadding(8);
   }
 
-  Future<String> _generateLink(BuildContext ctx) async {
+  String _generateBackupLink(
+      String alias, List<int> selectedQuestions, String encryptedMnemonic) {
+    final linkFormat = AppConfig.backupLinkFormat;
+    if (linkFormat == null || linkFormat == "") {
+      throw Exception("Could not retrieve backup link format");
+    }
+    final auth = AppConfig.backupAuthOptions.entries
+            .firstWhere((element) => element.value.contains("pin"))
+            ?.key ??
+        "0";
+    final BackupLink linkModel = BackupLink(
+        version: BACKUP_LINK_VERSION,
+        questions: selectedQuestions.map((e) => e.toString()).toList(),
+        auth: auth,
+        key: encryptedMnemonic);
+    String rawLink = linkFormat.replaceFirst("{alias}", alias);
+    rawLink = rawLink.replaceFirst(
+        "{date}", DateFormat('yyyy-MM-dd').format(DateTime.now()));
+    rawLink = rawLink.replaceFirst(
+        "{encoded-link}", base64Encode(linkModel.writeToBuffer()));
+    return rawLink;
+  }
+
+  Future<String> _retrieveBackupLink(BuildContext ctx) async {
+    String pin;
     String mnemonic;
+    String backupLink;
+
     try {
-      if (Globals.appState.pinCache.length > 0) {
-        final loading = showLoading(getText(context, "main.generatingIdentity"),
-            context: ctx);
-        final encryptedMnemonic = Globals
-            .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
-        mnemonic = await Symmetric.decryptStringAsync(
-            encryptedMnemonic, Globals.appState.pinCache);
-        loading.close();
-      } else {
+      // If widget wasn't passed a pin (user is backing up at some later point) ask for pin
+      if (widget.pinCache == null || widget.pinCache == "") {
         final result = await Navigator.push(
             ctx,
             MaterialPageRoute(
                 fullscreenDialog: true,
-                builder: (context) =>
-                    PinPromptModal(Globals.appState.currentAccount)));
+                builder: (context) => PinPromptModal(
+                      Globals.appState.currentAccount,
+                      returnPin: true,
+                    )));
         if (result is InvalidPatternError) {
           showMessage(getText(ctx, "main.thePinYouEnteredIsNotValid"),
               context: ctx, purpose: Purpose.DANGER);
           return Future.value();
         }
-        mnemonic = result;
+        pin = result;
+      } else {
+        pin = widget.pinCache;
       }
+      // Decrypt stored encrypted mnemonic with pin
+      final loading = showLoading(getText(context, "main.generatingIdentity"),
+          context: ctx);
+      final encryptedMnemonic = Globals
+          .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
+      mnemonic = await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
+      // Encrypt mnemonic with pin + questions
+      final encryptedBackupMnemonic = await Symmetric.encryptStringAsync(
+          mnemonic, pin + normalizeAnswers(questionAnswers.join("")));
+
+      backupLink = _generateBackupLink(
+          Globals.appState.currentAccount.identity.value.alias,
+          questionIndexes,
+          encryptedBackupMnemonic);
+
+      loading.close();
     } catch (err) {
       logger.log(err.toString());
       showMessage(getText(ctx, "main.thereWasAProblemDecryptingYourPrivateKey"),
@@ -218,6 +269,8 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
       return Future.value();
     }
     Globals.appState.currentAccount.identity.value.backedUp = true;
-    return mnemonic; // TODO generate backup link
+    print(backupLink);
+    logger.log(backupLink);
+    return backupLink;
   }
 }

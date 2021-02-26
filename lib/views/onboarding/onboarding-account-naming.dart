@@ -6,7 +6,6 @@ import 'package:dvote_common/widgets/text-input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';

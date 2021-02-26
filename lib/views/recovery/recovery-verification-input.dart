@@ -1,27 +1,36 @@
+import 'package:dvote/dvote.dart';
+import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
 import 'package:dvote_common/widgets/text-input.dart' as TextInput;
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:dvote_crypto/dvote_crypto.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vocdoni/app-config.dart';
+import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
+import 'package:vocdoni/lib/util/normalize.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/recovery/recovery-success.dart';
 import 'package:vocdoni/widgets/issues-button.dart';
 
 class RecoveryVerificationArgs {
-  //TODO implement necessary arguments (account name, hash, etc)
   final String accountName;
-  final List<int> questionIndexes;
-  RecoveryVerificationArgs(
-      {@required this.questionIndexes, @required this.accountName});
+  final String date;
+  final AccountRecovery recoveryModel;
+  RecoveryVerificationArgs({
+    @required this.accountName,
+    @required this.date,
+    @required this.recoveryModel,
+  });
 }
 
 class RecoveryVerificationInput extends StatefulWidget {
@@ -31,15 +40,15 @@ class RecoveryVerificationInput extends StatefulWidget {
 }
 
 class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
-  List<int> questionIndexes;
-  String accountName;
   List<String> questionAnswers;
+  List<int> questionIndexes;
+  String name;
+  AccountRecovery recovery;
 
   @override
   void initState() {
-    questionIndexes = [0, 0];
     questionAnswers = ["", ""];
-    accountName = "";
+    questionIndexes = [];
     super.initState();
     Globals.analytics.trackPage("RecoveryVerificationInput");
   }
@@ -55,20 +64,22 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
       logger.log("Invalid parameters");
       return;
     }
-    questionIndexes = args.questionIndexes;
-    accountName = args.accountName;
+    name = args.accountName;
+    recovery = args.recoveryModel;
+    questionIndexes = recovery.questions.map((e) => int.parse(e)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Builder(builder: (context) {
-    //   return Text("clime");
-    // });
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: Scaffold(
+        appBar: TopNavigation(
+          title: "",
+          onBackButton: () => Navigator.pop(context, null),
+        ),
         body: Builder(
           builder: (context) => Column(
             children: [
@@ -79,10 +90,9 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
                             alignment: Alignment.centerLeft,
                             child: extractBoldText(
                                     getText(context, "main.welcomeBackName")
-                                        .replaceAll("NAME", accountName))
+                                        .replaceAll("NAME", name))
                                 .withHPadding(spaceCard))
-                        .withVPadding(paddingPage)
-                        .withTopPadding(48),
+                        .withVPadding(paddingPage),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -134,16 +144,14 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
               getText(
                   ctx,
                   "main." +
-                      AppConfig.backupQuestionTexts[questionIndexes[position]]),
+                      AppConfig.backupQuestionTexts[
+                          questionIndexes[position].toString()]),
           mainTextMultiline: 3,
           rightIcon: null,
         ),
         TextInput.TextInput(
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
-          inputFormatter: questionIndexes[position] == 0
-              ? FilteringTextInputFormatter.allow("")
-              : null,
           onChanged: (answer) {
             setState(() {
               questionAnswers[position] = answer;
@@ -160,55 +168,85 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
           context: context, purpose: Purpose.WARNING);
       return "";
     }
-    String pin;
     try {
-      if (Globals.appState.pinCache.length > 0) {
-        pin = Globals.appState.pinCache;
+      // Ask for pin
+      final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => PinPromptModal(
+                    Globals.appState.currentAccount,
+                    tryDecrypt: false,
+                    accountName: name,
+                  )));
+      if (result == null) return "";
+      if (result is InvalidPatternError) {
+        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
+            context: context, purpose: Purpose.DANGER);
+        Globals.analytics.trackPage("RecoveryVerificationFail");
+        return Future.value();
+      }
+
+      final loading = showLoading(getText(context, "main.generatingIdentity"),
+          context: context); //TODO test with wrong pin
+
+      // Try to decrypt recovery key
+      final pin = result;
+      final answers = normalizeAnswers(questionAnswers.join());
+      final decryptedMnemonic =
+          await Symmetric.decryptStringAsync(recovery.key, pin + answers);
+      if (decryptedMnemonic == null || decryptedMnemonic.length == 0) {
+        Globals.analytics.trackPage("RecoveryVerificationFail");
+        // if key not decrypted correctly
+        showMessage(
+            getText(context,
+                "main.eitherThePINOrOneOfTheAnswersIsNotCorrectTryAgain"),
+            context: context,
+            purpose: Purpose.DANGER);
       } else {
-        final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-                fullscreenDialog: true,
-                builder: (context) => PinPromptModal(
-                      Globals.appState.currentAccount,
-                      decryptMnemonic: false,
-                      accountName: accountName,
-                    )));
-        if (result == null) return "";
-        if (result is InvalidPatternError) {
-          showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-              context: context, purpose: Purpose.DANGER);
-          Globals.analytics.trackPage("RecoveryVerificationFail");
-          return Future.value();
+        // Generate wallet. extract rootPublicKey to check for duplicates
+        final wallet = EthereumWallet.fromMnemonic(decryptedMnemonic);
+        final rootPublicKey = await wallet.publicKeyAsync();
+
+        // Check for duplicates. If so, this is just a verification that the backup is valid. Display success view.
+        final duplicate = Globals.accountPool?.value?.any((account) =>
+                account.identity.value.keys.length > 0 &&
+                pubKeysAreEqual(account.identity.value.keys[0].rootPublicKey,
+                    rootPublicKey)) ??
+            false;
+        if (duplicate) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => RecoverySuccess()));
+          return;
         }
-        pin = result;
+        // Identity is not a duplicate, this is a real backup. Create identity
+        final newAccount =
+            await AccountModel.fromMnemonic(decryptedMnemonic, name, pin);
+        await Globals.accountPool.addAccount(newAccount);
+
+        newAccount.identity.value.backedUp = true;
+
+        // Select new account
+        final newIndex = Globals.accountPool.value.indexWhere((account) =>
+            account.identity.hasValue &&
+            pubKeysAreEqual(account.identity.value.identityId,
+                newAccount.identity.value.identityId));
+        Globals.appState.selectAccount(newIndex);
+        Navigator.pushNamedAndRemoveUntil(context, "/home", (Route _) => false);
+        return;
       }
     } catch (err) {
-      logger.log(err.toString());
+      logger.log("Could not recover identity: $err");
       Globals.analytics.trackPage("RecoveryVerificationFail");
-      showMessage(
-          getText(context, "main.thereWasAProblemDecryptingYourPrivateKey"),
-          context: context,
-          purpose: Purpose.DANGER);
-      return Future.value();
-    }
-    // TODO decode link and generate key
-    if (false) {
-      Globals.analytics.trackPage("RecoveryVerificationFail");
-      // if key not decrypted correctly
       showMessage(
           getText(context,
               "main.eitherThePINOrOneOfTheAnswersIsNotCorrectTryAgain"),
           context: context,
           purpose: Purpose.DANGER);
-    } else {
-      // TODO detect if generated key already exists. if so, this is the dry run. just navigate home. else:
-      // TODO create account, write to storage
-      // TODO select account
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              fullscreenDialog: true, builder: (context) => RecoverySuccess()));
+      return Future.value();
     }
   }
 }

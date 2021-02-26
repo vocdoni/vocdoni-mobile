@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
 import 'package:dvote/net/gateway-pool.dart';
 import 'package:devicelocale/devicelocale.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info/package_info.dart';
+import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/logger.dart';
 
@@ -20,6 +23,7 @@ PackageInfo _packageInfo;
 AndroidDeviceInfo _androidInfo;
 IosDeviceInfo _iosInfo;
 String _deviceLanguage;
+Map<String, dynamic> _backupQuestionSpecJson;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -30,24 +34,6 @@ class AppConfig {
 
   static String get alternateEnvironment =>
       parseAlternateEnvironment(AppConfig.bootnodesUrl);
-
-  static setBootnodesUrlOverride(String url) async {
-    try {
-      _bootnodesUrlOverride = url;
-      await Globals.appState.refresh(force: true);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  static setNetworkOverride(String network) async {
-    try {
-      _networkOverride = network;
-      await Globals.appState.refresh(force: true);
-    } catch (err) {
-      throw err;
-    }
-  }
 
   static String get bootnodesUrl =>
       _bootnodesUrlOverride ?? _GATEWAY_BOOTNODES_URL;
@@ -84,7 +70,92 @@ class AppConfig {
     return "https://explorer.vocdoni.net";
   }
 
-  static setPackageInfo() async {
+  static PackageInfo get packageInfo => _packageInfo;
+
+  /// NOT used in app locale or language settings
+  static String get defaultDeviceLanguage => _deviceLanguage;
+
+  static String osVersion() {
+    if (_androidInfo != null) return "Android " + _androidInfo.version.baseOS;
+    if (_iosInfo != null) return "iOS " + _iosInfo.systemVersion;
+    return "";
+  }
+
+  static Map<String, String> get backupQuestionTexts {
+    if (_backupQuestionSpecJson.length == 0) return {};
+    if (_backupQuestionSpecJson["versions"] is! Map ||
+        _backupQuestionSpecJson["versions"].length == 0) return {};
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
+      return {};
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"]
+            is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"]
+                .length ==
+            0) return {};
+    Map<String, dynamic> questions =
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"];
+    return questions.cast<String, String>();
+  }
+
+  static Map<String, String> get backupAuthOptions {
+    if (_backupQuestionSpecJson.length == 0) return {};
+    if (_backupQuestionSpecJson["versions"] is! Map ||
+        _backupQuestionSpecJson["versions"].length == 0) return {};
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
+      return {};
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"]
+            is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"]
+                .length ==
+            0) return {};
+    Map<String, dynamic> auth =
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"];
+    return auth.cast<String, String>();
+  }
+
+  static String get backupLinkFormat {
+    if (_backupQuestionSpecJson.length == 0) return "";
+    if (_backupQuestionSpecJson["versions"] is! Map ||
+        _backupQuestionSpecJson["versions"].length == 0) return "";
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
+      return "";
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["linkFormat"]
+        is! String) return "";
+    return _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]
+        ["linkFormat"];
+  }
+
+  // STATIC SETTERS TO INITIALIZE RUNTIME CONFIGS
+
+  static setBootnodesUrlOverride(String url) async {
+    try {
+      _bootnodesUrlOverride = url;
+      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static setNetworkOverride(String network) async {
+    try {
+      _networkOverride = network;
+      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static init() async {
+    _setPackageInfo();
+    _setDeviceInfo();
+    _setDefaultDeviceLanguage();
+    _setBackupQuestionSpecJson();
+  }
+
+  static _setPackageInfo() async {
     try {
       _packageInfo = await PackageInfo.fromPlatform();
     } catch (err) {
@@ -92,9 +163,7 @@ class AppConfig {
     }
   }
 
-  static PackageInfo get packageInfo => _packageInfo;
-
-  static setDeviceInfo() async {
+  static _setDeviceInfo() async {
     try {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       if (Platform.isAndroid) {
@@ -108,17 +177,8 @@ class AppConfig {
     }
   }
 
-  static String osVersion() {
-    if (_androidInfo != null) return "Android " + _androidInfo.version.baseOS;
-    if (_iosInfo != null) return "iOS " + _iosInfo.systemVersion;
-    return "";
-  }
-
   /// NOT used in app locale or language settings
-  static String get defaultDeviceLanguage => _deviceLanguage;
-
-  /// NOT used in app locale or language settings
-  static setDefaultDeviceLanguage() async {
+  static _setDefaultDeviceLanguage() async {
     try {
       _deviceLanguage = (await Devicelocale.preferredLanguages)[0];
     } catch (err) {
@@ -127,11 +187,13 @@ class AppConfig {
     }
   }
 
-  static const backupQuestionTexts = [
-    "selectQuestion",
-    "nameOfYourFirstDog",
-    "yourFavoriteAnimationMovie",
-    "nameOfYourFirstBoss",
-    "nameOfTheStreetYouLivedOnAsAChild",
-  ];
+  static _setBackupQuestionSpecJson() async {
+    try {
+      final jsonDefaultStrings = await rootBundle
+          .loadString('lib/common-client-libs/backup/questions.spec.json');
+      _backupQuestionSpecJson = json.decode(jsonDefaultStrings);
+    } catch (err) {
+      logger.log("ERROR could not parse backup question spec: $err");
+    }
+  }
 }
