@@ -1,21 +1,18 @@
 import 'dart:async';
 
 import 'package:dvote_common/constants/colors.dart';
-import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import "package:flutter/material.dart";
-import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
@@ -40,43 +37,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // DEEP LINKS / UNIVERSAL LINKS
   /////////////////////////////////////////////////////////////////////////////
 
-  StreamSubscription<Uri> linkChangeStream;
-
   @override
   void initState() {
-    try {
-      if (AppNetworking.dvoteIsReady()) {
-        // Only refresh if networking is available
-        Globals.appState.currentAccount.refresh();
-      } else {
-        startNetworking()
-            .then((_) => Globals.appState.currentAccount.refresh());
-      }
-      Future.delayed(Duration(seconds: 1)).then((_) {
-        if (Globals.appState.bootnodeInfo.hasError)
-          showMessage(
-              getText(context,
-                  "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
-              context: scaffoldBodyContext ?? context,
-              purpose: Purpose.DANGER);
-      });
-
-      // HANDLE APP LAUNCH LINK
-      getInitialUri()
-          .then((uri) => handleLink(uri))
-          .catchError((err) => buildHandleIncomingLinkError()(err));
-
-      // HANDLE RUNTIME LINKS
-      linkChangeStream = getUriLinksStream().listen((uri) => handleLink(uri),
-          onError: buildHandleIncomingLinkError());
-
-      // Display the screen for a notification (if one is pending)
-      Future.delayed(Duration(seconds: 1))
-          .then((_) => Notifications.handlePendingNotification());
-    } catch (err) {
-      showAlert(getText(context, "main.theLinkYouFollowedAppearsToBeInvalid"),
-          title: getText(context, "main.error"), context: context);
+    if (AppNetworking.dvoteIsReady()) {
+      // Only refresh if networking is available
+      Globals.appState.currentAccount.refresh();
+    } else {
+      startNetworking().then((_) => Globals.appState.currentAccount.refresh());
     }
+    Future.delayed(Duration(seconds: 1)).then((_) {
+      if (Globals.appState.bootnodeInfo.hasError)
+        showMessage(
+            getText(context,
+                "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+            context: scaffoldBodyContext ?? context,
+            purpose: Purpose.DANGER);
+    });
 
     // APP EVENT LISTENER
     WidgetsBinding.instance.addObserver(this);
@@ -129,23 +105,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  handleLink(Uri uri) {
-    genericHandleLink(uri, scaffoldBodyContext ?? context);
-  }
-
-  buildHandleIncomingLinkError() {
-    return genericHandleIncomingLinkError(scaffoldBodyContext ?? context);
-  }
-
   /////////////////////////////////////////////////////////////////////////////
   // CLEANUP
   /////////////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
-    // RUNTIME LINK HANDLING
-    if (linkChangeStream != null) linkChangeStream.cancel();
-
     // APP EVENT LISTENER
     WidgetsBinding.instance.removeObserver(this);
 

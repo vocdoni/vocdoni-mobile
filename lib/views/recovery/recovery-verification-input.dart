@@ -225,9 +225,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         // Identity is not a duplicate, this is a real backup. Create identity
         final newAccount =
             await AccountModel.fromMnemonic(decryptedMnemonic, name, pin);
-        await Globals.accountPool.addAccount(newAccount);
-
         newAccount.identity.value.backedUp = true;
+        await Globals.accountPool.addAccount(newAccount);
 
         // Select new account
         final newIndex = Globals.accountPool.value.indexWhere((account) =>
