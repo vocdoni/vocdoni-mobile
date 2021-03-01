@@ -114,7 +114,7 @@ class Notifications {
       if (uri == null || !Globals.accountPool.hasValue) return;
       if (Globals.accountPool.value.length == 1 ||
           uri.path.contains("recovery")) {
-        handleIncomingLink(uri, context, isInScaffold: false).catchError((err) {
+        handleIncomingLink(uri, context).catchError((err) {
           showAlert(getText(context, "error.thereWasAProblemHandlingTheLink"),
               title: getText(context, "main.error"), context: context);
         });
@@ -124,8 +124,7 @@ class Notifications {
             .then((result) {
           if (result != null && result is int) {
             Globals.appState.selectAccount(result);
-            handleIncomingLink(uri, context, isInScaffold: false)
-                .catchError((err) {
+            handleIncomingLink(uri, context).catchError((err) {
               showAlert(
                   getText(context, "error.thereWasAProblemHandlingTheLink"),
                   title: getText(context, "main.error"),

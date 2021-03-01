@@ -14,6 +14,7 @@
 - Implement pin authentication & authentication versioning
 - Implement onboarding flow
 - Add common-client-lib submodule, implement backup link generation
+- Handle deep links globally
 
 # 0.8.16
 - Fix green border for some android versions
