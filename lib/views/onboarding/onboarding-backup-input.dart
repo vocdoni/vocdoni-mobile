@@ -268,8 +268,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
       return Future.value();
     }
     Globals.appState.currentAccount.identity.value.backedUp = true;
-    print(backupLink);
-    logger.log(backupLink);
+    Globals.accountPool.writeToStorage();
     return backupLink;
   }
 }

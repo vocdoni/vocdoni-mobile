@@ -1,13 +1,10 @@
 import 'package:convert/convert.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
-import 'package:dvote_common/constants/colors.dart';
-import 'package:dvote_common/dvote_common.dart';
-import 'package:dvote_common/widgets/spinner.dart';
-import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/overlays.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
@@ -16,7 +13,6 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/view-modals/action-account-select.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
@@ -24,38 +20,16 @@ import 'package:vocdoni/views/register-validation-page.dart';
 
 const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
 bool init = false;
-List<Uri> pendingUris = [];
 
 // /////////////////////////////////////////////////////////////////////////////
 // / MAIN
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
-    {bool isInScaffold = true}) async {
+Future handleIncomingLink(Uri newLink, BuildContext ctx) async {
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> indicator;
-  if (isInScaffold) {
-    indicator = showLoading(getText(scaffoldBodyContext, "main.pleaseWait"),
-        context: scaffoldBodyContext);
-  } else {
-    showDialog(
-      context: scaffoldBodyContext,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(paddingPage),
-            child: Row(
-              children: [
-                SpinnerCircular(),
-                Padding(padding: EdgeInsets.symmetric(horizontal: 10.0)),
-                Text(getText(context, "main.loading")),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+  OverlaySupportEntry overlayIndicator;
+  overlayIndicator = showLoadingOverlay(getText(ctx, "main.loading") + "...");
+
   try {
     final uriSegments = extractLinkSegments(newLink);
 
@@ -74,38 +48,38 @@ Future handleIncomingLink(Uri newLink, BuildContext scaffoldBodyContext,
 
     switch (uriSegments[0]) {
       case "entities":
-        await handleEntityLink(uriSegments,
-            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        await handleEntityLink(
+          uriSegments,
+          context: ctx,
+        );
         break;
       case "validation":
-        await handleValidationLink(uriSegments,
-            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        await handleValidationLink(uriSegments, context: ctx);
         break;
       case "posts":
-        await handleNewsLink(uriSegments,
-            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        await handleNewsLink(uriSegments, context: ctx);
         break;
       case "processes":
-        await handleProcessLink(uriSegments,
-            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        await handleProcessLink(uriSegments, context: ctx);
         break;
       case "recovery":
-        await handleRecoveryLink(uriSegments,
-            context: scaffoldBodyContext, closeDialog: !isInScaffold);
+        await handleRecoveryLink(uriSegments, context: ctx);
         break;
       // case "signature":
       //   await showSignatureScreen(
       //       payload: newLink.queryParameters["payload"],
       //       returnUri: newLink.queryParameters["returnUri"],
-      //       context: scaffoldBodyContext);
+      //       context: ctx);
       //   break;
       default:
         if (indicator != null) indicator.close();
+        if (overlayIndicator != null) overlayIndicator.dismiss(animate: true);
         throw LinkingError("Invalid path");
     }
+    if (overlayIndicator != null) overlayIndicator.dismiss(animate: true);
     if (indicator != null) indicator.close();
   } catch (err) {
-    if (!isInScaffold) Navigator.pop(scaffoldBodyContext);
+    if (overlayIndicator != null) overlayIndicator.dismiss(animate: true);
     if (indicator != null) indicator.close();
     logger.log("ERR: $err");
     throw err;
@@ -121,8 +95,10 @@ bool requiresNetworking(String path) {
 // / HANDLERS
 // /////////////////////////////////////////////////////////////////////////////
 
-Future handleEntityLink(List<String> linkSegments,
-    {@required BuildContext context, closeDialog = false}) async {
+Future handleEntityLink(
+  List<String> linkSegments, {
+  @required BuildContext context,
+}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46" ]
 
@@ -154,17 +130,18 @@ Future handleEntityLink(List<String> linkSegments,
     if (!entityModel.hasNotificationsEnabled()) {
       await entityModel.enableNotifications();
     }
-
     await Globals.accountPool.writeToStorage();
-    if (closeDialog) Navigator.pop(context);
-    Navigator.pushNamed(context, "/entity", arguments: entityModel);
+    Navigator.pushNamed(Globals.navigatorKey.currentContext, "/entity",
+        arguments: entityModel);
   } catch (err) {
     throw Exception(getText(context, "error.couldNotFetchTheEntityDetails"));
   }
 }
 
-Future handleNewsLink(List<String> linkSegments,
-    {@required BuildContext context, closeDialog = false}) async {
+Future handleNewsLink(
+  List<String> linkSegments, {
+  @required BuildContext context,
+}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x-entity-id", "0x-post-id" ]
 
@@ -197,7 +174,6 @@ Future handleNewsLink(List<String> linkSegments,
     final post = entityModel.feed.value.items
         .firstWhere((post) => post.id == postId, orElse: () => null);
     if (post == null) throw Exception();
-    if (closeDialog) Navigator.pop(context);
     Navigator.of(context).pushNamed("/entity/feed/post",
         arguments: FeedPostArgs(entity: entityModel, post: post));
   } catch (err) {
@@ -207,8 +183,10 @@ Future handleNewsLink(List<String> linkSegments,
   }
 }
 
-Future handleProcessLink(List<String> linkSegments,
-    {@required BuildContext context, closeDialog = false}) async {
+Future handleProcessLink(
+  List<String> linkSegments, {
+  @required BuildContext context,
+}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x-entity-id", "0x-process-id" ]
 
@@ -249,8 +227,8 @@ Future handleProcessLink(List<String> linkSegments,
     }
 
     // Navigate
-    if (closeDialog) Navigator.pop(context);
-    Navigator.pushNamed(context, "/entity/participation/poll",
+    Navigator.pushNamed(
+        Globals.navigatorKey.currentContext, "/entity/participation/poll",
         arguments: PollPageArgs(entity: entityModel, process: processModel));
   } catch (err) {
     // showMessage("Could not fetch the entity details",
@@ -260,8 +238,10 @@ Future handleProcessLink(List<String> linkSegments,
   }
 }
 
-Future handleRecoveryLink(List<String> linkSegments,
-    {@required BuildContext context, closeDialog = false}) async {
+Future handleRecoveryLink(
+  List<String> linkSegments, {
+  @required BuildContext context,
+}) async {
   if (linkSegments.length < 3 ||
       !(linkSegments[0] is String) ||
       !(linkSegments[1] is String) ||
@@ -276,8 +256,7 @@ Future handleRecoveryLink(List<String> linkSegments,
     AccountRecovery recoveryModel = AccountRecovery.fromBuffer(recoveryBytes);
 
     // Navigate
-    if (closeDialog) Navigator.pop(context);
-    Navigator.pushNamed(context, "/recovery",
+    Navigator.pushNamed(Globals.navigatorKey.currentContext, "/recovery",
         arguments: RecoveryVerificationArgs(
             accountName: linkSegments[1],
             date: linkSegments[2],
@@ -288,8 +267,10 @@ Future handleRecoveryLink(List<String> linkSegments,
   }
 }
 
-Future handleValidationLink(List<String> linkSegments,
-    {@required BuildContext context, closeDialog = false}) async {
+Future handleValidationLink(
+  List<String> linkSegments, {
+  @required BuildContext context,
+}) async {
   final paramSegments = linkSegments.skip(1).toList();
   // paramSegments => [ "0x462fc85288f9b204d5a146901b2b6a148bddf0ba1a2fb5c87fb33ff22891fb46", "token-1234" ]
 
@@ -364,7 +345,7 @@ Future handleValidationLink(List<String> linkSegments,
 //   final SignModalArguments args =
 //       SignModalArguments(payload: payload, returnUri: rtnUri);
 
-//   Navigator.pushNamed(context, "/signature", arguments: args);
+//   Navigator.pushNamed(Globals.navigatorKey.currentContext, "/signature", arguments: args);
 // }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -411,40 +392,6 @@ List<String> extractLinkSegments(Uri link) {
   allSegments.addAll(hashSegments);
 
   return allSegments;
-}
-
-// /////////////////////////////////////////////////////////////////////////////
-// / WRAPPER for WIDGETS
-// /////////////////////////////////////////////////////////////////////////////
-
-genericHandleLink(Uri givenUri, BuildContext context) {
-  print("Uri cache handle $pendingUris");
-  print("URI: $givenUri");
-  if (givenUri == null || !Globals.accountPool.hasValue) return;
-  if (Globals.accountPool.value.length == 1 ||
-      givenUri.path.contains("recovery")) {
-    handleIncomingLink(givenUri, context)
-        .catchError(genericHandleIncomingLinkError(context));
-  } else {
-    Navigator.push(context,
-            MaterialPageRoute(builder: (context) => LinkAccountSelect()))
-        .then((result) {
-      if (result != null && result is int) {
-        Globals.appState.selectAccount(result);
-        handleIncomingLink(givenUri, context)
-            .catchError(genericHandleIncomingLinkError(context));
-      }
-    });
-  }
-}
-
-genericHandleIncomingLinkError(BuildContext context) {
-  return (err) {
-    logger.log(err?.toString() ?? "handleIncomingLinkError");
-    final ctx = context;
-    showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
-        title: getText(context, "main.error"), context: context);
-  };
 }
 
 // /////////////////////////////////////////////////////////////////////////////
