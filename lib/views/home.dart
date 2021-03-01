@@ -1,26 +1,26 @@
 import 'dart:async';
+
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/alerts.dart';
+import 'package:dvote_common/widgets/bottomNavigation.dart';
 import 'package:dvote_common/widgets/flavor-banner.dart';
+import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/lib/logger.dart';
 import "package:flutter/material.dart";
 import 'package:uni_links/uni_links.dart';
-import 'package:dvote_common/constants/colors.dart';
-import 'package:vocdoni/lib/net.dart';
-import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/app-links.dart';
+import 'package:vocdoni/lib/globals.dart';
+import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
+import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/notifications.dart';
 import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/view-modals/qr-scan-modal.dart';
-import 'package:vocdoni/view-modals/action-account-select.dart';
 import 'package:vocdoni/views/home-content-tab.dart';
 import 'package:vocdoni/views/home-entities-tab.dart';
 import 'package:vocdoni/views/home-identity-tab.dart';
-import 'package:dvote_common/widgets/alerts.dart';
-import 'package:dvote_common/widgets/bottomNavigation.dart';
-import 'package:vocdoni/lib/i18n.dart';
-import 'package:dvote_common/widgets/toast.dart';
-import 'package:dvote_common/widgets/topNavigation.dart';
 // import 'package:vocdoni/lib/extensions.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,19 +55,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Future.delayed(Duration(seconds: 1)).then((_) {
         if (Globals.appState.bootnodeInfo.hasError)
           showMessage(
-              getText(scaffoldBodyContext ?? context,
+              getText(context,
                   "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
               context: scaffoldBodyContext ?? context,
               purpose: Purpose.DANGER);
       });
+
       // HANDLE APP LAUNCH LINK
       getInitialUri()
-          .then((initialUri) => handleLink(initialUri))
-          .catchError((err) => handleIncomingLinkError(err));
+          .then((uri) => handleLink(uri))
+          .catchError((err) => buildHandleIncomingLinkError()(err));
 
       // HANDLE RUNTIME LINKS
-      linkChangeStream = getUriLinksStream()
-          .listen((uri) => handleLink(uri), onError: handleIncomingLinkError);
+      linkChangeStream = getUriLinksStream().listen((uri) => handleLink(uri),
+          onError: buildHandleIncomingLinkError());
 
       // Display the screen for a notification (if one is pending)
       Future.delayed(Duration(seconds: 1))
@@ -94,33 +95,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     super.initState();
-  }
-
-  handleLink(Uri givenUri) {
-    if (givenUri == null || !Globals.accountPool.hasValue) return;
-    if (Globals.accountPool.value.length == 1 ||
-        givenUri.path.contains("recovery")) {
-      handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
-          .catchError(handleIncomingLinkError);
-    } else {
-      Navigator.push(context,
-              MaterialPageRoute(builder: (context) => LinkAccountSelect()))
-          .then((result) {
-        if (result != null && result is int) {
-          Globals.appState.selectAccount(result);
-          handleIncomingLink(givenUri, scaffoldBodyContext ?? context)
-              .catchError(handleIncomingLinkError);
-        }
-      });
-    }
-  }
-
-  handleIncomingLinkError(err) {
-    logger.log(err?.toString() ?? "handleIncomingLinkError");
-    final ctx = scaffoldBodyContext ?? context;
-    showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
-        title: getText(scaffoldBodyContext ?? context, "main.error"),
-        context: scaffoldBodyContext ?? context);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -153,6 +127,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         logger.log("Detached");
         break;
     }
+  }
+
+  handleLink(Uri uri) {
+    genericHandleLink(uri, scaffoldBodyContext ?? context);
+  }
+
+  buildHandleIncomingLinkError() {
+    return genericHandleIncomingLinkError(scaffoldBodyContext ?? context);
   }
 
   /////////////////////////////////////////////////////////////////////////////

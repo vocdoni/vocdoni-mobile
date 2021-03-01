@@ -187,7 +187,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         return Future.value();
       }
 
-      final loading = showLoading(getText(context, "main.generatingIdentity"),
+      showLoading(getText(context, "main.generatingIdentity"),
           context: context); //TODO test with wrong pin
 
       // Try to decrypt recovery key
