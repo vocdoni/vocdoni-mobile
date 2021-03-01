@@ -17,7 +17,6 @@ import 'package:vocdoni/views/dev/dev-ui-listItem.dart';
 import 'package:vocdoni/views/org-feed.dart';
 import 'package:vocdoni/views/org-participation.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
-import 'package:vocdoni/views/recovery/recovery-mnemonic-input.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/startup-page.dart';
 import 'package:vocdoni/lib/i18n.dart';

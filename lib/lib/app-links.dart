@@ -2,10 +2,12 @@ import 'package:convert/convert.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/spinner.dart';
 import 'package:dvote_common/widgets/toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/data-models/process.dart';
@@ -14,12 +16,15 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/net.dart';
+import 'package:vocdoni/view-modals/action-account-select.dart';
 import 'package:vocdoni/views/feed-post-page.dart';
 import 'package:vocdoni/views/poll-page.dart';
 import 'package:vocdoni/views/recovery/recovery-verification-input.dart';
 import 'package:vocdoni/views/register-validation-page.dart';
 
 const entityRegex = r"^(0x)?[a-zA-Z0-9]{40,64}$";
+bool init = false;
+List<Uri> pendingUris = [];
 
 // /////////////////////////////////////////////////////////////////////////////
 // / MAIN
@@ -406,6 +411,40 @@ List<String> extractLinkSegments(Uri link) {
   allSegments.addAll(hashSegments);
 
   return allSegments;
+}
+
+// /////////////////////////////////////////////////////////////////////////////
+// / WRAPPER for WIDGETS
+// /////////////////////////////////////////////////////////////////////////////
+
+genericHandleLink(Uri givenUri, BuildContext context) {
+  print("Uri cache handle $pendingUris");
+  print("URI: $givenUri");
+  if (givenUri == null || !Globals.accountPool.hasValue) return;
+  if (Globals.accountPool.value.length == 1 ||
+      givenUri.path.contains("recovery")) {
+    handleIncomingLink(givenUri, context)
+        .catchError(genericHandleIncomingLinkError(context));
+  } else {
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => LinkAccountSelect()))
+        .then((result) {
+      if (result != null && result is int) {
+        Globals.appState.selectAccount(result);
+        handleIncomingLink(givenUri, context)
+            .catchError(genericHandleIncomingLinkError(context));
+      }
+    });
+  }
+}
+
+genericHandleIncomingLinkError(BuildContext context) {
+  return (err) {
+    logger.log(err?.toString() ?? "handleIncomingLinkError");
+    final ctx = context;
+    showAlert(getText(ctx, "error.thereWasAProblemHandlingTheLink"),
+        title: getText(context, "main.error"), context: context);
+  };
 }
 
 // /////////////////////////////////////////////////////////////////////////////

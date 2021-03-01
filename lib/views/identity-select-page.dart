@@ -1,19 +1,22 @@
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import "package:flutter/material.dart";
+import 'dart:async';
+
 import 'package:dvote_common/constants/colors.dart';
-import 'package:vocdoni/constants/settings.dart';
-import 'package:vocdoni/data-models/account.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/section.dart';
-import 'package:vocdoni/lib/errors.dart';
-import 'package:dvote_crypto/main/encryption.dart';
-import 'package:vocdoni/lib/i18n.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_crypto/main/encryption.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import "package:flutter/material.dart";
+import 'package:vocdoni/constants/settings.dart';
+import 'package:vocdoni/data-models/account.dart';
+import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/pattern-prompt-modal.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-account-naming.dart';
 import 'package:vocdoni/views/onboarding/pin-transfer.dart';
+
 import '../app-config.dart';
 import '../lib/globals.dart';
 import 'onboarding/onboarding-backup-input.dart';
@@ -36,32 +39,33 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
         onWillPop: handleWillPop,
         child: Scaffold(
           body: Builder(
-              builder: (context) => ListView(
-                    // use this context within Scaffold for Toast's to work
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                          Section(
-                              text: getText(context, "main.selectAnIdentity"))
-                        ] +
-                        buildExistingIdentities(
-                            context, Globals.accountPool.value) +
-                        [
-                          SizedBox(height: 50),
-                          Section(
-                              text: getText(context, "action.addAnIdentity")),
-                          ListItem(
-                              mainText:
-                                  getText(context, "action.createANewIdentity"),
-                              icon: FeatherIcons.plusCircle,
-                              onTap: () => createNew(context)),
-                          ListItem(
-                              mainText: getText(
-                                  context, "main.restoreAnExistingIdentity"),
-                              icon: FeatherIcons.rotateCw,
-                              onTap: () => restorePreviousIdentity(context)),
-                          SizedBox(height: 50),
-                        ],
-                  )),
+            builder: (context) {
+              return ListView(
+                // use this context within Scaffold for Toast's to work
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                      Section(text: getText(context, "main.selectAnIdentity"))
+                    ] +
+                    buildExistingIdentities(
+                        context, Globals.accountPool.value) +
+                    [
+                      SizedBox(height: 50),
+                      Section(text: getText(context, "action.addAnIdentity")),
+                      ListItem(
+                          mainText:
+                              getText(context, "action.createANewIdentity"),
+                          icon: FeatherIcons.plusCircle,
+                          onTap: () => createNew(context)),
+                      ListItem(
+                          mainText: getText(
+                              context, "main.restoreAnExistingIdentity"),
+                          icon: FeatherIcons.rotateCw,
+                          onTap: () => restorePreviousIdentity(context)),
+                      SizedBox(height: 50),
+                    ],
+              );
+            },
+          ),
         ));
   }
 
