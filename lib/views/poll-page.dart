@@ -21,6 +21,7 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:vocdoni/widgets/multiple-choice-poll.dart';
+import 'package:vocdoni/widgets/multiple-question-poll.dart';
 import 'package:vocdoni/widgets/process-details.dart';
 import 'package:vocdoni/widgets/process-status.dart';
 
@@ -285,6 +286,7 @@ class _PollPageState extends State<PollPage> {
         rightIcon: null,
         isSpinning: true,
       );
+    print(process.processData.value.toString());
 
     if (process.processData.value.getEnvelopeType.hasAnonymousVoters)
       return buildUnsupportedProcess(getText(ctx, "main.anonymousVoting"));
@@ -307,6 +309,10 @@ class _PollPageState extends State<PollPage> {
 
     if (process.processData.value.getMaxTotalCost > 0)
       return MultipleChoicePoll(
+          entity, process, scaffoldScrollController, voteButtonKey);
+    if (process.processData.value.getMaxValue >
+        0) // TODO test metadata for poll type
+      return MultipleQuestionPoll(
           entity, process, scaffoldScrollController, voteButtonKey);
     return buildUnsupportedProcess(getText(ctx, "main.thisProcessType"));
   }
