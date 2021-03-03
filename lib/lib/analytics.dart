@@ -24,7 +24,7 @@ class Events {
 
 class Analytics {
   MixpanelAnalytics _mixpanel;
-  String _mixpanelToken = "3e46daca80e0263f0fc5a5e5e9bc76ea";
+  String _mixpanelToken = "991dcb6d588c33966d2cac2d452bc637";
 
   init() {
     // If there's no default analytics key, generate one. The first identity created should have this key.
