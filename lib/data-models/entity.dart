@@ -240,9 +240,6 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// Fetch the Entity metadata (if needed) and optionally fetch the models that depend on it (processes, feed and visible actions)
   Future<void> refreshMetadata(
       {bool force = false, bool skipChildren = true}) async {
-    // TODO: Get the IPFS hash
-    // TODO: Don't refetch if the IPFS hash is the same
-
     if (!(reference is EntityReference))
       return;
     else if (!force && this.metadata.isLoading && this.metadata.isLoadingFresh)
@@ -259,7 +256,20 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       if (force || !this.metadata.hasValue || !this.metadata.isFresh) {
         this.metadata.setToLoading();
 
-        freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool);
+        final currentContentUri =
+            await fetchEntityContentUri(reference, AppNetworking.pool);
+        if (this.metadata.hasValue &&
+            this.metadata.value.meta[META_ENTITY_CONTENT_URI] ==
+                currentContentUri.ipfsHash) {
+          // URI not changed
+          logger.log("[Entity metadata] Metadata is up to date");
+          if (!force && this.metadata.isFresh) return;
+        }
+
+        freshEntityMetadata = await fetchEntity(reference, AppNetworking.pool,
+            ipfsUri: currentContentUri);
+        freshEntityMetadata.meta[META_FEED_CONTENT_URI] =
+            currentContentUri.ipfsHash;
         freshEntityMetadata.meta[META_ENTITY_ID] = reference.entityId;
 
         if (this.metadata.hasValue) {
@@ -298,7 +308,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         needsProcessListReload = true;
       }
 
-      // URI changed?
+      // Feed URI changed?
       if (!oldEntityMetadata.hasValue)
         needsFeedReload = true;
       else if (oldEntityMetadata.hasValue) {
@@ -406,8 +416,6 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
         // URI not changed
         if (!force && this.feed.isFresh) return;
       }
-
-      // TODO: Don't refetch if the CURI is an IPFS hash and it didn't change
 
       this.feed.setToLoading();
 
