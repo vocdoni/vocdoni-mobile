@@ -301,8 +301,10 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   Future<void> subscribe(EntityModel entityModel) async {
     if (entityModel.reference == null)
       throw Exception("The entity has no reference");
+    bool isNew = false;
 
     if (!isSubscribed(entityModel.reference)) {
+      isNew = true;
       Identity_Peers peers = Identity_Peers();
       peers.entities.addAll(identity.value.peers.entities); // clone existing
       peers.identities
@@ -334,6 +336,9 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     }
 
     await Globals.accountPool.writeToStorage();
+    if (isNew) {
+      Globals.appState.contentCache.addBlocsFromEntity(entityModel);
+    }
   }
 
   /// Remove the given entity from the currently selected account's identity subscriptions

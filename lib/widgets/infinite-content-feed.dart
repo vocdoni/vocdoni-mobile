@@ -59,9 +59,11 @@ class _ContentListViewState extends State<ContentListView> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () {
+      onRefresh: () async {
+        print("refresh");
         // TODO don't just reload current blocs, add new ones
-        return Globals.appState.contentCache.loadBlocsFromStorage().then((_) {
+        await Globals.appState.currentAccount.refresh();
+        await Globals.appState.contentCache.loadBlocsFromStorage().then((_) {
           Globals.appState.contentCache.resetIndex();
           _pagingController.refresh();
           return Future.value();

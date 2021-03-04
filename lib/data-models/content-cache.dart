@@ -64,7 +64,6 @@ class StoredContent {
 
   Future<void> loadBlocsFromStorage() async {
     storedBlocs.setToLoading();
-    print("load blocs from storage");
     // Get a filtered list of the Entities of the current user
     final entities = Globals.appState.currentAccount.entities.value;
 
@@ -74,8 +73,7 @@ class StoredContent {
     final blocs = processes + posts;
     blocs.sort(_sortBlocs);
     storedBlocs.setValue(blocs);
-    print("${storedBlocs.value.length} blocs");
-    print("${blocs.map((e) => e.date).toList()}");
+    print("Loaded ${storedBlocs.value.length} blocs");
   }
 
   List<Bloc> getStoredProcesses(List<String> entityIds) {
@@ -88,7 +86,8 @@ class StoredContent {
       return storedProcesses;
     } catch (err) {
       log(err.toString());
-      throw RestoreError("There was an error loading processes from the pool");
+      throw RestoreError(
+          "There was an error loading processes from the pool: $err");
     }
   }
 
@@ -108,6 +107,20 @@ class StoredContent {
       log(err.toString());
       throw RestoreError("There was an error loading processes from the pool");
     }
+  }
+
+  Future<void> addBlocsFromEntity(EntityModel entity) async {
+    storedBlocs.setToLoading();
+    final nextIndex = _nextBlocIndex;
+    final processes = getStoredProcesses([entity.reference.entityId]);
+    final posts = getStoredPosts([entity]);
+
+    final newBlocs = storedBlocs.value.sublist(nextIndex) + processes + posts;
+    newBlocs.sort(_sortBlocs);
+    final allBlocs = storedBlocs.value.sublist(0, nextIndex) + newBlocs;
+
+    storedBlocs.setValue(allBlocs);
+    print("Added ${processes.length + posts.length} blocs");
   }
 
   int _sortBlocs(Bloc a, Bloc b) {

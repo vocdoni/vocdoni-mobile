@@ -80,9 +80,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!currentAccount.entities.hasValue ||
         currentAccount.entities.value.length == 0) {
       selectedTab = 2;
-    } else {
-      // internally, this will only refresh outdated individual elements
-      currentAccount.refresh(); // detached from async
     }
 
     super.initState();

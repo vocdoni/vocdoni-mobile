@@ -639,8 +639,8 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     }
     // Fetch end date if not stored
     if ((!this.endDate.hasValue) && Globals.appState.prevBlockStatus != null) {
-      final endBlock = this.metadata?.value?.startBlock ??
-          0 + this.metadata?.value?.blockCount ??
+      final endBlock = this.processData?.value?.getStartBlock ??
+          0 + this.processData?.value?.getBlockCount ??
           0;
       this.endDate.setValue(
           estimateDateAtBlockSync(endBlock, Globals.appState.prevBlockStatus));
@@ -650,7 +650,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     // Fetch start date if not stored
     if ((!this.endDate.hasValue) && Globals.appState.prevBlockStatus != null) {
-      final startBlock = this.metadata?.value?.startBlock ?? 0;
+      final startBlock = this.processData.value?.getStartBlock ?? 0;
       this.startDate.setValue(estimateDateAtBlockSync(
           startBlock, Globals.appState.prevBlockStatus));
     }
