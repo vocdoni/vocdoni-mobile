@@ -299,16 +299,25 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     logger.log("- [Process meta] Refreshing [${this.processId}]");
 
-    // TODO: Don't refetch if the IPFS hash is the same
-
     try {
       this.metadata.setToLoading();
+      final currentContentUri = this.processData.value?.getMetadata;
+
+      if (this.metadata.hasValue &&
+          this.metadata.value.meta[META_PROCESS_CONTENT_URI] ==
+              currentContentUri) {
+        // URI not changed
+        if (!force && this.metadata.isFresh) return;
+      }
+
       final newMetadata = await getProcessMetadata(
           this.processId, AppNetworking.pool,
           data: this.processData?.value);
       if (!(newMetadata is ProcessMetadata))
         throw Exception("The process cannot be found");
 
+      // Save current content uri for future
+      newMetadata.meta[META_FEED_CONTENT_URI] = currentContentUri;
       newMetadata.meta[META_PROCESS_ID] =
           this.processId; // Ensure we can read it back
       newMetadata.meta[META_ENTITY_ID] = this.entityId;
