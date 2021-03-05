@@ -40,7 +40,8 @@ class AppNetworking {
 
     // Fetch gateways
     _discoveryFuture = GatewayPool.discover(AppConfig.NETWORK_ID,
-            bootnodeUri: AppConfig.bootnodesUrl)
+            bootnodeUri: AppConfig.bootnodesUrl,
+            ensDomainSuffix: AppConfig.ensDomainSuffix)
         .then((gwPool) {
       if (gwPool is! GatewayPool)
         throw Exception("Could not initialize a pool of gateways");
@@ -77,14 +78,15 @@ class AppNetworking {
 
     _discoveryFuture = discoverGatewaysFromBootnodeInfo(gwInfo,
             networkId: AppConfig.NETWORK_ID,
-            alternateEnvironment: AppConfig.alternateEnvironment)
+            ensDomainSuffix: AppConfig.ensDomainSuffix)
         .then((gateways) {
       if (gateways is! List || gateways.length == 0)
         throw Exception("There are no active gateways");
 
       // OK
       _gwPool = GatewayPool(gateways, AppConfig.NETWORK_ID,
-          bootnodeUri: AppConfig.bootnodesUrl);
+          bootnodeUri: AppConfig.bootnodesUrl,
+          ensDomainSuffix: AppConfig.ensDomainSuffix);
 
       logger.log("[App] GW Pool ready");
       logger.log("- DVote Gateway: ${pool.current.dvote.uri}");
@@ -103,7 +105,8 @@ class AppNetworking {
     if (gateways is! List || gateways.length == 0)
       throw Exception("Empty list");
 
-    _gwPool = GatewayPool(gateways, networkId);
+    _gwPool = GatewayPool(gateways, networkId,
+        ensDomainSuffix: AppConfig.ensDomainSuffix);
   }
 }
 

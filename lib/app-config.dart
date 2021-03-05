@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
-import 'package:dvote/net/gateway-pool.dart';
+import 'package:dvote/constants.dart';
 import 'package:devicelocale/devicelocale.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info/package_info.dart';
@@ -19,6 +19,7 @@ import 'package:vocdoni/lib/logger.dart';
 const String _appMode = String.fromEnvironment("APP_MODE", defaultValue: "dev");
 String _bootnodesUrlOverride;
 String _networkOverride;
+String _ensDomainSuffixOverride;
 PackageInfo _packageInfo;
 AndroidDeviceInfo _androidInfo;
 IosDeviceInfo _iosInfo;
@@ -32,13 +33,17 @@ class AppConfig {
   static bool isBeta() => _appMode == "beta";
   static bool isProduction() => _appMode == "production";
 
-  static String get alternateEnvironment =>
-      parseAlternateEnvironment(AppConfig.bootnodesUrl);
-
   static String get bootnodesUrl =>
       _bootnodesUrlOverride ?? _GATEWAY_BOOTNODES_URL;
 
   static String get networkId => _networkOverride ?? NETWORK_ID;
+
+  static String get ensDomainSuffix {
+    if (_ensDomainSuffixOverride is String) return _ensDomainSuffixOverride;
+    if (_appMode == "dev") return DEVELOPMENT_ENS_DOMAIN_SUFFIX;
+    if (_appMode == "beta") return STAGING_ENS_DOMAIN_SUFFIX;
+    return PRODUCTION_ENS_DOMAIN_SUFFIX;
+  }
 
   // CONFIG VARS
   static const _GATEWAY_BOOTNODES_URL = String.fromEnvironment(
@@ -133,7 +138,6 @@ class AppConfig {
   static setBootnodesUrlOverride(String url) async {
     try {
       _bootnodesUrlOverride = url;
-      await Globals.appState.refresh(force: true);
     } catch (err) {
       throw err;
     }
@@ -142,7 +146,14 @@ class AppConfig {
   static setNetworkOverride(String network) async {
     try {
       _networkOverride = network;
-      await Globals.appState.refresh(force: true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static setEnsDomainSuffixOverride(String suffix) async {
+    try {
+      _ensDomainSuffixOverride = suffix;
     } catch (err) {
       throw err;
     }

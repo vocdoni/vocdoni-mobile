@@ -20,9 +20,9 @@ Future<void> restoreDataPools() {
   return Future.wait([
     // NOTE: Read's should be done first on the models that
     // don't depend on others to be restored
+    Globals.appState.readFromStorage(),
     Globals.processPool.readFromStorage(),
     Globals.feedPool.readFromStorage(),
-    Globals.appState.readFromStorage(),
   ])
       .then((_) => Globals.entityPool.readFromStorage())
       .then((_) => Globals.accountPool.readFromStorage());

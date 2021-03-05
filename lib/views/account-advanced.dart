@@ -10,6 +10,7 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/view-modals/bootnode-select.dart';
+import 'package:vocdoni/view-modals/ens-domain-select.dart';
 import 'package:vocdoni/view-modals/language-select.dart';
 import 'package:vocdoni/view-modals/network-select.dart';
 import 'package:vocdoni/views/app-logs.dart';
@@ -63,6 +64,18 @@ class _AccountAdvancedState extends State<AccountAdvanced> {
                         MaterialPageRoute(
                             fullscreenDialog: true,
                             builder: (context) => NetworkSelectPage()),
+                      );
+                    },
+                    icon: FeatherIcons.radio,
+                  ),
+                  ListItem(
+                    mainText: getText(context, "main.setEnsDomainSuffix"),
+                    onTap: () {
+                      Navigator.push(
+                        ctx,
+                        MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => EnsDomainSelectPage()),
                       );
                     },
                     icon: FeatherIcons.radio,

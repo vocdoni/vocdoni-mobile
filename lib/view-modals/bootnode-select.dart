@@ -92,6 +92,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
       });
       try {
         await AppConfig.setBootnodesUrlOverride(url);
+        await Globals.appState.refresh();
       } catch (err) {
         logger.log("$err");
         showAlert(

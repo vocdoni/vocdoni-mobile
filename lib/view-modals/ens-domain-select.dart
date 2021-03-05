@@ -1,3 +1,4 @@
+import 'package:dvote/constants.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/dvote_common.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -14,25 +15,25 @@ import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/startup.dart';
 import 'package:vocdoni/views/startup-page.dart';
 
-EventualNotifier<List<String>> availableNetworks = EventualNotifier([
-  "xdai",
-  "goerli",
-  "sokol",
+EventualNotifier<List<String>> availableDomainSuffixes = EventualNotifier([
+  PRODUCTION_ENS_DOMAIN_SUFFIX,
+  DEVELOPMENT_ENS_DOMAIN_SUFFIX,
+  STAGING_ENS_DOMAIN_SUFFIX,
 ]);
 
-class NetworkSelectPage extends StatefulWidget {
+class EnsDomainSelectPage extends StatefulWidget {
   @override
-  _NetworkSelectPageState createState() => _NetworkSelectPageState();
+  _EnsDomainSelectPageState createState() => _EnsDomainSelectPageState();
 }
 
-class _NetworkSelectPageState extends State<NetworkSelectPage> {
-  bool isLoadingNetwork;
-  String currentNetworkId;
+class _EnsDomainSelectPageState extends State<EnsDomainSelectPage> {
+  bool isLoadingEnsDomain;
+  String currentEnsDomainSuffix;
 
   @override
   void initState() {
-    isLoadingNetwork = false;
-    currentNetworkId = AppConfig.networkId;
+    isLoadingEnsDomain = false;
+    currentEnsDomainSuffix = AppConfig.ensDomainSuffix;
     super.initState();
   }
 
@@ -40,29 +41,30 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
   Widget build(ctx) {
     return Scaffold(
       appBar: TopNavigation(
-        title: getText(ctx, "main.networkId"),
+        title: getText(ctx, "main.ethereumNamespaceDomainSuffix"),
       ),
       body: EventualBuilder(
-        notifier: availableNetworks,
+        notifier: availableDomainSuffixes,
         builder: (BuildContext context, _, __) {
-          List<Widget> networkIdList = availableNetworks.value
-              .map((networkId) => buildNetworkItem(ctx, networkId))
+          List<Widget> ensDomainSuffixList = availableDomainSuffixes.value
+              .map((suffix) => buildEnsSuffixItem(ctx, suffix))
               .toList();
-          if (!availableNetworks.value.contains(currentNetworkId)) {
-            networkIdList.add(buildNetworkItem(ctx, currentNetworkId));
+          if (!availableDomainSuffixes.value.contains(currentEnsDomainSuffix)) {
+            ensDomainSuffixList
+                .add(buildEnsSuffixItem(ctx, currentEnsDomainSuffix));
           }
           return Column(
             children: [
               Expanded(
                   child: ListView(
-                children: networkIdList,
+                children: ensDomainSuffixList,
               )),
               FloatingActionButton(
-                onPressed: () => onAddNetwork(ctx),
+                onPressed: () => onAddEnsDomainSuffix(ctx),
                 backgroundColor: colorBlue,
                 child: Icon(FeatherIcons.plusCircle),
                 elevation: 5.0,
-                tooltip: getText(ctx, "action.addNetworkId"),
+                tooltip: getText(ctx, "action.addEnsDomainSuffix"),
               ).withBottomPadding(15),
             ],
           );
@@ -71,34 +73,34 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
     );
   }
 
-  Widget buildNetworkItem(BuildContext context, String networkId) {
+  Widget buildEnsSuffixItem(BuildContext context, String suffix) {
     return ListItem(
-        mainText: networkId,
+        mainText: suffix,
         mainTextMultiline: 3,
-        isSpinning: currentNetworkId == networkId && isLoadingNetwork,
-        rightIcon: currentNetworkId == networkId
+        isSpinning: currentEnsDomainSuffix == suffix && isLoadingEnsDomain,
+        rightIcon: currentEnsDomainSuffix == suffix
             ? Globals.appState.bootnodeInfo.hasError
                 ? FeatherIcons.x
                 : FeatherIcons.check
             : FeatherIcons.target,
-        onTap: buildOnTap(context, networkId));
+        onTap: buildOnTap(context, suffix));
   }
 
-  Function() buildOnTap(BuildContext context, String networkId) {
+  Function() buildOnTap(BuildContext context, String suffix) {
     return () async {
       setState(() {
-        currentNetworkId = networkId;
-        isLoadingNetwork = true;
+        currentEnsDomainSuffix = suffix;
+        isLoadingEnsDomain = true;
       });
       try {
-        await AppConfig.setNetworkOverride(networkId);
+        await AppConfig.setEnsDomainSuffixOverride(suffix);
         await Globals.appState.refresh();
       } catch (err) {
         logger.log("$err");
         showAlert(
-            getText(context, "main.networkId") +
+            getText(context, "main.suffix") +
                 " " +
-                networkId +
+                suffix +
                 " " +
                 getText(context, "main.mayBeInvalid").toLowerCase() +
                 " " +
@@ -108,12 +110,12 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
             title: getText(context, "main.unableToConnectToNetwork"),
             context: context);
         setState(() {
-          isLoadingNetwork = false;
+          isLoadingEnsDomain = false;
         });
         return;
       }
       setState(() {
-        isLoadingNetwork = false;
+        isLoadingEnsDomain = false;
       });
       Globals.appState.bootnodeInfo.setValue(null);
       Globals.appState.writeToStorage();
@@ -128,13 +130,13 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
     };
   }
 
-  onAddNetwork(BuildContext context) {
+  onAddEnsDomainSuffix(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) {
         String newUrl;
         return AlertDialog(
-          title: Text(getText(context, "action.addNetworkId")),
+          title: Text(getText(context, "action.addEnsDomainSuffix")),
           content: TextField(
             onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
@@ -151,9 +153,10 @@ class _NetworkSelectPageState extends State<NetworkSelectPage> {
             FlatButton(
               child: Text(getText(context, "main.ok")),
               onPressed: () {
-                List<String> networkIdList = availableNetworks.value;
-                networkIdList.add(newUrl);
-                availableNetworks.setValue(networkIdList);
+                List<String> ensDomainSuffixList =
+                    availableDomainSuffixes.value;
+                ensDomainSuffixList.add(newUrl);
+                availableDomainSuffixes.setValue(ensDomainSuffixList);
                 Navigator.of(context).pop(true);
               },
             )

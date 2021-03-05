@@ -286,7 +286,6 @@ class _PollPageState extends State<PollPage> {
         rightIcon: null,
         isSpinning: true,
       );
-    print(process.processData.value.toString());
 
     if (process.processData.value.getEnvelopeType.hasAnonymousVoters)
       return buildUnsupportedProcess(getText(ctx, "main.anonymousVoting"));

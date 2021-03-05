@@ -92,25 +92,30 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
   Future<void> readFromStorage() async {
     // Gateway boot nodes
     try {
-      this.bootnodeInfo.setToLoading();
-      final gwList = Globals.bootnodesPersistence.get();
-      this.bootnodeInfo.setValue(gwList);
-
       // Settings
       final settings = Globals.settingsPersistence.get();
-      if (settings is Map && settings["locale"] is String) {
-        if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
-          await selectLocale(Locale(settings["locale"]));
-      }
       if (settings is Map && settings["bootnodeUrlOverride"] is String) {
         AppConfig.setBootnodesUrlOverride(settings["bootnodeUrlOverride"]);
       }
       if (settings is Map && settings["networkIdOverride"] is String) {
         AppConfig.setNetworkOverride(settings["networkIdOverride"]);
       }
+      if (settings is Map && settings["ensDomainSuffixOverride"] is String) {
+        AppConfig.setEnsDomainSuffixOverride(
+            settings["ensDomainSuffixOverride"]);
+      }
       if (settings is Map && settings["analyticsKey"] is String) {
         this.analyticsKey = settings["analyticsKey"];
       }
+      if (settings is Map && settings["locale"] is String) {
+        if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
+          await selectLocale(Locale(settings["locale"]));
+      }
+      await Globals.appState.refresh();
+
+      this.bootnodeInfo.setToLoading();
+      final gwList = Globals.bootnodesPersistence.get();
+      this.bootnodeInfo.setValue(gwList);
     } catch (err) {
       logger.log(err);
       this
@@ -138,6 +143,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         "locale": locale?.value?.languageCode ?? DEFAULT_LANGUAGE,
         "bootnodeUrlOverride": AppConfig.bootnodesUrl,
         "networkIdOverride": AppConfig.networkId,
+        "ensDomainSuffixOverride": AppConfig.ensDomainSuffix,
         "analyticsKey": this.analyticsKey,
       };
       await Globals.settingsPersistence.write(settings);
@@ -174,7 +180,7 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
       logger.log("[App] Gateway discovery");
       final gateways = await discoverGatewaysFromBootnodeInfo(bnGatewayInfo,
           networkId: AppConfig.networkId,
-          alternateEnvironment: AppConfig.alternateEnvironment);
+          ensDomainSuffix: AppConfig.ensDomainSuffix);
 
       logger.log("[App] Gateway Pool ready");
       AppNetworking.setGateways(gateways, AppConfig.networkId);

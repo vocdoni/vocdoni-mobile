@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
+import 'package:dvote/models/build/dart/common/vote.pb.dart';
+import 'package:dvote/models/build/dart/vochain/vochain.pb.dart';
 import 'package:dvote/wrappers/process-keys.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -35,7 +37,7 @@ class PollPackagingPage extends StatefulWidget {
 
 class _PollPackagingPageState extends State<PollPackagingPage> {
   int _currentStep;
-  EnvelopePackage _envelope;
+  SignedTx _signedTx;
 
   @override
   void initState() {
@@ -140,18 +142,22 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       if (!mounted) return;
 
-      EnvelopePackage envelope = await packageSignedEnvelope(
+      final envelope = await packageEnvelope(
           widget.choices,
           merkleProof,
           widget.process.processId,
-          await wallet.privateKeyAsync,
           widget.process.processData.value.getCensusOrigin,
           processKeys: processKeys);
+
+      final signedTx = await packageVoteTx(
+        envelope,
+        await wallet.privateKeyAsync,
+      );
 
       if (!mounted) return;
 
       setState(() {
-        _envelope = envelope;
+        _signedTx = signedTx;
       });
 
       stepSendVote(context);
@@ -168,8 +174,8 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
   void stepSendVote(BuildContext context) async {
     try {
       setState(() => _currentStep = 2);
-      await submitEnvelope(_envelope.envelope, AppNetworking.pool,
-          hexSignature: _envelope.signature);
+      final txBytes = _signedTx.writeToBuffer();
+      await submitRawTx(txBytes, AppNetworking.pool);
 
       if (!mounted) return;
 
@@ -177,6 +183,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       return stepConfirm(context);
     } catch (error) {
+      logger.log("stepSendVote error: $error");
       if (!mounted) return;
 
       setState(() => _currentStep = 0);
