@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:dvote/dvote.dart';
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/overlays.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/lib/errors.dart';
@@ -111,7 +113,13 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
         if (SUPPORTED_LANGUAGES.contains(settings["locale"]))
           await selectLocale(Locale(settings["locale"]));
       }
-      await Globals.appState.refresh();
+      await Globals.appState.refresh().catchError((err) {
+        logger.log("Error refreshing app state: $err");
+        showMessageOverlay(
+            getText(Globals.navigatorKey.currentContext,
+                "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+            purpose: Purpose.DANGER);
+      });
 
       this.bootnodeInfo.setToLoading();
       final gwList = Globals.bootnodesPersistence.get();

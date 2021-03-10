@@ -563,12 +563,10 @@ packages:
   r_scan:
     dependency: "direct main"
     description:
-      path: "."
-      ref: f91ebf9032c63d235782b663752afb7947359c22
-      resolved-ref: f91ebf9032c63d235782b663752afb7947359c22
-      url: "git://github.com/masewo/r_scan.git"
-    source: git
-    version: "0.1.4+1"
+      name: r_scan
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5"
   rxdart:
     dependency: transitive
     description:

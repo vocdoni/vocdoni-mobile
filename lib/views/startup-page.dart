@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/alerts.dart';
 import 'package:dvote_common/widgets/loading-spinner.dart';
+import 'package:dvote_common/widgets/overlays.dart';
 import 'package:flutter/material.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vocdoni/app-config.dart';
@@ -48,13 +50,23 @@ class _StartupPageState extends State<StartupPage> {
         .then((_) => Globals.analytics.trackEvent(Events.APP_START))
         .then((_) {
       // non-blocking start networking
-      startNetworking();
+      startNetworking().catchError((err) {
+        logger.log(err);
+        showMessageOverlay(
+            getText(context,
+                "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+            purpose: Purpose.DANGER);
+      });
       showNextScreen();
       initLinking();
-
       // Detached update of the cached bootnodes
-      Globals.appState.refresh().catchError(
-          (err) => logger.log("[App] Detached bootnode update failed: $err"));
+      Globals.appState.refresh().catchError((err) {
+        logger.log("[App] Detached bootnode update failed: $err");
+        showMessageOverlay(
+            getText(context,
+                "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+            purpose: Purpose.DANGER);
+      });
     }).catchError((err) {
       if (!mounted) return;
 

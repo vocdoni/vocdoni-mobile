@@ -8,5 +8,5 @@ const VOCDONI_FAQ_NOT_IN_CENSUS_URL = "https://help.vocdoni.io/"; // TODO update
 const TERMS_OF_SERVICE_URL = "https://vocdoni.io/terms-of-service/";
 const PRIVACY_POLICY_URL = "https://vocdoni.io/privacy-policy/";
 const BACKUP_LINK_VERSION = "1";
-const PIN_LENGTH = 6;
+const PIN_LENGTH = 4;
 const IDENTITY_VERSION = "pin";

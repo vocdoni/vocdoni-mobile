@@ -1,9 +1,12 @@
 import 'package:dvote/api/voting.dart';
+import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/overlays.dart';
 import "package:flutter/material.dart";
 import 'package:vocdoni/lib/app-links.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:vocdoni/lib/dev/populate.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/net.dart';
 import 'package:vocdoni/lib/notifications.dart';
@@ -29,6 +32,14 @@ class DevMenu extends StatelessWidget {
                         builder: (context) => BootnodeSelectPage()));
               },
             ),
+            ListItem(
+                mainText: "Show message overlay",
+                onTap: () {
+                  showMessageOverlay(
+                      getText(Globals.navigatorKey.currentContext,
+                          "error.unableToConnectToGatewaysTheBootnodeUrlOrBlockchainNetworkIdMayBeInvalid"),
+                      purpose: Purpose.DANGER);
+                }),
             ListItem(
                 mainText: "Add fake organizations",
                 onTap: () {
