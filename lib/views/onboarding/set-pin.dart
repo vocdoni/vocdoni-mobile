@@ -68,7 +68,7 @@ class _SetPinPageState extends State<SetPinPage> {
         builder: (context) => pinStep == PinStep.GENERATING
             ? buildGenerating()
             : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Align(
                     alignment: Alignment.centerLeft,
@@ -96,6 +96,9 @@ class _SetPinPageState extends State<SetPinPage> {
                     onPinStopped: pinStep == PinStep.READY
                         ? onFirstPassDone
                         : onSecondPassDone,
+                    continueText: pinStep == PinStep.READY
+                        ? getText(context, "main.confirm")
+                        : null,
                     totalDigits: numPinDigits,
                     onPinHaptic: () {
                       HapticFeedback.mediumImpact();

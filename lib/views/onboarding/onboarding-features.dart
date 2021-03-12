@@ -25,7 +25,7 @@ class OnboardingFeaturesPage extends StatelessWidget {
               getText(context,
                   "main.thisAppGuaranteesThatYourVoteIsAnonymousAndYourPersonalInformationIsKeptSecured"),
               style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
-            ).withPadding(spaceCard),
+            ).withVPadding(spaceCard).withHPadding(focusMargin),
             Spacer(),
           ],
         ),
@@ -46,7 +46,7 @@ class OnboardingFeaturesPage extends StatelessWidget {
               },
             ),
           ],
-        ).withPadding(spaceCard),
+        ).withPadding(focusMargin),
       ),
     );
   }
