@@ -54,7 +54,7 @@ class _OnboardingAccountNamingPageState
                     accountName = name;
                   });
                 },
-              ).withHPadding(spaceCard),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,10 +74,10 @@ class _OnboardingAccountNamingPageState
                   ).withRightPadding(4),
                   Flexible(child: _getTermsOfServiceText()),
                 ],
-              ).withHPadding(spaceCard).withTopPadding(paddingPage),
+              ).withTopPadding(paddingPage),
               Spacer(),
             ],
-          ),
+          ).withHPadding(focusMargin),
         ),
         bottomNavigationBar: Builder(
           builder: (context) => Row(
@@ -126,7 +126,7 @@ class _OnboardingAccountNamingPageState
                 },
               ),
             ],
-          ).withPadding(spaceCard),
+          ).withPadding(focusMargin),
         ),
       ),
     );

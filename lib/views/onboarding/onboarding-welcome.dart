@@ -28,7 +28,7 @@ class OnboardingWelcomePage extends StatelessWidget {
               getText(context,
                   "main.vocdoniAllowsYouToStayConnectedToYourCollectivesByParticipatingInSecureVotingProcessesAndFollowingTheirActivity"),
               style: TextStyle(fontSize: 18, fontWeight: fontWeightLight),
-            ).withPadding(spaceCard),
+            ).withVPadding(spaceCard).withHPadding(focusMargin),
             Spacer(),
           ],
         ),
@@ -54,7 +54,7 @@ class OnboardingWelcomePage extends StatelessWidget {
               },
             ),
           ],
-        ).withPadding(spaceCard),
+        ).withPadding(focusMargin),
       ),
     );
   }
