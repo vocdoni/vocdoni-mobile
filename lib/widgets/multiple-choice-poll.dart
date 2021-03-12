@@ -34,7 +34,7 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    choices = List<int>.filled(widget.process.processData.value.getMaxCount, 0);
+    choices = List<int>.filled(widget.process.processData.value.maxCount, 0);
   }
 
   @override
@@ -86,11 +86,11 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
   }
 
   Widget buildPollInstructions() {
-    if (widget.process.processData.value.getMaxTotalCost > 1) {
+    if (widget.process.processData.value.maxTotalCost > 1) {
       return ListItem(
         mainText: getText(context, "main.chooseUpToNUMOptions").replaceAll(
             "{{NUM}}",
-            widget.process.processData.value.getMaxTotalCost.toString()),
+            widget.process.processData.value.maxTotalCost.toString()),
         rightIcon: null,
       );
     }
@@ -161,10 +161,10 @@ class _MultipleChoicePollState extends State<MultipleChoicePoll> {
   }
 
   onSetChoice(int questionIndex, int value) {
-    if (widget.process.processData.value.getMaxTotalCost == 1) {
+    if (widget.process.processData.value.maxTotalCost == 1) {
       choices.fillRange(0, choices.length, 0);
     }
-    if (numSelected < widget.process.processData.value.getMaxTotalCost) {
+    if (numSelected < widget.process.processData.value.maxTotalCost) {
       setState(() {
         choices[value] = 1;
       });

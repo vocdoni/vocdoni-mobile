@@ -147,7 +147,7 @@ packages:
       name: dvote
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.19.0"
+    version: "0.19.1"
   dvote_common:
     dependency: "direct main"
     description:

@@ -301,7 +301,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
 
     try {
       this.metadata.setToLoading();
-      final currentContentUri = this.processData.value?.getMetadata;
+      final currentContentUri = this.processData.value.metadata;
 
       if (this.metadata.hasValue &&
           this.metadata.value.meta[META_PROCESS_CONTENT_URI] ==
@@ -426,14 +426,14 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
       // final censusPublicKeyClaim = Hashing.digestHexClaim(pubKey);
       // final alreadyDigested = true;
 
-      final proof = await generateProof(this.processData.value.getCensusRoot,
+      final proof = await generateProof(this.processData.value.censusRoot,
           censusPublicKeyClaim, alreadyDigested, AppNetworking.pool);
       if (proof is! String || !hexRegexp.hasMatch(proof)) {
         this.isInCensus.setValue(false);
         return;
       }
 
-      final valid = await checkProof(this.processData.value.getCensusRoot,
+      final valid = await checkProof(this.processData.value.censusRoot,
           censusPublicKeyClaim, alreadyDigested, proof, AppNetworking.pool);
 
       logger.log(
@@ -518,8 +518,7 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     logger.log("- [Process census] Refreshing [${this.processId}]");
 
     this.censusSize.setToLoading();
-    return getCensusSize(
-            this.processData.value.getCensusRoot, AppNetworking.pool)
+    return getCensusSize(this.processData.value.censusRoot, AppNetworking.pool)
         .then((size) {
       logger.log(
           "- [Process census] Refreshing DONE: size $size [${this.processId}]");
@@ -568,9 +567,9 @@ class ProcessModel implements ModelRefreshable, ModelCleanable {
     logger.log("- [Process dates] Refreshing [${this.processId}]");
     this.startDate.setToLoading();
     this.endDate.setToLoading();
-    final startBlock = this.processData.value.getStartBlock;
-    final endBlock = this.processData.value.getStartBlock +
-        this.processData.value.getBlockCount;
+    final startBlock = this.processData.value.startBlock;
+    final endBlock =
+        this.processData.value.startBlock + this.processData.value.blockCount;
     return Globals.appState
         .refreshBlockStatus()
         .then((_) => estimateDateAtBlock(startBlock, AppNetworking.pool,

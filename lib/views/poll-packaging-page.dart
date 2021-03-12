@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
-import 'package:dvote/models/build/dart/common/vote.pb.dart';
 import 'package:dvote/models/build/dart/vochain/vochain.pb.dart';
 import 'package:dvote/wrappers/process-keys.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
@@ -80,7 +79,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
     try {
       // Derive per-entity key
       final entityAddress =
-          widget.process.processData.value.getEntityAddress.hexNo0x;
+          widget.process.processData.value.entityAddress.hexNo0x;
 
       if (!mounted) return;
 
@@ -101,7 +100,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       // final alreadyDigested = true;
 
       merkleProof = await generateProof(
-          widget.process.processData.value.getCensusRoot,
+          widget.process.processData.value.censusRoot,
           base64RawClaim, // b64DigestedClaim,
           alreadyDigested,
           AppNetworking.pool);
@@ -135,7 +134,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
 
       // PREPARE THE VOTE ENVELOPE
       ProcessKeys processKeys;
-      if (widget.process.processData.value.getEnvelopeType.hasEncryptedVotes) {
+      if (widget.process.processData.value.envelopeType.hasEncryptedVotes) {
         processKeys =
             await getProcessKeys(widget.process.processId, AppNetworking.pool);
       }
@@ -146,7 +145,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
           widget.choices,
           merkleProof,
           widget.process.processId,
-          widget.process.processData.value.getCensusOrigin,
+          widget.process.processData.value.censusOrigin,
           processKeys: processKeys);
 
       final signedTx = await packageVoteTx(

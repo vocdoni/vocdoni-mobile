@@ -141,9 +141,9 @@ class _PollPageState extends State<PollPage> {
           avatarUrl = processIpfsImageUrl(avatarUrl, ipfsDomain: IPFS_DOMAIN);
 
         String statusText = "";
-        if (process.processData?.value?.getEnvelopeType != null)
+        if (process.processData?.value.envelopeType != null)
           statusText =
-              process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ??
+              process.processData?.value.envelopeType?.hasEncryptedVotes ??
                       false
                   ? getText(context, "main.encryptedVote")
                   : getText(context, "main.publicVote");
@@ -193,7 +193,7 @@ class _PollPageState extends State<PollPage> {
     children.add(ProcessDetails(
         process, onScrollToSelectedContent(scaffoldScrollController)));
     children.add(buildSummary());
-    if (process.processData?.value?.getEnvelopeType?.hasEncryptedVotes ?? false)
+    if (process.processData?.value.envelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
     children.add(buildVoting(ctx, scaffoldScrollController));
 
@@ -287,29 +287,29 @@ class _PollPageState extends State<PollPage> {
         isSpinning: true,
       );
 
-    if (process.processData.value.getEnvelopeType.hasAnonymousVoters)
+    if (process.processData.value.envelopeType.hasAnonymousVoters)
       return buildUnsupportedProcess(getText(ctx, "main.anonymousVoting"));
-    if (process.processData.value.getEnvelopeType.hasSerialVoting)
+    if (process.processData.value.envelopeType.hasSerialVoting)
       return buildUnsupportedProcess(getText(ctx, "main.serialVoting"));
-    if (process.processData.value.getEnvelopeType.hasUniqueValues)
+    if (process.processData.value.envelopeType.hasUniqueValues)
       return buildUnsupportedProcess(getText(ctx, "main.uniqueValueVoting"));
-    if (process.processData.value.getCensusOrigin.isOffChainCA)
+    if (process.processData.value.censusOrigin.isOffChainCA)
       return buildUnsupportedProcess(
           getText(ctx, "main.certificateAuthorityVerification"));
-    if (!(process.processData.value.getCensusOrigin.isOffChain ||
-        process.processData.value.getCensusOrigin.isOffChainWeighted))
+    if (!(process.processData.value.censusOrigin.isOffChain ||
+        process.processData.value.censusOrigin.isOffChainWeighted))
       return buildUnsupportedProcess(getText(ctx, "main.onChainVoting"));
-    if (process.processData.value.getMode.hasDynamicCensus)
+    if (process.processData.value.mode.hasDynamicCensus)
       return buildUnsupportedProcess(getText(ctx, "main.dynamicCensus"));
-    if (process.processData.value.getMode.hasEncryptedMetadata)
+    if (process.processData.value.mode.hasEncryptedMetadata)
       return buildUnsupportedProcess(getText(ctx, "main.encryptedMetadata"));
-    if (process.processData.value.getCostExponent != 1)
+    if (process.processData.value.costExponent != 1)
       return buildUnsupportedProcess(getText(ctx, "main.quadraticVoting"));
 
-    if (process.processData.value.getMaxTotalCost > 0)
+    if (process.processData.value.maxTotalCost > 0)
       return MultipleChoicePoll(
           entity, process, scaffoldScrollController, voteButtonKey);
-    if (process.processData.value.getMaxValue >
+    if (process.processData.value.maxValue >
         0) // TODO test metadata for poll type
       return MultipleQuestionPoll(
           entity, process, scaffoldScrollController, voteButtonKey);

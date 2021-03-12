@@ -109,10 +109,9 @@ class _PollQuestionState extends State<PollQuestion> {
           widget.process.endDate
         ],
         builder: (context, _, __) {
-          if (widget
-              .process.processData.value.getEnvelopeType.hasSerialVoting) {
+          if (widget.process.processData.value.envelopeType.hasSerialVoting) {
             logger.log("ERROR: Question type not supported: " +
-                widget.process.processData.value.getEnvelopeType.toString());
+                widget.process.processData.value.envelopeType.toString());
             return buildError(
                 getText(context, "main.questionTypeNotSupported"));
           }

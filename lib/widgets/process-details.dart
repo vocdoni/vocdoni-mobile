@@ -164,7 +164,7 @@ class _ProcessDetailsState extends State<ProcessDetails> {
     String secondaryText = "";
     if (!loading) {
       realTime =
-          !widget.process.processData.value.getEnvelopeType.hasEncryptedVotes;
+          !widget.process.processData.value.envelopeType.hasEncryptedVotes;
       if (realTime)
         secondaryText =
             getText(context, "main.resultsWillBeDisplayedAsVotesAreCast");
@@ -190,7 +190,7 @@ class _ProcessDetailsState extends State<ProcessDetails> {
     String secondaryText = "";
     if (!loading) {
       anonymous =
-          widget.process.processData.value.getEnvelopeType.hasAnonymousVoters;
+          widget.process.processData.value.envelopeType.hasAnonymousVoters;
       if (anonymous)
         secondaryText =
             getText(context, "main.userIdentitiesAreDecoupledFromTheirVotes");
