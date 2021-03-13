@@ -49,6 +49,7 @@ class _OnboardingAccountNamingPageState
               TextInput(
                 hintText: getText(context, "main.whatWillYouCallThisAccount"),
                 textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.name,
                 onChanged: (name) {
                   setState(() {
                     accountName = name;

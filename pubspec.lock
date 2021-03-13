@@ -151,11 +151,9 @@ packages:
   dvote_common:
     dependency: "direct main"
     description:
-      path: "."
-      ref: dfdfce5e03daf97743502d66345ccf8d2b5d7669
-      resolved-ref: dfdfce5e03daf97743502d66345ccf8d2b5d7669
-      url: "https://gitlab.com/vocdoni/dvote-flutter-common.git"
-    source: git
+      path: "../dvote-flutter-common"
+      relative: true
+    source: path
     version: "0.1.2"
   dvote_crypto:
     dependency: transitive
@@ -260,6 +258,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  flutter_email_sender:
+    dependency: "direct main"
+    description:
+      name: flutter_email_sender
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   flutter_html:
     dependency: "direct main"
     description:
@@ -565,12 +570,10 @@ packages:
   r_scan:
     dependency: "direct main"
     description:
-      path: "."
-      ref: b94bcf1303a5834cfb1fa33d03c13b3c9ef94a04
-      resolved-ref: b94bcf1303a5834cfb1fa33d03c13b3c9ef94a04
-      url: "git://github.com/rhymelph/r_scan.git"
-    source: git
-    version: "0.1.4+1"
+      name: r_scan
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5"
   rxdart:
     dependency: transitive
     description:

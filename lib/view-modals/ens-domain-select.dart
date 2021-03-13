@@ -138,6 +138,7 @@ class _EnsDomainSelectPageState extends State<EnsDomainSelectPage> {
         return AlertDialog(
           title: Text(getText(context, "action.addEnsDomainSuffix")),
           content: TextField(
+            keyboardType: TextInputType.url,
             onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
             textCapitalization: TextCapitalization.none,

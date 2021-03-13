@@ -101,6 +101,7 @@ class _QrScanModalState extends State<QrScanModal> {
                   padding: EdgeInsets.symmetric(
                       horizontal: paddingPage, vertical: paddingPage),
                   child: TextField(
+                    keyboardType: TextInputType.url,
                     inputFormatters: [
                       FilteringTextInputFormatter.deny(RegExp('[ \t]'))
                     ],
