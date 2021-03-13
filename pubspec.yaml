@@ -24,9 +24,10 @@ dependencies:
   # dvote: ^0.18.0  # Ok on Android (native crypto)
   dvote: ^0.19.1
   dvote_common:
-    git:
-      url: https://gitlab.com/vocdoni/dvote-flutter-common.git
-      ref: dfdfce5e03daf97743502d66345ccf8d2b5d7669
+    path: ../dvote-flutter-common
+    # git:
+      # url: https://gitlab.com/vocdoni/dvote-flutter-common.git
+      # ref: dfdfce5e03daf97743502d66345ccf8d2b5d7669
   eventual: ^0.10.2
   protobuf: ^1.0.1
   uni_links: ^0.4.0
@@ -34,11 +35,11 @@ dependencies:
   flutter_html: ^0.11.1
   qr_flutter: ^3.2.0
   firebase_messaging: ^7.0.0
-  # r_scan: ^0.1.5  # Fails on iOS
-  r_scan:     # Works on iOS fails on android
-    git:
-      url: git://github.com/rhymelph/r_scan.git
-      ref: b94bcf1303a5834cfb1fa33d03c13b3c9ef94a04
+  r_scan: ^0.1.5  # Fails on iOS
+  # r_scan:     # Works on iOS fails on android
+    # git:
+      # url: git://github.com/rhymelph/r_scan.git
+      # ref: b94bcf1303a5834cfb1fa33d03c13b3c9ef94a04
   # r_scan:         # Works on android fails on iOS
     # git:
       # url: git://github.com/masewo/r_scan.git
@@ -57,6 +58,7 @@ dependencies:
   mutex: ^1.1.0
   devicelocale: ^0.3.3
   url_launcher: ^5.7.10
+  flutter_email_sender: ^4.0.0
   #rainbow_color: ^0.1.1
 
 

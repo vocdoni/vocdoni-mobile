@@ -51,6 +51,7 @@ class _RecoveryLinkInputState extends State<RecoveryLinkInput> {
                 style: TextStyle(fontWeight: fontWeightLight, fontSize: 16),
               ).withPadding(16),
               TextField(
+                keyboardType: TextInputType.url,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(RegExp('[ \t]'))
                 ],

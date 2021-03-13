@@ -136,6 +136,7 @@ class _BootnodeSelectPageState extends State<BootnodeSelectPage> {
         return AlertDialog(
           title: Text(getText(context, "action.addbootnodeUrl")),
           content: TextField(
+            keyboardType: TextInputType.url,
             onChanged: (value) => newUrl = value,
             style: TextStyle(fontSize: 18),
             textCapitalization: TextCapitalization.none,

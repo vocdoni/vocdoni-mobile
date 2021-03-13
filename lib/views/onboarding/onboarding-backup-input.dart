@@ -19,7 +19,7 @@ import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
 import 'package:vocdoni/lib/util/normalize.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
-import 'package:vocdoni/views/onboarding/onboarding-backup-email-send.dart';
+import 'package:vocdoni/views/onboarding/onboarding-backup-input-email.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-question-selection.dart';
 
 class OnboardingBackupInput extends StatefulWidget {
@@ -34,13 +34,11 @@ class OnboardingBackupInput extends StatefulWidget {
 class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
   List<int> questionIndexes;
   List<String> questionAnswers;
-  String email;
 
   @override
   void initState() {
     questionIndexes = [-1, -1];
     questionAnswers = ["", ""];
-    email = "";
     Globals.analytics.trackPage("OnboardingBackupInput");
     super.initState();
   }
@@ -86,30 +84,6 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                         .withTopPadding(paddingChip),
                     _buildBackupQuestion(0, context),
                     _buildBackupQuestion(1, context),
-                    Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              getText(context,
-                                  "main.weWillSendTheBackupToYourEmailSoYouCanRecoverYourAccountAtAnyTime"),
-                              style: TextStyle(
-                                fontSize: fontSizeBase,
-                                color: colorDescription,
-                              ),
-                            ).withHPadding(spaceCard))
-                        .withVPadding(paddingPage)
-                        .withTopPadding(paddingChip),
-                    TextInput.TextInput(
-                      hintText:
-                          getText(context, "main.yourEmail").toLowerCase(),
-                      textCapitalization: TextCapitalization.none,
-                      inputFormatter:
-                          FilteringTextInputFormatter.deny(RegExp('[ \t]')),
-                      onChanged: (newEmail) {
-                        setState(() {
-                          email = newEmail;
-                        });
-                      },
-                    ).withHPadding(spaceCard),
                   ],
                 ),
               ),
@@ -131,9 +105,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
               Spacer(),
               NavButton(
                 isDisabled: questionIndexes.any((index) => index == -1) ||
-                    questionAnswers.any((answer) => answer.length == 0) ||
-                    !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
-                        .hasMatch(email),
+                    questionAnswers.any((answer) => answer.length == 0),
                 style: NavButtonStyle.NEXT,
                 text: getText(context, "action.verifyBackup"),
                 onTap: () async {
@@ -143,7 +115,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            OnboardingBackupEmailSendPage(backupLink, email)),
+                            OnboardingBackupInputEmail(backupLink)),
                   );
                 },
               ),
@@ -162,6 +134,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     return Column(
       children: [
         ListItem(
+          isLink: index < 0,
           mainText: (position + 1).toString() +
               ". " +
               (index >= 0
@@ -190,7 +163,9 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
               ? FilteringTextInputFormatter.allow("")
               : null,
           onChanged: (answer) {
-            questionAnswers[position] = answer;
+            setState(() {
+              questionAnswers[position] = answer;
+            });
           },
         ).withHPadding(paddingPage),
       ],
