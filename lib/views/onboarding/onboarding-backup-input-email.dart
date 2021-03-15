@@ -121,9 +121,6 @@ class _OnboardingBackupInputEmailState
         getText(context,
             'main.ifYouEverNeedToRecoverYourAccountYouCanSearchForThisEmailAndFollowThisRecoveryLink') +
         ':\n' +
-        "https://" +
-        AppConfig.LINKING_DOMAIN +
-        "/" +
         widget.backupLink +
         '\n' +
         getText(context,
@@ -137,8 +134,7 @@ class _OnboardingBackupInputEmailState
     }
     if (!launched) {
       logger.log('Could not launch $url');
-      Clipboard.setData(ClipboardData(
-          text: AppConfig.LINKING_DOMAIN + "/" + widget.backupLink));
+      Clipboard.setData(ClipboardData(text: widget.backupLink));
       await showAlert(
           getText(context,
               'main.yourBackupLinkHasBeenCopiedToTheClipboardPleasePasteItSomewhereSecureAndMemorable'),

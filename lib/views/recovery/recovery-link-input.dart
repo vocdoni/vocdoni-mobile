@@ -1,4 +1,5 @@
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:vocdoni/lib/app-links.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
+import 'package:vocdoni/lib/logger.dart';
 
 class RecoveryLinkInput extends StatefulWidget {
   @override
@@ -61,6 +63,8 @@ class _RecoveryLinkInputState extends State<RecoveryLinkInput> {
                     color: colorDescription,
                     fontSize: 17),
                 decoration: InputDecoration(
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                     filled: true,
                     border: _emptyTextInputBorder(),
                     focusedBorder: _emptyTextInputBorder(),
@@ -79,16 +83,25 @@ class _RecoveryLinkInputState extends State<RecoveryLinkInput> {
 
   onSubmitLink(BuildContext scaffoldContext) {
     return (String input) async {
-      if (input == null) return;
-      if (input is! String) return;
+      try {
+        if (input == null) return;
+        if (input is! String) return;
 
-      final link = Uri.tryParse(input);
-      if (!(link is Uri) ||
-          !link.hasScheme ||
-          link.hasEmptyPath ||
-          !input.contains("recovery")) throw Exception("Invalid URI");
+        final link = Uri.tryParse(input);
+        if (!(link is Uri) ||
+            !link.hasScheme ||
+            link.hasEmptyPath ||
+            !input.contains("recovery")) throw Exception("Invalid URI");
 
-      await handleIncomingLink(link, scaffoldContext);
+        await handleIncomingLink(link, scaffoldContext);
+      } catch (err) {
+        logger.log(err);
+        showMessage(
+            getText(scaffoldContext,
+                "error.theCodeDoesNotContainAValidLinkOrTheDetailsCannotBeRetrieved"),
+            context: scaffoldContext,
+            purpose: Purpose.DANGER);
+      }
     };
   }
 
