@@ -1,12 +1,10 @@
-import 'package:dvote_common/widgets/baseButton.dart';
-import 'package:dvote_common/widgets/loading-spinner.dart';
+import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/topNavigation.dart';
 import "package:flutter/material.dart";
-import 'package:dvote_common/constants/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:vocdoni/lib/app-links.dart';
-import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/extensions.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 
 class RecoveryLinkInput extends StatefulWidget {
