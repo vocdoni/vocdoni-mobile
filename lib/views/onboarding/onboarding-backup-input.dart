@@ -192,7 +192,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
         "{date}", DateFormat('yyyy-MM-dd').format(DateTime.now()));
     rawLink = rawLink.replaceFirst(
         "{encoded-link}", hex.encode(linkModel.writeToBuffer()));
-    return rawLink;
+    return "https://" + AppConfig.LINKING_DOMAIN + "/" + rawLink;
   }
 
   Future<String> _retrieveBackupLink(BuildContext ctx) async {
