@@ -141,9 +141,9 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         ListItem(
           mainText: (position + 1).toString() +
               ". " +
-              getText(
+              getBackupQuestionText(
                   ctx,
-                  "main." +
+                  "question." +
                       AppConfig.backupQuestionTexts[
                           questionIndexes[position].toString()]),
           mainTextMultiline: 3,
