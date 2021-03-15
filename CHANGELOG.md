@@ -1,4 +1,4 @@
-# In progress
+# 1.0.0
 - Improve user logs scroll view
 - Display results by option value, not index
 - Use 12-word mnemonics for identity backups
@@ -12,9 +12,10 @@
 - Enable different ENS & Process domains
 - Enable MultipleChoice voting widget
 - Implement pin authentication & authentication versioning
-- Implement onboarding flow
+- Implement onboarding & backup flow
 - Add common-client-lib submodule, implement backup link generation
 - Handle deep links globally
+- Improve user experience and interface
 
 # 0.8.16
 - Fix green border for some android versions
