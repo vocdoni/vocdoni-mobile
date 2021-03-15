@@ -97,8 +97,6 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                   style: NavButtonStyle.BASIC,
                   text: getText(context, "action.illDoItLater"),
                   onTap: () {
-                    Globals.appState.currentAccount?.identity?.value?.backedUp =
-                        false;
                     Navigator.pushNamedAndRemoveUntil(
                         context, "/home", (route) => false);
                   }),
@@ -178,6 +176,8 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     if (linkFormat == null || linkFormat == "") {
       throw Exception("Could not retrieve backup link format");
     }
+    // Encode alias so it can contain non-standard characters, spaces, etc
+    alias = Uri.encodeComponent(alias);
     final auth = AppConfig.backupAuthOptions.entries
             .firstWhere((element) => element.value.contains("pin"))
             ?.key ??

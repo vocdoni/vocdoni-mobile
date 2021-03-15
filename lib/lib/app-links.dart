@@ -258,7 +258,7 @@ Future handleRecoveryLink(
     // Navigate
     Navigator.pushNamed(Globals.navigatorKey.currentContext, "/recovery",
         arguments: RecoveryVerificationArgs(
-            accountName: linkSegments[1],
+            accountName: Uri.decodeComponent(linkSegments[1]),
             date: linkSegments[2],
             recoveryModel: recoveryModel));
   } catch (err) {
