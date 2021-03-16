@@ -259,4 +259,17 @@ class _ProcessDetailsState extends State<ProcessDetails> {
       ],
     );
   }
+  // NOTE: Keep the comment to force i18n key parsing
+  // getText(context, "main.shortMonth1")
+  // getText(context, "main.shortMonth2")
+  // getText(context, "main.shortMonth3")
+  // getText(context, "main.shortMonth4")
+  // getText(context, "main.shortMonth5")
+  // getText(context, "main.shortMonth6")
+  // getText(context, "main.shortMonth7")
+  // getText(context, "main.shortMonth8")
+  // getText(context, "main.shortMonth9")
+  // getText(context, "main.shortMonth10")
+  // getText(context, "main.shortMonth11")
+  // getText(context, "main.shortMonth12")
 }
