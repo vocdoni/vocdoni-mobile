@@ -156,6 +156,7 @@ class _SetPinPageState extends State<SetPinPage> {
 
     if (!widget.generateIdentity) {
       Navigator.pop(context, pinEncryptionKey); // Back to name page
+      return;
     }
 
     try {

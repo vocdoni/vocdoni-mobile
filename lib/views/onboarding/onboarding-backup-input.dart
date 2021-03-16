@@ -155,6 +155,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           mainTextMultiline: 3,
         ),
         TextInput.TextInput(
+          enabled: index >= 0,
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
           inputFormatter: questionIndexes[position] == -1
