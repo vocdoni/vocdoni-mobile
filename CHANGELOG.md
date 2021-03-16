@@ -1,3 +1,7 @@
+# 1.0.1
+- Fix a bug with account recovery for legacy users
+- Disable backup question input when a question is not chosen
+
 # 1.0.0
 - Improve user logs scroll view
 - Display results by option value, not index
