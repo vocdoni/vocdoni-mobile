@@ -102,7 +102,8 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
                   }),
               Spacer(),
               NavButton(
-                isDisabled: questionIndexes.any((index) => index == -1) ||
+                isDisabled: questionIndexes.any((index) =>
+                        !AppConfig.backupActiveIndexes.contains(index)) ||
                     questionAnswers.any((answer) => answer.length == 0),
                 style: NavButtonStyle.NEXT,
                 text: getText(context, "action.verifyBackup"),
@@ -132,14 +133,12 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     return Column(
       children: [
         ListItem(
-          isLink: index < 0,
+          isLink: !AppConfig.backupActiveIndexes.contains(index),
           mainText: (position + 1).toString() +
               ". " +
-              (index >= 0
+              (AppConfig.backupActiveIndexes.contains(index)
                   ? getBackupQuestionText(
-                      ctx,
-                      "question." +
-                          AppConfig.backupQuestionTexts[index.toString()])
+                      ctx, AppConfig.backupQuestionTexts[index.toString()])
                   : getText(ctx, "main.selectQuestion")),
           onTap: () async {
             final newIndex = await Navigator.push(
@@ -155,7 +154,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           mainTextMultiline: 3,
         ),
         TextInput.TextInput(
-          enabled: index >= 0,
+          enabled: AppConfig.backupActiveIndexes.contains(index),
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
           inputFormatter: questionIndexes[position] == -1

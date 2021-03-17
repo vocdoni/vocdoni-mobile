@@ -120,6 +120,23 @@ class AppConfig {
     return auth.cast<String, String>();
   }
 
+  static List<int> get backupActiveIndexes {
+    if (_backupQuestionSpecJson.length == 0) return [];
+    if (_backupQuestionSpecJson["versions"] is! Map ||
+        _backupQuestionSpecJson["versions"].length == 0) return [];
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
+      return [];
+    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"]
+            is! List ||
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"]
+                .length ==
+            0) return [];
+    List active =
+        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"];
+    return active.cast<int>();
+  }
+
   static String get backupLinkFormat {
     if (_backupQuestionSpecJson.length == 0) return "";
     if (_backupQuestionSpecJson["versions"] is! Map ||

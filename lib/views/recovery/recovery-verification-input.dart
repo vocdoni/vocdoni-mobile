@@ -143,9 +143,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
               ". " +
               getBackupQuestionText(
                   ctx,
-                  "question." +
-                      AppConfig.backupQuestionTexts[
-                          questionIndexes[position].toString()]),
+                  AppConfig.backupQuestionTexts[
+                      questionIndexes[position].toString()]),
           mainTextMultiline: 3,
           rightIcon: null,
         ),

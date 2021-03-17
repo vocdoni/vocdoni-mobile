@@ -36,13 +36,15 @@ class OnboardingBackupQuestionSelection extends StatelessWidget {
 
   List<Widget> _generateQuestionList(BuildContext ctx) {
     final List<Widget> questions = [];
-    AppConfig.backupQuestionTexts.forEach((key, question) {
-      final index = int.parse(key);
+    AppConfig.backupActiveIndexes.forEach((index) {
+      // (key, question) {
+      // final index = int.parse(key);
       if (currentQuestions.contains(index) || index < 0) return;
       questions.add(
         ListItem(
           mainText: index >= 0
-              ? getBackupQuestionText(ctx, "question." + question)
+              ? getBackupQuestionText(
+                  ctx, AppConfig.backupQuestionTexts[index.toString()])
               : getText(ctx, "main.selectQuestion"),
           onTap: () {
             Navigator.pop(ctx, index);

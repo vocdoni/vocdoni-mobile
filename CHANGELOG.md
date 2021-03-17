@@ -1,3 +1,6 @@
+# Ongoing
+- Update backup version (support list of active backup questions)
+
 # 1.0.1
 - Fix a bug with account recovery for legacy users
 - Disable backup question input when a question is not chosen
