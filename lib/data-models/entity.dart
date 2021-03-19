@@ -192,11 +192,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
   /// The timestamp used to sign the precomputed request: `{"method":"getVisibility","timestamp":1234...}`
   int actionVisibilityTimestampUsed;
 
-  /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks
+  /// The signature of `actionVisibilityTimestampUsed`. Used for action visibility checks.
   String actionVisibilityCheckSignature;
 
   /// Builds an EntityModel with the given reference and optional data.
-  /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field
+  /// Overwrites the `entityId` and `entryPoints` of the `metadata.meta{}` field.
   EntityModel(this.reference,
       [EntityMetadata entityMeta, List<ProcessModel> procs, Feed feed]) {
     if (entityMeta is EntityMetadata) {
@@ -653,14 +653,13 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     if (!metadata.hasValue)
       return false;
     else if (Globals.appState.currentAccount == null) return false;
-
     final accountAddr =
         Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
     final key = Notifications.getMetaKeyForAccount(
       accountAddr,
       Notifications.supportedNotificationEvents[0],
     );
-    if (!metadata.value.meta.containsKey(key)) metadata.value.meta[key] = "yes";
+    // if (!metadata.value.meta.containsKey(key)) metadata.value.meta[key] = "yes";
     return metadata.value.meta[key] == "yes";
   }
 
