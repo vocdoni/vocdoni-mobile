@@ -193,7 +193,7 @@ class _PollPageState extends State<PollPage> {
     children.add(ProcessDetails(
         process, onScrollToSelectedContent(scaffoldScrollController)));
     children.add(buildSummary());
-    if (process.processData?.value.envelopeType?.hasEncryptedVotes ?? false)
+    if (process.processData?.value?.envelopeType?.hasEncryptedVotes ?? false)
       children.add(buildEncryptedItem(ctx));
     children.add(buildVoting(ctx, scaffoldScrollController));
 
@@ -305,13 +305,13 @@ class _PollPageState extends State<PollPage> {
       return buildUnsupportedProcess(getText(ctx, "main.encryptedMetadata"));
     if (process.processData.value.costExponent != 1)
       return buildUnsupportedProcess(getText(ctx, "main.quadraticVoting"));
-
-    if (process.processData.value.maxTotalCost > 0)
-      return MultipleChoicePoll(
-          entity, process, scaffoldScrollController, voteButtonKey);
-    if (process.processData.value.maxValue >
-        0) // TODO test metadata for poll type
+    print(process.metadata.value);
+    if (process.metadata?.value?.results?.display == "simple-question" ||
+        process.metadata?.value?.results?.display == "multiple-question")
       return MultipleQuestionPoll(
+          entity, process, scaffoldScrollController, voteButtonKey);
+    if (process.metadata?.value?.results?.display == "multiple-choice")
+      return MultipleChoicePoll(
           entity, process, scaffoldScrollController, voteButtonKey);
     return buildUnsupportedProcess(getText(ctx, "main.thisProcessType"));
   }

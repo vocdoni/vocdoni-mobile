@@ -213,7 +213,6 @@ class _QrScanModalState extends State<QrScanModal> {
     else if (!(result.message is String)) return;
 
     this.setState(() => scanning = false);
-    print(result.message);
     Future.delayed(Duration(milliseconds: 5))
         .then((_) => Navigator.of(context).pop(result.message));
   }

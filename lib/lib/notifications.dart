@@ -247,6 +247,9 @@ class Notifications {
     if (!supportedNotificationEvents.contains(elementName))
       throw Exception("Invalid element name");
 
+    // Remove `0x` in subscription topics
+    entityId = entityId.replaceFirst("0x", "");
+
     return "${entityId}_default_$elementName";
   }
 
