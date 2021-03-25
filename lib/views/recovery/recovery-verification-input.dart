@@ -1,5 +1,6 @@
 import 'package:dvote/dvote.dart';
-import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
+import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
+import 'package:dvote/util/backup.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
@@ -9,7 +10,6 @@ import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vocdoni/app-config.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/extensions.dart';
@@ -17,19 +17,14 @@ import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
-import 'package:vocdoni/lib/util/normalize.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/recovery/recovery-success.dart';
 import 'package:vocdoni/widgets/issues-button.dart';
 
 class RecoveryVerificationArgs {
-  final String accountName;
-  final String date;
-  final AccountRecovery recoveryModel;
+  final AccountBackup backup;
   RecoveryVerificationArgs({
-    @required this.accountName,
-    @required this.date,
-    @required this.recoveryModel,
+    @required this.backup,
   });
 }
 
@@ -42,8 +37,7 @@ class RecoveryVerificationInput extends StatefulWidget {
 class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
   List<String> questionAnswers;
   List<int> questionIndexes;
-  String name;
-  AccountRecovery recovery;
+  AccountBackup backup;
 
   @override
   void initState() {
@@ -64,9 +58,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
       logger.log("Invalid parameters");
       return;
     }
-    name = args.accountName;
-    recovery = args.recoveryModel;
-    questionIndexes = recovery.questions.map((e) => int.parse(e)).toList();
+    backup = args.backup;
+    questionIndexes = backup.questions.map((e) => e.value).toList();
   }
 
   @override
@@ -90,7 +83,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
                             alignment: Alignment.centerLeft,
                             child: extractBoldText(
                                     getText(context, "main.welcomeBackName")
-                                        .replaceAll("NAME", name))
+                                        .replaceAll("NAME", backup.alias))
                                 .withHPadding(spaceCard))
                         .withVPadding(paddingPage),
                     Align(
@@ -143,8 +136,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
               ". " +
               getBackupQuestionText(
                   ctx,
-                  AppConfig.backupQuestionTexts[
-                      questionIndexes[position].toString()]),
+                  AccountBackupHandler.getBackupQuestionLanguageKey(
+                      questionIndexes[position])),
           mainTextMultiline: 3,
           rightIcon: null,
         ),
@@ -176,7 +169,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
               builder: (context) => PinPromptModal(
                     Globals.appState.currentAccount,
                     tryDecrypt: false,
-                    accountName: name,
+                    accountName: backup.alias,
                   )));
       if (result == null) return "";
       if (result is InvalidPatternError) {
@@ -187,13 +180,12 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
       }
 
       showLoading(getText(context, "main.generatingIdentity"),
-          context: context); //TODO test with wrong pin
+          context: context);
 
       // Try to decrypt recovery key
       final pin = result;
-      final answers = normalizeAnswers(questionAnswers.join());
-      final decryptedMnemonic =
-          await Symmetric.decryptStringAsync(recovery.key, pin + answers);
+      final decryptedMnemonic = await AccountBackupHandler.decryptKey(
+          backup.key, pin, questionAnswers);
       if (decryptedMnemonic == null || decryptedMnemonic.length == 0) {
         Globals.analytics.trackPage("RecoveryVerificationFail");
         // if key not decrypted correctly
@@ -222,8 +214,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
           return;
         }
         // Identity is not a duplicate, this is a real backup. Create identity
-        final newAccount =
-            await AccountModel.fromMnemonic(decryptedMnemonic, name, pin);
+        final newAccount = await AccountModel.fromMnemonic(
+            decryptedMnemonic, backup.alias, pin);
         newAccount.identity.value.backedUp = true;
         await Globals.accountPool.addAccount(newAccount);
 

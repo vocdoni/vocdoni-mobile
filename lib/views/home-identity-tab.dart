@@ -63,15 +63,15 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                           purpose: Purpose.GOOD);
                     }),
                 Section(text: getText(context, "main.general")),
-                (currentAccount.identity.value.hasBackedUp() &&
-                        currentAccount.identity.value.backedUp)
-                    ? Container()
-                    : ListItem(
-                        mainText: getText(context, "main.backUpMyIdentity"),
-                        onTap: () => backupIdentity(ctx),
-                        icon: FeatherIcons.alertCircle,
-                        purpose: Purpose.DANGER,
-                      ),
+                ListItem(
+                  mainText: getText(context, "main.backUpMyIdentity"),
+                  onTap: () => backupIdentity(ctx),
+                  icon: FeatherIcons.alertCircle,
+                  purpose: (currentAccount.identity.value.hasBackedUp() &&
+                          currentAccount.identity.value.backedUp)
+                      ? Purpose.NONE
+                      : Purpose.DANGER,
+                ),
                 ListItem(
                   mainText: getText(context, "main.backUpMyMnemonic"),
                   onTap: () => showIdentityBackup(ctx),

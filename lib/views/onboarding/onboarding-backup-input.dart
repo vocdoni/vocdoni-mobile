@@ -1,5 +1,6 @@
 import 'package:convert/convert.dart';
 import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
+import 'package:dvote/util/backup.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
 import 'package:dvote_common/widgets/navButton.dart';
@@ -8,16 +9,13 @@ import 'package:dvote_common/widgets/toast.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:vocdoni/app-config.dart';
-import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
-import 'package:vocdoni/lib/util/normalize.dart';
 import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-input-email.dart';
 import 'package:vocdoni/views/onboarding/onboarding-backup-question-selection.dart';
@@ -103,7 +101,8 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
               Spacer(),
               NavButton(
                 isDisabled: questionIndexes.any((index) =>
-                        !AppConfig.backupActiveIndexes.contains(index)) ||
+                        !AccountBackupHandler.isValidBackupQuestionIndex(
+                            index)) ||
                     questionAnswers.any((answer) => answer.length == 0),
                 style: NavButtonStyle.NEXT,
                 text: getText(context, "action.verifyBackup"),
@@ -133,12 +132,12 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     return Column(
       children: [
         ListItem(
-          isLink: !AppConfig.backupActiveIndexes.contains(index),
+          isLink: !AccountBackupHandler.isValidBackupQuestionIndex(index),
           mainText: (position + 1).toString() +
               ". " +
-              (AppConfig.backupActiveIndexes.contains(index)
-                  ? getBackupQuestionText(
-                      ctx, AppConfig.backupQuestionTexts[index.toString()])
+              (AccountBackupHandler.isValidBackupQuestionIndex(index)
+                  ? getBackupQuestionText(ctx,
+                      AccountBackupHandler.getBackupQuestionLanguageKey(index))
                   : getText(ctx, "main.selectQuestion")),
           onTap: () async {
             final newIndex = await Navigator.push(
@@ -154,10 +153,11 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           mainTextMultiline: 3,
         ),
         TextInput.TextInput(
-          enabled: AppConfig.backupActiveIndexes.contains(index),
+          enabled: AccountBackupHandler.isValidBackupQuestionIndex(index),
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
-          inputFormatter: questionIndexes[position] == -1
+          inputFormatter: !AccountBackupHandler.isValidBackupQuestionIndex(
+                  questionIndexes[position])
               ? FilteringTextInputFormatter.allow("")
               : null,
           onChanged: (answer) {
@@ -168,31 +168,6 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
         ).withHPadding(paddingPage),
       ],
     ).withHPadding(8);
-  }
-
-  String _generateBackupLink(
-      String alias, List<int> selectedQuestions, String encryptedMnemonic) {
-    final linkFormat = AppConfig.backupLinkFormat;
-    if (linkFormat == null || linkFormat == "") {
-      throw Exception("Could not retrieve backup link format");
-    }
-    // Encode alias so it can contain non-standard characters, spaces, etc
-    alias = Uri.encodeComponent(alias);
-    final auth = AppConfig.backupAuthOptions.entries
-            .firstWhere((element) => element.value.contains("pin"))
-            ?.key ??
-        "0";
-    final BackupLink linkModel = BackupLink(
-        version: BACKUP_LINK_VERSION,
-        questions: selectedQuestions.map((e) => e.toString()).toList(),
-        auth: auth,
-        key: encryptedMnemonic);
-    String rawLink = linkFormat.replaceFirst("{alias}", alias);
-    rawLink = rawLink.replaceFirst(
-        "{date}", DateFormat('yyyy-MM-dd').format(DateTime.now()));
-    rawLink = rawLink.replaceFirst(
-        "{encoded-link}", hex.encode(linkModel.writeToBuffer()));
-    return "https://" + AppConfig.LINKING_DOMAIN + "/" + rawLink;
   }
 
   Future<String> _retrieveBackupLink(BuildContext ctx) async {
@@ -226,15 +201,17 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
       final encryptedMnemonic = Globals
           .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
       mnemonic = await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
-      // Encrypt mnemonic with pin + questions
-      final encryptedBackupMnemonic = await Symmetric.encryptStringAsync(
-          mnemonic, pin + normalizeAnswers(questionAnswers.join("")));
-
-      backupLink = _generateBackupLink(
+      final backup = await AccountBackupHandler.createBackup(
           Globals.appState.currentAccount.identity.value.alias,
           questionIndexes,
-          encryptedBackupMnemonic);
-
+          AccountBackup_Auth.PIN,
+          mnemonic,
+          pin,
+          questionAnswers);
+      final backupBytes = backup.writeToBuffer();
+      final backupString = hex.encode(backupBytes);
+      backupLink =
+          "https://" + AppConfig.LINKING_DOMAIN + "/recovery/" + backupString;
       loading.close();
     } catch (err) {
       logger.log(err.toString());

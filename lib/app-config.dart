@@ -1,13 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
-import 'package:dvote/constants.dart';
 import 'package:devicelocale/devicelocale.dart';
-import 'package:flutter/services.dart';
+import 'package:dvote/constants.dart';
 import 'package:package_info/package_info.dart';
-import 'package:vocdoni/constants/settings.dart';
-import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/logger.dart';
 
 /// Contains the compile-time defined config variables:
@@ -24,7 +20,6 @@ PackageInfo _packageInfo;
 AndroidDeviceInfo _androidInfo;
 IosDeviceInfo _iosInfo;
 String _deviceLanguage;
-Map<String, dynamic> _backupQuestionSpecJson;
 
 class AppConfig {
   static const APP_MODE = _appMode;
@@ -86,70 +81,6 @@ class AppConfig {
     return "";
   }
 
-  static Map<String, String> get backupQuestionTexts {
-    if (_backupQuestionSpecJson.length == 0) return {};
-    if (_backupQuestionSpecJson["versions"] is! Map ||
-        _backupQuestionSpecJson["versions"].length == 0) return {};
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
-      return {};
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"]
-            is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"]
-                .length ==
-            0) return {};
-    Map<String, dynamic> questions =
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["questions"];
-    return questions.cast<String, String>();
-  }
-
-  static Map<String, String> get backupAuthOptions {
-    if (_backupQuestionSpecJson.length == 0) return {};
-    if (_backupQuestionSpecJson["versions"] is! Map ||
-        _backupQuestionSpecJson["versions"].length == 0) return {};
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
-      return {};
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"]
-            is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"]
-                .length ==
-            0) return {};
-    Map<String, dynamic> auth =
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["auth"];
-    return auth.cast<String, String>();
-  }
-
-  static List<int> get backupActiveIndexes {
-    if (_backupQuestionSpecJson.length == 0) return [];
-    if (_backupQuestionSpecJson["versions"] is! Map ||
-        _backupQuestionSpecJson["versions"].length == 0) return [];
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
-      return [];
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"]
-            is! List ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"]
-                .length ==
-            0) return [];
-    List active =
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["active"];
-    return active.cast<int>();
-  }
-
-  static String get backupLinkFormat {
-    if (_backupQuestionSpecJson.length == 0) return "";
-    if (_backupQuestionSpecJson["versions"] is! Map ||
-        _backupQuestionSpecJson["versions"].length == 0) return "";
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION] is! Map ||
-        _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION].length == 0)
-      return "";
-    if (_backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]["linkFormat"]
-        is! String) return "";
-    return _backupQuestionSpecJson["versions"][BACKUP_LINK_VERSION]
-        ["linkFormat"];
-  }
-
   // STATIC SETTERS TO INITIALIZE RUNTIME CONFIGS
 
   static setBootnodesUrlOverride(String url) async {
@@ -180,7 +111,6 @@ class AppConfig {
     _setPackageInfo();
     _setDeviceInfo();
     _setDefaultDeviceLanguage();
-    _setBackupQuestionSpecJson();
   }
 
   static _setPackageInfo() async {
@@ -212,16 +142,6 @@ class AppConfig {
     } catch (err) {
       _deviceLanguage = "";
       logger.log(err);
-    }
-  }
-
-  static _setBackupQuestionSpecJson() async {
-    try {
-      final jsonDefaultStrings = await rootBundle
-          .loadString('lib/common-client-libs/backup/questions.spec.json');
-      _backupQuestionSpecJson = json.decode(jsonDefaultStrings);
-    } catch (err) {
-      logger.log("ERROR could not parse backup question spec: $err");
     }
   }
 }

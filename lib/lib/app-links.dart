@@ -1,6 +1,6 @@
 import 'package:convert/convert.dart';
 import 'package:dvote/dvote.dart';
-import 'package:dvote/models/build/dart/client-store/recovery.pb.dart';
+import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
 import 'package:dvote_common/widgets/overlays.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -242,25 +242,20 @@ Future handleRecoveryLink(
   List<String> linkSegments, {
   @required BuildContext context,
 }) async {
-  if (linkSegments.length < 3 ||
+  if (linkSegments.length < 2 ||
       !(linkSegments[0] is String) ||
-      !(linkSegments[1] is String) ||
-      !(linkSegments[2] is String) ||
-      !(linkSegments[3] is String)) {
+      !(linkSegments[1] is String)) {
     throw LinkingError("Invalid validation link");
   }
 
   try {
     // Decode & deserialize protobuf recovery model
-    final recoveryBytes = hex.decode(linkSegments.sublist(3).join());
-    AccountRecovery recoveryModel = AccountRecovery.fromBuffer(recoveryBytes);
+    final recoveryBytes = hex.decode(linkSegments.sublist(1).join());
+    AccountBackup backup = AccountBackup.fromBuffer(recoveryBytes);
 
     // Navigate
     Navigator.pushNamed(Globals.navigatorKey.currentContext, "/recovery",
-        arguments: RecoveryVerificationArgs(
-            accountName: Uri.decodeComponent(linkSegments[1]),
-            date: linkSegments[2],
-            recoveryModel: recoveryModel));
+        arguments: RecoveryVerificationArgs(backup: backup));
   } catch (err) {
     logger.log(err);
     throw Exception(getText(context, "error.invalidUrl") + " $err");
