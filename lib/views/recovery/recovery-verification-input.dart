@@ -136,7 +136,7 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
               ". " +
               getBackupQuestionText(
                   ctx,
-                  AccountBackupHandler.getBackupQuestionLanguageKey(
+                  AccountBackups.getBackupQuestionLanguageKey(
                       questionIndexes[position])),
           mainTextMultiline: 3,
           rightIcon: null,
@@ -184,8 +184,8 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
 
       // Try to decrypt recovery key
       final pin = result;
-      final decryptedMnemonic = await AccountBackupHandler.decryptKey(
-          backup.key, pin, questionAnswers);
+      final decryptedMnemonic =
+          await AccountBackups.decryptKey(backup.key, pin, questionAnswers);
       if (decryptedMnemonic == null || decryptedMnemonic.length == 0) {
         Globals.analytics.trackPage("RecoveryVerificationFail");
         // if key not decrypted correctly

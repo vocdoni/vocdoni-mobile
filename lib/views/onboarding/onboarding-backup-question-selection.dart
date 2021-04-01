@@ -42,9 +42,7 @@ class OnboardingBackupQuestionSelection extends StatelessWidget {
       questions.add(
         ListItem(
           mainText: getBackupQuestionText(
-              ctx,
-              AccountBackupHandler.getBackupQuestionLanguageKey(
-                  question.value)),
+              ctx, AccountBackups.getBackupQuestionLanguageKey(question.value)),
           onTap: () {
             Navigator.pop(ctx, question.value);
           },

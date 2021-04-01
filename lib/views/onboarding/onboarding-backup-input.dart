@@ -101,8 +101,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
               Spacer(),
               NavButton(
                 isDisabled: questionIndexes.any((index) =>
-                        !AccountBackupHandler.isValidBackupQuestionIndex(
-                            index)) ||
+                        !AccountBackups.isValidBackupQuestionIndex(index)) ||
                     questionAnswers.any((answer) => answer.length == 0),
                 style: NavButtonStyle.NEXT,
                 text: getText(context, "action.verifyBackup"),
@@ -132,12 +131,12 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
     return Column(
       children: [
         ListItem(
-          isLink: !AccountBackupHandler.isValidBackupQuestionIndex(index),
+          isLink: !AccountBackups.isValidBackupQuestionIndex(index),
           mainText: (position + 1).toString() +
               ". " +
-              (AccountBackupHandler.isValidBackupQuestionIndex(index)
-                  ? getBackupQuestionText(ctx,
-                      AccountBackupHandler.getBackupQuestionLanguageKey(index))
+              (AccountBackups.isValidBackupQuestionIndex(index)
+                  ? getBackupQuestionText(
+                      ctx, AccountBackups.getBackupQuestionLanguageKey(index))
                   : getText(ctx, "main.selectQuestion")),
           onTap: () async {
             final newIndex = await Navigator.push(
@@ -153,10 +152,10 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           mainTextMultiline: 3,
         ),
         TextInput.TextInput(
-          enabled: AccountBackupHandler.isValidBackupQuestionIndex(index),
+          enabled: AccountBackups.isValidBackupQuestionIndex(index),
           hintText: getText(context, "main.answer").toLowerCase(),
           textCapitalization: TextCapitalization.sentences,
-          inputFormatter: !AccountBackupHandler.isValidBackupQuestionIndex(
+          inputFormatter: !AccountBackups.isValidBackupQuestionIndex(
                   questionIndexes[position])
               ? FilteringTextInputFormatter.allow("")
               : null,
@@ -201,7 +200,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
       final encryptedMnemonic = Globals
           .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
       mnemonic = await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
-      final backup = await AccountBackupHandler.createBackup(
+      final backup = await AccountBackups.createBackup(
           Globals.appState.currentAccount.identity.value.alias,
           questionIndexes,
           AccountBackup_Auth.PIN,

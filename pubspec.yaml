@@ -41,10 +41,6 @@ dependencies:
     # git:
       # url: git://github.com/rhymelph/r_scan.git
       # ref: b94bcf1303a5834cfb1fa33d03c13b3c9ef94a04
-  # r_scan:         # Works on android fails on iOS
-    # git:
-      # url: git://github.com/masewo/r_scan.git
-      # ref: f91ebf9032c63d235782b663752afb7947359c22
   permission_handler: ^5.0.1+1
   feather_icons_flutter: ^4.7.4
   path_provider: ^1.6.21
