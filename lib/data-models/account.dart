@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:convert/convert.dart';
 import 'dart:math' hide log;
 import 'dart:typed_data';
 import 'package:dvote/blockchain/ens.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote/dvote.dart' as dvote;
+import 'package:dvote/models/build/dart/client-store/account.pb.dart';
+import 'package:dvote/models/build/dart/client-store/wallet.pb.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
 import 'package:vocdoni/constants/settings.dart';
@@ -44,7 +48,6 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       this.setToLoading();
       final identitiesList = Globals.identitiesPersistence.get();
       final accountModelList = identitiesList
-          .where((identity) => identity.meta[META_ACCOUNT_ID] is String)
           .map((identity) {
             final result = AccountModel.fromIdentity(identity);
 
@@ -89,12 +92,9 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
           .value
           .where((accountModel) =>
               accountModel.identity.hasValue &&
-              accountModel.identity.value.keys.length > 0)
+              accountModel.identity.value.address.length > 0)
           .map((accountModel) {
             final identity = accountModel.identity.value;
-
-            identity.meta[META_ACCOUNT_ID] =
-                accountModel.identity.value.keys[0].rootAddress;
 
             // Failed attempts
             if (accountModel.failedAuthAttempts.hasValue)
@@ -113,7 +113,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
 
             return identity;
           })
-          .cast<Identity>()
+          .cast<Account>()
           .toList();
       await Globals.identitiesPersistence.writeAll(identitiesList);
 
@@ -133,11 +133,11 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
     if (!this.hasValue)
       throw Exception("The pool has no accounts loaded yet");
     else if (!newAccount.identity.hasValue ||
-        newAccount.identity.value.keys.length == 0)
+        newAccount.identity.value.address.length == 0)
       throw Exception("The account needs to have an identity set");
 
     final currentIdentities = Globals.identitiesPersistence.get();
-    final alias = newAccount.identity.value.alias.trim();
+    final alias = newAccount.identity.value.name.trim();
     final reducedAlias = alias.toLowerCase().trim();
     if (currentIdentities
             .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
@@ -146,14 +146,11 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
       throw Exception("main.anAccountWithThisNameAlreadyExists");
     }
 
-    newAccount.identity.value.version =
-        AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
-
     // Prevent duplicates
     final duplicate = this.value.any((account) =>
-        account.identity.value.keys.length > 0 &&
-        pubKeysAreEqual(account.identity.value.keys[0].rootPublicKey,
-            newAccount.identity.value.keys[0].rootPublicKey));
+        account.identity.value.address.length > 0 &&
+        pubKeysAreEqual(
+            account.identity.value.address, newAccount.identity.value.address));
 
     if (duplicate) {
       logger.log("WARNING: Attempting to add a duplicate identity. Skipping.");
@@ -193,7 +190,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
 /// Persistence is handled by the related identity and the relevant EntityModels.
 ///
 class AccountModel implements ModelRefreshable, ModelCleanable {
-  final identity = EventualNotifier<Identity>();
+  final identity = EventualNotifier<Account>();
 
   /// generated from `identity.peers.entities`
   final entities = EventualNotifier<List<EntityModel>>();
@@ -207,7 +204,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
   // CONSTRUCTORS
 
   /// Create a model with the given identity and the peer entities found on the Entity Pool
-  AccountModel.fromIdentity(Identity idt) {
+  AccountModel.fromIdentity(Account idt) {
     this.identity.setDefaultValue(idt);
 
     if (!Globals.entityPool.hasValue) return;
@@ -215,7 +212,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     final entityList = this
         .identity
         .value
-        .peers
+        .extra
+        .appVoter
         .entities
         .map((EntityReference entitySummary) =>
             EntityModel.getFromPool(entitySummary))
@@ -241,7 +239,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       if (currentAccount is! AccountModel) return;
 
       final mnemonic = Symmetric.decryptString(
-          currentAccount.identity.value.keys[0].encryptedMnemonic,
+          base64.encode(currentAccount.identity.value.wallet.encryptedMnemonic),
           patternEncryptionKey);
       if (mnemonic == null) return;
 
@@ -291,7 +289,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
   bool isSubscribed(EntityReference entityReference) {
     if (!this.identity.hasValue) return false;
-    return this.identity.value.peers.entities.any((existingEntitiy) {
+    return this.identity.value.extra.appVoter.entities.any((existingEntitiy) {
       return entityReference.entityId == existingEntitiy.entityId;
     });
   }
@@ -302,18 +300,13 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     if (entityModel.reference == null)
       throw Exception("The entity has no reference");
 
+    final updatedIdentity = this.identity.value;
+
     if (!isSubscribed(entityModel.reference)) {
-      Identity_Peers peers = Identity_Peers();
-      peers.entities.addAll(identity.value.peers.entities); // clone existing
-      peers.identities
-          .addAll(identity.value.peers.identities); // clone existing
-
-      peers.entities.add(entityModel.reference); // new entity
-
-      final updatedIdentity = this.identity.value;
-      updatedIdentity.peers = peers;
-      this.identity.setValue(updatedIdentity);
+      updatedIdentity.extra.appVoter.entities
+          .add(entityModel.reference); // new entity
     }
+    this.identity.setValue(updatedIdentity);
     // Make sure this entity is stored in account entities
     if (!(this.entities.value?.any((existingEntity) {
           return existingEntity.reference.entityId ==
@@ -347,14 +340,10 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     if (entityModel == null) throw Exception("Entity not found");
 
     // Update identity subscriptions
-    Identity_Peers peers = Identity_Peers();
-    peers.entities.addAll(this.identity.value.peers.entities);
-    peers.entities.removeWhere((existingEntity) =>
-        existingEntity.entityId == entityReference.entityId);
-    peers.identities.addAll(this.identity.value.peers.identities);
-
     final updatedIdentity = this.identity.value;
-    updatedIdentity.peers = peers;
+    updatedIdentity.extra.appVoter.entities.removeWhere((existingEntity) =>
+        existingEntity.entityId == entityReference.entityId);
+
     this.identity.setValue(updatedIdentity);
 
     // Update in-memory models
@@ -370,16 +359,15 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
     await entityModel.disableNotifications();
 
     // Check if other identities are also following the entity
-    final currentAddress = this.identity.value.keys[0].rootAddress;
+    final currentAddress = this.identity.value.address;
     bool subscribedFromOtherAccounts = false;
     for (final existingAccount in Globals.accountPool.value) {
       if (!existingAccount.identity.hasValue ||
           !existingAccount.entities.hasValue ||
-          existingAccount.identity.value.keys.length == 0)
+          existingAccount.identity.value.address.length == 0)
         continue;
       // skip ourselves
-      else if (existingAccount.identity.value.keys[0].rootAddress ==
-          currentAddress)
+      else if (existingAccount.identity.value.address == currentAddress)
         continue;
       else if (!existingAccount.isSubscribed(entityReference)) continue;
 
@@ -445,37 +433,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       throw Exception("Invalid patternEncryptionKey");
 
     final wallet = EthereumWallet.fromMnemonic(mnemonic);
-
-    final rootPrivateKey = await wallet.privateKeyAsync;
-    final rootPublicKey = await wallet.publicKeyAsync();
-    final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic =
-        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
-        rootPrivateKey, patternEncryptionKey);
-
-    Identity newIdentity = Identity();
-    newIdentity.alias = alias;
-    newIdentity.identityId = rootPublicKey;
-    newIdentity.type = Identity_Type.ECDSA;
-
-    // If this is the first identity, set its analytics ID to the default one
-    if (((Globals?.accountPool?.value?.length ?? 0) == 0) &&
-        ((Globals?.appState?.analyticsKey?.length ?? 0) > 0))
-      newIdentity.analyticsID = Globals.appState.analyticsKey;
-    else
-      newIdentity.analyticsID = generateAnalyticsKey();
-
-    dvote.Key k = dvote.Key();
-    k.type = Key_Type.SECP256K1;
-    k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedRootPrivateKey = encryptedRootPrivateKey;
-    k.rootPublicKey = rootPublicKey;
-    k.rootAddress = rootAddress;
-
-    newIdentity.keys.add(k);
-
-    return AccountModel.fromIdentity(newIdentity);
+    return await accountFromWallet(wallet, patternEncryptionKey, alias);
   }
 
   /// Populates the object with a new identity and an empty list of organizations.
@@ -489,40 +447,36 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
       throw Exception("Invalid patternEncryptionKey");
 
     final wallet = await EthereumWallet.randomAsync(size: 128); // 12 words
-
-    final mnemonic = wallet.mnemonic;
-    final rootPrivateKey = await wallet.privateKeyAsync;
-    final rootPublicKey = await wallet.publicKeyAsync();
-    final rootAddress = await wallet.addressAsync;
-    final encryptedMenmonic =
-        await Symmetric.encryptStringAsync(mnemonic, patternEncryptionKey);
-    final encryptedRootPrivateKey = await Symmetric.encryptStringAsync(
-        rootPrivateKey, patternEncryptionKey);
-
-    Identity newIdentity = Identity();
-    newIdentity.alias = alias;
-    newIdentity.identityId = rootPublicKey;
-    newIdentity.type = Identity_Type.ECDSA;
-
-// If this is the first identity, set its analytics ID to the default one
-    if (((Globals?.accountPool?.value?.length ?? 0) == 0) &&
-        ((Globals?.appState?.analyticsKey?.length ?? 0) > 0))
-      newIdentity.analyticsID = Globals.appState.analyticsKey;
-    else
-      newIdentity.analyticsID = generateAnalyticsKey();
-
-    dvote.Key k = dvote.Key();
-    k.type = Key_Type.SECP256K1;
-    k.encryptedMnemonic = encryptedMenmonic;
-    k.encryptedRootPrivateKey = encryptedRootPrivateKey;
-    k.rootPublicKey = rootPublicKey;
-    k.rootAddress = rootAddress;
-
-    newIdentity.keys.add(k);
-    newIdentity.meta[META_ACCOUNT_ID] = rootAddress;
-
-    return AccountModel.fromIdentity(newIdentity);
+    return await accountFromWallet(wallet, patternEncryptionKey, alias);
   }
+}
+
+Future<AccountModel> accountFromWallet(
+    EthereumWallet wallet, String patternEncryptionKey, String alias) async {
+  final rootAddress = await wallet.addressAsync;
+  final encryptedMenmonic =
+      await Symmetric.encryptStringAsync(wallet.mnemonic, patternEncryptionKey);
+
+  Account newIdentity = Account();
+  newIdentity.name = alias;
+  // TODO NATE use hdpath and locale
+  newIdentity.wallet = Wallet(
+      encryptedMnemonic: base64.decode(encryptedMenmonic),
+      hdPath: "",
+      locale: "",
+      authMethod: Wallet_AuthMethod.PIN);
+  newIdentity.address = rootAddress;
+  newIdentity.hasBackup = false;
+  newIdentity.extra = Account_Extra(appVoter: Account_AppVoter());
+
+  // If this is the first identity, set its analytics ID to the default one
+  if (((Globals?.accountPool?.value?.length ?? 0) == 0) &&
+      ((Globals?.appState?.analyticsKey?.length ?? 0) > 0))
+    newIdentity.extra.appVoter.appAnalyticsID = Globals.appState.analyticsKey;
+  else
+    newIdentity.extra.appVoter.appAnalyticsID = generateAnalyticsKey();
+
+  return AccountModel.fromIdentity(newIdentity);
 }
 
 String generateAnalyticsKey() {

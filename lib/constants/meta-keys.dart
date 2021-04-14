@@ -1,7 +1,6 @@
 // META KEYS FOR ADDITIONAL FIELDS
 
 /// The user's address (by now)
-const META_ACCOUNT_ID = "accountId";
 const META_ACCOUNT_FAILED_ATTEMPTS = "accountFailedAttempts";
 const META_ACCOUNT_AUTH_THRESHOLD_DATE = "accountAuthThresholdDate";
 

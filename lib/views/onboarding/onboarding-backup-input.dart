@@ -1,5 +1,4 @@
 import 'package:convert/convert.dart';
-import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
 import 'package:dvote/util/backup.dart';
 import 'package:dvote_common/constants/colors.dart';
 import 'package:dvote_common/widgets/listItem.dart';
@@ -171,7 +170,6 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
 
   Future<String> _retrieveBackupLink(BuildContext ctx) async {
     String pin;
-    String mnemonic;
     String backupLink;
 
     try {
@@ -199,12 +197,13 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           context: ctx);
       final encryptedMnemonic = Globals
           .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
-      mnemonic = await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
+      final mnemonic =
+          await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
+      final wallet = EthereumWallet.fromMnemonic(mnemonic);
       final backup = await AccountBackups.createBackup(
           Globals.appState.currentAccount.identity.value.alias,
           questionIndexes,
-          AccountBackup_Auth.PIN,
-          mnemonic,
+          wallet,
           pin,
           questionAnswers);
       final backupBytes = backup.writeToBuffer();
