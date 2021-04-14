@@ -70,12 +70,14 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
       showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
           context: context, purpose: Purpose.DANGER);
     } else {
-      stepSendRequest(context, mnemonic);
+      stepSendRequest(
+          context, mnemonic, currentAccount.identity.value.wallet.hdPath);
     }
   }
 
   // STEP 2
-  void stepSendRequest(BuildContext context, String mnemonic) async {
+  void stepSendRequest(
+      BuildContext context, String mnemonic, String hdPath) async {
     setState(() => _currentStep = Steps.CONFIRM_TOKEN);
 
     try {
@@ -85,6 +87,7 @@ class _RegisterValidationPageState extends State<RegisterValidationPage> {
 
       // Derive per-entity key
       final wallet = EthereumWallet.fromMnemonic(mnemonic,
+          hdPath: hdPath,
           entityAddressHash: ensHashAddress(Uint8List.fromList(
               hex.decode(widget.entityId.replaceFirst("0x", "")))));
 

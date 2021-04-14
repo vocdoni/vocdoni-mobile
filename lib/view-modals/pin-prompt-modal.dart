@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:dvote_common/constants/colors.dart';
+import 'package:dvote_common/widgets/section.dart';
 import 'package:dvote_common/widgets/toast.dart';
+import 'package:dvote_common/widgets/topNavigation.dart';
 import 'package:dvote_common/widgets/unlockPattern/enterPin.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:vocdoni/constants/settings.dart';
 import 'package:vocdoni/data-models/account.dart';
 import 'package:vocdoni/lib/errors.dart';
-import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/globals.dart';
-import 'package:dvote_common/widgets/section.dart';
-import 'package:dvote_common/widgets/topNavigation.dart';
+import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/pattern.dart';
 
 /// This component prompts for a visual lock patten, which is transformed into a passphrase.
@@ -59,7 +61,7 @@ class _PinPromptModalState extends State<PinPromptModal> {
                 text: getText(context, "main.unlockName").replaceFirst(
                     "{{NAME}}",
                     widget.accountName == null
-                        ? widget.account.identity.value.alias
+                        ? widget.account.identity.value.name
                         : widget.accountName),
               ),
               Spacer(),
@@ -89,13 +91,13 @@ class _PinPromptModalState extends State<PinPromptModal> {
         return;
       }
       final encryptedText =
-          widget.account.identity.value.keys[0].encryptedMnemonic;
+          widget.account.identity.value.wallet.encryptedMnemonic;
       // check if we can decrypt it
       final loading = showLoading(getText(context, "main.generatingIdentity"),
           context: context);
 
-      final decryptedPayload =
-          await Symmetric.decryptStringAsync(encryptedText, passphrase);
+      final decryptedPayload = await Symmetric.decryptStringAsync(
+          base64.encode(encryptedText), passphrase);
       loading.close();
 
       if (decryptedPayload == null)

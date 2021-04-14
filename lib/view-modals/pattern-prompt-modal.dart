@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:dvote_common/constants/colors.dart';
@@ -57,7 +59,7 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
               Section(
                 withDectoration: false,
                 text: getText(context, "main.unlockName").replaceFirst(
-                    "{{NAME}}", widget.account.identity.value.alias),
+                    "{{NAME}}", widget.account.identity.value.name),
               ),
               Spacer(),
               Center(
@@ -102,12 +104,12 @@ class _PatternPromptModalState extends State<PatternPromptModal> {
   onPatternStop(BuildContext context, List<int> pattern) async {
     try {
       final encryptedText =
-          widget.account.identity.value.keys[0].encryptedMnemonic;
+          widget.account.identity.value.wallet.encryptedMnemonic;
       // check if we can decrypt it
 
       final passphrase = patternToString(pattern, gridSize: PATTERN_GRID_SIZE);
-      final decryptedPayload =
-          await Symmetric.decryptStringAsync(encryptedText, passphrase);
+      final decryptedPayload = await Symmetric.decryptStringAsync(
+          base64.encode(encryptedText), passphrase);
 
       if (decryptedPayload == null)
         throw InvalidPatternError("The decryption key is invalid");

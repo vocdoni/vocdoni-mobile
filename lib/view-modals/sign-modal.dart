@@ -39,7 +39,7 @@ class SignModal extends StatelessWidget {
           ),
           Text(getText(context, "main.using") +
               " " +
-              Globals.appState.currentAccount.identity.value.alias +
+              Globals.appState.currentAccount.identity.value.name +
               "?")
         ]),
       ),

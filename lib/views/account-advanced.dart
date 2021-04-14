@@ -125,7 +125,7 @@ class _AccountAdvancedState extends State<AccountAdvanced> {
             "main.thisActionWillPermanentlyEraseYourAccountFromThisDevice"),
         context: ctx,
         title: getText(ctx, "main.areYouSureYouWantToDeleteName").replaceFirst(
-            "{{NAME}}", Globals.appState.currentAccount.identity.value.alias),
+            "{{NAME}}", Globals.appState.currentAccount.identity.value.name),
         okButton: getText(ctx, "main.ok"),
         cancelButton: getText(ctx, "main.cancel"));
     if (confirm) {

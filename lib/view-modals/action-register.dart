@@ -211,7 +211,7 @@ class ActionRegisterPage extends StatelessWidget {
     if (!(selectedAccount is AccountModel))
       throw Exception("The current account cannot be accessed");
     else if (!selectedAccount.identity.hasValue ||
-        selectedAccount.identity.value.keys.length < 1)
+        selectedAccount.identity.value.wallet.encryptedMnemonic.length < 1)
       throw Exception("The current identity doesn't have a key to sign");
 
     // final confirm = await showPrompt(
@@ -236,6 +236,7 @@ class ActionRegisterPage extends StatelessWidget {
     // Derive the key for the entity
 
     final wallet = EthereumWallet.fromMnemonic(mnemonic,
+        hdPath: selectedAccount.identity.value.wallet.hdPath,
         entityAddressHash: ensHashAddress(
             Uint8List.fromList(hex.decode(entityId.replaceFirst("0x", "")))));
 

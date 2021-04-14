@@ -1,3 +1,4 @@
+import 'package:dvote/constants.dart';
 import 'package:dvote/dvote.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:dvote_common/dvote_common.dart';
@@ -76,7 +77,9 @@ class _RecoveryMnemonicInputState extends State<RecoveryMnemonicInput> {
     }
 
     try {
-      final w = await EthereumWallet.fromMnemonic(mnemonic).privateKeyAsync;
+      final w =
+          await EthereumWallet.fromMnemonic(mnemonic, hdPath: DEFAULT_HD_PATH)
+              .privateKeyAsync;
       if (!(w is String)) throw Exception();
     } catch (err) {
       showMessage(getText(context, "error.theWordsYouEnteredAreNotValid"),
@@ -100,17 +103,15 @@ class _RecoveryMnemonicInputState extends State<RecoveryMnemonicInput> {
       setState(() => restoring = true);
 
       final newAccount = await AccountModel.fromMnemonic(
-          mnemonic, alias, patternEncryptionKey);
+          mnemonic, DEFAULT_HD_PATH, alias, patternEncryptionKey);
       await Globals.accountPool.addAccount(newAccount);
 
       int newIndex = -1;
       for (int i = 0; i < Globals.accountPool.value.length; i++) {
-        // TODO: Compare by identityId instead of rootPublicKey
         if (!Globals.accountPool.value[i].identity.hasValue)
           continue;
-        else if (!pubKeysAreEqual(
-            Globals.accountPool.value[i].identity.value.keys[0].rootPublicKey,
-            newAccount.identity.value.keys[0].rootPublicKey)) continue;
+        else if (Globals.accountPool.value[i].identity.value.address !=
+            newAccount.identity.value.address) continue;
         newIndex = i;
         break;
       }

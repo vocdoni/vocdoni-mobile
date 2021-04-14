@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:convert/convert.dart';
 import 'package:dvote/util/backup.dart';
 import 'package:dvote_common/constants/colors.dart';
@@ -195,15 +197,10 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
       // Decrypt stored encrypted mnemonic with pin
       final loading = showLoading(getText(context, "main.generatingIdentity"),
           context: ctx);
-      final encryptedMnemonic = Globals
-          .appState.currentAccount.identity.value.keys[0].encryptedMnemonic;
-      final mnemonic =
-          await Symmetric.decryptStringAsync(encryptedMnemonic, pin);
-      final wallet = EthereumWallet.fromMnemonic(mnemonic);
       final backup = await AccountBackups.createBackup(
-          Globals.appState.currentAccount.identity.value.alias,
+          Globals.appState.currentAccount.identity.value.name,
           questionIndexes,
-          wallet,
+          Globals.appState.currentAccount.identity.value.wallet,
           pin,
           questionAnswers);
       final backupBytes = backup.writeToBuffer();
@@ -217,7 +214,7 @@ class _OnboardingBackupInputState extends State<OnboardingBackupInput> {
           context: ctx);
       return Future.value();
     }
-    Globals.appState.currentAccount.identity.value.backedUp = true;
+    Globals.appState.currentAccount.identity.value.hasBackup = true;
     Globals.accountPool.writeToStorage();
     return backupLink;
   }

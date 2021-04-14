@@ -106,7 +106,7 @@ class _OnboardingAccountNamingPageState
                   }
                   final repeated = Globals.accountPool.value.any((item) {
                     if (!item.identity.hasValue) return false;
-                    return item.identity.value.alias == accountName;
+                    return item.identity.value.name == accountName;
                   });
                   if (repeated) {
                     showMessage(

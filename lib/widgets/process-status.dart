@@ -312,6 +312,7 @@ class _ProcessStatusState extends State<ProcessStatusBar> {
       }
 
       final wallet = EthereumWallet.fromMnemonic(mnemonic,
+          hdPath: account.identity.value.wallet.hdPath,
           entityAddressHash: ensHashAddress(Uint8List.fromList(hex.decode(
               widget.entity.reference.entityId.replaceFirst("0x", "")))));
 

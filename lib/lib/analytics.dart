@@ -111,13 +111,14 @@ class Analytics {
       return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)
           ? Globals.appState.analyticsKey
           : null;
-    else if (currentAccount.identity.value.analyticsID == null ||
-        currentAccount.identity.value.analyticsID == "")
+    else if (currentAccount.identity.value.extra.appVoter.appAnalyticsID ==
+            null ||
+        currentAccount.identity.value.extra.appVoter.appAnalyticsID == "")
       return ((Globals.appState?.analyticsKey?.length ?? 0) > 0)
           ? Globals.appState.analyticsKey
           : null;
 
-    return currentAccount.identity.value.analyticsID;
+    return currentAccount.identity.value.extra.appVoter.appAnalyticsID;
   }
 
   String getAppVersion() {
@@ -149,8 +150,8 @@ class Analytics {
   }
 
   bool getBackupDone() {
-    if (Globals.appState?.currentAccount?.identity?.value?.hasBackedUp() ??
-        false) return true;
+    if (Globals.appState?.currentAccount?.identity?.value?.hasBackup ?? false)
+      return true;
     return false;
   }
 

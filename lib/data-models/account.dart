@@ -1,25 +1,22 @@
 import 'dart:convert';
-
-import 'package:convert/convert.dart';
 import 'dart:math' hide log;
 import 'dart:typed_data';
+
+import 'package:convert/convert.dart';
 import 'package:dvote/blockchain/ens.dart';
+import 'package:dvote/constants.dart';
 import 'package:dvote/dvote.dart';
-import 'package:dvote/dvote.dart' as dvote;
 import 'package:dvote/models/build/dart/client-store/account.pb.dart';
 import 'package:dvote/models/build/dart/client-store/wallet.pb.dart';
 import 'package:dvote_crypto/dvote_crypto.dart';
+import 'package:eventual/eventual.dart';
 import 'package:vocdoni/constants/meta-keys.dart';
-import 'package:vocdoni/constants/settings.dart';
+import 'package:vocdoni/data-models/entity.dart';
 import 'package:vocdoni/lib/errors.dart';
+import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/model-base.dart';
-import 'package:eventual/eventual.dart';
-import 'package:vocdoni/data-models/entity.dart';
-import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/random.dart';
-
-import '../app-config.dart';
 
 /// This class should be used exclusively as a global singleton.
 /// AccountPoolModel tracks all the registered accounts and provides individual models that
@@ -51,7 +48,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
           .map((identity) {
             final result = AccountModel.fromIdentity(identity);
 
-            final entities = identity.peers.entities
+            final entities = identity.extra.appVoter.entities
                 .map((entityRef) => Globals.entityPool.value.firstWhere(
                     (entity) => entity.reference.entityId == entityRef.entityId,
                     orElse: () => null))
@@ -140,7 +137,7 @@ class AccountPoolModel extends EventualNotifier<List<AccountModel>>
     final alias = newAccount.identity.value.name.trim();
     final reducedAlias = alias.toLowerCase().trim();
     if (currentIdentities
-            .where((item) => item.alias.toLowerCase().trim() == reducedAlias)
+            .where((item) => item.name.toLowerCase().trim() == reducedAlias)
             .length >
         0) {
       throw Exception("main.anAccountWithThisNameAlreadyExists");
@@ -245,6 +242,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
       for (final entity in this.entities.value) {
         final wallet = EthereumWallet.fromMnemonic(mnemonic,
+            hdPath: currentAccount.identity.value.wallet.hdPath,
             entityAddressHash: ensHashAddress(Uint8List.fromList(
                 hex.decode(entity.reference.entityId.replaceFirst("0x", "")))));
 
@@ -422,8 +420,8 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
 
   /// Returns a Model with the identity restored from the given mnemonic and an empty list of entities.
   /// NOTE: The returned model is not added to the global pool.
-  static Future<AccountModel> fromMnemonic(
-      String mnemonic, String alias, String patternEncryptionKey) async {
+  static Future<AccountModel> fromMnemonic(String mnemonic, String hdPath,
+      String alias, String patternEncryptionKey) async {
     if (!(mnemonic is String) || mnemonic.length < 2)
       throw Exception("Invalid patternEncryptionKey");
     else if (!(alias is String) || alias.length < 1)
@@ -432,7 +430,7 @@ class AccountModel implements ModelRefreshable, ModelCleanable {
         patternEncryptionKey.length < 2)
       throw Exception("Invalid patternEncryptionKey");
 
-    final wallet = EthereumWallet.fromMnemonic(mnemonic);
+    final wallet = EthereumWallet.fromMnemonic(mnemonic, hdPath: hdPath);
     return await accountFromWallet(wallet, patternEncryptionKey, alias);
   }
 
@@ -459,11 +457,10 @@ Future<AccountModel> accountFromWallet(
 
   Account newIdentity = Account();
   newIdentity.name = alias;
-  // TODO NATE use hdpath and locale
   newIdentity.wallet = Wallet(
       encryptedMnemonic: base64.decode(encryptedMenmonic),
-      hdPath: "",
-      locale: "",
+      hdPath: DEFAULT_HD_PATH,
+      locale: DEFAULT_MNEMONIC_LOCALE,
       authMethod: Wallet_AuthMethod.PIN);
   newIdentity.address = rootAddress;
   newIdentity.hasBackup = false;

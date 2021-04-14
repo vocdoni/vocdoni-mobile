@@ -1,16 +1,16 @@
 import 'dart:io';
-import 'package:dvote/dvote.dart';
 
-import 'package:vocdoni/lib/errors.dart';
-import "package:vocdoni/data-persistence/base-persistence.dart";
+import 'package:dvote/models/build/dart/client-store/account.pb.dart';
 import "package:vocdoni/constants/storage-names.dart";
+import "package:vocdoni/data-persistence/base-persistence.dart";
+import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/logger.dart';
 
 final String _storageFile = IDENTITIES_STORE_FILE;
 
-class IdentitiesPersistence extends BasePersistenceList<Identity> {
+class IdentitiesPersistence extends BasePersistenceList<Account> {
   @override
-  Future<List<Identity>> readAll() async {
+  Future<List<Account>> readAll() async {
     await super.init();
 
     try {
@@ -21,7 +21,7 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
       }
 
       final bytes = await fd.readAsBytes();
-      final store = IdentitiesStore.fromBuffer(bytes);
+      final store = AccountsStore.fromBuffer(bytes);
 
       // Update the in-memory current value
       set(store.items);
@@ -35,12 +35,12 @@ class IdentitiesPersistence extends BasePersistenceList<Identity> {
   }
 
   @override
-  Future<void> writeAll(List<Identity> value) async {
+  Future<void> writeAll(List<Account> value) async {
     await super.init();
 
     try {
       final fd = File("${storageDir.path}/$_storageFile");
-      final store = IdentitiesStore();
+      final store = AccountsStore();
       store.items.addAll(value);
       await fd.writeAsBytes(store.writeToBuffer());
 

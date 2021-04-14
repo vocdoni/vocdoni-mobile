@@ -251,7 +251,7 @@ Future handleRecoveryLink(
   try {
     // Decode & deserialize protobuf recovery model
     final recoveryBytes = hex.decode(linkSegments.sublist(1).join());
-    AccountBackup backup = AccountBackup.fromBuffer(recoveryBytes);
+    WalletBackup backup = WalletBackup.fromBuffer(recoveryBytes);
 
     // Navigate
     Navigator.pushNamed(Globals.navigatorKey.currentContext, "/recovery",

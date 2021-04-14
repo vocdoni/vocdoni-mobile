@@ -184,7 +184,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
     final repeated = Globals.accountPool.value.any((item) {
       if (!item.identity.hasValue) return false;
-      return item.identity.value.alias == alias;
+      return item.identity.value.name == alias;
     });
     if (repeated) {
       showMessage(getText(context, "main.youAlreadyHaveAnAccountWithThisName"),
@@ -215,8 +215,7 @@ class _IdentityCreateScreen extends State<IdentityCreatePage> {
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>
           account.identity.hasValue &&
-          pubKeysAreEqual(account.identity.value.identityId,
-              newAccount.identity.value.identityId));
+          account.identity.value.address == newAccount.identity.value.address);
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 

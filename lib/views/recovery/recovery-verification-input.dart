@@ -1,4 +1,3 @@
-import 'package:dvote/dvote.dart';
 import 'package:dvote/models/build/dart/client-store/backup.pb.dart';
 import 'package:dvote/util/backup.dart';
 import 'package:dvote_common/constants/colors.dart';
@@ -11,13 +10,11 @@ import 'package:dvote_crypto/dvote_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vocdoni/data-models/account.dart';
-import 'package:vocdoni/lib/errors.dart';
 import 'package:vocdoni/lib/extensions.dart';
 import 'package:vocdoni/lib/globals.dart';
 import 'package:vocdoni/lib/i18n.dart';
 import 'package:vocdoni/lib/logger.dart';
 import 'package:vocdoni/lib/util.dart';
-import 'package:vocdoni/view-modals/pin-prompt-modal.dart';
 import 'package:vocdoni/views/recovery/recovery-success.dart';
 import 'package:vocdoni/widgets/issues-button.dart';
 
@@ -180,14 +177,14 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         final decryptedMnemonic =
             await AccountBackups.decryptBackupMnemonic(backup, pin);
         // Generate wallet. extract rootPublicKey to check for duplicates
-        final wallet = EthereumWallet.fromMnemonic(decryptedMnemonic);
-        final rootPublicKey = await wallet.publicKeyAsync();
+        final wallet = EthereumWallet.fromMnemonic(decryptedMnemonic,
+            hdPath: backup.wallet.hdPath);
+        final address = await wallet.addressAsync;
 
         // Check for duplicates. If so, this is just a verification that the backup is valid. Display success view.
         final duplicate = Globals.accountPool?.value?.any((account) =>
-                account.identity.value.keys.length > 0 &&
-                pubKeysAreEqual(account.identity.value.keys[0].rootPublicKey,
-                    rootPublicKey)) ??
+                account.identity.value.address.length > 0 &&
+                account.identity.value.address == address) ??
             false;
         if (duplicate) {
           Navigator.push(
@@ -199,15 +196,15 @@ class _RecoveryVerificationInputState extends State<RecoveryVerificationInput> {
         }
         // Identity is not a duplicate, this is a real backup. Create identity
         final newAccount = await AccountModel.fromMnemonic(
-            decryptedMnemonic, backup.name, pin);
-        newAccount.identity.value.backedUp = true;
+            decryptedMnemonic, wallet.hdPath, backup.name, pin);
+        newAccount.identity.value.hasBackup = true;
         await Globals.accountPool.addAccount(newAccount);
 
         // Select new account
         final newIndex = Globals.accountPool.value.indexWhere((account) =>
             account.identity.hasValue &&
-            pubKeysAreEqual(account.identity.value.identityId,
-                newAccount.identity.value.identityId));
+            account.identity.value.address ==
+                newAccount.identity.value.address);
         Globals.appState.selectAccount(newIndex);
         Navigator.pushNamedAndRemoveUntil(context, "/home", (Route _) => false);
         return;

@@ -48,14 +48,14 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
             return ListView(
               children: <Widget>[
                 ListItem(
-                    mainText: currentAccount.identity.value.alias,
-                    secondaryText: currentAccount.identity.value.identityId,
+                    mainText: currentAccount.identity.value.name,
+                    secondaryText: currentAccount.identity.value.address,
                     isTitle: true,
                     isBold: true,
                     rightIcon: FeatherIcons.copy,
                     onTap: () {
                       Clipboard.setData(ClipboardData(
-                          text: currentAccount.identity.value.identityId));
+                          text: currentAccount.identity.value.address));
                       showMessage(
                           getText(
                               context, "main.identityIdCopiedOnTheClipboard"),
@@ -67,8 +67,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
                   mainText: getText(context, "main.backUpMyIdentity"),
                   onTap: () => backupIdentity(ctx),
                   icon: FeatherIcons.alertCircle,
-                  purpose: (currentAccount.identity.value.hasBackedUp() &&
-                          currentAccount.identity.value.backedUp)
+                  purpose: currentAccount.identity.value.hasBackup
                       ? Purpose.NONE
                       : Purpose.DANGER,
                 ),
@@ -137,7 +136,7 @@ class _HomeIdentityTabState extends State<HomeIdentityTab> {
 
     Navigator.pushNamed(ctx, "/identity/backup",
         arguments: IdentityBackupArguments(
-            Globals.appState.currentAccount.identity.value.alias, mnemonic));
+            Globals.appState.currentAccount.identity.value.name, mnemonic));
   }
 
   onLogOut(BuildContext ctx) async {

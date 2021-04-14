@@ -78,7 +78,7 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
       if (!accounts[i].identity.hasValue) continue;
 
       list.add(ListItem(
-        mainText: accounts[i].identity.value.alias,
+        mainText: accounts[i].identity.value.name,
         icon: FeatherIcons.user,
         onTap: () => onAccountSelected(ctx, accounts[i], i),
       ));
@@ -104,89 +104,24 @@ class _IdentitySelectPageState extends State<IdentitySelectPage> {
   onAccountSelected(
       BuildContext ctx, AccountModel account, int accountIdx) async {
     if (!account.identity.hasValue) return;
-    final accountHasPin = account.identity.value.version != null &&
-        account.identity.value.version.length > 0;
 
-    if (accountHasPin) {
-      var privKey = await Navigator.push(
-          ctx,
-          MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => PinPromptModal(account)));
-
-      if (privKey == null)
-        return;
-      else if (privKey is InvalidPatternError) {
-        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-            context: ctx, purpose: Purpose.DANGER);
-        return;
-      }
-      privKey = "";
-    } else {
-      logger.log("Account has no pin.");
-      final oldLockPattern = await Navigator.push(
-          ctx,
-          MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => PatternPromptModal(account)));
-
-      if (oldLockPattern == null) {
-        return;
-      } else if (oldLockPattern is InvalidPatternError) {
-        logger.log("Pattern is incorrect.");
-        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-            purpose: Purpose.DANGER, context: ctx);
-        return;
-      }
-      logger.log("Key decrypted correctly");
-
-      final newLockPattern = await Navigator.push(
+    var privKey = await Navigator.push(
         ctx,
         MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (ctx) => PinTransferPage(
-            account.identity.value.alias,
-          ),
-        ),
-      );
+            fullscreenDialog: true,
+            builder: (context) => PinPromptModal(account)));
 
-      if (newLockPattern == null) {
-        return;
-      } else if (newLockPattern is InvalidPatternError) {
-        showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
-            purpose: Purpose.DANGER, context: context);
-        return;
-      }
-      final loading = showLoading(getText(context, "main.generatingIdentity"),
-          context: ctx);
-
-      // Generate new identity from old one, with pin authentication
-
-      final oldEncryptedMnemonic =
-          account.identity.value.keys[0].encryptedMnemonic;
-      final oldEncryptedRootPrivateKey =
-          account.identity.value.keys[0].encryptedRootPrivateKey;
-
-      final mnemonic = await Symmetric.decryptStringAsync(
-          oldEncryptedMnemonic, oldLockPattern);
-      final privateKey = await Symmetric.decryptStringAsync(
-          oldEncryptedRootPrivateKey, oldLockPattern);
-
-      final encryptedMenmonic =
-          await Symmetric.encryptStringAsync(mnemonic, newLockPattern);
-      final encryptedRootPrivateKey =
-          await Symmetric.encryptStringAsync(privateKey, newLockPattern);
-
-      account.identity.value.keys[0].encryptedMnemonic = encryptedMenmonic;
-      account.identity.value.keys[0].encryptedRootPrivateKey =
-          encryptedRootPrivateKey;
-      account.identity.value.version =
-          AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
-      loading.close();
+    if (privKey == null)
+      return;
+    else if (privKey is InvalidPatternError) {
+      showMessage(getText(context, "main.thePinYouEnteredIsNotValid"),
+          context: ctx, purpose: Purpose.DANGER);
+      return;
     }
+    privKey = "";
     Globals.appState.selectAccount(accountIdx);
     Globals.accountPool.writeToStorage();
-    if (Globals.appState.currentAccount?.identity?.value?.backedUp == true) {
+    if (Globals.appState.currentAccount?.identity?.value?.hasBackup == true) {
       // Replace all routes with /home on top
       Navigator.pushNamedAndRemoveUntil(ctx, "/home", (Route _) => false);
     } else {

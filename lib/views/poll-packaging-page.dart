@@ -84,6 +84,7 @@ class _PollPackagingPageState extends State<PollPackagingPage> {
       if (!mounted) return;
 
       wallet = EthereumWallet.fromMnemonic(mnemonic,
+          hdPath: currentAccount.identity.value.wallet.hdPath,
           entityAddressHash:
               ensHashAddress(Uint8List.fromList(hex.decode(entityAddress))));
 

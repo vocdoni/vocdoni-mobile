@@ -49,17 +49,21 @@ class AppStateModel implements ModelPersistable, ModelRefreshable {
     Globals.appState.currentAccount.refresh(force: false);
 
     // if no analytics ID (new account or account from old app version) set analytics ID and write to storage
-    if (Globals.appState.currentAccount.identity.value.analyticsID == null ||
-        Globals.appState.currentAccount.identity.value.analyticsID == "") {
+    if (Globals.appState.currentAccount.identity.value.extra.appVoter
+                .appAnalyticsID ==
+            null ||
+        Globals.appState.currentAccount.identity.value.extra.appVoter
+                .appAnalyticsID ==
+            "") {
       if ((Globals.accountPool.hasValue &&
               Globals.accountPool.value.length > 1) ||
           Globals.appState.analyticsKey.length == 0) {
         // If there are already accounts, or the default analytics key is not set, generate a new key for this user
-        Globals.appState.currentAccount.identity.value.analyticsID =
-            generateAnalyticsKey();
+        Globals.appState.currentAccount.identity.value.extra.appVoter
+            .appAnalyticsID = generateAnalyticsKey();
       } else {
-        Globals.appState.currentAccount.identity.value.analyticsID =
-            Globals.appState.analyticsKey;
+        Globals.appState.currentAccount.identity.value.extra.appVoter
+            .appAnalyticsID = Globals.appState.analyticsKey;
       }
       Globals.accountPool.writeToStorage();
     }

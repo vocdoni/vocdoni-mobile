@@ -162,14 +162,11 @@ class _SetPinPageState extends State<SetPinPage> {
     try {
       final newAccount =
           await AccountModel.makeNew(widget.alias, pinEncryptionKey);
-      newAccount.identity.value.version =
-          AppConfig.packageInfo?.buildNumber ?? IDENTITY_VERSION;
       await Globals.accountPool.addAccount(newAccount);
 
       final newIndex = Globals.accountPool.value.indexWhere((account) =>
           account.identity.hasValue &&
-          pubKeysAreEqual(account.identity.value.identityId,
-              newAccount.identity.value.identityId));
+          account.identity.value.address == newAccount.identity.value.address);
       if (newIndex < 0)
         throw Exception("The new account can't be found on the pool");
 

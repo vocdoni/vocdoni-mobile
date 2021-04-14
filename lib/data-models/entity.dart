@@ -565,13 +565,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     try {
       notificationTopics.loading = true;
 
-      final accountAddr =
-          Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
-
       String key, topic;
       await Future.wait(
           Notifications.supportedNotificationEvents.map((element) {
-        key = Notifications.getMetaKeyForAccount(accountAddr, element);
+        key = Notifications.getMetaKeyForAccount(
+            Globals.appState.currentAccount.identity.value.address, element);
         topic = Notifications.getTopicForEntity(reference.entityId, element);
 
         metadata.value.meta[key] = "yes";
@@ -599,7 +597,7 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       notificationTopics.loading = true;
 
       final accountAddr =
-          Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
+          Globals.appState.currentAccount.identity.value.address;
 
       // Check if other identities are also registered
       String key, topic;
@@ -607,11 +605,11 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
       for (final existingAccount in Globals.accountPool.value) {
         if (!existingAccount.identity.hasValue ||
             !existingAccount.entities.hasValue ||
-            existingAccount.identity.value.keys.length == 0)
+            existingAccount.identity.value.address.length == 0)
           continue;
         // skip ourselves
-        else if (existingAccount.identity.value.keys[0].rootAddress ==
-            accountAddr) continue;
+        else if (existingAccount.identity.value.address == accountAddr)
+          continue;
 
         // does he/she has notifications enabled?
         Notifications.supportedNotificationEvents.forEach((event) {
@@ -653,10 +651,8 @@ class EntityModel implements ModelRefreshable, ModelCleanable {
     if (!metadata.hasValue)
       return false;
     else if (Globals.appState.currentAccount == null) return false;
-    final accountAddr =
-        Globals.appState.currentAccount.identity.value.keys[0].rootAddress;
     final key = Notifications.getMetaKeyForAccount(
-      accountAddr,
+      Globals.appState.currentAccount.identity.value.address,
       Notifications.supportedNotificationEvents[0],
     );
     // if (!metadata.value.meta.containsKey(key)) metadata.value.meta[key] = "yes";

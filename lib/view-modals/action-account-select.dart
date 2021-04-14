@@ -44,7 +44,7 @@ class _LinkAccountSelectState extends State<LinkAccountSelect> {
       if (!accounts[i].identity.hasValue) continue;
 
       list.add(ListItem(
-        mainText: accounts[i].identity.value.alias,
+        mainText: accounts[i].identity.value.name,
         icon: FeatherIcons.user,
         onTap: () => onAccountSelected(ctx, accounts[i], i),
       ));

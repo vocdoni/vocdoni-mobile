@@ -37,7 +37,7 @@ class OnboardingBackupQuestionSelection extends StatelessWidget {
 
   List<Widget> _generateQuestionList(BuildContext ctx) {
     final List<Widget> questions = [];
-    AccountBackup_Questions.values.forEach((question) {
+    WalletBackup_Recovery_QuestionEnum.values.forEach((question) {
       if (currentQuestions.contains(question.value)) return;
       questions.add(
         ListItem(
