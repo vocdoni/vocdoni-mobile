@@ -50,4 +50,12 @@ class NewsFeedPersistence extends BasePersistenceList<Feed> {
       throw PersistError("There was an error while storing the changes");
     }
   }
+
+  Future<void> eraseLegacyFile() async {
+    try {
+      final fd = File("${storageDir.path}/$OLD_NEWSFEED_STORE_FILE");
+      await fd.delete();
+      logger.log("Erased legacy newsfeed file");
+    } catch (_) {}
+  }
 }

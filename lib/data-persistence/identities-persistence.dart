@@ -51,4 +51,12 @@ class IdentitiesPersistence extends BasePersistenceList<Account> {
       throw PersistError("There was an error while storing the changes");
     }
   }
+
+  Future<void> eraseLegacyFile() async {
+    try {
+      final fd = File("${storageDir.path}/$OLD_IDENTITIES_STORE_FILE");
+      await fd.delete();
+      logger.log("Erased legacy identities file");
+    } catch (_) {}
+  }
 }

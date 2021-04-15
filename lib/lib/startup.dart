@@ -42,3 +42,14 @@ Future<void> startNetworking() {
         Globals.appState.bootnodeInfo.value);
   });
 }
+
+Future<void> eraseLegacyFiles() {
+  return Future.wait(<Future>[
+    Globals.bootnodesPersistence.eraseLegacyFile(),
+    Globals.identitiesPersistence.eraseLegacyFile(),
+    Globals.entitiesPersistence.eraseLegacyFile(),
+    Globals.processesPersistence.eraseLegacyFile(),
+    Globals.feedPersistence.eraseLegacyFile(),
+    Globals.settingsPersistence.eraseLegacyFile(),
+  ]);
+}
