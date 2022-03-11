@@ -235,7 +235,7 @@
     "main.selectLanguage": "Tria l'idioma",
     "main.selectQuestion": "",
     "main.selectYourChoiceForQuestionNum": "Selecciona una resposta per a la qüestió núm. {{NUM}}",
-    "main.sendEmail": "",
+    "main.sendEmail": "Enviar correu",
     "main.sent": "Enviat",
     "main.serialVoting": "",
     "main.setAPinToProtectYourData": "",
