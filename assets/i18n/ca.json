@@ -1,7 +1,7 @@
 {
     "action.add": "Afegeix",
     "action.addAnIdentity": "Afegeix una identitat",
-    "action.addEnsDomainSuffix": "",
+    "action.addEnsDomainSuffix": "Afegeix un sufix de domini de l'espai de noms Ethereum",
     "action.addNetworkId": "",
     "action.addbootnodeUrl": "Afegeix un punt d'entrada",
     "action.check": "",
